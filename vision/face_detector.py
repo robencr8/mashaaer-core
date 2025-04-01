@@ -416,6 +416,12 @@ class FaceDetector:
     def _generate_greeting(self, name, last_seen_time):
         """Generate a personalized greeting based on recognition history"""
         import random
+        import os
+        
+        # Special handling for the creator
+        developer_name = os.environ.get('DEVELOPER_NAME', 'Roben Edwan')
+        if name.lower() == developer_name.lower():
+            return "Welcome back, Roben. Robin AI is fully operational."
         
         # If this is a first-time greeting (no last_seen)
         if not last_seen_time:

@@ -34,6 +34,11 @@ intent_classifier = IntentClassifier()
 voice_recognition = VoiceRecognition(config)
 face_detector = FaceDetector(config, db_manager)
 
+# Initialize API routes
+from api_routes import init_api
+init_api(app, db_manager, emotion_tracker, face_detector, 
+         tts_manager, voice_recognition, intent_classifier, config)
+
 # Developer mode constants
 DEVELOPER_NAME = os.environ.get("DEVELOPER_NAME", "Roben Edwan")
 DEVELOPER_MODE_FLAG = "dev_mode_enabled"
@@ -124,6 +129,12 @@ def admin():
     
     return render_template('admin.html', stats=system_stats, dev_mode=True)
 
+@app.route('/session-report')
+def session_report():
+    """Show the session report dashboard with real-time data visualization"""
+    dev_mode = is_developer_mode()
+    return render_template('session_report.html', dev_mode=dev_mode)
+
 @app.route('/api/speak', methods=['POST'])
 def speak():
     text = request.json.get('text', '')
@@ -173,7 +184,17 @@ def listen():
         
         # Process emotion
         emotion = emotion_tracker.analyze_text(text)
-        emotion_tracker.log_emotion(emotion, text)
+        
+        # Get session ID for logging
+        from flask import session
+        session_id = session.get('session_id', None)
+        if not session_id:
+            import uuid
+            session_id = str(uuid.uuid4())
+            session['session_id'] = session_id
+            
+        # Log emotion with session ID
+        emotion_tracker.log_emotion(emotion, text, session_id=session_id)
         
         # Get intent
         intent = intent_classifier.classify(text)
@@ -336,8 +357,16 @@ def log_recognition():
         # Update last seen timestamp
         face_detector._update_last_seen(name)
         
-        # Log the emotion
-        emotion_tracker.log_emotion(emotion, f"Face recognition: {name}", source="face")
+        # Get session ID for logging
+        from flask import session
+        session_id = session.get('session_id', None)
+        if not session_id:
+            import uuid
+            session_id = str(uuid.uuid4())
+            session['session_id'] = session_id
+            
+        # Log the emotion with session ID
+        emotion_tracker.log_emotion(emotion, f"Face recognition: {name}", source="face", session_id=session_id)
         
         # Update profile interactions count
         conn = db_manager.get_connection()
@@ -372,22 +401,14 @@ def log_recognition():
         
         # Log to recognition history table
         try:
-            # Create table if it doesn't exist
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS recognition_history (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    timestamp TEXT NOT NULL,
-                    confidence REAL,
-                    emotion TEXT
-                )
-            ''')
+            # Create table if it doesn't exist (not needed as we already created it in the DB schema)
+            # We'll just use the existing recognition_history table
             
-            # Add record
+            # Add record with session_id
             timestamp = datetime.now().isoformat()
             cursor.execute(
-                "INSERT INTO recognition_history (name, timestamp, confidence, emotion) VALUES (?, ?, ?, ?)",
-                (name, timestamp, confidence, emotion)
+                "INSERT INTO recognition_history (name, timestamp, confidence, emotion, session_id) VALUES (?, ?, ?, ?, ?)",
+                (name, timestamp, confidence, emotion, session_id)
             )
             conn.commit()
         except Exception as e:

@@ -96,7 +96,8 @@ class DatabaseManager:
                         emotion TEXT,
                         source TEXT,
                         intensity REAL,
-                        text TEXT
+                        text TEXT,
+                        session_id TEXT
                     )
                 ''')
                 
@@ -107,6 +108,45 @@ class DatabaseManager:
                         name TEXT,
                         encoding BYTEA,
                         last_seen TIMESTAMP,
+                        metadata JSONB
+                    )
+                ''')
+                
+                # 7. Recognition history table
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS recognition_history (
+                        id SERIAL PRIMARY KEY,
+                        name TEXT NOT NULL,
+                        timestamp TIMESTAMP NOT NULL,
+                        confidence REAL,
+                        emotion TEXT,
+                        greeting TEXT,
+                        session_id TEXT
+                    )
+                ''')
+                
+                # 8. Voice logs table
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS voice_logs (
+                        id SERIAL PRIMARY KEY,
+                        text TEXT,
+                        timestamp TIMESTAMP,
+                        language TEXT,
+                        audio_path TEXT,
+                        emotion TEXT,
+                        intent TEXT,
+                        session_id TEXT
+                    )
+                ''')
+                
+                # 9. Sessions table
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS sessions (
+                        id TEXT PRIMARY KEY,
+                        start_time TIMESTAMP,
+                        end_time TIMESTAMP,
+                        user_name TEXT,
+                        device_info TEXT,
                         metadata JSONB
                     )
                 ''')
@@ -164,7 +204,8 @@ class DatabaseManager:
                         emotion TEXT,
                         source TEXT,
                         intensity REAL,
-                        text TEXT
+                        text TEXT,
+                        session_id TEXT
                     )
                 ''')
                 
@@ -175,6 +216,45 @@ class DatabaseManager:
                         name TEXT,
                         encoding BLOB,
                         last_seen TEXT,
+                        metadata TEXT
+                    )
+                ''')
+                
+                # 7. Recognition history table
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS recognition_history (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        name TEXT NOT NULL,
+                        timestamp TEXT NOT NULL,
+                        confidence REAL,
+                        emotion TEXT,
+                        greeting TEXT,
+                        session_id TEXT
+                    )
+                ''')
+                
+                # 8. Voice logs table
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS voice_logs (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        text TEXT,
+                        timestamp TEXT,
+                        language TEXT,
+                        audio_path TEXT,
+                        emotion TEXT,
+                        intent TEXT,
+                        session_id TEXT
+                    )
+                ''')
+                
+                # 9. Sessions table
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS sessions (
+                        id TEXT PRIMARY KEY,
+                        start_time TEXT,
+                        end_time TEXT,
+                        user_name TEXT,
+                        device_info TEXT,
                         metadata TEXT
                     )
                 ''')

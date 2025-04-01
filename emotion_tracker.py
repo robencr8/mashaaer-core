@@ -83,13 +83,24 @@ class EmotionTracker:
         import random
         return random.choice(self.emotion_labels)
     
-    def log_emotion(self, emotion, text="", source="text", intensity=0.5):
+    def log_emotion(self, emotion, text="", source="text", intensity=0.5, session_id=None):
         """Log an emotion detection event to the database"""
         try:
             conn = self.db_manager.get_connection()
             cursor = conn.cursor()
             
             timestamp = datetime.now().isoformat()
+            
+            # Log to emotion_data table (used for dashboard visualizations)
+            self.db_manager.execute_query(
+                """
+                INSERT INTO emotion_data (timestamp, emotion, source, intensity, text, session_id)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (timestamp, emotion, source, intensity, text, session_id)
+            )
+            
+            # Also log to emotions table (used for model training)
             cursor.execute(
                 "INSERT INTO emotions (emotion, text, timestamp, source, intensity) VALUES (?, ?, ?, ?, ?)",
                 (emotion, text, timestamp, source, intensity)
@@ -107,7 +118,8 @@ class EmotionTracker:
                 "text": text,
                 "timestamp": timestamp,
                 "source": source,
-                "intensity": intensity
+                "intensity": intensity,
+                "session_id": session_id
             }
             
             entries = []
@@ -190,6 +202,89 @@ class EmotionTracker:
         except Exception as e:
             self.logger.error(f"Failed to get total entries: {str(e)}")
             return 0
+            
+    def get_session_emotion_history(self, session_id):
+        """Get emotion history for a specific session"""
+        try:
+            # Get emotion data from the session
+            results = self.db_manager.execute_query(
+                """
+                SELECT emotion, timestamp, intensity FROM emotion_data 
+                WHERE session_id = ? 
+                ORDER BY timestamp
+                """,
+                (session_id,)
+            )
+            
+            if not results:
+                return {
+                    "timeline": [],
+                    "distribution": {}
+                }
+            
+            # Group by timestamp (in 5-minute intervals)
+            timeline = []
+            current_time = None
+            current_emotions = None
+            
+            for emotion, timestamp_str, intensity in results:
+                # Parse the timestamp
+                try:
+                    timestamp = datetime.fromisoformat(timestamp_str)
+                except ValueError:
+                    # Try alternate format
+                    timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
+                
+                # Round to nearest 5-minute
+                rounded_time = timestamp.replace(
+                    minute=5 * (timestamp.minute // 5),
+                    second=0,
+                    microsecond=0
+                )
+                
+                if current_time != rounded_time:
+                    # New time interval
+                    if current_emotions:
+                        timeline.append({
+                            "timestamp": current_time.isoformat(),
+                            "emotions": current_emotions
+                        })
+                    
+                    current_time = rounded_time
+                    current_emotions = {e: 0 for e in self.emotion_labels}
+                
+                # Add the emotion intensity
+                current_emotions[emotion] = max(current_emotions.get(emotion, 0), float(intensity))
+            
+            # Add the last emotions
+            if current_emotions:
+                timeline.append({
+                    "timestamp": current_time.isoformat() if current_time else datetime.now().isoformat(),
+                    "emotions": current_emotions
+                })
+            
+            # Calculate distribution
+            distribution = {}
+            for entry in timeline:
+                for emotion, intensity in entry["emotions"].items():
+                    if intensity > 0:
+                        distribution[emotion] = distribution.get(emotion, 0) + 1
+            
+            # Normalize distribution
+            total = sum(distribution.values()) or 1
+            distribution = {k: v / total for k, v in distribution.items()}
+            
+            return {
+                "timeline": timeline,
+                "distribution": distribution
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Failed to get session emotion history: {str(e)}")
+            return {
+                "timeline": [],
+                "distribution": {}
+            }
     
     def get_primary_emotion_for_name(self, name):
         """Get the primary emotion associated with a person's name"""
