@@ -1,0 +1,204 @@
+/* 
+ * Robin AI Enhanced - Main Stylesheet
+ * Uses Bootstrap Dark Theme with minimal overrides
+ */
+
+/* Base styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Robin branding colors */
+:root {
+    --robin-primary: var(--bs-info);
+    --robin-secondary: var(--bs-dark);
+    --robin-accent: var(--bs-warning);
+    --robin-text: var(--bs-light);
+    --robin-bg: #1a1a2e;
+}
+
+/* Card styling */
+.card {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Button styling */
+.btn-primary {
+    background-color: var(--robin-primary);
+    border-color: var(--robin-primary);
+}
+
+.btn-outline-primary {
+    border-color: var(--robin-primary);
+    color: var(--robin-primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--robin-primary);
+    color: var(--bs-dark);
+}
+
+/* Navigation */
+.navbar {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-brand {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.nav-link {
+    transition: color 0.3s;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.slide-in-up {
+    animation: slideInUp 0.5s ease forwards;
+}
+
+/* Emotion colors */
+.emotion-neutral {
+    color: var(--bs-primary);
+}
+
+.emotion-happy {
+    color: var(--bs-info);
+}
+
+.emotion-sad {
+    color: var(--bs-secondary);
+}
+
+.emotion-angry {
+    color: var(--bs-danger);
+}
+
+.emotion-fearful {
+    color: var(--bs-warning);
+}
+
+.emotion-disgusted {
+    color: var(--bs-purple);
+}
+
+.emotion-surprised {
+    color: var(--bs-orange);
+}
+
+.emotion-confused {
+    color: var(--bs-gray-400);
+}
+
+.emotion-interested {
+    color: var(--bs-success);
+}
+
+/* Terminal text styling */
+.terminal-text {
+    font-family: 'Courier New', monospace;
+    color: #33ff33;
+    background-color: #000;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+/* Loading spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    border: 0.25rem solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    border-top-color: var(--robin-primary);
+    animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Developer mode badge */
+.badge.bg-warning {
+    font-weight: normal;
+    padding: 0.4rem 0.6rem;
+}
+
+/* Accessible contrast improvements */
+.text-muted {
+    color: var(--bs-gray-400) !important;
+}
+
+.btn-outline-light {
+    border-color: var(--bs-gray-400);
+    color: var(--bs-gray-400);
+}
+
+.btn-outline-light:hover {
+    background-color: var(--bs-gray-400);
+    color: var(--bs-dark);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1.5rem;
+    }
+    
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-section p {
+        font-size: 1rem;
+    }
+}

@@ -1,0 +1,193 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--bs-info);
+    }
+    .hero-section {
+        padding: 4rem 0;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border-radius: 10px;
+        margin-bottom: 3rem;
+    }
+    .hero-section h1 {
+        font-size: 2.8rem;
+        margin-bottom: 1rem;
+    }
+    .hero-section p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+    .feature-card {
+        height: 100%;
+        transition: transform 0.3s ease;
+    }
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section text-center text-white p-5">
+    <h1><i class="fas fa-robot me-3"></i>Robin AI Enhanced</h1>
+    <p class="lead">Your advanced AI assistant with voice recognition, emotion detection, and personalized interactions</p>
+    <div class="mt-4">
+        <a href="/demo" class="btn btn-info btn-lg me-3">
+            <i class="fas fa-microphone me-2"></i>Try Demo
+        </a>
+        <a href="/emotion-timeline" class="btn btn-outline-light btn-lg">
+            <i class="fas fa-chart-line me-2"></i>View Emotions
+        </a>
+    </div>
+</div>
+
+<!-- Feature Cards -->
+<h2 class="text-center mb-4">Key Features</h2>
+<div class="row g-4">
+    <!-- Voice Recognition -->
+    <div class="col-md-4">
+        <div class="card feature-card h-100">
+            <div class="card-body text-center">
+                <div class="feature-icon">
+                    <i class="fas fa-microphone"></i>
+                </div>
+                <h5 class="card-title">Multilingual Voice Recognition</h5>
+                <p class="card-text">Understand both English and Arabic speech using advanced offline Vosk technology.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Emotion Detection -->
+    <div class="col-md-4">
+        <div class="card feature-card h-100">
+            <div class="card-body text-center">
+                <div class="feature-icon">
+                    <i class="fas fa-smile"></i>
+                </div>
+                <h5 class="card-title">Emotion Tracking</h5>
+                <p class="card-text">Analyze voice and text to detect emotions and build a timeline of interactions.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Face Recognition -->
+    <div class="col-md-4">
+        <div class="card feature-card h-100">
+            <div class="card-body text-center">
+                <div class="feature-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h5 class="card-title">Face Recognition</h5>
+                <p class="card-text">Remember faces and create personalized profiles for returning users.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- TTS -->
+    <div class="col-md-4">
+        <div class="card feature-card h-100">
+            <div class="card-body text-center">
+                <div class="feature-icon">
+                    <i class="fas fa-volume-up"></i>
+                </div>
+                <h5 class="card-title">Natural Text-to-Speech</h5>
+                <p class="card-text">Lifelike voice responses using ElevenLabs API with gTTS fallback support.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dashboard -->
+    <div class="col-md-4">
+        <div class="card feature-card h-100">
+            <div class="card-body text-center">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h5 class="card-title">Web Dashboard</h5>
+                <p class="card-text">Visualize emotional trends and interaction data through an intuitive interface.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Developer Mode -->
+    <div class="col-md-4">
+        <div class="card feature-card h-100">
+            <div class="card-body text-center">
+                <div class="feature-icon">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h5 class="card-title">Developer Mode</h5>
+                <p class="card-text">Unlock advanced features when "Roben Edwan" is detected via face or voice.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works Section -->
+<div class="mt-5 pt-4">
+    <h2 class="text-center mb-4">How It Works</h2>
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <ol class="list-group list-group-numbered">
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold">Voice & Face Recognition</div>
+                        Robin captures your voice and face, recognizing who you are.
+                    </div>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold">Emotion Analysis</div>
+                        Your tone and words are analyzed to understand your emotional state.
+                    </div>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold">Personalized Response</div>
+                        Robin generates natural responses tailored to your profile and context.
+                    </div>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="ms-2 me-auto">
+                        <div class="fw-bold">Continuous Learning</div>
+                        The system relearns emotional patterns every 12 hours for better accuracy.
+                    </div>
+                </li>
+            </ol>
+        </div>
+        <div class="col-md-6 text-center">
+            <div class="card bg-dark text-center p-4">
+                <i class="fas fa-brain mb-3" style="font-size: 5rem; color: var(--bs-info);"></i>
+                <h3>Adaptive Intelligence</h3>
+                <p class="lead">Robin gets better with every interaction, building a comprehensive memory of your preferences.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="mt-5 text-center">
+    <h2 class="mb-4">Quick Actions</h2>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a href="/api/speak" class="btn btn-info">
+            <i class="fas fa-volume-up me-2"></i>Test TTS
+        </a>
+        <a href="/demo" class="btn btn-info">
+            <i class="fas fa-microphone me-2"></i>Voice Demo
+        </a>
+        <a href="/emotion-timeline" class="btn btn-info">
+            <i class="fas fa-chart-line me-2"></i>Emotion Timeline
+        </a>
+        {% if dev_mode %}
+        <a href="/admin" class="btn btn-warning">
+            <i class="fas fa-tools me-2"></i>Admin Panel
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

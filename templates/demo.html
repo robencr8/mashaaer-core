@@ -1,0 +1,298 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .chat-container {
+        height: 60vh;
+        overflow-y: auto;
+        margin-bottom: 20px;
+    }
+    
+    .message {
+        border-radius: 18px;
+        margin-bottom: 15px;
+        padding: 12px 18px;
+        position: relative;
+        max-width: 75%;
+    }
+    
+    .user-message {
+        background-color: var(--bs-primary);
+        color: white;
+        margin-left: auto;
+    }
+    
+    .robin-message {
+        background-color: var(--bs-dark);
+        border: 1px solid var(--bs-secondary);
+    }
+    
+    .emotion-tag {
+        position: absolute;
+        top: -10px;
+        right: 10px;
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 10px;
+    }
+    
+    .camera-feed {
+        width: 100%;
+        border-radius: 10px;
+        overflow: hidden;
+        background-color: #1a1a2e;
+    }
+    
+    .camera-feed-placeholder {
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #1a1a2e;
+        color: var(--bs-secondary);
+        font-size: 18px;
+        border-radius: 10px;
+    }
+    
+    .control-buttons {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    
+    .control-buttons button {
+        margin: 0 10px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .recording-indicator {
+        animation: pulse 1.5s infinite;
+        display: none;
+    }
+    
+    .microphone-active .recording-indicator {
+        display: inline-block;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.4; }
+        100% { opacity: 1; }
+    }
+    
+    .status-bar {
+        font-size: 0.9rem;
+        color: var(--bs-secondary);
+    }
+    
+    .face-recognized {
+        display: none;
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 8px;
+        background-color: var(--bs-dark);
+    }
+    
+    .recognition-info {
+        display: flex;
+        align-items: center;
+    }
+    
+    .recognition-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: var(--bs-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+    }
+    
+    .recognition-avatar i {
+        font-size: 24px;
+    }
+    
+    .emotion-display {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        background-color: var(--bs-dark);
+        text-align: center;
+    }
+    
+    .emotion-icon {
+        font-size: 36px;
+        margin-bottom: 10px;
+    }
+    
+    .audio-controls {
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Left Column - Chat Interface -->
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3><i class="fas fa-comments me-2"></i>Chat with Robin</h3>
+                <div class="status-bar">
+                    <span id="status-indicator">Ready</span>
+                    <span class="recording-indicator ms-2"><i class="fas fa-circle text-danger"></i> Recording</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chat-container" id="chat-container">
+                    <!-- Welcome Message -->
+                    <div class="message robin-message">
+                        <p>Hello! I'm Robin AI. How can I assist you today?</p>
+                    </div>
+                </div>
+                
+                <!-- Input Controls -->
+                <div class="control-buttons">
+                    <button class="btn btn-primary" id="camera-btn" title="Toggle Camera">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                    <button class="btn btn-danger" id="voice-btn" title="Start/Stop Voice">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button class="btn btn-info" id="refresh-btn" title="Reset Chat">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                
+                <div class="input-group">
+                    <input type="text" id="text-input" class="form-control" placeholder="Type a message...">
+                    <button class="btn btn-primary" id="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Emotion Display -->
+        <div class="emotion-display">
+            <div class="emotion-icon" id="emotion-icon">
+                <i class="fas fa-meh"></i>
+            </div>
+            <h4 id="current-emotion">Neutral</h4>
+            <p id="emotion-description">Your emotional state appears neutral.</p>
+        </div>
+    </div>
+    
+    <!-- Right Column - Camera & Controls -->
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3><i class="fas fa-video me-2"></i>Visual Recognition</h3>
+            </div>
+            <div class="card-body">
+                <!-- Camera Feed -->
+                <div class="camera-feed">
+                    <video id="camera-feed" style="width: 100%; display: none;"></video>
+                    <div class="camera-feed-placeholder" id="camera-placeholder">
+                        <div class="text-center">
+                            <i class="fas fa-camera mb-3" style="font-size: 3rem;"></i>
+                            <p>Click the camera button to enable face recognition</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Face Recognition Results -->
+                <div class="face-recognized mt-3" id="face-recognition-result">
+                    <div class="recognition-info">
+                        <div class="recognition-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h5 id="recognized-name">Unknown</h5>
+                            <div id="recognition-confidence">Confidence: 0%</div>
+                            <small id="last-seen">Last seen: Never</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Audio Playback Controls -->
+                <div class="audio-controls">
+                    <h5><i class="fas fa-volume-up me-2"></i>Audio Settings</h5>
+                    <div class="mb-3">
+                        <label for="voice-select" class="form-label">Voice:</label>
+                        <select class="form-select" id="voice-select">
+                            <option value="default">Default</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="british">British</option>
+                            <option value="arabic">Arabic</option>
+                        </select>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="auto-speak" checked>
+                        <label class="form-check-label" for="auto-speak">Auto-speak responses</label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="volume-slider" class="form-label">Volume:</label>
+                        <input type="range" class="form-range" id="volume-slider" min="0" max="1" step="0.1" value="0.7">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/voice_interface.js') }}"></script>
+<script src="{{ url_for('static', filename='js/face_interface.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize voice interface
+        const voiceInterface = new VoiceInterface({
+            voiceBtn: document.getElementById('voice-btn'),
+            sendBtn: document.getElementById('send-btn'),
+            textInput: document.getElementById('text-input'),
+            chatContainer: document.getElementById('chat-container'),
+            statusIndicator: document.getElementById('status-indicator'),
+            emotionIcon: document.getElementById('emotion-icon'),
+            currentEmotion: document.getElementById('current-emotion'),
+            emotionDescription: document.getElementById('emotion-description'),
+            voiceSelect: document.getElementById('voice-select'),
+            autoSpeak: document.getElementById('auto-speak'),
+            volumeSlider: document.getElementById('volume-slider')
+        });
+        
+        // Initialize face interface
+        const faceInterface = new FaceInterface({
+            cameraBtn: document.getElementById('camera-btn'),
+            cameraFeed: document.getElementById('camera-feed'),
+            cameraPlaceholder: document.getElementById('camera-placeholder'),
+            faceRecognitionResult: document.getElementById('face-recognition-result'),
+            recognizedName: document.getElementById('recognized-name'),
+            recognitionConfidence: document.getElementById('recognition-confidence'),
+            lastSeen: document.getElementById('last-seen')
+        });
+        
+        // Button to reset chat
+        document.getElementById('refresh-btn').addEventListener('click', function() {
+            // Clear chat except first welcome message
+            const chatContainer = document.getElementById('chat-container');
+            while (chatContainer.childNodes.length > 1) {
+                chatContainer.removeChild(chatContainer.lastChild);
+            }
+            
+            // Reset emotion
+            document.getElementById('emotion-icon').innerHTML = '<i class="fas fa-meh"></i>';
+            document.getElementById('current-emotion').textContent = 'Neutral';
+            document.getElementById('emotion-description').textContent = 'Your emotional state appears neutral.';
+        });
+    });
+</script>
+{% endblock %}

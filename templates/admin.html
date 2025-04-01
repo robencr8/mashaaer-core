@@ -1,0 +1,662 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .admin-header {
+        margin-bottom: 25px;
+    }
+    
+    .system-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        flex: 1;
+        min-width: 200px;
+        padding: 20px;
+        border-radius: 8px;
+        transition: transform 0.2s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 600;
+    }
+    
+    .stat-label {
+        font-size: 1rem;
+        opacity: 0.8;
+    }
+    
+    .status-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    
+    .status-running {
+        background-color: #28a745;
+    }
+    
+    .status-warning {
+        background-color: #ffc107;
+    }
+    
+    .status-error {
+        background-color: #dc3545;
+    }
+    
+    .admin-section {
+        margin-bottom: 30px;
+    }
+    
+    .terminal-output {
+        background-color: #000;
+        color: #33ff33;
+        font-family: monospace;
+        padding: 15px;
+        border-radius: 5px;
+        min-height: 200px;
+        overflow-y: auto;
+        margin-top: 10px;
+    }
+    
+    .terminal-line {
+        margin-bottom: 5px;
+        line-height: 1.5;
+    }
+    
+    .system-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .face-profiles {
+        margin-top: 20px;
+    }
+    
+    .face-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        background-color: var(--bs-dark);
+    }
+    
+    .face-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: var(--bs-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+    }
+    
+    .log-entry {
+        padding: 8px;
+        margin-bottom: 5px;
+        border-radius: 4px;
+    }
+    
+    .log-info {
+        background-color: rgba(13, 110, 253, 0.2);
+    }
+    
+    .log-warning {
+        background-color: rgba(255, 193, 7, 0.2);
+    }
+    
+    .log-error {
+        background-color: rgba(220, 53, 69, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1><i class="fas fa-tools me-3"></i>Admin Dashboard</h1>
+        <div class="badge bg-warning p-2">
+            <i class="fas fa-code me-1"></i>Developer Mode Active
+        </div>
+    </div>
+    <p class="lead">System monitoring and management for Robin AI Enhanced</p>
+</div>
+
+<!-- System Stats -->
+<div class="system-stats">
+    <div class="stat-card bg-dark">
+        <div class="stat-icon text-primary">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-value">{{ stats.uptime }}</div>
+        <div class="stat-label">System Uptime</div>
+    </div>
+    
+    <div class="stat-card bg-dark">
+        <div class="stat-icon text-info">
+            <i class="fas fa-database"></i>
+        </div>
+        <div class="stat-value">{{ stats.memory_size }} MB</div>
+        <div class="stat-label">Database Size</div>
+    </div>
+    
+    <div class="stat-card bg-dark">
+        <div class="stat-icon text-success">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-value">{{ stats.emotion_count }}</div>
+        <div class="stat-label">Emotion Entries</div>
+    </div>
+    
+    <div class="stat-card bg-dark">
+        <div class="stat-icon text-warning">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value">{{ stats.face_profiles }}</div>
+        <div class="stat-label">Face Profiles</div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- System Status -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3><i class="fas fa-heartbeat me-2"></i>System Status</h3>
+                
+                {% if stats.system_status == "running" %}
+                <span class="badge bg-success">Running</span>
+                {% elif stats.system_status == "degraded" %}
+                <span class="badge bg-warning">Degraded</span>
+                {% elif stats.system_status == "error" %}
+                <span class="badge bg-danger">Error</span>
+                {% else %}
+                <span class="badge bg-secondary">Unknown</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <div class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-brain me-2"></i> Emotion Tracker
+                        </div>
+                        <span class="status-indicator status-running"></span>
+                    </div>
+                    <div class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-microphone me-2"></i> Voice Recognition
+                        </div>
+                        <span class="status-indicator status-running"></span>
+                    </div>
+                    <div class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-comments me-2"></i> Intent Classifier
+                        </div>
+                        <span class="status-indicator status-running"></span>
+                    </div>
+                    <div class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-camera me-2"></i> Face Recognition
+                        </div>
+                        <span class="status-indicator status-running"></span>
+                    </div>
+                    <div class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-volume-up me-2"></i> Text-to-Speech
+                        </div>
+                        <span class="status-indicator status-running"></span>
+                    </div>
+                </div>
+                
+                <div class="system-actions">
+                    <button class="btn btn-primary" id="refresh-status-btn">
+                        <i class="fas fa-sync-alt me-2"></i>Refresh Status
+                    </button>
+                    <button class="btn btn-warning" id="restart-services-btn">
+                        <i class="fas fa-redo me-2"></i>Restart Services
+                    </button>
+                    <button class="btn btn-secondary" id="retrain-emotion-btn">
+                        <i class="fas fa-brain me-2"></i>Retrain Emotion Model
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Terminal Output -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3><i class="fas fa-terminal me-2"></i>System Logs</h3>
+            </div>
+            <div class="card-body">
+                <div class="terminal-output" id="system-logs">
+                    <div class="terminal-line">[SYSTEM] Robin AI Enhanced initialized</div>
+                    <div class="terminal-line">[INFO] Loading voice recognition models...</div>
+                    <div class="terminal-line">[INFO] Emotion tracking system active</div>
+                    <div class="terminal-line">[INFO] Face recognition initialized</div>
+                    <div class="terminal-line">[INFO] TTS system ready, using ElevenLabs</div>
+                    <div class="terminal-line">[SYSTEM] All systems operational</div>
+                    <div class="terminal-line">[WARN] Developer mode activated</div>
+                </div>
+                
+                <div class="d-flex mt-3">
+                    <select class="form-select me-2" id="log-level">
+                        <option value="all">All Logs</option>
+                        <option value="info">Info</option>
+                        <option value="warning">Warnings</option>
+                        <option value="error">Errors</option>
+                    </select>
+                    <button class="btn btn-primary" id="clear-logs-btn">
+                        <i class="fas fa-trash me-2"></i>Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Face Profiles -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3><i class="fas fa-user-circle me-2"></i>Face Profiles</h3>
+            </div>
+            <div class="card-body">
+                <div id="face-profiles-container" class="face-profiles">
+                    <!-- Face profiles will be loaded dynamically -->
+                    <div class="face-item">
+                        <div class="face-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5>Roben Edwan</h5>
+                            <small>Last seen: Today, 10:45 AM</small>
+                        </div>
+                        <div>
+                            <span class="badge bg-warning">Developer</span>
+                        </div>
+                    </div>
+                    
+                    <div class="face-item">
+                        <div class="face-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h5>Guest User</h5>
+                            <small>Last seen: Yesterday, 3:20 PM</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <button class="btn btn-primary" id="add-face-btn" data-bs-toggle="modal" data-bs-target="#addFaceModal">
+                        <i class="fas fa-plus me-2"></i>Add New Face
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- System Configuration -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3><i class="fas fa-cogs me-2"></i>System Configuration</h3>
+            </div>
+            <div class="card-body">
+                <form id="system-config-form">
+                    <div class="mb-3">
+                        <label class="form-label">Offline Mode</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="offline-mode">
+                            <label class="form-check-label" for="offline-mode">Enable Offline Mode</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="tts-provider" class="form-label">TTS Provider</label>
+                        <select class="form-select" id="tts-provider">
+                            <option value="elevenlabs">ElevenLabs (Online)</option>
+                            <option value="gtts">Google TTS (Online)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="default-voice" class="form-label">Default Voice</label>
+                        <select class="form-select" id="default-voice">
+                            <option value="default">Default</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="british">British</option>
+                            <option value="arabic">Arabic</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="emotion-sensitivity" class="form-label">Emotion Detection Sensitivity</label>
+                        <input type="range" class="form-range" id="emotion-sensitivity" min="0" max="1" step="0.1" value="0.5">
+                        <div class="d-flex justify-content-between">
+                            <span>Low</span>
+                            <span>High</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="face-recognition-threshold" class="form-label">Face Recognition Threshold</label>
+                        <input type="range" class="form-range" id="face-recognition-threshold" min="0.4" max="0.8" step="0.05" value="0.6">
+                        <div class="d-flex justify-content-between">
+                            <span>More Permissive</span>
+                            <span>Stricter</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="auto-learning-interval" class="form-label">Auto-Learning Interval (hours)</label>
+                        <input type="number" class="form-control" id="auto-learning-interval" min="1" max="72" value="12">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Configuration
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="reset-defaults-btn">
+                        <i class="fas fa-undo me-2"></i>Reset to Defaults
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Face Modal -->
+<div class="modal fade" id="addFaceModal" tabindex="-1" aria-labelledby="addFaceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addFaceModalLabel">Add New Face Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-face-form">
+                    <div class="mb-3">
+                        <label for="face-name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="face-name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Face Image</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="face-image" accept="image/*" required>
+                            <button class="btn btn-outline-primary" type="button" id="capture-face-btn">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="face-preview-container" class="text-center mb-3" style="display: none;">
+                        <img id="face-preview" class="img-fluid rounded" style="max-height: 200px;">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="face-notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="face-notes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-face-btn">Save Profile</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Terminal log simulation
+        const systemLogs = document.getElementById('system-logs');
+        const logLevelSelect = document.getElementById('log-level');
+        const clearLogsBtn = document.getElementById('clear-logs-btn');
+        
+        // Status refresh button
+        document.getElementById('refresh-status-btn').addEventListener('click', function() {
+            const statusIndicators = document.querySelectorAll('.status-indicator');
+            
+            // Simulate refreshing status
+            statusIndicators.forEach(indicator => {
+                indicator.classList.remove('status-running', 'status-warning', 'status-error');
+                indicator.classList.add('status-warning');
+            });
+            
+            setTimeout(() => {
+                statusIndicators.forEach(indicator => {
+                    indicator.classList.remove('status-warning');
+                    indicator.classList.add('status-running');
+                });
+                addLogEntry('System status refreshed. All services operational.', 'info');
+            }, 1500);
+        });
+        
+        // Restart services button
+        document.getElementById('restart-services-btn').addEventListener('click', function() {
+            if (!confirm('Are you sure you want to restart all services?')) return;
+            
+            addLogEntry('Restarting all services...', 'warning');
+            const statusIndicators = document.querySelectorAll('.status-indicator');
+            
+            statusIndicators.forEach(indicator => {
+                indicator.classList.remove('status-running', 'status-warning', 'status-error');
+                indicator.classList.add('status-error');
+            });
+            
+            setTimeout(() => {
+                addLogEntry('Services restarting...', 'info');
+                
+                setTimeout(() => {
+                    statusIndicators.forEach(indicator => {
+                        indicator.classList.remove('status-error');
+                        indicator.classList.add('status-running');
+                    });
+                    addLogEntry('All services restarted successfully', 'info');
+                }, 2000);
+            }, 1500);
+        });
+        
+        // Retrain emotion model button
+        document.getElementById('retrain-emotion-btn').addEventListener('click', function() {
+            addLogEntry('Starting emotion model retraining...', 'info');
+            
+            fetch('/api/retrain-emotions', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addLogEntry('Emotion model retrained successfully', 'info');
+                } else {
+                    addLogEntry(`Error retraining model: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                addLogEntry(`Error: ${error.message}`, 'error');
+            });
+        });
+        
+        // System configuration form
+        document.getElementById('system-config-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const config = {
+                offline_mode: document.getElementById('offline-mode').checked,
+                tts_provider: document.getElementById('tts-provider').value,
+                default_voice: document.getElementById('default-voice').value,
+                emotion_sensitivity: document.getElementById('emotion-sensitivity').value,
+                face_recognition_threshold: document.getElementById('face-recognition-threshold').value,
+                auto_learning_interval: document.getElementById('auto-learning-interval').value
+            };
+            
+            addLogEntry('Saving configuration...', 'info');
+            
+            fetch('/api/save-config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(config)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addLogEntry('Configuration saved successfully', 'info');
+                } else {
+                    addLogEntry(`Error saving configuration: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                addLogEntry(`Error: ${error.message}`, 'error');
+            });
+        });
+        
+        // Reset to defaults button
+        document.getElementById('reset-defaults-btn').addEventListener('click', function() {
+            if (!confirm('Reset all settings to default values?')) return;
+            
+            document.getElementById('offline-mode').checked = false;
+            document.getElementById('tts-provider').value = 'elevenlabs';
+            document.getElementById('default-voice').value = 'default';
+            document.getElementById('emotion-sensitivity').value = 0.5;
+            document.getElementById('face-recognition-threshold').value = 0.6;
+            document.getElementById('auto-learning-interval').value = 12;
+            
+            addLogEntry('Settings reset to default values', 'info');
+        });
+        
+        // Face preview
+        document.getElementById('face-image').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('face-preview').src = e.target.result;
+                document.getElementById('face-preview-container').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        // Save face button
+        document.getElementById('save-face-btn').addEventListener('click', function() {
+            const form = document.getElementById('add-face-form');
+            const nameInput = document.getElementById('face-name');
+            const fileInput = document.getElementById('face-image');
+            
+            if (!nameInput.value || !fileInput.files[0]) {
+                alert('Name and face image are required');
+                return;
+            }
+            
+            addLogEntry(`Adding new face profile for: ${nameInput.value}`, 'info');
+            
+            // Create a new face item
+            const faceItem = document.createElement('div');
+            faceItem.className = 'face-item';
+            faceItem.innerHTML = `
+                <div class="face-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h5>${nameInput.value}</h5>
+                    <small>Last seen: Just now</small>
+                </div>
+            `;
+            
+            document.getElementById('face-profiles-container').prepend(faceItem);
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addFaceModal'));
+            modal.hide();
+            
+            // Reset form
+            form.reset();
+            document.getElementById('face-preview-container').style.display = 'none';
+            
+            addLogEntry(`Face profile for ${nameInput.value} added successfully`, 'info');
+        });
+        
+        // Log filtering
+        logLevelSelect.addEventListener('change', function() {
+            filterLogs(this.value);
+        });
+        
+        // Clear logs button
+        clearLogsBtn.addEventListener('click', function() {
+            systemLogs.innerHTML = '';
+            addLogEntry('Logs cleared', 'info');
+        });
+        
+        // Helper function to add log entries
+        function addLogEntry(message, level = 'info') {
+            const now = new Date();
+            const timestamp = now.toLocaleTimeString();
+            
+            const logLine = document.createElement('div');
+            logLine.className = `terminal-line log-entry log-${level}`;
+            
+            let prefix = '[INFO]';
+            if (level === 'warning') prefix = '[WARN]';
+            if (level === 'error') prefix = '[ERROR]';
+            
+            logLine.textContent = `${timestamp} ${prefix} ${message}`;
+            systemLogs.appendChild(logLine);
+            
+            // Auto scroll to bottom
+            systemLogs.scrollTop = systemLogs.scrollHeight;
+        }
+        
+        // Helper function to filter logs
+        function filterLogs(level) {
+            const logEntries = document.querySelectorAll('.log-entry');
+            
+            logEntries.forEach(entry => {
+                if (level === 'all') {
+                    entry.style.display = 'block';
+                    return;
+                }
+                
+                if (entry.classList.contains(`log-${level}`)) {
+                    entry.style.display = 'block';
+                } else {
+                    entry.style.display = 'none';
+                }
+            });
+        }
+        
+        // Add initial log entries
+        addLogEntry('Admin panel loaded', 'info');
+        addLogEntry('Developer mode active', 'warning');
+    });
+</script>
+{% endblock %}
