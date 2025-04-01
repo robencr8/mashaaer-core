@@ -35,6 +35,8 @@ intent_classifier = IntentClassifier()
 voice_recognition = VoiceRecognition(config)
 face_detector = FaceDetector(config, db_manager)
 auto_learning = AutoLearning(db_manager)
+from profile_manager import ProfileManager
+profile_manager = ProfileManager(db_manager)
 
 # Initialize API routes
 from api_routes import init_api
@@ -224,16 +226,31 @@ def speak():
     text = request.json.get('text', '')
     voice = request.json.get('voice', 'default')
     language = request.json.get('language', 'en-US')
+    use_profile = request.json.get('use_profile', True)
     
     if not text:
         return jsonify({'error': 'No text provided'}), 400
     
     try:
-        # Select voice based on language if not specifically provided
-        if voice == 'default' and language == 'ar':
-            voice = 'arabic'
-        
-        audio_path = tts_manager.speak(text, voice)
+        # Use profile manager to get personalized voice and adapted text
+        if use_profile:
+            # Adapt text based on preferred tone
+            adapted_text = profile_manager.adapt_response(text, language)
+            
+            # Get preferred voice for language if not explicitly specified
+            if voice == 'default':
+                voice = profile_manager.get_tts_voice_for_language(language)
+                
+            # Speak using profile-based settings
+            audio_path = tts_manager.speak(adapted_text, voice, language, profile_manager)
+        else:
+            # Select basic voice based on language if not specifically provided
+            if voice == 'default' and language == 'ar':
+                voice = 'arabic'
+            
+            # Use standard TTS without profile-based customization
+            audio_path = tts_manager.speak(text, voice)
+            
         return jsonify({
             'success': True, 
             'audio_path': audio_path,
@@ -269,7 +286,7 @@ def listen():
             # Special greeting for Roben
             if "name" in text.lower() and (DEVELOPER_NAME.lower() in text.lower()):
                 greeting = "Welcome back, Roben. Robin AI is fully operational."
-                tts_manager.speak(greeting)
+                tts_manager.speak(greeting, profile_manager=profile_manager)
                 logger.info("Special greeting played for creator")
         
         # Process emotion
@@ -338,7 +355,7 @@ def detect_face():
             
             # Special greeting for Roben when detected by face
             greeting = "Welcome back, Roben. Robin AI is fully operational."
-            tts_manager.speak(greeting)
+            tts_manager.speak(greeting, profile_manager=profile_manager)
             logger.info("Special greeting played for creator face detection")
         
         # Clean up temp file
@@ -455,13 +472,22 @@ def set_language():
         from flask import session
         session['language'] = language
         
+        # Update the user profile with the new language preference
+        profile_data = {
+            'language': language
+        }
+        profile_manager.update_profile(profile_data)
+        
+        # Get the appropriate voice for this language
+        tts_voice = profile_manager.get_tts_voice_for_language(language)
+        
         # Set voice and TTS preferences accordingly
         if language == 'ar':
             # Set Arabic voice if available
-            tts_manager.speak("تم تحديد اللغة العربية", "arabic")
+            tts_manager.speak("تم تحديد اللغة العربية", tts_voice, language, profile_manager)
         else:
             # Default to English voice
-            tts_manager.speak("English language selected", "default")
+            tts_manager.speak("English language selected", tts_voice, language, profile_manager)
             
         return jsonify({
             'success': True,
@@ -508,29 +534,42 @@ def update_profile():
         
         # Required fields
         full_name = data.get('full_name')
-        language_preference = data.get('language_preference')
+        language_preference = data.get('language_preference', 'en')
         
         if not full_name:
             return jsonify({'success': False, 'error': 'Full name is required'}), 400
             
-        if not language_preference:
-            return jsonify({'success': False, 'error': 'Language preference is required'}), 400
-            
         # Optional fields with defaults
         age = data.get('age')
         nickname = data.get('nickname', full_name.split()[0] if full_name else 'User')
-        preferred_voice_style = data.get('preferred_voice_style', 'default')
+        voice_style = data.get('voice_style', 'default')
         theme = data.get('theme', 'dark')
         onboarding_complete = data.get('onboarding_complete', True)
         
-        # Store settings in database
+        # Prepare profile data
+        profile_data = {
+            'full_name': full_name,
+            'nickname': nickname,
+            'language': language_preference,
+            'voice_style': voice_style,
+            'theme': theme,
+            'age': age if age else None
+        }
+        
+        # Use the ProfileManager to update the profile and infer personality
+        success = profile_manager.update_profile(profile_data)
+        
+        if not success:
+            return jsonify({'success': False, 'error': 'Failed to update profile'}), 500
+        
+        # Also maintain compatibility with old settings storage
         db_manager.set_setting('user_full_name', full_name)
         
         if age:
             db_manager.set_setting('user_age', str(age))
             
         db_manager.set_setting('user_nickname', nickname)
-        db_manager.set_setting('preferred_voice_style', preferred_voice_style)
+        db_manager.set_setting('preferred_voice_style', voice_style)
         db_manager.set_setting('theme', theme)
         db_manager.set_setting('language_preference', language_preference)
         db_manager.set_setting('onboarding_complete', 'true' if onboarding_complete else 'false')
@@ -539,12 +578,22 @@ def update_profile():
         from flask import session
         session['language'] = language_preference
         
-        # Create a face profile if an image was provided (not implemented in this version)
-        # This would be added in a future version where we capture a profile photo
+        # Get the inferred personality for the response
+        current_profile = profile_manager.get_current_profile()
+        inferred_tone = current_profile.get('preferred_tone', 'neutral')
+        
+        # Create a personalized greeting based on the inferred personality
+        greeting = profile_manager.get_greeting(nickname, language_preference)
+        
+        # Use the personalized TTS for the greeting
+        tts_voice = profile_manager.get_tts_voice_for_language(language_preference)
+        tts_manager.speak(greeting, tts_voice, language_preference, profile_manager)
         
         return jsonify({
             'success': True,
-            'message': 'Profile updated successfully'
+            'message': 'Profile updated successfully',
+            'greeting': greeting,
+            'inferred_tone': inferred_tone
         })
         
     except Exception as e:
@@ -689,6 +738,9 @@ def init_scheduler():
 
 # Make sure database is initialized at module import time
 db_manager.initialize_db()
+
+# Initialize profile manager tables
+profile_manager.initialize_tables()
 
 if __name__ == "__main__":
     # Start scheduler

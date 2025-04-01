@@ -5,6 +5,7 @@ import threading
 import time
 from .elevenlabs import ElevenLabsTTS
 from .gtts_fallback import GTTSFallback
+import json
 
 class TTSManager:
     """Manages text-to-speech functionality with provider fallback"""
@@ -52,18 +53,35 @@ class TTSManager:
             self.logger.error(f"Failed to initialize TTS: {str(e)}")
             return False
     
-    def speak(self, text, voice="default"):
-        """Synthesize speech from text with the best available provider"""
+    def speak(self, text, voice="default", language=None, profile_manager=None):
+        """
+        Synthesize speech from text with the best available provider
+        
+        Args:
+            text (str): The text to be spoken
+            voice (str): Voice ID or category (default uses profile preferences)
+            language (str): Language code (en, ar) - determines voice selection
+            profile_manager: Optional profile manager to get voice preferences
+        """
         if not text:
             self.logger.warning("Empty text provided to TTS")
             return None
+            
+        # If using profile_manager, adapt response style and get voice preference
+        if profile_manager:
+            # Adapt text based on preferred tone
+            text = profile_manager.adapt_response(text, language)
+            
+            # Get preferred voice for language if not explicitly specified
+            if voice == "default":
+                voice = profile_manager.get_tts_voice_for_language(language)
         
         with self.tts_lock:
             try:
                 # Try ElevenLabs first if available and preferred
                 if self.use_elevenlabs and self.config.TTS_PROVIDER == "elevenlabs":
                     try:
-                        self.logger.debug(f"Using ElevenLabs for: {text[:20]}...")
+                        self.logger.debug(f"Using ElevenLabs for: {text[:20]}... (voice: {voice})")
                         audio_path = self.elevenlabs.speak(text, voice)
                         self._play_audio(audio_path)
                         return audio_path
@@ -72,7 +90,7 @@ class TTSManager:
                 
                 # Fall back to gTTS
                 if self.use_gtts:
-                    self.logger.debug(f"Using gTTS for: {text[:20]}...")
+                    self.logger.debug(f"Using gTTS for: {text[:20]}... (voice: {voice})")
                     audio_path = self.gtts.speak(text, voice)
                     self._play_audio(audio_path)
                     return audio_path
