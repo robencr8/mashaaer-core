@@ -369,20 +369,18 @@ class ProfileManager:
         return response_styles.get(tone, response_styles['neutral'])
     
     def get_tts_voice_for_language(self, language=None):
-        """Get the appropriate TTS voice for a language based on user preferences"""
-        current_profile = self.get_current_profile()
-        
-        if not language:
-            language = current_profile.get('language', 'en')
-            
-        preferred_tone = current_profile.get('preferred_tone', 'neutral')
-        
-        # Get voice from tone categories
-        if preferred_tone in self.tone_categories:
-            return self.tone_categories[preferred_tone]['tts_voices'].get(language, 'default')
-        
-        # Fallback to defaults
-        return 'default' if language == 'en' else 'arabic'
+        """Get the appropriate TTS voice for a language based on user preferences."""
+        profile = self.get_current_profile()
+        tone = profile.get('voice_style', 'calm')  # default calm
+
+        if tone == 'sad':
+            return "EXAVITQu4vr4xnSDxMaL"  # Example: Sad voice ID
+        elif tone == 'happy':
+            return "pNInz6obpgDQGcFmaJgB"  # Example: Happy tone
+        elif tone == 'excited':
+            return "ErXwobaYiN019PkySvjV"  # Excited expressive
+        else:  # calm or unknown
+            return "21m00Tcm4TlvDq8ikWAM"  # Bella
     
     def get_greeting(self, name=None, language=None):
         """Get a personalized greeting based on profile preferences"""
