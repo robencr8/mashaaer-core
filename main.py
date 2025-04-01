@@ -18,6 +18,7 @@ from emotion_tracker import EmotionTracker
 from intent_classifier import IntentClassifier
 from database.db_manager import DatabaseManager
 from tts.tts_manager import TTSManager
+from auto_learning import AutoLearning
 from voice.recognition import VoiceRecognition
 from vision.face_detector import FaceDetector
 
@@ -33,6 +34,7 @@ tts_manager = TTSManager(config)
 intent_classifier = IntentClassifier()
 voice_recognition = VoiceRecognition(config)
 face_detector = FaceDetector(config, db_manager)
+auto_learning = AutoLearning(db_manager)
 
 # Initialize API routes
 from api_routes import init_api
@@ -146,12 +148,16 @@ def admin():
     if not is_developer_mode():
         return redirect(url_for('index'))
     
+    # Get AI learning stats
+    learning_status = auto_learning.get_learning_status()
+    
     system_stats = {
         'uptime': core_launcher.get_uptime(),
         'memory_size': db_manager.get_db_size(),
         'emotion_count': emotion_tracker.get_total_entries(),
         'face_profiles': face_detector.get_profile_count(),
-        'system_status': core_launcher.get_system_status()
+        'system_status': core_launcher.get_system_status(),
+        'learning_status': learning_status
     }
     
     return render_template('admin.html', stats=system_stats, dev_mode=True)
@@ -622,10 +628,53 @@ def log_recognition():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 def auto_learn_emotions():
-    """Schedule function to retrain emotion model"""
-    logger.info("Starting scheduled emotion learning...")
-    emotion_tracker.retrain_model()
-    logger.info("Emotion model retraining complete")
+    """Schedule function to run auto-learning cycles"""
+    logger.info("Starting scheduled auto-learning cycle...")
+    
+    # Check if auto-learning should run
+    if auto_learning.should_learn():
+        # Run the learning cycle
+        success = auto_learning.learn()
+        
+        # Also retrain the emotion model
+        emotion_tracker.retrain_model()
+        
+        logger.info(f"Auto-learning cycle complete. Success: {success}")
+    else:
+        logger.info("Skipping auto-learning cycle (not time yet or disabled)")
+        
+@app.route('/api/auto-learning/status')
+def get_auto_learning_status():
+    """Get auto-learning status and metrics"""
+    # Only accessible in developer mode
+    if not is_developer_mode():
+        return jsonify({'error': 'Developer mode required'}), 403
+    
+    status = auto_learning.get_learning_status()
+    return jsonify(status)
+
+@app.route('/api/auto-learning/toggle', methods=['POST'])
+def toggle_auto_learning():
+    """Enable or disable auto-learning"""
+    # Only accessible in developer mode
+    if not is_developer_mode():
+        return jsonify({'error': 'Developer mode required'}), 403
+    
+    data = request.json
+    enabled = data.get('enabled', True)
+    
+    new_state = auto_learning.set_learning_enabled(enabled)
+    return jsonify({'success': True, 'enabled': new_state})
+
+@app.route('/api/auto-learning/trigger', methods=['POST'])
+def trigger_auto_learning():
+    """Manually trigger an auto-learning cycle"""
+    # Only accessible in developer mode
+    if not is_developer_mode():
+        return jsonify({'error': 'Developer mode required'}), 403
+    
+    success = auto_learning.learn()
+    return jsonify({'success': success})
 
 # Start the scheduler for auto-learning
 def init_scheduler():
