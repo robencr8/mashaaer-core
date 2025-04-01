@@ -1,0 +1,543 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+  .registration-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    text-align: center;
+  }
+  
+  .registration-step {
+    display: none;
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 2rem;
+  }
+  
+  .registration-step.active {
+    display: block;
+  }
+  
+  .step-icon {
+    font-size: 3rem;
+    color: var(--bs-info);
+    margin-bottom: 1.5rem;
+  }
+  
+  .step-question {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .step-answer {
+    font-size: 1.4rem;
+    color: var(--bs-light);
+    margin-bottom: 1.5rem;
+    min-height: 2rem;
+  }
+  
+  .step-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .listening-indicator {
+    margin-top: 1.5rem;
+    font-size: 1rem;
+    color: var(--bs-info);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .listening-indicator.active {
+    opacity: 1;
+  }
+  
+  .pulse-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--bs-info);
+    margin: 0 2px;
+    animation: pulse-dot 1.5s ease-in-out infinite;
+  }
+  
+  .pulse-dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  
+  .pulse-dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+  
+  @keyframes pulse-dot {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.2;
+    }
+    50% {
+      transform: scale(1.5);
+      opacity: 1;
+    }
+  }
+  
+  .progress-container {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 2rem;
+  }
+  
+  .progress-bar {
+    height: 8px;
+    transition: width 0.5s ease;
+  }
+  
+  .completion-message {
+    font-size: 1.8rem;
+    color: var(--bs-success);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="registration-container">
+  <!-- Progress bar -->
+  <div class="progress-container">
+    <div class="progress">
+      <div id="registration-progress" class="progress-bar bg-info" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+  </div>
+
+  <!-- Step 1: Full Name -->
+  <div id="step-name" class="registration-step active">
+    <div class="step-icon">
+      <i class="fas fa-user"></i>
+    </div>
+    <div class="step-question">
+      <p class="en-text" style="display:none;">What is your full name?</p>
+      <p class="ar-text" style="display:none;">ما اسمك الكامل؟</p>
+    </div>
+    <div id="name-answer" class="step-answer"></div>
+    <div class="listening-indicator" id="name-listening">
+      <p class="en-text" style="display:none;">Listening <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
+      <p class="ar-text" style="display:none;">أستمع <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
+    </div>
+    <div class="step-buttons">
+      <button id="retry-name-btn" class="btn btn-outline-secondary" style="display:none;">
+        <span class="en-text" style="display:none;">Retry</span>
+        <span class="ar-text" style="display:none;">إعادة المحاولة</span>
+      </button>
+      <button id="confirm-name-btn" class="btn btn-primary" style="display:none;">
+        <span class="en-text" style="display:none;">Confirm</span>
+        <span class="ar-text" style="display:none;">تأكيد</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 2: Age -->
+  <div id="step-age" class="registration-step">
+    <div class="step-icon">
+      <i class="fas fa-birthday-cake"></i>
+    </div>
+    <div class="step-question">
+      <p class="en-text" style="display:none;">How old are you?</p>
+      <p class="ar-text" style="display:none;">كم عمرك؟</p>
+    </div>
+    <div id="age-answer" class="step-answer"></div>
+    <div class="listening-indicator" id="age-listening">
+      <p class="en-text" style="display:none;">Listening <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
+      <p class="ar-text" style="display:none;">أستمع <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
+    </div>
+    <div class="step-buttons">
+      <button id="retry-age-btn" class="btn btn-outline-secondary" style="display:none;">
+        <span class="en-text" style="display:none;">Retry</span>
+        <span class="ar-text" style="display:none;">إعادة المحاولة</span>
+      </button>
+      <button id="confirm-age-btn" class="btn btn-primary" style="display:none;">
+        <span class="en-text" style="display:none;">Confirm</span>
+        <span class="ar-text" style="display:none;">تأكيد</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 3: Nickname -->
+  <div id="step-nickname" class="registration-step">
+    <div class="step-icon">
+      <i class="fas fa-id-badge"></i>
+    </div>
+    <div class="step-question">
+      <p class="en-text" style="display:none;">What would you like me to call you?</p>
+      <p class="ar-text" style="display:none;">ما الذي تحب أن أُطلقه عليك؟</p>
+    </div>
+    <div id="nickname-answer" class="step-answer"></div>
+    <div class="listening-indicator" id="nickname-listening">
+      <p class="en-text" style="display:none;">Listening <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
+      <p class="ar-text" style="display:none;">أستمع <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
+    </div>
+    <div class="step-buttons">
+      <button id="retry-nickname-btn" class="btn btn-outline-secondary" style="display:none;">
+        <span class="en-text" style="display:none;">Retry</span>
+        <span class="ar-text" style="display:none;">إعادة المحاولة</span>
+      </button>
+      <button id="confirm-nickname-btn" class="btn btn-primary" style="display:none;">
+        <span class="en-text" style="display:none;">Confirm</span>
+        <span class="ar-text" style="display:none;">تأكيد</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 4: Voice Style -->
+  <div id="step-voice" class="registration-step">
+    <div class="step-icon">
+      <i class="fas fa-volume-up"></i>
+    </div>
+    <div class="step-question">
+      <p class="en-text" style="display:none;">How would you like my voice to sound? (soft, formal, playful...)</p>
+      <p class="ar-text" style="display:none;">كيف تفضل صوتي؟ (ناعم، رسمي، مشاغب...)</p>
+    </div>
+    <div id="voice-answer" class="step-answer"></div>
+    <div class="listening-indicator" id="voice-listening">
+      <p class="en-text" style="display:none;">Listening <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
+      <p class="ar-text" style="display:none;">أستمع <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
+    </div>
+    <div class="step-buttons">
+      <button id="retry-voice-btn" class="btn btn-outline-secondary" style="display:none;">
+        <span class="en-text" style="display:none;">Retry</span>
+        <span class="ar-text" style="display:none;">إعادة المحاولة</span>
+      </button>
+      <button id="confirm-voice-btn" class="btn btn-primary" style="display:none;">
+        <span class="en-text" style="display:none;">Confirm</span>
+        <span class="ar-text" style="display:none;">تأكيد</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 5: Theme -->
+  <div id="step-theme" class="registration-step">
+    <div class="step-icon">
+      <i class="fas fa-paint-brush"></i>
+    </div>
+    <div class="step-question">
+      <p class="en-text" style="display:none;">Do you prefer dark mode or light mode?</p>
+      <p class="ar-text" style="display:none;">هل تفضل الوضع الداكن أم الفاتح؟</p>
+    </div>
+    <div id="theme-answer" class="step-answer"></div>
+    <div class="listening-indicator" id="theme-listening">
+      <p class="en-text" style="display:none;">Listening <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
+      <p class="ar-text" style="display:none;">أستمع <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
+    </div>
+    <div class="step-buttons">
+      <button id="retry-theme-btn" class="btn btn-outline-secondary" style="display:none;">
+        <span class="en-text" style="display:none;">Retry</span>
+        <span class="ar-text" style="display:none;">إعادة المحاولة</span>
+      </button>
+      <button id="confirm-theme-btn" class="btn btn-primary" style="display:none;">
+        <span class="en-text" style="display:none;">Confirm</span>
+        <span class="ar-text" style="display:none;">تأكيد</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Completion Step -->
+  <div id="step-complete" class="registration-step">
+    <div class="step-icon">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <div class="completion-message">
+      <p class="en-text" style="display:none;">Thank you! Your profile has been set up successfully.</p>
+      <p class="ar-text" style="display:none;">شكرًا لك! تم إعداد ملفك الشخصي بنجاح.</p>
+    </div>
+    <div class="step-buttons">
+      <button id="continue-btn" class="btn btn-success">
+        <span class="en-text" style="display:none;">Continue to Robin AI</span>
+        <span class="ar-text" style="display:none;">المتابعة إلى روبن الذكاء الاصطناعي</span>
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get language preference from local storage
+    const userLanguage = localStorage.getItem('user_language') || 'en';
+    
+    // Show text in the correct language
+    if (userLanguage === 'en') {
+      document.querySelectorAll('.en-text').forEach(el => el.style.display = 'block');
+    } else {
+      document.querySelectorAll('.ar-text').forEach(el => el.style.display = 'block');
+    }
+    
+    // Profile data object
+    const profileData = {
+      full_name: '',
+      age: null,
+      nickname: '',
+      preferred_voice_style: '',
+      theme: '',
+      language_preference: userLanguage,
+      onboarding_complete: false
+    };
+    
+    // Current step tracker
+    let currentStep = 'name';
+    const steps = ['name', 'age', 'nickname', 'voice', 'theme', 'complete'];
+    const stepProgress = {
+      'name': 0,
+      'age': 20,
+      'nickname': 40,
+      'voice': 60,
+      'theme': 80,
+      'complete': 100
+    };
+    
+    // Update progress bar
+    function updateProgress(step) {
+      document.getElementById('registration-progress').style.width = `${stepProgress[step]}%`;
+      document.getElementById('registration-progress').setAttribute('aria-valuenow', stepProgress[step]);
+    }
+    
+    // Show a specific step
+    function showStep(step) {
+      // Hide all steps
+      document.querySelectorAll('.registration-step').forEach(el => {
+        el.classList.remove('active');
+      });
+      
+      // Show the requested step
+      document.getElementById(`step-${step}`).classList.add('active');
+      
+      // Update progress
+      updateProgress(step);
+      
+      // Start the step's process
+      if (step !== 'complete') {
+        askQuestion(step);
+      }
+    }
+    
+    // Ask question for the current step
+    function askQuestion(step) {
+      // Get question text
+      let questionText = '';
+      
+      switch(step) {
+        case 'name':
+          questionText = userLanguage === 'en' ? "What is your full name?" : "ما اسمك الكامل؟";
+          break;
+        case 'age':
+          questionText = userLanguage === 'en' ? "How old are you?" : "كم عمرك؟";
+          break;
+        case 'nickname':
+          questionText = userLanguage === 'en' ? "What would you like me to call you?" : "ما الذي تحب أن أُطلقه عليك؟";
+          break;
+        case 'voice':
+          questionText = userLanguage === 'en' ? "How would you like my voice to sound? (soft, formal, playful...)" : "كيف تفضل صوتي؟ (ناعم، رسمي، مشاغب...)";
+          break;
+        case 'theme':
+          questionText = userLanguage === 'en' ? "Do you prefer dark mode or light mode?" : "هل تفضل الوضع الداكن أم الفاتح؟";
+          break;
+      }
+      
+      // Speak the question
+      speakText(questionText, userLanguage);
+      
+      // Start listening after speaking
+      setTimeout(() => {
+        startListening(step);
+      }, 3000);
+    }
+    
+    // Start listening for voice input
+    function startListening(step) {
+      document.getElementById(`${step}-listening`).classList.add('active');
+      
+      // In a real implementation, this would start the voice recognition
+      // For this demo, we're simulating with timeouts
+      
+      // Simulate voice recognition with mock responses
+      setTimeout(() => {
+        let response = '';
+        
+        switch(step) {
+          case 'name':
+            response = userLanguage === 'en' ? 'John Smith' : 'محمد علي';
+            break;
+          case 'age':
+            response = '35';
+            break;
+          case 'nickname':
+            response = userLanguage === 'en' ? 'John' : 'محمد';
+            break;
+          case 'voice':
+            response = userLanguage === 'en' ? 'I prefer a soft voice' : 'أفضل صوت ناعم';
+            break;
+          case 'theme':
+            response = userLanguage === 'en' ? 'Dark mode' : 'الوضع الداكن';
+            break;
+        }
+        
+        processResponse(step, response);
+      }, 3000);
+    }
+    
+    // Process voice response
+    function processResponse(step, text) {
+      document.getElementById(`${step}-listening`).classList.remove('active');
+      
+      // Display the response
+      document.getElementById(`${step}-answer`).textContent = text;
+      
+      // Show confirmation buttons
+      document.getElementById(`retry-${step}-btn`).style.display = 'inline-block';
+      document.getElementById(`confirm-${step}-btn`).style.display = 'inline-block';
+      
+      // Save the response temporarily
+      switch(step) {
+        case 'name':
+          profileData.full_name = text;
+          break;
+        case 'age':
+          // Try to extract a number
+          const age = parseInt(text.match(/\d+/));
+          profileData.age = isNaN(age) ? 30 : age; // Default to 30 if no number found
+          break;
+        case 'nickname':
+          profileData.nickname = text;
+          break;
+        case 'voice':
+          profileData.preferred_voice_style = text;
+          break;
+        case 'theme':
+          // Determine theme preference
+          if (userLanguage === 'en') {
+            profileData.theme = text.toLowerCase().includes('light') ? 'light' : 'dark';
+          } else {
+            profileData.theme = text.includes('فاتح') ? 'light' : 'dark';
+          }
+          break;
+      }
+    }
+    
+    // Setup confirmation button event listeners
+    steps.forEach(step => {
+      if (step !== 'complete') {
+        // Retry button
+        document.getElementById(`retry-${step}-btn`).addEventListener('click', () => {
+          // Clear the answer
+          document.getElementById(`${step}-answer`).textContent = '';
+          
+          // Hide buttons
+          document.getElementById(`retry-${step}-btn`).style.display = 'none';
+          document.getElementById(`confirm-${step}-btn`).style.display = 'none';
+          
+          // Ask the question again
+          askQuestion(step);
+        });
+        
+        // Confirm button
+        document.getElementById(`confirm-${step}-btn`).addEventListener('click', () => {
+          // Move to the next step
+          const currentIndex = steps.indexOf(step);
+          if (currentIndex < steps.length - 1) {
+            currentStep = steps[currentIndex + 1];
+            
+            // If this is the last question, update the profile
+            if (currentStep === 'complete') {
+              updateProfile();
+            } else {
+              showStep(currentStep);
+            }
+          }
+        });
+      }
+    });
+    
+    // Continue button on completion step
+    document.getElementById('continue-btn').addEventListener('click', () => {
+      window.location.href = '/';
+    });
+    
+    // Function to update the user profile
+    function updateProfile() {
+      // Mark onboarding as complete
+      profileData.onboarding_complete = true;
+      
+      // Send profile data to server
+      fetch('/api/update-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(profileData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Show completion step
+          showStep('complete');
+          
+          // Speak completion message
+          const completionText = userLanguage === 'en' 
+            ? `Thank you, ${profileData.nickname}! Your profile has been set up successfully.`
+            : `شكرًا لك يا ${profileData.nickname}! تم إعداد ملفك الشخصي بنجاح.`;
+          
+          speakText(completionText, userLanguage);
+        } else {
+          console.error('Error updating profile:', data.error);
+          
+          // Show error message
+          alert(userLanguage === 'en' 
+            ? 'There was an error setting up your profile. Please try again.'
+            : 'حدث خطأ في إعداد ملفك الشخصي. يرجى المحاولة مرة أخرى.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        
+        // Show error message
+        alert(userLanguage === 'en' 
+          ? 'There was an error connecting to the server. Please try again.'
+          : 'حدث خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.');
+      });
+    }
+    
+    // Function to speak text using TTS
+    function speakText(text, language) {
+      fetch('/api/speak', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          text: text, 
+          language: language === 'en' ? 'en-US' : 'ar'
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('TTS success:', data);
+        } else {
+          console.error('TTS error:', data.error);
+        }
+      })
+      .catch(error => {
+        console.error('TTS API error:', error);
+      });
+    }
+    
+    // Initialize with the first step
+    showStep(currentStep);
+  });
+</script>
+{% endblock %}

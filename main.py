@@ -106,6 +106,18 @@ def index():
 def startup():
     return render_template('startup.html')
 
+@app.route('/consent')
+def consent():
+    return render_template('consent.html')
+
+@app.route('/voice-register')
+def voice_register():
+    return render_template('voice_register.html')
+
+@app.route('/goodbye')
+def goodbye():
+    return render_template('goodbye.html')
+
 @app.route('/demo')
 def demo():
     dev_mode = is_developer_mode()
@@ -409,6 +421,68 @@ def get_profile(name):
         logger.error(f"Error getting profile: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
         
+@app.route('/api/set-language', methods=['POST'])
+def set_language():
+    """Set the user's language preference"""
+    try:
+        data = request.json
+        language = data.get('language')
+        
+        if not language:
+            return jsonify({'success': False, 'error': 'Language preference is required'}), 400
+        
+        # Store in database
+        db_manager.set_setting('language_preference', language)
+        
+        # Store in session
+        from flask import session
+        session['language'] = language
+        
+        # Set voice and TTS preferences accordingly
+        if language == 'ar':
+            # Set Arabic voice if available
+            tts_manager.speak("تم تحديد اللغة العربية", "arabic")
+        else:
+            # Default to English voice
+            tts_manager.speak("English language selected", "default")
+            
+        return jsonify({
+            'success': True,
+            'message': 'Language preference set successfully'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error setting language: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/set-consent', methods=['POST'])
+def set_consent():
+    """Set user consent for data storage"""
+    try:
+        data = request.json
+        consent = data.get('consent', False)
+        language = data.get('language', 'en')
+        
+        # Store consent in database
+        db_manager.set_setting('user_consent', 'true' if consent else 'false')
+        
+        # Store language in database if provided
+        if language:
+            db_manager.set_setting('language_preference', language)
+            
+            # Set in session
+            from flask import session
+            session['language'] = language
+        
+        return jsonify({
+            'success': True,
+            'message': 'Consent preference saved successfully'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error setting consent: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/api/update-profile', methods=['POST'])
 def update_profile():
     """Update user profile during onboarding"""

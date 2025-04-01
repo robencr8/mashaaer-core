@@ -185,6 +185,25 @@
       userLanguage = lang;
       userProfile.language_preference = lang;
       
+      // Store language in localStorage for use across pages
+      localStorage.setItem('user_language', lang);
+      
+      // Send language preference to server
+      fetch('/api/set-language', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ language: lang })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Language set:', data);
+      })
+      .catch(error => {
+        console.error('Error setting language:', error);
+      });
+      
       // Hide language selector
       document.getElementById('language-selector').style.display = 'none';
       
@@ -200,12 +219,12 @@
       
       document.getElementById('question-text').textContent = welcomeText;
       
-      // Simulate speech
+      // Speak welcome message
       speakText(welcomeText);
       
-      // After welcome message, proceed to privacy consent
+      // After welcome message, redirect to consent page
       setTimeout(() => {
-        askPrivacyConsent();
+        window.location.href = '/consent';
       }, 5000);
     }
     
