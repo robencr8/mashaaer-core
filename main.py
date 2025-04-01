@@ -73,6 +73,13 @@ def set_developer_mode(enabled=True):
     db_manager.set_setting(DEVELOPER_MODE_FLAG, "true" if enabled else "false")
     
     logger.info(f"Developer mode {'enabled' if enabled else 'disabled'}")
+
+from flask import request
+
+@app.before_request
+def log_request_info():
+    print(f"🔍 Request to: {request.path}")
+
     return enabled
 
 # Scheduler for auto-learning
@@ -630,7 +637,7 @@ def log_recognition():
         cursor = conn.cursor()
         
         # Get the metadata
-        cursor.execute("SELECT metadata FROM faces WHERE name = $1", (name,))
+        cursor.execute("SELECT metadata FROM faces WHERE name = ?", (name,))
         result = cursor.fetchone()
         
         if result and result[0]:
@@ -649,7 +656,7 @@ def log_recognition():
                 
                 # Save updated metadata
                 cursor.execute(
-                    "UPDATE faces SET metadata = $1 WHERE name = $2",
+                    "UPDATE faces SET metadata = ? WHERE name = ?",
                     (json.dumps(metadata), name)
                 )
                 conn.commit()
@@ -664,7 +671,7 @@ def log_recognition():
             # Add record with session_id
             timestamp = datetime.now().isoformat()
             cursor.execute(
-                "INSERT INTO recognition_history (name, timestamp, confidence, emotion, session_id) VALUES ($1, $2, $3, $4, $5)",
+                "INSERT INTO recognition_history (name, timestamp, confidence, emotion, session_id) VALUES (?, ?, ?, ?, ?)",
                 (name, timestamp, confidence, emotion, session_id)
             )
             conn.commit()
@@ -741,10 +748,6 @@ db_manager.initialize_db()
 
 # Initialize profile manager tables
 profile_manager.initialize_tables()
-
-# Create all required PostgreSQL tables
-from create_tables import create_tables
-create_tables()
 
 if __name__ == "__main__":
     # Start scheduler
