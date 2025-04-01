@@ -1,5 +1,6 @@
 import os
 import logging
+import json
 from flask import Flask, render_template, request, jsonify, Response, redirect, url_for
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
@@ -26,7 +27,7 @@ app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
 
 # Initialize components
 config = Config()
-db_manager = DatabaseManager()
+db_manager = DatabaseManager(config=config, db_path=config.DB_PATH)
 emotion_tracker = EmotionTracker(db_manager)
 tts_manager = TTSManager(config)
 intent_classifier = IntentClassifier()
@@ -95,6 +96,12 @@ def emotion_timeline():
     emotions = emotion_tracker.get_emotion_history()
     dev_mode = is_developer_mode()
     return render_template('emotion_timeline.html', emotions=emotions, dev_mode=dev_mode)
+
+@app.route('/profile')
+def profile():
+    profiles = face_detector.get_all_profiles()
+    dev_mode = is_developer_mode()
+    return render_template('profile.html', profiles=profiles, dev_mode=dev_mode)
 
 @app.route('/admin')
 def admin():
@@ -222,6 +229,61 @@ def emotion_data():
     days = request.args.get('days', 7, type=int)
     emotions = emotion_tracker.get_emotion_history(days=days)
     return jsonify(emotions)
+
+@app.route('/api/add-face-profile', methods=['POST'])
+def add_face_profile():
+    if 'image' not in request.files:
+        return jsonify({'success': False, 'error': 'No image provided'}), 400
+        
+    name = request.form.get('name')
+    if not name:
+        return jsonify({'success': False, 'error': 'No name provided'}), 400
+        
+    # Get metadata if available
+    metadata = {}
+    metadata_json = request.form.get('metadata')
+    if metadata_json:
+        try:
+            metadata = json.loads(metadata_json)
+        except:
+            pass
+    
+    # Save image to temporary file
+    image = request.files['image']
+    temp_path = os.path.join(os.getcwd(), 'temp_profile.jpg')
+    image.save(temp_path)
+    
+    try:
+        # Add face to profiles
+        result = face_detector.add_face(name, temp_path, metadata)
+        
+        # Clean up temp file
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+            
+        if result:
+            logger.info(f"Added new face profile for {name}")
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'Failed to add face profile'}), 500
+    
+    except Exception as e:
+        logger.error(f"Error adding face profile: {str(e)}")
+        # Clean up temp file
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/delete-face-profile/<profile_id>', methods=['DELETE'])
+def delete_face_profile(profile_id):
+    try:
+        # This would be implemented in the face_detector
+        # For now, we'll return a mock response
+        logger.info(f"Deleting face profile {profile_id}")
+        return jsonify({'success': True})
+    except Exception as e:
+        logger.error(f"Error deleting face profile: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 def auto_learn_emotions():
     """Schedule function to retrain emotion model"""

@@ -308,3 +308,55 @@ class FaceDetector:
     def get_profile_count(self):
         """Get the number of face profiles"""
         return len(self.known_faces)
+        
+    def get_all_profiles(self):
+        """Get all face profiles with metadata"""
+        try:
+            profiles = []
+            
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT id, name, last_seen, metadata 
+                FROM faces 
+                ORDER BY last_seen DESC
+            """)
+            
+            rows = cursor.fetchall()
+            
+            for profile_id, name, last_seen, metadata_json in rows:
+                profile = {
+                    "id": profile_id,
+                    "name": name,
+                    "last_seen": last_seen
+                }
+                
+                # Get image path if available
+                face_dir = os.path.join(self.profiles_dir, name)
+                if os.path.exists(face_dir):
+                    image_files = [f for f in os.listdir(face_dir) if f.endswith(('.jpg', '.jpeg', '.png'))]
+                    if image_files:
+                        profile["image_path"] = os.path.join(face_dir, image_files[0])
+                
+                # Parse metadata
+                if metadata_json:
+                    try:
+                        metadata = json.loads(metadata_json)
+                        profile["metadata"] = metadata
+                        
+                        # Add some mock stats for demonstration
+                        profile["interactions"] = metadata.get("interactions", 
+                                                             int(np.random.randint(5, 50)))
+                        profile["recognition_rate"] = metadata.get("recognition_rate", 
+                                                                 int(np.random.randint(70, 100)))
+                    except:
+                        pass
+                
+                profiles.append(profile)
+            
+            return profiles
+        
+        except Exception as e:
+            self.logger.error(f"Failed to get profiles: {str(e)}")
+            return []

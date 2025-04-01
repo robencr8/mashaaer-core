@@ -21,8 +21,15 @@ class Config:
         # API keys
         self.ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
         
-        # Path configurations
+        # Database configurations
         self.DB_PATH = os.getenv("DB_PATH", "robin_memory.db")
+        self.USE_POSTGRES = self._get_bool_env("USE_POSTGRES", True)
+        self.DATABASE_URL = os.getenv("DATABASE_URL", "")
+        self.PGHOST = os.getenv("PGHOST", "")
+        self.PGPORT = os.getenv("PGPORT", "")
+        self.PGUSER = os.getenv("PGUSER", "")
+        self.PGPASSWORD = os.getenv("PGPASSWORD", "")
+        self.PGDATABASE = os.getenv("PGDATABASE", "")
         
         # Create data directories if they don't exist
         self.data_dirs = [
@@ -64,6 +71,10 @@ class Config:
         self.logger.info(f"- OFFLINE_MODE: {self.OFFLINE_MODE}")
         self.logger.info(f"- DEBUG: {self.DEBUG}")
         self.logger.info(f"- DB_PATH: {self.DB_PATH}")
+        self.logger.info(f"- USE_POSTGRES: {self.USE_POSTGRES}")
+        if self.USE_POSTGRES:
+            self.logger.info(f"- PGHOST: {self.PGHOST}")
+            self.logger.info(f"- PGDATABASE: {self.PGDATABASE}")
         self.logger.info(f"- TTS_PROVIDER: {self.TTS_PROVIDER}")
         self.logger.info(f"- Voice languages: {self.VOICE_LANGUAGES}")
     
