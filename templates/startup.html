@@ -151,6 +151,7 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="/static/js/voice_recorder.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     // Global variables
@@ -450,20 +451,72 @@
       });
     }
 
-    // Function to simulate listening for voice input
-    function startListening() {
-      // Show listening indicator
-      document.getElementById('listening-indicator').classList.add('active');
-
-      // In production, this would initialize voice recognition
-      // For demonstration, we're simulating voice input with a timeout
-
-      // In a real implementation, this would connect to the voice recognition API
-      // For the purposes of this demo, we'll simulate responses after a timeout
-      setTimeout(() => {
+    // Initialize voice recorder
+    const voiceRecorder = new VoiceRecorder({
+      onStart: () => {
+        console.log('Recording started');
+        document.getElementById('listening-indicator').classList.add('active');
+      },
+      onStop: () => {
+        console.log('Recording stopped');
+      },
+      onResult: (data) => {
+        console.log('Voice recognition result:', data);
+        document.getElementById('listening-indicator').classList.remove('active');
+        
+        // Check for Roben/Developer name
+        if (data.text && data.text.toLowerCase().includes('roben')) {
+          console.log('Developer name detected!');
+          // Special handling for developer
+          if (currentStep === 'name') {
+            const devWelcomeMsg = userLanguage === 'en' ?
+              'Welcome back, Roben. Robin AI is fully operational.' :
+              'مرحبًا بعودتك، روبن. روبن الذكاء الاصطناعي جاهز للعمل.';
+            
+            speakText(devWelcomeMsg);
+            
+            // Automatically switch to admin mode
+            setTimeout(() => {
+              window.location.href = '/admin';
+            }, 3000);
+            return;
+          }
+        }
+        
+        // Process regular response
+        processResponse(data.text);
+      },
+      onError: (error) => {
+        console.error('Voice recognition error:', error);
+        document.getElementById('listening-indicator').classList.remove('active');
+        
+        // Fallback to simulated response in case of error
         const simulatedResponse = simulateResponseForStep(currentStep);
         processResponse(simulatedResponse);
-      }, 5000);
+      },
+      maxRecordingTime: 7000 // 7 seconds max
+    });
+    
+    // Function to start real voice input
+    function startListening() {
+      // Show listening indicator if not already shown by recorder
+      if (!document.getElementById('listening-indicator').classList.contains('active')) {
+        document.getElementById('listening-indicator').classList.add('active');
+      }
+      
+      // Try to use the voice recorder
+      try {
+        voiceRecorder.start();
+      } catch (error) {
+        console.error('Failed to start voice recorder:', error);
+        
+        // Fallback to simulation if recorder fails
+        console.warn('Falling back to simulated responses');
+        setTimeout(() => {
+          const simulatedResponse = simulateResponseForStep(currentStep);
+          processResponse(simulatedResponse);
+        }, 5000);
+      }
     }
 
     // Function to stop listening indicator

@@ -259,6 +259,12 @@ def listen():
         if DEVELOPER_NAME in text:
             dev_mode = set_developer_mode(True)
             logger.info("Developer mode activated via voice")
+            
+            # Special greeting for Roben
+            if "name" in text.lower() and (DEVELOPER_NAME.lower() in text.lower()):
+                greeting = "Welcome back, Roben. Robin AI is fully operational."
+                tts_manager.speak(greeting)
+                logger.info("Special greeting played for creator")
         
         # Process emotion
         emotion = emotion_tracker.analyze_text(text)
@@ -323,6 +329,11 @@ def detect_face():
         if result.get('faces') and any(face.get('name') == DEVELOPER_NAME for face in result.get('faces', [])):
             dev_mode = set_developer_mode(True)
             logger.info("Developer mode activated via face recognition")
+            
+            # Special greeting for Roben when detected by face
+            greeting = "Welcome back, Roben. Robin AI is fully operational."
+            tts_manager.speak(greeting)
+            logger.info("Special greeting played for creator face detection")
         
         # Clean up temp file
         if os.path.exists(temp_path):
