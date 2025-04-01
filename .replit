@@ -1,0 +1,12 @@
+modules = ["python-3.11"]
+[workflows]
+runButton = "Run"
+
+[[workflows.workflow]]
+name = "Run"
+author = 41048457
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 RobinAI_Enhanced/main.py"
