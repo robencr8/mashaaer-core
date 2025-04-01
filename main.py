@@ -209,9 +209,19 @@ def detect_face():
         # Process with face detector
         result = face_detector.detect_faces(temp_path)
         
+        # Update last seen for recognized faces
+        if result and result.get('count', 0) > 0:
+            for face in result.get('faces', []):
+                if face.get('recognized', False):
+                    # Update the last seen timestamp for this face
+                    face_detector._update_last_seen(face.get('name'))
+                    
+                    # Attach an emotion if available based on metadata
+                    face['emotion'] = emotion_tracker.get_primary_emotion_for_name(face.get('name', ''))
+        
         # Check for developer mode trigger
         dev_mode = is_developer_mode()
-        if result.get('name') == DEVELOPER_NAME:
+        if result.get('faces') and any(face.get('name') == DEVELOPER_NAME for face in result.get('faces', [])):
             dev_mode = set_developer_mode(True)
             logger.info("Developer mode activated via face recognition")
         

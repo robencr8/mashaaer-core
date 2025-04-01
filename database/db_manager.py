@@ -193,11 +193,28 @@ class DatabaseManager:
             if self.use_postgres:
                 self.local.connection = self.pg_pool.getconn()
                 # Create cursor with dict factory
-                self.local.connection.autocommit = False
+                self.local.connection.autocommit = True  # Use autocommit to avoid transaction issues
             else:
                 self.local.connection = sqlite3.connect(self.db_path, timeout=30.0)
                 # Enable foreign keys in SQLite
                 self.local.connection.execute("PRAGMA foreign_keys = ON")
+        elif self.use_postgres:
+            # If connection exists, check if it's in a failed transaction state
+            # and create a new one if needed
+            try:
+                # Test connection with a simple query
+                cursor = self.local.connection.cursor()
+                cursor.execute("SELECT 1")
+                cursor.close()
+            except psycopg2.Error:
+                # Connection is in a bad state, release it and get a new one
+                self.logger.warning("Replacing failed PostgreSQL connection")
+                try:
+                    self.pg_pool.putconn(self.local.connection)
+                except:
+                    pass  # Connection might be closed already
+                self.local.connection = self.pg_pool.getconn()
+                self.local.connection.autocommit = True
         
         return self.local.connection
     

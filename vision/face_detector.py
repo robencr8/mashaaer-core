@@ -33,6 +33,26 @@ class FaceDetector:
         # For continuous detection
         self.is_running = False
         self.detection_thread = None
+        
+        # Greeting templates
+        self.first_time_greetings = [
+            "Hello {name}, nice to meet you for the first time!",
+            "Welcome {name}, I'm Robin AI. It's a pleasure to meet you!",
+            "Hi {name}! I don't think we've met before. I'm Robin!"
+        ]
+        
+        self.returning_greetings = [
+            "Welcome back {name}! It's been {time_passed} since I last saw you.",
+            "Hello again {name}! It's been {time_passed} since your last visit.",
+            "Nice to see you again {name}! It's been {time_passed}.",
+            "{name}! Good to see you after {time_passed}."
+        ]
+        
+        self.recent_greetings = [
+            "Hello again {name}! Nice to see you twice in the same day!",
+            "Back so soon, {name}? Great to see you again!",
+            "Welcome back {name}! Thanks for visiting again today!"
+        ]
     
     def initialize(self):
         """Initialize the face detection system"""
@@ -101,18 +121,50 @@ class FaceDetector:
             # This returns a dummy response until face_recognition is properly installed
             self.logger.info(f"Mock face detection called for {image_path}")
             
-            # Create a mock result with a recognized face for testing
+            # Get profiles from the database to simulate real recognition
+            profiles = self.get_all_profiles()
+            
+            # If no profiles exist, return an unknown face
+            if not profiles:
+                return {
+                    "count": 1,
+                    "faces": [{
+                        "location": [0, 0, 100, 100],  # top, right, bottom, left
+                        "recognized": False,
+                        "name": "Unknown",
+                        "confidence": 0.0,
+                    }],
+                    "encodings": []
+                }
+            
+            # Select a random profile to simulate recognition
+            import random
+            profile = random.choice(profiles)
+            
+            # Get the last seen information
+            last_seen_str = profile.get('last_seen', 'never')
+            last_seen_time = None
+            try:
+                if last_seen_str and last_seen_str != 'never':
+                    last_seen_time = datetime.fromisoformat(last_seen_str)
+            except:
+                last_seen_time = None
+                
+            # Generate a personalized greeting based on recognition history
+            greeting = self._generate_greeting(profile['name'], last_seen_time)
+            
+            # Mock face recognition result
             mock_result = {
                 "count": 1,
                 "faces": [{
                     "location": [0, 0, 100, 100],  # top, right, bottom, left
                     "recognized": True,
-                    "name": "Roben Edwan",
+                    "name": profile['name'],
                     "confidence": 0.92,
-                    "metadata": {
-                        "last_seen": datetime.now().isoformat()
-                    },
-                    "dev_mode": True
+                    "metadata": profile.get('metadata', {}),
+                    "dev_mode": profile['name'] == "Roben Edwan",
+                    "greeting": greeting,
+                    "last_seen": last_seen_str
                 }],
                 "encodings": []
             }
@@ -360,3 +412,40 @@ class FaceDetector:
         except Exception as e:
             self.logger.error(f"Failed to get profiles: {str(e)}")
             return []
+            
+    def _generate_greeting(self, name, last_seen_time):
+        """Generate a personalized greeting based on recognition history"""
+        import random
+        
+        # If this is a first-time greeting (no last_seen)
+        if not last_seen_time:
+            greeting_template = random.choice(self.first_time_greetings)
+            return greeting_template.format(name=name)
+        
+        # Calculate time difference
+        now = datetime.now()
+        time_diff = now - last_seen_time
+        
+        # If seen within the last 24 hours
+        if time_diff.days < 1:
+            greeting_template = random.choice(self.recent_greetings)
+            return greeting_template.format(name=name)
+        
+        # Format the time difference for returning greeting
+        if time_diff.days == 1:
+            time_passed = "a day"
+        elif time_diff.days < 7:
+            time_passed = f"{time_diff.days} days"
+        elif time_diff.days < 30:
+            weeks = time_diff.days // 7
+            time_passed = f"{weeks} {'week' if weeks == 1 else 'weeks'}"
+        elif time_diff.days < 365:
+            months = time_diff.days // 30
+            time_passed = f"{months} {'month' if months == 1 else 'months'}"
+        else:
+            years = time_diff.days // 365
+            time_passed = f"{years} {'year' if years == 1 else 'years'}"
+        
+        # Generate returning greeting
+        greeting_template = random.choice(self.returning_greetings)
+        return greeting_template.format(name=name, time_passed=time_passed)

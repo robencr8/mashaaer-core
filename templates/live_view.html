@@ -591,8 +591,15 @@
                 // Get and display profile
                 this.getProfileDetails(mainFace.name);
                 
-                // Show recognition status
-                this.recognitionStatus.textContent = `Recognized: ${mainFace.name} (${Math.round(mainFace.confidence * 100)}% confident)`;
+                // Show recognition status with greeting if available
+                if (mainFace.greeting) {
+                    this.recognitionStatus.textContent = mainFace.greeting;
+                    
+                    // Speak the greeting if available
+                    this.speakGreeting(mainFace.greeting);
+                } else {
+                    this.recognitionStatus.textContent = `Recognized: ${mainFace.name} (${Math.round(mainFace.confidence * 100)}% confident)`;
+                }
                 
                 // Draw face box
                 this.drawFaceBox(mainFace);
@@ -968,6 +975,33 @@
                     this.statusIndicator.innerHTML = '<i class="fas fa-circle me-1"></i>Error';
                     break;
             }
+        }
+        
+        speakGreeting(greeting) {
+            // Send the greeting to text-to-speech API
+            fetch('/api/speak', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: greeting,
+                    voice: 'default'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.audio_url) {
+                    // Play the audio
+                    const audio = new Audio(data.audio_url);
+                    audio.play();
+                } else {
+                    console.error('Failed to get speech audio:', data.error);
+                }
+            })
+            .catch(err => {
+                console.error('Error calling TTS API:', err);
+            });
         }
         
         getEmotionColor(emotion) {
