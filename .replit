@@ -45,4 +45,4 @@ build = ["sh", "-c", "pip install -r RobinAiCompanion/robin_requirements.txt"]
 
 [[ports]]
 localPort = 5000
-externalPort = 80
+externalPort = 5000
