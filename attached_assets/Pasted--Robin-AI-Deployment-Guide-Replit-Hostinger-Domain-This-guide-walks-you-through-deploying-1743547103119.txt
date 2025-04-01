@@ -1,0 +1,91 @@
+# 🚀 Robin AI Deployment Guide (Replit + Hostinger Domain)
+
+This guide walks you through deploying Robin AI on Replit and connecting it to your custom domain from Hostinger. Let's go!
+
+---
+
+## 📦 STEP 1: Unzip & Organize Project Files
+
+1. Unzip the `RobinAiCompanion.zip` file.
+2. Move the following to the **root directory** of your Replit project:
+   - `robin_requirements.txt`
+   - The entire `RobinAI_Enhanced/` folder
+3. Ensure there is **no nested folder** like `RobinAiCompanion/RobinAI_Enhanced/`.
+
+✅ Final structure should look like:
+/robin_requirements.txt
+/RobinAI_Enhanced/main.py
+/.replit
+
+lua
+Copy
+Edit
+
+---
+
+## ⚙️ STEP 2: Update `.replit` Configuration File
+
+Create or update the `.replit` file in the root of your project with this content:
+
+```toml
+[deployment]
+run = ["gunicorn", "--bind", "0.0.0.0:5000", "RobinAI_Enhanced.main:app"]
+build = ["sh", "-c", "pip install -r robin_requirements.txt"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+💡 This tells Replit how to build and run Robin AI.
+
+🔐 STEP 3: Set Secrets (Environment Variables)
+In your Replit project:
+
+Click the 🔐 Secrets tab.
+
+Add these key-value pairs:
+
+Key	Value (example)
+SESSION_SECRET	s3cr3tR0b1nKey!
+ELEVENLABS_API_KEY	your_actual_elevenlabs_api_key
+DATABASE_URL	sqlite:///data.db (optional)
+🧪 STEP 4: (Optional) Run Locally on Replit
+In the shell:
+
+bash
+Copy
+Edit
+pip install -r robin_requirements.txt
+python3 RobinAI_Enhanced/main.py
+If it launches successfully — you’re ready to deploy.
+
+🚀 STEP 5: Deploy to Production
+Click the Deploy button in Replit.
+
+Wait for build & run to finish.
+
+Visit your app at:
+
+arduino
+Copy
+Edit
+https://robin-ai-companion-robenedwan.replit.app
+🔧 IF YOU SEE: “Port already in use”
+Run this in Replit shell:
+
+bash
+Copy
+Edit
+kill $(lsof -t -i:5000)
+Then re-run or re-deploy.
+
+🌐 STEP 6: Connect Hostinger Domain
+Go to your Hostinger Dashboard > Domain Settings.
+
+Choose DNS > Manage Records.
+
+Add or modify a CNAME record like this:
+
+Type	Name	Target (Points To)
+CNAME	www	robin-ai-companion-robenedwan.replit.app.
+✅ Optionally, redirect the root domain (e.g. yourdomain.com) to www.
+
