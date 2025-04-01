@@ -91,7 +91,7 @@ class ProfileManager:
             # Create user_profile table if it doesn't exist
             self.db_manager.execute_query("""
                 CREATE TABLE IF NOT EXISTS user_profile (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id SERIAL PRIMARY KEY,
                     full_name TEXT,
                     nickname TEXT,
                     age INTEGER,
@@ -257,7 +257,7 @@ class ProfileManager:
             
             # Insert into database
             columns = ', '.join(profile_data.keys())
-            placeholders = ', '.join(['?' for _ in profile_data.keys()])
+            placeholders = ', '.join([f'${i+1}' for i in range(len(profile_data.keys()))])
             values = tuple(profile_data.values())
             
             query = f"INSERT INTO user_profile ({columns}) VALUES ({placeholders})"
@@ -298,16 +298,18 @@ class ProfileManager:
             # Build update query
             update_parts = []
             values = []
+            param_count = 1
             
             for key, value in current_profile.items():
                 if key != 'id':  # Skip ID field
-                    update_parts.append(f"{key} = ?")
+                    update_parts.append(f"{key} = ${param_count}")
                     values.append(value)
+                    param_count += 1
             
             # Add ID for WHERE clause
             values.append(profile_id)
             
-            query = f"UPDATE user_profile SET {', '.join(update_parts)} WHERE id = ?"
+            query = f"UPDATE user_profile SET {', '.join(update_parts)} WHERE id = ${param_count}"
             self.db_manager.execute_query(query, tuple(values))
             
             # Update current profile
