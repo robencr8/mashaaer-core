@@ -123,7 +123,7 @@ class VoiceInterface {
             
         } catch (error) {
             console.error('Error starting recording:', error);
-            this.updateStatus('Microphone access denied');
+            this.updateStatus('Unable to access microphone. Please check if permission is granted.');
         }
     }
     

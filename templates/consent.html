@@ -10,54 +10,54 @@
     min-height: 80vh;
     text-align: center;
   }
-  
+
   .consent-icon {
     font-size: 4rem;
-    color: var(--bs-info);
+    color: #1e40af;
     margin-bottom: 2rem;
   }
-  
+
   .consent-text {
     font-size: 1.6rem;
     margin-bottom: 2rem;
     max-width: 800px;
   }
-  
+
   .consent-buttons {
     display: flex;
     gap: 2rem;
   }
-  
+
   .listening-indicator {
     margin-top: 2rem;
     font-size: 1rem;
-    color: var(--bs-info);
+    color: #1e40af;
     opacity: 0;
     transition: opacity 0.3s ease;
   }
-  
+
   .listening-indicator.active {
     opacity: 1;
   }
-  
+
   .pulse-dot {
     display: inline-block;
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: var(--bs-info);
+    background-color: #1e40af;
     margin: 0 2px;
     animation: pulse-dot 1.5s ease-in-out infinite;
   }
-  
+
   .pulse-dot:nth-child(2) {
     animation-delay: 0.2s;
   }
-  
+
   .pulse-dot:nth-child(3) {
     animation-delay: 0.4s;
   }
-  
+
   @keyframes pulse-dot {
     0%, 100% {
       transform: scale(1);
@@ -76,12 +76,12 @@
   <div class="consent-icon">
     <i class="fas fa-shield-alt"></i>
   </div>
-  
+
   <div id="consent-text" class="consent-text">
     <p id="consent-message-en" style="display:none;">Before we begin, do you agree to store your information securely on this device only?</p>
     <p id="consent-message-ar" style="display:none;">قبل أن أبدأ، هل توافق على أن أحتفظ بمعلوماتك في هذا الجهاز فقط؟</p>
   </div>
-  
+
   <div class="consent-buttons">
     <button id="yes-btn" class="btn btn-success btn-lg">
       <span class="en-text" style="display:none;">Yes, I agree</span>
@@ -92,7 +92,7 @@
       <span class="ar-text" style="display:none;">لا، لا أوافق</span>
     </button>
   </div>
-  
+
   <div id="listening-indicator" class="listening-indicator">
     <p class="en-text" style="display:none;">Listening <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
     <p class="ar-text" style="display:none;">أستمع <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
@@ -105,7 +105,7 @@
   document.addEventListener('DOMContentLoaded', function() {
     // Get language preference from session storage
     const userLanguage = localStorage.getItem('user_language') || 'en';
-    
+
     // Show text in the correct language
     if (userLanguage === 'en') {
       document.getElementById('consent-message-en').style.display = 'block';
@@ -114,28 +114,28 @@
       document.getElementById('consent-message-ar').style.display = 'block';
       document.querySelectorAll('.ar-text').forEach(el => el.style.display = 'block');
     }
-    
+
     // Speak consent message
     const consentText = userLanguage === 'en' 
       ? "Before we begin, do you agree to store your information securely on this device only?"
       : "قبل أن أبدأ، هل توافق على أن أحتفظ بمعلوماتك في هذا الجهاز فقط؟";
-    
+
     speakText(consentText, userLanguage);
-    
+
     // Button event listeners
     document.getElementById('yes-btn').addEventListener('click', () => {
       handleConsent(true);
     });
-    
+
     document.getElementById('no-btn').addEventListener('click', () => {
       handleConsent(false);
     });
-    
+
     // Start voice recognition after speaking
     setTimeout(() => {
       startListening();
     }, 5000);
-    
+
     // Function to handle consent response
     function handleConsent(consented) {
       if (consented) {
@@ -164,14 +164,14 @@
         window.location.href = '/goodbye';
       }
     }
-    
+
     // Function to start listening for voice input
     function startListening() {
       document.getElementById('listening-indicator').classList.add('active');
-      
+
       // In a real implementation, this would connect to the voice recognition API
       // For now, we'll simulate by listening for about 5 seconds then processing
-      
+
       // Mock implementation - in production would use the web audio API to capture voice
       // and send to the backend for processing
       setTimeout(() => {
@@ -179,16 +179,16 @@
         processVoiceResponse(mockResponse);
       }, 5000);
     }
-    
+
     // Function to process voice response
     function processVoiceResponse(text) {
       document.getElementById('listening-indicator').classList.remove('active');
-      
+
       console.log('Voice response:', text);
-      
+
       // Check if response indicates consent
       let consented = false;
-      
+
       if (userLanguage === 'en') {
         consented = text.toLowerCase().includes('yes') || 
                     text.toLowerCase().includes('agree') ||
@@ -198,10 +198,10 @@
                     text.includes('موافق') ||
                     text.includes('صح');
       }
-      
+
       handleConsent(consented);
     }
-    
+
     // Function to speak text using TTS
     function speakText(text, language) {
       fetch('/api/speak', {
