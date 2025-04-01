@@ -41,7 +41,7 @@ channel = "stable-24_05"
 [deployment]
 deploymentTarget = "autoscale"
 run = ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
-build = ["sh", "-c", "AI "]
+build = ["sh", "-c", "pip install -r robin_requirements.txt"]
 
 [[ports]]
 localPort = 5000
