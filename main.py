@@ -133,7 +133,58 @@ def admin():
 def session_report():
     """Show the session report dashboard with real-time data visualization"""
     dev_mode = is_developer_mode()
-    return render_template('session_report.html', dev_mode=dev_mode)
+    
+    # Get sample emotion labels and data for initial chart display
+    emotion_labels = ['Happy', 'Sad', 'Angry', 'Surprised', 'Fearful', 'Disgusted', 'Neutral']
+    emotion_data = [12, 5, 3, 7, 2, 1, 8]
+    
+    return render_template('session_report.html', 
+                          dev_mode=dev_mode, 
+                          labels=emotion_labels, 
+                          data=emotion_data)
+
+@app.route('/download/session.csv')
+def download_session_csv():
+    """Download session data as CSV"""
+    from flask import session as flask_session
+    import csv
+    from io import StringIO
+    
+    # Get session ID from query parameters or use current session
+    session_id = request.args.get('session_id', None)
+    if session_id == 'current' or not session_id:
+        session_id = flask_session.get('session_id')
+        if not session_id:
+            import uuid
+            session_id = str(uuid.uuid4())
+            flask_session['session_id'] = session_id
+    
+    # Get emotion data for this session
+    emotions_query = """
+        SELECT emotion, timestamp, intensity, text, source
+        FROM emotion_data
+        WHERE session_id = ?
+        ORDER BY timestamp ASC
+    """
+    emotion_data = db_manager.execute_query(emotions_query, (session_id,))
+    
+    # Create CSV in memory
+    si = StringIO()
+    writer = csv.writer(si)
+    writer.writerow(['Emotion', 'Timestamp', 'Intensity', 'Text', 'Source'])
+    
+    for row in emotion_data:
+        writer.writerow(row)
+    
+    output = si.getvalue()
+    si.close()
+    
+    # Return the CSV as a file download
+    return Response(
+        output,
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=session_report.csv"}
+    )
 
 @app.route('/api/speak', methods=['POST'])
 def speak():
