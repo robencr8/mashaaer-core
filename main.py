@@ -240,10 +240,10 @@ def init_scheduler():
     scheduler.start()
     logger.info("Auto-learning scheduler initialized")
 
+# Make sure database is initialized at module import time
+db_manager.initialize_db()
+
 if __name__ == "__main__":
-    # Initialize database
-    db_manager.initialize_db()
-    
     # Start scheduler
     init_scheduler()
     
