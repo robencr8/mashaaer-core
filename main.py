@@ -33,8 +33,37 @@ intent_classifier = IntentClassifier()
 voice_recognition = VoiceRecognition(config)
 face_detector = FaceDetector(config, db_manager)
 
-# Developer mode flag
-dev_mode_enabled = False
+# Developer mode constants
+DEVELOPER_NAME = os.environ.get("DEVELOPER_NAME", "Roben Edwan")
+DEVELOPER_MODE_FLAG = "dev_mode_enabled"
+
+# Helper function to get developer mode status
+def is_developer_mode():
+    # Check session first (for current request)
+    from flask import session
+    if session.get(DEVELOPER_MODE_FLAG, False):
+        return True
+    
+    # Then check database (persistent across sessions)
+    try:
+        value = db_manager.get_setting(DEVELOPER_MODE_FLAG, "false")
+        if isinstance(value, str):
+            return value.lower() == "true"
+        return bool(value)
+    except:
+        return False
+
+# Helper function to set developer mode
+def set_developer_mode(enabled=True):
+    # Update session
+    from flask import session
+    session[DEVELOPER_MODE_FLAG] = enabled
+    
+    # Update database
+    db_manager.set_setting(DEVELOPER_MODE_FLAG, "true" if enabled else "false")
+    
+    logger.info(f"Developer mode {'enabled' if enabled else 'disabled'}")
+    return enabled
 
 # Scheduler for auto-learning
 scheduler = BackgroundScheduler()
@@ -53,21 +82,24 @@ core_launcher = CoreLauncher(
 # Routes
 @app.route('/')
 def index():
-    return render_template('index.html', dev_mode=dev_mode_enabled)
+    dev_mode = is_developer_mode()
+    return render_template('index.html', dev_mode=dev_mode)
 
 @app.route('/demo')
 def demo():
-    return render_template('demo.html', dev_mode=dev_mode_enabled)
+    dev_mode = is_developer_mode()
+    return render_template('demo.html', dev_mode=dev_mode)
 
 @app.route('/emotion-timeline')
 def emotion_timeline():
     emotions = emotion_tracker.get_emotion_history()
-    return render_template('emotion_timeline.html', emotions=emotions, dev_mode=dev_mode_enabled)
+    dev_mode = is_developer_mode()
+    return render_template('emotion_timeline.html', emotions=emotions, dev_mode=dev_mode)
 
 @app.route('/admin')
 def admin():
     # Only accessible in developer mode
-    if not dev_mode_enabled:
+    if not is_developer_mode():
         return redirect(url_for('index'))
     
     system_stats = {
@@ -78,19 +110,30 @@ def admin():
         'system_status': core_launcher.get_system_status()
     }
     
-    return render_template('admin.html', stats=system_stats, dev_mode=dev_mode_enabled)
+    return render_template('admin.html', stats=system_stats, dev_mode=True)
 
 @app.route('/api/speak', methods=['POST'])
 def speak():
     text = request.json.get('text', '')
     voice = request.json.get('voice', 'default')
+    language = request.json.get('language', 'en-US')
     
     if not text:
         return jsonify({'error': 'No text provided'}), 400
     
     try:
+        # Select voice based on language if not specifically provided
+        if voice == 'default' and language == 'ar':
+            voice = 'arabic'
+        
         audio_path = tts_manager.speak(text, voice)
-        return jsonify({'success': True, 'audio_path': audio_path})
+        return jsonify({
+            'success': True, 
+            'audio_path': audio_path,
+            'text': text,
+            'voice': voice,
+            'language': language
+        })
     except Exception as e:
         logger.error(f"TTS error: {str(e)}")
         return jsonify({'error': str(e)}), 500
@@ -111,9 +154,9 @@ def listen():
         text = voice_recognition.process_audio(temp_path)
         
         # Check for developer mode trigger
-        global dev_mode_enabled
-        if "Roben Edwan" in text:
-            dev_mode_enabled = True
+        dev_mode = is_developer_mode()
+        if DEVELOPER_NAME in text:
+            dev_mode = set_developer_mode(True)
             logger.info("Developer mode activated via voice")
         
         # Process emotion
@@ -132,7 +175,7 @@ def listen():
             'text': text, 
             'emotion': emotion,
             'intent': intent,
-            'dev_mode': dev_mode_enabled
+            'dev_mode': dev_mode
         })
     
     except Exception as e:
@@ -155,9 +198,9 @@ def detect_face():
         result = face_detector.detect_faces(temp_path)
         
         # Check for developer mode trigger
-        global dev_mode_enabled
-        if result.get('name') == "Roben Edwan":
-            dev_mode_enabled = True
+        dev_mode = is_developer_mode()
+        if result.get('name') == DEVELOPER_NAME:
+            dev_mode = set_developer_mode(True)
             logger.info("Developer mode activated via face recognition")
         
         # Clean up temp file
@@ -167,7 +210,7 @@ def detect_face():
         return jsonify({
             'success': True,
             'result': result,
-            'dev_mode': dev_mode_enabled
+            'dev_mode': dev_mode
         })
     
     except Exception as e:
