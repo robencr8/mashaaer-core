@@ -1,0 +1,102 @@
+ Intro Screen Flow (startup.html)
+Create startup.html with a floating glowing sphere animation (CSS or Lottie).
+
+When this page loads:
+
+Automatically play a voice message based on the user’s chosen language.
+
+Example (Arabic):
+
+"اصنع مستقبلك... أنا أسمعك الآن..."
+
+Example (English):
+
+"Shape your future... I am now listening..."
+
+✅ 2. First-Time Voice Registration
+After animation completes (~4 seconds), begin voice-based registration.
+
+Ask the following questions in the language selected by the user:
+
+"What is your full name?" / "ما اسمك الكامل؟"
+
+"How old are you?" / "كم عمرك؟"
+
+"What would you like me to call you?" / "ما الذي تحب أن أُطلقه عليك؟"
+
+"How would you like my voice to sound? (soft, formal, playful...)"
+/ "كيف تفضل صوتي؟ (ناعم، رسمي، مشاغب...)"
+
+"Do you prefer dark mode or light mode?"
+/ "هل تفضل الوضع الداكن أم الفاتح؟"
+
+✅ 3. Privacy Consent (Pre-Onboarding)
+Before asking any personal questions, play:
+
+Arabic:
+
+"قبل أن أبدأ، هل توافق على أن أحتفظ بمعلوماتك في هذا الجهاز فقط؟"
+
+English:
+
+"Before we begin, do you agree to store your information securely on this device only?"
+
+Expect one-word response: "Yes" / "No" or "نعم" / "لا"
+
+If user does not consent, stop onboarding and exit gracefully.
+
+✅ 4. Store to Local Memory (robin_memory.db)
+Create or update user_profile table.
+
+Save:
+
+full_name
+
+age
+
+nickname
+
+preferred_voice_style
+
+theme
+
+language_preference
+
+onboarding_complete = true
+
+Automatically skip this step in future runs and launch directly to /main or /admin.
+
+✅ 5. Language Selector (Startup)
+At the very first startup (before playing anything):
+
+Ask:
+
+"Please choose your preferred language: Arabic or English"
+/ "اختر لغتك المفضلة: العربية أم الإنجليزية؟"
+
+Wait for voice input.
+
+Store language_preference in robin_memory.db.
+
+All following questions must follow the selected language.
+
+⚠️ Advanced Implementation Notes
+Use tts_manager.speak() with both voice_style and language selected.
+
+Integrate backend set_language() and set_tone() logic from user_profile.
+
+Do NOT allow skipping consent or questions unless explicitly approved by user.
+
+Include graceful error handling for speech recognition timeouts or invalid responses.
+
+🛡️ This script builds the foundation of trust, identity, and soul inside Robin AI.
+
+If Agent 1 follows this to the letter, you will get:
+
+A multi-language onboarding interface
+
+Personalized AI behavior per user
+
+Legal privacy protection
+
+Voice-only interaction layer

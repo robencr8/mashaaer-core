@@ -88,8 +88,23 @@ core_launcher = CoreLauncher(
 # Routes
 @app.route('/')
 def index():
+    # Check if onboarding has been completed
+    onboarding_status = db_manager.get_setting('onboarding_complete', 'false')
+    onboarding_complete = False
+    
+    if isinstance(onboarding_status, str):
+        onboarding_complete = onboarding_status.lower() == 'true'
+    
+    # If onboarding not complete, redirect to startup
+    if not onboarding_complete:
+        return redirect(url_for('startup'))
+        
     dev_mode = is_developer_mode()
     return render_template('index.html', dev_mode=dev_mode)
+
+@app.route('/startup')
+def startup():
+    return render_template('startup.html')
 
 @app.route('/demo')
 def demo():
@@ -394,6 +409,57 @@ def get_profile(name):
         logger.error(f"Error getting profile: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
         
+@app.route('/api/update-profile', methods=['POST'])
+def update_profile():
+    """Update user profile during onboarding"""
+    try:
+        data = request.json
+        
+        # Required fields
+        full_name = data.get('full_name')
+        language_preference = data.get('language_preference')
+        
+        if not full_name:
+            return jsonify({'success': False, 'error': 'Full name is required'}), 400
+            
+        if not language_preference:
+            return jsonify({'success': False, 'error': 'Language preference is required'}), 400
+            
+        # Optional fields with defaults
+        age = data.get('age')
+        nickname = data.get('nickname', full_name.split()[0] if full_name else 'User')
+        preferred_voice_style = data.get('preferred_voice_style', 'default')
+        theme = data.get('theme', 'dark')
+        onboarding_complete = data.get('onboarding_complete', True)
+        
+        # Store settings in database
+        db_manager.set_setting('user_full_name', full_name)
+        
+        if age:
+            db_manager.set_setting('user_age', str(age))
+            
+        db_manager.set_setting('user_nickname', nickname)
+        db_manager.set_setting('preferred_voice_style', preferred_voice_style)
+        db_manager.set_setting('theme', theme)
+        db_manager.set_setting('language_preference', language_preference)
+        db_manager.set_setting('onboarding_complete', 'true' if onboarding_complete else 'false')
+        
+        # Set the current session language
+        from flask import session
+        session['language'] = language_preference
+        
+        # Create a face profile if an image was provided (not implemented in this version)
+        # This would be added in a future version where we capture a profile photo
+        
+        return jsonify({
+            'success': True,
+            'message': 'Profile updated successfully'
+        })
+        
+    except Exception as e:
+        logger.error(f"Error updating profile: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/api/log-recognition', methods=['POST'])
 def log_recognition():
     try:

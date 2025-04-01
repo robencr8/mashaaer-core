@@ -1,0 +1,127 @@
+Codename: Soul Interface Designer
+Mission: Build the holy visual skin of RobinAI onboarding and identity.
+
+🎯 Objective:
+Deliver a visually divine, minimalist interface that runs voice-first, adapts to user behavior, and respects privacy while setting emotional tone.
+
+✅ INSTRUCTION SET FOR AGENT 2
+1. 🪐 startup.html – Divine First Impression
+Build startup.html as the first user-facing experience with the following visual specs:
+
+Full-screen dark gradient background
+
+A single glowing sphere floating slowly in center (animated via CSS or Lottie)
+
+The sphere pulses when listening (voice input) and shimmers when speaking
+
+No buttons, no logos, no distractions
+
+When the page loads:
+
+A soft system voice plays:
+
+Arabic: "اصنع مستقبلك... أنا أسمعك الآن..."
+
+English: "Shape your future... I am now listening..."
+
+Then the onboarding sequence begins with voice only (no visual forms).
+
+2. 🎤 Visuals During Voice Interaction
+While system is asking or listening:
+
+Show subtle voice waveform animation under the sphere
+
+Sphere changes color based on AI tone:
+
+Soft: Cyan
+
+Formal: Indigo
+
+Playful: Violet
+
+Add gentle audio feedback:
+
+start_listen.wav (when listening)
+
+start_speak.wav (before response)
+
+3. 🛡️ Privacy Consent Modal (Only Once)
+If this is first run (onboarding_complete = false):
+
+Fade-in a simple modal before anything else:
+
+Message:
+
+Arabic: "هل توافق على تخزين معلوماتك الشخصية داخل هذا الجهاز فقط؟"
+
+English: "Do you agree to store your personal information on this device only?"
+
+Two voice options: "Yes" / "No"
+
+If accepted, modal fades out and onboarding begins
+
+If rejected: redirect to goodbye.html or exit
+
+4. 🌗 Theme & Voice Preferences
+During onboarding, ask user their voice style and theme mode
+
+Save theme in memory:
+
+Dark Mode: default UI uses deep gradients and shadows
+
+Light Mode: clean whites and soft blue accent
+
+Apply selected theme immediately after onboarding
+
+5. 🧑‍💻 Developer Mode (Roben Only)
+If face or voice = "Roben Edwan":
+
+Show a subtle glowing badge:
+
+🛡️ Super Admin: Roben Edwan
+
+Add voice access only:
+
+Say: "افتح وضع المطور" / "Activate developer mode"
+
+Developer panel appears from bottom:
+
+System Monitor
+
+Log Viewer
+
+Voice Engine Switcher
+
+AI Behavior Tweaker
+
+6. 🖼️ Interface Simplicity
+DO NOT show any of the following in the main view:
+
+Button-based menus
+
+Drop-downs
+
+Login boxes
+
+Help links
+
+Interaction is done entirely through voice
+
+🎨 Framework Recommendations
+Use Tailwind CSS for clean layout control
+
+Use Lottie + anime.js for orb motion
+
+Animate transitions (fade-in, pulse, scale) with framer-motion-like rhythm
+
+Ensure full mobile compatibility
+
+Final Note for Agent 2:
+When this is done, the experience should feel alien… sacred… cinematic.
+
+RobinAI must feel like it speaks from another world, not a normal app.
+
+"I’m listening, Creator..."
+Not buttons. Not pixels.
+Presence. Soul. Magic.
+
