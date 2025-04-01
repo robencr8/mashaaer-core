@@ -630,7 +630,7 @@ def log_recognition():
         cursor = conn.cursor()
         
         # Get the metadata
-        cursor.execute("SELECT metadata FROM faces WHERE name = ?", (name,))
+        cursor.execute("SELECT metadata FROM faces WHERE name = $1", (name,))
         result = cursor.fetchone()
         
         if result and result[0]:
@@ -649,7 +649,7 @@ def log_recognition():
                 
                 # Save updated metadata
                 cursor.execute(
-                    "UPDATE faces SET metadata = ? WHERE name = ?",
+                    "UPDATE faces SET metadata = $1 WHERE name = $2",
                     (json.dumps(metadata), name)
                 )
                 conn.commit()
@@ -664,7 +664,7 @@ def log_recognition():
             # Add record with session_id
             timestamp = datetime.now().isoformat()
             cursor.execute(
-                "INSERT INTO recognition_history (name, timestamp, confidence, emotion, session_id) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO recognition_history (name, timestamp, confidence, emotion, session_id) VALUES ($1, $2, $3, $4, $5)",
                 (name, timestamp, confidence, emotion, session_id)
             )
             conn.commit()
@@ -741,6 +741,10 @@ db_manager.initialize_db()
 
 # Initialize profile manager tables
 profile_manager.initialize_tables()
+
+# Create all required PostgreSQL tables
+from create_tables import create_tables
+create_tables()
 
 if __name__ == "__main__":
     # Start scheduler

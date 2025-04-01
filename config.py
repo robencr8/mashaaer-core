@@ -18,18 +18,18 @@ class Config:
         self.OFFLINE_MODE = self._get_bool_env("OFFLINE_MODE", False)
         self.DEBUG = self._get_bool_env("DEBUG", True)
         
-        # API keys
-        self.ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
+        # API keys - Use environment variable directly to ensure it's available
+        self.ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
         
-        # Database configurations
-        self.DB_PATH = os.getenv("DB_PATH", "robin_memory.db")
+        # Database configurations - Use environment variables directly
+        self.DB_PATH = os.environ.get("DB_PATH", "robin_memory.db")
         self.USE_POSTGRES = self._get_bool_env("USE_POSTGRES", True)
-        self.DATABASE_URL = os.getenv("DATABASE_URL", "")
-        self.PGHOST = os.getenv("PGHOST", "")
-        self.PGPORT = os.getenv("PGPORT", "")
-        self.PGUSER = os.getenv("PGUSER", "")
-        self.PGPASSWORD = os.getenv("PGPASSWORD", "")
-        self.PGDATABASE = os.getenv("PGDATABASE", "")
+        self.DATABASE_URL = os.environ.get("DATABASE_URL", "")
+        self.PGHOST = os.environ.get("PGHOST", "")
+        self.PGPORT = os.environ.get("PGPORT", "")
+        self.PGUSER = os.environ.get("PGUSER", "")
+        self.PGPASSWORD = os.environ.get("PGPASSWORD", "")
+        self.PGDATABASE = os.environ.get("PGDATABASE", "")
         
         # Create data directories if they don't exist
         self.data_dirs = [
@@ -52,7 +52,7 @@ class Config:
         
         # Voice recognition settings
         self.VOICE_LANGUAGES = ["en-US", "ar"]
-        self.DEFAULT_VOICE = os.getenv("DEFAULT_VOICE", "en-US")
+        self.DEFAULT_VOICE = os.environ.get("DEFAULT_VOICE", "en-US")
         
         # TTS settings
         self.TTS_PROVIDER = "elevenlabs" if self.ELEVENLABS_API_KEY and not self.OFFLINE_MODE else "gtts"
@@ -62,7 +62,7 @@ class Config:
     
     def _get_bool_env(self, key, default):
         """Helper to parse boolean environment variables"""
-        value = os.getenv(key, str(default)).lower()
+        value = os.environ.get(key, str(default)).lower()
         return value in ("true", "1", "yes", "y", "t")
     
     def _report_config(self):

@@ -43,7 +43,7 @@ class EmotionTracker:
             
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS emotions (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id SERIAL PRIMARY KEY,
                     emotion TEXT NOT NULL,
                     text TEXT,
                     timestamp TEXT NOT NULL,
@@ -95,14 +95,14 @@ class EmotionTracker:
             self.db_manager.execute_query(
                 """
                 INSERT INTO emotion_data (timestamp, emotion, source, intensity, text, session_id)
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 """,
                 (timestamp, emotion, source, intensity, text, session_id)
             )
             
             # Also log to emotions table (used for model training)
             cursor.execute(
-                "INSERT INTO emotions (emotion, text, timestamp, source, intensity) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO emotions (emotion, text, timestamp, source, intensity) VALUES (%s, %s, %s, %s, %s)",
                 (emotion, text, timestamp, source, intensity)
             )
             
@@ -149,8 +149,9 @@ class EmotionTracker:
             # Get data from the last N days
             start_date = (datetime.now() - timedelta(days=days)).isoformat()
             
+            # The $1 parameter style requires prepared statements in psycopg2
             cursor.execute(
-                "SELECT emotion, timestamp, intensity FROM emotions WHERE timestamp >= ? ORDER BY timestamp",
+                "SELECT emotion, timestamp, intensity FROM emotions WHERE timestamp >= %s ORDER BY timestamp",
                 (start_date,)
             )
             
@@ -206,11 +207,12 @@ class EmotionTracker:
     def get_session_emotion_history(self, session_id):
         """Get emotion history for a specific session"""
         try:
-            # Get emotion data from the session
+            # Get emotion data from the session using db_manager.execute_query
+            # This query is used for retrieving emotion data by session ID
             results = self.db_manager.execute_query(
                 """
                 SELECT emotion, timestamp, intensity FROM emotion_data 
-                WHERE session_id = ? 
+                WHERE session_id = %s 
                 ORDER BY timestamp
                 """,
                 (session_id,)
@@ -294,7 +296,7 @@ class EmotionTracker:
             
             # Look for emotions associated with this name in text
             cursor.execute(
-                "SELECT emotion, COUNT(*) as count FROM emotions WHERE text LIKE ? GROUP BY emotion ORDER BY count DESC LIMIT 1",
+                "SELECT emotion, COUNT(*) as count FROM emotions WHERE text LIKE %s GROUP BY emotion ORDER BY count DESC LIMIT 1",
                 (f"%{name}%",)
             )
             
@@ -304,7 +306,7 @@ class EmotionTracker:
                 
             # If no specific emotion is found, check recognition history
             cursor.execute(
-                "SELECT emotion, COUNT(*) as count FROM recognition_history WHERE name = ? GROUP BY emotion ORDER BY count DESC LIMIT 1",
+                "SELECT emotion, COUNT(*) as count FROM recognition_history WHERE name = %s GROUP BY emotion ORDER BY count DESC LIMIT 1",
                 (name,)
             )
             

@@ -65,9 +65,9 @@ class FaceDetector:
             
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS faces (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id SERIAL PRIMARY KEY,
                     name TEXT NOT NULL,
-                    encoding BLOB,
+                    encoding BYTEA,
                     last_seen TEXT,
                     metadata TEXT
                 )
@@ -199,19 +199,19 @@ class FaceDetector:
             cursor = conn.cursor()
             
             # Check if name already exists
-            cursor.execute("SELECT id FROM faces WHERE name = ?", (name,))
+            cursor.execute("SELECT id FROM faces WHERE name = %s", (name,))
             existing = cursor.fetchone()
             
             if existing:
                 # Update existing face
                 cursor.execute(
-                    "UPDATE faces SET encoding = ?, last_seen = ?, metadata = ? WHERE name = ?",
+                    "UPDATE faces SET encoding = %s, last_seen = %s, metadata = %s WHERE name = %s",
                     (encoding_json, datetime.now().isoformat(), metadata_json, name)
                 )
             else:
                 # Add new face
                 cursor.execute(
-                    "INSERT INTO faces (name, encoding, last_seen, metadata) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO faces (name, encoding, last_seen, metadata) VALUES (%s, %s, %s, %s)",
                     (name, encoding_json, datetime.now().isoformat(), metadata_json)
                 )
             
@@ -257,7 +257,7 @@ class FaceDetector:
             cursor = conn.cursor()
             
             cursor.execute(
-                "UPDATE faces SET last_seen = ? WHERE name = ?",
+                "UPDATE faces SET last_seen = %s WHERE name = %s",
                 (timestamp, name)
             )
             
