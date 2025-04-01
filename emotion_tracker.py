@@ -191,6 +191,39 @@ class EmotionTracker:
             self.logger.error(f"Failed to get total entries: {str(e)}")
             return 0
     
+    def get_primary_emotion_for_name(self, name):
+        """Get the primary emotion associated with a person's name"""
+        try:
+            conn = self.db_manager.get_connection()
+            cursor = conn.cursor()
+            
+            # Look for emotions associated with this name in text
+            cursor.execute(
+                "SELECT emotion, COUNT(*) as count FROM emotions WHERE text LIKE ? GROUP BY emotion ORDER BY count DESC LIMIT 1",
+                (f"%{name}%",)
+            )
+            
+            result = cursor.fetchone()
+            if result and result[0]:
+                return result[0]
+                
+            # If no specific emotion is found, check recognition history
+            cursor.execute(
+                "SELECT emotion, COUNT(*) as count FROM recognition_history WHERE name = ? GROUP BY emotion ORDER BY count DESC LIMIT 1",
+                (name,)
+            )
+            
+            result = cursor.fetchone()
+            if result and result[0]:
+                return result[0]
+            
+            # If still no result, return neutral
+            return "neutral"
+            
+        except Exception as e:
+            self.logger.error(f"Failed to get primary emotion for {name}: {str(e)}")
+            return "neutral"
+    
     def retrain_model(self):
         """Retrain the emotion model with collected data"""
         self.logger.info("Retraining emotion model...")

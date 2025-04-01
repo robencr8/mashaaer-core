@@ -102,6 +102,11 @@ def profile():
     profiles = face_detector.get_all_profiles()
     dev_mode = is_developer_mode()
     return render_template('profile.html', profiles=profiles, dev_mode=dev_mode)
+    
+@app.route('/live-view')
+def live_view():
+    dev_mode = is_developer_mode()
+    return render_template('live_view.html', dev_mode=dev_mode)
 
 @app.route('/admin')
 def admin():
@@ -283,6 +288,104 @@ def delete_face_profile(profile_id):
         return jsonify({'success': True})
     except Exception as e:
         logger.error(f"Error deleting face profile: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+        
+@app.route("/api/profile/<name>")
+def get_profile(name):
+    try:
+        # Get profile by name
+        profiles = face_detector.get_all_profiles()
+        profile = next((p for p in profiles if p['name'] == name), None)
+        
+        if not profile:
+            return jsonify({'success': False, 'error': 'Profile not found'}), 404
+        
+        # Add emotion data if available
+        try:
+            # Get the primary emotion from the emotion tracker
+            profile['primary_emotion'] = emotion_tracker.get_primary_emotion_for_name(name)
+        except:
+            profile['primary_emotion'] = 'neutral'
+        
+        return jsonify({'success': True, 'profile': profile})
+    except Exception as e:
+        logger.error(f"Error getting profile: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+        
+@app.route('/api/log-recognition', methods=['POST'])
+def log_recognition():
+    try:
+        data = request.json
+        name = data.get('name')
+        emotion = data.get('emotion', 'neutral')
+        confidence = data.get('confidence', 0.0)
+        
+        if not name:
+            return jsonify({'success': False, 'error': 'Name is required'}), 400
+        
+        # Update last seen timestamp
+        face_detector._update_last_seen(name)
+        
+        # Log the emotion
+        emotion_tracker.log_emotion(emotion, f"Face recognition: {name}", source="face")
+        
+        # Update profile interactions count
+        conn = db_manager.get_connection()
+        cursor = conn.cursor()
+        
+        # Get the metadata
+        cursor.execute("SELECT metadata FROM faces WHERE name = ?", (name,))
+        result = cursor.fetchone()
+        
+        if result and result[0]:
+            try:
+                metadata = json.loads(result[0])
+                
+                # Update interactions count
+                interactions = metadata.get('interactions', 0)
+                metadata['interactions'] = interactions + 1
+                
+                # Update recognition rate (simulate improvement over time)
+                current_rate = metadata.get('recognition_rate', 70)
+                confidence_value = int(confidence * 100)
+                new_rate = min(98, int((current_rate * 3 + confidence_value) / 4))
+                metadata['recognition_rate'] = new_rate
+                
+                # Save updated metadata
+                cursor.execute(
+                    "UPDATE faces SET metadata = ? WHERE name = ?",
+                    (json.dumps(metadata), name)
+                )
+                conn.commit()
+            except Exception as e:
+                logger.error(f"Error updating profile metadata: {str(e)}")
+        
+        # Log to recognition history table
+        try:
+            # Create table if it doesn't exist
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS recognition_history (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL,
+                    timestamp TEXT NOT NULL,
+                    confidence REAL,
+                    emotion TEXT
+                )
+            ''')
+            
+            # Add record
+            timestamp = datetime.now().isoformat()
+            cursor.execute(
+                "INSERT INTO recognition_history (name, timestamp, confidence, emotion) VALUES (?, ?, ?, ?)",
+                (name, timestamp, confidence, emotion)
+            )
+            conn.commit()
+        except Exception as e:
+            logger.error(f"Error logging recognition to history: {str(e)}")
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        logger.error(f"Error logging recognition: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 def auto_learn_emotions():

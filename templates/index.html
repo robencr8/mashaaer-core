@@ -114,6 +114,19 @@
         </div>
     </div>
     
+    <!-- Live Face Recognition -->
+    <div class="col-md-4">
+        <div class="card feature-card h-100">
+            <div class="card-body text-center">
+                <div class="feature-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <h5 class="card-title">Live Face Recognition</h5>
+                <p class="card-text">Real-time face detection and recognition with memory recall and emotion logging.</p>
+            </div>
+        </div>
+    </div>
+    
     <!-- Developer Mode -->
     <div class="col-md-4">
         <div class="card feature-card h-100">
@@ -174,14 +187,17 @@
 <div class="mt-5 text-center">
     <h2 class="mb-4">Quick Actions</h2>
     <div class="d-flex justify-content-center gap-3 flex-wrap">
-        <a href="/api/speak" class="btn btn-info">
-            <i class="fas fa-volume-up me-2"></i>Test TTS
+        <a href="/live-view" class="btn btn-primary">
+            <i class="fas fa-camera me-2"></i>Live Face Recognition
         </a>
         <a href="/demo" class="btn btn-info">
             <i class="fas fa-microphone me-2"></i>Voice Demo
         </a>
         <a href="/emotion-timeline" class="btn btn-info">
             <i class="fas fa-chart-line me-2"></i>Emotion Timeline
+        </a>
+        <a href="/profile" class="btn btn-info">
+            <i class="fas fa-user-circle me-2"></i>Face Profiles
         </a>
         {% if dev_mode %}
         <a href="/admin" class="btn btn-warning">
