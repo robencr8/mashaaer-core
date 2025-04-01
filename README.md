@@ -1,16 +1,51 @@
-# RobinAI Enhanced
+
+# RobinAI Enhanced Legacy
 
 ## Overview
-RobinAI Enhanced is a comprehensive AI assistant system leveraging advanced machine learning technologies for intelligent interaction. Built by Hay Nazzal, this system integrates voice recognition, emotion tracking, face detection, and multiple interaction interfaces.
 
-## Key Features
-- **Multi-language Voice Recognition**: Support for both English and Arabic using VOSK
-- **Real-time Emotion Tracking**: Analyze and visualize emotional patterns over time
-- **Face Recognition**: Profile-based recognition with personalized greetings
-- **Session-based Data Organization**: Comprehensive session reports and visualizations
-- **Multi-modal Interaction**: Web dashboard, API layer, and voice interface
+Robin AI Enhanced Legacy is a sophisticated AI assistant engineered to provide seamless voice recognition, emotion tracking, and face recognition capabilities. This system offers a robust web dashboard for real-time interaction, user management, and session analytics.
+
+## Installation Instructions
+
+1. **Unzipping and Running the System:**
+
+   To get started, unzip the provided archive:
+   ```bash
+   unzip RobinAI_Enhanced.zip
+   cd RobinAI_Enhanced
+   ```
+   Next, install the necessary dependencies and launch the application:
+   ```bash
+   pip install -r requirements.txt
+   python3 main.py
+   ```
+
+2. **Accessing the Admin Dashboard:**
+
+   Visit the admin dashboard to manage your AI system:
+   - Open a web browser and navigate to `http://0.0.0.0:5000/admin`
+   - The dashboard provides various tools for system monitoring and management, accessible only in developer mode.
+
+3. **Triggering Super Admin Mode:**
+
+   Super Admin mode can be activated using face or voice recognition:
+   - **Face Recognition**: When the system detects the designated face (e.g., Roben Edwan), Super Admin features are unlocked.
+   - **Voice Command**: Similarly, saying specific trigger phrases can unlock Super Admin mode.
+
+4. **Viewing and Downloading Session Reports:**
+
+   The system supports detailed session reporting:
+   - Navigate to `http://0.0.0.0:5000/session-report` to view live session data and analytics.
+   - Use the session report page to download session logs in CSV format for offline analysis.
+
+5. **Modifying Voice and Emotion Settings:**
+
+   Customize the settings to optimize the AI’s capabilities:
+   - Visit the system configuration section within the admin dashboard to adjust voice and emotion sensitivity settings.
+   - Voice recognition and text-to-speech options can be customized per your preferences for each session.
 
 ## System Architecture
+
 - **Core Components**:
   - Voice Recognition Module
   - Emotion Tracking System
@@ -22,30 +57,14 @@ RobinAI Enhanced is a comprehensive AI assistant system leveraging advanced mach
 - **Web Interface**: Clean, responsive dashboard built with Bootstrap
 
 ## Special Features
+
 - **Developer Mode**: Activated when creator (Roben Edwan) is recognized
 - **Offline-first Design**: Core functionality works without internet connection
 - **Auto-learning**: Scheduled emotion model retraining
 - **Session Reports**: Comprehensive data visualization and CSV export
 
-## Setup and Installation
-1. Clone the repository
-2. Install required dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-3. Configure environment variables:
-   - `ELEVENLABS_API_KEY`: (Optional) For enhanced TTS
-   - `PORT`: Default 5000
-   - `MODEL_DIR`: Directory for offline models
-   - `DEVELOPER_NAME`: Default "Roben Edwan"
-   - PostgreSQL credentials (if using PostgreSQL)
-
-4. Run the application:
-   ```
-   python main.py
-   ```
-
 ## Web Routes
+
 - `/`: Main dashboard
 - `/demo`: Interactive demo
 - `/emotion-timeline`: Emotion visualization
@@ -55,6 +74,7 @@ RobinAI Enhanced is a comprehensive AI assistant system leveraging advanced mach
 - `/session-report`: Session data visualization
 
 ## API Endpoints
+
 - `/api/status`: System status
 - `/api/emotion-data`: Get emotion data for visualization
 - `/api/face-recognition-data`: Get face recognition data
@@ -63,12 +83,5 @@ RobinAI Enhanced is a comprehensive AI assistant system leveraging advanced mach
 - `/api/profiles`: Get saved face profiles
 - `/api/session-data`: Get comprehensive session data
 - `/api/sessions`: Get list of available sessions
-
-## Data Storage
-- Database storage for sessions, conversations, emotions, and face profiles
-- File-based storage for face encodings and offline models
-
-## Legacy Version
-This is the legacy build of RobinAI Enhanced, preserved for reference and historical purposes.
 
 © 2025 Hay Nazzal. All rights reserved.
