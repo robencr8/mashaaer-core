@@ -291,15 +291,15 @@ def get_status():
         }
         
         # Notification service status
-        from twilio_handler import TwilioHandler
-        twilio_handler = TwilioHandler()
+        from twilio_handler import twilio_handler
+        twilio_status = twilio_handler.get_status()
         status['notifications'] = {
             'provider': 'Twilio',
-            'available': twilio_handler.is_available(),
-            'sms_enabled': twilio_handler.is_available(),
-            'phone_number': twilio_handler.phone_number[-4:] if twilio_handler.is_available() else None,
+            'available': twilio_status['configured'],
+            'sms_enabled': twilio_status['configured'],
+            'phone_number': twilio_status['from_number'][-4:] if twilio_status['from_number'] else None,
             'can_send_international': False,  # Trial accounts can't send to international numbers
-            'status': 'active' if twilio_handler.is_available() else 'inactive'
+            'status': 'active' if twilio_status['configured'] else 'inactive'
         }
         
         # Current session info
@@ -974,7 +974,7 @@ def send_sms():
         logger.info(f"API: Attempting to send SMS to {sanitized_number}")
             
         # Send the message
-        result = twilio_handler.send_message(to_number, message)
+        result = twilio_handler.send_sms(to_number, message)
         
         if result.get('success', False):
             # Log success but with sanitized number for privacy

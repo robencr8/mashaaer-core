@@ -1,10 +1,7 @@
 import os
 import logging
 import json
-import traceback
-import socket
-from urllib.parse import urlparse
-from flask import Flask, render_template, request, jsonify, Response, redirect, url_for, session, abort
+from flask import Flask, render_template, request, jsonify, Response, redirect, url_for
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
@@ -33,13 +30,6 @@ app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
 # Enable CORS for all routes to support Flutter and mobile app integration
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-# Cache-busting function to prevent stale assets
-BUILD_VERSION = str(int(time.time()))  # Use timestamp as version
-def versioned_url(filename):
-    """Add version parameter to static asset URLs for cache-busting"""
-    from flask import url_for
-    return url_for('static', filename=filename, v=BUILD_VERSION)
-
 # Initialize components
 config = Config()
 db_manager = DatabaseManager(config=config, db_path=config.DB_PATH)
@@ -53,175 +43,10 @@ twilio_handler = TwilioHandler()
 from profile_manager import ProfileManager
 profile_manager = ProfileManager(db_manager)
 
-# Initialize context assistant and AI model router
-from context_assistant import ContextAssistant
-from ai_model_router import AIModelRouter
-context_assistant = ContextAssistant(db_manager, profile_manager, emotion_tracker, intent_classifier)
-model_router = AIModelRouter()
-
 # Initialize API routes
 from api_routes import init_api
-from api_routes_dev import init_developer_api
 init_api(app, db_manager, emotion_tracker, face_detector, 
-         tts_manager, voice_recognition, intent_classifier, config,
-         context_assistant, model_router)
-
-# Initialize Developer API routes
-app.config['db_manager'] = db_manager
-init_developer_api(app, emotion_tracker, db_manager)
-
-# Add /ask endpoint for direct AI interactions
-@app.route('/ask', methods=['POST'])
-def ask():
-    """
-    Endpoint for direct AI interaction with dynamic model switching
-    
-    Request format:
-    {
-        "input": "User query text",
-        "model": "Optional model name"  # Defaults to MODEL_BACKEND env setting
-    }
-    
-    Response format:
-    {
-        "response": "AI response text",
-        "model": "Model used",
-        "status": "success/error"
-    }
-    """
-    import uuid  # Import uuid here
-    
-    try:
-        # Log the request
-        logger.info(f"Ask endpoint accessed from {request.remote_addr}")
-        
-        # Get request data
-        data = request.get_json()
-        if not data:
-            return jsonify({
-                'status': 'error',
-                'message': 'No data provided'
-            }), 400
-        
-        # Extract user input
-        user_input = data.get('input')
-        model_name = data.get('model')
-        system_prompt = data.get('system_prompt')
-        
-        # Validate input
-        if not user_input or not isinstance(user_input, str) or len(user_input.strip()) == 0:
-            return jsonify({
-                'status': 'error',
-                'message': 'Input is required'
-            }), 400
-        
-        # Log the request
-        logger.info(f"Ask request: input='{user_input[:50]}...'")
-        
-        # Store in session history
-        session_id = session.get('session_id', str(uuid.uuid4()))
-        session['session_id'] = session_id
-        
-        # Add to conversation history if database connection is available
-        try:
-            if db_manager:
-                db_manager.execute_query(
-                    "INSERT INTO conversation_history (session_id, user_input, timestamp) VALUES (%s, %s, %s)",
-                    (session_id, user_input, time.time())
-                )
-        except Exception as db_error:
-            logger.warning(f"Could not log conversation to database: {str(db_error)}")
-        
-        # Generate AI response using the model router
-        response_data = model_router.generate_response(
-            prompt=user_input,
-            model=model_name,
-            system_prompt=system_prompt,
-            temperature=0.7,
-            max_tokens=500
-        )
-        
-        # Format the response
-        if response_data.get('success', False):
-            ai_response = response_data.get('content', '')
-            model_used = response_data.get('model', 'unknown')
-            
-            # Store the response in history if database is available
-            try:
-                if db_manager and ai_response:
-                    # PostgreSQL doesn't support ORDER BY/LIMIT in UPDATE statements the same way as SQLite
-                    # First find the most recent matching conversation
-                    find_query = """
-                        SELECT id FROM conversation_history 
-                        WHERE session_id = %s AND user_input = %s 
-                        ORDER BY timestamp DESC LIMIT 1
-                    """
-                    result = db_manager.execute_query(find_query, (session_id, user_input))
-                    
-                    if result and len(result) > 0:
-                        # Then update that specific record by ID
-                        row_id = result[0][0]
-                        db_manager.execute_query(
-                            "UPDATE conversation_history SET ai_response = %s, model_used = %s WHERE id = %s",
-                            (ai_response, model_used, row_id)
-                        )
-            except Exception as db_error:
-                logger.warning(f"Could not update conversation history: {str(db_error)}")
-            
-            # Return the successful response
-            return jsonify({
-                'response': ai_response,
-                'model': model_used,
-                'status': 'success'
-            })
-        else:
-            # Return the error
-            error_message = response_data.get('error', 'Unknown error')
-            error_type = response_data.get('error_type', 'unknown_error')
-            fallback_reason = response_data.get('fallback_reason', None)
-            
-            # Log the error 
-            logger.warning(f"AI response generation failed: {error_message}")
-            
-            response_json = {
-                'status': 'error',
-                'message': error_message,
-                'model': response_data.get('model', 'unknown'),
-                'error_type': error_type
-            }
-            
-            # Add quota information if it's a quota issue
-            if isinstance(error_message, str) and "quota" in error_message.lower():
-                logger.error("OpenAI quota exceeded error detected in /ask endpoint")
-                response_json['quota_exceeded'] = True
-                
-                # Check if this is the special "no-fallback" scenario
-                if error_type == "quota_exceeded_no_fallback":
-                    response_json['model_suggestion'] = "Install Ollama for local AI support when OpenAI is unavailable"
-                    response_json['installation_suggestion'] = "Visit https://ollama.ai to download and install Ollama"
-                else:
-                    response_json['model_suggestion'] = "Use model='auto' to automatically fall back to Ollama models when OpenAI is unavailable"
-            
-            # Check for Ollama availability
-            if 'ollama_available' in response_data:
-                response_json['ollama_available'] = response_data['ollama_available']
-                
-            # Add fallback reason if available
-            if fallback_reason:
-                response_json['fallback_reason'] = fallback_reason
-                
-            return jsonify(response_json), 500
-    
-    except Exception as e:
-        # Log the error
-        logger.error(f"Error processing /ask request: {str(e)}")
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        }), 500
-
-# Add versioned_url helper to Jinja templates
-app.jinja_env.globals.update(versioned_url=versioned_url)
+         tts_manager, voice_recognition, intent_classifier, config)
 
 # Developer mode constants
 DEVELOPER_NAME = os.environ.get("DEVELOPER_NAME", "Roben Edwan")
@@ -256,65 +81,16 @@ def set_developer_mode(enabled=True):
 
 from flask import request
 
-# Function to check if request is coming from a local network
-def is_local_network(host):
-    """Check if host is on a local network"""
-    if not host:
-        return False
-    return (
-        host == 'localhost' or
-        host == '127.0.0.1' or
-        host.startswith('192.168.') or
-        host.startswith('10.') or
-        host.startswith('172.16.') or
-        host.startswith('0.0.0.0') or
-        '.local' in host
-    )
-
-# Function to get the public replit domain
-def get_replit_domain():
-    """Get the public Replit domain from environment variables"""
-    replit_domain = os.environ.get("REPLIT_DOMAINS", "")
-    # If there are multiple domains, use the first one
-    if ',' in replit_domain:
-        replit_domain = replit_domain.split(',')[0].strip()
-    return replit_domain
-
 @app.before_request
-def handle_request_routing():
-    """Handle request routing, redirecting, and logging"""
-    # Get host and request details
-    host = request.host.split(':')[0]  # Remove port if present
-    full_url = request.url
-    path = request.path
-    
-    # Check if we need to redirect to a proper domain
-    replit_domain = get_replit_domain()
-    
-    # Get real URL scheme (HTTP/HTTPS) - Replit typically uses HTTPS
-    scheme = 'https' if request.headers.get('X-Forwarded-Proto') == 'https' else request.scheme
-    
-    # Debug log for routing
-    logger.debug(f"📍 Request: {full_url}, host: {host}, path: {path}, replit_domain: {replit_domain}")
-    
-    # Check if this is a Replit testing/feedback tool
-    is_replit_tool = request.headers.get('User-Agent', '').lower().startswith('replit') or 'replit' in request.headers.get('User-Agent', '').lower()
-    
-    # For testing purposes, treat all localhost requests as coming from a Replit tool
-    # This allows the web_application_feedback_tool to work properly
-    if 'localhost' in host:
-        is_replit_tool = True
-        
-    # Special handling for API requests, the '/ask' endpoint, or Replit tools: no redirects, just log
-    if path.startswith('/api/') or path == '/ask' or is_replit_tool:
+def log_request_info():
+    if request.path.startswith('/api/'):
         # Log API requests with more detail
         api_info = {
-            'endpoint': path,
+            'endpoint': request.path,
             'method': request.method,
             'args': {k: v for k, v in request.args.items()},
             'content_type': request.content_type,
-            'has_json': request.is_json,
-            'host': host
+            'has_json': request.is_json
         }
         # Add JSON data if available
         if request.is_json:
@@ -324,63 +100,10 @@ def handle_request_routing():
                 api_info['json'] = 'Error parsing JSON'
                 
         logger.info(f"🔍 API Request: {api_info}")
-        return None  # Continue processing the request
-    
-    # Simple logging for regular routes
-    logger.info(f"🔍 Request to: {path} from {host}")
-    
-    # For non-API routes, handle localhost redirection if needed
-    # But only when not already running in the Replit environment
-    # This prevents redirect loops and allows the feedback tool to work
-    is_replit_env = 'replit.dev' in host or 'replit.com' in host
-    in_dev_environment = os.environ.get('FLASK_ENV') == 'development'
-    
-    # If running in local network but not in Replit environment, redirect to domain
-    # We already check for Replit tools above, no need to check again
-    # Additional check for User-Agent will prevent redirection for Replit feedback tool
-    
-    if (is_local_network(host) and 
-        replit_domain and 
-        not is_replit_env and 
-        not in_dev_environment and
-        not 'localhost_testing' in request.args and
-        not is_replit_tool):
-        
-        # Create redirect URL to the proper replit domain
-        redirect_url = f"https://{replit_domain}{path}"
-        if request.query_string:
-            redirect_url += f"?{request.query_string.decode('utf-8')}"
-            
-        logger.info(f"🔀 Redirecting from local {host} to {replit_domain}")
-        return redirect(redirect_url, code=302)
-    
-    # Check for legacy routes that need to be redirected to mobile interface
-    return handle_legacy_route_redirects(path)
-
-def handle_legacy_route_redirects(path):
-    """Redirect legacy routes to the new mobile interface"""
-    # Map of legacy routes to mobile replacements
-    legacy_routes = {
-        '/index.html': 'mobile_splash',
-        '/dashboard': 'mobile_index',
-        '/emotions': 'mobile_emotions',
-        '/profile.html': 'mobile_profiles',
-        '/settings': 'mobile_settings',
-        '/help': 'mobile_help',
-        '/contact': 'mobile_contact',
-        '/admin.html': 'mobile_settings',
-        '/sms.html': 'mobile_settings',
-        '/session-data': 'mobile_emotions'
-    }
-    
-    # Check if this is a legacy route that needs redirection
-    for legacy_path, mobile_route in legacy_routes.items():
-        if path == legacy_path:
-            logger.info(f"📱 Redirecting legacy route {path} to {mobile_route}")
-            return redirect(url_for(mobile_route), code=302)
-    
-    # Not a legacy route, continue with normal request processing
-    return None
+    else:
+        # Simple logging for regular routes
+        print(f"🔍 Request to: {request.path}")
+    # No need to return anything from this before_request handler
 
 # Scheduler for auto-learning
 scheduler = BackgroundScheduler()
@@ -399,52 +122,59 @@ core_launcher = CoreLauncher(
 # Routes
 @app.route('/')
 def index():
-    """Root route now directly serves the splash screen content without redirects"""
-    # Serve the mobile splash screen directly
-    return render_template('mobile/splash.html', versioned_url=versioned_url)
+    # Check if onboarding has been completed
+    onboarding_status = db_manager.get_setting('onboarding_complete', 'false')
+    onboarding_complete = False
+
+    if isinstance(onboarding_status, str):
+        onboarding_complete = onboarding_status.lower() == 'true'
+
+    # If onboarding not complete, redirect to startup
+    if not onboarding_complete:
+        return redirect(url_for('startup'))
+
+    dev_mode = is_developer_mode()
+    return render_template('index.html', dev_mode=dev_mode)
 
 @app.route('/startup')
 def startup():
-    # Always redirect to the cosmic mobile UI
     welcome_message = "Welcome to Robin AI. Let's get started with your onboarding."
     tts_manager.speak(welcome_message, 'default', 'en', profile_manager)
-    # Use mobile splash instead of old startup template
-    return redirect(url_for('mobile_splash'))
+    return render_template('startup.html')
 
 @app.route('/consent')
 def consent():
-    # Always redirect to the cosmic mobile UI
-    return redirect(url_for('mobile_index'))
+    return render_template('consent.html')
 
 @app.route('/voice-register')
 def voice_register():
-    # Always redirect to the cosmic mobile UI
-    return redirect(url_for('mobile_index'))
+    return render_template('voice_register.html')
 
 @app.route('/goodbye')
 def goodbye():
-    # Always redirect to the cosmic mobile UI
-    return redirect(url_for('mobile_index'))
+    return render_template('goodbye.html')
 
 @app.route('/demo')
 def demo():
-    # Redirect to mobile index which has the demo capabilities
-    return redirect(url_for('mobile_index'))
+    dev_mode = is_developer_mode()
+    return render_template('demo.html', dev_mode=dev_mode)
 
 @app.route('/emotion-timeline')
 def emotion_timeline():
-    # Redirect to mobile emotions page which has cosmic emotion visualization
-    return redirect(url_for('mobile_emotions'))
+    emotions = emotion_tracker.get_emotion_history()
+    dev_mode = is_developer_mode()
+    return render_template('emotion_timeline.html', emotions=emotions, dev_mode=dev_mode)
 
 @app.route('/profile')
 def profile():
-    # Redirect to mobile profiles page which has cosmic profile UI
-    return redirect(url_for('mobile_profiles'))
+    profiles = face_detector.get_all_profiles()
+    dev_mode = is_developer_mode()
+    return render_template('profile.html', profiles=profiles, dev_mode=dev_mode)
 
 @app.route('/live-view')
 def live_view():
-    # Redirect to mobile index which has the camera and voice capabilities built-in
-    return redirect(url_for('mobile_index'))
+    dev_mode = is_developer_mode()
+    return render_template('live_view.html', dev_mode=dev_mode)
 
 @app.route('/enable-dev-mode')
 def enable_dev_mode():
@@ -458,27 +188,66 @@ def enable_dev_mode():
 def admin():
     # Only accessible in developer mode
     if not is_developer_mode():
-        return redirect(url_for('mobile_index'))
+        return redirect(url_for('index'))
 
-    # For now, redirect to mobile settings which has the admin controls
-    # Future: Create a dedicated mobile/admin.html template with cosmic UI
-    return redirect(url_for('mobile_settings'))
+    # Get AI learning stats
+    learning_status = auto_learning.get_learning_status()
+
+    system_stats = {
+        'uptime': core_launcher.get_uptime(),
+        'memory_size': db_manager.get_db_size(),
+        'emotion_count': emotion_tracker.get_total_entries(),
+        'face_profiles': face_detector.get_profile_count(),
+        'system_status': core_launcher.get_system_status(),
+        'learning_status': learning_status,
+        'sms_available': twilio_handler.is_available()
+    }
+
+    return render_template('admin.html', stats=system_stats, dev_mode=True)
 
 @app.route('/sms-notifications')
 def sms_notifications():
     # Only accessible in developer mode
     if not is_developer_mode():
-        return redirect(url_for('mobile_index'))
+        return redirect(url_for('index'))
     
-    # For now, redirect to the mobile settings page which has a section for SMS
-    # Future: Create a dedicated mobile/sms.html template with cosmic UI
-    return redirect(url_for('mobile_settings'))
+    # Initialize Twilio handler
+    twilio_handler = TwilioHandler()
+    
+    # Check if Twilio is available
+    twilio_status = twilio_handler.is_available()
+    
+    # Get Twilio account information (truncated for security)
+    twilio_sid = os.environ.get('TWILIO_ACCOUNT_SID', '')
+    twilio_phone = os.environ.get('TWILIO_PHONE_NUMBER', '')
+    
+    # Get message history from Twilio handler
+    sms_history = twilio_handler.get_message_history()
+    
+    # Prepare status message
+    twilio_status_message = "SMS notifications are active and ready." if twilio_status else "SMS notifications unavailable. Check Twilio credentials."
+    
+    return render_template(
+        'sms_notifications.html', 
+        dev_mode=True,
+        twilio_status=twilio_status,
+        twilio_status_message=twilio_status_message,
+        sms_history=sms_history
+    )
 
 @app.route('/session-report')
 def session_report():
     """Show the session report dashboard with real-time data visualization"""
-    # Redirect to mobile emotions page which has cosmic emotion visualization
-    return redirect(url_for('mobile_emotions'))
+    dev_mode = is_developer_mode()
+
+    # Get sample emotion labels and data for initial chart display
+    emotion_labels = ['Happy', 'Sad', 'Angry', 'Surprised', 'Fearful', 'Disgusted', 'Neutral']
+    emotion_data = [12, 5, 3, 7, 2, 1, 8]
+
+    return render_template('session_report.html', 
+                          dev_mode=dev_mode, 
+                          labels=emotion_labels, 
+                          data=emotion_data)
 
 @app.route('/download/session.csv')
 def download_session_csv():
@@ -486,10 +255,6 @@ def download_session_csv():
     from flask import session as flask_session
     import csv
     from io import StringIO
-    
-    # If not in developer mode, redirect to mobile UI
-    if not is_developer_mode():
-        return redirect(url_for('mobile_emotions'))
 
     # Get session ID from query parameters or use current session
     session_id = request.args.get('session_id', None)
@@ -504,7 +269,7 @@ def download_session_csv():
     emotions_query = """
         SELECT emotion, timestamp, intensity, text, source
         FROM emotion_data
-        WHERE session_id = %s
+        WHERE session_id = ?
         ORDER BY timestamp ASC
     """
     emotion_data = db_manager.execute_query(emotions_query, (session_id,))
@@ -681,36 +446,8 @@ def detect_face():
 @app.route('/api/emotion-data')
 def emotion_data():
     days = request.args.get('days', 7, type=int)
-    session_id = request.args.get('session_id', None)
-    mobile_format = request.args.get('mobile_format', 'false').lower() == 'true'
-    
-    if session_id:
-        # Get emotions for a specific session
-        emotions = emotion_tracker.get_session_emotion_history(session_id)
-    else:
-        # Get general emotion history
-        emotions = emotion_tracker.get_emotion_history(days=days)
-    
-    # Convert timestamps to mobile-friendly format if requested
-    if mobile_format and emotions and 'data' in emotions:
-        for entry in emotions['data']:
-            if 'timestamp' in entry:
-                # Convert timestamp to Unix timestamp (milliseconds) for mobile
-                try:
-                    if isinstance(entry['timestamp'], str):
-                        from datetime import datetime
-                        dt = datetime.fromisoformat(entry['timestamp'].replace('Z', '+00:00'))
-                        entry['timestamp'] = int(dt.timestamp() * 1000)
-                except Exception as e:
-                    logger.error(f"Error converting timestamp: {str(e)}")
-    
-    return jsonify({
-        'success': True,
-        'emotions': emotions,
-        'session_id': session_id,
-        'days': days,
-        'mobile_format': mobile_format
-    })
+    emotions = emotion_tracker.get_emotion_history(days=days)
+    return jsonify(emotions)
 
 @app.route('/api/add-face-profile', methods=['POST'])
 def add_face_profile():
@@ -767,7 +504,29 @@ def delete_face_profile(profile_id):
         logger.error(f"Error deleting face profile: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-# Profile API route moved to api_routes.py
+@app.route("/api/profile/<name>")
+def get_profile(name):
+    try:
+        # Get profile by name
+        profiles = face_detector.get_all_profiles()
+        profile = next((p for p in profiles if p['name'] == name), None)
+
+        if not profile:
+            return jsonify({'success': False, 'error': 'Profile not found'}), 404
+
+        # Add emotion data if available
+        try:
+            # Get the primary emotion from the emotion tracker
+            profile['primary_emotion'] = emotion_tracker.get_primary_emotion_for_name(name)
+        except:
+            profile['primary_emotion'] = 'neutral'
+
+        return jsonify({'success': True, 'profile': profile})
+    except Exception as e:
+        logger.error(f"Error getting profile: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/set-language', methods=['POST'])
 def set_language():
     """Set the user's language preference"""
     try:
@@ -812,200 +571,51 @@ def set_language():
 
 @app.route('/api/send-sms', methods=['POST'])
 def send_sms():
-    """Send SMS notification with enhanced error handling and UAE number support"""
+    """Send SMS notification"""
     if not is_developer_mode():
-        return jsonify({
-            'success': False, 
-            'error': 'Not authorized',
-            'solution': 'Enable developer mode to use SMS features'
-        }), 403
+        return jsonify({'success': False, 'error': 'Not authorized'}), 403
         
     try:
-        # Accept both JSON and form data for flexibility
-        if request.is_json:
-            data = request.json
-        else:
-            data = request.form.to_dict()
-            
-        # Get phone number from parameters, with multiple possible keys for flexibility
-        phone_number = data.get('phone_number') or data.get('to') or data.get('number') or data.get('recipient')
-        
-        # Get message text with multiple possible keys
-        message = data.get('message') or data.get('text') or data.get('content') or data.get('body')
-        
-        # Special handling for owner shortcuts
-        if phone_number and phone_number.lower() in ["roben", "owner", "admin", "me", "creator"]:
-            owner_number = os.environ.get("OWNER_PHONE_NUMBER")
-            if owner_number:
-                logger.info(f"Using owner shortcut: Converting '{phone_number}' to owner's number")
-                phone_number = owner_number
-            else:
-                logger.warning("Owner shortcut used but OWNER_PHONE_NUMBER not set")
-        
-        # Special handling for Roben's number in any format
-        roben_patterns = ["522233989", "0522233989", "971522233989", "00971522233989", "+971522233989"]
-        if phone_number and any(pattern in phone_number for pattern in roben_patterns):
-            logger.info("Detected Roben's number, using standardized format")
-            phone_number = "+971522233989"
+        data = request.json
+        phone_number = data.get('phone_number')
+        message = data.get('message')
         
         if not phone_number or not message:
-            return jsonify({
-                'success': False, 
-                'error': 'Phone number and message are required',
-                'required_fields': {
-                    'phone_number': 'Recipient phone number in E.164 format (+971XXXXXXXXX)',
-                    'message': 'Text message to send'
-                },
-                'help': {
-                    'uae_format': 'For UAE numbers, use +971XXXXXXXXX or 05XXXXXXXX format',
-                    'shortcuts': 'You can use "owner", "roben", "admin", or "me" to send to the owner'
-                }
-            }), 400
+            return jsonify({'success': False, 'error': 'Phone number and message are required'}), 400
             
         # Initialize Twilio handler
         twilio_handler = TwilioHandler()
         
         # Check if Twilio is available
         if not twilio_handler.is_available():
-            missing_env_vars = []
-            if not os.environ.get("TWILIO_ACCOUNT_SID"):
-                missing_env_vars.append("TWILIO_ACCOUNT_SID")
-            if not os.environ.get("TWILIO_AUTH_TOKEN"):
-                missing_env_vars.append("TWILIO_AUTH_TOKEN")
-            if not os.environ.get("TWILIO_PHONE_NUMBER"):
-                missing_env_vars.append("TWILIO_PHONE_NUMBER")
-                
             return jsonify({
                 'success': False, 
-                'error': 'Twilio service is not available.',
-                'missing_credentials': missing_env_vars,
-                'solution': 'Please set the required Twilio environment variables and restart the server.'
+                'error': 'Twilio service is not available. Check credentials.'
             }), 503
-        
-        # Clean up phone number
-        original_number = phone_number  # Save for reference
-        if phone_number:
-            # Remove spaces, dashes, brackets
-            phone_number = phone_number.replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
-            
-            # UAE format handling - more comprehensive than the twilio_handler
-            if not phone_number.startswith('+'):
-                if phone_number.startswith('0097'):
-                    # Convert 00971-style to +971
-                    phone_number = '+' + phone_number[2:]
-                elif phone_number.startswith('97') and len(phone_number) >= 10:
-                    # Convert 971-style to +971
-                    phone_number = '+' + phone_number
-                elif phone_number.startswith('05') and len(phone_number) >= 9:
-                    # Convert UAE local format (05x) to international (+971 5x)
-                    phone_number = '+971' + phone_number[1:]
-                elif phone_number.startswith('5') and len(phone_number) >= 8:
-                    # Handle bare UAE mobile numbers (5xxxxxxxx)
-                    phone_number = '+971' + phone_number
-                elif phone_number.startswith('00'):
-                    # Handle double-zero prefixed international format (instead of +)
-                    phone_number = '+' + phone_number[2:]
-                else:
-                    # Generic fallback - add + prefix
-                    phone_number = '+' + phone_number
-                    
-                logger.info(f"Reformatted number from '{original_number}' to '{phone_number}'")
-        
-        # Log the attempt with sanitized number (show only first 6 digits)
-        sanitized_number = phone_number[:6] + "XXXX" if len(phone_number) > 6 else "XXXXXX"
-        logger.info(f"Attempting to send SMS to {sanitized_number}...")
             
         # Send the message
-        result = twilio_handler.send_message(phone_number, message)
+        success = twilio_handler.send_message(phone_number, message)
         
-        if result.get('success', False):
-            # Log success but with sanitized number for privacy
-            logger.info(f"Successfully sent SMS to {sanitized_number}")
-            
-            # Create a response with detailed information
+        if success:
             return jsonify({
                 'success': True,
-                'message': f'SMS sent successfully',
-                'details': {
-                    'sid': result.get('sid', ''),
-                    'to': sanitized_number,
-                    'from': result.get('from', ''),
-                    'segments': result.get('segments', 1),
-                    'length': result.get('length', len(message)),
-                    'timestamp': datetime.now().isoformat(),
-                    'message_preview': message[:20] + '...' if len(message) > 20 else message
-                }
+                'message': f'SMS sent to {phone_number}'
             })
         else:
-            # Extract error details from the result
-            error_message = result.get('error', 'Failed to send SMS')
-            solution = result.get('solution', '')
-            details = result.get('details', '')
-            error_type = result.get('error_type', 'unknown_error')
-            
-            # Log the error
-            logger.error(f"SMS sending failed: {error_message}")
-            if details:
-                logger.error(f"SMS error details: {details}")
-            
-            # Create error response
-            response = {
+            return jsonify({
                 'success': False,
-                'error': error_message,
-                'error_type': error_type
-            }
-            
-            # Add optional fields if available
-            if solution:
-                response['solution'] = solution
-                logger.info(f"SMS error solution: {solution}")
-            if details:
-                response['details'] = details
-            
-            # Add UAE-specific help if available
-            if 'uae_number_info' in result:
-                response['uae_number_info'] = result['uae_number_info']
-            elif '+971' in phone_number or '971' in phone_number or '05' in original_number:
-                # Add UAE format helpers even if not provided by the handler
-                response['uae_number_info'] = {
-                    'examples': ['+971522233989', '+971501234567'],
-                    'format_info': 'UAE mobile numbers start with "5" after the country code',
-                    'local_format': 'Local format: 05XXXXXXXX',
-                    'international_format': 'International format: +971XXXXXXXX' 
-                }
-                
-            # Add detailed logs for debugging
-            if is_developer_mode():
-                response['debug'] = {
-                    'to_number': sanitized_number,
-                    'original_input': original_number,
-                    'processed_number': phone_number,
-                    'message_length': len(message),
-                    'timestamp': datetime.now().isoformat()
-                }
-                
-            return jsonify(response), 400
+                'error': 'Failed to send SMS'
+            }), 500
             
     except Exception as e:
-        error_message = str(e)
-        logger.error(f"Exception in send_sms endpoint: {error_message}")
-        
-        return jsonify({
-            'success': False, 
-            'error': 'Server error processing SMS request',
-            'details': error_message if is_developer_mode() else 'See server logs for details',
-            'traceback': traceback.format_exc() if is_developer_mode() else None
-        }), 500
+        logger.error(f"Error sending SMS: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/send-sms-alert', methods=['POST'])
 def send_sms_alert():
     """Send a pre-formatted SMS alert notification"""
     if not is_developer_mode():
-        return jsonify({
-            'success': False, 
-            'error': 'Not authorized',
-            'solution': 'Enable developer mode to use SMS features'
-        }), 403
+        return jsonify({'success': False, 'error': 'Not authorized'}), 403
         
     try:
         data = request.json
@@ -1013,179 +623,64 @@ def send_sms_alert():
         alert_type = data.get('alert_type')
         
         if not phone_number or not alert_type:
-            return jsonify({
-                'success': False, 
-                'error': 'Phone number and alert type are required',
-                'required_fields': {
-                    'phone_number': 'Recipient phone number in E.164 format (+971XXXXXXXXX)',
-                    'alert_type': 'Type of alert to send (emotion_detected, face_recognized, system_status)'
-                }
-            }), 400
+            return jsonify({'success': False, 'error': 'Phone number and alert type are required'}), 400
             
         # Initialize Twilio handler
         twilio_handler = TwilioHandler()
         
         # Check if Twilio is available
         if not twilio_handler.is_available():
-            missing_env_vars = []
-            if not os.environ.get("TWILIO_ACCOUNT_SID"):
-                missing_env_vars.append("TWILIO_ACCOUNT_SID")
-            if not os.environ.get("TWILIO_AUTH_TOKEN"):
-                missing_env_vars.append("TWILIO_AUTH_TOKEN")
-            if not os.environ.get("TWILIO_PHONE_NUMBER"):
-                missing_env_vars.append("TWILIO_PHONE_NUMBER")
-                
             return jsonify({
                 'success': False, 
-                'error': 'Twilio service is not available.',
-                'missing_credentials': missing_env_vars,
-                'solution': 'Please set the required Twilio environment variables and restart the server.'
+                'error': 'Twilio service is not available. Check credentials.'
             }), 503
-        
-        # Log the attempt with sanitized number (show only first 6 digits)
-        sanitized_number = phone_number[:6] + "XXXX" if len(phone_number) > 6 else "XXXXXX"
-        logger.info(f"Attempting to send SMS alert ({alert_type}) to {sanitized_number}...")
-        
-        # Prepare real-time data for alerts
-        system_status = {}
-        uptime = "Unknown"  # Default value
-        if alert_type == 'system_status':
-            # Get actual system uptime
-            if core_launcher:
-                uptime = core_launcher.get_uptime()
-                system_status = core_launcher.get_system_status()
-                if not isinstance(system_status, dict):
-                    system_status = {}
-            
-        # Get the current emotion data if it's an emotion alert
-        emotion_data = {}
-        if alert_type == 'emotion_detected':
-            # Get the most recent emotion
-            recent_emotions = emotion_tracker.get_emotion_history(days=1)
-            if recent_emotions and 'data' in recent_emotions and len(recent_emotions['data']) > 0:
-                latest = recent_emotions['data'][0]
-                emotion_data = {
-                    'emotion': latest.get('emotion', 'happiness'),
-                    'confidence': latest.get('intensity', 85) * 100,
-                    'timestamp': latest.get('timestamp', datetime.now().isoformat())
-                }
-            
-        # Get face recognition data if it's a face recognition alert
-        face_data = {}
-        if alert_type == 'face_recognized':
-            # Get the most recent face recognition
-            conn = db_manager.get_connection()
-            cursor = conn.cursor()
-            cursor.execute("SELECT name, timestamp FROM recognition_history ORDER BY timestamp DESC LIMIT 1")
-            result = cursor.fetchone()
-            if result:
-                face_data = {
-                    'name': result[0],
-                    'time': result[1]
-                }
             
         # Prepare alert message based on type
-        result = None
+        success = False
         if alert_type == 'emotion_detected':
-            result = twilio_handler.send_notification(
+            success = twilio_handler.send_notification(
                 phone_number, 
                 'emotion', 
-                emotion=emotion_data.get('emotion', 'happiness'), 
-                confidence=emotion_data.get('confidence', 85)
+                emotion='happiness', 
+                confidence=85
             )
         elif alert_type == 'face_recognized':
-            result = twilio_handler.send_notification(
+            success = twilio_handler.send_notification(
                 phone_number, 
                 'face', 
-                name=face_data.get('name', 'User'), 
-                time=face_data.get('time', 'just now')
+                name='User', 
+                time='now'
             )
         elif alert_type == 'system_status':
-            message = f'Robin AI system status: Online, uptime: {uptime}'
-            if system_status:
-                message += f"\nEmotion entries: {system_status.get('emotion_entries', 0)}"
-                message += f"\nFace profiles: {system_status.get('face_profiles', 0)}"
-                message += f"\nSessions: {system_status.get('sessions', 0)}"
-                
-            result = twilio_handler.send_notification(
+            uptime = "3 hours, 45 minutes"
+            success = twilio_handler.send_notification(
                 phone_number, 
                 'system', 
-                message=message
+                message=f'Robin AI system status: Online, uptime: {uptime}'
             )
         else:
-            return jsonify({
-                'success': False, 
-                'error': 'Invalid alert type', 
-                'valid_types': ['emotion_detected', 'face_recognized', 'system_status']
-            }), 400
+            return jsonify({'success': False, 'error': 'Invalid alert type'}), 400
             
-        if result and result.get('success', False):
-            # Log success but with sanitized number for privacy
-            logger.info(f"Successfully sent SMS alert ({alert_type}) to {sanitized_number}")
-            
+        if success:
             return jsonify({
                 'success': True,
-                'message': f'Alert notification sent to {phone_number}',
-                'sid': result.get('sid', ''),
-                'timestamp': datetime.now().isoformat(),
-                'alert_type': alert_type,
-                'sent_to': phone_number
+                'message': f'Alert notification sent to {phone_number}'
             })
         else:
-            # Extract error details from the result
-            error_message = result.get('error', 'Failed to send alert notification')
-            solution = result.get('solution', '')
-            details = result.get('details', '')
-            
-            # Log the error
-            logger.error(f"SMS alert sending failed: {error_message}")
-            if details:
-                logger.error(f"SMS alert error details: {details}")
-            
-            # Create error response
-            response = {
+            return jsonify({
                 'success': False,
-                'error': error_message,
-                'to': phone_number,
-                'alert_type': alert_type
-            }
-            
-            # Add optional fields if available
-            if solution:
-                response['solution'] = solution
-                logger.info(f"SMS alert error solution: {solution}")
-            if details:
-                response['details'] = details
-            
-            # If this is a trial account issue with unverified number, provide specific guidance
-            if "trial account" in error_message.lower() or "21612" in details:
-                response['trial_account_help'] = "Your Twilio account is in trial mode. You can only send messages to verified numbers. Please verify this number in your Twilio console."
-                
-            # Add UAE-specific help if relevant
-            if (phone_number.startswith('+971') or 
-                phone_number.startswith('971') or 
-                phone_number.startswith('05')):
-                response['uae_format_help'] = "UAE mobile numbers should be in format +971xxxxxxxxx (e.g., +971522233989)"
-                
-            return jsonify(response), 500
+                'error': 'Failed to send alert notification'
+            }), 500
             
     except Exception as e:
         logger.error(f"Error sending SMS alert: {str(e)}")
-        return jsonify({
-            'success': False, 
-            'error': str(e),
-            'traceback': traceback.format_exc()
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/get-sms-status')
 def get_sms_status():
     """Get SMS notification status"""
     if not is_developer_mode():
-        return jsonify({
-            'success': False, 
-            'error': 'Not authorized',
-            'solution': 'Enable developer mode to access SMS features'
-        }), 403
+        return jsonify({'success': False, 'error': 'Not authorized'}), 403
         
     try:
         # Initialize Twilio handler
@@ -1194,175 +689,48 @@ def get_sms_status():
         # Check if Twilio is available
         available = twilio_handler.is_available()
         
-        # Get missing environment variables if not available
-        missing_env_vars = []
-        if not available:
-            if not os.environ.get("TWILIO_ACCOUNT_SID"):
-                missing_env_vars.append("TWILIO_ACCOUNT_SID")
-            if not os.environ.get("TWILIO_AUTH_TOKEN"):
-                missing_env_vars.append("TWILIO_AUTH_TOKEN")
-            if not os.environ.get("TWILIO_PHONE_NUMBER"):
-                missing_env_vars.append("TWILIO_PHONE_NUMBER")
-        
-        # Format phone number for display if available
-        phone_number = os.environ.get('TWILIO_PHONE_NUMBER', '')
-        formatted_phone = None
-        
-        if phone_number:
-            # Format for UAE numbers specifically
-            if phone_number.startswith('+971'):
-                formatted_phone = f"{phone_number[:4]} {phone_number[4:6]} {phone_number[6:9]} {phone_number[9:]}"
-            else:
-                # Add spaces for readability
-                formatted_phone = ' '.join([phone_number[i:i+4] for i in range(0, len(phone_number), 4)])
-        
-        response = {
+        return jsonify({
             'success': True,
             'available': available,
             'account_sid': os.environ.get('TWILIO_ACCOUNT_SID', '')[:8] + '...' if available else '',
-            'phone_number': phone_number,
-            'formatted_phone': formatted_phone,
-            'last_check': datetime.now().isoformat()
-        }
-        
-        # Add missing credentials info if not available
-        if not available:
-            response['missing_credentials'] = missing_env_vars
-            response['setup_instructions'] = "To setup SMS notifications, you need to set the Twilio environment variables and restart the server."
-            
-            # Provide more specific instructions for each missing variable
-            if "TWILIO_ACCOUNT_SID" in missing_env_vars:
-                response['twilio_account_sid_help'] = "Find your Account SID in the Twilio Console Dashboard at https://www.twilio.com/console"
-                
-            if "TWILIO_AUTH_TOKEN" in missing_env_vars:
-                response['twilio_auth_token_help'] = "Find your Auth Token in the Twilio Console Dashboard at https://www.twilio.com/console"
-                
-            if "TWILIO_PHONE_NUMBER" in missing_env_vars:
-                response['twilio_phone_number_help'] = "Get a Twilio phone number in the Twilio Console at https://www.twilio.com/console/phone-numbers/incoming"
-        else:
-            # Add account status if available
-            response['account_type'] = 'Trial' if phone_number and phone_number.startswith('+1') else 'Production'
-            response['verified_numbers_required'] = response['account_type'] == 'Trial'
-            
-            # Add tip for UAE numbers
-            response['uae_format_tip'] = "For UAE recipients, use format +971XXXXXXXXX (e.g., +971522233989)"
-            
-        return jsonify(response)
+            'phone_number': os.environ.get('TWILIO_PHONE_NUMBER', '') if available else ''
+        })
             
     except Exception as e:
         logger.error(f"Error getting SMS status: {str(e)}")
-        return jsonify({
-            'success': False, 
-            'error': str(e),
-            'traceback': traceback.format_exc()
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/get-sms-history')
 def get_sms_history():
     """Get SMS message history"""
     if not is_developer_mode():
-        return jsonify({
-            'success': False, 
-            'error': 'Not authorized',
-            'solution': 'Enable developer mode to access SMS history'
-        }), 403
+        return jsonify({'success': False, 'error': 'Not authorized'}), 403
         
     try:
         # Initialize Twilio handler
         twilio_handler = TwilioHandler()
         
-        # Check if Twilio is available first
-        if not twilio_handler.is_available():
-            missing_env_vars = []
-            if not os.environ.get("TWILIO_ACCOUNT_SID"):
-                missing_env_vars.append("TWILIO_ACCOUNT_SID")
-            if not os.environ.get("TWILIO_AUTH_TOKEN"):
-                missing_env_vars.append("TWILIO_AUTH_TOKEN")
-            if not os.environ.get("TWILIO_PHONE_NUMBER"):
-                missing_env_vars.append("TWILIO_PHONE_NUMBER")
-            
-            return jsonify({
-                'success': False,
-                'error': 'Twilio service is not available',
-                'missing_credentials': missing_env_vars,
-                'setup_instructions': 'Set up Twilio credentials to access SMS history',
-                'history': [] # Empty history since Twilio is not available
-            })
-        
         # Get message history
-        logger.info("Fetching SMS message history from Twilio")
         messages = twilio_handler.get_message_history()
         
-        # Format messages for display with better information
+        # Format messages for display
         history = []
-        
-        if messages:
-            for msg in messages:
-                # Sanitize phone number for privacy in logs (show only first 6 digits)
-                to_number = msg.get('to', 'Unknown')
-                sanitized_number = to_number[:6] + "XXXX" if len(to_number) > 6 else "XXXXXX"
-                
-                # Format the message body (truncate if too long)
-                body = msg.get('body', '')
-                if len(body) > 50:
-                    body_preview = body[:50] + "..."
-                else:
-                    body_preview = body
-                
-                # Parse timestamp if available
-                timestamp = msg.get('date_sent', '')
-                formatted_time = timestamp
-                
-                if timestamp:
-                    try:
-                        # Try to parse and format the timestamp
-                        from datetime import datetime
-                        if isinstance(timestamp, str):
-                            dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
-                            formatted_time = dt.strftime('%Y-%m-%d %H:%M:%S')
-                    except Exception as e:
-                        logger.error(f"Error formatting timestamp: {str(e)}")
-                
-                # Add to history with enhanced details
-                history.append({
-                    'to_number': to_number,
-                    'sanitized_number': sanitized_number,
-                    'status': msg.get('status', 'unknown'),
-                    'body': body,
-                    'body_preview': body_preview,
-                    'timestamp': timestamp,
-                    'formatted_time': formatted_time,
-                    'sid': msg.get('sid', ''),
-                    'price': msg.get('price', 'unknown'),
-                    'direction': msg.get('direction', 'outbound'),
-                    'error_code': msg.get('error_code', None)
-                })
-                
-            logger.info(f"Retrieved {len(history)} SMS message records")
-        else:
-            logger.info("No SMS history found or message history is not available")
-            
-        # Additional metadata for the response
-        account_sid = os.environ.get('TWILIO_ACCOUNT_SID', '')[:8] + '...' if os.environ.get('TWILIO_ACCOUNT_SID') else ''
-        phone_number = os.environ.get('TWILIO_PHONE_NUMBER', '')
+        for msg in messages:
+            history.append({
+                'to_number': msg.get('to', 'Unknown'),
+                'status': msg.get('status', 'unknown'),
+                'body': msg.get('body', ''),
+                'timestamp': msg.get('date_sent', '')
+            })
             
         return jsonify({
             'success': True,
-            'history': history,
-            'count': len(history),
-            'retrieved_at': datetime.now().isoformat(),
-            'from_number': phone_number,
-            'account_sid': account_sid
+            'history': history
         })
             
     except Exception as e:
         logger.error(f"Error getting SMS history: {str(e)}")
-        return jsonify({
-            'success': False, 
-            'error': str(e),
-            'traceback': traceback.format_exc(),
-            'history': [] # Empty history since an error occurred
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/set-consent', methods=['POST'])
 def set_consent():
@@ -1610,227 +978,114 @@ profile_manager.initialize_tables()
 
 # Mobile app routes
 @app.route('/mobile')
-@app.route('/mobile/splash')
 def mobile_splash():
     """Mobile app splash screen"""
     # Splash screen is the entry point for mobile experience
-    return render_template('mobile/splash.html', versioned_url=versioned_url)
+    return render_template('mobile/splash.html')
 
 @app.route('/mobile/index')
 def mobile_index():
     """Mobile app main page"""
     # Mobile interface is always accessible without onboarding checks
-    return render_template('mobile/index.html', versioned_url=versioned_url)
+    return render_template('mobile/index.html')
 
 @app.route('/mobile/emotions')
 def mobile_emotions():
     """Mobile app emotions page"""
-    return render_template('mobile/emotions.html', versioned_url=versioned_url)
+    return render_template('mobile/emotions.html')
 
 @app.route('/mobile/help')
 def mobile_help():
     """Mobile app help page."""
-    return render_template('mobile/help.html', versioned_url=versioned_url)
+    return render_template('mobile/help.html')
 
 @app.route('/mobile/contact')
 def mobile_contact():
     """Mobile app contact page."""
-    return render_template('mobile/contact.html', versioned_url=versioned_url)
+    return render_template('mobile/contact.html')
 
 @app.route('/mobile/profiles')
 def mobile_profiles():
     """Mobile app profiles page"""
-    return render_template('mobile/profiles.html', versioned_url=versioned_url)
+    return render_template('mobile/profiles.html')
 
 @app.route('/mobile/settings')
 def mobile_settings():
     """Mobile app settings page"""
-    return render_template('mobile/settings.html', versioned_url=versioned_url)
+    return render_template('mobile/settings.html')
 
-@app.route('/ai-models')
-def ai_models_page():
-    """AI Models status and testing page"""
-    return render_template('ai_models.html', versioned_url=versioned_url)
-    
-# User settings API endpoints
-@app.route('/api/user/settings', methods=['GET'])
+@app.route('/api/user/settings', methods=['GET', 'POST'])
 def user_settings():
     """Get or update user settings"""
-    try:
-        if request.method == 'GET':
-            # Get current settings from the database
-            settings = {}
-            default_settings = {
-                'language': 'en',
-                'darkMode': True,
-                'voiceStyle': 'default',
-                'voiceRecognition': True,
-                'storeHistory': True,
-                'faceRecognition': True,
-                'aiModelBackend': os.environ.get('MODEL_BACKEND', 'auto'),
-                'developerMode': is_developer_mode(),
-                'debugMode': os.environ.get('DEBUG', 'false').lower() == 'true'
-            }
-            
-            # Get values from database or use defaults
-            for key, default_value in default_settings.items():
-                try:
-                    value = db_manager.get_setting(key, str(default_value))
-                    
-                    # Convert string to proper types
-                    if isinstance(default_value, bool):
-                        # Handle string to boolean conversion
-                        if isinstance(value, str):
-                            settings[key] = value.lower() in ['true', '1', 'yes']
-                        else:
-                            settings[key] = bool(value)
-                    else:
-                        settings[key] = value
-                except Exception as e:
-                    logger.warning(f"Error getting setting {key}: {str(e)}")
-                    settings[key] = default_value
-            
-            return jsonify({
-                'success': True,
-                'settings': settings
-            })
-        
-        # Handle POST request (update settings)
-        data = request.get_json()
-        if not data:
-            return jsonify({
-                'success': False,
-                'error': 'No data provided'
-            }), 400
-        
-        # Update only the specified settings
-        updated_settings = {}
-        for key, value in data.items():
-            try:
-                # Special handling for certain settings
-                if key == 'developerMode':
-                    # Only set developer mode if authorized
-                    if value and not is_developer_mode():
-                        if request.headers.get('X-Developer-Key') != os.environ.get('DEVELOPER_KEY', 'robin_dev_key'):
-                            continue  # Skip unauthorized developer mode enable
-                    set_developer_mode(value)
-                    updated_settings[key] = value
-                elif key == 'debugMode':
-                    # Only allow debug mode changes in developer mode
-                    if is_developer_mode():
-                        # Set in database
-                        db_manager.set_setting(key, str(value))
-                        # Try to update environment variable too
-                        os.environ['DEBUG'] = 'true' if value else 'false'
-                        updated_settings[key] = value
-                elif key == 'aiModelBackend':
-                    # Update both database and environment
-                    db_manager.set_setting(key, str(value))
-                    os.environ['MODEL_BACKEND'] = str(value)
-                    updated_settings[key] = value
-                else:
-                    # Standard setting
-                    db_manager.set_setting(key, str(value))
-                    updated_settings[key] = value
-            except Exception as e:
-                logger.error(f"Error updating setting {key}: {str(e)}")
-                return jsonify({
-                    'success': False,
-                    'error': f"Error updating setting {key}: {str(e)}"
-                }), 500
-        
-        return jsonify({
-            'success': True,
-            'updated': updated_settings
-        })
-        
-    except Exception as e:
-        logger.error(f"Error managing user settings: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+    if request.method == 'GET':
+        # Get settings from database
+        settings = {
+            'language': db_manager.get_setting('language', 'en'),
+            'darkMode': db_manager.get_setting('dark_mode', 'true').lower() == 'true',
+            'voiceStyle': db_manager.get_setting('voice_style', 'default'),
+            'voiceRecognition': db_manager.get_setting('voice_recognition_enabled', 'true').lower() == 'true',
+            'storeHistory': db_manager.get_setting('store_history', 'true').lower() == 'true',
+            'faceRecognition': db_manager.get_setting('face_recognition_enabled', 'true').lower() == 'true'
+        }
+        return jsonify({'success': True, 'settings': settings})
+    else:
+        # Update settings
+        data = request.json
+        try:
+            for key, value in data.items():
+                if key == 'language':
+                    db_manager.set_setting('language', value)
+                elif key == 'darkMode':
+                    db_manager.set_setting('dark_mode', 'true' if value else 'false')
+                elif key == 'voiceStyle':
+                    db_manager.set_setting('voice_style', value)
+                elif key == 'voiceRecognition':
+                    db_manager.set_setting('voice_recognition_enabled', 'true' if value else 'false')
+                elif key == 'storeHistory':
+                    db_manager.set_setting('store_history', 'true' if value else 'false')
+                elif key == 'faceRecognition':
+                    db_manager.set_setting('face_recognition_enabled', 'true' if value else 'false')
+            return jsonify({'success': True})
+        except Exception as e:
+            logger.error(f"Error updating settings: {str(e)}")
+            return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/user/settings/reset', methods=['POST'])
 def reset_user_settings():
     """Reset user settings to default"""
     try:
-        # Default settings
         default_settings = {
             'language': 'en',
-            'darkMode': True,
-            'voiceStyle': 'default',
-            'voiceRecognition': True,
-            'storeHistory': True,
-            'faceRecognition': True,
-            'aiModelBackend': 'auto',
+            'dark_mode': 'true',
+            'voice_style': 'default',
+            'voice_recognition_enabled': 'true',
+            'store_history': 'true',
+            'face_recognition_enabled': 'true'
         }
-        
-        # Don't reset developer mode or debug mode
-        preserve_settings = ['developerMode', 'debugMode']
-        
-        # Get current values of preserved settings
-        preserved_values = {}
-        for key in preserve_settings:
-            try:
-                preserved_values[key] = db_manager.get_setting(key, 'false')
-            except:
-                preserved_values[key] = 'false'
-        
-        # Delete all settings first
-        try:
-            db_manager.execute_query("DELETE FROM settings WHERE key NOT IN %s", (tuple(preserve_settings),))
-        except Exception as e:
-            logger.warning(f"Error deleting settings: {str(e)}")
-        
-        # Then insert default settings
+
         for key, value in default_settings.items():
-            db_manager.set_setting(key, str(value))
-        
-        # Restore preserved settings
-        for key, value in preserved_values.items():
             db_manager.set_setting(key, value)
-        
-        # Update MODEL_BACKEND environment variable
-        os.environ['MODEL_BACKEND'] = 'auto'
-        
-        return jsonify({
-            'success': True,
-            'message': 'Settings reset to default values'
-        })
+
+        return jsonify({'success': True})
     except Exception as e:
-        logger.error(f"Error resetting user settings: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        logger.error(f"Error resetting settings: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/user/logout', methods=['POST'])
 def user_logout():
     """Log out the current user"""
     try:
+        # Clear the onboarding flag
+        db_manager.set_setting('onboarding_complete', 'false')
+
         # Clear session data
+        from flask import session
         session.clear()
-        
-        return jsonify({
-            'success': True,
-            'message': 'Logged out successfully'
-        })
+
+        return jsonify({'success': True})
     except Exception as e:
         logger.error(f"Error logging out: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
-
-@app.route('/test-ask')
-def test_ask_endpoint():
-    """Test page for the /ask endpoint"""
-    # Only accessible in developer mode
-    if not is_developer_mode():
-        return redirect(url_for('mobile_index'))
-        
-    return render_template('test_ask_endpoint.html')
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 # SMS Notification Routes - duplicate code removed
 
@@ -1843,11 +1098,10 @@ def send_sms_legacy():
     
     # Get request parameters
     data = request.json
-    # Support both parameter names for backward compatibility
-    phone_number = data.get('phone_number', data.get('to_number'))
+    to_number = data.get('to_number')
     message = data.get('message')
     
-    if not phone_number or not message:
+    if not to_number or not message:
         return jsonify({'success': False, 'error': 'Phone number and message are required'}), 400
     
     # Check if SMS service is available
@@ -1856,28 +1110,12 @@ def send_sms_legacy():
     
     # Send the SMS
     try:
-        result = twilio_handler.send_message(phone_number, message)
+        result = twilio_handler.send_message(to_number, message)
         
-        if result and result.get('success', False):
+        if result:
             return jsonify({'success': True, 'message': 'SMS sent successfully'})
         else:
-            # Extract error details from the result
-            error_message = result.get('error', 'Failed to send SMS')
-            solution = result.get('solution', '')
-            details = result.get('details', '')
-            
-            response = {
-                'success': False,
-                'error': error_message
-            }
-            
-            # Add optional fields if available
-            if solution:
-                response['solution'] = solution
-            if details:
-                response['details'] = details
-                
-            return jsonify(response), 500
+            return jsonify({'success': False, 'error': 'Failed to send SMS'}), 500
             
     except Exception as e:
         logger.error(f"SMS sending error: {str(e)}")
@@ -1892,12 +1130,11 @@ def send_sms_alert_legacy():
     
     # Get request parameters
     data = request.json
-    # Support both parameter names for backward compatibility
-    phone_number = data.get('phone_number', data.get('to_number'))
+    to_number = data.get('to_number')
     notification_type = data.get('alert_type', 'alert')  # Default to alert type
     message = data.get('message', 'Alert notification')
     
-    if not phone_number:
+    if not to_number:
         return jsonify({'success': False, 'error': 'Phone number is required'}), 400
     
     # Check if SMS service is available
@@ -1924,28 +1161,12 @@ def send_sms_alert_legacy():
     
     # Send the notification
     try:
-        result = twilio_handler.send_notification(phone_number, notification_type.split('_')[0], **notification_params)
+        result = twilio_handler.send_notification(to_number, notification_type.split('_')[0], **notification_params)
         
-        if result and result.get('success', False):
+        if result:
             return jsonify({'success': True, 'message': f'Alert notification sent successfully'})
         else:
-            # Extract error details from the result
-            error_message = result.get('error', 'Failed to send notification')
-            solution = result.get('solution', '')
-            details = result.get('details', '')
-            
-            response = {
-                'success': False,
-                'error': error_message
-            }
-            
-            # Add optional fields if available
-            if solution:
-                response['solution'] = solution
-            if details:
-                response['details'] = details
-                
-            return jsonify(response), 500
+            return jsonify({'success': False, 'error': 'Failed to send notification'}), 500
             
     except Exception as e:
         logger.error(f"SMS notification error: {str(e)}")
@@ -1961,30 +1182,5 @@ if __name__ == "__main__":
     # Wait for core systems to initialize
     time.sleep(2)
 
-    # Start Flask app when run directly (not through Gunicorn)
-    # This ensures proper binding for both development and deployment
-    port = 5000
-    try:
-        logger.info(f"Starting Flask app on port {port}")
-        app.run(host="0.0.0.0", port=port, debug=True, use_reloader=False)
-    except OSError as e:
-        if "Address already in use" in str(e):
-            # Fallback to alternative port if 5000 is in use
-            port = 8000
-            logger.info(f"Port 5000 unavailable, falling back to port {port}")
-            app.run(host="0.0.0.0", port=port, debug=True, use_reloader=False)
-        else:
-            # Re-raise other OSErrors
-            raise
-from flask import Flask, render_template
-from api_routes import api_blueprint
-
-app = Flask(__name__)
-app.register_blueprint(api_blueprint)
-
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    # Start Flask app
+    app.run(host="0.0.0.0", port=3000, debug=True, use_reloader=False)

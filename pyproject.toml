@@ -24,4 +24,6 @@ dependencies = [
     "flask-cors>=5.0.1",
     "openai>=1.70.0",
     "psutil>=7.0.0",
+    "kivy>=2.3.1",
+    "buildozer>=1.5.0",
 ]
