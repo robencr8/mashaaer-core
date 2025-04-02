@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Robin AI - Cosmic Assistant</title>
+  <title>Robin AI - Mobile Gateway</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="/static/mobile/css/mobile_style.css">
@@ -13,12 +13,19 @@
   <!-- Add to homescreen for iOS -->
   <link rel="apple-touch-icon" href="/static/mobile/images/robin-icon-192.png">
   <link rel="manifest" href="/static/mobile/manifest.json">
+  <script>
+    function setLang(lang) {
+      document.documentElement.lang = lang;
+      document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      alert(lang === 'ar' ? 'تم تغيير اللغة إلى العربية' : 'Language switched to English');
+    }
+  </script>
 </head>
 <body>
   <div class="app-container">
     <header>
-      <h1>🚀 Robin AI</h1>
-      <h2>Your Cosmic Voice Assistant</h2>
+      <h1>👁️ Robin AI</h1>
+      <h2>Beyond the Stars – A Companion From Another Realm</h2>
       
       <div class="cosmic-orb">
         <div class="orbit"></div>
@@ -26,12 +33,20 @@
         <div class="orbit"></div>
         <div class="orb"></div>
       </div>
-      
-      <div class="user-status" id="userStatus">
-        <span class="status-dot"></span>
-        <span class="status-text" id="aiStatusText">Connecting to neural network...</span>
-      </div>
     </header>
+
+    <div class="lang-toggle">
+      <button class="lang-btn" onclick="setLang('en')">English</button>
+      <button class="lang-btn" onclick="setLang('ar')">العربية</button>
+    </div>
+
+    <div class="features">
+      <div class="feature">🔊 Voice-Driven Commands</div>
+      <div class="feature">🌌 Emotional + Visual Awareness</div>
+      <div class="feature">🛰️ Works Offline – No Cloud</div>
+      <div class="feature">👤 Recognizes Faces & Objects</div>
+      <div class="feature">🛡️ Personal Memory Storage</div>
+    </div>
 
     <div class="actions">
       <div class="action-button voice-button" id="voiceButton">
@@ -48,11 +63,10 @@
       </div>
     </div>
 
-    <div class="features">
-      <div class="feature">👁️ Visual Awareness</div>
-      <div class="feature">🧠 Emotional Intelligence</div>
-      <div class="feature">🌐 Works Offline</div>
-      <div class="feature">🗣️ Arabic + English</div>
+    <div class="button-group">
+      <a class="button" href="/startup">🚀 Launch Robin</a>
+      <a class="button" href="/live-view">👁️ Live View</a>
+      <a class="button" href="/admin">🧠 Developer Panel</a>
     </div>
 
     <div class="conversation" id="conversation">
@@ -135,7 +149,7 @@
   </div>
 
   <footer>
-    Robin AI - Forged by Roben Edwan from beyond the stars.
+    Robin AI • Built by Roben Edwan • Gamma-Inspired Mobile Reality
   </footer>
 
   <script src="/static/js/voice_recorder.js"></script>

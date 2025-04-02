@@ -114,7 +114,8 @@ def index():
 
 @app.route('/startup')
 def startup():
-    tts_prompt("Welcome to Robin AI. Let's set up your preferences to start.")
+    # Create a welcome message for the startup page
+    # We'll use the template's built-in TTS capability instead of server-side TTS
     return render_template('startup.html')
 
 @app.route('/consent')
@@ -753,17 +754,7 @@ profile_manager.initialize_tables()
 @app.route('/mobile')
 def mobile_index():
     """Mobile app main page"""
-    # Check if onboarding has been completed
-    onboarding_status = db_manager.get_setting('onboarding_complete', 'false')
-    onboarding_complete = False
-    
-    if isinstance(onboarding_status, str):
-        onboarding_complete = onboarding_status.lower() == 'true'
-    
-    # If onboarding not complete, redirect to startup
-    if not onboarding_complete:
-        return redirect(url_for('startup'))
-        
+    # Mobile interface is always accessible without onboarding checks
     return render_template('mobile/index.html')
 
 @app.route('/mobile/emotions')

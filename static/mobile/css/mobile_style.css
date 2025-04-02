@@ -59,6 +59,15 @@
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -203,6 +212,47 @@ h2 {
   height: 8px;
 }
 
+.lang-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.lang-btn {
+  background: var(--background-surface);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.lang-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    transparent 100%);
+  animation: shimmer 2s infinite linear;
+}
+
+.lang-btn:hover {
+  background: rgba(99, 102, 241, 0.2);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+
 .features {
   display: grid;
   grid-template-columns: 1fr;
@@ -299,6 +349,28 @@ footer {
   margin-top: 1rem;
   position: relative;
   width: 100%;
+}
+
+/* RTL support for Arabic */
+html[lang="ar"] .feature,
+html[lang="ar"] .button,
+html[lang="ar"] footer {
+  direction: rtl;
+  text-align: right;
+}
+
+html[lang="ar"] .orbit::before {
+  animation-direction: reverse;
+}
+
+html[lang="ar"] .feature::before,
+html[lang="ar"] .button::before {
+  transform: translateX(100%);
+}
+
+html[lang="ar"] .feature:hover::before,
+html[lang="ar"] .button:hover::before {
+  transform: translateX(-100%);
 }
 
 /* Media queries for larger screens */
