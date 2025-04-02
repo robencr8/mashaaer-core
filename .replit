@@ -40,8 +40,8 @@ channel = "stable-24_05"
 
 [deployment]
 deploymentTarget = "autoscale"
-run = ["gunicorn", "--bind", "0.0.0.0:5000", "RobinAiCompanion.main:app"]
-build = ["sh", "-c", "pip install -r RobinAiCompanion/robin_requirements.txt"]
+run = ["gunicorn", "--bind", "0.0.0.0:5000", "RobinAI_Enhanced.main:app"]
+build = ["sh", "-c", "pip install -r RobinAI_Enhanced/requirements.txt"]
 
 [[ports]]
 localPort = 5000
