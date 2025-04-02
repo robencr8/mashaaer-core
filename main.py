@@ -399,23 +399,9 @@ core_launcher = CoreLauncher(
 # Routes
 @app.route('/')
 def index():
-    # Always redirect to the cosmic mobile UI
-    return redirect(url_for('mobile_splash'))
-    
-    # Legacy code, no longer used
-    # Check if onboarding has been completed
-    # onboarding_status = db_manager.get_setting('onboarding_complete', 'false')
-    # onboarding_complete = False
-    # 
-    # if isinstance(onboarding_status, str):
-    #     onboarding_complete = onboarding_status.lower() == 'true'
-    # 
-    # # If onboarding not complete, redirect to startup
-    # if not onboarding_complete:
-    #     return redirect(url_for('startup'))
-    # 
-    # dev_mode = is_developer_mode()
-    # return render_template('index.html', dev_mode=dev_mode)
+    """Root route now directly serves the splash screen content without redirects"""
+    # Serve the mobile splash screen directly
+    return render_template('mobile/splash.html', versioned_url=versioned_url)
 
 @app.route('/startup')
 def startup():
