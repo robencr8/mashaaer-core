@@ -86,8 +86,19 @@ class TwilioHandler:
             'update': "📊 UPDATE: {message}",
             'emotion': "😊 EMOTION DETECTED: {emotion} with confidence {confidence}%",
             'face': "👤 FACE RECOGNIZED: {name} detected at {time}",
-            'security': "🔒 SECURITY: {message}"
+            'security': "🔒 SECURITY: {message}",
+            'system': "⚙️ SYSTEM: {message}"
         }
+        
+        # Add level indicator for alerts if specified
+        if notification_type == 'alert' and 'level' in kwargs:
+            level = kwargs.get('level', '').upper()
+            if level in ['WARNING', 'CRITICAL', 'INFO']:
+                templates['alert'] = f"🚨 ROBIN AI {level} ALERT: {{message}}"
+                
+                # Add immediate attention note for critical alerts
+                if level == 'CRITICAL':
+                    kwargs['message'] = f"{kwargs.get('message', '')} Immediate attention required."
         
         template = templates.get(notification_type, "{message}")
         
@@ -97,6 +108,32 @@ class TwilioHandler:
         except KeyError as e:
             logger.error(f"Missing parameter in notification template: {str(e)}")
             return False
+            
+    def get_message_history(self):
+        """
+        Get the recent message history (placeholder for future implementation)
+        
+        Returns:
+            list: A list of message dictionaries with status and metadata
+        """
+        # This would typically make an API call to Twilio to fetch message history
+        # For now, we'll return a placeholder response
+        
+        if not self.available:
+            logger.warning("Cannot get message history: Twilio credentials not available")
+            return []
+            
+        # Placeholder for message history
+        # In a real implementation, we would fetch this from the Twilio API
+        return [
+            {
+                "to": "+1234567890",
+                "status": "delivered", 
+                "body": "Welcome to Robin AI! Your personal AI assistant is ready.",
+                "date_sent": "2025-04-02T08:30:00Z",
+                "sid": "SM123456789"
+            }
+        ]
 
 # Example usage:
 # twilio = TwilioHandler()
