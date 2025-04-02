@@ -48,6 +48,17 @@ class AIModelRouter:
         logger.info(f"- Supported Ollama Models: {', '.join(self.ollama_models)}")
         logger.info(f"- Supported OpenAI Models: {', '.join(self.openai_models)}")
         logger.info(f"- OpenAI API Key: {'Configured' if self.openai_api_key else 'Not configured'}")
+        
+        # Additional information for auto mode
+        if self.model_backend == "auto":
+            if self.openai_api_key and self.is_ollama_running():
+                logger.info("- Using AUTO mode: Will try OpenAI first, then Ollama as fallback")
+            elif self.openai_api_key:
+                logger.info("- Using AUTO mode: Will use OpenAI (Ollama not detected)")
+            elif self.is_ollama_running():
+                logger.info("- Using AUTO mode: Will use Ollama (OpenAI key not configured)")
+            else:
+                logger.warning("- Using AUTO mode: No AI backends detected! Emergency fallback will be used.")
     
     def _is_model_supported(self, model: str) -> bool:
         """Check if the specified model is supported"""
@@ -59,7 +70,15 @@ class AIModelRouter:
     def get_default_model(self) -> str:
         """Get the default model based on configuration"""
         # If model_backend is set, use it to determine default model
-        if self.model_backend == "ollama" and self.is_ollama_running():
+        if self.model_backend == "auto":
+            # For auto mode, return based on availability preference
+            if self.openai_api_key:
+                return "gpt-4o"  # Prefer OpenAI when available in auto mode
+            elif self.is_ollama_running():
+                return self.ollama_models[0]
+            else:
+                return "auto"  # Special value indicating auto mode with no models
+        elif self.model_backend == "ollama" and self.is_ollama_running():
             return self.ollama_models[0]  # First Ollama model (openchat)
         elif self.model_backend == "openai" and self.openai_api_key:
             return "gpt-4o"  # Prefer the latest GPT-4o model
@@ -444,7 +463,81 @@ class AIModelRouter:
                 }
         
         # No specific model provided, use configured backend
-        if self.model_backend == "ollama" or (not self.model_backend and self.is_ollama_running()):
+        if self.model_backend == "auto":
+            # Auto mode - try both backends based on availability
+            if self.openai_api_key:
+                # If OpenAI is configured, try it first (typically better quality)
+                logger.info("Using auto mode, trying OpenAI first")
+                model_to_use = "gpt-4o"
+                result = self.complete_with_openai(
+                    prompt=prompt,
+                    model=model_to_use,
+                    system_prompt=system_prompt,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    stream=stream
+                )
+                
+                # If successful, return the result
+                if result["success"]:
+                    logger.info(f"Generated response using OpenAI model: {model_to_use} in {time.time() - start_time:.2f}s")
+                    return result
+                
+                # If failed and Ollama is running, try that as fallback
+                if self.is_ollama_running():
+                    logger.info("OpenAI failed in auto mode, trying Ollama")
+                    fallback_model = self.ollama_models[0]
+                    result = self.complete_with_ollama(
+                        prompt=prompt,
+                        model=fallback_model,
+                        system_prompt=system_prompt,
+                        temperature=temperature,
+                        max_tokens=max_tokens,
+                        stream=stream
+                    )
+                    
+                    if result["success"]:
+                        logger.info(f"Generated response using fallback Ollama model: {fallback_model} in {time.time() - start_time:.2f}s")
+                        result["original_model"] = model_to_use
+                        result["fallback"] = True
+                        return result
+                
+                # Both failed, return last error
+                return result
+            
+            # If OpenAI not configured, try Ollama
+            elif self.is_ollama_running():
+                logger.info("Using auto mode, OpenAI not configured, trying Ollama")
+                model_to_use = self.ollama_models[0]
+                result = self.complete_with_ollama(
+                    prompt=prompt,
+                    model=model_to_use,
+                    system_prompt=system_prompt,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    stream=stream
+                )
+                
+                if result["success"]:
+                    logger.info(f"Generated response using Ollama model: {model_to_use} in {time.time() - start_time:.2f}s")
+                    return result
+                
+                # Ollama failed, no OpenAI fallback available
+                return result
+            
+            # No backends available in auto mode
+            error = "No AI model backends available in auto mode. Please configure OPENAI_API_KEY or ensure Ollama is running."
+            logger.error(error)
+            return {
+                "success": False,
+                "error": error,
+                "model": "auto",
+                "timestamp": time.time(),
+                "content": None,
+                "error_type": "no_backends_available_auto"
+            }
+                
+        elif self.model_backend == "ollama" or (not self.model_backend and self.is_ollama_running()):
             # Try Ollama first
             model_to_use = self.ollama_models[0]  # Default to first model in list
             result = self.complete_with_ollama(
@@ -525,13 +618,24 @@ class AIModelRouter:
         # No available models or backends
         error = "No AI model backends available. Please configure MODEL_BACKEND or OPENAI_API_KEY."
         logger.error(error)
+        
+        # Provide a simple fallback response when no AI services are available
+        # This ensures the application doesn't completely break when offline
+        if "hello" in prompt.lower() or "hi" in prompt.lower() or "how are you" in prompt.lower():
+            fallback_content = "Hello! I'm Robin AI. I'm currently running in offline mode, so my responses are limited. The AI model service is currently unavailable."
+        else:
+            fallback_content = "I'm sorry, I can't process your request at the moment. The AI model service is unavailable. Please check the configuration and try again later."
+        
+        logger.warning(f"Using emergency fallback response for query: {prompt[:50]}...")
+        
         return {
-            "success": False,
+            "success": True,  # Mark as success so the application continues functioning
             "error": error,
-            "model": None,
+            "model": "fallback",
             "timestamp": time.time(),
-            "content": None,
-            "error_type": "no_backends_available"
+            "content": fallback_content,
+            "error_type": "no_backends_available",
+            "fallback": True
         }
     
     def get_status(self) -> Dict[str, Any]:

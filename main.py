@@ -65,6 +65,128 @@ init_api(app, db_manager, emotion_tracker, face_detector,
          tts_manager, voice_recognition, intent_classifier, config,
          context_assistant, model_router)
 
+# Add /ask endpoint for direct AI interactions
+@app.route('/ask', methods=['POST'])
+def ask():
+    """
+    Endpoint for direct AI interaction with dynamic model switching
+    
+    Request format:
+    {
+        "input": "User query text",
+        "model": "Optional model name"  # Defaults to MODEL_BACKEND env setting
+    }
+    
+    Response format:
+    {
+        "response": "AI response text",
+        "model": "Model used",
+        "status": "success/error"
+    }
+    """
+    import uuid  # Import uuid here
+    
+    try:
+        # Log the request
+        logger.info(f"Ask endpoint accessed from {request.remote_addr}")
+        
+        # Get request data
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'status': 'error',
+                'message': 'No data provided'
+            }), 400
+        
+        # Extract user input
+        user_input = data.get('input')
+        model_name = data.get('model')
+        system_prompt = data.get('system_prompt')
+        
+        # Validate input
+        if not user_input or not isinstance(user_input, str) or len(user_input.strip()) == 0:
+            return jsonify({
+                'status': 'error',
+                'message': 'Input is required'
+            }), 400
+        
+        # Log the request
+        logger.info(f"Ask request: input='{user_input[:50]}...'")
+        
+        # Store in session history
+        session_id = session.get('session_id', str(uuid.uuid4()))
+        session['session_id'] = session_id
+        
+        # Add to conversation history if database connection is available
+        try:
+            if db_manager:
+                db_manager.execute_query(
+                    "INSERT INTO conversation_history (session_id, user_input, timestamp) VALUES (%s, %s, %s)",
+                    (session_id, user_input, time.time())
+                )
+        except Exception as db_error:
+            logger.warning(f"Could not log conversation to database: {str(db_error)}")
+        
+        # Generate AI response using the model router
+        response_data = model_router.generate_response(
+            prompt=user_input,
+            model=model_name,
+            system_prompt=system_prompt,
+            temperature=0.7,
+            max_tokens=500
+        )
+        
+        # Format the response
+        if response_data.get('success', False):
+            ai_response = response_data.get('content', '')
+            model_used = response_data.get('model', 'unknown')
+            
+            # Store the response in history if database is available
+            try:
+                if db_manager and ai_response:
+                    # PostgreSQL doesn't support ORDER BY/LIMIT in UPDATE statements the same way as SQLite
+                    # First find the most recent matching conversation
+                    find_query = """
+                        SELECT id FROM conversation_history 
+                        WHERE session_id = %s AND user_input = %s 
+                        ORDER BY timestamp DESC LIMIT 1
+                    """
+                    result = db_manager.execute_query(find_query, (session_id, user_input))
+                    
+                    if result and len(result) > 0:
+                        # Then update that specific record by ID
+                        row_id = result[0][0]
+                        db_manager.execute_query(
+                            "UPDATE conversation_history SET ai_response = %s, model_used = %s WHERE id = %s",
+                            (ai_response, model_used, row_id)
+                        )
+            except Exception as db_error:
+                logger.warning(f"Could not update conversation history: {str(db_error)}")
+            
+            # Return the successful response
+            return jsonify({
+                'response': ai_response,
+                'model': model_used,
+                'status': 'success'
+            })
+        else:
+            # Return the error
+            error_message = response_data.get('error', 'Unknown error')
+            logger.warning(f"AI response generation failed: {error_message}")
+            return jsonify({
+                'status': 'error',
+                'message': error_message,
+                'model': response_data.get('model', 'unknown')
+            }), 500
+    
+    except Exception as e:
+        # Log the error
+        logger.error(f"Error processing /ask request: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
 # Add versioned_url helper to Jinja templates
 app.jinja_env.globals.update(versioned_url=versioned_url)
 
@@ -142,8 +264,8 @@ def handle_request_routing():
     # Debug log for routing
     logger.debug(f"📍 Request: {full_url}, host: {host}, path: {path}, replit_domain: {replit_domain}")
     
-    # Special handling for API requests: no redirects, just log
-    if path.startswith('/api/'):
+    # Special handling for API requests and the '/ask' endpoint: no redirects, just log
+    if path.startswith('/api/') or path == '/ask':
         # Log API requests with more detail
         api_info = {
             'endpoint': path,
@@ -351,7 +473,7 @@ def download_session_csv():
     emotions_query = """
         SELECT emotion, timestamp, intensity, text, source
         FROM emotion_data
-        WHERE session_id = ?
+        WHERE session_id = %s
         ORDER BY timestamp ASC
     """
     emotion_data = db_manager.execute_query(emotions_query, (session_id,))
@@ -1498,6 +1620,15 @@ def mobile_settings():
 def ai_models_page():
     """AI Models status and testing page"""
     return render_template('ai_models.html', versioned_url=versioned_url)
+
+@app.route('/test-ask')
+def test_ask_endpoint():
+    """Test page for the /ask endpoint"""
+    # Only accessible in developer mode
+    if not is_developer_mode():
+        return redirect(url_for('mobile_index'))
+        
+    return render_template('test_ask_endpoint.html')
 
 @app.route('/api/user/settings', methods=['GET', 'POST'])
 def user_settings():
