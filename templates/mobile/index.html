@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Robin AI Mobile</title>
+  <title>Robin AI - Cosmic Assistant</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/static/mobile/css/mobile_style.css">
   <link rel="stylesheet" href="/static/mobile/css/app.css">
   <!-- Add to homescreen for iOS -->
   <link rel="apple-touch-icon" href="/static/mobile/images/robin-icon-192.png">
@@ -15,25 +16,22 @@
 </head>
 <body>
   <div class="app-container">
-    <div class="header">
-      <div class="logo">
-        <span class="icon">🤖</span>
-        <span class="title">Robin AI</span>
+    <header>
+      <h1>🚀 Robin AI</h1>
+      <h2>Your Cosmic Voice Assistant</h2>
+      
+      <div class="cosmic-orb">
+        <div class="orbit"></div>
+        <div class="orbit"></div>
+        <div class="orbit"></div>
+        <div class="orb"></div>
       </div>
+      
       <div class="user-status" id="userStatus">
         <span class="status-dot"></span>
-        <span class="status-text">Offline</span>
+        <span class="status-text" id="aiStatusText">Connecting to neural network...</span>
       </div>
-    </div>
-
-    <div class="ai-status">
-      <div class="orbit-container">
-        <div class="orbit">
-          <div class="planet"></div>
-        </div>
-      </div>
-      <div class="status-text" id="aiStatusText">Connecting...</div>
-    </div>
+    </header>
 
     <div class="actions">
       <div class="action-button voice-button" id="voiceButton">
@@ -48,6 +46,13 @@
         <div class="button-icon"><i class="fas fa-keyboard"></i></div>
         <div class="button-text">Text</div>
       </div>
+    </div>
+
+    <div class="features">
+      <div class="feature">👁️ Visual Awareness</div>
+      <div class="feature">🧠 Emotional Intelligence</div>
+      <div class="feature">🌐 Works Offline</div>
+      <div class="feature">🗣️ Arabic + English</div>
     </div>
 
     <div class="conversation" id="conversation">
@@ -90,7 +95,7 @@
         <div class="circle"></div>
         <div class="circle"></div>
       </div>
-      <div class="recording-status">Listening...</div>
+      <div class="recording-status">Listening to the cosmos...</div>
       <button id="stopRecordingButton" class="stop-recording">
         <i class="fas fa-stop"></i>
       </button>
@@ -128,6 +133,10 @@
       </div>
     </div>
   </div>
+
+  <footer>
+    Robin AI - Forged by Roben Edwan from beyond the stars.
+  </footer>
 
   <script src="/static/js/voice_recorder.js"></script>
   <script src="/static/mobile/js/app.js"></script>

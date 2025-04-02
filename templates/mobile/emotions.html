@@ -8,6 +8,7 @@
   <title>Emotions - Robin AI Mobile</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/static/mobile/css/mobile_style.css">
   <link rel="stylesheet" href="/static/mobile/css/app.css">
   <link rel="stylesheet" href="/static/mobile/css/emotions.css">
   <link rel="apple-touch-icon" href="/static/mobile/images/robin-icon-192.png">
@@ -17,20 +18,22 @@
 </head>
 <body>
   <div class="app-container">
-    <div class="header">
-      <div class="logo">
-        <span class="icon">🤖</span>
-        <span class="title">Robin AI</span>
+    <header>
+      <h1>Emotional Cosmos</h1>
+      <h2>Mapping Your Emotional Journey</h2>
+      
+      <div class="cosmic-orb">
+        <div class="orbit"></div>
+        <div class="orbit"></div>
+        <div class="orbit"></div>
+        <div class="orb"></div>
       </div>
+      
       <div class="user-status" id="userStatus">
         <span class="status-dot"></span>
-        <span class="status-text">Offline</span>
+        <span class="status-text">Analyzing emotional patterns...</span>
       </div>
-    </div>
-
-    <div class="page-title">
-      <h2>Emotion Tracking</h2>
-    </div>
+    </header>
 
     <div class="emotion-filters">
       <div class="filter-group">
@@ -92,6 +95,10 @@
     </div>
   </div>
 
+  <footer>
+    Robin AI - Mapping the universe of human emotions.
+  </footer>
+  
   <script src="/static/mobile/js/emotions.js"></script>
 </body>
 </html>
