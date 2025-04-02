@@ -9,10 +9,10 @@
   <title>Help - Robin AI Mobile</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="/static/mobile/css/mobile_style.css">
-  <link rel="stylesheet" href="/static/mobile/css/app.css">
-  <link rel="apple-touch-icon" href="/static/mobile/images/robin-icon-192.png">
-  <link rel="manifest" href="/static/mobile/manifest.json">
+  <link rel="stylesheet" href="{{ versioned_url('mobile/css/mobile_style.css') }}">
+  <link rel="stylesheet" href="{{ versioned_url('mobile/css/app.css') }}">
+  <link rel="apple-touch-icon" href="{{ versioned_url('mobile/images/robin-icon-192.png') }}">
+  <link rel="manifest" href="{{ versioned_url('mobile/manifest.json') }}">
   <style>
     .help-section {
       background: var(--background-surface);
@@ -200,7 +200,7 @@
     Robin AI • Beyond the Stars • A Companion From a Parallel Cosmic Realm
   </footer>
 
-  <script src="/static/mobile/js/app.js"></script>
+  <script src="{{ versioned_url('mobile/js/app.js') }}"></script>
 </body>
 </html>
 

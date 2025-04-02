@@ -1285,38 +1285,38 @@ profile_manager.initialize_tables()
 def mobile_splash():
     """Mobile app splash screen"""
     # Splash screen is the entry point for mobile experience
-    return render_template('mobile/splash.html')
+    return render_template('mobile/splash.html', versioned_url=versioned_url)
 
 @app.route('/mobile/index')
 def mobile_index():
     """Mobile app main page"""
     # Mobile interface is always accessible without onboarding checks
-    return render_template('mobile/index.html')
+    return render_template('mobile/index.html', versioned_url=versioned_url)
 
 @app.route('/mobile/emotions')
 def mobile_emotions():
     """Mobile app emotions page"""
-    return render_template('mobile/emotions.html')
+    return render_template('mobile/emotions.html', versioned_url=versioned_url)
 
 @app.route('/mobile/help')
 def mobile_help():
     """Mobile app help page."""
-    return render_template('mobile/help.html')
+    return render_template('mobile/help.html', versioned_url=versioned_url)
 
 @app.route('/mobile/contact')
 def mobile_contact():
     """Mobile app contact page."""
-    return render_template('mobile/contact.html')
+    return render_template('mobile/contact.html', versioned_url=versioned_url)
 
 @app.route('/mobile/profiles')
 def mobile_profiles():
     """Mobile app profiles page"""
-    return render_template('mobile/profiles.html')
+    return render_template('mobile/profiles.html', versioned_url=versioned_url)
 
 @app.route('/mobile/settings')
 def mobile_settings():
     """Mobile app settings page"""
-    return render_template('mobile/settings.html')
+    return render_template('mobile/settings.html', versioned_url=versioned_url)
 
 @app.route('/api/user/settings', methods=['GET', 'POST'])
 def user_settings():
