@@ -2,20 +2,205 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Help - Robin AI Mobile</title>
-    <link rel="stylesheet" href="/static/mobile/css/app.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Help - Robin AI Mobile</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/static/mobile/css/mobile_style.css">
+  <link rel="stylesheet" href="/static/mobile/css/app.css">
+  <link rel="apple-touch-icon" href="/static/mobile/images/robin-icon-192.png">
+  <link rel="manifest" href="/static/mobile/manifest.json">
+  <style>
+    .help-section {
+      background: var(--background-surface);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .help-section h3 {
+      color: var(--accent-primary);
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      position: relative;
+    }
+    
+    .help-section h3::after {
+      content: "";
+      position: absolute;
+      bottom: -0.5rem;
+      left: 0;
+      width: 4rem;
+      height: 2px;
+      background: linear-gradient(to right, var(--accent-primary), transparent);
+    }
+    
+    .help-item {
+      margin-bottom: 1.5rem;
+    }
+    
+    .help-question {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    .help-question i {
+      color: var(--accent-tertiary);
+      margin-right: 0.5rem;
+    }
+    
+    .help-answer {
+      color: var(--text-secondary);
+      margin-left: 1.5rem;
+      border-left: 2px solid rgba(0, 255, 231, 0.2);
+      padding-left: 1rem;
+    }
+    
+    .help-tip {
+      background: rgba(0, 255, 231, 0.05);
+      padding: 1rem;
+      border-radius: var(--border-radius);
+      margin-top: 1rem;
+      position: relative;
+    }
+    
+    .help-tip::before {
+      content: "✨ TIP";
+      position: absolute;
+      top: -0.5rem;
+      left: 1rem;
+      background: var(--accent-primary);
+      color: black;
+      font-size: 0.7rem;
+      font-weight: bold;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.3rem;
+    }
+  </style>
 </head>
 <body>
-    <div class="app-container">
-        <header>
-            <h1>Help - Robin AI</h1>
-        </header>
-        <div class="content">
-            <p>Welcome to the help page. Here you can find answers to common questions and get support for the Robin AI mobile app.</p>
+  <div class="app-container">
+    <header>
+      <h1>Cosmic Guidance</h1>
+      <h2>Help Portal to Robin AI</h2>
+      
+      <div class="cosmic-orb">
+        <div class="orbit"></div>
+        <div class="orbit"></div>
+        <div class="orbit"></div>
+        <div class="orb"></div>
+      </div>
+    </header>
+
+    <div class="help-container">
+      <div class="help-section">
+        <h3>Getting Started</h3>
+        <div class="help-item">
+          <div class="help-question">
+            <i class="fas fa-rocket"></i>
+            <span>What is Robin AI?</span>
+          </div>
+          <div class="help-answer">
+            Robin AI is an advanced AI assistant from a parallel cosmic realm. It combines voice recognition, emotion detection, face recognition, and contextual understanding to provide a personalized and adaptive experience.
+          </div>
         </div>
+        
+        <div class="help-item">
+          <div class="help-question">
+            <i class="fas fa-microphone"></i>
+            <span>How do I talk to Robin?</span>
+          </div>
+          <div class="help-answer">
+            Tap the "Sonic Portal" button on the home screen to activate voice communication. Speak clearly, and Robin will process your voice and respond accordingly.
+          </div>
+        </div>
+      </div>
+      
+      <div class="help-section">
+        <h3>Key Features</h3>
+        <div class="help-item">
+          <div class="help-question">
+            <i class="fas fa-face-smile"></i>
+            <span>What is Emotional Cosmos?</span>
+          </div>
+          <div class="help-answer">
+            Emotional Cosmos tracks and visualizes your emotional patterns over time, helping Robin adapt its responses to your emotional state.
+          </div>
+        </div>
+        
+        <div class="help-item">
+          <div class="help-question">
+            <i class="fas fa-user"></i>
+            <span>What are Face Profiles?</span>
+          </div>
+          <div class="help-answer">
+            Robin can recognize faces and associate them with profiles. This allows for personalized greetings and responses when it sees a familiar face.
+          </div>
+        </div>
+        
+        <div class="help-tip">
+          For the best experience, use Robin in a well-lit environment with minimal background noise. This helps with both face recognition and voice clarity.
+        </div>
+      </div>
+      
+      <div class="help-section">
+        <h3>Troubleshooting</h3>
+        <div class="help-item">
+          <div class="help-question">
+            <i class="fas fa-microphone-slash"></i>
+            <span>Voice recognition isn't working</span>
+          </div>
+          <div class="help-answer">
+            Make sure you've granted microphone permissions in your browser. Try speaking clearly and in a quiet environment. If issues persist, try refreshing the page.
+          </div>
+        </div>
+        
+        <div class="help-item">
+          <div class="help-question">
+            <i class="fas fa-camera"></i>
+            <span>Camera access issues</span>
+          </div>
+          <div class="help-answer">
+            Ensure you've granted camera permissions in your browser. If the camera isn't activating, try closing other applications that might be using the camera and refresh the page.
+          </div>
+        </div>
+      </div>
     </div>
+
+    <div class="tab-bar">
+      <div class="tab" data-tab="home">
+        <i class="fas fa-home"></i>
+        <span>Nexus</span>
+      </div>
+      <div class="tab" data-tab="emotions">
+        <i class="fas fa-chart-line"></i>
+        <span>Aura</span>
+      </div>
+      <div class="tab" data-tab="profiles">
+        <i class="fas fa-user"></i>
+        <span>Entities</span>
+      </div>
+      <div class="tab" data-tab="settings">
+        <i class="fas fa-cog"></i>
+        <span>Conduit</span>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Robin AI • Beyond the Stars • A Companion From a Parallel Cosmic Realm
+  </footer>
+
+  <script src="/static/mobile/js/app.js"></script>
 </body>
 </html>
 

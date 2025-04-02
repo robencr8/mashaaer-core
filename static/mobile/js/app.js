@@ -1,3 +1,129 @@
+// VoiceRecorder class - handles voice recording and API communication
+class VoiceRecorder {
+  constructor(options = {}) {
+    this.options = {
+      onStart: options.onStart || function() {},
+      onStop: options.onStop || function() {},
+      onResult: options.onResult || function() {},
+      onError: options.onError || function() {},
+      maxRecordingTime: options.maxRecordingTime || 10000 // 10 seconds by default
+    };
+    
+    this.mediaRecorder = null;
+    this.audioChunks = [];
+    this.isRecording = false;
+    this.stream = null;
+    this.timeoutId = null;
+  }
+  
+  // Start recording
+  start() {
+    if (this.isRecording) {
+      return;
+    }
+    
+    this.audioChunks = [];
+    
+    // Get user media (microphone)
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        this.stream = stream;
+        this.mediaRecorder = new MediaRecorder(stream);
+        
+        // Set up event handlers
+        this.mediaRecorder.addEventListener('dataavailable', event => {
+          this.audioChunks.push(event.data);
+        });
+        
+        this.mediaRecorder.addEventListener('stop', () => {
+          this._processRecording();
+        });
+        
+        // Start recording
+        this.mediaRecorder.start();
+        this.isRecording = true;
+        
+        // Call onStart callback
+        this.options.onStart();
+        
+        // Set timeout for maximum recording duration
+        this.timeoutId = setTimeout(() => {
+          if (this.isRecording) {
+            this.stop();
+          }
+        }, this.options.maxRecordingTime);
+      })
+      .catch(error => {
+        this.options.onError(error);
+      });
+  }
+  
+  // Stop recording
+  stop() {
+    if (!this.isRecording || !this.mediaRecorder) {
+      return;
+    }
+    
+    // Clear timeout
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
+    
+    // Stop recording
+    this.mediaRecorder.stop();
+    this.isRecording = false;
+    
+    // Stop all tracks in the stream
+    if (this.stream) {
+      this.stream.getTracks().forEach(track => track.stop());
+      this.stream = null;
+    }
+    
+    // Call onStop callback
+    this.options.onStop();
+  }
+  
+  // Process the recording and send to API
+  _processRecording() {
+    // Create audio blob from chunks
+    const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+    
+    // Create form data for API request
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.webm');
+    
+    // Send to API for processing
+    fetch('/api/listen', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Voice recognition failed');
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        // Call onResult callback with the data
+        this.options.onResult({
+          success: true,
+          text: data.text,
+          emotion: data.emotion,
+          intent: data.intent
+        });
+      } else {
+        throw new Error(data.error || 'Voice recognition failed');
+      }
+    })
+    .catch(error => {
+      console.error('Error in voice recognition:', error);
+      this.options.onError(error);
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   // DOM elements
   const userStatus = document.getElementById('userStatus');
@@ -561,7 +687,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle tab-specific actions
     switch (tabName) {
       case 'home':
-        // Already on home view
+        // Navigate to home view
+        window.location.href = '/mobile';
         break;
       case 'emotions':
         // Navigate to emotions page
@@ -574,6 +701,14 @@ document.addEventListener('DOMContentLoaded', function() {
       case 'settings':
         // Navigate to settings page
         window.location.href = '/mobile/settings';
+        break;
+      case 'help':
+        // Navigate to help page
+        window.location.href = '/mobile/help';
+        break;
+      case 'contact':
+        // Navigate to contact page
+        window.location.href = '/mobile/contact';
         break;
     }
   }

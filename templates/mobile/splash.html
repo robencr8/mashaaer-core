@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Robin AI - Parallel Cosmic Realm</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/static/mobile/css/mobile_style.css">
+  <link rel="apple-touch-icon" href="/static/mobile/images/robin-icon-192.png">
+  <link rel="manifest" href="/static/mobile/manifest.json">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(145deg, #0b0c10, #1f1f2e);
+      color: #e4e4e4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .splash-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      animation: fadeIn 2s ease-in-out;
+    }
+    
+    .cosmic-sphere {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin-bottom: 40px;
+    }
+    
+    .sphere {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #00ffe7, #6f00ff);
+      box-shadow: 0 0 60px rgba(0, 255, 231, 0.8);
+      animation: pulse 4s ease-in-out infinite, float 6s ease-in-out infinite;
+    }
+    
+    .orbit {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: rotate 15s linear infinite;
+    }
+    
+    .orbit:nth-child(1) {
+      width: 150px;
+      height: 150px;
+    }
+    
+    .orbit:nth-child(2) {
+      width: 180px;
+      height: 180px;
+      animation-duration: 30s;
+      animation-direction: reverse;
+    }
+    
+    .orbit:nth-child(3) {
+      width: 210px;
+      height: 210px;
+      animation-duration: 45s;
+    }
+    
+    .orbital-particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background-color: #00ffe7;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(0, 255, 231, 0.8);
+    }
+    
+    .orbit:nth-child(1) .orbital-particle {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .orbit:nth-child(2) .orbital-particle {
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+    }
+    
+    .orbit:nth-child(3) .orbital-particle {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .title {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      color: #00ffe7;
+      text-shadow: 0 0 15px rgba(0, 255, 231, 0.5);
+      font-weight: 700;
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      color: #c9c9c9;
+      max-width: 80%;
+      font-style: italic;
+    }
+    
+    .loading-text {
+      font-size: 1.2rem;
+      color: #00ffe7;
+      margin-top: 2rem;
+      letter-spacing: 1px;
+      animation: blink 2s infinite;
+    }
+    
+    .enter-button {
+      background: linear-gradient(90deg, #00ffe7, #6f00ff);
+      color: white;
+      padding: 15px 40px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      border: none;
+      margin-top: 30px;
+      cursor: pointer;
+      box-shadow: 0 5px 20px rgba(111, 0, 255, 0.5);
+      transition: transform 0.3s, box-shadow 0.3s;
+      opacity: 0;
+      animation: fadeIn 2s ease-in-out 3s forwards;
+    }
+    
+    .enter-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(0, 255, 231, 0.6);
+    }
+    
+    .lang-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 30px;
+      animation: fadeIn 2s ease-in-out 2s forwards;
+      opacity: 0;
+    }
+    
+    .lang-btn {
+      background: transparent;
+      border: 2px solid #00ffe7;
+      color: #00ffe7;
+      padding: 10px 25px;
+      font-weight: bold;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 1rem;
+      backdrop-filter: blur(4px);
+      transition: all 0.3s ease;
+    }
+    
+    .lang-btn:hover {
+      background-color: rgba(0, 255, 231, 0.2);
+      transform: scale(1.05);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { 
+        box-shadow: 0 0 40px rgba(0, 255, 231, 0.6);
+      }
+      50% { 
+        box-shadow: 0 0 70px rgba(0, 255, 231, 0.9);
+      }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translate(-50%, -50%); }
+      50% { transform: translate(-50%, -60%); }
+    }
+    
+    @keyframes rotate {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    /* RTL Support */
+    html[dir="rtl"] .lang-toggle {
+      flex-direction: row-reverse;
+    }
+    
+    @media (max-width: 480px) {
+      .title {
+        font-size: 2rem;
+      }
+      
+      .subtitle {
+        font-size: 1rem;
+      }
+      
+      .cosmic-sphere {
+        width: 150px;
+        height: 150px;
+      }
+      
+      .sphere {
+        width: 90px;
+        height: 90px;
+      }
+      
+      .orbit:nth-child(1) {
+        width: 110px;
+        height: 110px;
+      }
+      
+      .orbit:nth-child(2) {
+        width: 130px;
+        height: 130px;
+      }
+      
+      .orbit:nth-child(3) {
+        width: 150px;
+        height: 150px;
+      }
+    }
+  </style>
+  <script>
+    function setLang(lang) {
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      localStorage.setItem('preferredLanguage', lang);
+      
+      // Update UI text based on language
+      if (lang === 'ar') {
+        document.getElementById('title').innerText = 'روبن أيه آي';
+        document.getElementById('subtitle').innerText = 'رفيقك من العالم الكوني الموازي';
+        document.getElementById('loading').innerText = 'جاري الإتصال بين الأبعاد...';
+        document.getElementById('enter-button').innerText = 'الدخول إلى البوابة';
+      } else {
+        document.getElementById('title').innerText = 'Robin AI';
+        document.getElementById('subtitle').innerText = 'Your Companion From a Parallel Cosmic Realm';
+        document.getElementById('loading').innerText = 'Establishing interdimensional connection...';
+        document.getElementById('enter-button').innerText = 'Enter Portal';
+      }
+    }
+    
+    // Redirect to main mobile interface after animation
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check for saved language preference
+      const savedLang = localStorage.getItem('preferredLanguage');
+      if (savedLang) {
+        setLang(savedLang);
+      }
+      
+      // Auto-redirect after 6 seconds
+      setTimeout(function() {
+        document.getElementById('loading').style.display = 'none';
+      }, 3000);
+    });
+    
+    function enterPortal() {
+      window.location.href = '/mobile/index';
+    }
+  </script>
+</head>
+<body>
+  <div class="splash-container">
+    <div class="cosmic-sphere">
+      <div class="orbit">
+        <div class="orbital-particle"></div>
+      </div>
+      <div class="orbit">
+        <div class="orbital-particle"></div>
+      </div>
+      <div class="orbit">
+        <div class="orbital-particle"></div>
+      </div>
+      <div class="sphere"></div>
+    </div>
+    
+    <h1 class="title" id="title">Robin AI</h1>
+    <p class="subtitle" id="subtitle">Your Companion From a Parallel Cosmic Realm</p>
+    
+    <div class="lang-toggle">
+      <button class="lang-btn" onclick="setLang('en')">English</button>
+      <button class="lang-btn" onclick="setLang('ar')">العربية</button>
+    </div>
+    
+    <div class="loading-text" id="loading">Establishing interdimensional connection...</div>
+    
+    <button class="enter-button" id="enter-button" onclick="enterPortal()">Enter Portal</button>
+  </div>
+</body>
+</html>

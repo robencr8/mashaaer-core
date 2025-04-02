@@ -37,12 +37,12 @@ class FaceRecognitionModule:
                     name TEXT NOT NULL,
                     encoding BLOB,
                     last_seen TEXT,
-                    metadata TEXT
+                    face_metadata TEXT
                 )
             ''')
 
             # Load existing profiles
-            cursor.execute("SELECT name, encoding, last_seen, metadata FROM faces")
+            cursor.execute("SELECT name, encoding, last_seen, face_metadata FROM faces")
             profiles = cursor.fetchall()
 
             with self.face_memory_lock:
@@ -191,13 +191,13 @@ class FaceRecognitionModule:
             if existing:
                 # Update existing record
                 cursor.execute(
-                    "UPDATE faces SET encoding = ?, last_seen = ?, metadata = ? WHERE name = ?",
+                    "UPDATE faces SET encoding = ?, last_seen = ?, face_metadata = ? WHERE name = ?",
                     (encoding_json, timestamp, metadata_json, name)
                 )
             else:
                 # Insert new record
                 cursor.execute(
-                    "INSERT INTO faces (name, encoding, last_seen, metadata) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO faces (name, encoding, last_seen, face_metadata) VALUES (?, ?, ?, ?)",
                     (name, encoding_json, timestamp, metadata_json)
                 )
 
@@ -226,17 +226,17 @@ class FaceRecognitionModule:
             conn = self.db_manager.get_connection()
             cursor = conn.cursor()
 
-            cursor.execute("SELECT name, last_seen, metadata FROM faces ORDER BY last_seen DESC")
+            cursor.execute("SELECT name, last_seen, face_metadata FROM faces ORDER BY last_seen DESC")
             results = cursor.fetchall()
 
-            for name, last_seen, metadata in results:
+            for name, last_seen, face_metadata in results:
                 profile = {
                     "name": name,
                     "last_seen": last_seen
                 }
 
-                if metadata:
-                    profile["metadata"] = json.loads(metadata)
+                if face_metadata:
+                    profile["metadata"] = json.loads(face_metadata)
 
                 profiles.append(profile)
 

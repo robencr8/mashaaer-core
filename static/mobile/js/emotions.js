@@ -78,26 +78,35 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   }
 
-  // Fetch emotion data
+  // Fetch emotion data - updated to work with ApiService
   function fetchEmotionData() {
-    // Build the API URL based on filters
-    let url = '/api/emotion-data?';
-    
-    // Time range parameter
+    // Calculate days parameter based on selected time range
+    let days = 7; // default: week
     if (appState.timeRange === 'day') {
-      url += 'days=1';
-    } else if (appState.timeRange === 'week') {
-      url += 'days=7';
+      days = 1;
     } else if (appState.timeRange === 'month') {
-      url += 'days=30';
+      days = 30;
     }
     
-    // Session filter parameter
+    // Prepare parameters for the API call
+    const params = {
+      days: days,
+      session_only: appState.currentSessionOnly
+    };
+    
+    // Check if we should add session_id
     if (appState.currentSessionOnly && appState.sessionId) {
-      url += `&session_id=${appState.sessionId}`;
+      params.session_id = appState.sessionId;
     }
+    
+    // Build the API URL with query parameters
+    let url = '/api/emotion-data?';
+    Object.keys(params).forEach((key, index) => {
+      url += `${index > 0 ? '&' : ''}${key}=${params[key]}`;
+    });
     
     // Fetch data from the API
+    // Note: This will be replaced with ApiService.fetchEmotionTimeline() in a Flutter app
     fetch(url)
       .then(response => {
         if (!response.ok) {
@@ -106,17 +115,13 @@ document.addEventListener('DOMContentLoaded', function() {
         return response.json();
       })
       .then(data => {
-        if (data.success) {
-          // Store the emotion data
-          appState.emotionData = data;
-          
-          // Update the UI
-          updateEmotionStats(data);
-          updateEmotionHistory(data);
-          updateEmotionChart(data);
-        } else {
-          throw new Error(data.error || 'Failed to fetch emotion data');
-        }
+        // Store the emotion data
+        appState.emotionData = data;
+        
+        // Update the UI
+        updateEmotionStats(data);
+        updateEmotionHistory(data);
+        updateEmotionChart(data);
       })
       .catch(error => {
         console.error('Error fetching emotion data:', error);
@@ -469,6 +474,12 @@ document.addEventListener('DOMContentLoaded', function() {
         break;
       case 'settings':
         window.location.href = '/mobile/settings';
+        break;
+      case 'help':
+        window.location.href = '/mobile/help';
+        break;
+      case 'contact':
+        window.location.href = '/mobile/contact';
         break;
     }
   }

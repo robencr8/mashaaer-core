@@ -2,6 +2,9 @@ import os
 import logging
 import threading
 import time
+import sqlite3
+import psycopg2
+from psycopg2 import pool
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, text
 from database.models import Base, Setting, EmotionData, Face, RecognitionHistory

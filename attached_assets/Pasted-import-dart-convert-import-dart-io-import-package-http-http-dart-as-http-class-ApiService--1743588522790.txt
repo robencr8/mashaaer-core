@@ -1,0 +1,57 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+
+class ApiService {
+  final String baseUrl = 'http://0.0.0.0:5000/api';
+
+  Future<Map<String, dynamic>> fetchEmotionTimeline() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/emotion-data'));
+      if (response.statusCode == 200) return jsonDecode(response.body);
+      throw Exception('Failed to load emotion timeline');
+    } catch (e) {
+      throw Exception('Error fetching emotion timeline: $e');
+    }
+  }
+
+  Future<String> submitVoiceCommand(File audioFile) async {
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/listen'));
+      request.files.add(await http.MultipartFile.fromPath('audio', audioFile.path));
+      final response = await request.send();
+      if (response.statusCode == 200) {
+        final responseData = await response.stream.bytesToString();
+        return jsonDecode(responseData)['audio_path'];
+      }
+      throw Exception('Failed to submit voice command');
+    } catch (e) {
+      throw Exception('Error submitting voice command: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchUserProfile(String name) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/profile/$name'));
+      if (response.statusCode == 200) return jsonDecode(response.body);
+      throw Exception('Failed to load user profile');
+    } catch (e) {
+      throw Exception('Error fetching user profile: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> submitFaceImage(File imageFile) async {
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/face-detect'));
+      request.files.add(await http.MultipartFile.fromPath('image', imageFile.path));
+      final response = await request.send();
+      if (response.statusCode == 200) {
+        final responseData = await response.stream.bytesToString();
+        return jsonDecode(responseData);
+      }
+      throw Exception('Failed to submit face image');
+    } catch (e) {
+      throw Exception('Error submitting face image: $e');
+    }
+  }
+}

@@ -956,6 +956,12 @@ profile_manager.initialize_tables()
 
 # Mobile app routes
 @app.route('/mobile')
+def mobile_splash():
+    """Mobile app splash screen"""
+    # Splash screen is the entry point for mobile experience
+    return render_template('mobile/splash.html')
+
+@app.route('/mobile/index')
 def mobile_index():
     """Mobile app main page"""
     # Mobile interface is always accessible without onboarding checks
