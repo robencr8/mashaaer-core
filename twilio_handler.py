@@ -14,9 +14,18 @@ class TwilioHandler:
     
     def __init__(self):
         """Initialize the Twilio handler with credentials from environment variables"""
+        # Get Twilio credentials
         self.account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
         self.auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
         self.phone_number = os.environ.get("TWILIO_PHONE_NUMBER")
+        
+        # Set default owner phone number if not already set
+        owner_phone = os.environ.get("OWNER_PHONE_NUMBER", "")
+        if not owner_phone:
+            # Use Roben's number as default
+            roben_number = "+971522233989"
+            os.environ["OWNER_PHONE_NUMBER"] = roben_number
+            logger.info(f"Setting default owner phone number: {roben_number[:6]}XXXX")
         
         # Check if credentials are available
         self.available = all([self.account_sid, self.auth_token, self.phone_number])
@@ -71,7 +80,7 @@ class TwilioHandler:
         if not to_number.startswith('+'):
             logger.warning(f"Phone number {to_number} is not in E.164 format. Attempting to format...")
             
-            # Handle all possible UAE number formats
+            # Handle all possible UAE number formats (more comprehensive)
             if to_number.startswith('0097'):
                 # Convert 00971-style to +971
                 to_number = '+' + to_number[2:]
@@ -80,11 +89,11 @@ class TwilioHandler:
                 # Convert 971-style to +971
                 to_number = '+' + to_number
                 logger.info(f"Converted 971 format to E.164: {to_number}")
-            elif to_number.startswith('05') and len(to_number) >= 10:
+            elif to_number.startswith('05') and len(to_number) >= 9:
                 # Convert UAE local format (05x) to international (+971 5x)
                 to_number = '+971' + to_number[1:]
                 logger.info(f"Converted UAE local format to E.164: {to_number}")
-            elif to_number.startswith('5') and len(to_number) == 9:
+            elif to_number.startswith('5') and len(to_number) >= 8:
                 # Handle bare UAE mobile numbers (5xxxxxxxx)
                 to_number = '+971' + to_number
                 logger.info(f"Converted UAE mobile number to E.164: {to_number}")
@@ -92,10 +101,23 @@ class TwilioHandler:
                 # Handle double-zero prefixed international format (instead of +)
                 to_number = '+' + to_number[2:]
                 logger.info(f"Converted 00 international format to E.164: {to_number}")
+            # Handle Roben's specific number format if hard-coded
+            elif to_number == "00971522233989" or to_number == "971522233989":
+                to_number = "+971522233989"
+                logger.info(f"Converted owner's number to E.164: {to_number}")
+            elif to_number == "0522233989" or to_number == "522233989":
+                to_number = "+971522233989"
+                logger.info(f"Converted owner's number to E.164: {to_number}")
             else:
                 # Generic fallback for other formats
                 to_number = '+' + to_number
                 logger.warning(f"Applied generic E.164 formatting: {to_number}, may not be correct")
+            
+            # Special handling for owner number (Roben Edwan)
+            owner_number = os.environ.get("OWNER_PHONE_NUMBER", "")
+            if owner_number and (original_number in ["roben", "owner", "admin", "me"] or to_number in ["roben", "owner", "admin", "me"]):
+                to_number = owner_number
+                logger.info(f"Using owner's number: {owner_number[:6]}XXXX")
             
             # Logging for the number transformation
             logger.info(f"Transformed phone number from '{original_number}' to '{to_number}'")

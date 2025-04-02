@@ -2,8 +2,13 @@ import os
 import json
 import time
 import uuid
+import logging
+import traceback
 from datetime import datetime, timedelta
 from flask import Blueprint, jsonify, request, session
+
+# Setup logging
+logger = logging.getLogger(__name__)
 
 # Blueprint definition
 api = Blueprint('api', __name__)
@@ -174,7 +179,7 @@ def init_api(app, _db_manager, _emotion_tracker, _face_detector,
                 except:
                     api_info['json'] = 'Error parsing JSON'
                     
-            print(f"🔍 API Request: {api_info}")
+            logger.info(f"🔍 API Request: {api_info}")
 
 # API Helper functions
 def _get_or_create_session_id():
@@ -258,7 +263,7 @@ def get_status():
                 status['session']['developer_name'] = developer_name
                 status['session']['last_seen'] = recent_recognitions[0][1]
         except Exception as e:
-            print(f"Error checking developer mode: {e}")
+            logger.error(f"Error checking developer mode: {e}")
         
         return jsonify({'success': True, **status})
     except Exception as e:
@@ -272,21 +277,43 @@ def get_emotion_data():
         days = request.args.get('days', default=7, type=int)
         session_only = request.args.get('session_only', default=False, type=bool)
         session_id = request.args.get('session_id', None)
+        cache_buster = request.args.get('_t', None)  # For cache busting
         
-        # Emotion data
-        if session_only and session_id:
-            # Get emotions from specific session
-            emotion_data = emotion_tracker.get_session_emotion_history(session_id)
-        elif session_only:
-            # Get emotions from current session
+        # Add debug log for monitoring data requests
+        logger.info(f"📊 Emotion data request: days={days}, session_only={session_only}, session_id={session_id}, cache_buster={cache_buster}")
+        
+        # Ensure we have a valid session ID if session_only is specified
+        if session_only and not session_id:
             session_id = _get_or_create_session_id()
-            emotion_data = emotion_tracker.get_session_emotion_history(session_id)
-        else:
-            # Get all emotions within timeframe
-            emotion_data = emotion_tracker.get_emotion_history(days)
+            logger.info(f"📊 Auto-assigned session ID: {session_id}")
+            
+        # Fetch emotion data based on request parameters
+        try:
+            if session_only and session_id:
+                # Get emotions from specific session
+                emotion_data = emotion_tracker.get_session_emotion_history(session_id)
+                logger.info(f"📊 Fetched session emotion data: {len(emotion_data.get('timeline', []))} entries")
+            elif session_only:
+                # Get emotions from current session
+                session_id = _get_or_create_session_id()
+                emotion_data = emotion_tracker.get_session_emotion_history(session_id)
+                logger.info(f"📊 Fetched current session emotion data: {len(emotion_data.get('timeline', []))} entries")
+            else:
+                # Get all emotions within timeframe
+                emotion_data = emotion_tracker.get_emotion_history(days)
+                logger.info(f"📊 Fetched historical emotion data for {days} days")
+        except Exception as e:
+            logger.error(f"⚠️ Error fetching emotion data: {e}")
+            emotion_data = {"timeline": [], "distribution": {}}
         
-        # Calculate overall distribution
-        total_entries = emotion_tracker.get_total_entries()
+        # Calculate overall distribution - handle missing data gracefully
+        try:
+            total_entries = emotion_tracker.get_total_entries()
+        except Exception as e:
+            logger.error(f"⚠️ Error getting total entries: {e}")
+            total_entries = 0
+        
+        logger.info(f"📊 Total emotion entries: {total_entries}")
         
         # Prepare response in a standardized format for both web and mobile
         # Create a simple emotions array for mobile client
@@ -663,16 +690,46 @@ def get_sessions():
 
 @api.route('/sms', methods=['POST'])
 def send_sms():
-    """Send SMS notification via Twilio"""
+    """Send SMS notification via Twilio with enhanced UAE number support"""
     try:
-        data = request.json
-        to_number = data.get('to_number')
-        message = data.get('message')
+        # Support both JSON and form data for flexibility
+        if request.is_json:
+            data = request.json
+        else:
+            data = request.form.to_dict()
+            
+        # Support multiple parameter names for better API compatibility
+        to_number = data.get('to_number') or data.get('phone_number') or data.get('to') or data.get('number')
+        message = data.get('message') or data.get('text') or data.get('body') or data.get('content')
+        
+        # Special handling for owner shortcuts
+        if to_number and to_number.lower() in ["roben", "owner", "admin", "me", "creator"]:
+            import os
+            owner_number = os.environ.get("OWNER_PHONE_NUMBER")
+            if owner_number:
+                logger.info(f"API: Using owner shortcut: Converting '{to_number}' to owner's number")
+                to_number = owner_number
+            else:
+                logger.warning("API: Owner shortcut used but OWNER_PHONE_NUMBER not set")
+                
+        # Special handling for Roben's number in any format
+        roben_patterns = ["522233989", "0522233989", "971522233989", "00971522233989", "+971522233989"]
+        if to_number and any(pattern in to_number for pattern in roben_patterns):
+            logger.info("API: Detected Roben's number, using standardized format")
+            to_number = "+971522233989"
         
         if not to_number or not message:
             return jsonify({
                 'success': False,
-                'error': 'Both to_number and message are required'
+                'error': 'Both recipient number and message are required',
+                'required_fields': {
+                    'to_number': 'Recipient phone number in E.164 format (+971XXXXXXXXX)',
+                    'message': 'Text message to send'
+                },
+                'help': {
+                    'uae_format': 'For UAE numbers, use +971XXXXXXXXX or 05XXXXXXXX format',
+                    'shortcuts': 'You can use "owner", "roben", "admin", or "me" to send to the owner'
+                }
             }), 400
             
         # Initialize Twilio handler
@@ -681,53 +738,185 @@ def send_sms():
         
         # Check if Twilio is available
         if not twilio_handler.is_available():
+            import os
+            missing_env_vars = []
+            if not os.environ.get("TWILIO_ACCOUNT_SID"):
+                missing_env_vars.append("TWILIO_ACCOUNT_SID")
+            if not os.environ.get("TWILIO_AUTH_TOKEN"):
+                missing_env_vars.append("TWILIO_AUTH_TOKEN")
+            if not os.environ.get("TWILIO_PHONE_NUMBER"):
+                missing_env_vars.append("TWILIO_PHONE_NUMBER")
+                
             return jsonify({
                 'success': False,
-                'error': 'Twilio service not available. Check credentials.'
+                'error': 'Twilio service is not available.',
+                'missing_credentials': missing_env_vars,
+                'solution': 'Please set the required Twilio environment variables and restart the server.'
             }), 503
+        
+        # Save original number for reference and logging
+        original_number = to_number
+        
+        # Clean up phone number
+        if to_number:
+            # Remove spaces, dashes, brackets
+            to_number = to_number.replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
+            
+            # UAE format handling - similar to main.py
+            if not to_number.startswith('+'):
+                if to_number.startswith('0097'):
+                    # Convert 00971-style to +971
+                    to_number = '+' + to_number[2:]
+                elif to_number.startswith('97') and len(to_number) >= 10:
+                    # Convert 971-style to +971
+                    to_number = '+' + to_number
+                elif to_number.startswith('05') and len(to_number) >= 9:
+                    # Convert UAE local format (05x) to international (+971 5x)
+                    to_number = '+971' + to_number[1:]
+                elif to_number.startswith('5') and len(to_number) >= 8:
+                    # Handle bare UAE mobile numbers (5xxxxxxxx)
+                    to_number = '+971' + to_number
+                elif to_number.startswith('00'):
+                    # Handle double-zero prefixed international format (instead of +)
+                    to_number = '+' + to_number[2:]
+                else:
+                    # Generic fallback - add + prefix
+                    to_number = '+' + to_number
+                    
+                logger.info(f"API: Reformatted number from '{original_number}' to '{to_number}'")
+            
+        # Log the attempt with sanitized number for privacy
+        sanitized_number = to_number[:6] + "XXXX" if len(to_number) > 6 else "XXXXXX"
+        logger.info(f"API: Attempting to send SMS to {sanitized_number}")
             
         # Send the message
-        try:
-            result = twilio_handler.send_message(to_number, message)
+        result = twilio_handler.send_message(to_number, message)
+        
+        if result.get('success', False):
+            # Log success but with sanitized number for privacy
+            logger.info(f"API: Successfully sent SMS to {sanitized_number}")
             
-            if result["success"]:
-                return jsonify({
-                    'success': True,
-                    'message': 'SMS sent successfully',
-                    'to': result.get('to', to_number),
-                    'sid': result.get('sid', '')
-                })
-            else:
-                # Get status code based on error type
-                status_code = 500
-                if "Invalid 'To' Phone Number" in result.get('details', ''):
-                    status_code = 400
-                    result['error'] = f'Invalid phone number format: {to_number}. Use E.164 format (+[country code][number]).'
-                
-                return jsonify(result), status_code
-        except Exception as e:
-            error_msg = str(e)
+            # Create a response with detailed information
+            from datetime import datetime
             return jsonify({
+                'success': True,
+                'message': f'SMS sent successfully',
+                'details': {
+                    'sid': result.get('sid', ''),
+                    'to': sanitized_number,
+                    'from': result.get('from', ''),
+                    'segments': result.get('segments', 1),
+                    'length': result.get('length', len(message)),
+                    'timestamp': datetime.now().isoformat(),
+                    'message_preview': message[:20] + '...' if len(message) > 20 else message
+                }
+            })
+        else:
+            # Extract error details from the result
+            error_message = result.get('error', 'Failed to send SMS')
+            solution = result.get('solution', '')
+            details = result.get('details', '')
+            error_type = result.get('error_type', 'unknown_error')
+            
+            # Log the error
+            logger.error(f"API: SMS sending failed: {error_message}")
+            if details:
+                logger.error(f"API: SMS error details: {details}")
+            
+            # Create error response
+            response = {
                 'success': False,
-                'error': 'Unexpected error in SMS handling',
-                'details': error_msg
-            }), 500
+                'error': error_message,
+                'error_type': error_type
+            }
+            
+            # Add optional fields if available
+            if solution:
+                response['solution'] = solution
+                logger.info(f"API: SMS error solution: {solution}")
+            if details:
+                response['details'] = details
+            
+            # Add UAE-specific help if available
+            if 'uae_number_info' in result:
+                response['uae_number_info'] = result['uae_number_info']
+            elif '+971' in to_number or '971' in to_number or '05' in original_number:
+                # Add UAE format helpers even if not provided by the handler
+                response['uae_number_info'] = {
+                    'examples': ['+971522233989', '+971501234567'],
+                    'format_info': 'UAE mobile numbers start with "5" after the country code',
+                    'local_format': 'Local format: 05XXXXXXXX',
+                    'international_format': 'International format: +971XXXXXXXX' 
+                }
+                
+            # Get appropriate status code
+            status_code = 400 if error_type in ['invalid_number_format', 'trial_account_restriction'] else 500
+                
+            return jsonify(response), status_code
+                
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        error_message = str(e)
+        logger.error(f"API: Exception in send_sms endpoint: {error_message}")
+        import traceback
+        
+        return jsonify({
+            'success': False, 
+            'error': 'Server error processing SMS request',
+            'details': error_message,
+            'traceback': traceback.format_exc()
+        }), 500
 
 @api.route('/sms-alert', methods=['POST'])
 def send_sms_alert():
-    """Send SMS notification with pre-formatted alert message"""
+    """Send SMS notification with pre-formatted alert message with enhanced error handling"""
     try:
-        data = request.json
-        to_number = data.get('to_number')
-        alert_type = data.get('alert_type', 'default')
+        # Support both JSON and form data for flexibility
+        if request.is_json:
+            data = request.json
+        else:
+            data = request.form.to_dict()
+        
+        # Support multiple parameter names for better API compatibility
+        to_number = data.get('to_number') or data.get('phone_number') or data.get('to') or data.get('number')
+        alert_type = data.get('alert_type') or data.get('type') or data.get('notification_type') or 'default'
+        
+        # Support either direct alert_data object or individual parameters
         alert_data = data.get('alert_data', {})
+        
+        # If no alert_data provided but individual parameters are, build alert_data dynamically
+        if not alert_data and isinstance(data, dict):
+            # Filter out known non-data parameters
+            excluded_keys = ['to_number', 'phone_number', 'to', 'number', 'alert_type', 'type', 'notification_type', 'alert_data']
+            # Add all remaining parameters to alert_data
+            alert_data = {k: v for k, v in data.items() if k not in excluded_keys}
+        
+        # Special handling for owner shortcuts
+        if to_number and to_number.lower() in ["roben", "owner", "admin", "me", "creator"]:
+            import os
+            owner_number = os.environ.get("OWNER_PHONE_NUMBER")
+            if owner_number:
+                logger.info(f"API: Using owner shortcut: Converting '{to_number}' to owner's number")
+                to_number = owner_number
+            else:
+                logger.warning("API: Owner shortcut used but OWNER_PHONE_NUMBER not set")
+                
+        # Special handling for Roben's number in any format
+        roben_patterns = ["522233989", "0522233989", "971522233989", "00971522233989", "+971522233989"]
+        if to_number and any(pattern in to_number for pattern in roben_patterns):
+            logger.info("API: Detected Roben's number, using standardized format")
+            to_number = "+971522233989"
         
         if not to_number:
             return jsonify({
                 'success': False,
-                'error': 'to_number is required'
+                'error': 'Recipient phone number is required',
+                'required_fields': {
+                    'to_number': 'Recipient phone number in E.164 format (+971XXXXXXXXX)'
+                },
+                'help': {
+                    'uae_format': 'For UAE numbers, use +971XXXXXXXXX or 05XXXXXXXX format',
+                    'shortcuts': 'You can use "owner", "roben", "admin", or "me" to send to the owner'
+                }
             }), 400
             
         # Initialize Twilio handler
@@ -736,40 +925,162 @@ def send_sms_alert():
         
         # Check if Twilio is available
         if not twilio_handler.is_available():
+            import os
+            missing_env_vars = []
+            if not os.environ.get("TWILIO_ACCOUNT_SID"):
+                missing_env_vars.append("TWILIO_ACCOUNT_SID")
+            if not os.environ.get("TWILIO_AUTH_TOKEN"):
+                missing_env_vars.append("TWILIO_AUTH_TOKEN")
+            if not os.environ.get("TWILIO_PHONE_NUMBER"):
+                missing_env_vars.append("TWILIO_PHONE_NUMBER")
+                
             return jsonify({
                 'success': False,
-                'error': 'Twilio service not available. Check credentials.'
+                'error': 'Twilio service is not available.',
+                'missing_credentials': missing_env_vars,
+                'solution': 'Please set the required Twilio environment variables and restart the server.'
             }), 503
             
-        # Send the notification with the specified alert type
-        try:
-            result = twilio_handler.send_notification(to_number, alert_type, **alert_data)
+        # Save original number for reference and logging
+        original_number = to_number
+        
+        # Clean up phone number
+        if to_number:
+            # Remove spaces, dashes, brackets
+            to_number = to_number.replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
             
-            if result["success"]:
-                return jsonify({
-                    'success': True,
-                    'message': 'SMS alert sent successfully',
-                    'to': result.get('to', to_number),
-                    'sid': result.get('sid', ''),
-                    'alert_type': result.get('alert_type', alert_type)
-                })
-            else:
-                # Get status code based on error type
-                status_code = 500
-                if "Invalid 'To' Phone Number" in result.get('details', ''):
-                    status_code = 400
-                    result['error'] = f'Invalid phone number format: {to_number}. Use E.164 format (+[country code][number]).'
-                
-                return jsonify(result), status_code
-        except Exception as e:
-            error_msg = str(e)
+            # UAE format handling - similar to main.py
+            if not to_number.startswith('+'):
+                if to_number.startswith('0097'):
+                    # Convert 00971-style to +971
+                    to_number = '+' + to_number[2:]
+                elif to_number.startswith('97') and len(to_number) >= 10:
+                    # Convert 971-style to +971
+                    to_number = '+' + to_number
+                elif to_number.startswith('05') and len(to_number) >= 9:
+                    # Convert UAE local format (05x) to international (+971 5x)
+                    to_number = '+971' + to_number[1:]
+                elif to_number.startswith('5') and len(to_number) >= 8:
+                    # Handle bare UAE mobile numbers (5xxxxxxxx)
+                    to_number = '+971' + to_number
+                elif to_number.startswith('00'):
+                    # Handle double-zero prefixed international format (instead of +)
+                    to_number = '+' + to_number[2:]
+                else:
+                    # Generic fallback - add + prefix
+                    to_number = '+' + to_number
+                    
+                logger.info(f"API: Reformatted number from '{original_number}' to '{to_number}'")
+        
+        # Validate alert type
+        valid_alert_types = [
+            'alert', 'emotion', 'emotion_alert', 'face', 'face_new', 
+            'face_familiar', 'security', 'system', 'error', 'status',
+            'voice', 'command', 'greeting', 'response', 'learning',
+            'reminder', 'update', 'info', 'uae_alert', 'default'
+        ]
+        
+        if alert_type not in valid_alert_types:
+            logger.warning(f"API: Unknown alert type '{alert_type}', defaulting to 'default'")
+            # For backward compatibility, don't return an error, just use default
+            alert_type = 'default'
+            alert_data['message'] = alert_data.get('message', f"Alert from Robin AI ({alert_type})")
+        
+        # Get additional context for alerts if needed
+        if alert_type == 'system' and not alert_data.get('message'):
+            # Add system status info for system alerts
+            import os
+            hostname = os.environ.get('HOSTNAME', 'unknown')
+            from datetime import datetime
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            alert_data['message'] = f"System status notification from Robin AI at {current_time}"
+            
+        # Add timestamp if not disabled
+        if alert_data.get('include_timestamp', True) and 'timestamp' not in alert_data:
+            from datetime import datetime
+            alert_data['timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+        # Log the attempt with sanitized number for privacy
+        sanitized_number = to_number[:6] + "XXXX" if len(to_number) > 6 else "XXXXXX"
+        logger.info(f"API: Attempting to send SMS alert ({alert_type}) to {sanitized_number}")
+            
+        # Send the notification with the specified alert type
+        result = twilio_handler.send_notification(to_number, alert_type, **alert_data)
+        
+        if result.get('success', False):
+            # Log success but with sanitized number for privacy
+            logger.info(f"API: Successfully sent SMS alert ({alert_type}) to {sanitized_number}")
+            
+            # Create a response with detailed information
+            from datetime import datetime
             return jsonify({
+                'success': True,
+                'message': f'SMS alert sent successfully',
+                'details': {
+                    'sid': result.get('sid', ''),
+                    'to': sanitized_number,
+                    'from': result.get('from', ''),
+                    'alert_type': alert_type,
+                    'timestamp': datetime.now().isoformat(),
+                    'segments': result.get('segments', 1),
+                    'length': result.get('length', 0)
+                }
+            })
+        else:
+            # Extract error details from the result
+            error_message = result.get('error', 'Failed to send SMS alert')
+            solution = result.get('solution', '')
+            details = result.get('details', '')
+            error_type = result.get('error_type', 'unknown_error')
+            
+            # Log the error
+            logger.error(f"API: SMS alert sending failed: {error_message}")
+            if details:
+                logger.error(f"API: SMS alert error details: {details}")
+            
+            # Create error response
+            response = {
                 'success': False,
-                'error': 'Unexpected error in SMS alert handling',
-                'details': error_msg
-            }), 500
+                'error': error_message,
+                'error_type': error_type,
+                'alert_type': alert_type
+            }
+            
+            # Add optional fields if available
+            if solution:
+                response['solution'] = solution
+                logger.info(f"API: SMS alert error solution: {solution}")
+            if details:
+                response['details'] = details
+            
+            # Add UAE-specific help if available
+            if 'uae_number_info' in result:
+                response['uae_number_info'] = result['uae_number_info']
+            elif '+971' in to_number or '971' in to_number or '05' in original_number:
+                # Add UAE format helpers even if not provided by the handler
+                response['uae_number_info'] = {
+                    'examples': ['+971522233989', '+971501234567'],
+                    'format_info': 'UAE mobile numbers start with "5" after the country code',
+                    'local_format': 'Local format: 05XXXXXXXX',
+                    'international_format': 'International format: +971XXXXXXXX' 
+                }
+                
+            # Get appropriate status code
+            status_code = 400 if error_type in ['invalid_number_format', 'trial_account_restriction'] else 500
+                
+            return jsonify(response), status_code
+            
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        error_message = str(e)
+        logger.error(f"API: Exception in send_sms_alert endpoint: {error_message}")
+        import traceback
+        
+        return jsonify({
+            'success': False, 
+            'error': 'Server error processing SMS alert request',
+            'details': error_message,
+            'traceback': traceback.format_exc()
+        }), 500
 
 @api.route('/session-data', methods=['GET'])
 def get_session_data():

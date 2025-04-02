@@ -198,10 +198,22 @@ class ApiService {
     // Construct the full URL
     let url = this.baseUrl + endpoint;
     
-    // Add query parameters if provided
-    if (params) {
-      url += '?' + params.toString();
+    // Create a new params object if one wasn't provided
+    if (!params) {
+      params = new URLSearchParams();
     }
+    
+    // Force cache busting for all requests
+    // Especially important for emotion and face recognition data
+    const cacheBuster = Date.now();
+    params.set('_t', cacheBuster);
+    
+    // Add a version parameter to ensure different versions of the app don't clash
+    const appVersion = window.ROBIN_VERSION || '1.0';
+    params.set('v', appVersion);
+    
+    // Add query parameters to the URL
+    url += '?' + params.toString();
     
     return url;
   }
@@ -212,7 +224,30 @@ class ApiService {
    * @returns {Promise<Object>} Parsed response data
    */
   async handleResponse(response) {
-    const data = await response.json();
+    let data;
+    
+    try {
+      data = await response.json();
+    } catch (error) {
+      console.error('Error parsing JSON response:', error);
+      
+      if (typeof showToast === 'function') {
+        showToast('Error parsing server response', 'error');
+      }
+      
+      return {
+        success: false,
+        error: 'Invalid JSON response from server',
+        status: response.status,
+        parsing_error: true
+      };
+    }
+    
+    // Ensure data is always an object, even if the API returns null or empty
+    if (!data || typeof data !== 'object') {
+      console.warn('API returned invalid data format:', data);
+      data = {};
+    }
     
     if (!response.ok) {
       // Show error toast if the showToast function is available
@@ -228,9 +263,21 @@ class ApiService {
       };
     }
     
+    // For emotion data responses, ensure there's always valid data even if API returns empty
+    if (response.url.includes('/emotion-data') && (!data.emotions || !data.emotions.data)) {
+      console.warn('Emotion data missing or invalid, providing fallback structure');
+      // Ensure we have a valid structure even if API returns incomplete data
+      if (!data.emotions) {
+        data.emotions = { data: [] };
+      } else if (!data.emotions.data) {
+        data.emotions.data = [];
+      }
+    }
+    
     return {
       success: true,
-      ...data
+      ...data,
+      timestamp: Date.now() // Add timestamp to every response for tracking
     };
   }
 

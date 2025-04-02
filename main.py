@@ -2,7 +2,9 @@ import os
 import logging
 import json
 import traceback
-from flask import Flask, render_template, request, jsonify, Response, redirect, url_for
+import socket
+from urllib.parse import urlparse
+from flask import Flask, render_template, request, jsonify, Response, redirect, url_for, session, abort
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
@@ -92,16 +94,57 @@ def set_developer_mode(enabled=True):
 
 from flask import request
 
+# Function to check if request is coming from a local network
+def is_local_network(host):
+    """Check if host is on a local network"""
+    if not host:
+        return False
+    return (
+        host == 'localhost' or
+        host == '127.0.0.1' or
+        host.startswith('192.168.') or
+        host.startswith('10.') or
+        host.startswith('172.16.') or
+        host.startswith('0.0.0.0') or
+        '.local' in host
+    )
+
+# Function to get the public replit domain
+def get_replit_domain():
+    """Get the public Replit domain from environment variables"""
+    replit_domain = os.environ.get("REPLIT_DOMAINS", "")
+    # If there are multiple domains, use the first one
+    if ',' in replit_domain:
+        replit_domain = replit_domain.split(',')[0].strip()
+    return replit_domain
+
 @app.before_request
-def log_request_info():
-    if request.path.startswith('/api/'):
+def handle_request_routing():
+    """Handle request routing, redirecting, and logging"""
+    # Get host and request details
+    host = request.host.split(':')[0]  # Remove port if present
+    full_url = request.url
+    path = request.path
+    
+    # Check if we need to redirect to a proper domain
+    replit_domain = get_replit_domain()
+    
+    # Get real URL scheme (HTTP/HTTPS) - Replit typically uses HTTPS
+    scheme = 'https' if request.headers.get('X-Forwarded-Proto') == 'https' else request.scheme
+    
+    # Debug log for routing
+    logger.debug(f"📍 Request: {full_url}, host: {host}, path: {path}, replit_domain: {replit_domain}")
+    
+    # Special handling for API requests: no redirects, just log
+    if path.startswith('/api/'):
         # Log API requests with more detail
         api_info = {
-            'endpoint': request.path,
+            'endpoint': path,
             'method': request.method,
             'args': {k: v for k, v in request.args.items()},
             'content_type': request.content_type,
-            'has_json': request.is_json
+            'has_json': request.is_json,
+            'host': host
         }
         # Add JSON data if available
         if request.is_json:
@@ -111,10 +154,59 @@ def log_request_info():
                 api_info['json'] = 'Error parsing JSON'
                 
         logger.info(f"🔍 API Request: {api_info}")
-    else:
-        # Simple logging for regular routes
-        print(f"🔍 Request to: {request.path}")
-    # No need to return anything from this before_request handler
+        return None  # Continue processing the request
+    
+    # Simple logging for regular routes
+    logger.info(f"🔍 Request to: {path} from {host}")
+    
+    # For non-API routes, handle localhost redirection if needed
+    # But only when not already running in the Replit environment
+    # This prevents redirect loops and allows the feedback tool to work
+    is_replit_env = 'replit.dev' in host or 'replit.com' in host
+    in_dev_environment = os.environ.get('FLASK_ENV') == 'development'
+    
+    # If running in local network but not in Replit environment, redirect to domain
+    if (is_local_network(host) and 
+        replit_domain and 
+        not is_replit_env and 
+        not in_dev_environment and
+        not 'localhost_testing' in request.args):
+        
+        # Create redirect URL to the proper replit domain
+        redirect_url = f"https://{replit_domain}{path}"
+        if request.query_string:
+            redirect_url += f"?{request.query_string.decode('utf-8')}"
+            
+        logger.info(f"🔀 Redirecting from local {host} to {replit_domain}")
+        return redirect(redirect_url, code=302)
+    
+    # Check for legacy routes that need to be redirected to mobile interface
+    return handle_legacy_route_redirects(path)
+
+def handle_legacy_route_redirects(path):
+    """Redirect legacy routes to the new mobile interface"""
+    # Map of legacy routes to mobile replacements
+    legacy_routes = {
+        '/index.html': 'mobile_splash',
+        '/dashboard': 'mobile_index',
+        '/emotions': 'mobile_emotions',
+        '/profile.html': 'mobile_profiles',
+        '/settings': 'mobile_settings',
+        '/help': 'mobile_help',
+        '/contact': 'mobile_contact',
+        '/admin.html': 'mobile_settings',
+        '/sms.html': 'mobile_settings',
+        '/session-data': 'mobile_emotions'
+    }
+    
+    # Check if this is a legacy route that needs redirection
+    for legacy_path, mobile_route in legacy_routes.items():
+        if path == legacy_path:
+            logger.info(f"📱 Redirecting legacy route {path} to {mobile_route}")
+            return redirect(url_for(mobile_route), code=302)
+    
+    # Not a legacy route, continue with normal request processing
+    return None
 
 # Scheduler for auto-learning
 scheduler = BackgroundScheduler()
@@ -569,9 +661,32 @@ def send_sms():
         }), 403
         
     try:
-        data = request.json
-        phone_number = data.get('phone_number')
-        message = data.get('message')
+        # Accept both JSON and form data for flexibility
+        if request.is_json:
+            data = request.json
+        else:
+            data = request.form.to_dict()
+            
+        # Get phone number from parameters, with multiple possible keys for flexibility
+        phone_number = data.get('phone_number') or data.get('to') or data.get('number') or data.get('recipient')
+        
+        # Get message text with multiple possible keys
+        message = data.get('message') or data.get('text') or data.get('content') or data.get('body')
+        
+        # Special handling for owner shortcuts
+        if phone_number and phone_number.lower() in ["roben", "owner", "admin", "me", "creator"]:
+            owner_number = os.environ.get("OWNER_PHONE_NUMBER")
+            if owner_number:
+                logger.info(f"Using owner shortcut: Converting '{phone_number}' to owner's number")
+                phone_number = owner_number
+            else:
+                logger.warning("Owner shortcut used but OWNER_PHONE_NUMBER not set")
+        
+        # Special handling for Roben's number in any format
+        roben_patterns = ["522233989", "0522233989", "971522233989", "00971522233989", "+971522233989"]
+        if phone_number and any(pattern in phone_number for pattern in roben_patterns):
+            logger.info("Detected Roben's number, using standardized format")
+            phone_number = "+971522233989"
         
         if not phone_number or not message:
             return jsonify({
@@ -580,6 +695,10 @@ def send_sms():
                 'required_fields': {
                     'phone_number': 'Recipient phone number in E.164 format (+971XXXXXXXXX)',
                     'message': 'Text message to send'
+                },
+                'help': {
+                    'uae_format': 'For UAE numbers, use +971XXXXXXXXX or 05XXXXXXXX format',
+                    'shortcuts': 'You can use "owner", "roben", "admin", or "me" to send to the owner'
                 }
             }), 400
             
@@ -603,6 +722,35 @@ def send_sms():
                 'solution': 'Please set the required Twilio environment variables and restart the server.'
             }), 503
         
+        # Clean up phone number
+        original_number = phone_number  # Save for reference
+        if phone_number:
+            # Remove spaces, dashes, brackets
+            phone_number = phone_number.replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
+            
+            # UAE format handling - more comprehensive than the twilio_handler
+            if not phone_number.startswith('+'):
+                if phone_number.startswith('0097'):
+                    # Convert 00971-style to +971
+                    phone_number = '+' + phone_number[2:]
+                elif phone_number.startswith('97') and len(phone_number) >= 10:
+                    # Convert 971-style to +971
+                    phone_number = '+' + phone_number
+                elif phone_number.startswith('05') and len(phone_number) >= 9:
+                    # Convert UAE local format (05x) to international (+971 5x)
+                    phone_number = '+971' + phone_number[1:]
+                elif phone_number.startswith('5') and len(phone_number) >= 8:
+                    # Handle bare UAE mobile numbers (5xxxxxxxx)
+                    phone_number = '+971' + phone_number
+                elif phone_number.startswith('00'):
+                    # Handle double-zero prefixed international format (instead of +)
+                    phone_number = '+' + phone_number[2:]
+                else:
+                    # Generic fallback - add + prefix
+                    phone_number = '+' + phone_number
+                    
+                logger.info(f"Reformatted number from '{original_number}' to '{phone_number}'")
+        
         # Log the attempt with sanitized number (show only first 6 digits)
         sanitized_number = phone_number[:6] + "XXXX" if len(phone_number) > 6 else "XXXXXX"
         logger.info(f"Attempting to send SMS to {sanitized_number}...")
@@ -617,17 +765,23 @@ def send_sms():
             # Create a response with detailed information
             return jsonify({
                 'success': True,
-                'message': f'SMS sent to {phone_number}',
-                'sid': result.get('sid', ''),
-                'timestamp': datetime.now().isoformat(),
-                'sent_to': phone_number,
-                'message_preview': message[:20] + '...' if len(message) > 20 else message
+                'message': f'SMS sent successfully',
+                'details': {
+                    'sid': result.get('sid', ''),
+                    'to': sanitized_number,
+                    'from': result.get('from', ''),
+                    'segments': result.get('segments', 1),
+                    'length': result.get('length', len(message)),
+                    'timestamp': datetime.now().isoformat(),
+                    'message_preview': message[:20] + '...' if len(message) > 20 else message
+                }
             })
         else:
             # Extract error details from the result
             error_message = result.get('error', 'Failed to send SMS')
             solution = result.get('solution', '')
             details = result.get('details', '')
+            error_type = result.get('error_type', 'unknown_error')
             
             # Log the error
             logger.error(f"SMS sending failed: {error_message}")
@@ -638,7 +792,7 @@ def send_sms():
             response = {
                 'success': False,
                 'error': error_message,
-                'to': phone_number
+                'error_type': error_type
             }
             
             # Add optional fields if available
@@ -648,24 +802,39 @@ def send_sms():
             if details:
                 response['details'] = details
             
-            # If this is a trial account issue with unverified number, provide specific guidance
-            if "trial account" in error_message.lower() or "21612" in details:
-                response['trial_account_help'] = "Your Twilio account is in trial mode. You can only send messages to verified numbers. Please verify this number in your Twilio console."
+            # Add UAE-specific help if available
+            if 'uae_number_info' in result:
+                response['uae_number_info'] = result['uae_number_info']
+            elif '+971' in phone_number or '971' in phone_number or '05' in original_number:
+                # Add UAE format helpers even if not provided by the handler
+                response['uae_number_info'] = {
+                    'examples': ['+971522233989', '+971501234567'],
+                    'format_info': 'UAE mobile numbers start with "5" after the country code',
+                    'local_format': 'Local format: 05XXXXXXXX',
+                    'international_format': 'International format: +971XXXXXXXX' 
+                }
                 
-            # Add UAE-specific help if relevant
-            if (phone_number.startswith('+971') or 
-                phone_number.startswith('971') or 
-                phone_number.startswith('05')):
-                response['uae_format_help'] = "UAE mobile numbers should be in format +971xxxxxxxxx (e.g., +971522233989)"
+            # Add detailed logs for debugging
+            if is_developer_mode():
+                response['debug'] = {
+                    'to_number': sanitized_number,
+                    'original_input': original_number,
+                    'processed_number': phone_number,
+                    'message_length': len(message),
+                    'timestamp': datetime.now().isoformat()
+                }
                 
-            return jsonify(response), 500
+            return jsonify(response), 400
             
     except Exception as e:
-        logger.error(f"Error sending SMS: {str(e)}")
+        error_message = str(e)
+        logger.error(f"Exception in send_sms endpoint: {error_message}")
+        
         return jsonify({
             'success': False, 
-            'error': str(e),
-            'traceback': traceback.format_exc()
+            'error': 'Server error processing SMS request',
+            'details': error_message if is_developer_mode() else 'See server logs for details',
+            'traceback': traceback.format_exc() if is_developer_mode() else None
         }), 500
 
 @app.route('/api/send-sms-alert', methods=['POST'])
