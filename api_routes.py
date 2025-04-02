@@ -117,10 +117,14 @@ def get_emotion_data():
         # Time period (days)
         days = request.args.get('days', default=7, type=int)
         session_only = request.args.get('session_only', default=False, type=bool)
+        session_id = request.args.get('session_id', None)
         
         # Emotion data
-        if session_only:
-            # Only get emotions from current session
+        if session_only and session_id:
+            # Get emotions from specific session
+            emotion_data = emotion_tracker.get_session_emotion_history(session_id)
+        elif session_only:
+            # Get emotions from current session
             session_id = _get_or_create_session_id()
             emotion_data = emotion_tracker.get_session_emotion_history(session_id)
         else:
@@ -130,12 +134,47 @@ def get_emotion_data():
         # Calculate overall distribution
         total_entries = emotion_tracker.get_total_entries()
         
-        # Return formatted data
+        # Prepare response in a standardized format for both web and mobile
+        # Create a simple emotions array for mobile client
+        emotions = []
+        
+        # Process data based on the format returned
+        if 'timeline' in emotion_data:
+            # Session emotion data format
+            for entry in emotion_data.get('timeline', []):
+                emotions.append({
+                    'emotion': entry.get('emotion', 'unknown'),
+                    'timestamp': entry.get('timestamp'),
+                    'intensity': entry.get('intensity', 0.5),
+                    'source': entry.get('source', 'text')
+                })
+        elif 'labels' in emotion_data and 'datasets' in emotion_data:
+            # General emotion history format
+            for dataset in emotion_data.get('datasets', []):
+                emotion_name = dataset.get('label', 'unknown').lower()
+                data_points = dataset.get('data', [])
+                labels = emotion_data.get('labels', [])
+                
+                for i, count in enumerate(data_points):
+                    if count > 0 and i < len(labels):
+                        date_str = labels[i]
+                        # Create entries for each count
+                        for _ in range(count):
+                            emotions.append({
+                                'emotion': emotion_name,
+                                'timestamp': date_str + 'T12:00:00',  # Noon for consistency
+                                'intensity': 0.5,  # Default intensity
+                                'source': 'historical'
+                            })
+        
+        # Return standardized data for mobile client
         return jsonify({
-            'timeline': emotion_data,
+            'emotions': emotions,
             'total_entries': total_entries,
             'days': days,
-            'session_only': session_only
+            'session_only': session_only,
+            'session_id': session_id,
+            'success': True
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
