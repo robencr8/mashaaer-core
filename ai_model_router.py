@@ -264,9 +264,12 @@ class AIModelRouter:
                 "error_type": "missing_api_key"
             }
         
-        # Use actual OpenAI client for better reliability
         try:
+            # Import needed for OpenAI client
+            import openai
             from openai import OpenAI
+            
+            # Initialize the OpenAI client
             client = OpenAI(api_key=self.openai_api_key)
             
             # Default system prompt if not provided
@@ -318,17 +321,26 @@ class AIModelRouter:
                 }
                 
         except Exception as e:
-            logger.error(f"Error calling OpenAI API: {str(e)}")
+            error_message = str(e)
+            logger.error(f"Error calling OpenAI API: {error_message}")
+            
             # Update error metrics
             self.error_count += 1
             
+            # Check for quota exceeded error
+            error_type = "api_exception"
+            if "quota" in error_message.lower() or "insufficient_quota" in error_message.lower():
+                error_type = "quota_exceeded"
+                error_message = "OpenAI API quota exceeded. Consider switching to 'auto' mode for automatic fallback to local models."
+            
             return {
                 "success": False,
-                "error": f"Error calling OpenAI API: {str(e)}",
+                "error": error_message,
                 "model": model,
                 "timestamp": time.time(),
                 "content": None,
-                "error_type": "api_exception"
+                "error_type": error_type,
+                "suggestion": "Try using 'auto' mode which will fall back to local models when OpenAI is unavailable."
             }
     
     def generate_response(
@@ -359,7 +371,11 @@ class AIModelRouter:
         
         # If model is specified, try to use it directly
         if model:
-            if model.lower() in [m.lower() for m in self.ollama_models]:
+            # Special case: treat "auto" as a directive to use auto-selection logic
+            if model.lower() == "auto":
+                # Just use the auto-selection logic below
+                model = None  # Reset model to None to use auto mode
+            elif model.lower() in [m.lower() for m in self.ollama_models]:
                 # Use Ollama for this model
                 result = self.complete_with_ollama(
                     prompt=prompt,
@@ -483,9 +499,22 @@ class AIModelRouter:
                     logger.info(f"Generated response using OpenAI model: {model_to_use} in {time.time() - start_time:.2f}s")
                     return result
                 
+                # Check if the error is due to quota exceeded
+                is_quota_exceeded = False
+                error_message = result.get("error", "")
+                if isinstance(error_message, str) and "quota" in error_message.lower():
+                    is_quota_exceeded = True
+                elif isinstance(error_message, dict) and error_message.get("type") == "insufficient_quota":
+                    is_quota_exceeded = True
+                
                 # If failed and Ollama is running, try that as fallback
                 if self.is_ollama_running():
-                    logger.info("OpenAI failed in auto mode, trying Ollama")
+                    # Add a more informative log message if quota is exceeded
+                    if is_quota_exceeded:
+                        logger.warning("OpenAI quota exceeded, automatically switching to Ollama models")
+                    else:
+                        logger.info("OpenAI failed in auto mode, trying Ollama")
+                    
                     fallback_model = self.ollama_models[0]
                     result = self.complete_with_ollama(
                         prompt=prompt,
@@ -500,6 +529,7 @@ class AIModelRouter:
                         logger.info(f"Generated response using fallback Ollama model: {fallback_model} in {time.time() - start_time:.2f}s")
                         result["original_model"] = model_to_use
                         result["fallback"] = True
+                        result["fallback_reason"] = "openai_quota_exceeded" if is_quota_exceeded else "openai_error"
                         return result
                 
                 # Both failed, return last error
@@ -593,9 +623,22 @@ class AIModelRouter:
                 logger.info(f"Generated response using OpenAI model: {model_to_use} in {time.time() - start_time:.2f}s")
                 return result
             
+            # Check if the error is due to quota exceeded
+            is_quota_exceeded = False
+            error_message = result.get("error", "")
+            if isinstance(error_message, str) and "quota" in error_message.lower():
+                is_quota_exceeded = True
+            elif isinstance(error_message, dict) and error_message.get("type") == "insufficient_quota":
+                is_quota_exceeded = True
+            
             # If failed and Ollama is running, try that as fallback
             if self.is_ollama_running():
-                logger.info(f"OpenAI failed, falling back to Ollama")
+                # Add a more informative log message if quota is exceeded
+                if is_quota_exceeded:
+                    logger.warning("OpenAI quota exceeded, automatically switching to Ollama models")
+                else:
+                    logger.info(f"OpenAI failed, falling back to Ollama")
+                
                 fallback_model = self.ollama_models[0]
                 result = self.complete_with_ollama(
                     prompt=prompt,
@@ -610,6 +653,7 @@ class AIModelRouter:
                     logger.info(f"Generated response using fallback Ollama model: {fallback_model} in {time.time() - start_time:.2f}s")
                     result["original_model"] = model_to_use
                     result["fallback"] = True
+                    result["fallback_reason"] = "openai_quota_exceeded" if is_quota_exceeded else "openai_error"
                     return result
             
             # All fallbacks failed or not available

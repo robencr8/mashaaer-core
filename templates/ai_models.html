@@ -114,6 +114,15 @@
                             <div class="mb-3">
                                 <strong>Backend:</strong> <span id="model-backend">-</span>
                             </div>
+                            <div class="alert alert-info" role="alert">
+                                <h6 class="alert-heading">About Auto Mode</h6>
+                                <p class="mb-1">When using <code>auto</code> mode, Robin AI will:</p>
+                                <ul class="mb-0">
+                                    <li>Try OpenAI models first for best quality</li>
+                                    <li>If OpenAI is unavailable or quota exceeded, automatically fall back to Ollama</li>
+                                    <li>Provide detailed error information when both backends fail</li>
+                                </ul>
+                            </div>
                             <div class="mb-3">
                                 <strong>Status:</strong> <span id="status-badge" class="badge rounded-pill">-</span>
                             </div>
@@ -169,6 +178,7 @@
                     <label for="model-select" class="form-label">Select Model</label>
                     <select class="form-select model-selector" id="model-select">
                         <option value="">Use default model</option>
+                        <option value="auto">Auto (Smart Selection with Fallback)</option>
                     </select>
                 </div>
                 <div class="mb-3">

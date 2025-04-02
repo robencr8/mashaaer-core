@@ -172,12 +172,30 @@ def ask():
         else:
             # Return the error
             error_message = response_data.get('error', 'Unknown error')
+            error_type = response_data.get('error_type', 'unknown_error')
+            fallback_reason = response_data.get('fallback_reason', None)
+            
+            # Log the error 
             logger.warning(f"AI response generation failed: {error_message}")
-            return jsonify({
+            
+            response_json = {
                 'status': 'error',
                 'message': error_message,
-                'model': response_data.get('model', 'unknown')
-            }), 500
+                'model': response_data.get('model', 'unknown'),
+                'error_type': error_type
+            }
+            
+            # Add quota information if it's a quota issue
+            if isinstance(error_message, str) and "quota" in error_message.lower():
+                logger.error("OpenAI quota exceeded error detected in /ask endpoint")
+                response_json['quota_exceeded'] = True
+                response_json['model_suggestion'] = "Use model='auto' to automatically fall back to Ollama models when OpenAI is unavailable"
+            
+            # Add fallback reason if available
+            if fallback_reason:
+                response_json['fallback_reason'] = fallback_reason
+                
+            return jsonify(response_json), 500
     
     except Exception as e:
         # Log the error
