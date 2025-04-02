@@ -1,112 +1,152 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <title>Robin AI Cosmic Companion</title>
-  <style>
-    body {
-      background: radial-gradient(ellipse at center, #0a0a2a 0%, #000000 100%);
-      font-family: 'Orbitron', sans-serif;
-      color: #fff;
-      text-align: center;
-      padding: 60px;
-    }
-    h1 {
-      font-size: 2.5em;
-      margin-bottom: 20px;
-      color: #55e0ff;
-      text-shadow: 0 0 8px #55e0ff;
-    }
-    input {
-      width: 300px;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      background: #222;
-      color: white;
-    }
-    .interaction-button {
-      margin-top: 15px;
-      padding: 10px 30px;
-      font-size: 1em;
-      background: #55e0ff;
-      color: black;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    #response_area {
-      margin-top: 30px;
-      font-size: 1.1em;
-      color: #fff;
-    }
-    .active {
-      box-shadow: 0 0 15px #55e0ff;
-      animation: pulse 1.5s infinite;
-    }
-    #loader {
-      display: none;
-      font-size: 1.1em;
-      margin-top: 10px;
-      color: #ffbb33;
-    }
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>مشاعر | Feelings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(ellipse at center, #0c0c1e 0%, #000000 100%);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .logo {
+            font-size: 3em;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #ffcfd7;
+            text-shadow: 0 0 15px #ff9999;
+        }
+
+        .logo-en {
+            font-size: 1.8em;
+            margin-top: 5px;
+            font-weight: lighter;
+            color: #d6d6ff;
+            text-shadow: 0 0 10px #9999ff;
+        }
+
+        .subtitle {
+            font-size: 1.4em;
+            margin-top: 20px;
+            color: #ccccff;
+            text-shadow: 0 0 6px #8888ff;
+        }
+
+        .note {
+            margin-top: 40px;
+            font-size: 1em;
+            color: #777;
+        }
+        /*Adding styles from original to maintain functionality*/
+        .interaction-button {
+            margin-top: 15px;
+            padding: 10px 30px;
+            font-size: 1em;
+            background: #55e0ff;
+            color: black;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        #loader {
+            display: none;
+            font-size: 1.1em;
+            margin-top: 10px;
+            color: #ffbb33;
+        }
+        input {
+            width: 300px;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            background: #222;
+            color: white;
+            margin-top:20px;
+        }
+        #response_area {
+            margin-top: 30px;
+            font-size: 1.1em;
+            color: #fff;
+            text-align: right; /*for RTL*/
+        }
+
+    </style>
 </head>
 <body>
-  <h1>Robin AI</h1>
-  <input id="user_input" placeholder="Say something or type..." />
-  <button id="send_button" class="interaction-button" onclick="sendInput()">Send</button>
-  <button id="mic_button" class="interaction-button">🎤 Listen</button>
-  <div id="loader">Listening...</div>
-  <div id="response_area"></div>
 
-  <script>
-    const micButton = document.getElementById('mic_button');
-    const userInputField = document.getElementById('user_input');
-    const loader = document.getElementById('loader');
+    <div class="logo">مشاعر</div>
+    <div class="logo-en">Feelings</div>
+    <div class="subtitle">أنا هنا لأفهمك... لا فقط لأجيبك</div>
+    <div class="note">جارٍ التحميل... Preparing your experience</div>
+    <input id="user_input" placeholder="قل شيئاً أو اكتب..." />
+    <button id="send_button" class="interaction-button" onclick="sendInput()">إرسال</button>
+    <button id="mic_button" class="interaction-button">🎤 استمع</button>
+    <div id="loader">جارٍ الاستماع...</div>
+    <div id="response_area"></div>
 
-    micButton.addEventListener('click', () => {
-      micButton.classList.toggle('active');
-      loader.style.display = 'block';
+    <script>
+        const micButton = document.getElementById('mic_button');
+        const userInputField = document.getElementById('user_input');
+        const loader = document.getElementById('loader');
 
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = "en-US";
-      recognition.start();
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        userInputField.value = transcript;
-        loader.style.display = 'none';
-        sendInput(transcript);
-      };
-      recognition.onerror = function(event) {
-        alert("Voice recognition error: " + event.error);
-        loader.style.display = 'none';
-      };
-    });
+        micButton.addEventListener('click', () => {
+            micButton.classList.toggle('active');
+            loader.style.display = 'block';
 
-    function sendInput(text = null) {
-      const userInput = text || userInputField.value;
-      loader.style.display = 'block';
-      loader.textContent = "Thinking...";
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "ar-SA"; // Changed to Arabic
+            recognition.start();
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                userInputField.value = transcript;
+                loader.style.display = 'none';
+                sendInput(transcript);
+            };
+            recognition.onerror = function(event) {
+                alert("Voice recognition error: " + event.error);
+                loader.style.display = 'none';
+            };
+        });
 
-      fetch("/ask", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ user_input: userInput }),
-      })
-      .then(response => response.json())
-      .then(data => {
-        document.getElementById("response_area").textContent = data.response || data.error;
-        loader.style.display = 'none';
-      });
-    }
-  </script>
+        function sendInput(text = null) {
+            const userInput = text || userInputField.value;
+            loader.style.display = 'block';
+            loader.textContent = "جارٍ التفكير..."; // Arabic
+
+            fetch("/ask", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ user_input: userInput }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("response_area").textContent = data.response || data.error;
+                loader.style.display = 'none';
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const hasVisited = localStorage.getItem('hasVisited');
+            if (!hasVisited) {
+                localStorage.setItem('hasVisited', 'true');
+                // Start voice interaction for onboarding -  This section remains placeholder as specific onboarding logic wasn't provided.
+                console.log("Voice onboarding started");
+                // Redirect logic if needed - This section remains placeholder as specific redirect logic wasn't provided.
+            }
+        });
+    </script>
+
 </body>
 </html>
