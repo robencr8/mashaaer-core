@@ -10,6 +10,10 @@ import re
 from datetime import datetime
 from collections import deque
 import os
+import time
+
+# Import AI Model Router for dynamic model selection
+from ai_model_router import AIModelRouter
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +26,9 @@ class ContextAssistant:
         self.profile_manager = profile_manager
         self.emotion_tracker = emotion_tracker
         self.intent_classifier = intent_classifier
+        
+        # Initialize AI Model Router for dynamic model selection
+        self.model_router = AIModelRouter()
         
         # Context memory maintains recent conversations
         self.context_memory = deque(maxlen=10)  # Remember last 10 exchanges
@@ -489,6 +496,67 @@ class ContextAssistant:
         # First exchange in conversation
         if context['exchanges'] == 0:
             return self.get_time_appropriate_greeting(name, language)
+        
+        # Try using AI model if appropriate
+        try:
+            # Use the AI Model Router if the input is complex or a direct question
+            should_use_ai = (
+                len(user_input) > 40 or  # Complex input
+                user_input.endswith('?') or  # Question
+                'what' in user_input.lower() or 'how' in user_input.lower() or 
+                'why' in user_input.lower() or 'when' in user_input.lower() or
+                'explain' in user_input.lower() or 'tell me' in user_input.lower()
+            )
+            
+            if should_use_ai:
+                # Log that we're using AI
+                logger.info(f"Using AI model for complex response to: '{user_input[:50]}...'")
+                
+                # Prepare context for AI
+                recent_history = self.get_conversation_history(limit=3)
+                history_text = "\n".join([
+                    f"User: {ex['user_input']}\nRobin: {ex['response']}" 
+                    for ex in recent_history
+                ])
+                
+                # Create a system prompt based on personality and context
+                system_prompt = f"""You are Robin AI, a helpful AI assistant.
+Your personality style is {personality}.
+User's current emotion: {emotion if emotion else 'neutral'}
+Current time of day: {context.get('time_of_day', 'unknown')}
+Conversation topic: {topic if topic else 'general'}
+Language: {language}
+User's name: {name if name else 'User'}
+
+Keep your response natural, friendly and concise.
+Use {name} occasionally in your response if appropriate.
+"""
+                
+                # Generate AI response
+                ai_response = self.model_router.generate_response(
+                    prompt=user_input,
+                    system_prompt=system_prompt,
+                    temperature=0.7,
+                    max_tokens=200
+                )
+                
+                # If AI generation was successful, return the content
+                if ai_response and ai_response.get('success', False):
+                    content = ai_response.get('content', '')
+                    if content:
+                        # Log AI model used
+                        logger.info(f"Used AI model: {ai_response.get('model', 'unknown')} for response")
+                        return content
+                else:
+                    # Log error
+                    logger.warning(f"AI response failed: {ai_response.get('error', 'unknown error')}")
+                    # Continue with fallback response generation
+        
+        except Exception as e:
+            # Log error but continue with fallback response
+            logger.error(f"Error using AI model: {str(e)}")
+        
+        # If we reached here, AI failed or wasn't used - fall back to template-based responses
         
         # If we have a detected topic and specific responses for it
         if topic and topic in self.topics:

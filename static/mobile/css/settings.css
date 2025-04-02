@@ -123,6 +123,30 @@ input:checked + .toggle-slider:before {
   font-size: 0.875rem;
 }
 
+/* Link items */
+.link-item .setting-value {
+  display: flex;
+  align-items: center;
+}
+
+.settings-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: white;
+  text-decoration: none;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.settings-link:hover {
+  background-color: var(--accent-color);
+  transform: scale(1.05);
+}
+
 /* Settings actions */
 .settings-actions {
   display: flex;

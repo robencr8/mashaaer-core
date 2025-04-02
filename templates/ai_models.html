@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robin AI - Model Status</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <style>
+        body {
+            padding: 15px;
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+        }
+        .model-card {
+            border-left: 4px solid var(--bs-primary);
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        .model-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .ollama-model {
+            border-left-color: var(--bs-primary);
+        }
+        .openai-model {
+            border-left-color: var(--bs-success);
+        }
+        .header-cosmic {
+            background: linear-gradient(135deg, #1e1e2f 0%, #2d2b42 100%);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .cosmic-glow {
+            text-shadow: 0 0 10px rgba(100, 149, 237, 0.5);
+        }
+        .status-badge {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .query-box {
+            background-color: var(--bs-dark);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .response-area {
+            min-height: 100px;
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+        }
+        .model-selector {
+            max-width: 100%;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .header-cosmic {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.75rem;
+            }
+            .query-box {
+                padding: 15px;
+            }
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            .model-info .col-md-6 {
+                margin-bottom: 15px;
+            }
+            .back-to-mobile {
+                display: block;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="back-to-mobile mt-2 mb-3">
+            <a href="/mobile/settings" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-arrow-left me-1"></i> Back to Mobile
+            </a>
+        </div>
+        
+        <div class="header-cosmic text-center">
+            <h1 class="cosmic-glow">Robin AI <small class="text-muted">Model Router</small></h1>
+            <p class="lead">Dynamic AI Model Selection and Fallback System</p>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">AI Service Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="status-loading" class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                            <span>Loading status...</span>
+                        </div>
+                        <div id="status-content" class="d-none">
+                            <div class="mb-3">
+                                <strong>Backend:</strong> <span id="model-backend">-</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Status:</strong> <span id="status-badge" class="badge rounded-pill">-</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>OpenAI API:</strong> <span id="openai-status">-</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Ollama Server:</strong> <span id="ollama-status">-</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Default Model:</strong> <span id="default-model">-</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Request Count:</strong> <span id="request-count">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Available Models</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="models-loading" class="d-flex align-items-center">
+                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                            <span>Loading models...</span>
+                        </div>
+                        <div id="models-content" class="d-none">
+                            <div id="ollama-models">
+                                <h6 class="text-primary mb-3">Ollama Models</h6>
+                                <div id="ollama-models-list" class="mb-4">
+                                    <div class="text-muted">No models available</div>
+                                </div>
+                            </div>
+                            <div id="openai-models">
+                                <h6 class="text-success mb-3">OpenAI Models</h6>
+                                <div id="openai-models-list">
+                                    <div class="text-muted">No models available</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="query-box">
+            <h4 class="mb-3">Test AI Query</h4>
+            <form id="query-form">
+                <div class="mb-3">
+                    <label for="model-select" class="form-label">Select Model</label>
+                    <select class="form-select model-selector" id="model-select">
+                        <option value="">Use default model</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="query-input" class="form-label">Your Query</label>
+                    <textarea class="form-control" id="query-input" rows="3" placeholder="Enter your question here..."></textarea>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="system-prompt" class="form-label">System Prompt (Optional)</label>
+                        <textarea class="form-control" id="system-prompt" rows="2" placeholder="You are Robin AI, a helpful and friendly assistant."></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="temperature" class="form-label">Temperature: <span id="temp-value">0.7</span></label>
+                        <input type="range" class="form-range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+                        <small class="text-muted">Lower values (0.0) are more deterministic, higher values (1.0) more creative</small>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="submit-btn">Send Query</button>
+            </form>
+            
+            <div id="response-container" class="mt-4 d-none">
+                <h5>Response <small class="text-muted" id="model-used"></small></h5>
+                <div class="response-area" id="response-text"></div>
+                <div class="mt-2 d-flex justify-content-between">
+                    <small class="text-muted" id="response-time"></small>
+                    <small class="text-muted" id="token-usage"></small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch AI model status
+            fetchModelStatus();
+            
+            // Setup temperature slider
+            const tempSlider = document.getElementById('temperature');
+            const tempValue = document.getElementById('temp-value');
+            tempSlider.addEventListener('input', function() {
+                tempValue.textContent = this.value;
+            });
+            
+            // Setup query form
+            const queryForm = document.getElementById('query-form');
+            queryForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                sendAiQuery();
+            });
+        });
+        
+        function fetchModelStatus() {
+            fetch('/api/ai-models')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('AI Model Status:', data);
+                    
+                    if (data.success) {
+                        // Update status section
+                        document.getElementById('status-loading').classList.add('d-none');
+                        document.getElementById('status-content').classList.remove('d-none');
+                        
+                        // Set backend info
+                        document.getElementById('model-backend').textContent = data.model_backend || 'Auto (Automatic Selection)';
+                        
+                        // Set status badge
+                        const statusBadge = document.getElementById('status-badge');
+                        if (data.status === 'online') {
+                            statusBadge.textContent = 'Online';
+                            statusBadge.classList.add('bg-success');
+                        } else {
+                            statusBadge.textContent = 'Offline';
+                            statusBadge.classList.add('bg-danger');
+                        }
+                        
+                        // Set API status
+                        document.getElementById('openai-status').textContent = data.openai_configured ? 'Configured ✓' : 'Not Configured ✗';
+                        document.getElementById('ollama-status').textContent = data.ollama_running ? 'Running ✓' : 'Not Running ✗';
+                        document.getElementById('default-model').textContent = data.recommended_model || '-';
+                        document.getElementById('request-count').textContent = data.request_count || '0';
+                        
+                        // Update models section
+                        document.getElementById('models-loading').classList.add('d-none');
+                        document.getElementById('models-content').classList.remove('d-none');
+                        
+                        // Process Ollama models
+                        const ollamaModels = data.available_models.ollama || [];
+                        const ollamaList = document.getElementById('ollama-models-list');
+                        ollamaList.innerHTML = '';
+                        
+                        if (ollamaModels.length > 0) {
+                            ollamaModels.forEach(model => {
+                                const modelOption = document.createElement('option');
+                                modelOption.value = model;
+                                modelOption.textContent = model;
+                                document.getElementById('model-select').appendChild(modelOption);
+                                
+                                const modelCard = document.createElement('div');
+                                modelCard.className = 'card model-card ollama-model mb-2';
+                                modelCard.innerHTML = `
+                                    <div class="card-body py-2">
+                                        <span class="badge bg-primary me-2">Ollama</span>
+                                        ${model}
+                                    </div>
+                                `;
+                                ollamaList.appendChild(modelCard);
+                            });
+                        } else {
+                            ollamaList.innerHTML = '<div class="text-muted">No Ollama models available</div>';
+                        }
+                        
+                        // Process OpenAI models
+                        const openaiModels = data.available_models.openai || [];
+                        const openaiList = document.getElementById('openai-models-list');
+                        openaiList.innerHTML = '';
+                        
+                        if (openaiModels.length > 0) {
+                            openaiModels.forEach(model => {
+                                const modelOption = document.createElement('option');
+                                modelOption.value = model;
+                                modelOption.textContent = model;
+                                document.getElementById('model-select').appendChild(modelOption);
+                                
+                                const modelCard = document.createElement('div');
+                                modelCard.className = 'card model-card openai-model mb-2';
+                                modelCard.innerHTML = `
+                                    <div class="card-body py-2">
+                                        <span class="badge bg-success me-2">OpenAI</span>
+                                        ${model}
+                                    </div>
+                                `;
+                                openaiList.appendChild(modelCard);
+                            });
+                        } else {
+                            openaiList.innerHTML = '<div class="text-muted">No OpenAI models available</div>';
+                        }
+                    } else {
+                        alert('Error loading AI model status: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching model status:', error);
+                    alert('Error connecting to server. Please try again later.');
+                });
+        }
+        
+        function sendAiQuery() {
+            const query = document.getElementById('query-input').value.trim();
+            if (!query) {
+                alert('Please enter a query');
+                return;
+            }
+            
+            const model = document.getElementById('model-select').value;
+            const systemPrompt = document.getElementById('system-prompt').value.trim();
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            
+            // Disable form and show loading
+            const submitBtn = document.getElementById('submit-btn');
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Processing...';
+            
+            // Hide previous response
+            document.getElementById('response-container').classList.add('d-none');
+            
+            // Send request
+            fetch('/api/ai-query', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    query: query,
+                    model: model || null,
+                    system_prompt: systemPrompt || null,
+                    temperature: temperature
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('AI Query Response:', data);
+                
+                // Re-enable form
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+                
+                // Display response
+                const responseContainer = document.getElementById('response-container');
+                responseContainer.classList.remove('d-none');
+                
+                if (data.success) {
+                    document.getElementById('response-text').textContent = data.content;
+                    document.getElementById('model-used').textContent = '(' + (data.model || 'default') + ')';
+                    document.getElementById('response-time').textContent = `Processing time: ${data.processing_time ? data.processing_time.toFixed(2) + 's' : 'unknown'}`;
+                    
+                    // Display token usage if available
+                    if (data.usage) {
+                        document.getElementById('token-usage').textContent = `Tokens: ${data.usage.prompt_tokens} prompt + ${data.usage.completion_tokens} completion = ${data.usage.total_tokens} total`;
+                    } else {
+                        document.getElementById('token-usage').textContent = '';
+                    }
+                } else {
+                    document.getElementById('response-text').textContent = 'Error: ' + (data.error || 'Unknown error');
+                    document.getElementById('model-used').textContent = '';
+                    document.getElementById('response-time').textContent = '';
+                    document.getElementById('token-usage').textContent = '';
+                }
+                
+                // Refresh status after query
+                fetchModelStatus();
+            })
+            .catch(error => {
+                console.error('Error sending AI query:', error);
+                alert('Error connecting to server. Please try again later.');
+                
+                // Re-enable form
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+            });
+        }
+    </script>
+</body>
+</html>

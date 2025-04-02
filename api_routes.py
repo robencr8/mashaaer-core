@@ -21,11 +21,15 @@ tts_manager = None
 voice_recognition = None
 intent_classifier = None
 config = None
+model_router = None  # AI Model Router reference
+context_assistant = None  # Reference to context assistant for AI capabilities
 
 def init_api(app, _db_manager, _emotion_tracker, _face_detector, 
-            _tts_manager, _voice_recognition, _intent_classifier, _config):
+            _tts_manager, _voice_recognition, _intent_classifier, _config,
+            _context_assistant=None, _model_router=None):
     """Initialize the API blueprint with necessary dependencies"""
-    global db_manager, emotion_tracker, face_detector, tts_manager, voice_recognition, intent_classifier, config
+    global db_manager, emotion_tracker, face_detector, tts_manager
+    global voice_recognition, intent_classifier, config, context_assistant, model_router
     
     # Store references to core components
     db_manager = _db_manager
@@ -35,6 +39,22 @@ def init_api(app, _db_manager, _emotion_tracker, _face_detector,
     voice_recognition = _voice_recognition
     intent_classifier = _intent_classifier
     config = _config
+    context_assistant = _context_assistant
+    
+    # Initialize model router if not provided
+    if _model_router:
+        model_router = _model_router
+    elif context_assistant and hasattr(context_assistant, 'model_router'):
+        model_router = context_assistant.model_router
+    else:
+        # Create AI Model Router on demand if not available
+        try:
+            from ai_model_router import AIModelRouter
+            model_router = AIModelRouter()
+            logger.info("Initialized AI Model Router for API routes")
+        except Exception as e:
+            logger.warning(f"Could not initialize AI Model Router: {str(e)}")
+            model_router = None
     
     # Add API documentation endpoint
     @api.route('/', methods=['GET'])
@@ -145,6 +165,21 @@ def init_api(app, _db_manager, _emotion_tracker, _face_detector,
                 'description': 'Get comprehensive data for a specific session',
                 'params': [
                     {'name': 'session_id', 'type': 'string', 'default': 'current', 'description': 'Session ID to retrieve data for'}
+                ]
+            },
+            '/api/ai-models': {
+                'methods': ['GET'],
+                'description': 'Get information about available AI models',
+                'params': []
+            },
+            '/api/ai-query': {
+                'methods': ['POST'],
+                'description': 'Send a direct query to the selected AI model',
+                'params': [
+                    {'name': 'query', 'type': 'string', 'required': True, 'description': 'The text query to send to the AI model'},
+                    {'name': 'model', 'type': 'string', 'default': None, 'description': 'Optional specific model to use'},
+                    {'name': 'system_prompt', 'type': 'string', 'default': None, 'description': 'Optional system instructions'},
+                    {'name': 'temperature', 'type': 'float', 'default': 0.7, 'description': 'Controls randomness (0.0 to 1.0)'}
                 ]
             }
         }
@@ -864,6 +899,130 @@ def send_sms():
             'error': 'Server error processing SMS request',
             'details': error_message,
             'traceback': traceback.format_exc()
+        }), 500
+
+@api.route('/ai-models', methods=['GET'])
+def get_ai_models():
+    """Get information about available AI models"""
+    try:
+        if not model_router:
+            return jsonify({
+                'success': False,
+                'error': 'AI Model Router not available',
+                'models': []
+            }), 503
+        
+        # Get model status
+        model_status = model_router.get_status()
+        
+        # Format response for API clients
+        response = {
+            'success': True,
+            'model_backend': model_status.get('model_backend', ''),
+            'available_models': model_status.get('available_models', {}),
+            'ollama_running': model_status.get('ollama_running', False),
+            'openai_configured': model_status.get('openai_configured', False),
+            'request_count': model_status.get('request_count', 0),
+            'error_count': model_status.get('error_count', 0),
+            'last_model_used': model_status.get('last_model_used', None)
+        }
+        
+        # Calculate status summary
+        response['status'] = 'online' if (response['ollama_running'] or response['openai_configured']) else 'offline'
+        
+        # Calculate available and recommended models
+        all_models = []
+        if response['ollama_running'] and 'ollama' in response['available_models']:
+            all_models.extend(response['available_models']['ollama'])
+        if response['openai_configured'] and 'openai' in response['available_models']:
+            all_models.extend(response['available_models']['openai'])
+        
+        response['models'] = all_models
+        response['recommended_model'] = model_router.get_default_model()
+        
+        return jsonify(response)
+    except Exception as e:
+        logger.error(f"Error getting AI models: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'models': []
+        }), 500
+
+@api.route('/ai-query', methods=['POST'])
+def ai_query():
+    """Send a direct query to the selected AI model"""
+    try:
+        # Get request data
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
+        
+        # Extract query parameters
+        query = data.get('query')
+        model_name = data.get('model')
+        system_prompt = data.get('system_prompt')
+        temperature = data.get('temperature', 0.7)
+        
+        # Validate query
+        if not query or not isinstance(query, str) or len(query.strip()) == 0:
+            return jsonify({
+                'success': False,
+                'error': 'Query is required'
+            }), 400
+        
+        # Log the request
+        logger.info(f"AI query request: query='{query[:50]}...', model={model_name}, temperature={temperature}")
+        
+        if not model_router:
+            return jsonify({
+                'success': False,
+                'error': 'AI Model Router not available'
+            }), 503
+        
+        # Send to AI model
+        start_time = time.time()
+        response = model_router.generate_response(
+            prompt=query,
+            model=model_name,
+            system_prompt=system_prompt,
+            temperature=temperature,
+            max_tokens=500,
+            stream=False
+        )
+        end_time = time.time()
+        
+        # Calculate processing time
+        processing_time = end_time - start_time
+        
+        # Format API response
+        result = {
+            'success': response.get('success', False),
+            'content': response.get('content', None),
+            'model': response.get('model', model_name),
+            'processing_time': processing_time,
+            'timestamp': response.get('timestamp', time.time())
+        }
+        
+        # Add error if present
+        if not result['success']:
+            result['error'] = response.get('error', 'Unknown error')
+            logger.warning(f"AI query failed: {result['error']}")
+            return jsonify(result), 500
+        
+        # Log successful response
+        logger.info(f"AI query successful: model={result['model']}, time={processing_time:.2f}s")
+        
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Error processing AI query: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'content': None
         }), 500
 
 @api.route('/sms-alert', methods=['POST'])

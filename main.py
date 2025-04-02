@@ -53,10 +53,17 @@ twilio_handler = TwilioHandler()
 from profile_manager import ProfileManager
 profile_manager = ProfileManager(db_manager)
 
+# Initialize context assistant and AI model router
+from context_assistant import ContextAssistant
+from ai_model_router import AIModelRouter
+context_assistant = ContextAssistant(db_manager, profile_manager, emotion_tracker, intent_classifier)
+model_router = AIModelRouter()
+
 # Initialize API routes
 from api_routes import init_api
 init_api(app, db_manager, emotion_tracker, face_detector, 
-         tts_manager, voice_recognition, intent_classifier, config)
+         tts_manager, voice_recognition, intent_classifier, config,
+         context_assistant, model_router)
 
 # Add versioned_url helper to Jinja templates
 app.jinja_env.globals.update(versioned_url=versioned_url)
@@ -1486,6 +1493,11 @@ def mobile_profiles():
 def mobile_settings():
     """Mobile app settings page"""
     return render_template('mobile/settings.html', versioned_url=versioned_url)
+
+@app.route('/ai-models')
+def ai_models_page():
+    """AI Models status and testing page"""
+    return render_template('ai_models.html', versioned_url=versioned_url)
 
 @app.route('/api/user/settings', methods=['GET', 'POST'])
 def user_settings():
