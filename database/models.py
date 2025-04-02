@@ -24,7 +24,7 @@ class Face(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
     image_path = Column(String)
-    metadata = Column(Text)
+    face_metadata = Column(Text)  # Renamed from metadata to avoid SQLAlchemy reserved word
     last_seen = Column(String)
 
 class RecognitionHistory(Base):
