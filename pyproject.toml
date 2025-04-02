@@ -23,4 +23,5 @@ dependencies = [
     "alembic>=1.15.2",
     "flask-cors>=5.0.1",
     "openai>=1.70.0",
+    "psutil>=7.0.0",
 ]

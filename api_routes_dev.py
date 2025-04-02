@@ -5,463 +5,753 @@ Provides access to system logs, database management, and performance metrics
 
 import os
 import json
-import logging
-import datetime
 import time
-import shutil
+import logging
+import psutil
 import sqlite3
-import subprocess
-from flask import Blueprint, request, jsonify, session
+from datetime import datetime, timedelta
 
-# Set up logger
+# Configure logger
 logger = logging.getLogger(__name__)
 
+# Import Flask dependencies here to avoid circular imports
+from flask import Blueprint, jsonify, request, current_app
+
+# Initialize the developer API blueprint
 def init_developer_api(app):
     """Initialize the developer API endpoints"""
+    
     dev_api = Blueprint('dev_api', __name__)
     
-    @dev_api.route('/logs', methods=['GET'])
+    @dev_api.route('/api/dev/logs', methods=['GET'])
     def get_logs():
         """Get system logs for developer mode"""
         try:
+            # Check if request has developer authorization
+            if not _is_developer_authorized():
+                return jsonify({'success': False, 'error': 'Developer authorization required'}), 403
+            
+            # Determine log paths
+            log_paths = _get_log_paths()
+            
+            # Get filter parameters
             log_type = request.args.get('type', 'all')
-            max_entries = int(request.args.get('max', 1000))
+            level = request.args.get('level', 'all')
+            limit = int(request.args.get('limit', 100))
+            search = request.args.get('search', '')
             
-            # Define log directories
-            log_dirs = {
-                'system': './logs',
-                'voice': './voice_logs',
-                'errors': './logs/errors'
-            }
-            
-            logs = []
-            
-            # Determine which directories to scan based on log_type
-            dirs_to_scan = []
-            if log_type == 'all':
-                dirs_to_scan = log_dirs.values()
-            elif log_type in log_dirs:
-                dirs_to_scan = [log_dirs[log_type]]
-            
-            # Scan log directories
-            for log_dir in dirs_to_scan:
-                if os.path.exists(log_dir):
-                    for filename in os.listdir(log_dir):
-                        if filename.endswith('.log'):
-                            log_path = os.path.join(log_dir, filename)
-                            try:
-                                with open(log_path, 'r') as file:
-                                    for line in file:
-                                        # Parse log entry
-                                        try:
-                                            parts = line.strip().split(' ', 3)
-                                            if len(parts) >= 3:
-                                                date_str = parts[0]
-                                                time_str = parts[1]
-                                                level = parts[2].strip('[]')
-                                                message = parts[3] if len(parts) > 3 else ""
-                                                
-                                                logs.append({
-                                                    'timestamp': f"{date_str} {time_str}",
-                                                    'level': level,
-                                                    'message': message,
-                                                    'type': os.path.basename(log_dir),
-                                                    'source': filename
-                                                })
-                                        except Exception:
-                                            # If parse fails, just add the raw line
-                                            logs.append({
-                                                'timestamp': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                                                'level': 'INFO',
-                                                'message': line.strip(),
-                                                'type': os.path.basename(log_dir),
-                                                'source': filename
-                                            })
-                            except Exception as e:
-                                logger.error(f"Error reading log file {log_path}: {str(e)}")
-            
-            # Sort logs by timestamp (most recent first)
-            logs.sort(key=lambda x: x['timestamp'], reverse=True)
-            
-            # Limit to max_entries
-            logs = logs[:max_entries]
+            # Read and filter logs
+            logs = _read_logs(log_paths, log_type, level, limit, search)
             
             return jsonify({
                 'success': True,
                 'logs': logs,
-                'count': len(logs)
+                'log_paths': log_paths
             })
         except Exception as e:
-            logger.error(f"Error retrieving logs: {str(e)}")
-            return jsonify({
-                'success': False,
-                'error': f"Error retrieving logs: {str(e)}"
-            }), 500
+            logger.error(f"Error getting logs: {str(e)}")
+            return jsonify({'success': False, 'error': str(e)}), 500
     
-    @dev_api.route('/logs/clear', methods=['POST'])
+    @dev_api.route('/api/dev/logs/clear', methods=['POST'])
     def clear_logs():
         """Clear system logs (developer mode only)"""
         try:
-            # Make sure this is a developer with the right permissions
-            if request.headers.get('X-Developer-Key') != os.environ.get('DEVELOPER_KEY', 'robin_dev_key'):
-                # Check if user has developer mode enabled in session
-                if not session.get('developer_mode', False):
-                    return jsonify({
-                        'success': False,
-                        'error': 'Developer permission required'
-                    }), 403
+            # Check if request has developer authorization
+            if not _is_developer_authorized():
+                return jsonify({'success': False, 'error': 'Developer authorization required'}), 403
             
-            # Define log directories
-            log_dirs = ['./logs', './voice_logs']
+            # Determine log paths
+            log_paths = _get_log_paths()
             
-            cleared_files = []
+            # Get specific log type to clear, or 'all'
+            log_type = request.json.get('type', 'all')
             
-            for log_dir in log_dirs:
-                if os.path.exists(log_dir):
-                    for filename in os.listdir(log_dir):
-                        if filename.endswith('.log'):
-                            log_path = os.path.join(log_dir, filename)
-                            try:
-                                # Clear content but keep file
-                                with open(log_path, 'w') as file:
-                                    file.write(f"Log cleared on {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                                cleared_files.append(log_path)
-                            except Exception as e:
-                                logger.error(f"Error clearing log file {log_path}: {str(e)}")
-            
-            logger.info(f"Cleared {len(cleared_files)} log files through developer interface")
+            # Clear specified logs
+            cleared = _clear_logs(log_paths, log_type)
             
             return jsonify({
                 'success': True,
-                'message': f"Cleared {len(cleared_files)} log files",
-                'cleared_files': cleared_files
+                'cleared': cleared
             })
         except Exception as e:
             logger.error(f"Error clearing logs: {str(e)}")
-            return jsonify({
-                'success': False,
-                'error': f"Error clearing logs: {str(e)}"
-            }), 500
+            return jsonify({'success': False, 'error': str(e)}), 500
     
-    @dev_api.route('/db/status', methods=['GET'])
+    @dev_api.route('/api/dev/db/status', methods=['GET'])
     def get_db_status():
         """Get database status information for developer mode"""
         try:
-            # Database file paths
-            db_files = []
+            # Check if request has developer authorization
+            if not _is_developer_authorized():
+                return jsonify({'success': False, 'error': 'Developer authorization required'}), 403
             
-            # Check main database
-            if os.path.exists('robin_memory.db'):
-                db_files.append('robin_memory.db')
+            # Get DB Manager from app context
+            db_manager = current_app.config.get('db_manager')
+            if not db_manager:
+                return jsonify({'success': False, 'error': 'Database manager not available'}), 500
             
-            # Look for other SQLite databases
-            for file in os.listdir('.'):
-                if file.endswith('.db') and file != 'robin_memory.db':
-                    db_files.append(file)
-            
-            total_size = 0
-            all_tables = []
-            total_records = 0
-            
-            for db_file in db_files:
-                try:
-                    # Get file size
-                    size_bytes = os.path.getsize(db_file)
-                    total_size += size_bytes
-                    
-                    # Connect to database
-                    conn = sqlite3.connect(db_file)
-                    c = conn.cursor()
-                    
-                    # Get list of tables
-                    c.execute("SELECT name FROM sqlite_master WHERE type='table';")
-                    tables = c.fetchall()
-                    
-                    for table in tables:
-                        table_name = table[0]
-                        
-                        # Skip SQLite internal tables
-                        if table_name.startswith('sqlite_'):
-                            continue
-                        
-                        # Get row count
-                        try:
-                            c.execute(f"SELECT COUNT(*) FROM '{table_name}';")
-                            row_count = c.fetchone()[0]
-                            total_records += row_count
-                            
-                            # Calculate table size (approximate)
-                            c.execute(f"PRAGMA table_info('{table_name}');")
-                            columns = c.fetchall()
-                            
-                            all_tables.append({
-                                'name': table_name,
-                                'rows': row_count,
-                                'columns': len(columns),
-                                'database': db_file,
-                                'size': f"{(size_bytes / len(tables)) / 1024:.1f} KB" if len(tables) > 0 else "0 KB"
-                            })
-                        except Exception as e:
-                            logger.error(f"Error analyzing table {table_name}: {str(e)}")
-                            all_tables.append({
-                                'name': table_name,
-                                'rows': 0,
-                                'columns': 0,
-                                'database': db_file,
-                                'size': "Unknown",
-                                'error': str(e)
-                            })
-                    
-                    conn.close()
-                except Exception as e:
-                    logger.error(f"Error analyzing database {db_file}: {str(e)}")
-            
-            # Get backup information
-            last_backup = None
-            backup_dir = './database/backups'
-            if os.path.exists(backup_dir):
-                backups = [f for f in os.listdir(backup_dir) if f.endswith('.backup') or f.endswith('.sql')]
-                if backups:
-                    # Get most recent backup
-                    backups.sort(key=lambda x: os.path.getmtime(os.path.join(backup_dir, x)), reverse=True)
-                    last_backup_time = os.path.getmtime(os.path.join(backup_dir, backups[0]))
-                    last_backup = datetime.datetime.fromtimestamp(last_backup_time).strftime('%Y-%m-%d %H:%M:%S')
+            # Get database information
+            db_status = _get_db_info(db_manager)
             
             return jsonify({
                 'success': True,
-                'size': f"{total_size / 1024 / 1024:.2f} MB",
-                'size_bytes': total_size,
-                'tables': all_tables,
-                'total_records': total_records,
-                'databases': db_files,
-                'last_backup': last_backup
+                'status': db_status
             })
         except Exception as e:
-            logger.error(f"Error retrieving database status: {str(e)}")
-            return jsonify({
-                'success': False,
-                'error': f"Error retrieving database status: {str(e)}"
-            }), 500
+            logger.error(f"Error getting database status: {str(e)}")
+            return jsonify({'success': False, 'error': str(e)}), 500
     
-    @dev_api.route('/db/backup', methods=['POST'])
+    @dev_api.route('/api/dev/db/backup', methods=['POST'])
     def backup_database():
         """Create a database backup (developer mode only)"""
         try:
-            # Make sure this is a developer with the right permissions
-            if request.headers.get('X-Developer-Key') != os.environ.get('DEVELOPER_KEY', 'robin_dev_key'):
-                # Check if user has developer mode enabled in session
-                if not session.get('developer_mode', False):
-                    return jsonify({
-                        'success': False,
-                        'error': 'Developer permission required'
-                    }), 403
+            # Check if request has developer authorization
+            if not _is_developer_authorized():
+                return jsonify({'success': False, 'error': 'Developer authorization required'}), 403
             
-            # Ensure backup directory exists
-            backup_dir = './database/backups'
-            os.makedirs(backup_dir, exist_ok=True)
-            
-            # Create timestamp for backup filename
-            timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-            backup_filename = f"robin_db_backup_{timestamp}.sql"
-            backup_path = os.path.join(backup_dir, backup_filename)
-            
-            # Database file path
-            db_path = 'robin_memory.db'
-            
-            if not os.path.exists(db_path):
-                return jsonify({
-                    'success': False,
-                    'error': 'Database file not found'
-                }), 404
+            # Get DB Manager from app context
+            db_manager = current_app.config.get('db_manager')
+            if not db_manager:
+                return jsonify({'success': False, 'error': 'Database manager not available'}), 500
             
             # Create backup
-            # Option 1: Simple file copy (if SQLite)
-            simple_backup_path = os.path.join(backup_dir, f"robin_db_backup_{timestamp}.backup")
-            shutil.copy2(db_path, simple_backup_path)
+            backup_path = _backup_database(db_manager)
             
-            try:
-                # Option 2: Use sqlite3 command to dump SQL (better for restoration)
-                dump_cmd = f"sqlite3 {db_path} .dump > {backup_path}"
-                subprocess.run(dump_cmd, shell=True, check=True)
-                
-                logger.info(f"Created database backup: {backup_path}")
-                
-                # Generate download URL
-                download_url = f"/database/backups/{backup_filename}"
-                
-                return jsonify({
-                    'success': True,
-                    'message': f"Database backup created successfully",
-                    'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    'backup_path': backup_path,
-                    'file_size': os.path.getsize(backup_path),
-                    'download_url': download_url,
-                    'filename': backup_filename
-                })
-            except Exception as e:
-                logger.error(f"Error creating SQL dump backup: {str(e)}")
-                # If SQL dump fails, at least we have the file copy
-                return jsonify({
-                    'success': True,
-                    'message': f"Database backup created (file copy only, SQL dump failed)",
-                    'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    'backup_path': simple_backup_path,
-                    'file_size': os.path.getsize(simple_backup_path),
-                    'error_details': str(e)
-                })
+            return jsonify({
+                'success': True,
+                'backup_path': backup_path,
+                'message': f'Database backup created at {backup_path}'
+            })
         except Exception as e:
             logger.error(f"Error backing up database: {str(e)}")
-            return jsonify({
-                'success': False,
-                'error': f"Error backing up database: {str(e)}"
-            }), 500
+            return jsonify({'success': False, 'error': str(e)}), 500
     
-    @dev_api.route('/db/optimize', methods=['POST'])
+    @dev_api.route('/api/dev/db/optimize', methods=['POST'])
     def optimize_database():
         """Optimize database performance (developer mode only)"""
         try:
-            # Make sure this is a developer with the right permissions
-            if request.headers.get('X-Developer-Key') != os.environ.get('DEVELOPER_KEY', 'robin_dev_key'):
-                # Check if user has developer mode enabled in session
-                if not session.get('developer_mode', False):
-                    return jsonify({
-                        'success': False,
-                        'error': 'Developer permission required'
-                    }), 403
+            # Check if request has developer authorization
+            if not _is_developer_authorized():
+                return jsonify({'success': False, 'error': 'Developer authorization required'}), 403
             
-            # Database file path
-            db_path = 'robin_memory.db'
+            # Get DB Manager from app context
+            db_manager = current_app.config.get('db_manager')
+            if not db_manager:
+                return jsonify({'success': False, 'error': 'Database manager not available'}), 500
             
-            if not os.path.exists(db_path):
-                return jsonify({
-                    'success': False,
-                    'error': 'Database file not found'
-                }), 404
-            
-            # Connect to database
-            conn = sqlite3.connect(db_path)
-            cursor = conn.cursor()
-            
-            # Perform optimization operations
-            operations = [
-                "PRAGMA optimize;",
-                "VACUUM;",
-                "ANALYZE;",
-                "PRAGMA integrity_check;"
-            ]
-            
-            results = {}
-            
-            for op in operations:
-                try:
-                    cursor.execute(op)
-                    if op == "PRAGMA integrity_check;":
-                        results[op] = cursor.fetchone()[0]
-                    else:
-                        results[op] = "Success"
-                except Exception as e:
-                    results[op] = f"Error: {str(e)}"
-            
-            conn.close()
-            
-            logger.info("Database optimization completed through developer interface")
+            # Optimize database
+            optimization_result = _optimize_database(db_manager)
             
             return jsonify({
                 'success': True,
-                'message': "Database optimization completed",
-                'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'operations': results
+                'optimization_result': optimization_result
             })
         except Exception as e:
             logger.error(f"Error optimizing database: {str(e)}")
-            return jsonify({
-                'success': False,
-                'error': f"Error optimizing database: {str(e)}"
-            }), 500
+            return jsonify({'success': False, 'error': str(e)}), 500
     
-    @dev_api.route('/system/performance', methods=['GET'])
+    @dev_api.route('/api/dev/system/performance', methods=['GET'])
     def get_system_performance():
         """Get system performance metrics for developer mode"""
         try:
-            # Measure API response time (include this in the response)
-            start_time = time.time()
+            # Check if request has developer authorization
+            if not _is_developer_authorized():
+                return jsonify({'success': False, 'error': 'Developer authorization required'}), 403
             
-            # Get CPU usage
-            try:
-                # Try importing psutil
-                import psutil
-                cpu_usage = psutil.cpu_percent(interval=0.1)
-                
-                # Get memory usage
-                memory = psutil.virtual_memory()
-                memory_usage = {
-                    'total': f"{memory.total / (1024 * 1024 * 1024):.2f} GB",
-                    'available': f"{memory.available / (1024 * 1024 * 1024):.2f} GB",
-                    'used': f"{memory.used / (1024 * 1024 * 1024):.2f} GB",
-                    'percent': memory.percent
-                }
-                
-                # Get disk usage
-                disk = psutil.disk_usage('/')
-                disk_usage = {
-                    'total': f"{disk.total / (1024 * 1024 * 1024):.2f} GB",
-                    'used': f"{disk.used / (1024 * 1024 * 1024):.2f} GB",
-                    'free': f"{disk.free / (1024 * 1024 * 1024):.2f} GB",
-                    'percent': disk.percent
-                }
-                
-                # Get system uptime
-                boot_time = datetime.datetime.fromtimestamp(psutil.boot_time())
-                uptime = datetime.datetime.now() - boot_time
-                uptime_str = str(uptime).split('.')[0]  # Format as HH:MM:SS
-                uptime_seconds = uptime.total_seconds()
-                boot_time_str = boot_time.strftime('%Y-%m-%d %H:%M:%S')
-            except ImportError:
-                # Fallback if psutil isn't available
-                cpu_usage = -1
-                memory_usage = {
-                    'total': 'N/A',
-                    'available': 'N/A',
-                    'used': 'N/A',
-                    'percent': -1
-                }
-                disk_usage = {
-                    'total': 'N/A',
-                    'used': 'N/A',
-                    'free': 'N/A',
-                    'percent': -1
-                }
-                uptime_str = 'N/A'
-                uptime_seconds = -1
-                boot_time_str = 'N/A'
-            
-            # Get active sessions (estimate from Flask session)
-            active_sessions = len(os.listdir('./flask_session')) if os.path.exists('./flask_session') else 0
-            
-            # Get API response time
-            api_response_time = int((time.time() - start_time) * 1000)  # in milliseconds
+            # Get system performance metrics
+            performance = _get_system_performance()
             
             return jsonify({
                 'success': True,
-                'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'cpu': cpu_usage,
-                'memory': f"{memory_usage['used']} / {memory_usage['total']} ({memory_usage['percent']}%)" if cpu_usage != -1 else 'N/A',
-                'memory_percent': memory_usage['percent'] if cpu_usage != -1 else -1,
-                'disk': f"{disk_usage['used']} / {disk_usage['total']} ({disk_usage['percent']}%)" if cpu_usage != -1 else 'N/A',
-                'disk_percent': disk_usage['percent'] if cpu_usage != -1 else -1,
-                'uptime': uptime_str,
-                'uptime_seconds': uptime_seconds,
-                'boot_time': boot_time_str,
-                'active_sessions': active_sessions,
-                'api_response_time': api_response_time
+                'performance': performance
             })
         except Exception as e:
-            logger.error(f"Error retrieving system performance: {str(e)}")
-            return jsonify({
-                'success': False,
-                'error': f"Error retrieving system performance: {str(e)}"
-            }), 500
+            logger.error(f"Error getting system performance: {str(e)}")
+            return jsonify({'success': False, 'error': str(e)}), 500
     
-    # Register the blueprint
-    app.register_blueprint(dev_api, url_prefix='/api')
+    # Helper methods
+    def _is_developer_authorized():
+        """Check if the request is authorized for developer operations"""
+        # First check for developer mode in app config
+        from main import is_developer_mode
+        
+        if not is_developer_mode():
+            # If not in dev mode, check for developer API key
+            dev_key = request.headers.get('X-Developer-Key')
+            expected_key = os.environ.get('DEVELOPER_KEY', 'robin_dev_key')
+            
+            if not dev_key or dev_key != expected_key:
+                return False
+        
+        return True
+    
+    def _get_log_paths():
+        """Get paths to log files"""
+        log_dir = 'logs'
+        
+        # Create logs directory if it doesn't exist
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+            
+        # Define log paths
+        log_paths = {
+            'system': os.path.join(log_dir, 'robin.log'),
+            'errors': os.path.join(log_dir, 'errors.log'),
+            'api': os.path.join(log_dir, 'api.log'),
+            'voice': os.path.join('voice_logs', 'recognition.log')
+        }
+        
+        return log_paths
+    
+    def _read_logs(log_paths, log_type='all', level='all', limit=100, search=''):
+        """Read and filter logs"""
+        logs = []
+        
+        # Determine which log files to read
+        files_to_read = []
+        if log_type == 'all':
+            files_to_read = log_paths.values()
+        elif log_type in log_paths:
+            files_to_read = [log_paths[log_type]]
+        
+        # Read each log file
+        for log_file in files_to_read:
+            if os.path.exists(log_file):
+                try:
+                    with open(log_file, 'r') as f:
+                        file_logs = f.readlines()
+                        
+                        # Filter by level if specified
+                        if level != 'all':
+                            file_logs = [log for log in file_logs if f":{level.upper()}:" in log]
+                            
+                        # Filter by search term if specified
+                        if search:
+                            file_logs = [log for log in file_logs if search.lower() in log.lower()]
+                            
+                        # Add log source and parse timestamp if possible
+                        parsed_logs = []
+                        for log in file_logs:
+                            log_entry = {
+                                'text': log.strip(),
+                                'source': os.path.basename(log_file),
+                                'timestamp': _extract_timestamp(log)
+                            }
+                            parsed_logs.append(log_entry)
+                        
+                        logs.extend(parsed_logs)
+                except Exception as e:
+                    logs.append({
+                        'text': f"Error reading log file {log_file}: {str(e)}",
+                        'source': 'error',
+                        'timestamp': time.time()
+                    })
+        
+        # Sort logs by timestamp (newest first)
+        logs.sort(key=lambda x: x.get('timestamp', 0), reverse=True)
+        
+        # Limit number of logs
+        return logs[:limit]
+    
+    def _extract_timestamp(log_line):
+        """Extract timestamp from log line"""
+        try:
+            # Try to extract ISO format timestamp
+            iso_formats = [
+                '%Y-%m-%d %H:%M:%S,%f',
+                '%Y-%m-%d %H:%M:%S.%f',
+                '%Y-%m-%dT%H:%M:%S.%f',
+                '%Y-%m-%d %H:%M:%S'
+            ]
+            
+            for fmt in iso_formats:
+                try:
+                    date_str = log_line.split(' ')[0] + ' ' + log_line.split(' ')[1]
+                    dt = datetime.strptime(date_str, fmt)
+                    return dt.timestamp()
+                except:
+                    continue
+            
+            # If no timestamp found, use current time
+            return time.time()
+        except:
+            return time.time()
+    
+    def _clear_logs(log_paths, log_type='all'):
+        """Clear specified log files"""
+        cleared = []
+        
+        # Determine which log files to clear
+        files_to_clear = []
+        if log_type == 'all':
+            files_to_clear = log_paths.values()
+        elif log_type in log_paths:
+            files_to_clear = [log_paths[log_type]]
+        
+        # Clear each log file
+        for log_file in files_to_clear:
+            if os.path.exists(log_file):
+                try:
+                    with open(log_file, 'w') as f:
+                        f.write(f"Log cleared at {datetime.now().isoformat()}\n")
+                    cleared.append(os.path.basename(log_file))
+                except Exception as e:
+                    logger.error(f"Error clearing log file {log_file}: {str(e)}")
+        
+        return cleared
+    
+    def _get_db_info(db_manager):
+        """Get database information"""
+        info = {
+            'type': 'unknown',
+            'tables': [],
+            'size': 0,
+            'rows_per_table': {},
+            'last_backup': None
+        }
+        
+        try:
+            # Determine database type
+            if hasattr(db_manager, 'use_postgres') and db_manager.use_postgres:
+                info['type'] = 'postgresql'
+                info['connection'] = {
+                    'host': os.environ.get('PGHOST', 'unknown'),
+                    'port': os.environ.get('PGPORT', 'unknown'),
+                    'database': os.environ.get('PGDATABASE', 'unknown'),
+                    'user': os.environ.get('PGUSER', 'unknown')
+                }
+                
+                # Get tables
+                tables_query = """
+                    SELECT table_name FROM information_schema.tables
+                    WHERE table_schema = 'public'
+                """
+                tables_result = db_manager.execute_query(tables_query)
+                
+                if tables_result:
+                    tables = [row[0] for row in tables_result]
+                    info['tables'] = tables
+                    
+                    # Get row count for each table
+                    for table in tables:
+                        try:
+                            count_query = f"SELECT COUNT(*) FROM {table}"
+                            count_result = db_manager.execute_query(count_query)
+                            if count_result:
+                                info['rows_per_table'][table] = count_result[0][0]
+                        except:
+                            info['rows_per_table'][table] = -1
+                
+                # Get database size
+                size_query = """
+                    SELECT pg_database_size(current_database())
+                """
+                size_result = db_manager.execute_query(size_query)
+                if size_result:
+                    info['size'] = size_result[0][0]
+                    info['size_human'] = _format_size(size_result[0][0])
+                
+            else:
+                info['type'] = 'sqlite'
+                info['path'] = db_manager.db_path
+                
+                # Get file size
+                if os.path.exists(db_manager.db_path):
+                    info['size'] = os.path.getsize(db_manager.db_path)
+                    info['size_human'] = _format_size(info['size'])
+                
+                # Get tables
+                try:
+                    conn = sqlite3.connect(db_manager.db_path)
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+                    tables = [row[0] for row in cursor.fetchall()]
+                    info['tables'] = tables
+                    
+                    # Get row count for each table
+                    for table in tables:
+                        try:
+                            cursor.execute(f"SELECT COUNT(*) FROM {table}")
+                            count = cursor.fetchone()[0]
+                            info['rows_per_table'][table] = count
+                        except:
+                            info['rows_per_table'][table] = -1
+                    
+                    conn.close()
+                except Exception as e:
+                    logger.error(f"Error getting SQLite database info: {str(e)}")
+            
+            # Check for last backup
+            backup_dir = 'database/backups'
+            if os.path.exists(backup_dir):
+                backups = [os.path.join(backup_dir, f) for f in os.listdir(backup_dir) if f.endswith('.sql') or f.endswith('.dump')]
+                if backups:
+                    # Get the most recent backup
+                    newest_backup = max(backups, key=os.path.getmtime)
+                    info['last_backup'] = {
+                        'path': newest_backup,
+                        'size': os.path.getsize(newest_backup),
+                        'size_human': _format_size(os.path.getsize(newest_backup)),
+                        'date': datetime.fromtimestamp(os.path.getmtime(newest_backup)).isoformat()
+                    }
+        
+        except Exception as e:
+            logger.error(f"Error getting database info: {str(e)}")
+            info['error'] = str(e)
+        
+        return info
+    
+    def _backup_database(db_manager):
+        """Create a database backup"""
+        # Create backup directory if it doesn't exist
+        backup_dir = 'database/backups'
+        if not os.path.exists(backup_dir):
+            os.makedirs(backup_dir)
+        
+        # Generate backup file name
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        backup_path = None
+        
+        try:
+            # Different backup procedures for PostgreSQL and SQLite
+            if hasattr(db_manager, 'use_postgres') and db_manager.use_postgres:
+                # PostgreSQL backup using pg_dump
+                backup_file = os.path.join(backup_dir, f"postgres_backup_{timestamp}.sql")
+                
+                # Build pg_dump command
+                pg_host = os.environ.get('PGHOST')
+                pg_port = os.environ.get('PGPORT')
+                pg_user = os.environ.get('PGUSER')
+                pg_db = os.environ.get('PGDATABASE')
+                pg_password = os.environ.get('PGPASSWORD')
+                
+                # Set PGPASSWORD environment for pg_dump
+                current_env = os.environ.copy()
+                current_env['PGPASSWORD'] = pg_password
+                
+                # Run pg_dump
+                import subprocess
+                pg_dump_cmd = [
+                    'pg_dump',
+                    '-h', pg_host,
+                    '-p', pg_port,
+                    '-U', pg_user,
+                    '-d', pg_db,
+                    '-f', backup_file,
+                    '--format=plain'
+                ]
+                
+                try:
+                    subprocess.run(pg_dump_cmd, env=current_env, check=True)
+                    backup_path = backup_file
+                except subprocess.CalledProcessError:
+                    # Try alternative method - use db_manager to export data
+                    backup_file = os.path.join(backup_dir, f"postgres_data_export_{timestamp}.json")
+                    _export_data_to_json(db_manager, backup_file)
+                    backup_path = backup_file
+            else:
+                # SQLite backup using Python
+                backup_file = os.path.join(backup_dir, f"sqlite_backup_{timestamp}.db")
+                
+                # Copy the database file
+                import shutil
+                shutil.copy2(db_manager.db_path, backup_file)
+                backup_path = backup_file
+        
+        except Exception as e:
+            logger.error(f"Error creating database backup: {str(e)}")
+            # Try JSON export as fallback
+            try:
+                backup_file = os.path.join(backup_dir, f"data_export_fallback_{timestamp}.json")
+                _export_data_to_json(db_manager, backup_file)
+                backup_path = backup_file
+            except Exception as json_err:
+                logger.error(f"JSON export fallback failed: {str(json_err)}")
+                raise
+        
+        return backup_path
+    
+    def _export_data_to_json(db_manager, output_file):
+        """Export database data to JSON file"""
+        data = {}
+        
+        # Get tables
+        if hasattr(db_manager, 'use_postgres') and db_manager.use_postgres:
+            tables_query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
+        else:
+            tables_query = "SELECT name FROM sqlite_master WHERE type='table'"
+        
+        tables_result = db_manager.execute_query(tables_query)
+        if tables_result:
+            tables = [row[0] for row in tables_result]
+            
+            # Export data from each table
+            for table in tables:
+                try:
+                    query = f"SELECT * FROM {table}"
+                    rows = db_manager.execute_query(query)
+                    
+                    # Get column names
+                    if hasattr(db_manager, 'use_postgres') and db_manager.use_postgres:
+                        col_query = f"""
+                            SELECT column_name FROM information_schema.columns
+                            WHERE table_schema = 'public' AND table_name = '{table}'
+                            ORDER BY ordinal_position
+                        """
+                        col_result = db_manager.execute_query(col_query)
+                        columns = [row[0] for row in col_result]
+                    else:
+                        cursor = db_manager.get_cursor()
+                        cursor.execute(f"PRAGMA table_info({table})")
+                        columns = [row[1] for row in cursor.fetchall()]
+                    
+                    # Convert rows to dictionaries
+                    table_data = []
+                    for row in rows:
+                        row_dict = {columns[i]: row[i] for i in range(len(columns))}
+                        table_data.append(row_dict)
+                    
+                    data[table] = table_data
+                except Exception as e:
+                    logger.error(f"Error exporting data from table {table}: {str(e)}")
+        
+        # Write data to JSON file
+        with open(output_file, 'w') as f:
+            json.dump(data, f, default=str)
+    
+    def _optimize_database(db_manager):
+        """Optimize database performance"""
+        result = {
+            'vacuum': False,
+            'analyze': False,
+            'indices': [],
+            'errors': []
+        }
+        
+        try:
+            # Different optimizations for PostgreSQL and SQLite
+            if hasattr(db_manager, 'use_postgres') and db_manager.use_postgres:
+                # PostgreSQL optimizations
+                try:
+                    db_manager.execute_query("VACUUM ANALYZE")
+                    result['vacuum'] = True
+                    result['analyze'] = True
+                except Exception as e:
+                    result['errors'].append(f"VACUUM ANALYZE failed: {str(e)}")
+                
+                # Update table statistics
+                try:
+                    # Get tables
+                    tables_query = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
+                    tables_result = db_manager.execute_query(tables_query)
+                    
+                    if tables_result:
+                        tables = [row[0] for row in tables_result]
+                        
+                        # Analyze each table
+                        for table in tables:
+                            try:
+                                db_manager.execute_query(f"ANALYZE {table}")
+                                result['indices'].append(f"Analyzed {table}")
+                            except Exception as e:
+                                result['errors'].append(f"ANALYZE {table} failed: {str(e)}")
+                except Exception as e:
+                    result['errors'].append(f"Error updating table statistics: {str(e)}")
+                
+            else:
+                # SQLite optimizations
+                try:
+                    conn = sqlite3.connect(db_manager.db_path)
+                    cursor = conn.cursor()
+                    
+                    # VACUUM
+                    cursor.execute("VACUUM")
+                    result['vacuum'] = True
+                    
+                    # ANALYZE
+                    cursor.execute("ANALYZE")
+                    result['analyze'] = True
+                    
+                    # Get indices
+                    cursor.execute("SELECT name FROM sqlite_master WHERE type='index'")
+                    indices = [row[0] for row in cursor.fetchall()]
+                    result['indices'] = indices
+                    
+                    conn.close()
+                except Exception as e:
+                    result['errors'].append(f"SQLite optimization failed: {str(e)}")
+        
+        except Exception as e:
+            result['errors'].append(f"Database optimization failed: {str(e)}")
+        
+        return result
+    
+    def _get_system_performance():
+        """Get system performance metrics"""
+        performance = {
+            'cpu': {},
+            'memory': {},
+            'disk': {},
+            'uptime': {},
+            'process': {}
+        }
+        
+        try:
+            # CPU metrics
+            performance['cpu']['percent'] = psutil.cpu_percent(interval=1)
+            performance['cpu']['count'] = psutil.cpu_count()
+            performance['cpu']['per_cpu'] = psutil.cpu_percent(interval=0.1, percpu=True)
+            
+            # Memory metrics
+            memory = psutil.virtual_memory()
+            performance['memory']['total'] = memory.total
+            performance['memory']['total_human'] = _format_size(memory.total)
+            performance['memory']['used'] = memory.used
+            performance['memory']['used_human'] = _format_size(memory.used)
+            performance['memory']['percent'] = memory.percent
+            
+            # Disk metrics
+            disk = psutil.disk_usage('/')
+            performance['disk']['total'] = disk.total
+            performance['disk']['total_human'] = _format_size(disk.total)
+            performance['disk']['used'] = disk.used
+            performance['disk']['used_human'] = _format_size(disk.used)
+            performance['disk']['percent'] = disk.percent
+            
+            # Uptime
+            boot_time = datetime.fromtimestamp(psutil.boot_time())
+            uptime = datetime.now() - boot_time
+            performance['uptime']['seconds'] = uptime.total_seconds()
+            performance['uptime']['formatted'] = _format_timedelta(uptime)
+            
+            # Process information
+            process = psutil.Process()
+            performance['process']['pid'] = process.pid
+            performance['process']['cpu_percent'] = process.cpu_percent(interval=1)
+            performance['process']['memory_percent'] = process.memory_percent()
+            performance['process']['memory_info'] = {
+                'rss': process.memory_info().rss,
+                'rss_human': _format_size(process.memory_info().rss),
+                'vms': process.memory_info().vms,
+                'vms_human': _format_size(process.memory_info().vms)
+            }
+            
+            # Process start time
+            start_time = datetime.fromtimestamp(process.create_time())
+            process_uptime = datetime.now() - start_time
+            performance['process']['uptime'] = {
+                'seconds': process_uptime.total_seconds(),
+                'formatted': _format_timedelta(process_uptime)
+            }
+            
+            # Get open files
+            try:
+                open_files = process.open_files()
+                performance['process']['open_files'] = len(open_files)
+            except:
+                performance['process']['open_files'] = -1
+            
+            # Get connections
+            try:
+                connections = process.connections()
+                performance['process']['connections'] = len(connections)
+            except:
+                performance['process']['connections'] = -1
+            
+            # Resource trends (last 1 hour)
+            performance['trends'] = _get_resource_trends()
+            
+        except Exception as e:
+            logger.error(f"Error getting system performance: {str(e)}")
+            performance['error'] = str(e)
+        
+        return performance
+    
+    def _get_resource_trends():
+        """Get resource usage trends over time"""
+        trends = {
+            'cpu': [],
+            'memory': [],
+            'timestamp': []
+        }
+        
+        try:
+            # Try to load previous resource data if available
+            trend_file = 'logs/resource_trends.json'
+            current_time = time.time()
+            
+            if os.path.exists(trend_file):
+                try:
+                    with open(trend_file, 'r') as f:
+                        saved_trends = json.load(f)
+                        
+                        # Filter to last hour
+                        one_hour_ago = current_time - 3600
+                        indices = []
+                        
+                        for i, ts in enumerate(saved_trends.get('timestamp', [])):
+                            if ts >= one_hour_ago:
+                                indices.append(i)
+                        
+                        # Get relevant data points
+                        if indices:
+                            trends['timestamp'] = [saved_trends['timestamp'][i] for i in indices]
+                            trends['cpu'] = [saved_trends['cpu'][i] for i in indices]
+                            trends['memory'] = [saved_trends['memory'][i] for i in indices]
+                except Exception as e:
+                    logger.warning(f"Error loading resource trends: {str(e)}")
+            
+            # Add current data point
+            trends['timestamp'].append(current_time)
+            trends['cpu'].append(psutil.cpu_percent())
+            trends['memory'].append(psutil.virtual_memory().percent)
+            
+            # Save updated trends
+            with open(trend_file, 'w') as f:
+                json.dump(trends, f)
+            
+        except Exception as e:
+            logger.error(f"Error getting resource trends: {str(e)}")
+        
+        return trends
+    
+    def _format_size(size_bytes):
+        """Format bytes to human-readable size"""
+        if size_bytes < 1024:
+            return f"{size_bytes} B"
+        
+        size_kb = size_bytes / 1024
+        if size_kb < 1024:
+            return f"{size_kb:.2f} KB"
+        
+        size_mb = size_kb / 1024
+        if size_mb < 1024:
+            return f"{size_mb:.2f} MB"
+        
+        size_gb = size_mb / 1024
+        return f"{size_gb:.2f} GB"
+    
+    def _format_timedelta(delta):
+        """Format timedelta to human-readable string"""
+        days = delta.days
+        hours, remainder = divmod(delta.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        
+        if days > 0:
+            return f"{days}d {hours}h {minutes}m {seconds}s"
+        elif hours > 0:
+            return f"{hours}h {minutes}m {seconds}s"
+        elif minutes > 0:
+            return f"{minutes}m {seconds}s"
+        else:
+            return f"{seconds}s"
+    
+    # Register blueprint with app
+    app.register_blueprint(dev_api)
+    
+    # Store DB Manager in app config for access by API endpoints
+    app.config['db_manager'] = app.config.get('db_manager', None)
+    
+    logger.info("Developer API routes initialized")
+    
     return dev_api
