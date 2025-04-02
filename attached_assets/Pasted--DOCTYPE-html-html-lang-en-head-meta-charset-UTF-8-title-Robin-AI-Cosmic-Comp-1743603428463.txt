@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Robin AI | Cosmic Companion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+            color: #aef;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        #user_input {
+            padding: 10px;
+            width: 70%;
+            font-size: 1rem;
+            border: 2px solid #00f0ff;
+            background-color: #111;
+            color: #fff;
+        }
+        button {
+            background-color: #00f0ff;
+            border: none;
+            padding: 10px 20px;
+            color: black;
+            font-weight: bold;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        #mic_button {
+            background-color: #6f00ff;
+        }
+        #response_area {
+            margin-top: 20px;
+            width: 80%;
+            min-height: 100px;
+            border: 1px solid #555;
+            padding: 20px;
+            background: #0f0f1f;
+            color: #aef;
+        }
+    </style>
+</head>
+<body>
+    <h1>Robin AI - Ask Me Anything</h1>
+    <input type="text" id="user_input" placeholder="Speak or type your question...">
+    <div>
+        <button id="send_button">Send</button>
+        <button id="mic_button">🎤</button>
+    </div>
+    <div id="response_area"></div>
+
+    <script>
+        document.getElementById("send_button").addEventListener("click", function() {
+            const userInput = document.getElementById("user_input").value;
+            fetch("/get_response", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: "user_input=" + encodeURIComponent(userInput),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const responseArea = document.getElementById("response_area");
+                responseArea.textContent = data.response || ("Error: " + data.error);
+            });
+        });
+
+        const micButton = document.getElementById("mic_button");
+        const inputField = document.getElementById("user_input");
+
+        micButton.addEventListener("click", () => {
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "en-US";
+            recognition.start();
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                inputField.value = transcript;
+            };
+        });
+    </script>
+</body>
+</html>
