@@ -226,6 +226,12 @@
                         </div>
                         <span class="status-indicator status-running"></span>
                     </div>
+                    <div class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-sms me-2"></i> SMS Notifications
+                        </div>
+                        <span class="status-indicator {% if stats.sms_available %}status-running{% else %}status-error{% endif %}"></span>
+                    </div>
                 </div>
                 
                 <div class="system-actions">
@@ -238,6 +244,9 @@
                     <button class="btn btn-secondary" id="retrain-emotion-btn">
                         <i class="fas fa-brain me-2"></i>Retrain Emotion Model
                     </button>
+                    <a href="/sms-notifications" class="btn btn-info">
+                        <i class="fas fa-sms me-2"></i>SMS Notifications
+                    </a>
                 </div>
             </div>
         </div>

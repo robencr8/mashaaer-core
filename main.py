@@ -21,6 +21,7 @@ from tts.tts_manager import TTSManager
 from auto_learning import AutoLearning
 from voice.recognition import VoiceRecognition
 from vision.face_detector import FaceDetector
+from twilio_handler import TwilioHandler
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -35,6 +36,7 @@ intent_classifier = IntentClassifier()
 voice_recognition = VoiceRecognition(config)
 face_detector = FaceDetector(config, db_manager)
 auto_learning = AutoLearning(db_manager)
+twilio_handler = TwilioHandler()
 from profile_manager import ProfileManager
 profile_manager = ProfileManager(db_manager)
 
@@ -167,10 +169,19 @@ def admin():
         'emotion_count': emotion_tracker.get_total_entries(),
         'face_profiles': face_detector.get_profile_count(),
         'system_status': core_launcher.get_system_status(),
-        'learning_status': learning_status
+        'learning_status': learning_status,
+        'sms_available': twilio_handler.is_available()
     }
 
     return render_template('admin.html', stats=system_stats, dev_mode=True)
+
+@app.route('/sms-notifications')
+def sms_notifications():
+    # Only accessible in developer mode
+    if not is_developer_mode():
+        return redirect(url_for('index'))
+        
+    return render_template('sms_notifications.html', dev_mode=True)
 
 @app.route('/session-report')
 def session_report():
@@ -843,6 +854,84 @@ def user_logout():
         return jsonify({'success': True})
     except Exception as e:
         logger.error(f"Error logging out: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+# SMS Notification Routes
+@app.route('/api/notifications/sms/status', methods=['GET'])
+def get_sms_status():
+    """Get SMS notification status"""
+    available = twilio_handler.is_available()
+    
+    return jsonify({
+        'success': True,
+        'available': available
+    })
+
+@app.route('/api/notifications/sms/send', methods=['POST'])
+def send_sms():
+    """Send SMS notification"""
+    # Only allow in developer mode
+    if not is_developer_mode():
+        return jsonify({'success': False, 'error': 'Developer mode required'}), 403
+    
+    # Get request parameters
+    data = request.json
+    phone_number = data.get('phone_number')
+    message = data.get('message')
+    
+    if not phone_number or not message:
+        return jsonify({'success': False, 'error': 'Phone number and message are required'}), 400
+    
+    # Check if SMS service is available
+    if not twilio_handler.is_available():
+        return jsonify({'success': False, 'error': 'SMS service is not available. Check Twilio credentials.'}), 503
+    
+    # Send the SMS
+    try:
+        result = twilio_handler.send_message(phone_number, message)
+        
+        if result:
+            return jsonify({'success': True, 'message': 'SMS sent successfully'})
+        else:
+            return jsonify({'success': False, 'error': 'Failed to send SMS'}), 500
+            
+    except Exception as e:
+        logger.error(f"SMS sending error: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/notifications/sms/alert', methods=['POST'])
+def send_sms_alert():
+    """Send a pre-formatted SMS alert notification"""
+    # Only allow in developer mode
+    if not is_developer_mode():
+        return jsonify({'success': False, 'error': 'Developer mode required'}), 403
+    
+    # Get request parameters
+    data = request.json
+    phone_number = data.get('phone_number')
+    notification_type = data.get('type', 'alert')  # Default to alert type
+    
+    if not phone_number:
+        return jsonify({'success': False, 'error': 'Phone number is required'}), 400
+    
+    # Check if SMS service is available
+    if not twilio_handler.is_available():
+        return jsonify({'success': False, 'error': 'SMS service is not available. Check Twilio credentials.'}), 503
+    
+    # Extract notification parameters
+    notification_params = {k: v for k, v in data.items() if k not in ['phone_number', 'type']}
+    
+    # Send the notification
+    try:
+        result = twilio_handler.send_notification(phone_number, notification_type, **notification_params)
+        
+        if result:
+            return jsonify({'success': True, 'message': f'{notification_type.capitalize()} notification sent successfully'})
+        else:
+            return jsonify({'success': False, 'error': 'Failed to send notification'}), 500
+            
+    except Exception as e:
+        logger.error(f"SMS notification error: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == "__main__":
