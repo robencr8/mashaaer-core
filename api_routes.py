@@ -66,6 +66,35 @@ def init_api(app, _db_manager, _emotion_tracker, _face_detector,
                 'description': 'Get system status and information about all subsystems',
                 'params': []
             },
+            '/api/analyze-emotion': {
+                'methods': ['POST'],
+                'description': 'Analyze text for emotional content using advanced algorithms',
+                'params': [
+                    {'name': 'text', 'type': 'string', 'required': True, 'description': 'Text to analyze for emotions'},
+                    {'name': 'context', 'type': 'array', 'default': None, 'description': 'Optional previous messages for context'},
+                    {'name': 'return_details', 'type': 'bool', 'default': True, 'description': 'Return detailed analysis or just primary emotion'}
+                ],
+                'example': {
+                    'text': 'I am feeling so happy today, everything is going well!', 
+                    'context': ['How are you?'], 
+                    'return_details': True
+                }
+            },
+            '/api/emotion-trends': {
+                'methods': ['GET'],
+                'description': 'Get detailed emotion trends and patterns analysis',
+                'params': [
+                    {'name': 'days', 'type': 'int', 'default': 7, 'description': 'Number of days to analyze'},
+                    {'name': 'include_wellbeing', 'type': 'bool', 'default': True, 'description': 'Include wellbeing score in results'}
+                ]
+            },
+            '/api/emotion-wellbeing': {
+                'methods': ['GET'],
+                'description': 'Get emotional wellbeing score based on recent emotion data',
+                'params': [
+                    {'name': 'days', 'type': 'int', 'default': 7, 'description': 'Number of days to analyze'}
+                ]
+            },
             '/api/emotion-data': {
                 'methods': ['GET'],
                 'description': 'Get emotion data for visualization',
@@ -681,14 +710,134 @@ def retrain_emotion_model():
                 'error': 'Developer mode required for model retraining'
             }), 403
         
-        # Trigger retraining
-        emotion_tracker.retrain_model()
+        # Trigger retraining with advanced algorithm
+        result = emotion_tracker.retrain_model()
         
         return jsonify({
             'success': True,
+            'result': result,
+            'message': 'Emotion model retraining complete',
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         })
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@api.route('/analyze-emotion', methods=['POST'])
+def analyze_emotion():
+    """
+    Analyze text for emotional content using advanced algorithms
+    
+    Request body:
+    {
+        "text": "Text to analyze for emotions",
+        "context": ["Optional previous messages for context"],
+        "return_details": true/false (optional, default: true)
+    }
+    """
+    try:
+        data = request.json
+        if not data or 'text' not in data:
+            return jsonify({'error': 'Missing required text parameter'}), 400
+            
+        text = data.get('text')
+        context = data.get('context')
+        return_details = data.get('return_details', True)
+        
+        # Log the request
+        logger.info(f"Emotion analysis request: {len(text)} chars, {len(context) if context else 0} context messages")
+        
+        if return_details:
+            # Use advanced analysis with full details
+            result = emotion_tracker.analyze_text_advanced(text, context)
+            
+            # Add timestamp
+            result['timestamp'] = datetime.now().isoformat()
+            
+            # Log the emotion automatically
+            session_id = _get_or_create_session_id()
+            emotion_tracker.log_emotion(
+                result['primary_emotion'], 
+                text, 
+                "text", 
+                result['intensity'], 
+                session_id
+            )
+            
+            return jsonify({
+                'success': True,
+                'result': result
+            })
+        else:
+            # Simple analysis, just return the primary emotion
+            emotion = emotion_tracker.analyze_text(text, context)
+            
+            # Log the emotion automatically
+            session_id = _get_or_create_session_id()
+            emotion_tracker.log_emotion(emotion, text, "text", 0.5, session_id)
+            
+            return jsonify({
+                'success': True,
+                'emotion': emotion,
+                'timestamp': datetime.now().isoformat()
+            })
+    except Exception as e:
+        logger.error(f"Error analyzing emotion: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@api.route('/emotion-trends', methods=['GET'])
+def get_emotion_trends():
+    """
+    Get detailed emotion trends and patterns analysis
+    
+    Query parameters:
+    - days: Number of days to analyze (default: 7)
+    - include_wellbeing: Include wellbeing score in results (default: true)
+    """
+    try:
+        days = request.args.get('days', default=7, type=int)
+        include_wellbeing = request.args.get('include_wellbeing', default='true') == 'true'
+        
+        # Get trend analysis
+        trends = emotion_tracker.analyze_emotion_trends(days)
+        
+        # Add wellbeing score if requested
+        if include_wellbeing:
+            wellbeing = emotion_tracker.get_emotional_wellbeing_score(days)
+            trends['wellbeing'] = wellbeing
+        
+        # Calculate changes from previous period if we have enough data
+        changes = emotion_tracker.detect_emotion_changes("day")
+        if changes and "error" not in changes:
+            trends['changes'] = changes
+            
+        return jsonify({
+            'success': True,
+            'trends': trends
+        })
+    except Exception as e:
+        logger.error(f"Error getting emotion trends: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@api.route('/emotion-wellbeing', methods=['GET'])
+def get_emotion_wellbeing():
+    """
+    Get emotional wellbeing score based on recent emotion data
+    
+    Query parameters:
+    - days: Number of days to analyze (default: 7)
+    """
+    try:
+        days = request.args.get('days', default=7, type=int)
+        
+        # Get wellbeing score and assessment
+        wellbeing = emotion_tracker.get_emotional_wellbeing_score(days)
+        
+        return jsonify({
+            'success': True,
+            'wellbeing': wellbeing
+        })
+    except Exception as e:
+        logger.error(f"Error calculating wellbeing score: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 @api.route('/sessions', methods=['GET'])
@@ -1243,7 +1392,7 @@ def send_sms_alert():
 
 @api.route('/session-data', methods=['GET'])
 def get_session_data():
-    """Get comprehensive data for a specific session"""
+    """Get comprehensive data for a specific session including emotion analysis"""
     try:
         # Get session ID from query parameters or use current session
         session_id = request.args.get('session_id', None)
@@ -1371,6 +1520,19 @@ def get_session_data():
                 # If there's any error in calculation, use default
                 stats['duration'] = 'N/A'
         
+        # Get advanced emotion analysis if we have enough data
+        advanced_analysis = None
+        if len(emotion_timeline) >= 5:
+            try:
+                # Get emotional wellbeing for this session
+                advanced_analysis = {
+                    'wellbeing': emotion_tracker.get_emotional_wellbeing_score(),
+                    'patterns': emotion_tracker.detect_emotion_changes("day"),
+                    'timestamp': datetime.now().isoformat()
+                }
+            except Exception as e:
+                logger.error(f"Error getting advanced emotion analysis: {e}")
+                
         return jsonify({
             'success': True,
             'session': {
@@ -1384,7 +1546,8 @@ def get_session_data():
             'emotion_timeline': emotion_timeline,
             'interactions': interactions,
             'face_recognitions': face_recognitions,
-            'stats': stats
+            'stats': stats,
+            'advanced_analysis': advanced_analysis
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500

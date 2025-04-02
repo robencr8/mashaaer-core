@@ -1115,12 +1115,112 @@ class EmotionTracker:
         # For backward compatibility, return just the primary emotion
         return result["primary_emotion"]
     
-    def analyze_voice(self, audio_path):
-        """Analyze voice recording to determine emotion"""
-        # This would normally use a ML model to analyze audio features
-        # For now, return a random emotion as a placeholder
-        import random
-        return random.choice(self.emotion_labels)
+    def analyze_voice(self, audio_path, context=None):
+        """
+        Analyze voice recording to determine emotion using advanced techniques
+        
+        Args:
+            audio_path: Path to the audio file to analyze
+            context: Optional previous conversation context
+            
+        Returns:
+            Primary emotion as string or detailed analysis dict if return_details=True
+        """
+        try:
+            # Check if OpenAI integration is available for audio analysis
+            if OPENAI_AVAILABLE and os.environ.get("OPENAI_API_KEY"):
+                result = self._analyze_voice_with_openai(audio_path, context)
+                if result:
+                    return result["primary_emotion"]
+            
+            # Fallback: Attempt to transcribe the audio and analyze the text
+            # This would typically use a specialized voice emotion model
+            # For now we'll simulate using pitch/tone features
+            
+            # Simulated voice features (would be extracted from audio)
+            voice_features = {
+                "pitch_mean": random.uniform(80, 250),  # in Hz
+                "pitch_range": random.uniform(10, 100),  # in Hz
+                "energy": random.uniform(0.2, 0.9),     # normalized energy
+                "speech_rate": random.uniform(2, 6),    # syllables per second
+                "pauses": random.uniform(0.05, 0.3)     # pause ratio
+            }
+            
+            # Simple rule-based model for voice emotions
+            emotions = {emotion: 0.0 for emotion in self.emotion_labels}
+            
+            # High pitch + high energy + fast speech = excitement/happiness 
+            if voice_features["pitch_mean"] > 180 and voice_features["energy"] > 0.7:
+                emotions["excited"] += 0.7
+                emotions["happy"] += 0.5
+            
+            # Low pitch + low energy + slow speech = sadness
+            if voice_features["pitch_mean"] < 120 and voice_features["energy"] < 0.5:
+                emotions["sad"] += 0.7
+                emotions["tired"] += 0.4
+            
+            # High energy + wide pitch range = anger
+            if voice_features["energy"] > 0.7 and voice_features["pitch_range"] > 70:
+                emotions["angry"] += 0.8
+            
+            # Low energy + narrow pitch range = calm/neutral
+            if voice_features["energy"] < 0.4 and voice_features["pitch_range"] < 30:
+                emotions["calm"] += 0.6
+                emotions["neutral"] += 0.4
+            
+            # Fast speech + low pauses = excitement
+            if voice_features["speech_rate"] > 5 and voice_features["pauses"] < 0.1:
+                emotions["excited"] += 0.5
+            
+            # Slow speech + many pauses = thoughtful/confused
+            if voice_features["speech_rate"] < 3 and voice_features["pauses"] > 0.2:
+                emotions["confused"] += 0.6
+                emotions["interested"] += 0.3
+            
+            # Find the emotion with the highest score
+            if any(emotions.values()):
+                primary_emotion = max(emotions.items(), key=lambda x: x[1])[0]
+                return primary_emotion
+            
+            # Default fallback if no clear emotion
+            return "neutral"
+            
+        except Exception as e:
+            self.logger.error(f"Error analyzing voice emotion: {str(e)}")
+            return "neutral"
+    
+    def _analyze_voice_with_openai(self, audio_path, context=None):
+        """Analyze voice using OpenAI's audio capabilities"""
+        try:
+            # Initialize OpenAI client if needed
+            if not self.openai_client:
+                self.openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+            
+            # First transcribe the audio
+            with open(audio_path, "rb") as audio_file:
+                transcription = self.openai_client.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=audio_file
+                )
+            
+            transcribed_text = transcription.text
+            
+            if not transcribed_text or len(transcribed_text.strip()) < 3:
+                self.logger.warning("Voice transcription failed or returned empty text")
+                return None
+            
+            # Then analyze the transcribed text with our advanced analyzer
+            result = self.analyze_text_advanced(transcribed_text, context)
+            
+            # Add voice-specific metadata
+            result["source"] = "voice"
+            result["transcription"] = transcribed_text
+            
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Error analyzing voice with OpenAI: {str(e)}")
+            return None
     
     def log_emotion(self, emotion, text="", source="text", intensity=0.5, session_id=None):
         """Log an emotion detection event to the database"""

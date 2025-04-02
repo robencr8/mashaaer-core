@@ -68,7 +68,7 @@ init_api(app, db_manager, emotion_tracker, face_detector,
 
 # Initialize Developer API routes
 app.config['db_manager'] = db_manager
-init_developer_api(app)
+init_developer_api(app, emotion_tracker, db_manager)
 
 # Add /ask endpoint for direct AI interactions
 @app.route('/ask', methods=['POST'])

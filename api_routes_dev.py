@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 from flask import Blueprint, jsonify, request, current_app
 
 # Initialize the developer API blueprint
-def init_developer_api(app):
-    """Initialize the developer API endpoints"""
+def init_developer_api(app, emotion_tracker=None, db_manager=None):
+    """Initialize the developer API endpoints with access to subsystems"""
     
     dev_api = Blueprint('dev_api', __name__)
     
@@ -148,6 +148,188 @@ def init_developer_api(app):
             })
         except Exception as e:
             logger.error(f"Error optimizing database: {str(e)}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @dev_api.route('/api/dev/emotion/debug', methods=['GET'])
+    def get_emotion_debug_info():
+        """Get emotion tracking system debug information"""
+        try:
+            # Check if request has developer authorization
+            if not _is_developer_authorized():
+                return jsonify({'success': False, 'error': 'Developer authorization required'}), 403
+            
+            # Check if emotion tracker is available
+            if not emotion_tracker:
+                return jsonify({'success': False, 'error': 'Emotion tracker not available'}), 500
+            
+            # Get emotion system debug info
+            debug_info = {
+                'status': 'active',
+                'version': 'advanced-2.0',
+                'last_analysis': None,
+                'models': {
+                    'openai_available': hasattr(emotion_tracker, '_analyze_with_openai'),
+                    'rule_based_available': hasattr(emotion_tracker, '_analyze_with_rules'),
+                    'pattern_recognition': hasattr(emotion_tracker, '_update_pattern_data')
+                },
+                'capabilities': {
+                    'contextual_analysis': True,
+                    'emotion_intensity': True,
+                    'trend_analysis': True,
+                    'pattern_detection': True,
+                    'wellbeing_scoring': True
+                },
+                'data_stats': {}
+            }
+            
+            # Get emotion data stats
+            try:
+                total_entries = emotion_tracker.get_total_entries()
+                debug_info['data_stats']['total_entries'] = total_entries
+                
+                # Get distribution of emotions
+                emotions = emotion_tracker.get_emotion_history(days=30)
+                debug_info['data_stats']['distribution'] = emotions.get('distribution', {})
+                debug_info['data_stats']['timeline_entries'] = len(emotions.get('timeline', []))
+                
+                # Get emotion by source
+                sources_query = """
+                    SELECT source, COUNT(*) as count 
+                    FROM emotion_data 
+                    GROUP BY source
+                """
+                if db_manager:
+                    sources = db_manager.execute_query(sources_query)
+                    if sources:
+                        debug_info['data_stats']['sources'] = {src[0]: src[1] for src in sources}
+            except Exception as e:
+                debug_info['data_stats']['error'] = str(e)
+            
+            return jsonify({
+                'success': True,
+                'debug_info': debug_info
+            })
+        except Exception as e:
+            logger.error(f"Error getting emotion debug info: {str(e)}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @dev_api.route('/api/dev/emotion/test', methods=['POST'])
+    def test_emotion_analysis():
+        """Test emotion analysis with sample text"""
+        try:
+            # Check if request has developer authorization
+            if not _is_developer_authorized():
+                return jsonify({'success': False, 'error': 'Developer authorization required'}), 403
+            
+            # Check if emotion tracker is available
+            if not emotion_tracker:
+                return jsonify({'success': False, 'error': 'Emotion tracker not available'}), 500
+            
+            # Get request data
+            data = request.json
+            if not data or 'text' not in data:
+                return jsonify({'success': False, 'error': 'Text is required for testing'}), 400
+            
+            text = data.get('text')
+            context = data.get('context', [])
+            
+            # Run advanced analysis
+            advanced_result = emotion_tracker.analyze_text_advanced(text, context)
+            
+            # Run regular analysis for comparison
+            simple_result = emotion_tracker.analyze_text(text, context)
+            
+            # Compare results
+            comparison = {
+                'match': advanced_result.get('primary_emotion') == simple_result,
+                'advanced': advanced_result.get('primary_emotion'),
+                'simple': simple_result,
+                'confidence': advanced_result.get('confidence', 0.0),
+                'intensity': advanced_result.get('intensity', 0.0)
+            }
+            
+            return jsonify({
+                'success': True,
+                'advanced_result': advanced_result,
+                'simple_result': simple_result,
+                'comparison': comparison,
+                'timestamp': datetime.now().isoformat()
+            })
+        except Exception as e:
+            logger.error(f"Error testing emotion analysis: {str(e)}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
+    @dev_api.route('/api/dev/emotion/settings', methods=['GET', 'POST'])
+    def manage_emotion_settings():
+        """Get or update emotion tracking settings"""
+        try:
+            # Check if request has developer authorization
+            if not _is_developer_authorized():
+                return jsonify({'success': False, 'error': 'Developer authorization required'}), 403
+            
+            # Check if emotion tracker is available
+            if not emotion_tracker:
+                return jsonify({'success': False, 'error': 'Emotion tracker not available'}), 500
+            
+            # GET request - return current settings
+            if request.method == 'GET':
+                settings = {
+                    'openai_enabled': getattr(emotion_tracker, 'use_openai', True),
+                    'pattern_tracking_enabled': getattr(emotion_tracker, 'use_pattern_tracking', True),
+                    'contextual_analysis_enabled': getattr(emotion_tracker, 'use_contextual_analysis', True),
+                    'default_intensity': getattr(emotion_tracker, 'default_intensity', 0.5),
+                    'min_confidence_threshold': getattr(emotion_tracker, 'min_confidence', 0.3),
+                    'primary_emotions': getattr(emotion_tracker, 'primary_emotions', 
+                                           ['joy', 'sadness', 'anger', 'fear', 'surprise', 'disgust', 'neutral']),
+                    'extended_emotions': getattr(emotion_tracker, 'extended_emotions', [])
+                }
+                
+                return jsonify({
+                    'success': True,
+                    'settings': settings
+                })
+            
+            # POST request - update settings
+            elif request.method == 'POST':
+                data = request.json
+                if not data:
+                    return jsonify({'success': False, 'error': 'No settings provided'}), 400
+                
+                # Update settings
+                updates = {}
+                
+                if 'openai_enabled' in data:
+                    setattr(emotion_tracker, 'use_openai', bool(data['openai_enabled']))
+                    updates['openai_enabled'] = bool(data['openai_enabled'])
+                
+                if 'pattern_tracking_enabled' in data:
+                    setattr(emotion_tracker, 'use_pattern_tracking', bool(data['pattern_tracking_enabled']))
+                    updates['pattern_tracking_enabled'] = bool(data['pattern_tracking_enabled'])
+                
+                if 'contextual_analysis_enabled' in data:
+                    setattr(emotion_tracker, 'use_contextual_analysis', bool(data['contextual_analysis_enabled']))
+                    updates['contextual_analysis_enabled'] = bool(data['contextual_analysis_enabled'])
+                
+                if 'default_intensity' in data:
+                    value = float(data['default_intensity'])
+                    if 0.0 <= value <= 1.0:
+                        setattr(emotion_tracker, 'default_intensity', value)
+                        updates['default_intensity'] = value
+                
+                if 'min_confidence_threshold' in data:
+                    value = float(data['min_confidence_threshold'])
+                    if 0.0 <= value <= 1.0:
+                        setattr(emotion_tracker, 'min_confidence', value)
+                        updates['min_confidence_threshold'] = value
+                
+                return jsonify({
+                    'success': True,
+                    'updated': updates,
+                    'message': 'Emotion tracking settings updated successfully'
+                })
+                
+        except Exception as e:
+            logger.error(f"Error managing emotion settings: {str(e)}")
             return jsonify({'success': False, 'error': str(e)}), 500
     
     @dev_api.route('/api/dev/system/performance', methods=['GET'])
