@@ -33,6 +33,27 @@ def init_api(app, _db_manager, _emotion_tracker, _face_detector,
     
     # Register the blueprint
     app.register_blueprint(api, url_prefix='/api')
+    
+    # Configure logging for all API requests
+    @app.before_request
+    def log_api_request():
+        if request.path.startswith('/api/'):
+            api_info = {
+                'endpoint': request.path,
+                'method': request.method,
+                'args': {k: v for k, v in request.args.items()},
+                'content_type': request.content_type,
+                'has_json': request.is_json
+            }
+            
+            # Add JSON data if available
+            if request.is_json:
+                try:
+                    api_info['json'] = request.get_json()
+                except:
+                    api_info['json'] = 'Error parsing JSON'
+                    
+            print(f"🔍 API Request: {api_info}")
 
 # API Helper functions
 def _get_or_create_session_id():
@@ -348,10 +369,39 @@ def get_profiles():
         
         return jsonify({
             'profiles': profiles,
-            'count': len(profiles)
+            'count': len(profiles),
+            'success': True
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': str(e), 'success': False}), 500
+
+@api.route('/profile/<name>', methods=['GET'])
+def get_profile(name):
+    """Get a specific profile by name"""
+    try:
+        if not face_detector:
+            return jsonify({'error': 'Face detection not available', 'success': False}), 503
+        
+        # Get all profiles and find the one with matching name
+        profiles = face_detector.get_all_profiles()
+        profile = next((p for p in profiles if p.get('name') == name), None)
+        
+        if not profile:
+            return jsonify({'error': f'Profile not found for name: {name}', 'success': False}), 404
+        
+        # Add emotion data if available
+        try:
+            # Get the primary emotion from the emotion tracker
+            profile['primary_emotion'] = emotion_tracker.get_primary_emotion_for_name(name)
+        except:
+            profile['primary_emotion'] = 'neutral'
+        
+        return jsonify({
+            'profile': profile,
+            'success': True
+        })
+    except Exception as e:
+        return jsonify({'error': str(e), 'success': False}), 500
 
 @api.route('/log-recognition', methods=['POST'])
 def log_face_recognition():
@@ -477,6 +527,122 @@ def get_sessions():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@api.route('/sms', methods=['POST'])
+def send_sms():
+    """Send SMS notification via Twilio"""
+    try:
+        data = request.json
+        to_number = data.get('to_number')
+        message = data.get('message')
+        
+        if not to_number or not message:
+            return jsonify({
+                'success': False,
+                'error': 'Both to_number and message are required'
+            }), 400
+            
+        # Initialize Twilio handler
+        from twilio_handler import TwilioHandler
+        twilio_handler = TwilioHandler()
+        
+        # Check if Twilio is available
+        if not twilio_handler.is_available():
+            return jsonify({
+                'success': False,
+                'error': 'Twilio service not available. Check credentials.'
+            }), 503
+            
+        # Send the message
+        try:
+            result = twilio_handler.send_message(to_number, message)
+            
+            if result:
+                return jsonify({
+                    'success': True,
+                    'message': 'SMS sent successfully',
+                    'to': to_number
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Failed to send SMS'
+                }), 500
+        except Exception as e:
+            error_msg = str(e)
+            if "Invalid 'To' Phone Number" in error_msg:
+                return jsonify({
+                    'success': False,
+                    'error': f'Invalid phone number format: {to_number}. Use E.164 format (+[country code][number]).',
+                    'details': error_msg
+                }), 400
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Twilio error occurred',
+                    'details': error_msg
+                }), 500
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@api.route('/sms-alert', methods=['POST'])
+def send_sms_alert():
+    """Send SMS notification with pre-formatted alert message"""
+    try:
+        data = request.json
+        to_number = data.get('to_number')
+        alert_type = data.get('alert_type', 'default')
+        alert_data = data.get('alert_data', {})
+        
+        if not to_number:
+            return jsonify({
+                'success': False,
+                'error': 'to_number is required'
+            }), 400
+            
+        # Initialize Twilio handler
+        from twilio_handler import TwilioHandler
+        twilio_handler = TwilioHandler()
+        
+        # Check if Twilio is available
+        if not twilio_handler.is_available():
+            return jsonify({
+                'success': False,
+                'error': 'Twilio service not available. Check credentials.'
+            }), 503
+            
+        # Send the notification with the specified alert type
+        try:
+            result = twilio_handler.send_notification(to_number, alert_type, **alert_data)
+            
+            if result:
+                return jsonify({
+                    'success': True,
+                    'message': 'SMS alert sent successfully',
+                    'to': to_number,
+                    'alert_type': alert_type
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Failed to send SMS alert'
+                }), 500
+        except Exception as e:
+            error_msg = str(e)
+            if "Invalid 'To' Phone Number" in error_msg:
+                return jsonify({
+                    'success': False,
+                    'error': f'Invalid phone number format: {to_number}. Use E.164 format (+[country code][number]).',
+                    'details': error_msg
+                }), 400
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': 'Twilio error occurred',
+                    'details': error_msg
+                }), 500
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @api.route('/session-data', methods=['GET'])
 def get_session_data():

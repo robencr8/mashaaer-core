@@ -504,7 +504,29 @@ def delete_face_profile(profile_id):
         logger.error(f"Error deleting face profile: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-# Profile API route moved to api_routes.py
+@app.route("/api/profile/<name>")
+def get_profile(name):
+    try:
+        # Get profile by name
+        profiles = face_detector.get_all_profiles()
+        profile = next((p for p in profiles if p['name'] == name), None)
+
+        if not profile:
+            return jsonify({'success': False, 'error': 'Profile not found'}), 404
+
+        # Add emotion data if available
+        try:
+            # Get the primary emotion from the emotion tracker
+            profile['primary_emotion'] = emotion_tracker.get_primary_emotion_for_name(name)
+        except:
+            profile['primary_emotion'] = 'neutral'
+
+        return jsonify({'success': True, 'profile': profile})
+    except Exception as e:
+        logger.error(f"Error getting profile: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/set-language', methods=['POST'])
 def set_language():
     """Set the user's language preference"""
     try:
