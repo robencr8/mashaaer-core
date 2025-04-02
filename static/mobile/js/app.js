@@ -427,38 +427,73 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Get AI response
   function getAIResponse(userInput, emotion, intent) {
-    // Simulate thinking time (replace with real API call in production)
+    // Update status
     aiStatusText.textContent = 'Thinking...';
     
-    // Use the server's text-to-speech API to get a response
-    fetch('/api/speak', {
+    // Use the contextual response API
+    fetch('/api/contextual-response', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         text: userInput,
-        use_profile: true
+        emotion: emotion,
+        intent: intent
       })
     })
     .then(response => {
       if (!response.ok) {
-        throw new Error('Error getting response');
+        throw new Error('Error getting contextual response');
       }
       return response.json();
     })
     .then(data => {
       if (data.success) {
-        // Add the response message
-        addMessage(data.text, 'assistant', new Date());
+        // Get the contextual response
+        const responseText = data.response;
+        
+        // Add the response message to the chat
+        addMessage(responseText, 'assistant', new Date());
         
         // Reset status
         aiStatusText.textContent = 'Connected';
         
-        // Play audio if available
-        if (data.audio_path) {
-          playAudio(data.audio_path);
+        // Update personality display
+        const personalityType = document.getElementById('personalityType');
+        if (personalityType && data.personality) {
+          // Capitalize first letter of personality 
+          const formattedPersonality = data.personality.charAt(0).toUpperCase() + data.personality.slice(1);
+          personalityType.textContent = formattedPersonality;
+          
+          // Add a subtle visual effect to show personality change
+          personalityType.classList.add('highlight');
+          setTimeout(() => {
+            personalityType.classList.remove('highlight');
+          }, 1000);
         }
+        
+        // Now play the response using TTS
+        fetch('/api/speak', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            text: responseText,
+            use_profile: true,
+            language: data.language
+          })
+        })
+        .then(response => response.json())
+        .then(ttsData => {
+          if (ttsData.success && ttsData.audio_path) {
+            playAudio(ttsData.audio_path);
+          }
+        })
+        .catch(error => {
+          console.error('Error with TTS:', error);
+        });
       } else {
         throw new Error(data.error || 'Error getting response');
       }

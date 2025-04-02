@@ -1,7 +1,7 @@
 import os
 import logging
 import json
-from flask import Flask, render_template, request, jsonify, Response, redirect, url_for
+from flask import Flask, render_template, request, jsonify, Response, redirect, url_for, session
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 import threading
@@ -21,6 +21,7 @@ from tts.tts_manager import TTSManager
 from auto_learning import AutoLearning
 from voice.recognition import VoiceRecognition
 from vision.face_detector import FaceDetector
+from context_assistant import ContextAssistant
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -37,6 +38,9 @@ face_detector = FaceDetector(config, db_manager)
 auto_learning = AutoLearning(db_manager)
 from profile_manager import ProfileManager
 profile_manager = ProfileManager(db_manager)
+
+# Initialize context assistant with all required components
+context_assistant = ContextAssistant(db_manager, profile_manager, emotion_tracker, intent_classifier)
 
 # Initialize API routes
 from api_routes import init_api
@@ -385,6 +389,39 @@ def emotion_data():
     days = request.args.get('days', 7, type=int)
     emotions = emotion_tracker.get_emotion_history(days=days)
     return jsonify(emotions)
+
+@app.route('/api/contextual-response', methods=['POST'])
+def get_contextual_response():
+    """Get a contextual, personality-driven response from Robin AI"""
+    try:
+        # Get user input from request
+        data = request.json
+        user_input = data.get('text', '')
+        
+        if not user_input:
+            return jsonify({'error': 'No text provided'}), 400
+            
+        # Get optional params if provided
+        emotion = data.get('emotion', None)
+        intent = data.get('intent', None)
+        
+        # Generate contextual response
+        response = context_assistant.get_personality_response(user_input, emotion, intent)
+        
+        # Get the current profile for additional info
+        profile = profile_manager.get_current_profile()
+        language = profile.get('language', 'en')
+        
+        # Create and return response
+        return jsonify({
+            'success': True,
+            'response': response,
+            'personality': profile.get('preferred_tone', 'calm'),
+            'language': language
+        })
+    except Exception as e:
+        logger.error(f"Contextual response error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/add-face-profile', methods=['POST'])
 def add_face_profile():
