@@ -114,6 +114,7 @@ def index():
 
 @app.route('/startup')
 def startup():
+    tts_prompt("Welcome to Robin AI. Let's set up your preferences to start.")
     return render_template('startup.html')
 
 @app.route('/consent')
