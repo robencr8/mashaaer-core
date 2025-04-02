@@ -133,6 +133,16 @@
           </div>
           <div class="setting-info">
             <span class="info-text">Auto mode tries OpenAI first, then falls back to Ollama if needed</span>
+            <div class="model-statuses">
+              <div class="model-status">
+                <span class="model-status-dot" id="openaiStatus"></span>
+                <span class="model-status-text">OpenAI Status: <span id="openaiStatusText">Checking...</span></span>
+              </div>
+              <div class="model-status">
+                <span class="model-status-dot" id="ollamaStatus"></span>
+                <span class="model-status-text">Ollama Status: <span id="ollamaStatusText">Checking...</span></span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="setting-item link-item">
@@ -144,6 +154,80 @@
             <a href="/ai-models" class="settings-link">
               <i class="fas fa-external-link-alt"></i>
             </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section" id="developerModeSection">
+        <h3>Developer Mode</h3>
+        <div class="setting-item">
+          <div class="setting-label">
+            <i class="fas fa-code"></i>
+            <span>Developer Mode</span>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="developerModeToggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div id="developerModeOptions" class="dev-tools-container" style="display: none;">
+          <div class="setting-item">
+            <div class="setting-label">
+              <i class="fas fa-flask"></i>
+              <span>Test API Endpoint</span>
+            </div>
+            <div class="setting-value">
+              <a href="/test-ask" class="settings-link">
+                <i class="fas fa-external-link-alt"></i>
+              </a>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">
+              <i class="fas fa-bug"></i>
+              <span>Debug Mode</span>
+            </div>
+            <div class="setting-control">
+              <label class="toggle-switch">
+                <input type="checkbox" id="debugModeToggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">
+              <i class="fas fa-terminal"></i>
+              <span>Access Logs</span>
+            </div>
+            <div class="setting-value">
+              <a href="#" id="viewLogsBtn" class="settings-link">
+                <i class="fas fa-external-link-alt"></i>
+              </a>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">
+              <i class="fas fa-database"></i>
+              <span>Database Status</span>
+            </div>
+            <div class="setting-value">
+              <a href="#" id="checkDbStatusBtn" class="settings-link">
+                <i class="fas fa-sync-alt"></i>
+              </a>
+            </div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-label">
+              <i class="fas fa-server"></i>
+              <span>System Performance</span>
+            </div>
+            <div class="setting-value">
+              <a href="#" id="systemPerformanceBtn" class="settings-link">
+                <i class="fas fa-chart-bar"></i>
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -175,14 +259,142 @@
     <div class="modal" id="confirmModal">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>Confirm Action</h3>
+          <h3>تأكيد الإجراء</h3>
           <button class="close-button" id="closeConfirmModal">&times;</button>
         </div>
         <div class="modal-body">
           <p id="confirmMessage">Are you sure you want to proceed with this action?</p>
           <div class="confirm-actions">
-            <button id="cancelButton" class="cancel-button">Cancel</button>
-            <button id="confirmButton" class="send-button">Confirm</button>
+            <button id="cancelButton" class="cancel-button">إلغاء</button>
+            <button id="confirmButton" class="send-button">تأكيد</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Developer Mode Logs Modal -->
+    <div class="modal" id="logsModal">
+      <div class="modal-content modal-fullscreen">
+        <div class="modal-header">
+          <h3><i class="fas fa-terminal"></i> System Logs</h3>
+          <button class="close-button" id="closeLogsModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="logs-toolbar">
+            <select id="logTypeSelect" class="logs-select">
+              <option value="all">All Logs</option>
+              <option value="error">Error Logs</option>
+              <option value="api">API Requests</option>
+              <option value="system">System Events</option>
+              <option value="ml">ML Operations</option>
+              <option value="face">Face Recognition</option>
+              <option value="voice">Voice Recognition</option>
+            </select>
+            <div class="logs-filter">
+              <input type="text" id="logFilterInput" placeholder="Filter logs...">
+              <button id="clearLogsFilterBtn"><i class="fas fa-times"></i></button>
+            </div>
+            <button id="refreshLogsBtn" class="refresh-button"><i class="fas fa-sync-alt"></i></button>
+          </div>
+          <div class="logs-container">
+            <pre id="logsContent" class="logs-content"></pre>
+          </div>
+          <div class="logs-actions">
+            <button id="copyLogsBtn" class="logs-button"><i class="fas fa-copy"></i> Copy</button>
+            <button id="downloadLogsBtn" class="logs-button"><i class="fas fa-download"></i> Download</button>
+            <button id="clearLogsBtn" class="logs-button danger"><i class="fas fa-trash"></i> Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Developer Mode Database Modal -->
+    <div class="modal" id="dbStatusModal">
+      <div class="modal-content modal-fullscreen">
+        <div class="modal-header">
+          <h3><i class="fas fa-database"></i> Database Status</h3>
+          <button class="close-button" id="closeDbStatusModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="db-stats">
+            <div class="db-stat-item">
+              <div class="db-stat-label">Database Size</div>
+              <div class="db-stat-value" id="dbSize">Checking...</div>
+            </div>
+            <div class="db-stat-item">
+              <div class="db-stat-label">Total Tables</div>
+              <div class="db-stat-value" id="totalTables">Checking...</div>
+            </div>
+            <div class="db-stat-item">
+              <div class="db-stat-label">Total Records</div>
+              <div class="db-stat-value" id="totalRecords">Checking...</div>
+            </div>
+            <div class="db-stat-item">
+              <div class="db-stat-label">Last Backup</div>
+              <div class="db-stat-value" id="lastBackup">Never</div>
+            </div>
+          </div>
+          <div class="db-tables">
+            <h4>Database Tables</h4>
+            <div class="db-table-list" id="dbTableList">
+              <div class="loading-spinner"></div>
+            </div>
+          </div>
+          <div class="db-actions">
+            <button id="refreshDbBtn" class="db-button"><i class="fas fa-sync-alt"></i> Refresh</button>
+            <button id="backupDbBtn" class="db-button"><i class="fas fa-save"></i> Backup</button>
+            <button id="optimizeDbBtn" class="db-button"><i class="fas fa-bolt"></i> Optimize</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- System Performance Modal -->
+    <div class="modal" id="systemPerformanceModal">
+      <div class="modal-content modal-fullscreen">
+        <div class="modal-header">
+          <h3><i class="fas fa-server"></i> System Performance</h3>
+          <button class="close-button" id="closeSystemPerformanceModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="performance-stats">
+            <div class="performance-stat-item">
+              <div class="performance-stat-label">CPU Usage</div>
+              <div class="performance-stat-value" id="cpuUsage">Checking...</div>
+              <div class="performance-stat-chart">
+                <div class="chart-placeholder" id="cpuChart"></div>
+              </div>
+            </div>
+            <div class="performance-stat-item">
+              <div class="performance-stat-label">Memory Usage</div>
+              <div class="performance-stat-value" id="memoryUsage">Checking...</div>
+              <div class="performance-stat-chart">
+                <div class="chart-placeholder" id="memoryChart"></div>
+              </div>
+            </div>
+            <div class="performance-stat-item">
+              <div class="performance-stat-label">API Response Time</div>
+              <div class="performance-stat-value" id="apiResponseTime">Checking...</div>
+              <div class="performance-stat-chart">
+                <div class="chart-placeholder" id="apiChart"></div>
+              </div>
+            </div>
+            <div class="performance-stat-item">
+              <div class="performance-stat-label">Active Sessions</div>
+              <div class="performance-stat-value" id="activeSessions">Checking...</div>
+            </div>
+          </div>
+          <div class="performance-actions">
+            <button id="refreshPerformanceBtn" class="performance-button"><i class="fas fa-sync-alt"></i> Refresh</button>
+            <div class="refresh-rate">
+              <label for="performanceRefreshRate">Refresh Rate:</label>
+              <select id="performanceRefreshRate">
+                <option value="0">Manual</option>
+                <option value="5" selected>5s</option>
+                <option value="10">10s</option>
+                <option value="30">30s</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>

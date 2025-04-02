@@ -525,6 +525,157 @@ textarea {
   font-size: 1.5rem;
 }
 
+/* Toast notifications */
+#toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: calc(100% - 2rem);
+  pointer-events: none;
+}
+
+.toast {
+  background-color: var(--secondary-color);
+  color: var(--text-color);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateX(100%);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  max-width: 100%;
+  position: relative;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.toast-icon {
+  font-size: 1.25rem;
+}
+
+.toast-message {
+  font-size: 0.9rem;
+  flex: 1;
+  padding-right: 0.5rem;
+}
+
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.toast-success {
+  border-left: 4px solid var(--success-color);
+}
+
+.toast-success .toast-icon {
+  color: var(--success-color);
+}
+
+.toast-error {
+  border-left: 4px solid var(--error-color);
+}
+
+.toast-error .toast-icon {
+  color: var(--error-color);
+}
+
+.toast-warning {
+  border-left: 4px solid var(--warning-color);
+}
+
+.toast-warning .toast-icon {
+  color: var(--warning-color);
+}
+
+.toast-info {
+  border-left: 4px solid var(--primary-color);
+}
+
+.toast-info .toast-icon {
+  color: var(--primary-color);
+}
+
+.toast-loading {
+  border-left: 4px solid var(--primary-color);
+}
+
+.toast-loading .toast-icon {
+  color: var(--primary-color);
+}
+
+/* Testing status indicators */
+.model-test-indicator,
+.model-status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.model-available {
+  background-color: var(--success-color);
+}
+
+.model-unavailable {
+  background-color: var(--error-color);
+}
+
+.model-unknown,
+.model-checking {
+  background-color: var(--warning-color);
+}
+
+.model-statuses {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.model-status {
+  display: flex;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.model-status-text {
+  color: var(--text-muted);
+}
+
+#openaiStatusText.available,
+#ollamaStatusText.available {
+  color: var(--success-color);
+}
+
+#openaiStatusText.unavailable,
+#ollamaStatusText.unavailable {
+  color: var(--error-color);
+}
+
+#openaiStatusText.checking,
+#ollamaStatusText.checking {
+  color: var(--warning-color);
+}
+
 /* Making sure the app looks good on larger screens too */
 @media (min-width: 640px) {
   .app-container {
@@ -532,5 +683,9 @@ textarea {
     margin: 0 auto;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     height: 100%;
+  }
+  
+  #toast-container {
+    max-width: 400px;
   }
 }

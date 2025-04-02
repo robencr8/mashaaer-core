@@ -61,9 +61,13 @@ model_router = AIModelRouter()
 
 # Initialize API routes
 from api_routes import init_api
+from api_routes_dev import init_developer_api
 init_api(app, db_manager, emotion_tracker, face_detector, 
          tts_manager, voice_recognition, intent_classifier, config,
          context_assistant, model_router)
+
+# Initialize Developer API routes
+init_developer_api(app)
 
 # Add /ask endpoint for direct AI interactions
 @app.route('/ask', methods=['POST'])
@@ -1648,6 +1652,177 @@ def mobile_settings():
 def ai_models_page():
     """AI Models status and testing page"""
     return render_template('ai_models.html', versioned_url=versioned_url)
+    
+# User settings API endpoints
+@app.route('/api/user/settings', methods=['GET'])
+def user_settings():
+    """Get or update user settings"""
+    try:
+        if request.method == 'GET':
+            # Get current settings from the database
+            settings = {}
+            default_settings = {
+                'language': 'en',
+                'darkMode': True,
+                'voiceStyle': 'default',
+                'voiceRecognition': True,
+                'storeHistory': True,
+                'faceRecognition': True,
+                'aiModelBackend': os.environ.get('MODEL_BACKEND', 'auto'),
+                'developerMode': is_developer_mode(),
+                'debugMode': os.environ.get('DEBUG', 'false').lower() == 'true'
+            }
+            
+            # Get values from database or use defaults
+            for key, default_value in default_settings.items():
+                try:
+                    value = db_manager.get_setting(key, str(default_value))
+                    
+                    # Convert string to proper types
+                    if isinstance(default_value, bool):
+                        # Handle string to boolean conversion
+                        if isinstance(value, str):
+                            settings[key] = value.lower() in ['true', '1', 'yes']
+                        else:
+                            settings[key] = bool(value)
+                    else:
+                        settings[key] = value
+                except Exception as e:
+                    logger.warning(f"Error getting setting {key}: {str(e)}")
+                    settings[key] = default_value
+            
+            return jsonify({
+                'success': True,
+                'settings': settings
+            })
+        
+        # Handle POST request (update settings)
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
+        
+        # Update only the specified settings
+        updated_settings = {}
+        for key, value in data.items():
+            try:
+                # Special handling for certain settings
+                if key == 'developerMode':
+                    # Only set developer mode if authorized
+                    if value and not is_developer_mode():
+                        if request.headers.get('X-Developer-Key') != os.environ.get('DEVELOPER_KEY', 'robin_dev_key'):
+                            continue  # Skip unauthorized developer mode enable
+                    set_developer_mode(value)
+                    updated_settings[key] = value
+                elif key == 'debugMode':
+                    # Only allow debug mode changes in developer mode
+                    if is_developer_mode():
+                        # Set in database
+                        db_manager.set_setting(key, str(value))
+                        # Try to update environment variable too
+                        os.environ['DEBUG'] = 'true' if value else 'false'
+                        updated_settings[key] = value
+                elif key == 'aiModelBackend':
+                    # Update both database and environment
+                    db_manager.set_setting(key, str(value))
+                    os.environ['MODEL_BACKEND'] = str(value)
+                    updated_settings[key] = value
+                else:
+                    # Standard setting
+                    db_manager.set_setting(key, str(value))
+                    updated_settings[key] = value
+            except Exception as e:
+                logger.error(f"Error updating setting {key}: {str(e)}")
+                return jsonify({
+                    'success': False,
+                    'error': f"Error updating setting {key}: {str(e)}"
+                }), 500
+        
+        return jsonify({
+            'success': True,
+            'updated': updated_settings
+        })
+        
+    except Exception as e:
+        logger.error(f"Error managing user settings: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/user/settings/reset', methods=['POST'])
+def reset_user_settings():
+    """Reset user settings to default"""
+    try:
+        # Default settings
+        default_settings = {
+            'language': 'en',
+            'darkMode': True,
+            'voiceStyle': 'default',
+            'voiceRecognition': True,
+            'storeHistory': True,
+            'faceRecognition': True,
+            'aiModelBackend': 'auto',
+        }
+        
+        # Don't reset developer mode or debug mode
+        preserve_settings = ['developerMode', 'debugMode']
+        
+        # Get current values of preserved settings
+        preserved_values = {}
+        for key in preserve_settings:
+            try:
+                preserved_values[key] = db_manager.get_setting(key, 'false')
+            except:
+                preserved_values[key] = 'false'
+        
+        # Delete all settings first
+        try:
+            db_manager.execute_query("DELETE FROM settings WHERE key NOT IN %s", (tuple(preserve_settings),))
+        except Exception as e:
+            logger.warning(f"Error deleting settings: {str(e)}")
+        
+        # Then insert default settings
+        for key, value in default_settings.items():
+            db_manager.set_setting(key, str(value))
+        
+        # Restore preserved settings
+        for key, value in preserved_values.items():
+            db_manager.set_setting(key, value)
+        
+        # Update MODEL_BACKEND environment variable
+        os.environ['MODEL_BACKEND'] = 'auto'
+        
+        return jsonify({
+            'success': True,
+            'message': 'Settings reset to default values'
+        })
+    except Exception as e:
+        logger.error(f"Error resetting user settings: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/user/logout', methods=['POST'])
+def user_logout():
+    """Log out the current user"""
+    try:
+        # Clear session data
+        session.clear()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Logged out successfully'
+        })
+    except Exception as e:
+        logger.error(f"Error logging out: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 @app.route('/test-ask')
 def test_ask_endpoint():
