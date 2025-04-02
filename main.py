@@ -966,6 +966,16 @@ def mobile_emotions():
     """Mobile app emotions page"""
     return render_template('mobile/emotions.html')
 
+@app.route('/mobile/help')
+def mobile_help():
+    """Mobile app help page."""
+    return render_template('mobile/help.html')
+
+@app.route('/mobile/contact')
+def mobile_contact():
+    """Mobile app contact page."""
+    return render_template('mobile/contact.html')
+
 @app.route('/mobile/profiles')
 def mobile_profiles():
     """Mobile app profiles page"""
