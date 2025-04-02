@@ -22,7 +22,7 @@ from tts.tts_manager import TTSManager
 from auto_learning import AutoLearning
 from voice.recognition import VoiceRecognition
 from vision.face_detector import FaceDetector
-from twilio_handler import TwilioHandler
+import twilio_api
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -39,7 +39,7 @@ intent_classifier = IntentClassifier()
 voice_recognition = VoiceRecognition(config)
 face_detector = FaceDetector(config, db_manager)
 auto_learning = AutoLearning(db_manager)
-twilio_handler = TwilioHandler()
+# Note: Twilio API is imported directly as needed
 from profile_manager import ProfileManager
 profile_manager = ProfileManager(db_manager)
 
@@ -192,6 +192,10 @@ def admin():
 
     # Get AI learning stats
     learning_status = auto_learning.get_learning_status()
+    
+    # Check Twilio availability using our new API
+    import twilio_api
+    sms_available = twilio_api.is_twilio_configured()
 
     system_stats = {
         'uptime': core_launcher.get_uptime(),
@@ -200,7 +204,7 @@ def admin():
         'face_profiles': face_detector.get_profile_count(),
         'system_status': core_launcher.get_system_status(),
         'learning_status': learning_status,
-        'sms_available': twilio_handler.is_available()
+        'sms_available': sms_available
     }
 
     return render_template('admin.html', stats=system_stats, dev_mode=True)
@@ -211,18 +215,18 @@ def sms_notifications():
     if not is_developer_mode():
         return redirect(url_for('index'))
     
-    # Initialize Twilio handler
-    twilio_handler = TwilioHandler()
+    # Import Twilio API helpers
+    import twilio_api
     
     # Check if Twilio is available
-    twilio_status = twilio_handler.is_available()
+    twilio_status = twilio_api.is_twilio_configured()
     
     # Get Twilio account information (truncated for security)
     twilio_sid = os.environ.get('TWILIO_ACCOUNT_SID', '')
     twilio_phone = os.environ.get('TWILIO_PHONE_NUMBER', '')
     
-    # Get message history from Twilio handler
-    sms_history = twilio_handler.get_message_history()
+    # Get message history from Twilio API
+    sms_history = twilio_api.get_message_history()
     
     # Prepare status message
     twilio_status_message = "SMS notifications are active and ready." if twilio_status else "SMS notifications unavailable. Check Twilio credentials."
@@ -583,23 +587,24 @@ def send_sms():
         if not phone_number or not message:
             return jsonify({'success': False, 'error': 'Phone number and message are required'}), 400
             
-        # Initialize Twilio handler
-        twilio_handler = TwilioHandler()
+        # Import Twilio API helpers
+        import twilio_api
         
         # Check if Twilio is available
-        if not twilio_handler.is_available():
+        if not twilio_api.is_twilio_configured():
             return jsonify({
                 'success': False, 
                 'error': 'Twilio service is not available. Check credentials.'
             }), 503
             
         # Send the message
-        success = twilio_handler.send_message(phone_number, message)
+        result = twilio_api.send_sms(phone_number, message)
         
-        if success:
+        if result:
             return jsonify({
                 'success': True,
-                'message': f'SMS sent to {phone_number}'
+                'message': f'SMS sent to {phone_number}',
+                'sid': result.get('sid', '')
             })
         else:
             return jsonify({
@@ -625,46 +630,54 @@ def send_sms_alert():
         if not phone_number or not alert_type:
             return jsonify({'success': False, 'error': 'Phone number and alert type are required'}), 400
             
-        # Initialize Twilio handler
-        twilio_handler = TwilioHandler()
+        # Import Twilio API helpers
+        import twilio_api
         
         # Check if Twilio is available
-        if not twilio_handler.is_available():
+        if not twilio_api.is_twilio_configured():
             return jsonify({
                 'success': False, 
                 'error': 'Twilio service is not available. Check credentials.'
             }), 503
             
         # Prepare alert message based on type
-        success = False
+        result = None
+        title = ""
+        message = ""
+        level = "info"
+        
         if alert_type == 'emotion_detected':
-            success = twilio_handler.send_notification(
-                phone_number, 
-                'emotion', 
-                emotion='happiness', 
-                confidence=85
-            )
+            title = "Emotion Detection"
+            message = "An emotional response of 'happiness' was detected with 85% confidence."
+            level = "info"
         elif alert_type == 'face_recognized':
-            success = twilio_handler.send_notification(
-                phone_number, 
-                'face', 
-                name='User', 
-                time='now'
-            )
+            title = "Face Recognition"
+            message = "User was recognized in the system just now."
+            level = "info"
         elif alert_type == 'system_status':
             uptime = "3 hours, 45 minutes"
-            success = twilio_handler.send_notification(
-                phone_number, 
-                'system', 
-                message=f'Robin AI system status: Online, uptime: {uptime}'
-            )
+            title = "System Status"
+            message = f"Robin AI system is online. Current uptime: {uptime}"
+            level = "info"
+        elif alert_type == 'warning':
+            title = "System Warning"
+            message = "System resources are running low. Please check the admin dashboard."
+            level = "warning"
+        elif alert_type == 'alert':
+            title = "Critical Alert"
+            message = "Multiple recognition failures detected. System might need maintenance."
+            level = "alert"
         else:
             return jsonify({'success': False, 'error': 'Invalid alert type'}), 400
             
-        if success:
+        # Send the notification
+        result = twilio_api.send_notification(phone_number, title, message, level)
+            
+        if result:
             return jsonify({
                 'success': True,
-                'message': f'Alert notification sent to {phone_number}'
+                'message': f'Alert notification sent to {phone_number}',
+                'sid': result.get('sid', '')
             })
         else:
             return jsonify({
@@ -683,11 +696,11 @@ def get_sms_status():
         return jsonify({'success': False, 'error': 'Not authorized'}), 403
         
     try:
-        # Initialize Twilio handler
-        twilio_handler = TwilioHandler()
+        # Import Twilio API helpers
+        import twilio_api
         
         # Check if Twilio is available
-        available = twilio_handler.is_available()
+        available = twilio_api.is_twilio_configured()
         
         return jsonify({
             'success': True,
@@ -707,20 +720,20 @@ def get_sms_history():
         return jsonify({'success': False, 'error': 'Not authorized'}), 403
         
     try:
-        # Initialize Twilio handler
-        twilio_handler = TwilioHandler()
+        # Import Twilio API helpers
+        import twilio_api
         
         # Get message history
-        messages = twilio_handler.get_message_history()
+        messages = twilio_api.get_message_history()
         
-        # Format messages for display
+        # Format messages for display (already in the correct format from twilio_api)
         history = []
         for msg in messages:
             history.append({
                 'to_number': msg.get('to', 'Unknown'),
-                'status': msg.get('status', 'unknown'),
-                'body': msg.get('body', ''),
-                'timestamp': msg.get('date_sent', '')
+                'status': msg.get('sid', 'unknown'),
+                'body': msg.get('message', ''),
+                'timestamp': msg.get('timestamp', '')
             })
             
         return jsonify({
@@ -1104,16 +1117,19 @@ def send_sms_legacy():
     if not to_number or not message:
         return jsonify({'success': False, 'error': 'Phone number and message are required'}), 400
     
+    # Import Twilio API helpers
+    import twilio_api
+    
     # Check if SMS service is available
-    if not twilio_handler.is_available():
+    if not twilio_api.is_twilio_configured():
         return jsonify({'success': False, 'error': 'SMS service is not available. Check Twilio credentials.'}), 503
     
     # Send the SMS
     try:
-        result = twilio_handler.send_message(to_number, message)
+        result = twilio_api.send_sms(to_number, message)
         
         if result:
-            return jsonify({'success': True, 'message': 'SMS sent successfully'})
+            return jsonify({'success': True, 'message': 'SMS sent successfully', 'sid': result.get('sid', '')})
         else:
             return jsonify({'success': False, 'error': 'Failed to send SMS'}), 500
             
@@ -1137,34 +1153,37 @@ def send_sms_alert_legacy():
     if not to_number:
         return jsonify({'success': False, 'error': 'Phone number is required'}), 400
     
+    # Import Twilio API helpers
+    import twilio_api
+    
     # Check if SMS service is available
-    if not twilio_handler.is_available():
+    if not twilio_api.is_twilio_configured():
         return jsonify({'success': False, 'error': 'SMS service is not available. Check Twilio credentials.'}), 503
     
     # Prepare notification parameters
-    notification_params = {'message': message}
+    title = notification_type.replace('_', ' ').title()
+    level = data.get('alert_level', 'info')
     
-    # Add additional parameters
-    alert_level = data.get('alert_level')
-    if alert_level:
-        notification_params['level'] = alert_level
-    
-    # Add emotion details if this is an emotion alert
+    # Customize message based on notification type
     if notification_type == 'emotion_detected':
-        notification_params['emotion'] = data.get('emotion', 'unknown')
-        notification_params['confidence'] = data.get('confidence', 90)
-    
-    # Add face details if this is a face recognition alert
-    if notification_type == 'face_recognized':
-        notification_params['name'] = data.get('name', 'someone')
-        notification_params['time'] = data.get('time', 'just now')
+        emotion = data.get('emotion', 'unknown')
+        confidence = data.get('confidence', 90)
+        message = f"Emotion detected: {emotion} with {confidence}% confidence"
+    elif notification_type == 'face_recognized':
+        name = data.get('name', 'someone')
+        time = data.get('time', 'just now')
+        message = f"Face recognized: {name} was seen {time}"
     
     # Send the notification
     try:
-        result = twilio_handler.send_notification(to_number, notification_type.split('_')[0], **notification_params)
+        result = twilio_api.send_notification(to_number, title, message, level)
         
         if result:
-            return jsonify({'success': True, 'message': f'Alert notification sent successfully'})
+            return jsonify({
+                'success': True, 
+                'message': 'Alert notification sent successfully',
+                'sid': result.get('sid', '')
+            })
         else:
             return jsonify({'success': False, 'error': 'Failed to send notification'}), 500
             

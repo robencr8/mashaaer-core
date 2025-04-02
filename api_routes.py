@@ -4,6 +4,7 @@ import time
 import uuid
 import logging
 import traceback
+import twilio_api
 from datetime import datetime, timedelta
 from flask import Blueprint, jsonify, request, session
 
@@ -291,8 +292,10 @@ def get_status():
         }
         
         # Notification service status
-        from twilio_handler import twilio_handler
-        twilio_status = twilio_handler.get_status()
+        twilio_status = {
+            'configured': twilio_api.is_twilio_configured(),
+            'from_number': os.environ.get('TWILIO_PHONE_NUMBER', '')
+        }
         status['notifications'] = {
             'provider': 'Twilio',
             'available': twilio_status['configured'],
@@ -974,7 +977,7 @@ def send_sms():
         logger.info(f"API: Attempting to send SMS to {sanitized_number}")
             
         # Send the message
-        result = twilio_handler.send_sms(to_number, message)
+        result = twilio_api.send_sms(to_number, message)
         
         if result.get('success', False):
             # Log success but with sanitized number for privacy
@@ -1313,7 +1316,9 @@ def send_sms_alert():
         logger.info(f"API: Attempting to send SMS alert ({alert_type}) to {sanitized_number}")
             
         # Send the notification with the specified alert type
-        result = twilio_handler.send_notification(to_number, alert_type, **alert_data)
+        title = alert_type.replace('_', ' ').title()
+        message = alert_data.get('message', f"Alert from Robin AI ({alert_type})")
+        result = twilio_api.send_notification(to_number, title, message, alert_type)
         
         if result.get('success', False):
             # Log success but with sanitized number for privacy
