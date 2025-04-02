@@ -23,7 +23,7 @@ class AIModelRouter:
     def __init__(self):
         """Initialize the AI Model Router with configuration from environment variables"""
         # Load configuration from environment variables
-        self.model_backend = os.environ.get("MODEL_BACKEND", "").lower()
+        self.model_backend = os.environ.get("MODEL_BACKEND", "auto").lower()
         self.ollama_base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
         self.openai_api_key = os.environ.get("OPENAI_API_KEY", "")
         
