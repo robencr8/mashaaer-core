@@ -1,0 +1,96 @@
+import os
+import openai
+from flask import Flask, render_template, request, jsonify
+
+app = Flask(__name__)
+
+# Set your OpenAI API key
+openai.api_key = os.environ.get("OPENAI_API_KEY")
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/get_response", methods=["POST"])
+def get_response():
+    user_input = request.form["user_input"]
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",  # Or another suitable model
+            messages=[
+                {"role": "system", "content": "You are a helpful AI assistant."},
+                {"role": "user", "content": user_input},
+            ],
+        )
+        ai_response = response["choices"][0]["message"]["content"]
+        return jsonify({"response": ai_response})
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+
+Explanation and Improvements:
+ * Environment Variable for API Key:
+   * The code now correctly uses os.environ.get("OPENAI_API_KEY") to retrieve the OpenAI API key. This is crucial for security. Never hardcode your API key directly into your code.
+   * On Replit, you should set this API key as a secret environment variable.
+ * Flask Structure:
+   * The code employs Flask, a web framework, to create a web application.
+   * @app.route("/") defines the root route, rendering the index.html template.
+   * @app.route("/get_response", methods=["POST"]) handles POST requests from the client-side JavaScript. This route receives the user's input and sends it to the OpenAI API.
+ * OpenAI API Interaction:
+   * The get_response function uses openai.ChatCompletion.create() to interact with the OpenAI API.
+   * It sends the user's input as a message to the API, along with a system message to set the AI's role.
+   * The API's response is extracted and sent back to the client as a JSON object.
+   * Error handling using try/except block.
+ * JSON Response:
+   * The API response is returned as a JSON object using jsonify(). This is essential for communicating with the client-side JavaScript.
+ * Running the Flask App:
+   * app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080))) starts the Flask development server.
+   * host="0.0.0.0" makes the app accessible from any network interface.
+   * port=int(os.environ.get("PORT", 8080)) uses the PORT environment variable (which Replit sets) or defaults to 8080.
+ * index.html (Example):
+   * You'll need an index.html file in the templates folder. Here's a basic example:
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Robin AI Companion</title>
+</head>
+<body>
+    <h1>Robin AI Companion</h1>
+    <input type="text" id="user_input">
+    <button id="send_button">Send</button>
+    <div id="response_area"></div>
+
+    <script>
+        document.getElementById("send_button").addEventListener("click", function() {
+            const userInput = document.getElementById("user_input").value;
+            fetch("/get_response", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: "user_input=" + encodeURIComponent(userInput),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.response) {
+                    document.getElementById("response_area").textContent = data.response;
+                } else if (data.error){
+                    document.getElementById("response_area").textContent = "Error: " + data.error;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+How to Use on Replit:
+ * Create a Replit: Create a new Python Flask Replit.
+ * Replace main.py: Replace the contents of main.py with the code above.
+ * Create templates/index.html: Create a templates folder and add the index.html file inside it.
+ * Set the API Key:
+   * Go to the "Secrets" tab (the lock icon in the left sidebar).
+   * Add a new secret with the key OPENAI_API_KEY and the value as your actual OpenAI API key.
+ * Run the Replit: Click the "Run" button. The web app should start, and you'll see a web view.
+ * Interact: Type your prompt into the input field and click "Send." The AI's response will appear below.

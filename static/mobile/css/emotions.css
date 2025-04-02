@@ -1,5 +1,54 @@
 /* Emotions page specific styles */
 
+/* Safari Speech Recognition Warning Styles */
+.speech-warning {
+  margin: 0 0.5rem 1rem;
+  background-color: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--border-radius);
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.warning-content {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+}
+
+.warning-content i.fa-exclamation-triangle {
+  color: #f59e0b;
+  font-size: 1.25rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.warning-content span {
+  flex-grow: 1;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--text-color);
+}
+
+.close-warning {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.close-warning:hover {
+  color: var(--text-color);
+}
+
 .page-title {
   text-align: center;
   padding: 1rem 0;

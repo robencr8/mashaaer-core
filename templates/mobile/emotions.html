@@ -35,6 +35,15 @@
       </div>
     </header>
 
+    <!-- Safari Speech Recognition Warning Banner -->
+    <div id="speechRecognitionWarning" class="speech-warning" style="display: none;">
+      <div class="warning-content">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>Voice recognition is not fully supported in Safari. For best experience, use Chrome or other browsers.</span>
+        <button id="closeSpeechWarning" class="close-warning"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+
     <div class="emotion-filters">
       <div class="filter-group">
         <label for="timeRange">Time Range:</label>
@@ -122,6 +131,33 @@
         }, 300);
       }, 3000);
     }
+    
+    // Check for Safari browser and SpeechRecognition support
+    document.addEventListener('DOMContentLoaded', function() {
+      // Detect Safari browser
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      
+      // Check if SpeechRecognition is supported
+      const hasSpeechRecognition = 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
+      
+      // Show warning if Safari and no SpeechRecognition support
+      if (isSafari && !hasSpeechRecognition) {
+        document.getElementById('speechRecognitionWarning').style.display = 'block';
+      }
+      
+      // Close button for warning banner
+      document.getElementById('closeSpeechWarning').addEventListener('click', function() {
+        document.getElementById('speechRecognitionWarning').style.display = 'none';
+        
+        // Set a flag in localStorage to remember the user's choice
+        localStorage.setItem('speechWarningDismissed', 'true');
+      });
+      
+      // Only show the warning if it hasn't been dismissed before
+      if (localStorage.getItem('speechWarningDismissed') === 'true') {
+        document.getElementById('speechRecognitionWarning').style.display = 'none';
+      }
+    });
     
     // Tab navigation
     document.querySelectorAll('.tab').forEach(tab => {
