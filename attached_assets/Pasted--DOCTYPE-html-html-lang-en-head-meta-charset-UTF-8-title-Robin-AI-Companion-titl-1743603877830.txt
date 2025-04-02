@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Robin AI Companion</title>
+  <style>
+    body {
+      background: radial-gradient(ellipse at center, #0a0a2a 0%, #000000 100%);
+      font-family: 'Orbitron', sans-serif;
+      color: #fff;
+      text-align: center;
+      padding: 60px;
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: #55e0ff;
+      text-shadow: 0 0 8px #55e0ff;
+    }
+    input {
+      width: 300px;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      background: #222;
+      color: white;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 30px;
+      font-size: 1em;
+      background: #55e0ff;
+      color: black;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #response_area {
+      margin-top: 30px;
+      font-size: 1.1em;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Robin AI</h1>
+  <p>“Your Companion from a Parallel Cosmic Realm”</p>
+  <input id="user_input" placeholder="Say something or type..." />
+  <button onclick="sendInput()">Send</button>
+  <button onclick="startListening()">🎤 Talk</button>
+  <div id="response_area"></div>
+
+  <script>
+    function sendInput(text = null) {
+      const userInput = text || document.getElementById("user_input").value;
+      fetch("/get_response", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: "user_input=" + encodeURIComponent(userInput),
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById("response_area").textContent = data.response || data.error;
+      });
+    }
+
+    function startListening() {
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        sendInput(transcript);
+      };
+
+      recognition.onerror = function(event) {
+        alert("Voice recognition error: " + event.error);
+      };
+    }
+  </script>
+</body>
+</html>
