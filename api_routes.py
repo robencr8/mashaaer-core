@@ -48,7 +48,7 @@ def _get_or_create_session_id():
         db_manager.execute_query(
             """
             INSERT INTO sessions (id, start_time, user_name, device_info, metadata)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s)
             """,
             (session['session_id'], timestamp, 'Anonymous', user_agent, json.dumps({}))
         )
@@ -93,7 +93,7 @@ def get_status():
             recent_recognitions = db_manager.execute_query(
                 """
                 SELECT name, timestamp FROM recognition_history 
-                WHERE name = ? AND datetime(timestamp) > datetime('now', '-30 minutes')
+                WHERE name = %s AND timestamp > NOW() - INTERVAL '30 minutes'
                 ORDER BY timestamp DESC LIMIT 1
                 """,
                 (developer_name,)
@@ -153,15 +153,15 @@ def get_face_recognition_data():
             query = """
                 SELECT name, timestamp, confidence, emotion, greeting 
                 FROM recognition_history
-                WHERE session_id = ?
-                ORDER BY timestamp DESC LIMIT ?
+                WHERE session_id = %s
+                ORDER BY timestamp DESC LIMIT %s
             """
             params = (session_id, limit)
         else:
             query = """
                 SELECT name, timestamp, confidence, emotion, greeting 
                 FROM recognition_history
-                ORDER BY timestamp DESC LIMIT ?
+                ORDER BY timestamp DESC LIMIT %s
             """
             params = (limit,)
         
@@ -208,9 +208,9 @@ def get_recent_conversations():
             query = """
                 SELECT user_input, response, timestamp, emotion, intent, session_id
                 FROM conversations
-                WHERE session_id = ?
+                WHERE session_id = %s
                 ORDER BY timestamp DESC
-                LIMIT ?
+                LIMIT %s
             """
             params = (session_id, limit)
         else:
@@ -218,7 +218,7 @@ def get_recent_conversations():
                 SELECT user_input, response, timestamp, emotion, intent, session_id
                 FROM conversations
                 ORDER BY timestamp DESC
-                LIMIT ?
+                LIMIT %s
             """
             params = (limit,)
         
@@ -255,9 +255,9 @@ def get_voice_logs():
             query = """
                 SELECT text, timestamp, language, emotion, intent, session_id
                 FROM voice_logs
-                WHERE session_id = ?
+                WHERE session_id = %s
                 ORDER BY timestamp DESC
-                LIMIT ?
+                LIMIT %s
             """
             params = (session_id, limit)
         else:
@@ -265,7 +265,7 @@ def get_voice_logs():
                 SELECT text, timestamp, language, emotion, intent, session_id
                 FROM voice_logs
                 ORDER BY timestamp DESC
-                LIMIT ?
+                LIMIT %s
             """
             params = (limit,)
         
@@ -331,7 +331,7 @@ def log_face_recognition():
         db_manager.execute_query(
             """
             INSERT INTO recognition_history (name, timestamp, confidence, emotion, greeting, session_id)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
             """,
             (name, timestamp, confidence, emotion, greeting, session_id)
         )
@@ -381,7 +381,7 @@ def retrain_emotion_model():
         recent_recognitions = db_manager.execute_query(
             """
             SELECT name, timestamp FROM recognition_history 
-            WHERE name = ? AND datetime(timestamp) > datetime('now', '-30 minutes')
+            WHERE name = %s AND timestamp > NOW() - INTERVAL '30 minutes'
             ORDER BY timestamp DESC LIMIT 1
             """,
             (developer_name,)
@@ -453,7 +453,7 @@ def get_session_data():
             """
             SELECT id, start_time, user_name, device_info, metadata
             FROM sessions
-            WHERE id = ?
+            WHERE id = %s
             """,
             (session_id,)
         )
@@ -468,7 +468,7 @@ def get_session_data():
         emotions_query = """
             SELECT emotion, COUNT(emotion) as count
             FROM emotion_data
-            WHERE session_id = ?
+            WHERE session_id = %s
             GROUP BY emotion
             ORDER BY count DESC
         """
@@ -482,7 +482,7 @@ def get_session_data():
         timeline_query = """
             SELECT emotion, timestamp, intensity, text, source
             FROM emotion_data
-            WHERE session_id = ?
+            WHERE session_id = %s
             ORDER BY timestamp ASC
         """
         timeline_data = db_manager.execute_query(timeline_query, (session_id,))
@@ -501,11 +501,11 @@ def get_session_data():
         interactions_query = """
             SELECT 'text' as source, user_input as text, timestamp, emotion, intent
             FROM conversations
-            WHERE session_id = ?
+            WHERE session_id = %s
             UNION ALL
             SELECT 'voice' as source, text, timestamp, emotion, intent
             FROM voice_logs
-            WHERE session_id = ?
+            WHERE session_id = %s
             ORDER BY timestamp DESC
         """
         interactions_data = db_manager.execute_query(interactions_query, (session_id, session_id))
@@ -524,7 +524,7 @@ def get_session_data():
         face_query = """
             SELECT name, timestamp, confidence, emotion, greeting
             FROM recognition_history
-            WHERE session_id = ?
+            WHERE session_id = %s
             ORDER BY timestamp DESC
         """
         face_data = db_manager.execute_query(face_query, (session_id,))

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Robin AI - Fourth Dimension Init</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(ellipse at center, #0e0e14 0%, #0b0c10 100%);
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .orb {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #00ffe7, #222);
+      box-shadow: 0 0 50px #00ffe755, 0 0 100px #00ffe722, inset 0 0 15px #ffffff22;
+      animation: float 4s ease-in-out infinite, pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 50px #00ffe755, 0 0 100px #00ffe722, inset 0 0 15px #ffffff22; }
+      50% { box-shadow: 0 0 80px #00ffe7aa, 0 0 150px #00ffe755, inset 0 0 25px #ffffff33; }
+    }
+
+    .intro-voice {
+      position: absolute;
+      bottom: 10vh;
+      text-align: center;
+      color: #00ffe7;
+      font-size: 1.2rem;
+      letter-spacing: 1px;
+      opacity: 0;
+      animation: fadeIn 4s ease 1s forwards;
+      font-style: italic;
+      text-shadow: 0 0 10px #00ffe7cc;
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body onload="setTimeout(playQuestion, 5000)">
+  <div class="orb"></div>
+  <div class="intro-voice">Soul Sync Engaged</div>
+  <audio autoplay>
+    <source src="/static/sfx/soul_sync_intro.mp3" type="audio/mpeg">
+  </audio>
+  <script>
+    const onboardingQuestions = [
+      "What's your name?",
+      "How do you want me to speak to you? Calm, serious, or playful?",
+      "What is your age?",
+      "Do you prefer dark or light mode?",
+      "Do you want to sync your soul forever?"
+    ];
+
+    let currentQuestion = 0;
+
+    function playQuestion() {
+      if (currentQuestion >= onboardingQuestions.length) {
+        finishOnboarding();
+        return;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(onboardingQuestions[currentQuestion]);
+      utterance.lang = 'en-US';
+      utterance.onend = () => {
+        startRecording();
+      };
+      speechSynthesis.speak(utterance);
+    }
+
+    function startRecording() {
+      console.log("🎙️ Listening for user response...");
+      setTimeout(() => {
+        currentQuestion++;
+        playQuestion();
+      }, 4000);
+    }
+
+    function finishOnboarding() {
+      console.log("✅ All questions recorded. Welcome, soul.");
+    }
+  </script>
+</body>
+</html>
