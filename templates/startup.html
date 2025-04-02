@@ -422,11 +422,11 @@
       });
     }
 
-    // Function to simulate speaking text (would use actual TTS in production)
+    // Function to speak text using the actual TTS API
     function speakText(text) {
       console.log('Speaking:', text);
 
-      // In production, this would call the TTS API
+      // Call actual TTS API
       fetch('/api/speak', {
         method: 'POST',
         headers: {
@@ -440,8 +440,11 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          // Audio will be played by the server or client depending on implementation
           console.log('TTS success:', data);
+          
+          // Create audio element to play the response
+          const audio = new Audio(data.audio_path);
+          audio.play().catch(e => console.error('Error playing audio:', e));
         } else {
           console.error('TTS error:', data.error);
         }

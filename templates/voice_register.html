@@ -265,6 +265,7 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="/static/js/voice_recorder.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     // Get language preference from local storage
@@ -300,6 +301,36 @@
       'complete': 100
     };
     
+    // Initialize voice recorder
+    const voiceRecorder = new VoiceRecorder({
+      onStart: () => {
+        console.log('Recording started');
+        document.getElementById(`${currentStep}-listening`).classList.add('active');
+      },
+      onStop: () => {
+        console.log('Recording stopped');
+      },
+      onResult: (data) => {
+        console.log('Voice recognition result:', data);
+        document.getElementById(`${currentStep}-listening`).classList.remove('active');
+        
+        // Process voice response
+        if (data.text) {
+          processResponse(currentStep, data.text);
+        }
+      },
+      onError: (error) => {
+        console.error('Voice recognition error:', error);
+        document.getElementById(`${currentStep}-listening`).classList.remove('active');
+        
+        // Alert the user to try again
+        alert(userLanguage === 'en' 
+          ? "Voice recognition failed. Please try again or use the buttons." 
+          : "فشل التعرف على الصوت. يرجى المحاولة مرة أخرى أو استخدام الأزرار.");
+      },
+      maxRecordingTime: 7000 // 7 seconds max
+    });
+    
     // Update progress bar
     function updateProgress(step) {
       document.getElementById('registration-progress').style.width = `${stepProgress[step]}%`;
@@ -318,6 +349,9 @@
       
       // Update progress
       updateProgress(step);
+      
+      // Update current step tracker
+      currentStep = step;
       
       // Start the step's process
       if (step !== 'complete') {
@@ -359,35 +393,17 @@
     
     // Start listening for voice input
     function startListening(step) {
-      document.getElementById(`${step}-listening`).classList.add('active');
-      
-      // In a real implementation, this would start the voice recognition
-      // For this demo, we're simulating with timeouts
-      
-      // Simulate voice recognition with mock responses
-      setTimeout(() => {
-        let response = '';
+      try {
+        voiceRecorder.start();
+      } catch (error) {
+        console.error('Failed to start voice recorder:', error);
+        document.getElementById(`${step}-listening`).classList.remove('active');
         
-        switch(step) {
-          case 'name':
-            response = userLanguage === 'en' ? 'John Smith' : 'محمد علي';
-            break;
-          case 'age':
-            response = '35';
-            break;
-          case 'nickname':
-            response = userLanguage === 'en' ? 'John' : 'محمد';
-            break;
-          case 'voice':
-            response = userLanguage === 'en' ? 'I prefer a soft voice' : 'أفضل صوت ناعم';
-            break;
-          case 'theme':
-            response = userLanguage === 'en' ? 'Dark mode' : 'الوضع الداكن';
-            break;
-        }
-        
-        processResponse(step, response);
-      }, 3000);
+        // Alert user about the error
+        alert(userLanguage === 'en' 
+          ? "Could not access microphone. Please check microphone permissions and try again." 
+          : "تعذر الوصول إلى الميكروفون. يرجى التحقق من أذونات الميكروفون والمحاولة مرة أخرى.");
+      }
     }
     
     // Process voice response
@@ -527,6 +543,10 @@
       .then(data => {
         if (data.success) {
           console.log('TTS success:', data);
+          
+          // Create audio element to play the response
+          const audio = new Audio(data.audio_path);
+          audio.play().catch(e => console.error('Error playing audio:', e));
         } else {
           console.error('TTS error:', data.error);
         }

@@ -101,6 +101,7 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="/static/js/voice_recorder.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     // Get language preference from session storage
@@ -129,6 +130,36 @@
 
     document.getElementById('no-btn').addEventListener('click', () => {
       handleConsent(false);
+    });
+
+    // Initialize voice recorder
+    const voiceRecorder = new VoiceRecorder({
+      onStart: () => {
+        console.log('Recording started');
+        document.getElementById('listening-indicator').classList.add('active');
+      },
+      onStop: () => {
+        console.log('Recording stopped');
+      },
+      onResult: (data) => {
+        console.log('Voice recognition result:', data);
+        document.getElementById('listening-indicator').classList.remove('active');
+        
+        // Process voice response
+        if (data.text) {
+          processVoiceResponse(data.text);
+        }
+      },
+      onError: (error) => {
+        console.error('Voice recognition error:', error);
+        document.getElementById('listening-indicator').classList.remove('active');
+        
+        // Fallback to buttons on error
+        alert(userLanguage === 'en' 
+          ? "Voice recognition failed. Please use the buttons to respond." 
+          : "فشل التعرف على الصوت. يرجى استخدام الأزرار للرد.");
+      },
+      maxRecordingTime: 7000 // 7 seconds max
     });
 
     // Start voice recognition after speaking
@@ -167,23 +198,16 @@
 
     // Function to start listening for voice input
     function startListening() {
-      document.getElementById('listening-indicator').classList.add('active');
-
-      // In a real implementation, this would connect to the voice recognition API
-      // For now, we'll simulate by listening for about 5 seconds then processing
-
-      // Mock implementation - in production would use the web audio API to capture voice
-      // and send to the backend for processing
-      setTimeout(() => {
-        const mockResponse = userLanguage === 'en' ? 'yes' : 'نعم';
-        processVoiceResponse(mockResponse);
-      }, 5000);
+      try {
+        voiceRecorder.start();
+      } catch (error) {
+        console.error('Failed to start voice recorder:', error);
+        document.getElementById('listening-indicator').classList.remove('active');
+      }
     }
 
     // Function to process voice response
     function processVoiceResponse(text) {
-      document.getElementById('listening-indicator').classList.remove('active');
-
       console.log('Voice response:', text);
 
       // Check if response indicates consent
@@ -218,6 +242,10 @@
       .then(data => {
         if (data.success) {
           console.log('TTS success:', data);
+          
+          // Create audio element to play the response
+          const audio = new Audio(data.audio_path);
+          audio.play().catch(e => console.error('Error playing audio:', e));
         } else {
           console.error('TTS error:', data.error);
         }

@@ -79,8 +79,7 @@ from flask import request
 @app.before_request
 def log_request_info():
     print(f"🔍 Request to: {request.path}")
-
-    return enabled
+    # No need to return anything from this before_request handler
 
 # Scheduler for auto-learning
 scheduler = BackgroundScheduler()
@@ -748,6 +747,111 @@ db_manager.initialize_db()
 
 # Initialize profile manager tables
 profile_manager.initialize_tables()
+
+# Mobile app routes
+@app.route('/mobile')
+def mobile_index():
+    """Mobile app main page"""
+    # Check if onboarding has been completed
+    onboarding_status = db_manager.get_setting('onboarding_complete', 'false')
+    onboarding_complete = False
+    
+    if isinstance(onboarding_status, str):
+        onboarding_complete = onboarding_status.lower() == 'true'
+    
+    # If onboarding not complete, redirect to startup
+    if not onboarding_complete:
+        return redirect(url_for('startup'))
+        
+    return render_template('mobile/index.html')
+
+@app.route('/mobile/emotions')
+def mobile_emotions():
+    """Mobile app emotions page"""
+    return render_template('mobile/emotions.html')
+
+@app.route('/mobile/profiles')
+def mobile_profiles():
+    """Mobile app profiles page"""
+    return render_template('mobile/profiles.html')
+
+@app.route('/mobile/settings')
+def mobile_settings():
+    """Mobile app settings page"""
+    return render_template('mobile/settings.html')
+
+@app.route('/api/user/settings', methods=['GET', 'POST'])
+def user_settings():
+    """Get or update user settings"""
+    if request.method == 'GET':
+        # Get settings from database
+        settings = {
+            'language': db_manager.get_setting('language', 'en'),
+            'darkMode': db_manager.get_setting('dark_mode', 'true').lower() == 'true',
+            'voiceStyle': db_manager.get_setting('voice_style', 'default'),
+            'voiceRecognition': db_manager.get_setting('voice_recognition_enabled', 'true').lower() == 'true',
+            'storeHistory': db_manager.get_setting('store_history', 'true').lower() == 'true',
+            'faceRecognition': db_manager.get_setting('face_recognition_enabled', 'true').lower() == 'true'
+        }
+        return jsonify({'success': True, 'settings': settings})
+    else:
+        # Update settings
+        data = request.json
+        try:
+            for key, value in data.items():
+                if key == 'language':
+                    db_manager.set_setting('language', value)
+                elif key == 'darkMode':
+                    db_manager.set_setting('dark_mode', 'true' if value else 'false')
+                elif key == 'voiceStyle':
+                    db_manager.set_setting('voice_style', value)
+                elif key == 'voiceRecognition':
+                    db_manager.set_setting('voice_recognition_enabled', 'true' if value else 'false')
+                elif key == 'storeHistory':
+                    db_manager.set_setting('store_history', 'true' if value else 'false')
+                elif key == 'faceRecognition':
+                    db_manager.set_setting('face_recognition_enabled', 'true' if value else 'false')
+            return jsonify({'success': True})
+        except Exception as e:
+            logger.error(f"Error updating settings: {str(e)}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/user/settings/reset', methods=['POST'])
+def reset_user_settings():
+    """Reset user settings to default"""
+    try:
+        default_settings = {
+            'language': 'en',
+            'dark_mode': 'true',
+            'voice_style': 'default',
+            'voice_recognition_enabled': 'true',
+            'store_history': 'true',
+            'face_recognition_enabled': 'true'
+        }
+        
+        for key, value in default_settings.items():
+            db_manager.set_setting(key, value)
+            
+        return jsonify({'success': True})
+    except Exception as e:
+        logger.error(f"Error resetting settings: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/user/logout', methods=['POST'])
+def user_logout():
+    """Log out the current user"""
+    try:
+        # Clear the onboarding flag
+        db_manager.set_setting('onboarding_complete', 'false')
+        
+        # Clear session data
+        from flask import session
+        session.clear()
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        logger.error(f"Error logging out: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == "__main__":
     # Start scheduler

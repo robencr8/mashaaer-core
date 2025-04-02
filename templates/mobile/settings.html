@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Settings - Robin AI Mobile</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/static/mobile/css/app.css">
+  <link rel="stylesheet" href="/static/mobile/css/settings.css">
+  <link rel="apple-touch-icon" href="/static/mobile/images/robin-icon-192.png">
+  <link rel="manifest" href="/static/mobile/manifest.json">
+</head>
+<body>
+  <div class="app-container">
+    <div class="header">
+      <div class="logo">
+        <span class="icon">🤖</span>
+        <span class="title">Robin AI</span>
+      </div>
+      <div class="user-status" id="userStatus">
+        <span class="status-dot"></span>
+        <span class="status-text">Offline</span>
+      </div>
+    </div>
+
+    <div class="page-title">
+      <h2>Settings</h2>
+    </div>
+
+    <div class="settings-container">
+      <div class="settings-section">
+        <h3>General</h3>
+        <div class="setting-item">
+          <div class="setting-label">
+            <i class="fas fa-globe"></i>
+            <span>Language</span>
+          </div>
+          <div class="setting-control">
+            <select id="languageSelect" class="settings-select">
+              <option value="en">English</option>
+              <option value="ar">العربية (Arabic)</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-label">
+            <i class="fas fa-moon"></i>
+            <span>Dark Mode</span>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="darkModeToggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Voice & Speech</h3>
+        <div class="setting-item">
+          <div class="setting-label">
+            <i class="fas fa-volume-up"></i>
+            <span>Voice Style</span>
+          </div>
+          <div class="setting-control">
+            <select id="voiceStyleSelect" class="settings-select">
+              <option value="default">Default</option>
+              <option value="friendly">Friendly</option>
+              <option value="professional">Professional</option>
+              <option value="calm">Calm</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-label">
+            <i class="fas fa-microphone"></i>
+            <span>Voice Recognition</span>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="voiceRecognitionToggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Privacy</h3>
+        <div class="setting-item">
+          <div class="setting-label">
+            <i class="fas fa-user-shield"></i>
+            <span>Store Conversation History</span>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="storeHistoryToggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-label">
+            <i class="fas fa-camera-retro"></i>
+            <span>Face Recognition</span>
+          </div>
+          <div class="setting-control">
+            <label class="toggle-switch">
+              <input type="checkbox" id="faceRecognitionToggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>About</h3>
+        <div class="setting-item info-item">
+          <div class="setting-label">
+            <i class="fas fa-info-circle"></i>
+            <span>Version</span>
+          </div>
+          <div class="setting-value">1.0.0</div>
+        </div>
+        <div class="setting-item info-item">
+          <div class="setting-label">
+            <i class="fas fa-code"></i>
+            <span>Developer</span>
+          </div>
+          <div class="setting-value">Roben Edwan</div>
+        </div>
+      </div>
+
+      <div class="settings-actions">
+        <button id="resetButton" class="settings-button danger">Reset Settings</button>
+        <button id="logoutButton" class="settings-button">Logout</button>
+      </div>
+    </div>
+
+    <div class="modal" id="confirmModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Confirm Action</h3>
+          <button class="close-button" id="closeConfirmModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p id="confirmMessage">Are you sure you want to proceed with this action?</p>
+          <div class="confirm-actions">
+            <button id="cancelButton" class="cancel-button">Cancel</button>
+            <button id="confirmButton" class="send-button">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab" data-tab="home">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </div>
+      <div class="tab" data-tab="emotions">
+        <i class="fas fa-chart-line"></i>
+        <span>Emotions</span>
+      </div>
+      <div class="tab" data-tab="profiles">
+        <i class="fas fa-user"></i>
+        <span>Profiles</span>
+      </div>
+      <div class="tab active" data-tab="settings">
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/mobile/js/settings.js"></script>
+</body>
+</html>

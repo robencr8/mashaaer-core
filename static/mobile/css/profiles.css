@@ -1,0 +1,276 @@
+/* Profiles page specific styles */
+
+.page-title {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.page-title h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.profile-actions {
+  margin: 0 0.5rem 1rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.action-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.action-btn:hover {
+  background-color: var(--primary-dark);
+}
+
+.profiles-container {
+  margin: 0 0.5rem 5rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.profile-card {
+  background-color: var(--secondary-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.profile-card:active {
+  transform: scale(0.98);
+}
+
+.profile-header {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  align-items: center;
+}
+
+.profile-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--background-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  overflow: hidden;
+}
+
+.profile-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.profile-meta {
+  display: flex;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  gap: 1rem;
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-action-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.125rem;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.profile-action-btn:hover {
+  color: var(--text-color);
+}
+
+.profile-action-btn.delete:hover {
+  color: var(--error-color);
+}
+
+.profile-footer {
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Profile modal styles */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-group input[type="text"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: inherit;
+}
+
+.profile-photo-container {
+  margin-top: 0.5rem;
+}
+
+.profile-photo-preview {
+  width: 100%;
+  height: 200px;
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center;
+  color: var(--text-muted);
+}
+
+.profile-photo-preview i {
+  font-size: 1.5rem;
+}
+
+.metadata-fields {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.metadata-fields input {
+  flex: 1;
+}
+
+.small-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.metadata-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.metadata-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: var(--background-color);
+  border-radius: 6px;
+}
+
+.metadata-item-content {
+  font-size: 0.875rem;
+}
+
+.metadata-item-remove {
+  background: none;
+  border: none;
+  color: var(--error-color);
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* Profile details modal */
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.profile-detail-image {
+  width: 100%;
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.profile-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.profile-detail-section h4 {
+  font-size: 1rem;
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background-color: var(--background-color);
+  border-radius: 6px;
+}
+
+.detail-label {
+  font-weight: 500;
+  font-size: 0.9375rem;
+}
+
+.detail-value {
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}

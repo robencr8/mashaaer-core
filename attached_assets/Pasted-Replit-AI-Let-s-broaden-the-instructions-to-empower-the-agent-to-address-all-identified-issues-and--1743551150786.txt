@@ -1,0 +1,43 @@
+Replit AI. Let's broaden the instructions to empower the agent to address all identified issues and implement the voice-based onboarding for new users.
+
+Comprehensive Instructions for Replit Agent:
+
+"Replit Agent, the RobinAICompanion project is currently facing a web accessibility issue, preventing interaction with the application. Additionally, there's a requirement to enhance the new user onboarding process by incorporating voice prompts for the setup questions. Please address both of these aspects comprehensively:
+
+Part 1: Resolving Web Accessibility Issue
+
+Systematic Troubleshooting: Follow the detailed troubleshooting steps outlined in the previous instructions. This includes:
+
+Restarting the Replit server.
+Thoroughly examining the 'Console' output for all error messages and exceptions.
+Verifying dependency installation using pip install -r requirements.txt (or the relevant file).
+Checking the correctness of environment variables.
+Reviewing the .replit configuration file for the run command and port mappings.
+As a diagnostic measure, temporarily simplifying main.py to isolate the source of the startup failure, remembering to revert any temporary changes.
+Identify and Fix the Root Cause: Based on the console logs and the results of the troubleshooting steps, identify the underlying reason why the web application is failing to become accessible in the Webview. Implement the necessary corrections to the code, configuration, or environment to resolve this issue.
+
+Confirm Web Accessibility: After implementing the fix, ensure that the web application loads correctly in the Webview and that you can interact with its user interface.
+
+Part 2: Implementing Voice-Based New User Onboarding
+
+Locate Onboarding Logic: Identify the code in the Flask application (likely within main.py and potentially related templates or API endpoints like /startup, /consent, /voice-register, /api/update-profile, /api/set-language, /api/set-consent) that handles the new user onboarding process and presents setup questions.
+
+Integrate Text-to-Speech (TTS): For each setup question currently presented as text, utilize the tts_manager component to generate corresponding voice prompts.
+
+Modify Onboarding Flow: Adjust the onboarding flow in the user interface (HTML templates and associated JavaScript, if any) to:
+
+Initially present the setup question as a voice prompt using the integrated TTS.
+Provide visual cues (text on the screen) alongside the voice prompt for accessibility.
+Maintain the existing mechanisms for users to input their responses (text fields, selections, etc.).
+Consider Speech-to-Text (STT) Integration (Optional Enhancement): If feasible within the timeframe and without introducing significant complexity or cost, consider optionally allowing users to respond to the setup questions using voice input via the voice_recognition component. This would provide a fully interactive voice-based onboarding experience.
+
+Test Thoroughly: After implementing the voice-based onboarding, thoroughly test the entire new user setup process to ensure:
+
+Voice prompts are generated and played correctly for each question.
+Visual cues are appropriately displayed.
+Users can input their responses using the available methods (text, and optionally voice).
+User preferences are correctly captured and stored.
+The onboarding process completes smoothly.
+Overall Goal:
+
+The primary goal is to have a fully functional RobinAICompanion application with a working web interface that you can interact with tonight. Additionally, the new user onboarding experience should be enhanced with voice prompts for the setup questions

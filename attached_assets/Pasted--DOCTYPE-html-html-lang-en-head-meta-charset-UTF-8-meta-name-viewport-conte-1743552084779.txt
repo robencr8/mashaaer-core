@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Robin AI - Personal Assistant</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #0f1117;
+      color: #f1f1f1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      font-weight: 400;
+      margin-bottom: 2rem;
+      color: #a0a0a0;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      max-width: 500px;
+      margin-bottom: 2rem;
+    }
+    .features div {
+      background: #1a1c23;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+    .cta {
+      margin-top: 2rem;
+    }
+    .cta a {
+      text-decoration: none;
+      color: #fff;
+      background: #4f46e5;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: bold;
+      transition: background 0.3s;
+    }
+    .cta a:hover {
+      background: #3730a3;
+    }
+    .footer-links {
+      margin-top: 3rem;
+      display: flex;
+      gap: 1rem;
+    }
+    .footer-links a {
+      color: #9ca3af;
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .footer-links a:hover {
+      color: #f1f1f1;
+    }
+    .presentation {
+      margin-top: 3rem;
+      width: 100%;
+      max-width: 700px;
+    }
+    iframe {
+      width: 100%;
+      height: 450px;
+      border-radius: 12px;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>🤖 Robin AI</h1>
+  <h2>Smart. Private. Emotional. Built by Roben Edwan.</h2>
+  <div class="features">
+    <div>🎙️ Multilingual Voice Interaction (Arabic + English)</div>
+    <div>🧠 Emotional Awareness</div>
+    <div>👁️ Face & Object Recognition</div>
+    <div>📶 Fully Offline Capable</div>
+    <div>🔐 Developer Mode for Roben</div>
+  </div>
+  <div class="cta">
+    <a href="/startup">🚀 Start Robin AI</a>
+  </div>
+  <div class="presentation">
+    <h2>📽️ Explore Robin AI Presentation</h2>
+    <iframe src="https://gamma.app/embed/a7bnglpz97ljhuz" allow="fullscreen" title="Robin AI Intro"></iframe>
+  </div>
+  <div class="footer-links">
+    <a href="/admin">Admin Dashboard</a>
+    <a href="/live-view">Live Camera</a>
+    <a href="/session-report">Session Report</a>
+  </div>
+</body>
+</html>

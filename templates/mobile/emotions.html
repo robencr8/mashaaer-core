@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Emotions - Robin AI Mobile</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/static/mobile/css/app.css">
+  <link rel="stylesheet" href="/static/mobile/css/emotions.css">
+  <link rel="apple-touch-icon" href="/static/mobile/images/robin-icon-192.png">
+  <link rel="manifest" href="/static/mobile/manifest.json">
+  <!-- Chart.js dependency -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <div class="header">
+      <div class="logo">
+        <span class="icon">🤖</span>
+        <span class="title">Robin AI</span>
+      </div>
+      <div class="user-status" id="userStatus">
+        <span class="status-dot"></span>
+        <span class="status-text">Offline</span>
+      </div>
+    </div>
+
+    <div class="page-title">
+      <h2>Emotion Tracking</h2>
+    </div>
+
+    <div class="emotion-filters">
+      <div class="filter-group">
+        <label for="timeRange">Time Range:</label>
+        <select id="timeRange" class="filter-select">
+          <option value="day">Today</option>
+          <option value="week" selected>Past Week</option>
+          <option value="month">Past Month</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-checkbox-container">
+          <input type="checkbox" id="currentSession" checked>
+          <span class="checkmark"></span>
+          Current Session Only
+        </label>
+      </div>
+    </div>
+
+    <div class="emotion-chart-container">
+      <canvas id="emotionChart"></canvas>
+    </div>
+
+    <div class="emotion-stats">
+      <div class="emotion-stat-box">
+        <div class="stat-title">Primary Emotion</div>
+        <div class="stat-value" id="primaryEmotion">-</div>
+      </div>
+      <div class="emotion-stat-box">
+        <div class="stat-title">Entries</div>
+        <div class="stat-value" id="totalEntries">0</div>
+      </div>
+    </div>
+
+    <div class="emotion-history">
+      <h3>Recent Emotions</h3>
+      <div class="emotion-list" id="emotionList">
+        <!-- Emotion entries will be populated here -->
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab" data-tab="home">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </div>
+      <div class="tab active" data-tab="emotions">
+        <i class="fas fa-chart-line"></i>
+        <span>Emotions</span>
+      </div>
+      <div class="tab" data-tab="profiles">
+        <i class="fas fa-user"></i>
+        <span>Profiles</span>
+      </div>
+      <div class="tab" data-tab="settings">
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/mobile/js/emotions.js"></script>
+</body>
+</html>
