@@ -855,6 +855,7 @@ name = "repl-nix-workspace"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "alembic" },
     { name = "apscheduler" },
     { name = "email-validator" },
     { name = "flask" },
@@ -875,6 +876,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "alembic", specifier = ">=1.15.2" },
     { name = "apscheduler", specifier = ">=3.11.0" },
     { name = "email-validator", specifier = ">=2.2.0" },
     { name = "flask", specifier = ">=3.1.0" },

@@ -1,20 +1,20 @@
 import os
 import logging
-import sqlite3
 import threading
 import time
-import psycopg2
-from psycopg2 import pool
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, text
+from database.models import Base, Setting, EmotionData, Face, RecognitionHistory
 
 class DatabaseManager:
     """Manages database connections and operations with support for SQLite and PostgreSQL"""
-    
+
     def __init__(self, config=None, db_path="robin_memory.db"):
         self.logger = logging.getLogger(__name__)
         self.config = config
         self.db_path = db_path
         self.use_postgres = False
-        
+
         if config and config.USE_POSTGRES and config.DATABASE_URL:
             self.use_postgres = True
             self.logger.info("Using PostgreSQL database")
@@ -30,242 +30,20 @@ class DatabaseManager:
             db_dir = os.path.dirname(self.db_path)
             if db_dir and not os.path.exists(db_dir):
                 os.makedirs(db_dir, exist_ok=True)
-        
+
         # Connection pool (thread-local)
         self.local = threading.local()
-    
+        self.engine = create_engine(f'sqlite:///{self.db_path}')  # Update for ORM
+        self.Session = sessionmaker(bind=self.engine)
+
     def initialize_db(self):
-        """Initialize the database and create tables"""
-        self.logger.info(f"Initializing database at {self.db_path}")
-        
-        conn = self.get_connection()
-        cursor = conn.cursor()
-        
+        """Initialize the ORM database and create tables"""
         try:
-            # Create core tables based on database type
-            if self.use_postgres:
-                # 1. Settings table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS settings (
-                        key TEXT PRIMARY KEY,
-                        value TEXT,
-                        type TEXT,
-                        updated_at TIMESTAMP
-                    )
-                ''')
-                
-                # 2. Conversations table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS conversations (
-                        id SERIAL PRIMARY KEY,
-                        user_input TEXT,
-                        response TEXT,
-                        timestamp TIMESTAMP,
-                        emotion TEXT,
-                        intent TEXT
-                    )
-                ''')
-                
-                # 3. User profiles table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS user_profiles (
-                        id SERIAL PRIMARY KEY,
-                        name TEXT,
-                        face_id TEXT,
-                        preferences TEXT,
-                        last_interaction TIMESTAMP
-                    )
-                ''')
-                
-                # 4. System logs table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS system_logs (
-                        id SERIAL PRIMARY KEY,
-                        timestamp TIMESTAMP,
-                        level TEXT,
-                        module TEXT,
-                        message TEXT
-                    )
-                ''')
-                
-                # 5. Emotion data table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS emotion_data (
-                        id SERIAL PRIMARY KEY,
-                        timestamp TIMESTAMP,
-                        emotion TEXT,
-                        source TEXT,
-                        intensity REAL,
-                        text TEXT,
-                        session_id TEXT
-                    )
-                ''')
-                
-                # 6. Face profiles table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS face_profiles (
-                        id SERIAL PRIMARY KEY,
-                        name TEXT,
-                        encoding BYTEA,
-                        last_seen TIMESTAMP,
-                        metadata JSONB
-                    )
-                ''')
-                
-                # 7. Recognition history table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS recognition_history (
-                        id SERIAL PRIMARY KEY,
-                        name TEXT NOT NULL,
-                        timestamp TIMESTAMP NOT NULL,
-                        confidence REAL,
-                        emotion TEXT,
-                        greeting TEXT,
-                        session_id TEXT
-                    )
-                ''')
-                
-                # 8. Voice logs table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS voice_logs (
-                        id SERIAL PRIMARY KEY,
-                        text TEXT,
-                        timestamp TIMESTAMP,
-                        language TEXT,
-                        audio_path TEXT,
-                        emotion TEXT,
-                        intent TEXT,
-                        session_id TEXT
-                    )
-                ''')
-                
-                # 9. Sessions table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS sessions (
-                        id TEXT PRIMARY KEY,
-                        start_time TIMESTAMP,
-                        end_time TIMESTAMP,
-                        user_name TEXT,
-                        device_info TEXT,
-                        metadata JSONB
-                    )
-                ''')
-                
-            else:
-                # 1. Settings table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS settings (
-                        key TEXT PRIMARY KEY,
-                        value TEXT,
-                        type TEXT,
-                        updated_at TEXT
-                    )
-                ''')
-                
-                # 2. Conversations table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS conversations (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        user_input TEXT,
-                        response TEXT,
-                        timestamp TEXT,
-                        emotion TEXT,
-                        intent TEXT
-                    )
-                ''')
-                
-                # 3. User profiles table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS user_profiles (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        name TEXT,
-                        face_id TEXT,
-                        preferences TEXT,
-                        last_interaction TEXT
-                    )
-                ''')
-                
-                # 4. System logs table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS system_logs (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        timestamp TEXT,
-                        level TEXT,
-                        module TEXT,
-                        message TEXT
-                    )
-                ''')
-                
-                # 5. Emotion data table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS emotion_data (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        timestamp TEXT,
-                        emotion TEXT,
-                        source TEXT,
-                        intensity REAL,
-                        text TEXT,
-                        session_id TEXT
-                    )
-                ''')
-                
-                # 6. Face profiles table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS face_profiles (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        name TEXT,
-                        encoding BLOB,
-                        last_seen TEXT,
-                        metadata TEXT
-                    )
-                ''')
-                
-                # 7. Recognition history table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS recognition_history (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        name TEXT NOT NULL,
-                        timestamp TEXT NOT NULL,
-                        confidence REAL,
-                        emotion TEXT,
-                        greeting TEXT,
-                        session_id TEXT
-                    )
-                ''')
-                
-                # 8. Voice logs table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS voice_logs (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        text TEXT,
-                        timestamp TEXT,
-                        language TEXT,
-                        audio_path TEXT,
-                        emotion TEXT,
-                        intent TEXT,
-                        session_id TEXT
-                    )
-                ''')
-                
-                # 9. Sessions table
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS sessions (
-                        id TEXT PRIMARY KEY,
-                        start_time TEXT,
-                        end_time TEXT,
-                        user_name TEXT,
-                        device_info TEXT,
-                        metadata TEXT
-                    )
-                ''')
-            
-            conn.commit()
-            self.logger.info("Database initialized successfully")
-            
+            Base.metadata.create_all(self.engine)
+            self.logger.info("✅ ORM Database schema created (or already exists).")
         except Exception as e:
-            self.logger.error(f"Failed to initialize database: {str(e)}")
-            raise
-    
+            self.logger.error(f"❌ Error creating ORM tables: {str(e)}")
+
     def get_connection(self):
         """Get a database connection (thread-safe)"""
         # Create a new connection if one doesn't exist for this thread
@@ -295,9 +73,9 @@ class DatabaseManager:
                     pass  # Connection might be closed already
                 self.local.connection = self.pg_pool.getconn()
                 self.local.connection.autocommit = True
-        
+
         return self.local.connection
-    
+
     def close_connections(self):
         """Close all database connections"""
         if hasattr(self.local, 'connection'):
@@ -307,12 +85,12 @@ class DatabaseManager:
             else:
                 self.local.connection.close()
             delattr(self.local, 'connection')
-    
+
     def execute_query(self, query, params=None):
         """Execute a query and return results"""
         try:
             conn = self.get_connection()
-            
+
             # Create cursor with the appropriate type
             if self.use_postgres:
                 cursor = conn.cursor()
@@ -323,14 +101,14 @@ class DatabaseManager:
                         query = query.replace("?", f"%s", 1)
             else:
                 cursor = conn.cursor()
-            
+
             if params:
                 cursor.execute(query, params)
             else:
                 cursor.execute(query)
-            
+
             conn.commit()
-            
+
             # Check if it's a SELECT query
             if query.strip().upper().startswith("SELECT"):
                 result = cursor.fetchall()
@@ -339,34 +117,34 @@ class DatabaseManager:
                     # This depends on your needs - sometimes you want dicts, sometimes tuples
                     pass
                 return result
-            
+
             return True
-        
+
         except Exception as e:
             self.logger.error(f"Database query error: {str(e)}")
             self.logger.error(f"Query: {query}")
             if params:
                 self.logger.error(f"Params: {params}")
             raise
-    
+
     def get_setting(self, key, default=None):
         """Get a setting from the database"""
         try:
             conn = self.get_connection()
             cursor = conn.cursor()
-            
+
             if self.use_postgres:
                 cursor.execute("SELECT value, type FROM settings WHERE key = %s", (key,))
             else:
                 cursor.execute("SELECT value, type FROM settings WHERE key = ?", (key,))
-                
+
             result = cursor.fetchone()
-            
+
             if not result:
                 return default
-            
+
             value, type_str = result
-            
+
             # Convert based on type
             if type_str == "int":
                 return int(value)
@@ -376,26 +154,26 @@ class DatabaseManager:
                 return value.lower() in ("true", "1", "yes")
             else:
                 return value
-        
+
         except Exception as e:
             self.logger.error(f"Failed to get setting {key}: {str(e)}")
             return default
-    
+
     def set_setting(self, key, value):
         """Set a setting in the database"""
         try:
             # Determine the type
             value_type = type(value).__name__
-            
+
             # Convert to string for storage
             if value_type == "bool":
                 value_str = "true" if value else "false"
             else:
                 value_str = str(value)
-            
+
             conn = self.get_connection()
             cursor = conn.cursor()
-            
+
             # Use UPSERT - syntax differs between SQLite and PostgreSQL
             if self.use_postgres:
                 cursor.execute(
@@ -421,22 +199,22 @@ class DatabaseManager:
                     """,
                     (key, value_str, value_type)
                 )
-            
+
             conn.commit()
             return True
-        
+
         except Exception as e:
             self.logger.error(f"Failed to set setting {key}: {str(e)}")
             return False
-    
+
     def log_conversation(self, user_input, response, emotion="neutral", intent="unknown"):
         """Log a conversation to the database"""
         try:
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
-            
+
             conn = self.get_connection()
             cursor = conn.cursor()
-            
+
             if self.use_postgres:
                 cursor.execute(
                     """
@@ -455,20 +233,20 @@ class DatabaseManager:
                     """,
                     (user_input, response, timestamp, emotion, intent)
                 )
-            
+
             conn.commit()
             return True
-        
+
         except Exception as e:
             self.logger.error(f"Failed to log conversation: {str(e)}")
             return False
-    
+
     def get_recent_conversations(self, limit=10):
         """Get recent conversations from the database"""
         try:
             conn = self.get_connection()
             cursor = conn.cursor()
-            
+
             if self.use_postgres:
                 cursor.execute(
                     """
@@ -489,13 +267,13 @@ class DatabaseManager:
                     """,
                     (limit,)
                 )
-            
+
             return cursor.fetchall()
-        
+
         except Exception as e:
             self.logger.error(f"Failed to get recent conversations: {str(e)}")
             return []
-    
+
     def get_db_size(self):
         """Get the database file size in MB"""
         try:
@@ -516,3 +294,23 @@ class DatabaseManager:
         except Exception as e:
             self.logger.error(f"Failed to get DB size: {str(e)}")
             return 0
+
+    def get_emotions_by_session(self, session_id):
+        """Get emotions by session ID using ORM"""
+        try:
+            with self.Session() as session:
+                return session.query(EmotionData).filter_by(session_id=session_id).order_by(EmotionData.timestamp).all()
+        except Exception as e:
+            self.logger.error(f"Query error: {str(e)}")
+            return []
+
+    def get_or_create_setting(self, key, default=None):
+        with self.Session() as session:
+            setting = session.query(Setting).filter_by(key=key).first()
+            if setting:
+                return setting.value
+            else:
+                new_setting = Setting(key=key, value=default)
+                session.add(new_setting)
+                session.commit()
+                return default
