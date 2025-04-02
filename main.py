@@ -140,7 +140,7 @@ def index():
 def startup():
     welcome_message = "Welcome to Robin AI. Let's get started with your onboarding."
     tts_manager.speak(welcome_message, 'default', 'en', profile_manager)
-    return render_template('startup.html')
+    return render_template('startup_standalone.html')
 
 @app.route('/consent')
 def consent():

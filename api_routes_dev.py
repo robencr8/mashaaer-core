@@ -928,6 +928,82 @@ def init_developer_api(app, emotion_tracker=None, db_manager=None):
         else:
             return f"{seconds}s"
     
+    @dev_api.route('/api/dev/gdrive-sync', methods=['POST'])
+    def gdrive_sync():
+        """Sync project to Google Drive (developer mode only)"""
+        try:
+            # Check if request has developer authorization
+            if not _is_developer_authorized():
+                return jsonify({'success': False, 'error': 'Developer authorization required'}), 403
+            
+            import subprocess
+            import os
+            from datetime import datetime
+            
+            # Create timestamp for log
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            
+            # Create directory for sync logs if it doesn't exist
+            os.makedirs('logs/gdrive_sync', exist_ok=True)
+            
+            # Log file for sync output
+            log_file = f"logs/gdrive_sync/sync_{timestamp}.log"
+            
+            logger.info(f"Starting Google Drive sync, log file: {log_file}")
+            
+            # Execute the sync script
+            try:
+                result = subprocess.run(
+                    ['python', 'rclone_sync.py'],
+                    capture_output=True,
+                    text=True,
+                    timeout=300  # 5 minute timeout
+                )
+                
+                # Store output in log file
+                with open(log_file, 'w') as f:
+                    f.write(f"=== STDOUT ===\n{result.stdout}\n\n=== STDERR ===\n{result.stderr}")
+                
+                if result.returncode == 0:
+                    logger.info("Google Drive sync completed successfully")
+                    folder_url = "https://drive.google.com/drive/folders/1wUodMcwES79gB18uul2xACChciO-X2Um"
+                    
+                    return jsonify({
+                        'success': True, 
+                        'message': 'Project synced to Google Drive successfully',
+                        'log_file': log_file,
+                        'folder_url': folder_url
+                    })
+                else:
+                    logger.error(f"Google Drive sync failed with code {result.returncode}")
+                    error_message = result.stderr.strip() if result.stderr else "Unknown error"
+                    
+                    return jsonify({
+                        'success': False, 
+                        'error': f"Sync failed with code {result.returncode}: {error_message}",
+                        'log_file': log_file
+                    })
+            
+            except subprocess.TimeoutExpired:
+                logger.error("Google Drive sync timed out after 5 minutes")
+                return jsonify({
+                    'success': False, 
+                    'error': 'Sync timed out after 5 minutes',
+                    'log_file': log_file
+                })
+            
+            except Exception as e:
+                logger.error(f"Error running sync script: {str(e)}")
+                return jsonify({
+                    'success': False, 
+                    'error': f"Error running sync script: {str(e)}",
+                    'log_file': log_file
+                })
+                
+        except Exception as e:
+            logger.error(f"Error syncing to Google Drive: {str(e)}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+    
     # Register blueprint with app
     app.register_blueprint(dev_api)
     

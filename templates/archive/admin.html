@@ -247,6 +247,9 @@
                     <a href="/sms-notifications" class="btn btn-info">
                         <i class="fas fa-sms me-2"></i>SMS Notifications
                     </a>
+                    <button class="btn btn-success" id="gdrive-sync-btn">
+                        <i class="fas fa-cloud-upload-alt me-2"></i>Sync to Google Drive
+                    </button>
                 </div>
             </div>
         </div>
@@ -666,6 +669,48 @@
         // Add initial log entries
         addLogEntry('Admin panel loaded', 'info');
         addLogEntry('Developer mode active', 'warning');
+        
+        // Google Drive Sync button
+        document.getElementById('gdrive-sync-btn').addEventListener('click', function() {
+            if (!confirm('Sync project to Roben\'s Google Drive?\n\nThis will upload the current state of the project to the Google Drive folder.')) return;
+            
+            addLogEntry('Starting Google Drive sync...', 'info');
+            
+            // Disable the button during sync
+            const syncBtn = document.getElementById('gdrive-sync-btn');
+            const originalText = syncBtn.innerHTML;
+            syncBtn.disabled = true;
+            syncBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin me-2"></i>Syncing...';
+            
+            // Make API call to trigger sync
+            fetch('/api/dev/gdrive-sync', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addLogEntry('Google Drive sync completed successfully!', 'info');
+                    
+                    if (data.log_file) {
+                        addLogEntry(`Sync log saved to: ${data.log_file}`, 'info');
+                    }
+                    
+                    if (data.folder_url) {
+                        addLogEntry(`Files synced to: ${data.folder_url}`, 'info');
+                    }
+                } else {
+                    addLogEntry(`Error syncing to Google Drive: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                addLogEntry(`Error: ${error.message}`, 'error');
+            })
+            .finally(() => {
+                // Re-enable button
+                syncBtn.disabled = false;
+                syncBtn.innerHTML = originalText;
+            });
+        });
     });
 </script>
 {% endblock %}
