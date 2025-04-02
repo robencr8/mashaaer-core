@@ -1551,3 +1551,10 @@ def get_session_data():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+from flask import Blueprint, jsonify
+
+api_blueprint = Blueprint('api', __name__)
+
+@api_blueprint.route('/get_profile', methods=['GET'])
+def get_profile():
+    return jsonify({"status": "working", "message": "API is alive."})

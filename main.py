@@ -1976,3 +1976,15 @@ if __name__ == "__main__":
         else:
             # Re-raise other OSErrors
             raise
+from flask import Flask, render_template
+from api_routes import api_blueprint
+
+app = Flask(__name__)
+app.register_blueprint(api_blueprint)
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)

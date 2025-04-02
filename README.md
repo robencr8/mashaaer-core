@@ -85,3 +85,25 @@ Robin AI Enhanced Legacy is a sophisticated AI assistant engineered to provide s
 - `/api/sessions`: Get list of available sessions
 
 © 2025 Hay Nazzal. All rights reserved.
+# مشروع مشاعر | Feelings
+
+مساعد ذكي يدمج بين الصوت، المشاعر، والواجهة العربية الحديثة.
+
+## تشغيل المشروع:
+
+1. تأكد من تنصيب `Python 3.10+`.
+2. ثبت الحزم:
+```bash
+pip install -r requirements.txt
+```
+3. شغّل:
+```bash
+python main.py
+```
+4. افتح المتصفح على:
+   - `http://0.0.0.0:5000`
+
+### الميزات:
+- واجهة عربية + إنجليزية
+- تحليل مشاعر تلقائي
+- تفاعل صوتي
