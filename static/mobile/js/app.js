@@ -1,3 +1,133 @@
+// ApiService class - handles API communication
+class ApiService {
+  // Emotion data API methods
+  static async fetchEmotionTimeline(days = 7, sessionOnly = false, sessionId = null) {
+    let url = '/api/emotion-data?days=' + days;
+    
+    if (sessionOnly && sessionId) {
+      url += '&session_only=true&session_id=' + sessionId;
+    }
+    
+    try {
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch emotion timeline');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching emotion timeline:', error);
+      throw error;
+    }
+  }
+  
+  // Face recognition API methods
+  static async getFaceProfiles() {
+    try {
+      const response = await fetch('/api/face-recognition-data');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch face profiles');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching face profiles:', error);
+      throw error;
+    }
+  }
+  
+  // Voice API methods
+  static async processVoiceInput(audioBlob) {
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob);
+      
+      const response = await fetch('/api/listen', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to process voice input');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error processing voice input:', error);
+      throw error;
+    }
+  }
+  
+  // Text-to-speech API methods
+  static async speakText(text, voice = 'default', language = 'en-US') {
+    try {
+      const response = await fetch('/api/speak', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          text: text,
+          voice: voice,
+          language: language
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate speech');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error generating speech:', error);
+      throw error;
+    }
+  }
+  
+  // User settings API methods
+  static async getUserSettings() {
+    try {
+      const response = await fetch('/api/user/settings');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch user settings');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching user settings:', error);
+      throw error;
+    }
+  }
+  
+  // SMS notification API methods
+  static async sendSmsAlert(phoneNumber, message) {
+    try {
+      const response = await fetch('/api/send-sms-alert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          phone_number: phoneNumber,
+          message: message
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to send SMS alert');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error sending SMS alert:', error);
+      throw error;
+    }
+  }
+}
+
 // VoiceRecorder class - handles voice recording and API communication
 class VoiceRecorder {
   constructor(options = {}) {
@@ -89,38 +219,25 @@ class VoiceRecorder {
     // Create audio blob from chunks
     const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
     
-    // Create form data for API request
-    const formData = new FormData();
-    formData.append('audio', audioBlob, 'recording.webm');
-    
-    // Send to API for processing
-    fetch('/api/listen', {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Voice recognition failed');
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.success) {
-        // Call onResult callback with the data
-        this.options.onResult({
-          success: true,
-          text: data.text,
-          emotion: data.emotion,
-          intent: data.intent
-        });
-      } else {
-        throw new Error(data.error || 'Voice recognition failed');
-      }
-    })
-    .catch(error => {
-      console.error('Error in voice recognition:', error);
-      this.options.onError(error);
-    });
+    // Use ApiService to process voice input
+    ApiService.processVoiceInput(audioBlob)
+      .then(data => {
+        if (data.success) {
+          // Call onResult callback with the data
+          this.options.onResult({
+            success: true,
+            text: data.text,
+            emotion: data.emotion,
+            intent: data.intent
+          });
+        } else {
+          throw new Error(data.error || 'Voice recognition failed');
+        }
+      })
+      .catch(error => {
+        console.error('Error in voice recognition:', error);
+        this.options.onError(error);
+      });
   }
 }
 
@@ -520,35 +637,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Process user input
   function processUserInput(text, emotion) {
-    // Send to server for processing
-    fetch('/api/listen', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        text: text,
-        emotion: emotion || 'unknown'
+    // Create a form data object with text input
+    const formData = new FormData();
+    formData.append('text', text);
+    
+    if (emotion) {
+      formData.append('emotion', emotion);
+    }
+    
+    // Use ApiService to process the input
+    ApiService.processVoiceInput(formData)
+      .then(data => {
+        if (data.success) {
+          // Get response from the server
+          getAIResponse(text, data.emotion, data.intent);
+        } else {
+          throw new Error(data.error || 'Error processing input');
+        }
       })
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Error processing input');
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.success) {
-        // Get response from the server
-        getAIResponse(text, data.emotion, data.intent);
-      } else {
-        throw new Error(data.error || 'Error processing input');
-      }
-    })
-    .catch(error => {
-      console.error('Error sending user input:', error);
-      addMessage('Sorry, I encountered an error processing your request. Please try again.', 'assistant', new Date());
-    });
+      .catch(error => {
+        console.error('Error sending user input:', error);
+        addMessage('Sorry, I encountered an error processing your request. Please try again.', 'assistant', new Date());
+      });
   }
 
   // Get AI response
@@ -599,27 +709,16 @@ document.addEventListener('DOMContentLoaded', function() {
           }, 1000);
         }
         
-        // Now play the response using TTS
-        fetch('/api/speak', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            text: responseText,
-            use_profile: true,
-            language: data.language
+        // Now play the response using TTS with ApiService
+        ApiService.speakText(responseText, data.voice || 'default', data.language || 'en-US')
+          .then(ttsData => {
+            if (ttsData.success && ttsData.audio_path) {
+              playAudio(ttsData.audio_path);
+            }
           })
-        })
-        .then(response => response.json())
-        .then(ttsData => {
-          if (ttsData.success && ttsData.audio_path) {
-            playAudio(ttsData.audio_path);
-          }
-        })
-        .catch(error => {
-          console.error('Error with TTS:', error);
-        });
+          .catch(error => {
+            console.error('Error with TTS:', error);
+          });
       } else {
         throw new Error(data.error || 'Error getting response');
       }

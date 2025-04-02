@@ -88,32 +88,8 @@ document.addEventListener('DOMContentLoaded', function() {
       days = 30;
     }
     
-    // Prepare parameters for the API call
-    const params = {
-      days: days,
-      session_only: appState.currentSessionOnly
-    };
-    
-    // Check if we should add session_id
-    if (appState.currentSessionOnly && appState.sessionId) {
-      params.session_id = appState.sessionId;
-    }
-    
-    // Build the API URL with query parameters
-    let url = '/api/emotion-data?';
-    Object.keys(params).forEach((key, index) => {
-      url += `${index > 0 ? '&' : ''}${key}=${params[key]}`;
-    });
-    
-    // Fetch data from the API
-    // Note: This will be replaced with ApiService.fetchEmotionTimeline() in a Flutter app
-    fetch(url)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch emotion data');
-        }
-        return response.json();
-      })
+    // Use ApiService to fetch emotion data
+    ApiService.fetchEmotionTimeline(days, appState.currentSessionOnly, appState.sessionId)
       .then(data => {
         // Store the emotion data
         appState.emotionData = data;

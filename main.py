@@ -2,6 +2,7 @@ import os
 import logging
 import json
 from flask import Flask, render_template, request, jsonify, Response, redirect, url_for
+from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 import threading
@@ -26,6 +27,8 @@ from twilio_handler import TwilioHandler
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
+# Enable CORS for all routes to support Flutter and mobile app integration
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Initialize components
 config = Config()
