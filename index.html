@@ -1,0 +1,114 @@
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Robin AI | Cosmic Companion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+            color: #aef;
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #user_input {
+            padding: 10px;
+            width: 70%;
+            font-size: 1rem;
+            border: 2px solid #00f0ff;
+            background-color: #111;
+            color: #fff;
+        }
+        #send_button, #mic_button {
+            background-color: #00f0ff;
+            border: none;
+            padding: 14px 28px;
+            color: black;
+            font-weight: bold;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: background-color 0.3s;
+        }
+        #mic_button.active {
+            background-color: #ff1493;
+        }
+        #response_area {
+            margin-top: 20px;
+            width: 80%;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #555;
+            padding: 20px;
+            background: #0f0f1f;
+            color: #aef;
+            font-size: 1.1rem;
+        }
+        .glowing-orbit {
+            animation: orbit 5s linear infinite;
+        }
+        @keyframes orbit {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Robin AI - Ask Me Anything</h1>
+    <input type="text" id="user_input" placeholder="Speak or type your question...">
+    <div class="glowing-orbit">
+        <button id="send_button">Send</button>
+        <button id="mic_button">🎤</button>
+    </div>
+    <div id="response_area"></div>
+
+    <script>
+        const micButton = document.getElementById('mic_button');
+        const userInputField = document.getElementById('user_input');
+
+        micButton.addEventListener('click', () => {
+            micButton.classList.toggle('active');
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "en-US";
+            recognition.start();
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                userInputField.value = transcript;
+            };
+        });
+
+        document.getElementById("send_button").addEventListener("click", function() {
+            const userInput = userInputField.value;
+            fetch("/get_response", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: "user_input=" + encodeURIComponent(userInput),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const responseArea = document.getElementById("response_area");
+                const textNode = document.createElement("div");
+                textNode.textContent = data.response || ("Error: " + data.error);
+                responseArea.appendChild(textNode);
+                responseArea.scrollTop = responseArea.scrollHeight; // Auto-scroll
+            });
+        });
+    </script>
+</body>
+</html>
+```
