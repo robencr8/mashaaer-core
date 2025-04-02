@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Robin AI Companion</title>
+  <title>Robin AI Cosmic Companion</title>
   <style>
     body {
       background: radial-gradient(ellipse at center, #0a0a2a 0%, #000000 100%);
@@ -25,7 +25,7 @@
       background: #222;
       color: white;
     }
-    button {
+    .interaction-button {
       margin-top: 15px;
       padding: 10px 30px;
       font-size: 1em;
@@ -40,53 +40,35 @@
       font-size: 1.1em;
       color: #fff;
     }
+    .active {
+      box-shadow: 0 0 15px #55e0ff;
+      animation: pulse 1.5s infinite;
+    }
+    #loader {
+      display: none;
+      font-size: 1.1em;
+      margin-top: 10px;
+      color: #ffbb33;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
   </style>
 </head>
 <body>
-  <div class="cosmic-container">
-    <header>
-      <h1>Robin AI Cosmic Web Companion</h1>
-    </header>
-    <div class="cosmic-background">
-      <div class="orbital-elements">
-        <div class="glowing-orb"></div>
-        <div class="glowing-orb"></div>
-        <div class="glowing-orb"></div>
-      </div>
-    </div>
-    <div class="interaction-panel">
-      <input id="user_input" placeholder="Speak or type your cosmic queries..." />
-      <button id="send_button" class="interaction-button">Send</button>
-      <button id="mic_button" class="interaction-button">🎤 Listen</button>
-    </div>
-    <div id="response_area" class="cosmic-response-panel"></div>
-
-    <div id="loader" class="loader">Listening...</div>
-  </div>
+  <h1>Robin AI</h1>
+  <input id="user_input" placeholder="Say something or type..." />
+  <button id="send_button" class="interaction-button" onclick="sendInput()">Send</button>
+  <button id="mic_button" class="interaction-button">🎤 Listen</button>
+  <div id="loader">Listening...</div>
+  <div id="response_area"></div>
 
   <script>
     const micButton = document.getElementById('mic_button');
     const userInputField = document.getElementById('user_input');
     const loader = document.getElementById('loader');
-
-    function sendInput(text = null) {
-      const userInput = text || userInputField.value;
-      loader.style.display = 'block';
-      loader.textContent = 'Thinking...';
-
-      fetch("/ask", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: "user_input=" + encodeURIComponent(userInput),
-      })
-      .then(response => response.json())
-      .then(data => {
-        document.getElementById("response_area").textContent = data.response || data.error;
-        loader.style.display = 'none';
-      });
-    }
 
     micButton.addEventListener('click', () => {
       micButton.classList.toggle('active');
@@ -106,37 +88,24 @@
         loader.style.display = 'none';
       };
     });
-  </script>
 
-  <script>
     function sendInput(text = null) {
-      const userInput = text || document.getElementById("user_input").value;
-      fetch("/get_response", {
+      const userInput = text || userInputField.value;
+      loader.style.display = 'block';
+      loader.textContent = "Thinking...";
+
+      fetch("/ask", {
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/json",
         },
-        body: "user_input=" + encodeURIComponent(userInput),
+        body: JSON.stringify({ user_input: userInput }),
       })
       .then(response => response.json())
       .then(data => {
         document.getElementById("response_area").textContent = data.response || data.error;
+        loader.style.display = 'none';
       });
-    }
-
-    function startListening() {
-      const recognition = new webkitSpeechRecognition();
-      recognition.lang = "en-US";
-      recognition.start();
-
-      recognition.onresult = function(event) {
-        const transcript = event.results[0][0].transcript;
-        sendInput(transcript);
-      };
-
-      recognition.onerror = function(event) {
-        alert("Voice recognition error: " + event.error);
-      };
     }
   </script>
 </body>
