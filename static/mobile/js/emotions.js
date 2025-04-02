@@ -35,7 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchEmotionData();
   });
 
-  // Tab navigation
+  // Tab navigation is now handled in the inline script
+  // We keep this here for backward compatibility
   tabs.forEach(tab => {
     tab.addEventListener('click', function() {
       const tabName = this.getAttribute('data-tab');
@@ -43,19 +44,29 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Initialize the page
+  // Initialize the page using our API Service
   function initializePage() {
-    // Check server connection
-    checkServerStatus()
-      .then(status => {
-        if (status.online) {
+    // Show loading state
+    userStatus.querySelector('.status-text').textContent = 'Connecting...';
+    
+    // Check server connection using the API service
+    apiService.getStatus()
+      .then(response => {
+        if (response.success) {
           setConnected(true);
           
-          // Get the session ID
-          appState.sessionId = status.session.id;
+          // Get the session ID from the response
+          if (response.session && response.session.id) {
+            appState.sessionId = response.session.id;
+          }
           
           // Fetch emotion data
           fetchEmotionData();
+          
+          // Show success toast
+          if (typeof showToast === 'function') {
+            showToast('Connected to Robin AI', 'success');
+          }
         } else {
           setConnected(false);
           showError('Could not connect to Robin AI server. Please try again later.');
@@ -64,21 +75,11 @@ document.addEventListener('DOMContentLoaded', function() {
       .catch(error => {
         console.error('Error initializing page:', error);
         setConnected(false);
+        showError('Connection error: ' + (error.message || 'Unknown error'));
       });
   }
 
-  // Check server status
-  function checkServerStatus() {
-    return fetch('/api/status')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Server status check failed');
-        }
-        return response.json();
-      });
-  }
-
-  // Fetch emotion data - updated to work with ApiService
+  // Fetch emotion data using the global apiService instance
   function fetchEmotionData() {
     // Calculate days parameter based on selected time range
     let days = 7; // default: week
@@ -88,30 +89,57 @@ document.addEventListener('DOMContentLoaded', function() {
       days = 30;
     }
     
-    // Use ApiService to fetch emotion data
-    ApiService.fetchEmotionTimeline(days, appState.currentSessionOnly, appState.sessionId)
-      .then(data => {
-        // Store the emotion data
-        appState.emotionData = data;
-        
-        // Update the UI
-        updateEmotionStats(data);
-        updateEmotionHistory(data);
-        updateEmotionChart(data);
+    // Show loading state
+    userStatus.querySelector('.status-text').textContent = 'Loading data...';
+    
+    // Use apiService to fetch emotion data
+    apiService.fetchEmotionTimeline(days, appState.currentSessionOnly, appState.sessionId)
+      .then(response => {
+        if (response.success) {
+          // Store the emotion data
+          appState.emotionData = response;
+          
+          // Update the UI
+          updateEmotionStats(response);
+          updateEmotionHistory(response);
+          updateEmotionChart(response);
+          
+          // Update status
+          userStatus.querySelector('.status-text').textContent = 'Data updated';
+          setTimeout(() => {
+            if (appState.connected) {
+              userStatus.querySelector('.status-text').textContent = 'Online';
+            }
+          }, 2000);
+          
+          // Show success toast
+          if (typeof showToast === 'function') {
+            showToast('Emotion data updated successfully', 'success');
+          }
+        } else {
+          showError(response.error || 'Failed to fetch emotion data');
+          clearUIElements();
+        }
       })
       .catch(error => {
         console.error('Error fetching emotion data:', error);
-        // Clear UI elements
-        primaryEmotionElement.textContent = '-';
-        totalEntriesElement.textContent = '0';
-        emotionListElement.innerHTML = '<p class="empty-message">No emotion data available.</p>';
-        
-        // Destroy existing chart
-        if (chartInstance) {
-          chartInstance.destroy();
-          chartInstance = null;
-        }
+        showError('Error loading emotion data: ' + (error.message || 'Unknown error'));
+        clearUIElements();
       });
+  }
+  
+  // Clear UI elements when there's an error
+  function clearUIElements() {
+    // Clear UI elements
+    primaryEmotionElement.textContent = '-';
+    totalEntriesElement.textContent = '0';
+    emotionListElement.innerHTML = '<p class="empty-message">No emotion data available.</p>';
+    
+    // Destroy existing chart
+    if (chartInstance) {
+      chartInstance.destroy();
+      chartInstance = null;
+    }
   }
 
   // Update emotion statistics
@@ -432,8 +460,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Show error message
   function showError(message) {
-    // Add error toast or notification if needed
     console.error(message);
+    // Use toast notification if available
+    if (typeof showToast === 'function') {
+      showToast(message, 'error');
+    }
   }
 
   // Navigate to tab

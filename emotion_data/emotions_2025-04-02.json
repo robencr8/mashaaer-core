@@ -30,5 +30,13 @@
     "source": "text",
     "intensity": 0.5,
     "session_id": "eb11c67f-6fd6-43ef-b9eb-98800a5e43e8"
+  },
+  {
+    "emotion": "happy",
+    "text": "Testing emotion logging",
+    "timestamp": "2025-04-02T10:56:06.931886",
+    "source": "test",
+    "intensity": 0.8,
+    "session_id": "d34e2c4d-ffd8-4ad9-bbeb-2ae642845131"
   }
 ]

@@ -167,6 +167,62 @@
   </footer>
 
   <script src="/static/js/voice_recorder.js"></script>
+  <script src="/static/mobile/js/api-service.js"></script>
   <script src="/static/mobile/js/app.js"></script>
+  
+  <script>
+    // Initialize API status check
+    document.addEventListener('DOMContentLoaded', async function() {
+      try {
+        const statusElement = document.getElementById('aiStatusText');
+        if (statusElement) {
+          statusElement.textContent = 'Checking connection...';
+          
+          // Get system status from API
+          const status = await apiService.getStatus();
+          
+          if (status && status.success) {
+            statusElement.textContent = 'Connected';
+            document.querySelector('.status-dot').classList.add('online');
+            
+            // Update personality if available
+            if (status.notifications && status.notifications.available) {
+              console.log('Notifications available:', status.notifications);
+            }
+          } else {
+            statusElement.textContent = 'Offline Mode';
+            document.querySelector('.status-dot').classList.add('offline');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking API status:', error);
+        const statusElement = document.getElementById('aiStatusText');
+        if (statusElement) {
+          statusElement.textContent = 'Connection Error';
+          document.querySelector('.status-dot').classList.add('error');
+        }
+      }
+    });
+    
+    // Toast notification system
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          document.body.removeChild(toast);
+        }, 300);
+      }, 3000);
+    }
+  </script>
 </body>
 </html>

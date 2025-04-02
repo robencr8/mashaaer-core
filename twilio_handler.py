@@ -39,16 +39,23 @@ class TwilioHandler:
             message_text (str): The message content to send
             
         Returns:
-            bool: True if the message was sent successfully, False otherwise
+            dict: A dictionary with status information and any error details
         """
         if not self.available:
-            logger.error("Cannot send SMS: Twilio credentials not available")
-            return False
+            error_msg = "Cannot send SMS: Twilio credentials not available"
+            logger.error(error_msg)
+            return {"success": False, "error": error_msg}
         
         # Check if phone number is in proper format
         if not to_number.startswith('+'):
-            logger.warning(f"Phone number {to_number} is not in E.164 format. Adding +1 prefix.")
-            to_number = '+1' + to_number.lstrip('1')
+            logger.warning(f"Phone number {to_number} is not in E.164 format. Adding + prefix.")
+            # UAE numbers should start with +971
+            if to_number.startswith('0097'):
+                to_number = '+' + to_number[2:]
+            elif to_number.startswith('97'):
+                to_number = '+' + to_number
+            else:
+                to_number = '+' + to_number
         
         try:
             # Initialize Twilio client
@@ -62,11 +69,30 @@ class TwilioHandler:
             )
             
             logger.info(f"SMS sent to {to_number}, SID: {message.sid}")
-            return True
+            return {"success": True, "sid": message.sid, "to": to_number}
             
         except Exception as e:
-            logger.error(f"Failed to send SMS: {str(e)}")
-            return False
+            error_msg = str(e)
+            logger.error(f"Failed to send SMS: {error_msg}")
+            
+            # Provide more specific error messages for common Twilio errors
+            error_response = {
+                "success": False,
+                "error": "Failed to send SMS",
+                "details": error_msg,
+                "to": to_number
+            }
+            
+            # Check for specific error cases
+            if "21612" in error_msg:
+                error_response["error"] = "Cannot send to this international number with trial account"
+                error_response["solution"] = "Upgrade Twilio account or use a verified number"
+            elif "21211" in error_msg:
+                error_response["error"] = "Invalid phone number format"
+            elif "21608" in error_msg:
+                error_response["error"] = "Twilio account not authorized to send to this region"
+            
+            return error_response
     
     def send_notification(self, to_number, notification_type, **kwargs):
         """
@@ -78,7 +104,7 @@ class TwilioHandler:
             **kwargs: Additional parameters specific to the notification type
             
         Returns:
-            bool: True if the notification was sent successfully, False otherwise
+            dict: A dictionary with status information and any error details
         """
         templates = {
             'alert': "🚨 ROBIN AI ALERT: {message}",
@@ -104,10 +130,18 @@ class TwilioHandler:
         
         try:
             message = template.format(**kwargs)
-            return self.send_message(to_number, message)
+            result = self.send_message(to_number, message)
+            if result["success"]:
+                result["alert_type"] = notification_type
+            return result
         except KeyError as e:
-            logger.error(f"Missing parameter in notification template: {str(e)}")
-            return False
+            error_msg = f"Missing parameter in notification template: {str(e)}"
+            logger.error(error_msg)
+            return {
+                "success": False, 
+                "error": error_msg,
+                "alert_type": notification_type
+            }
             
     def get_message_history(self):
         """

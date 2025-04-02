@@ -31,6 +31,127 @@ def init_api(app, _db_manager, _emotion_tracker, _face_detector,
     intent_classifier = _intent_classifier
     config = _config
     
+    # Add API documentation endpoint
+    @api.route('/', methods=['GET'])
+    def api_docs():
+        """API documentation listing all available endpoints"""
+        endpoints = {
+            '/api/status': {
+                'methods': ['GET'],
+                'description': 'Get system status and information about all subsystems',
+                'params': []
+            },
+            '/api/emotion-data': {
+                'methods': ['GET'],
+                'description': 'Get emotion data for visualization',
+                'params': [
+                    {'name': 'days', 'type': 'int', 'default': 7, 'description': 'Number of days of data to retrieve'},
+                    {'name': 'session_only', 'type': 'bool', 'default': False, 'description': 'Only get data for current session'},
+                    {'name': 'session_id', 'type': 'string', 'default': None, 'description': 'Get data for specific session ID'}
+                ]
+            },
+            '/api/face-recognition-data': {
+                'methods': ['GET'],
+                'description': 'Get face recognition data',
+                'params': [
+                    {'name': 'limit', 'type': 'int', 'default': 20, 'description': 'Number of records to retrieve'},
+                    {'name': 'session_only', 'type': 'bool', 'default': False, 'description': 'Only get data for current session'}
+                ]
+            },
+            '/api/recent-conversations': {
+                'methods': ['GET'],
+                'description': 'Get recent conversation history',
+                'params': [
+                    {'name': 'limit', 'type': 'int', 'default': 10, 'description': 'Number of conversations to retrieve'},
+                    {'name': 'session_only', 'type': 'bool', 'default': False, 'description': 'Only get conversations for current session'}
+                ]
+            },
+            '/api/voice-logs': {
+                'methods': ['GET'],
+                'description': 'Get voice recognition logs',
+                'params': [
+                    {'name': 'limit', 'type': 'int', 'default': 20, 'description': 'Number of logs to retrieve'},
+                    {'name': 'session_only', 'type': 'bool', 'default': False, 'description': 'Only get logs for current session'}
+                ]
+            },
+            '/api/profiles': {
+                'methods': ['GET'],
+                'description': 'Get all saved face profiles with metadata',
+                'params': []
+            },
+            '/api/profile/<name>': {
+                'methods': ['GET'],
+                'description': 'Get a specific profile by name',
+                'params': [
+                    {'name': 'name', 'type': 'string', 'required': True, 'description': 'Profile name to retrieve'}
+                ]
+            },
+            '/api/log-recognition': {
+                'methods': ['POST'],
+                'description': 'Log a face recognition event',
+                'params': [
+                    {'name': 'name', 'type': 'string', 'required': True, 'description': 'Name of recognized person'},
+                    {'name': 'confidence', 'type': 'float', 'default': 0.0, 'description': 'Recognition confidence'},
+                    {'name': 'emotion', 'type': 'string', 'default': 'neutral', 'description': 'Detected emotion'},
+                    {'name': 'greeting', 'type': 'string', 'default': None, 'description': 'Greeting message used'}
+                ]
+            },
+            '/api/log-emotion': {
+                'methods': ['POST'],
+                'description': 'Log an emotion detection event',
+                'params': [
+                    {'name': 'emotion', 'type': 'string', 'required': True, 'description': 'Detected emotion'},
+                    {'name': 'text', 'type': 'string', 'default': '', 'description': 'Text content'},
+                    {'name': 'source', 'type': 'string', 'default': 'text', 'description': 'Source of emotion (text, voice, face)'},
+                    {'name': 'intensity', 'type': 'float', 'default': 0.5, 'description': 'Emotion intensity (0-1)'}
+                ]
+            },
+            '/api/retrain-emotion-model': {
+                'methods': ['POST'],
+                'description': 'Trigger emotion model retraining (requires developer mode)',
+                'params': []
+            },
+            '/api/sessions': {
+                'methods': ['GET'],
+                'description': 'Get a list of available sessions',
+                'params': [
+                    {'name': 'limit', 'type': 'int', 'default': 10, 'description': 'Number of sessions to retrieve'}
+                ]
+            },
+            '/api/sms': {
+                'methods': ['POST'],
+                'description': 'Send SMS notification via Twilio',
+                'params': [
+                    {'name': 'to_number', 'type': 'string', 'required': True, 'description': 'Recipient phone number in E.164 format'},
+                    {'name': 'message', 'type': 'string', 'required': True, 'description': 'Message content to send'}
+                ]
+            },
+            '/api/sms-alert': {
+                'methods': ['POST'],
+                'description': 'Send SMS alert notification with pre-formatted message',
+                'params': [
+                    {'name': 'to_number', 'type': 'string', 'required': True, 'description': 'Recipient phone number in E.164 format'},
+                    {'name': 'alert_type', 'type': 'string', 'default': 'alert', 'description': 'Alert type (alert, reminder, update, emotion, face, security, system)'},
+                    {'name': 'alert_data', 'type': 'object', 'required': True, 'description': 'Data for the alert message template'}
+                ]
+            },
+            '/api/session-data': {
+                'methods': ['GET'],
+                'description': 'Get comprehensive data for a specific session',
+                'params': [
+                    {'name': 'session_id', 'type': 'string', 'default': 'current', 'description': 'Session ID to retrieve data for'}
+                ]
+            }
+        }
+        
+        return jsonify({
+            'name': 'Robin AI Enhanced API',
+            'version': 'v2.0.0',
+            'base_url': '/api',
+            'endpoints': endpoints,
+            'success': True
+        })
+    
     # Register the blueprint
     app.register_blueprint(api, url_prefix='/api')
     
@@ -100,6 +221,18 @@ def get_status():
             }
         }
         
+        # Notification service status
+        from twilio_handler import TwilioHandler
+        twilio_handler = TwilioHandler()
+        status['notifications'] = {
+            'provider': 'Twilio',
+            'available': twilio_handler.is_available(),
+            'sms_enabled': twilio_handler.is_available(),
+            'phone_number': twilio_handler.phone_number[-4:] if twilio_handler.is_available() else None,
+            'can_send_international': False,  # Trial accounts can't send to international numbers
+            'status': 'active' if twilio_handler.is_available() else 'inactive'
+        }
+        
         # Current session info
         session_id = _get_or_create_session_id()
         status['session'] = {
@@ -127,9 +260,9 @@ def get_status():
         except Exception as e:
             print(f"Error checking developer mode: {e}")
         
-        return jsonify(status)
+        return jsonify({'success': True, **status})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @api.route('/emotion-data', methods=['GET'])
 def get_emotion_data():
@@ -557,31 +690,28 @@ def send_sms():
         try:
             result = twilio_handler.send_message(to_number, message)
             
-            if result:
+            if result["success"]:
                 return jsonify({
                     'success': True,
                     'message': 'SMS sent successfully',
-                    'to': to_number
+                    'to': result.get('to', to_number),
+                    'sid': result.get('sid', '')
                 })
             else:
-                return jsonify({
-                    'success': False,
-                    'error': 'Failed to send SMS'
-                }), 500
+                # Get status code based on error type
+                status_code = 500
+                if "Invalid 'To' Phone Number" in result.get('details', ''):
+                    status_code = 400
+                    result['error'] = f'Invalid phone number format: {to_number}. Use E.164 format (+[country code][number]).'
+                
+                return jsonify(result), status_code
         except Exception as e:
             error_msg = str(e)
-            if "Invalid 'To' Phone Number" in error_msg:
-                return jsonify({
-                    'success': False,
-                    'error': f'Invalid phone number format: {to_number}. Use E.164 format (+[country code][number]).',
-                    'details': error_msg
-                }), 400
-            else:
-                return jsonify({
-                    'success': False,
-                    'error': 'Twilio error occurred',
-                    'details': error_msg
-                }), 500
+            return jsonify({
+                'success': False,
+                'error': 'Unexpected error in SMS handling',
+                'details': error_msg
+            }), 500
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -615,32 +745,29 @@ def send_sms_alert():
         try:
             result = twilio_handler.send_notification(to_number, alert_type, **alert_data)
             
-            if result:
+            if result["success"]:
                 return jsonify({
                     'success': True,
                     'message': 'SMS alert sent successfully',
-                    'to': to_number,
-                    'alert_type': alert_type
+                    'to': result.get('to', to_number),
+                    'sid': result.get('sid', ''),
+                    'alert_type': result.get('alert_type', alert_type)
                 })
             else:
-                return jsonify({
-                    'success': False,
-                    'error': 'Failed to send SMS alert'
-                }), 500
+                # Get status code based on error type
+                status_code = 500
+                if "Invalid 'To' Phone Number" in result.get('details', ''):
+                    status_code = 400
+                    result['error'] = f'Invalid phone number format: {to_number}. Use E.164 format (+[country code][number]).'
+                
+                return jsonify(result), status_code
         except Exception as e:
             error_msg = str(e)
-            if "Invalid 'To' Phone Number" in error_msg:
-                return jsonify({
-                    'success': False,
-                    'error': f'Invalid phone number format: {to_number}. Use E.164 format (+[country code][number]).',
-                    'details': error_msg
-                }), 400
-            else:
-                return jsonify({
-                    'success': False,
-                    'error': 'Twilio error occurred',
-                    'details': error_msg
-                }), 500
+            return jsonify({
+                'success': False,
+                'error': 'Unexpected error in SMS alert handling',
+                'details': error_msg
+            }), 500
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 

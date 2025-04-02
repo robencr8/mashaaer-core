@@ -99,6 +99,43 @@
     Robin AI - Mapping the universe of human emotions.
   </footer>
   
+  <script src="/static/mobile/js/api-service.js"></script>
   <script src="/static/mobile/js/emotions.js"></script>
+  
+  <script>
+    // Initialize the toast notification system
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          document.body.removeChild(toast);
+        }, 300);
+      }, 3000);
+    }
+    
+    // Tab navigation
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        const tabName = this.dataset.tab;
+        if (tabName === 'home') {
+          window.location.href = '/mobile';
+        } else if (tabName === 'profiles') {
+          window.location.href = '/mobile/profiles';
+        } else if (tabName === 'settings') {
+          window.location.href = '/mobile/settings';
+        }
+      });
+    });
+  </script>
 </body>
 </html>
