@@ -122,59 +122,66 @@ core_launcher = CoreLauncher(
 # Routes
 @app.route('/')
 def index():
+    # Always redirect to the cosmic mobile UI
+    return redirect(url_for('mobile_splash'))
+    
+    # Legacy code, no longer used
     # Check if onboarding has been completed
-    onboarding_status = db_manager.get_setting('onboarding_complete', 'false')
-    onboarding_complete = False
-
-    if isinstance(onboarding_status, str):
-        onboarding_complete = onboarding_status.lower() == 'true'
-
-    # If onboarding not complete, redirect to startup
-    if not onboarding_complete:
-        return redirect(url_for('startup'))
-
-    dev_mode = is_developer_mode()
-    return render_template('index.html', dev_mode=dev_mode)
+    # onboarding_status = db_manager.get_setting('onboarding_complete', 'false')
+    # onboarding_complete = False
+    # 
+    # if isinstance(onboarding_status, str):
+    #     onboarding_complete = onboarding_status.lower() == 'true'
+    # 
+    # # If onboarding not complete, redirect to startup
+    # if not onboarding_complete:
+    #     return redirect(url_for('startup'))
+    # 
+    # dev_mode = is_developer_mode()
+    # return render_template('index.html', dev_mode=dev_mode)
 
 @app.route('/startup')
 def startup():
+    # Always redirect to the cosmic mobile UI
     welcome_message = "Welcome to Robin AI. Let's get started with your onboarding."
     tts_manager.speak(welcome_message, 'default', 'en', profile_manager)
-    return render_template('startup.html')
+    # Use mobile splash instead of old startup template
+    return redirect(url_for('mobile_splash'))
 
 @app.route('/consent')
 def consent():
-    return render_template('consent.html')
+    # Always redirect to the cosmic mobile UI
+    return redirect(url_for('mobile_index'))
 
 @app.route('/voice-register')
 def voice_register():
-    return render_template('voice_register.html')
+    # Always redirect to the cosmic mobile UI
+    return redirect(url_for('mobile_index'))
 
 @app.route('/goodbye')
 def goodbye():
-    return render_template('goodbye.html')
+    # Always redirect to the cosmic mobile UI
+    return redirect(url_for('mobile_index'))
 
 @app.route('/demo')
 def demo():
-    dev_mode = is_developer_mode()
-    return render_template('demo.html', dev_mode=dev_mode)
+    # Redirect to mobile index which has the demo capabilities
+    return redirect(url_for('mobile_index'))
 
 @app.route('/emotion-timeline')
 def emotion_timeline():
-    emotions = emotion_tracker.get_emotion_history()
-    dev_mode = is_developer_mode()
-    return render_template('emotion_timeline.html', emotions=emotions, dev_mode=dev_mode)
+    # Redirect to mobile emotions page which has cosmic emotion visualization
+    return redirect(url_for('mobile_emotions'))
 
 @app.route('/profile')
 def profile():
-    profiles = face_detector.get_all_profiles()
-    dev_mode = is_developer_mode()
-    return render_template('profile.html', profiles=profiles, dev_mode=dev_mode)
+    # Redirect to mobile profiles page which has cosmic profile UI
+    return redirect(url_for('mobile_profiles'))
 
 @app.route('/live-view')
 def live_view():
-    dev_mode = is_developer_mode()
-    return render_template('live_view.html', dev_mode=dev_mode)
+    # Redirect to mobile index which has the camera and voice capabilities built-in
+    return redirect(url_for('mobile_index'))
 
 @app.route('/enable-dev-mode')
 def enable_dev_mode():
@@ -188,66 +195,27 @@ def enable_dev_mode():
 def admin():
     # Only accessible in developer mode
     if not is_developer_mode():
-        return redirect(url_for('index'))
+        return redirect(url_for('mobile_index'))
 
-    # Get AI learning stats
-    learning_status = auto_learning.get_learning_status()
-
-    system_stats = {
-        'uptime': core_launcher.get_uptime(),
-        'memory_size': db_manager.get_db_size(),
-        'emotion_count': emotion_tracker.get_total_entries(),
-        'face_profiles': face_detector.get_profile_count(),
-        'system_status': core_launcher.get_system_status(),
-        'learning_status': learning_status,
-        'sms_available': twilio_handler.is_available()
-    }
-
-    return render_template('admin.html', stats=system_stats, dev_mode=True)
+    # For now, redirect to mobile settings which has the admin controls
+    # Future: Create a dedicated mobile/admin.html template with cosmic UI
+    return redirect(url_for('mobile_settings'))
 
 @app.route('/sms-notifications')
 def sms_notifications():
     # Only accessible in developer mode
     if not is_developer_mode():
-        return redirect(url_for('index'))
+        return redirect(url_for('mobile_index'))
     
-    # Initialize Twilio handler
-    twilio_handler = TwilioHandler()
-    
-    # Check if Twilio is available
-    twilio_status = twilio_handler.is_available()
-    
-    # Get Twilio account information (truncated for security)
-    twilio_sid = os.environ.get('TWILIO_ACCOUNT_SID', '')
-    twilio_phone = os.environ.get('TWILIO_PHONE_NUMBER', '')
-    
-    # Get message history from Twilio handler
-    sms_history = twilio_handler.get_message_history()
-    
-    # Prepare status message
-    twilio_status_message = "SMS notifications are active and ready." if twilio_status else "SMS notifications unavailable. Check Twilio credentials."
-    
-    return render_template(
-        'sms_notifications.html', 
-        dev_mode=True,
-        twilio_status=twilio_status,
-        twilio_status_message=twilio_status_message,
-        sms_history=sms_history
-    )
+    # For now, redirect to the mobile settings page which has a section for SMS
+    # Future: Create a dedicated mobile/sms.html template with cosmic UI
+    return redirect(url_for('mobile_settings'))
 
 @app.route('/session-report')
 def session_report():
     """Show the session report dashboard with real-time data visualization"""
-    dev_mode = is_developer_mode()
-
-    # Get sample emotion labels and data for initial chart display
-    emotion_labels = ['Happy', 'Sad', 'Angry', 'Surprised', 'Fearful', 'Disgusted', 'Neutral']
-    emotion_data = [12, 5, 3, 7, 2, 1, 8]
-
-    return render_template('session_report.html', 
-                          dev_mode=dev_mode, 
-                          labels=emotion_labels, 
-                          data=emotion_data)
+    # Redirect to mobile emotions page which has cosmic emotion visualization
+    return redirect(url_for('mobile_emotions'))
 
 @app.route('/download/session.csv')
 def download_session_csv():
@@ -1161,4 +1129,4 @@ if __name__ == "__main__":
     time.sleep(2)
 
     # Start Flask app
-    app.run(host="0.0.0.0", port=3000, debug=True, use_reloader=False)
+    app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)
