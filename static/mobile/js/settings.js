@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const voiceRecognitionToggle = document.getElementById('voiceRecognitionToggle');
   const storeHistoryToggle = document.getElementById('storeHistoryToggle');
   const faceRecognitionToggle = document.getElementById('faceRecognitionToggle');
+  const aiModelBackendSelect = document.getElementById('aiModelBackendSelect');
   const resetButton = document.getElementById('resetButton');
   const logoutButton = document.getElementById('logoutButton');
   const confirmModal = document.getElementById('confirmModal');
@@ -25,7 +26,8 @@ document.addEventListener('DOMContentLoaded', function() {
       voiceStyle: 'default',
       voiceRecognition: true,
       storeHistory: true,
-      faceRecognition: true
+      faceRecognition: true,
+      aiModelBackend: 'auto'
     },
     confirmAction: null
   };
@@ -56,6 +58,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   faceRecognitionToggle.addEventListener('change', function() {
     updateSetting('faceRecognition', this.checked);
+  });
+  
+  aiModelBackendSelect.addEventListener('change', function() {
+    updateSetting('aiModelBackend', this.value);
   });
 
   resetButton.addEventListener('click', confirmResetSettings);
@@ -154,6 +160,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Face recognition
     faceRecognitionToggle.checked = appState.settings.faceRecognition !== false;
+    
+    // AI Model Backend
+    aiModelBackendSelect.value = appState.settings.aiModelBackend || 'auto';
   }
 
   // Update setting
@@ -243,7 +252,8 @@ document.addEventListener('DOMContentLoaded', function() {
           voiceStyle: 'default',
           voiceRecognition: true,
           storeHistory: true,
-          faceRecognition: true
+          faceRecognition: true,
+          aiModelBackend: 'auto'
         };
         
         // Update UI

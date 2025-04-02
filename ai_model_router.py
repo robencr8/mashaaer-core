@@ -532,8 +532,23 @@ class AIModelRouter:
                         result["fallback_reason"] = "openai_quota_exceeded" if is_quota_exceeded else "openai_error"
                         return result
                 
-                # Both failed, return last error
-                return result
+                # Both failed, but it's critical to identify when this is a quota-exceeded situation
+                if is_quota_exceeded:
+                    error_msg = "OpenAI API quota exceeded and no Ollama fallback available. Please either purchase more OpenAI credits or install Ollama for fallback."
+                    logger.error(error_msg)
+                    return {
+                        "success": False,
+                        "error": error_msg,
+                        "model": "auto",
+                        "timestamp": time.time(),
+                        "content": None,
+                        "error_type": "quota_exceeded_no_fallback",
+                        "quota_exceeded": True,
+                        "ollama_available": False
+                    }
+                else:
+                    # Return last error for non-quota issues
+                    return result
             
             # If OpenAI not configured, try Ollama
             elif self.is_ollama_running():

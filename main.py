@@ -189,8 +189,18 @@ def ask():
             if isinstance(error_message, str) and "quota" in error_message.lower():
                 logger.error("OpenAI quota exceeded error detected in /ask endpoint")
                 response_json['quota_exceeded'] = True
-                response_json['model_suggestion'] = "Use model='auto' to automatically fall back to Ollama models when OpenAI is unavailable"
+                
+                # Check if this is the special "no-fallback" scenario
+                if error_type == "quota_exceeded_no_fallback":
+                    response_json['model_suggestion'] = "Install Ollama for local AI support when OpenAI is unavailable"
+                    response_json['installation_suggestion'] = "Visit https://ollama.ai to download and install Ollama"
+                else:
+                    response_json['model_suggestion'] = "Use model='auto' to automatically fall back to Ollama models when OpenAI is unavailable"
             
+            # Check for Ollama availability
+            if 'ollama_available' in response_data:
+                response_json['ollama_available'] = response_data['ollama_available']
+                
             # Add fallback reason if available
             if fallback_reason:
                 response_json['fallback_reason'] = fallback_reason
@@ -1659,7 +1669,8 @@ def user_settings():
             'voiceStyle': db_manager.get_setting('voice_style', 'default'),
             'voiceRecognition': db_manager.get_setting('voice_recognition_enabled', 'true').lower() == 'true',
             'storeHistory': db_manager.get_setting('store_history', 'true').lower() == 'true',
-            'faceRecognition': db_manager.get_setting('face_recognition_enabled', 'true').lower() == 'true'
+            'faceRecognition': db_manager.get_setting('face_recognition_enabled', 'true').lower() == 'true',
+            'aiModelBackend': db_manager.get_setting('ai_model_backend', 'auto')
         }
         return jsonify({'success': True, 'settings': settings})
     else:
@@ -1679,6 +1690,11 @@ def user_settings():
                     db_manager.set_setting('store_history', 'true' if value else 'false')
                 elif key == 'faceRecognition':
                     db_manager.set_setting('face_recognition_enabled', 'true' if value else 'false')
+                elif key == 'aiModelBackend':
+                    db_manager.set_setting('ai_model_backend', value)
+                    # Also update the environment variable for immediate effect
+                    os.environ['MODEL_BACKEND'] = value
+                    logger.info(f"AI Model Backend changed to {value}")
             return jsonify({'success': True})
         except Exception as e:
             logger.error(f"Error updating settings: {str(e)}")
@@ -1694,8 +1710,12 @@ def reset_user_settings():
             'voice_style': 'default',
             'voice_recognition_enabled': 'true',
             'store_history': 'true',
-            'face_recognition_enabled': 'true'
+            'face_recognition_enabled': 'true',
+            'ai_model_backend': 'auto'
         }
+        
+        # Also update MODEL_BACKEND environment variable to match default
+        os.environ['MODEL_BACKEND'] = 'auto'
 
         for key, value in default_settings.items():
             db_manager.set_setting(key, value)
