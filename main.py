@@ -1,6 +1,7 @@
 import os
 import logging
 import json
+import traceback
 from flask import Flask, render_template, request, jsonify, Response, redirect, url_for
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -30,6 +31,13 @@ app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
 # Enable CORS for all routes to support Flutter and mobile app integration
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
+# Cache-busting function to prevent stale assets
+BUILD_VERSION = str(int(time.time()))  # Use timestamp as version
+def versioned_url(filename):
+    """Add version parameter to static asset URLs for cache-busting"""
+    from flask import url_for
+    return url_for('static', filename=filename, v=BUILD_VERSION)
+
 # Initialize components
 config = Config()
 db_manager = DatabaseManager(config=config, db_path=config.DB_PATH)
@@ -47,6 +55,9 @@ profile_manager = ProfileManager(db_manager)
 from api_routes import init_api
 init_api(app, db_manager, emotion_tracker, face_detector, 
          tts_manager, voice_recognition, intent_classifier, config)
+
+# Add versioned_url helper to Jinja templates
+app.jinja_env.globals.update(versioned_url=versioned_url)
 
 # Developer mode constants
 DEVELOPER_NAME = os.environ.get("DEVELOPER_NAME", "Roben Edwan")
@@ -223,6 +234,10 @@ def download_session_csv():
     from flask import session as flask_session
     import csv
     from io import StringIO
+    
+    # If not in developer mode, redirect to mobile UI
+    if not is_developer_mode():
+        return redirect(url_for('mobile_emotions'))
 
     # Get session ID from query parameters or use current session
     session_id = request.args.get('session_id', None)
@@ -414,8 +429,36 @@ def detect_face():
 @app.route('/api/emotion-data')
 def emotion_data():
     days = request.args.get('days', 7, type=int)
-    emotions = emotion_tracker.get_emotion_history(days=days)
-    return jsonify(emotions)
+    session_id = request.args.get('session_id', None)
+    mobile_format = request.args.get('mobile_format', 'false').lower() == 'true'
+    
+    if session_id:
+        # Get emotions for a specific session
+        emotions = emotion_tracker.get_session_emotion_history(session_id)
+    else:
+        # Get general emotion history
+        emotions = emotion_tracker.get_emotion_history(days=days)
+    
+    # Convert timestamps to mobile-friendly format if requested
+    if mobile_format and emotions and 'data' in emotions:
+        for entry in emotions['data']:
+            if 'timestamp' in entry:
+                # Convert timestamp to Unix timestamp (milliseconds) for mobile
+                try:
+                    if isinstance(entry['timestamp'], str):
+                        from datetime import datetime
+                        dt = datetime.fromisoformat(entry['timestamp'].replace('Z', '+00:00'))
+                        entry['timestamp'] = int(dt.timestamp() * 1000)
+                except Exception as e:
+                    logger.error(f"Error converting timestamp: {str(e)}")
+    
+    return jsonify({
+        'success': True,
+        'emotions': emotions,
+        'session_id': session_id,
+        'days': days,
+        'mobile_format': mobile_format
+    })
 
 @app.route('/api/add-face-profile', methods=['POST'])
 def add_face_profile():
@@ -517,9 +560,13 @@ def set_language():
 
 @app.route('/api/send-sms', methods=['POST'])
 def send_sms():
-    """Send SMS notification"""
+    """Send SMS notification with enhanced error handling and UAE number support"""
     if not is_developer_mode():
-        return jsonify({'success': False, 'error': 'Not authorized'}), 403
+        return jsonify({
+            'success': False, 
+            'error': 'Not authorized',
+            'solution': 'Enable developer mode to use SMS features'
+        }), 403
         
     try:
         data = request.json
@@ -527,41 +574,109 @@ def send_sms():
         message = data.get('message')
         
         if not phone_number or not message:
-            return jsonify({'success': False, 'error': 'Phone number and message are required'}), 400
+            return jsonify({
+                'success': False, 
+                'error': 'Phone number and message are required',
+                'required_fields': {
+                    'phone_number': 'Recipient phone number in E.164 format (+971XXXXXXXXX)',
+                    'message': 'Text message to send'
+                }
+            }), 400
             
         # Initialize Twilio handler
         twilio_handler = TwilioHandler()
         
         # Check if Twilio is available
         if not twilio_handler.is_available():
+            missing_env_vars = []
+            if not os.environ.get("TWILIO_ACCOUNT_SID"):
+                missing_env_vars.append("TWILIO_ACCOUNT_SID")
+            if not os.environ.get("TWILIO_AUTH_TOKEN"):
+                missing_env_vars.append("TWILIO_AUTH_TOKEN")
+            if not os.environ.get("TWILIO_PHONE_NUMBER"):
+                missing_env_vars.append("TWILIO_PHONE_NUMBER")
+                
             return jsonify({
                 'success': False, 
-                'error': 'Twilio service is not available. Check credentials.'
+                'error': 'Twilio service is not available.',
+                'missing_credentials': missing_env_vars,
+                'solution': 'Please set the required Twilio environment variables and restart the server.'
             }), 503
+        
+        # Log the attempt with sanitized number (show only first 6 digits)
+        sanitized_number = phone_number[:6] + "XXXX" if len(phone_number) > 6 else "XXXXXX"
+        logger.info(f"Attempting to send SMS to {sanitized_number}...")
             
         # Send the message
-        success = twilio_handler.send_message(phone_number, message)
+        result = twilio_handler.send_message(phone_number, message)
         
-        if success:
+        if result.get('success', False):
+            # Log success but with sanitized number for privacy
+            logger.info(f"Successfully sent SMS to {sanitized_number}")
+            
+            # Create a response with detailed information
             return jsonify({
                 'success': True,
-                'message': f'SMS sent to {phone_number}'
+                'message': f'SMS sent to {phone_number}',
+                'sid': result.get('sid', ''),
+                'timestamp': datetime.now().isoformat(),
+                'sent_to': phone_number,
+                'message_preview': message[:20] + '...' if len(message) > 20 else message
             })
         else:
-            return jsonify({
+            # Extract error details from the result
+            error_message = result.get('error', 'Failed to send SMS')
+            solution = result.get('solution', '')
+            details = result.get('details', '')
+            
+            # Log the error
+            logger.error(f"SMS sending failed: {error_message}")
+            if details:
+                logger.error(f"SMS error details: {details}")
+            
+            # Create error response
+            response = {
                 'success': False,
-                'error': 'Failed to send SMS'
-            }), 500
+                'error': error_message,
+                'to': phone_number
+            }
+            
+            # Add optional fields if available
+            if solution:
+                response['solution'] = solution
+                logger.info(f"SMS error solution: {solution}")
+            if details:
+                response['details'] = details
+            
+            # If this is a trial account issue with unverified number, provide specific guidance
+            if "trial account" in error_message.lower() or "21612" in details:
+                response['trial_account_help'] = "Your Twilio account is in trial mode. You can only send messages to verified numbers. Please verify this number in your Twilio console."
+                
+            # Add UAE-specific help if relevant
+            if (phone_number.startswith('+971') or 
+                phone_number.startswith('971') or 
+                phone_number.startswith('05')):
+                response['uae_format_help'] = "UAE mobile numbers should be in format +971xxxxxxxxx (e.g., +971522233989)"
+                
+            return jsonify(response), 500
             
     except Exception as e:
         logger.error(f"Error sending SMS: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({
+            'success': False, 
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }), 500
 
 @app.route('/api/send-sms-alert', methods=['POST'])
 def send_sms_alert():
     """Send a pre-formatted SMS alert notification"""
     if not is_developer_mode():
-        return jsonify({'success': False, 'error': 'Not authorized'}), 403
+        return jsonify({
+            'success': False, 
+            'error': 'Not authorized',
+            'solution': 'Enable developer mode to use SMS features'
+        }), 403
         
     try:
         data = request.json
@@ -569,64 +684,179 @@ def send_sms_alert():
         alert_type = data.get('alert_type')
         
         if not phone_number or not alert_type:
-            return jsonify({'success': False, 'error': 'Phone number and alert type are required'}), 400
+            return jsonify({
+                'success': False, 
+                'error': 'Phone number and alert type are required',
+                'required_fields': {
+                    'phone_number': 'Recipient phone number in E.164 format (+971XXXXXXXXX)',
+                    'alert_type': 'Type of alert to send (emotion_detected, face_recognized, system_status)'
+                }
+            }), 400
             
         # Initialize Twilio handler
         twilio_handler = TwilioHandler()
         
         # Check if Twilio is available
         if not twilio_handler.is_available():
+            missing_env_vars = []
+            if not os.environ.get("TWILIO_ACCOUNT_SID"):
+                missing_env_vars.append("TWILIO_ACCOUNT_SID")
+            if not os.environ.get("TWILIO_AUTH_TOKEN"):
+                missing_env_vars.append("TWILIO_AUTH_TOKEN")
+            if not os.environ.get("TWILIO_PHONE_NUMBER"):
+                missing_env_vars.append("TWILIO_PHONE_NUMBER")
+                
             return jsonify({
                 'success': False, 
-                'error': 'Twilio service is not available. Check credentials.'
+                'error': 'Twilio service is not available.',
+                'missing_credentials': missing_env_vars,
+                'solution': 'Please set the required Twilio environment variables and restart the server.'
             }), 503
+        
+        # Log the attempt with sanitized number (show only first 6 digits)
+        sanitized_number = phone_number[:6] + "XXXX" if len(phone_number) > 6 else "XXXXXX"
+        logger.info(f"Attempting to send SMS alert ({alert_type}) to {sanitized_number}...")
+        
+        # Prepare real-time data for alerts
+        system_status = {}
+        uptime = "Unknown"  # Default value
+        if alert_type == 'system_status':
+            # Get actual system uptime
+            if core_launcher:
+                uptime = core_launcher.get_uptime()
+                system_status = core_launcher.get_system_status()
+                if not isinstance(system_status, dict):
+                    system_status = {}
+            
+        # Get the current emotion data if it's an emotion alert
+        emotion_data = {}
+        if alert_type == 'emotion_detected':
+            # Get the most recent emotion
+            recent_emotions = emotion_tracker.get_emotion_history(days=1)
+            if recent_emotions and 'data' in recent_emotions and len(recent_emotions['data']) > 0:
+                latest = recent_emotions['data'][0]
+                emotion_data = {
+                    'emotion': latest.get('emotion', 'happiness'),
+                    'confidence': latest.get('intensity', 85) * 100,
+                    'timestamp': latest.get('timestamp', datetime.now().isoformat())
+                }
+            
+        # Get face recognition data if it's a face recognition alert
+        face_data = {}
+        if alert_type == 'face_recognized':
+            # Get the most recent face recognition
+            conn = db_manager.get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT name, timestamp FROM recognition_history ORDER BY timestamp DESC LIMIT 1")
+            result = cursor.fetchone()
+            if result:
+                face_data = {
+                    'name': result[0],
+                    'time': result[1]
+                }
             
         # Prepare alert message based on type
-        success = False
+        result = None
         if alert_type == 'emotion_detected':
-            success = twilio_handler.send_notification(
+            result = twilio_handler.send_notification(
                 phone_number, 
                 'emotion', 
-                emotion='happiness', 
-                confidence=85
+                emotion=emotion_data.get('emotion', 'happiness'), 
+                confidence=emotion_data.get('confidence', 85)
             )
         elif alert_type == 'face_recognized':
-            success = twilio_handler.send_notification(
+            result = twilio_handler.send_notification(
                 phone_number, 
                 'face', 
-                name='User', 
-                time='now'
+                name=face_data.get('name', 'User'), 
+                time=face_data.get('time', 'just now')
             )
         elif alert_type == 'system_status':
-            uptime = "3 hours, 45 minutes"
-            success = twilio_handler.send_notification(
+            message = f'Robin AI system status: Online, uptime: {uptime}'
+            if system_status:
+                message += f"\nEmotion entries: {system_status.get('emotion_entries', 0)}"
+                message += f"\nFace profiles: {system_status.get('face_profiles', 0)}"
+                message += f"\nSessions: {system_status.get('sessions', 0)}"
+                
+            result = twilio_handler.send_notification(
                 phone_number, 
                 'system', 
-                message=f'Robin AI system status: Online, uptime: {uptime}'
+                message=message
             )
         else:
-            return jsonify({'success': False, 'error': 'Invalid alert type'}), 400
+            return jsonify({
+                'success': False, 
+                'error': 'Invalid alert type', 
+                'valid_types': ['emotion_detected', 'face_recognized', 'system_status']
+            }), 400
             
-        if success:
+        if result and result.get('success', False):
+            # Log success but with sanitized number for privacy
+            logger.info(f"Successfully sent SMS alert ({alert_type}) to {sanitized_number}")
+            
             return jsonify({
                 'success': True,
-                'message': f'Alert notification sent to {phone_number}'
+                'message': f'Alert notification sent to {phone_number}',
+                'sid': result.get('sid', ''),
+                'timestamp': datetime.now().isoformat(),
+                'alert_type': alert_type,
+                'sent_to': phone_number
             })
         else:
-            return jsonify({
+            # Extract error details from the result
+            error_message = result.get('error', 'Failed to send alert notification')
+            solution = result.get('solution', '')
+            details = result.get('details', '')
+            
+            # Log the error
+            logger.error(f"SMS alert sending failed: {error_message}")
+            if details:
+                logger.error(f"SMS alert error details: {details}")
+            
+            # Create error response
+            response = {
                 'success': False,
-                'error': 'Failed to send alert notification'
-            }), 500
+                'error': error_message,
+                'to': phone_number,
+                'alert_type': alert_type
+            }
+            
+            # Add optional fields if available
+            if solution:
+                response['solution'] = solution
+                logger.info(f"SMS alert error solution: {solution}")
+            if details:
+                response['details'] = details
+            
+            # If this is a trial account issue with unverified number, provide specific guidance
+            if "trial account" in error_message.lower() or "21612" in details:
+                response['trial_account_help'] = "Your Twilio account is in trial mode. You can only send messages to verified numbers. Please verify this number in your Twilio console."
+                
+            # Add UAE-specific help if relevant
+            if (phone_number.startswith('+971') or 
+                phone_number.startswith('971') or 
+                phone_number.startswith('05')):
+                response['uae_format_help'] = "UAE mobile numbers should be in format +971xxxxxxxxx (e.g., +971522233989)"
+                
+            return jsonify(response), 500
             
     except Exception as e:
         logger.error(f"Error sending SMS alert: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({
+            'success': False, 
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }), 500
 
 @app.route('/api/get-sms-status')
 def get_sms_status():
     """Get SMS notification status"""
     if not is_developer_mode():
-        return jsonify({'success': False, 'error': 'Not authorized'}), 403
+        return jsonify({
+            'success': False, 
+            'error': 'Not authorized',
+            'solution': 'Enable developer mode to access SMS features'
+        }), 403
         
     try:
         # Initialize Twilio handler
@@ -635,48 +865,175 @@ def get_sms_status():
         # Check if Twilio is available
         available = twilio_handler.is_available()
         
-        return jsonify({
+        # Get missing environment variables if not available
+        missing_env_vars = []
+        if not available:
+            if not os.environ.get("TWILIO_ACCOUNT_SID"):
+                missing_env_vars.append("TWILIO_ACCOUNT_SID")
+            if not os.environ.get("TWILIO_AUTH_TOKEN"):
+                missing_env_vars.append("TWILIO_AUTH_TOKEN")
+            if not os.environ.get("TWILIO_PHONE_NUMBER"):
+                missing_env_vars.append("TWILIO_PHONE_NUMBER")
+        
+        # Format phone number for display if available
+        phone_number = os.environ.get('TWILIO_PHONE_NUMBER', '')
+        formatted_phone = None
+        
+        if phone_number:
+            # Format for UAE numbers specifically
+            if phone_number.startswith('+971'):
+                formatted_phone = f"{phone_number[:4]} {phone_number[4:6]} {phone_number[6:9]} {phone_number[9:]}"
+            else:
+                # Add spaces for readability
+                formatted_phone = ' '.join([phone_number[i:i+4] for i in range(0, len(phone_number), 4)])
+        
+        response = {
             'success': True,
             'available': available,
             'account_sid': os.environ.get('TWILIO_ACCOUNT_SID', '')[:8] + '...' if available else '',
-            'phone_number': os.environ.get('TWILIO_PHONE_NUMBER', '') if available else ''
-        })
+            'phone_number': phone_number,
+            'formatted_phone': formatted_phone,
+            'last_check': datetime.now().isoformat()
+        }
+        
+        # Add missing credentials info if not available
+        if not available:
+            response['missing_credentials'] = missing_env_vars
+            response['setup_instructions'] = "To setup SMS notifications, you need to set the Twilio environment variables and restart the server."
+            
+            # Provide more specific instructions for each missing variable
+            if "TWILIO_ACCOUNT_SID" in missing_env_vars:
+                response['twilio_account_sid_help'] = "Find your Account SID in the Twilio Console Dashboard at https://www.twilio.com/console"
+                
+            if "TWILIO_AUTH_TOKEN" in missing_env_vars:
+                response['twilio_auth_token_help'] = "Find your Auth Token in the Twilio Console Dashboard at https://www.twilio.com/console"
+                
+            if "TWILIO_PHONE_NUMBER" in missing_env_vars:
+                response['twilio_phone_number_help'] = "Get a Twilio phone number in the Twilio Console at https://www.twilio.com/console/phone-numbers/incoming"
+        else:
+            # Add account status if available
+            response['account_type'] = 'Trial' if phone_number and phone_number.startswith('+1') else 'Production'
+            response['verified_numbers_required'] = response['account_type'] == 'Trial'
+            
+            # Add tip for UAE numbers
+            response['uae_format_tip'] = "For UAE recipients, use format +971XXXXXXXXX (e.g., +971522233989)"
+            
+        return jsonify(response)
             
     except Exception as e:
         logger.error(f"Error getting SMS status: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({
+            'success': False, 
+            'error': str(e),
+            'traceback': traceback.format_exc()
+        }), 500
 
 @app.route('/api/get-sms-history')
 def get_sms_history():
     """Get SMS message history"""
     if not is_developer_mode():
-        return jsonify({'success': False, 'error': 'Not authorized'}), 403
+        return jsonify({
+            'success': False, 
+            'error': 'Not authorized',
+            'solution': 'Enable developer mode to access SMS history'
+        }), 403
         
     try:
         # Initialize Twilio handler
         twilio_handler = TwilioHandler()
         
+        # Check if Twilio is available first
+        if not twilio_handler.is_available():
+            missing_env_vars = []
+            if not os.environ.get("TWILIO_ACCOUNT_SID"):
+                missing_env_vars.append("TWILIO_ACCOUNT_SID")
+            if not os.environ.get("TWILIO_AUTH_TOKEN"):
+                missing_env_vars.append("TWILIO_AUTH_TOKEN")
+            if not os.environ.get("TWILIO_PHONE_NUMBER"):
+                missing_env_vars.append("TWILIO_PHONE_NUMBER")
+            
+            return jsonify({
+                'success': False,
+                'error': 'Twilio service is not available',
+                'missing_credentials': missing_env_vars,
+                'setup_instructions': 'Set up Twilio credentials to access SMS history',
+                'history': [] # Empty history since Twilio is not available
+            })
+        
         # Get message history
+        logger.info("Fetching SMS message history from Twilio")
         messages = twilio_handler.get_message_history()
         
-        # Format messages for display
+        # Format messages for display with better information
         history = []
-        for msg in messages:
-            history.append({
-                'to_number': msg.get('to', 'Unknown'),
-                'status': msg.get('status', 'unknown'),
-                'body': msg.get('body', ''),
-                'timestamp': msg.get('date_sent', '')
-            })
+        
+        if messages:
+            for msg in messages:
+                # Sanitize phone number for privacy in logs (show only first 6 digits)
+                to_number = msg.get('to', 'Unknown')
+                sanitized_number = to_number[:6] + "XXXX" if len(to_number) > 6 else "XXXXXX"
+                
+                # Format the message body (truncate if too long)
+                body = msg.get('body', '')
+                if len(body) > 50:
+                    body_preview = body[:50] + "..."
+                else:
+                    body_preview = body
+                
+                # Parse timestamp if available
+                timestamp = msg.get('date_sent', '')
+                formatted_time = timestamp
+                
+                if timestamp:
+                    try:
+                        # Try to parse and format the timestamp
+                        from datetime import datetime
+                        if isinstance(timestamp, str):
+                            dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                            formatted_time = dt.strftime('%Y-%m-%d %H:%M:%S')
+                    except Exception as e:
+                        logger.error(f"Error formatting timestamp: {str(e)}")
+                
+                # Add to history with enhanced details
+                history.append({
+                    'to_number': to_number,
+                    'sanitized_number': sanitized_number,
+                    'status': msg.get('status', 'unknown'),
+                    'body': body,
+                    'body_preview': body_preview,
+                    'timestamp': timestamp,
+                    'formatted_time': formatted_time,
+                    'sid': msg.get('sid', ''),
+                    'price': msg.get('price', 'unknown'),
+                    'direction': msg.get('direction', 'outbound'),
+                    'error_code': msg.get('error_code', None)
+                })
+                
+            logger.info(f"Retrieved {len(history)} SMS message records")
+        else:
+            logger.info("No SMS history found or message history is not available")
+            
+        # Additional metadata for the response
+        account_sid = os.environ.get('TWILIO_ACCOUNT_SID', '')[:8] + '...' if os.environ.get('TWILIO_ACCOUNT_SID') else ''
+        phone_number = os.environ.get('TWILIO_PHONE_NUMBER', '')
             
         return jsonify({
             'success': True,
-            'history': history
+            'history': history,
+            'count': len(history),
+            'retrieved_at': datetime.now().isoformat(),
+            'from_number': phone_number,
+            'account_sid': account_sid
         })
             
     except Exception as e:
         logger.error(f"Error getting SMS history: {str(e)}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({
+            'success': False, 
+            'error': str(e),
+            'traceback': traceback.format_exc(),
+            'history': [] # Empty history since an error occurred
+        }), 500
 
 @app.route('/api/set-consent', methods=['POST'])
 def set_consent():
@@ -924,6 +1281,7 @@ profile_manager.initialize_tables()
 
 # Mobile app routes
 @app.route('/mobile')
+@app.route('/mobile/splash')
 def mobile_splash():
     """Mobile app splash screen"""
     # Splash screen is the entry point for mobile experience
@@ -1044,10 +1402,11 @@ def send_sms_legacy():
     
     # Get request parameters
     data = request.json
-    to_number = data.get('to_number')
+    # Support both parameter names for backward compatibility
+    phone_number = data.get('phone_number', data.get('to_number'))
     message = data.get('message')
     
-    if not to_number or not message:
+    if not phone_number or not message:
         return jsonify({'success': False, 'error': 'Phone number and message are required'}), 400
     
     # Check if SMS service is available
@@ -1056,12 +1415,28 @@ def send_sms_legacy():
     
     # Send the SMS
     try:
-        result = twilio_handler.send_message(to_number, message)
+        result = twilio_handler.send_message(phone_number, message)
         
-        if result:
+        if result and result.get('success', False):
             return jsonify({'success': True, 'message': 'SMS sent successfully'})
         else:
-            return jsonify({'success': False, 'error': 'Failed to send SMS'}), 500
+            # Extract error details from the result
+            error_message = result.get('error', 'Failed to send SMS')
+            solution = result.get('solution', '')
+            details = result.get('details', '')
+            
+            response = {
+                'success': False,
+                'error': error_message
+            }
+            
+            # Add optional fields if available
+            if solution:
+                response['solution'] = solution
+            if details:
+                response['details'] = details
+                
+            return jsonify(response), 500
             
     except Exception as e:
         logger.error(f"SMS sending error: {str(e)}")
@@ -1076,11 +1451,12 @@ def send_sms_alert_legacy():
     
     # Get request parameters
     data = request.json
-    to_number = data.get('to_number')
+    # Support both parameter names for backward compatibility
+    phone_number = data.get('phone_number', data.get('to_number'))
     notification_type = data.get('alert_type', 'alert')  # Default to alert type
     message = data.get('message', 'Alert notification')
     
-    if not to_number:
+    if not phone_number:
         return jsonify({'success': False, 'error': 'Phone number is required'}), 400
     
     # Check if SMS service is available
@@ -1107,12 +1483,28 @@ def send_sms_alert_legacy():
     
     # Send the notification
     try:
-        result = twilio_handler.send_notification(to_number, notification_type.split('_')[0], **notification_params)
+        result = twilio_handler.send_notification(phone_number, notification_type.split('_')[0], **notification_params)
         
-        if result:
+        if result and result.get('success', False):
             return jsonify({'success': True, 'message': f'Alert notification sent successfully'})
         else:
-            return jsonify({'success': False, 'error': 'Failed to send notification'}), 500
+            # Extract error details from the result
+            error_message = result.get('error', 'Failed to send notification')
+            solution = result.get('solution', '')
+            details = result.get('details', '')
+            
+            response = {
+                'success': False,
+                'error': error_message
+            }
+            
+            # Add optional fields if available
+            if solution:
+                response['solution'] = solution
+            if details:
+                response['details'] = details
+                
+            return jsonify(response), 500
             
     except Exception as e:
         logger.error(f"SMS notification error: {str(e)}")
@@ -1128,5 +1520,18 @@ if __name__ == "__main__":
     # Wait for core systems to initialize
     time.sleep(2)
 
-    # Start Flask app
-    app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)
+    # Start Flask app when run directly (not through Gunicorn)
+    # This ensures proper binding for both development and deployment
+    port = 5000
+    try:
+        logger.info(f"Starting Flask app on port {port}")
+        app.run(host="0.0.0.0", port=port, debug=True, use_reloader=False)
+    except OSError as e:
+        if "Address already in use" in str(e):
+            # Fallback to alternative port if 5000 is in use
+            port = 8000
+            logger.info(f"Port 5000 unavailable, falling back to port {port}")
+            app.run(host="0.0.0.0", port=port, debug=True, use_reloader=False)
+        else:
+            # Re-raise other OSErrors
+            raise

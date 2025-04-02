@@ -83,7 +83,7 @@ class ApiService {
    */
   async sendSms(toNumber, message) {
     return this.post('/send-sms', {
-      to_number: toNumber,
+      phone_number: toNumber,
       message: message
     });
   }
@@ -97,9 +97,9 @@ class ApiService {
    */
   async sendSmsAlert(toNumber, alertType, alertData = {}) {
     return this.post('/send-sms-alert', {
-      to_number: toNumber,
+      phone_number: toNumber,
       alert_type: alertType,
-      alert_data: alertData
+      ...alertData // Spread the alert data directly into the payload
     });
   }
 
