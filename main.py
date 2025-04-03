@@ -178,6 +178,22 @@ def minimal_test_page():
     """Serve the minimal test page for diagnosing web application accessibility"""
     return render_template('minimal_test.html')
 
+@app.route('/feedback-test')
+def feedback_test_page():
+    """Serve a minimal static HTML file specifically for the web application feedback tool"""
+    # Direct file serving (bypassing template engine) for maximum compatibility
+    response = make_response(open('static/feedback_test.html', 'r').read())
+    
+    # Set content type to HTML
+    response.headers['Content-Type'] = 'text/html'
+    
+    # Add explicit CORS headers to ensure compatibility with feedback tool
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    
+    return response
+
 # Voice API test pages
 @app.route('/test-voice-api')
 def test_voice_api():
@@ -237,6 +253,38 @@ def minimal_api():
     # Add explicit CORS headers to ensure compatibility with feedback tool
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    
+    return response
+
+@app.route('/api/test-cors', methods=['GET', 'POST', 'OPTIONS'])
+def test_cors_endpoint():
+    """Test endpoint specifically for CORS testing with the feedback tool"""
+    logger.info(f"Received {request.method} request to /api/test-cors from {request.headers.get('Origin', 'unknown origin')}")
+    
+    # For OPTIONS requests (preflight)
+    if request.method == 'OPTIONS':
+        logger.info("Handling OPTIONS preflight request")
+        response = jsonify({'message': 'Preflight request successful'})
+        # Explicitly set CORS headers
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Max-Age'] = '3600'
+        return response
+    
+    # For GET or POST requests
+    response = jsonify({
+        'message': 'CORS test successful',
+        'method': request.method,
+        'origin': request.headers.get('Origin', 'unknown'),
+        'timestamp': datetime.now().isoformat(),
+        'headers_received': {k: v for k, v in request.headers.items()},
+    })
+    
+    # Explicitly set CORS headers
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = '*'
     
     return response
