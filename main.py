@@ -52,27 +52,14 @@ import mobile_api_routes  # Mobile-optimized API routes
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
-# Fix CORS configuration to allow specific origins when using credentials
-# Can't use wildcard (*) with supports_credentials=True
+# Temporarily using a permissive CORS configuration to diagnose accessibility issues
+# This allows from all origins during testing to identify the feedback tool's origin
+logger.info("Configuring permissive CORS for diagnostic purposes")
 CORS(app, 
-     resources={r"/*": {"origins": ["https://replit.com", "https://*.replit.app", "https://*.repl.co", "http://localhost:*", "http://127.0.0.1:*"]}},
-     supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "X-Custom-Header"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
-     expose_headers=["Content-Type", "Content-Length", "Date"])
-
-# Also add CORS middleware to ensure all responses have proper headers
-@app.after_request
-def add_cors_headers(response):
-    origin = request.headers.get('Origin')
-    if origin:
-        # If origin header exists, set CORS headers
-        if origin.startswith('https://replit.com') or '.replit.app' in origin or '.repl.co' in origin or origin.startswith('http://localhost:') or origin.startswith('http://127.0.0.1:'):
-            response.headers.add('Access-Control-Allow-Origin', origin)
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin,X-Custom-Header')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,HEAD,PATCH')
-    return response
+     origins="*",  # Allow all origins temporarily for diagnostic purposes
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+     supports_credentials=False)
 
 # Initialize components
 config = Config()
@@ -170,6 +157,12 @@ def minimal_page():
     # Direct file serving of minimal HTML file
     return app.send_static_file('minimal.html')
 
+# Ultra-minimal static HTML page with zero dependencies
+@app.route('/ultra-minimal')
+def ultra_minimal_page():
+    # Direct file serving of ultra-minimal HTML file
+    return app.send_static_file('ultra_minimal.html')
+
 @app.route('/minimal-test')
 def minimal_test_page():
     """Serve the minimal test page for diagnosing web application accessibility"""
@@ -204,31 +197,15 @@ def diagnostic_panel():
     return app.send_static_file('diagnostic.html')
 
 # Simple API endpoint to test connectivity
-@app.route('/api/ping', methods=['GET', 'OPTIONS'])
+@app.route('/api/ping', methods=['GET'])
 def api_ping():
     """Simple endpoint that returns JSON to test connectivity"""
-    if request.method == 'OPTIONS':
-        # Handle CORS preflight request
-        return handle_cors_preflight()
-    
-    # Return JSON response with CORS headers
-    response = jsonify({
+    # Return JSON response (CORS headers added automatically by Flask-CORS)
+    return jsonify({
         'status': 'ok',
         'message': 'Server is running',
         'timestamp': datetime.now().isoformat()
     })
-    
-    # Add CORS headers manually
-    origin = request.headers.get('Origin', '*')
-    if origin in ['https://replit.com'] or origin.endswith('.replit.app') or origin.endswith('.repl.co'):
-        response.headers['Access-Control-Allow-Origin'] = origin
-    else:
-        # Default to wildcard for other origins
-        response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-Custom-Header'
-    
-    return response
 
 @app.route('/tts_cache/<path:filename>')
 def serve_tts_cache(filename):
@@ -273,6 +250,17 @@ from flask import request, make_response
 
 @app.before_request
 def log_request_info():
+    # Capture and log the Origin header for all requests
+    origin = request.headers.get('Origin', 'No Origin header')
+    host = request.headers.get('Host', 'No Host header')
+    user_agent = request.headers.get('User-Agent', 'No User-Agent')
+    
+    # Detailed diagnostic logging to identify CORS issues 
+    logger.info(f"🔍 Request: {request.method} {request.path}")
+    logger.info(f"🔍 Origin: {origin}")
+    logger.info(f"🔍 Host: {host}")
+    logger.info(f"🔍 User-Agent: {user_agent}")
+    
     if request.path.startswith('/api/'):
         # Log API requests with more detail
         api_info = {
@@ -280,7 +268,11 @@ def log_request_info():
             'method': request.method,
             'args': {k: v for k, v in request.args.items()},
             'content_type': request.content_type,
-            'has_json': request.is_json
+            'has_json': request.is_json,
+            'origin': origin,
+            'headers': {k: v for k, v in request.headers.items() 
+                       if k.lower() in ['accept', 'accept-encoding', 'accept-language', 
+                                       'connection', 'content-type', 'referer']}
         }
         # Add JSON data if available
         if request.is_json:
@@ -289,69 +281,10 @@ def log_request_info():
             except:
                 api_info['json'] = 'Error parsing JSON'
 
-        logger.info(f"🔍 API Request: {api_info}")
-    else:
-        # Simple logging for regular routes
-        print(f"🔍 Request to: {request.path}")
+        logger.info(f"🔍 API Request Details: {api_info}")
     # No need to return anything from this before_request handler
 
-# Manual CORS preflight handler for browsers that don't properly handle OPTIONS requests
-@app.route('/api/cors-preflight', methods=['OPTIONS'])
-def handle_cors_preflight():
-    response = make_response()
-    
-    # Get the origin from the request
-    origin = request.headers.get('Origin', '*')
-    
-    # If the origin is from a specific allowed domain, set it explicitly
-    if origin in ['https://replit.com'] or origin.endswith('.replit.app') or origin.endswith('.repl.co'):
-        response.headers.add('Access-Control-Allow-Origin', origin)
-    else:
-        # Default to wildcard for other origins
-        response.headers.add('Access-Control-Allow-Origin', '*')
-    
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin,X-Custom-Header')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    response.headers.add('Access-Control-Expose-Headers', 'Content-Length,Content-Type,Date')
-    response.headers.add('Cross-Origin-Resource-Policy', 'cross-origin')
-    response.headers.add('X-Content-Type-Options', 'nosniff')
-    
-    # Log the origin for debugging
-    if config.DEBUG:
-        logger.debug(f"CORS preflight request from origin: {origin}")
-    
-    return response
-
-# Global OPTIONS request handler to ensure proper CORS for all routes
-@app.route('/', defaults={'path': ''}, methods=['OPTIONS'])
-@app.route('/<path:path>', methods=['OPTIONS'])
-def options_handler(path):
-    """Handle OPTIONS requests for all routes to ensure proper CORS handling"""
-    response = make_response()
-    
-    # Get the origin from the request
-    origin = request.headers.get('Origin', '*')
-    
-    # If the origin is from a specific allowed domain, set it explicitly
-    if origin in ['https://replit.com'] or origin.endswith('.replit.app') or origin.endswith('.repl.co'):
-        response.headers.add('Access-Control-Allow-Origin', origin)
-    else:
-        # Default to wildcard for other origins
-        response.headers.add('Access-Control-Allow-Origin', '*')
-    
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin,X-Custom-Header')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    response.headers.add('Access-Control-Expose-Headers', 'Content-Length,Content-Type,Date')
-    response.headers.add('Cross-Origin-Resource-Policy', 'cross-origin')
-    response.headers.add('X-Content-Type-Options', 'nosniff')
-    
-    # Log the origin for debugging
-    if config.DEBUG:
-        logger.debug(f"OPTIONS request for {path} from origin: {origin}")
-    
-    return response
+# We've removed custom OPTIONS handler since Flask-CORS handles this automatically
 
 # Scheduler for auto-learning
 scheduler = BackgroundScheduler()
@@ -391,14 +324,7 @@ def index():
             # Try our ultra-simple status message as fallback
             logger.info("Falling back to simple text response")
             response = make_response("Server is running. If you see this, the server is accessible.")
-            # Add CORS headers manually
-            origin = request.headers.get('Origin', '*')
-            if origin in ['https://replit.com'] or origin.endswith('.replit.app') or origin.endswith('.repl.co'):
-                response.headers['Access-Control-Allow-Origin'] = origin
-            else:
-                response.headers['Access-Control-Allow-Origin'] = '*'
-            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-Custom-Header'
+            # CORS headers are handled automatically by Flask-CORS
             return response
         except Exception as inner_e:
             logger.critical(f"Critical error in error handler: {str(inner_e)}")
