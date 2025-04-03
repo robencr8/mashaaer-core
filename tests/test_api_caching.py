@@ -666,282 +666,142 @@ def test_performance_metrics(client: FlaskClient, db_session: Session, clear_cac
         assert improvement > 80  # Cache should be at least 80% faster
 
 def test_cache_hit_count_tracking(client: FlaskClient, db_session: Session, clear_cache, app: Flask):
-    """Tests that cache hit counts are properly tracked."""
+    """Tests that cache hit counts are properly tracked when retrieving cached emotion analysis results."""
     print("\n===== Starting test_cache_hit_count_tracking =====")
 
     with app.app_context():
-        # Explicitly clear any existing cache entries and verify it's empty
-        clear_cache()
-        db_session.commit()  # Ensure the DB is in a clean state
-        
-        cache_count = db_session.query(Cache).count()
-        assert cache_count == 0, f"Expected empty cache at start of test, but found {cache_count} entries"
-        print(f"Verified cache is empty: {cache_count} entries")
-    
-        # Use a unique text for this test to avoid cache collisions with other tests
-        import uuid
-        unique_id = uuid.uuid4().hex[:8]
-        test_text = f"Tracking cache hit counts for test {unique_id}"
-        print(f"Using unique test text: '{test_text}'")
-        
-        # For debugging: Make sure db_manager is correctly configured in the app context
-        from main import db_manager
-        print(f"DEBUG: db_manager available: {db_manager is not None}")
-        print(f"DEBUG: db_manager has store_cached_response: {hasattr(db_manager, 'store_cached_response')}")
-        
-        # Create a cache key using the same algorithm as in the application
-        import hashlib
-        normalized_text = test_text.strip().lower()
-        cache_key = f"emotion_{hashlib.md5(normalized_text.encode()).hexdigest()}_en"
-        print(f"DEBUG: Generated cache key: {cache_key}")
-        
-        # Add a direct cache entry to completely bypass the API call mechanism
-        # This ensures we're testing the cache retrieval logic directly
-        cache_data = {
-            "primary_emotion": "happy",
-            "confidence": 0.9,
-            "emotions": {
-                "happy": 0.9,
-                "neutral": 0.05,
-                "sad": 0.02,
-                "angry": 0.01,
-                "fear": 0.01,
-                "surprise": 0.01
-            },
-            "language": "en",
-            "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-        }
-        
-        # Manually add the cache entry using db_manager
-        import json
-        store_result = db_manager.store_cached_response(
-            cache_key, 
-            json.dumps(cache_data), 
-            expiry_seconds=300,
-            content_type='application/json'
-        )
-        print(f"DEBUG: Manual cache entry creation result: {store_result}")
-        
-        # Verify the cache entry exists
-        cache_entry = db_session.query(Cache).filter(Cache.key == cache_key).first()
-        assert cache_entry is not None, "Cache entry was not created manually"
-        print(f"DEBUG: Initial cache entry verified: key={cache_entry.key}, hit_count={cache_entry.hit_count}")
-        
-        # Make sure we're not using a stale session
-        db_session.commit()
-        db_session.refresh(cache_entry)
-        
-        # Store the initial hit count
-        initial_hit_count = cache_entry.hit_count
-        print(f"DEBUG: Initial hit count: {initial_hit_count}")
-        
-        # Set up mocks for emotion analysis functions to prevent real emotion analysis from running
-        with patch('emotion_tracker.EmotionTracker.analyze_text') as mock_analyze, \
-             patch('emotion_tracker.EmotionTracker.analyze_text_advanced') as mock_analyze_advanced:
+        try:
+            # Step 1: Setup - ensure we have a clean database state
+            clear_cache()
+            db_session.commit()
             
-            # Mock both methods to ensure complete coverage
-            mock_emotion_result = {
-                "primary_emotion": "happy", 
-                "confidence": 0.9,
-                "emotions": {
-                    "happy": 0.9,
-                    "neutral": 0.05,
-                    "sad": 0.02,
-                    "angry": 0.01,
-                    "fear": 0.01,
-                    "surprise": 0.01
-                }
-            }
+            cache_count = db_session.query(Cache).count()
+            assert cache_count == 0, f"Expected empty cache at start of test, but found {cache_count} entries"
+            print(f"Verified cache is empty: {cache_count} entries")
             
-            mock_analyze.return_value = mock_emotion_result
-            mock_analyze_advanced.return_value = mock_emotion_result
+            # Create unique test text to avoid collisions with other tests
+            import uuid
+            unique_id = uuid.uuid4().hex[:8]
+            test_text = f"Testing cache hit counts {unique_id}"
+            print(f"Using unique test text: '{test_text}'")
             
-            print(f"DEBUG: Mocks configured")
-            
-            # First request to populate cache
-            print("\n===== Step 1: Making first request to populate cache =====")
-            response1 = client.post(
-                "/mobile-api/analyze-emotion",
-                json={"text": test_text, "language": "en", "include_details": "true"}
-            )
-            
-            # Verify first response - should be a cache miss
-            result1 = json.loads(response1.data)
-            print(f"First response: {json.dumps(result1, indent=2)}")
-            assert response1.status_code == 200
-            assert result1.get("success") is True
-            assert result1.get("cache_status") == "miss"
-            
-            # Generate the cache key for our test
+            # Generate the cache key using the same algorithm as in the application
             import hashlib
             normalized_text = test_text.strip().lower()
             cache_key = f"emotion_{hashlib.md5(normalized_text.encode()).hexdigest()}_en"
             print(f"Cache key: {cache_key}")
             
-            # Get cache entry after first request
-            cache_entry = get_cache_entry(db_session, cache_key)
-            assert cache_entry is not None, "Cache entry was not created"
-            hit_count_before = cache_entry.hit_count
-            print(f"Initial hit count from database: {hit_count_before}")
-            
-            # Debug: Check result1 metadata structure - it's nested in result in the API
-            if "result" in result1 and "metadata" in result1["result"]:
-                print(f"Metadata in first response: {json.dumps(result1['result']['metadata'], indent=2)}")
-                if "cache_hit_count" in result1["result"]["metadata"]:
-                    print(f"Cache hit count in first response: {result1['result']['metadata']['cache_hit_count']}")
-                else:
-                    print("No cache_hit_count field in first response metadata")
-            else:
-                print("No result.metadata field in first response")
-            
-            # Commit session to ensure cache entry is persisted
-            db_session.commit()
-            
-            # Make multiple cache hits - we'll do 3 requests
-            print("\n===== Step 2: Making 3 more requests to test hit count =====")
-            
-            hit_counts = []
-            for i in range(3):
-                print(f"\n--- Request {i+1} ---")
+            # Step 2: Set up mocks to control the emotion analysis behavior
+            with patch('emotion_tracker.EmotionTracker.analyze_text') as mock_analyze, \
+                 patch('emotion_tracker.EmotionTracker.analyze_text_advanced') as mock_analyze_advanced:
                 
-                # Get cache entry before request
-                cache_before = get_cache_entry(db_session, cache_key)
-                print(f"Hit count before request {i+1}: {cache_before.hit_count}")
+                # Configure mocks with consistent return values
+                mock_emotion_result = {
+                    "primary_emotion": "happy",
+                    "confidence": 0.9,
+                    "emotions": {
+                        "happy": 0.9,
+                        "neutral": 0.05,
+                        "sad": 0.02,
+                        "angry": 0.01,
+                        "fear": 0.01,
+                        "surprise": 0.01
+                    }
+                }
+                mock_analyze.return_value = mock_emotion_result
+                mock_analyze_advanced.return_value = mock_emotion_result
                 
-                response = client.post(
+                # Step 3: First request to create the cache entry
+                print("\n----- Making initial request to create cache entry -----")
+                response1 = client.post(
                     "/mobile-api/analyze-emotion",
                     json={"text": test_text, "language": "en", "include_details": "true"}
                 )
-                result = json.loads(response.data)
                 
-                # Debug: Print key sections of the response
-                print(f"Status code: {response.status_code}")
-                print(f"Success: {result.get('success')}")
-                print(f"Cache status: {result.get('cache_status')}")
+                # Verify the response indicates a cache miss
+                result1 = json.loads(response1.data)
+                print(f"Response status code: {response1.status_code}")
+                print(f"Cache status: {result1.get('cache_status')}")
+                assert response1.status_code == 200
+                assert result1.get("success") is True
+                assert result1.get("cache_status") == "miss"
                 
-                # Validate response format
-                assert response.status_code == 200
-                assert result.get("success") is True
-                assert result.get("cache_status") == "hit", f"Expected 'hit' but got '{result.get('cache_status')}'"
+                # Ensure the cache entry was created
+                db_session.commit()  # Commit to ensure any pending changes are visible
                 
-                # Debug: Check result metadata structure - it's nested in result in the API
-                if "result" in result and "metadata" in result["result"]:
-                    print(f"Metadata in response: {json.dumps(result['result']['metadata'], indent=2)}")
-                    if "cache_hit_count" in result["result"]["metadata"]:
-                        hit_count = result["result"]["metadata"]["cache_hit_count"]
-                        print(f"Cache hit count in response: {hit_count}")
-                        hit_counts.append(hit_count)
-                    else:
-                        print("No cache_hit_count field in response metadata")
-                else:
-                    print("No result.metadata field in response")
+                cache_entry = db_session.query(Cache).filter(Cache.key == cache_key).first()
+                assert cache_entry is not None, "Cache entry was not created after first request"
+                initial_hit_count = cache_entry.hit_count
+                print(f"Initial hit count: {initial_hit_count}")
                 
-                # Get cache entry after request to check database directly
-                db_session.refresh(cache_before)  # Refresh to get updated values
-                print(f"Hit count in database after request {i+1}: {cache_before.hit_count}")
-            
-            print(f"\nHit counts from responses: {hit_counts}")
-            
-            # Final verification: check the database record
-            final_cache_entry = get_cache_entry(db_session, cache_key)
-            final_hit_count = final_cache_entry.hit_count
-            print(f"Final hit count from database: {final_hit_count}")
-            
-            # Verify hit count increased correctly
-            expected_increase = 3
-            assert final_hit_count >= initial_hit_count + expected_increase, \
-                f"Expected hit count to increase by at least {expected_increase}, but it went from {initial_hit_count} to {final_hit_count}"
+                # Step 4: Make multiple requests to test hit count increments
+                print("\n----- Making subsequent requests to test hit count -----")
+                num_requests = 3
+                
+                # Track the hit counts from each response
+                hit_counts_from_api = []
+                hit_counts_from_db = []
+                
+                for i in range(num_requests):
+                    print(f"\nRequest {i+1} of {num_requests}")
+                    
+                    # Get the hit count before this request
+                    db_session.refresh(cache_entry)
+                    before_count = cache_entry.hit_count
+                    hit_counts_from_db.append(before_count)
+                    print(f"Hit count before request: {before_count}")
+                    
+                    # Make the request
+                    response = client.post(
+                        "/mobile-api/analyze-emotion",
+                        json={"text": test_text, "language": "en", "include_details": "true"}
+                    )
+                    result = json.loads(response.data)
+                    
+                    # Verify it's a cache hit
+                    assert response.status_code == 200
+                    assert result.get("success") is True
+                    assert result.get("cache_status") == "hit", f"Expected cache hit, got {result.get('cache_status')}"
+                    
+                    # Check for cache_hit_count in response metadata
+                    if "result" in result and "metadata" in result["result"]:
+                        metadata = result["result"]["metadata"]
+                        print(f"Response metadata: {json.dumps(metadata, indent=2)}")
+                        
+                        if "cache_hit_count" in metadata:
+                            hit_count = metadata["cache_hit_count"]
+                            hit_counts_from_api.append(hit_count)
+                            print(f"Cache hit count in response: {hit_count}")
+                        else:
+                            print("No cache_hit_count field in response metadata")
+                    
+                    # Commit and refresh to see the updated hit count
+                    db_session.commit()
+                    db_session.refresh(cache_entry)
+                    after_count = cache_entry.hit_count
+                    print(f"Hit count after request: {after_count}")
+                    
+                    # Verify the hit count increased by 1
+                    assert after_count == before_count + 1, \
+                        f"Expected hit count to increase by 1, but went from {before_count} to {after_count}"
+                
+                # Step 5: Final verification - check overall hit count increase
+                final_hit_count = cache_entry.hit_count
+                print(f"\nFinal hit count: {final_hit_count}")
+                print(f"Hit count progression in database: {hit_counts_from_db} → {final_hit_count}")
+                print(f"Hit counts from API responses: {hit_counts_from_api}")
+                
+                expected_final_count = initial_hit_count + num_requests
+                assert final_hit_count == expected_final_count, \
+                    f"Expected final hit count to be {expected_final_count}, but got {final_hit_count}"
+                
+                # Verify the mocks were called only once (for the first request)
+                assert mock_analyze.call_count + mock_analyze_advanced.call_count > 0, \
+                    "Neither analyze_text nor analyze_text_advanced was called"
+                total_analysis_calls = mock_analyze.call_count + mock_analyze_advanced.call_count
+                assert total_analysis_calls == 1, \
+                    f"Expected 1 emotion analysis call, but got {total_analysis_calls}"
         
-        # First request to populate cache
-        print("\n===== Step 1: Making first request to populate cache =====")
-        response1 = client.post(
-            "/mobile-api/analyze-emotion",
-            json={"text": test_text, "language": "en", "include_details": "true"}
-        )
-        
-        # Verify first response - should be a cache miss
-        result1 = json.loads(response1.data)
-        print(f"First response: {json.dumps(result1, indent=2)}")
-        assert response1.status_code == 200
-        assert result1.get("success") is True
-        assert result1.get("cache_status") == "miss"
-        
-        # Generate the cache key for our test
-        import hashlib
-        normalized_text = test_text.strip().lower()
-        cache_key = f"emotion_{hashlib.md5(normalized_text.encode()).hexdigest()}_en"
-        print(f"Cache key: {cache_key}")
-        
-        # Get cache entry after first request
-        cache_entry = get_cache_entry(db_session, cache_key)
-        assert cache_entry is not None, "Cache entry was not created"
-        hit_count_before = cache_entry.hit_count
-        print(f"Initial hit count from database: {hit_count_before}")
-        
-        # Debug: Check result1 metadata structure - it's nested in result in the API
-        if "result" in result1 and "metadata" in result1["result"]:
-            print(f"Metadata in first response: {json.dumps(result1['result']['metadata'], indent=2)}")
-            if "cache_hit_count" in result1["result"]["metadata"]:
-                print(f"Cache hit count in first response: {result1['result']['metadata']['cache_hit_count']}")
-            else:
-                print("No cache_hit_count field in first response metadata")
-        else:
-            print("No result.metadata field in first response")
-        
-        # Commit session to ensure cache entry is persisted
-        db_session.commit()
-        
-        # Make multiple cache hits - we'll do 3 requests
-        print("\n===== Step 2: Making 3 more requests to test hit count =====")
-        
-        hit_counts = []
-        for i in range(3):
-            print(f"\n--- Request {i+1} ---")
-            
-            # Get cache entry before request
-            cache_before = get_cache_entry(db_session, cache_key)
-            print(f"Hit count before request {i+1}: {cache_before.hit_count}")
-            
-            response = client.post(
-                "/mobile-api/analyze-emotion",
-                json={"text": test_text, "language": "en", "include_details": "true"}
-            )
-            result = json.loads(response.data)
-            
-            # Debug: Print key sections of the response
-            print(f"Status code: {response.status_code}")
-            print(f"Success: {result.get('success')}")
-            print(f"Cache status: {result.get('cache_status')}")
-            
-            # Validate response format
-            assert response.status_code == 200
-            assert result.get("success") is True
-            assert result.get("cache_status") == "hit"
-            
-            # Debug: Check result metadata structure - it's nested in result in the API
-            if "result" in result and "metadata" in result["result"]:
-                print(f"Metadata in response: {json.dumps(result['result']['metadata'], indent=2)}")
-                if "cache_hit_count" in result["result"]["metadata"]:
-                    hit_count = result["result"]["metadata"]["cache_hit_count"]
-                    print(f"Cache hit count in response: {hit_count}")
-                    hit_counts.append(hit_count)
-                else:
-                    print("No cache_hit_count field in response metadata")
-            else:
-                print("No result.metadata field in response")
-            
-            # Get cache entry after request to check database directly
-            db_session.refresh(cache_before)  # Refresh to get updated values
-            print(f"Hit count in database after request {i+1}: {cache_before.hit_count}")
-        
-        print(f"\nHit counts from responses: {hit_counts}")
-        
-        # Final verification: check the database record
-        final_cache_entry = get_cache_entry(db_session, cache_key)
-        final_hit_count = final_cache_entry.hit_count
-        print(f"Final hit count from database: {final_hit_count}")
-        
-        # Verify hit count increased correctly
-        expected_increase = 3
-        assert final_hit_count == hit_count_before + expected_increase, \
-            f"Expected hit count to increase by {expected_increase}, but it went from {hit_count_before} to {final_hit_count}"
+        finally:
+            # Clean up any pending transactions to avoid affecting other tests
+            db_session.rollback()
