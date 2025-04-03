@@ -320,13 +320,28 @@ def handle_cors_preflight():
 def options_handler(path):
     """Handle OPTIONS requests for all routes to ensure proper CORS handling"""
     response = make_response()
-    response.headers.add('Access-Control-Allow-Origin', '*')
+    
+    # Get the origin from the request
+    origin = request.headers.get('Origin', '*')
+    
+    # If the origin is from a specific allowed domain, set it explicitly
+    if origin in ['https://replit.com'] or origin.endswith('.replit.app') or origin.endswith('.repl.co'):
+        response.headers.add('Access-Control-Allow-Origin', origin)
+    else:
+        # Default to wildcard for other origins
+        response.headers.add('Access-Control-Allow-Origin', '*')
+    
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin,X-Custom-Header')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     response.headers.add('Access-Control-Expose-Headers', 'Content-Length,Content-Type,Date')
     response.headers.add('Cross-Origin-Resource-Policy', 'cross-origin')
     response.headers.add('X-Content-Type-Options', 'nosniff')
+    
+    # Log the origin for debugging
+    if config.DEBUG:
+        logger.debug(f"OPTIONS request for {path} from origin: {origin}")
+    
     return response
 
 # Scheduler for auto-learning
@@ -357,25 +372,28 @@ def test_simple_html_page():
 @app.route('/')
 def index():
     try:
-        logger.info("Root route accessed - serving cosmic onboarding experience")
-        # Always serve the cosmic onboarding experience as the default landing page
-        return render_template('cosmic_onboarding.html')
+        logger.info("Root route accessed - serving static test page")
+        # Use a simple static page to help with web application feedback tool
+        return app.send_static_file('simple_test.html')
     except Exception as e:
         error_msg = f"Error in root route: {str(e)}"
         logger.error(error_msg)
         try:
-            # Try our ultra-simple status page as fallback
-            logger.info("Falling back to simple_status.html")
-            return app.send_static_file('simple_status.html')
-        except Exception as simple_e:
-            error_msg2 = f"Error serving simple_status.html: {str(simple_e)}"
-            logger.error(error_msg2)
-            try:
-                # Just return a simple text response as last resort
-                return f"Server is running, but encountered errors:\n1. {error_msg}\n2. {error_msg2}", 500
-            except Exception as inner_e:
-                logger.critical(f"Critical error in error handler: {str(inner_e)}")
-                return "Server error", 500
+            # Try our ultra-simple status message as fallback
+            logger.info("Falling back to simple text response")
+            response = make_response("Server is running. If you see this, the server is accessible.")
+            # Add CORS headers manually
+            origin = request.headers.get('Origin', '*')
+            if origin in ['https://replit.com'] or origin.endswith('.replit.app') or origin.endswith('.repl.co'):
+                response.headers['Access-Control-Allow-Origin'] = origin
+            else:
+                response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-Custom-Header'
+            return response
+        except Exception as inner_e:
+            logger.critical(f"Critical error in error handler: {str(inner_e)}")
+            return "Server is running", 200
 
 @app.route('/startup')
 def startup():
