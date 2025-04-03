@@ -1,6 +1,6 @@
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, Text
+from sqlalchemy import Column, Integer, String, Float, Text, Boolean
 
 Base = declarative_base()
 
@@ -35,3 +35,16 @@ class RecognitionHistory(Base):
     confidence = Column(Float)
     emotion = Column(String)
     session_id = Column(String)
+
+class VoiceLog(Base):
+    __tablename__ = 'voice_logs'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(String)
+    session_id = Column(String)
+    language = Column(String)
+    error_type = Column(String, nullable=True)
+    raw_input = Column(Text, nullable=True)
+    recognized_text = Column(Text, nullable=True)
+    success = Column(Boolean, default=False)
+    device_info = Column(Text, nullable=True)
+    context = Column(String, nullable=True)

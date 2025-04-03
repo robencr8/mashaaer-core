@@ -7,7 +7,7 @@ import psycopg2
 from psycopg2 import pool
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, text
-from database.models import Base, Setting, EmotionData, Face, RecognitionHistory
+from database.models import Base, Setting, EmotionData, Face, RecognitionHistory, VoiceLog
 
 class DatabaseManager:
     """Manages database connections and operations with support for SQLite and PostgreSQL"""
@@ -317,3 +317,82 @@ class DatabaseManager:
                 session.add(new_setting)
                 session.commit()
                 return default
+                
+    def log_voice_recognition(self, session_id=None, language=None, error_type=None, 
+                             raw_input=None, recognized_text=None, success=False, 
+                             device_info=None, context=None):
+        """
+        Log voice recognition attempt to the database with detailed error tracking
+        
+        Args:
+            session_id: Current user session ID
+            language: Language code (e.g., 'en', 'ar')
+            error_type: Type of error if recognition failed (e.g., 'no_audio', 'timeout', 'recognition_failed')
+            raw_input: Raw audio data or metadata
+            recognized_text: Text recognized (if successful)
+            success: Whether recognition was successful
+            device_info: Information about the user's device
+            context: Context of the voice recognition (e.g., 'onboarding', 'main_interface')
+            
+        Returns:
+            bool: Success status of the logging operation
+        """
+        try:
+            # Generate timestamp in ISO format
+            timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+            
+            # Use ORM approach
+            with self.Session() as session:
+                voice_log = VoiceLog(
+                    timestamp=timestamp,
+                    session_id=session_id or "unknown",
+                    language=language or "unknown",
+                    error_type=error_type,
+                    raw_input=raw_input,
+                    recognized_text=recognized_text,
+                    success=success,
+                    device_info=device_info,
+                    context=context
+                )
+                session.add(voice_log)
+                session.commit()
+                
+            self.logger.info(f"Voice recognition logged: language={language}, success={success}, error_type={error_type}")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"Failed to log voice recognition: {str(e)}")
+            return False
+            
+    def get_voice_logs(self, limit=50, success_only=False, error_only=False, language=None):
+        """
+        Get voice recognition logs from the database with filtering options
+        
+        Args:
+            limit: Maximum number of logs to retrieve
+            success_only: If True, only successful recognitions are returned
+            error_only: If True, only failed recognitions are returned
+            language: Filter by specific language
+            
+        Returns:
+            list: List of voice log entries
+        """
+        try:
+            with self.Session() as session:
+                query = session.query(VoiceLog)
+                
+                # Apply filters
+                if success_only:
+                    query = query.filter(VoiceLog.success == True)
+                elif error_only:
+                    query = query.filter(VoiceLog.success == False)
+                    
+                if language:
+                    query = query.filter(VoiceLog.language == language)
+                    
+                # Get results
+                return query.order_by(VoiceLog.timestamp.desc()).limit(limit).all()
+                
+        except Exception as e:
+            self.logger.error(f"Failed to get voice logs: {str(e)}")
+            return []

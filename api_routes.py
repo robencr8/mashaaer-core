@@ -720,7 +720,8 @@ def listen_for_voice():
         logger.info(f"API: Voice recognition step: {step}")
         
         # Check if we're running in test/demo mode where we use sample responses
-        is_test_mode = config.get_setting('USE_SAMPLE_VOICE_RESPONSES', 'true').lower() == 'true'
+        import os
+        is_test_mode = os.environ.get('USE_SAMPLE_VOICE_RESPONSES', 'true').lower() == 'true'
         logger.info(f"API: Voice recognition running in test mode: {is_test_mode}")
         
         if is_test_mode:
@@ -745,8 +746,8 @@ def listen_for_voice():
                 
                 # Default to Arabic if not specified
                 if not language:
-                    # Try to get from session or database
-                    language = session.get('language') or db_manager.get_setting('default_language', 'ar')
+                    # Try to get from session or default to Arabic
+                    language = session.get('language') or os.environ.get('DEFAULT_LANGUAGE', 'ar')
                 
                 # Map language code to recognition language
                 recognition_language = 'ar-EG' if language == 'ar' else 'en-US'
@@ -757,6 +758,28 @@ def listen_for_voice():
                 
                 if not result['success']:
                     logger.warning(f"API: Voice recognition failed: {result.get('error', 'Unknown error')}")
+                    
+                    # Log the voice recognition failure
+                    session_id = _get_or_create_session_id()
+                    language = request.args.get('language') or request.form.get('language') or session.get('language', 'ar')
+                    device_info = json.dumps({
+                        'user_agent': request.user_agent.string,
+                        'platform': request.user_agent.platform,
+                        'browser': request.user_agent.browser
+                    }) if request.user_agent else None
+                    
+                    # Log failure to database with error details
+                    db_manager.log_voice_recognition(
+                        session_id=session_id,
+                        language=language,
+                        error_type=result.get('error', 'Unknown recognition error'),
+                        raw_input=result.get('raw_data', None),
+                        recognized_text=None,
+                        success=False,
+                        device_info=device_info,
+                        context=step
+                    )
+                    
                     return jsonify({
                         'success': False,
                         'error': 'Voice recognition failed',
@@ -772,6 +795,28 @@ def listen_for_voice():
             except Exception as rec_error:
                 logger.error(f"API: Error during speech recognition: {str(rec_error)}")
                 logger.error(traceback.format_exc())
+                
+                # Log the exception to the database
+                session_id = _get_or_create_session_id()
+                language = request.args.get('language') or request.form.get('language') or session.get('language', 'ar')
+                device_info = json.dumps({
+                    'user_agent': request.user_agent.string,
+                    'platform': request.user_agent.platform,
+                    'browser': request.user_agent.browser
+                }) if request.user_agent else None
+                
+                # Log exception to database
+                db_manager.log_voice_recognition(
+                    session_id=session_id,
+                    language=language,
+                    error_type=f"exception:{type(rec_error).__name__}",
+                    raw_input=None,
+                    recognized_text=None,
+                    success=False,
+                    device_info=device_info,
+                    context=f"{step}:exception"
+                )
+                
                 return jsonify({
                     'success': False,
                     'error': 'Speech recognition error',
@@ -781,8 +826,26 @@ def listen_for_voice():
                     'debug': f"Exception during recognition: {str(rec_error)}"
                 }), 500, response_headers
         
-        # Log the recognized text for debugging purposes
-        db_manager.log_voice_recognition(step, recognized_text, confidence)
+        # Log the voice recognition with detailed error tracking
+        session_id = _get_or_create_session_id()
+        language = request.args.get('language') or request.form.get('language') or session.get('language', 'ar')
+        device_info = json.dumps({
+            'user_agent': request.user_agent.string,
+            'platform': request.user_agent.platform,
+            'browser': request.user_agent.browser
+        }) if request.user_agent else None
+        
+        # Log voice recognition attempt to database
+        db_manager.log_voice_recognition(
+            session_id=session_id,
+            language=language,
+            error_type=None,  # No error if we reached this point
+            raw_input=None,   # We don't store the raw audio
+            recognized_text=recognized_text,
+            success=True,
+            device_info=device_info,
+            context=step      # The onboarding step as context
+        )
         
         return jsonify({
             'success': True,
@@ -795,6 +858,32 @@ def listen_for_voice():
         error_message = str(e)
         logger.error(f"API: Exception in voice recognition endpoint: {error_message}")
         logger.error(traceback.format_exc())
+        
+        # Log the global exception to the database
+        try:
+            session_id = _get_or_create_session_id()
+            step = request.args.get('step') or request.form.get('step') or 'unknown'
+            language = request.args.get('language') or request.form.get('language') or session.get('language', 'ar')
+            device_info = json.dumps({
+                'user_agent': request.user_agent.string if request.user_agent else 'unknown',
+                'platform': request.user_agent.platform if request.user_agent else 'unknown',
+                'browser': request.user_agent.browser if request.user_agent else 'unknown'
+            })
+            
+            # Log global exception to database
+            db_manager.log_voice_recognition(
+                session_id=session_id,
+                language=language,
+                error_type=f"global_exception:{type(e).__name__}",
+                raw_input=None,
+                recognized_text=None,
+                success=False,
+                device_info=device_info,
+                context=f"{step}:global_exception"
+            )
+        except Exception as log_error:
+            # If even logging fails, just log to console - don't let it disrupt the error response
+            logger.error(f"Failed to log voice recognition error: {str(log_error)}")
         
         return jsonify({
             'success': False,
