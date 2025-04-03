@@ -1,0 +1,40 @@
+Okay, based on the images, the most pressing issue is the recurring problem with the web server becoming unreachable. This needs to be the immediate focus.
+Here's a prioritized plan of action:
+1.  CRITICAL: Resolve the Web Server Inaccessibility Issue
+* Agent's Action:
+* Thoroughly investigate why the server is becoming unreachable after restarting the application.
+* This requires a systematic approach:
+* Check Server Logs: Examine the server's console output or log files for any error messages, warnings, or exceptions.
+* Review Recent Changes: Carefully analyze the code changes made before the server started failing. Use version control diffs to pinpoint the exact modifications.
+* Configuration Verification: Double-check all configuration settings (e.g., port, host, database connections, environment variables) to ensure they are correct and consistent.
+* Dependency Conflicts: If new libraries or dependencies have been added, check for conflicts or version incompatibilities.
+* Resource Usage: Monitor server resource usage (CPU, memory) to rule out resource exhaustion.
+* Minimal Reproduction: Try to reproduce the error with the simplest possible code to isolate the cause.
+* Implement a permanent fix to prevent this issue from recurring.
+2.  Verify Core Functionality (After Server is Stable)
+* Agent's Action:
+* Once the server is reliably accessible, thoroughly test the core functionalities:
+* Onboarding Flow:
+* Test all input types (name, email, etc.) with valid and invalid data.
+* Verify voice and text input.
+* Ensure the Terms of Service/Privacy Policy flow works.
+* Confirm user data is saved correctly.
+* Chat and Voice Engine:
+* Test Arabic and English conversations.
+* Check TTS/STT accuracy and responsiveness.
+* Verify emotional response accuracy and context retention.
+* Vision and Facial Recognition:
+* If implemented, test camera access, face capture, and recognition accuracy.
+* Ensure proper data handling and security.
+3.  UI/UX and Other Enhancements (If Time Allows)
+* Agent's Action:
+* If the core functionality is stable and time permits, proceed with UI/UX enhancements and other features.
+* Prioritize based on user needs and project goals.
+Why this order?
+ * Stability is Paramount: The application cannot function without a stable server.
+ * Core Functionality is Essential: Users expect the core features (chat, voice, onboarding) to work reliably.
+ * Enhancements are Secondary: UI/UX improvements and other features are important but less critical than core functionality.
+Crucial Communication:
+ * The agent must keep you informed of their progress in resolving the server issue.
+ * Provide detailed error messages, code snippets, and configuration information when necessary.
+By following this prioritized plan, you can ensure that the application is stable and functional before focusing on less critical enhancements.

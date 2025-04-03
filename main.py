@@ -1373,5 +1373,5 @@ if __name__ == "__main__":
     # Wait for core systems to initialize
     time.sleep(2)
 
-    # Start Flask app
-    app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)
+    # Start Flask app - allow auto-reloading to work with gunicorn
+    app.run(host="0.0.0.0", port=5000, debug=True)

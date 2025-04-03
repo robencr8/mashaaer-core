@@ -6,7 +6,7 @@ import logging
 import traceback
 import twilio_api
 from datetime import datetime, timedelta
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, jsonify, request, session, current_app
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -108,8 +108,9 @@ def get_status():
     
     # Add more details if available
     try:
-        # Get uptime if core_launcher is available
-        if 'core_launcher' in globals() and core_launcher is not None:
+        # Get uptime if core_launcher is available in main app
+        from main import core_launcher
+        if core_launcher is not None:
             status['system']['uptime'] = core_launcher.get_uptime()
             
         # Add database details if available
@@ -207,6 +208,10 @@ def send_sms():
         # Send the message
         result = twilio_api.send_sms(to_number, message)
         
+        # Handle None result (in case of API failure)
+        if result is None:
+            result = {'success': False, 'error': 'Twilio API call failed'}
+            
         if result.get('success', False):
             # Log success but with sanitized number for privacy
             logger.info(f"API: Successfully sent SMS to {sanitized_number}")
@@ -319,7 +324,12 @@ def play_cosmic_sound():
             # Use TTS to generate the audio
             try:
                 # Generate TTS audio
-                audio_path = tts_manager.generate_tts(welcome_text, language=language)
+                voice = "arabic" if language == "ar" else "default"
+                if tts_manager is not None:
+                    audio_path = tts_manager.generate_tts(welcome_text, voice=voice, language=language)
+                else:
+                    logger.error("TTS Manager is not available")
+                    return jsonify({'success': False, 'error': 'TTS service not available'}), 503
                 
                 if audio_path:
                     # Return the audio file path
@@ -345,7 +355,12 @@ def play_cosmic_sound():
             
             # Generate greeting audio
             try:
-                audio_path = tts_manager.generate_tts(greeting_text, language=language)
+                voice = "arabic" if language == "ar" else "default"
+                if tts_manager is not None:
+                    audio_path = tts_manager.generate_tts(greeting_text, voice=voice, language=language)
+                else:
+                    logger.error("TTS Manager is not available")
+                    return jsonify({'success': False, 'error': 'TTS service not available'}), 503
                 
                 if audio_path:
                     return jsonify({
@@ -624,6 +639,10 @@ def send_sms_alert():
         # Send the notification
         result = twilio_api.send_notification(to_number, title, message, alert_type)
         
+        # Handle None result (in case of API failure)
+        if result is None:
+            result = {'success': False, 'error': 'Twilio notification API call failed'}
+            
         if result.get('success', False):
             # Log success
             logger.info(f"API: Successfully sent {alert_type} alert to {sanitized_number}")
@@ -660,7 +679,7 @@ def send_sms_alert():
             'error_details': error_message
         }), 500
 
-@api.route('/listen', methods=['POST'])
+@api.route('/listen-for-voice', methods=['POST'])
 def listen_for_voice():
     """
     Listen for voice input and convert to text
