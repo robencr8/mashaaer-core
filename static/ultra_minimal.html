@@ -2,28 +2,119 @@
 <html>
 <head>
     <title>Minimal CORS Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
 </head>
 <body>
-    <h1>Minimal Test Page</h1>
-    <p>Server is reachable.</p>
-    <button id="testButton">Test CORS</button>
-    <div id="result"></div>
+    <h1>Ultra-Minimal CORS Test</h1>
+    <p>Click the button below to test CORS functionality with the minimal API endpoint.</p>
+    
+    <button id="testButton">Test CORS (GET)</button>
+    <button id="testPostButton">Test CORS (POST)</button>
+    
+    <div>
+        <h3>Network Request:</h3>
+        <div id="requestInfo"></div>
+    </div>
+    
+    <div>
+        <h3>Response:</h3>
+        <div id="result"></div>
+    </div>
+    
     <script>
+        // Function to display response
+        function displayResponse(data, error = false) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = JSON.stringify(data, null, 2);
+            resultDiv.className = error ? 'error' : 'success';
+        }
+        
+        // Function to display request info
+        function displayRequestInfo(method, url) {
+            const requestInfoDiv = document.getElementById('requestInfo');
+            requestInfoDiv.textContent = `Method: ${method}\nURL: ${url}\nOrigin: ${window.location.origin}`;
+        }
+        
+        // GET request handler
         document.getElementById('testButton').addEventListener('click', () => {
-            fetch('/api/test-cors', {
+            const url = '/api/test-cors-minimal';
+            displayRequestInfo('GET', url);
+            
+            // Make the fetch request
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayResponse(data);
+                    console.log('Success:', data);
+                })
+                .catch(error => {
+                    displayResponse(`Error: ${error.message}`, true);
+                    console.error('Error:', error);
+                });
+        });
+        
+        // POST request handler
+        document.getElementById('testPostButton').addEventListener('click', () => {
+            const url = '/api/test-cors-minimal';
+            displayRequestInfo('POST', url);
+            
+            // Make the fetch request
+            fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 'data': 'test' })
+                body: JSON.stringify({ test: 'data' })
             })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('result').textContent = 'Success: ' + JSON.stringify(data, null, 2);
-            })
-            .catch(error => {
-                document.getElementById('result').textContent = 'Error: ' + error;
-            });
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayResponse(data);
+                    console.log('Success:', data);
+                })
+                .catch(error => {
+                    displayResponse(`Error: ${error.message}`, true);
+                    console.error('Error:', error);
+                });
         });
     </script>
 </body>

@@ -229,35 +229,61 @@ def cors_test_route_minimal():
     # Get the origin from the request headers or use wildcard as fallback
     origin = request.headers.get('Origin', '*')
     logger.info(f"Received {request.method} request to /api/test-cors-minimal from {origin}")
+    logger.debug(f"Request Headers: {dict(request.headers)}")
     
     # For OPTIONS requests (preflight)
     if request.method == 'OPTIONS':
         logger.info(f"Handling OPTIONS preflight request for minimal test endpoint from {origin}")
         response = make_response()
-        # Explicitly set CORS headers - echo back the origin instead of using wildcard
-        response.headers['Access-Control-Allow-Origin'] = origin
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
-        response.headers['Access-Control-Max-Age'] = '3600'
-        # We're not using credentials here, but if we were, we would set this to 'true'
-        # response.headers['Access-Control-Allow-Credentials'] = 'true'
+        
+        # Explicitly set CORS headers
+        response_headers = {
+            'Access-Control-Allow-Origin': origin,
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': request.headers.get('Access-Control-Request-Headers', 'Content-Type, Authorization, X-Requested-With'),
+            'Access-Control-Allow-Credentials': 'true',
+            'Access-Control-Max-Age': '3600'
+        }
+        
+        # Add all headers to the response
+        for key, value in response_headers.items():
+            response.headers[key] = value
+            
+        logger.debug(f"OPTIONS Response Headers: {dict(response.headers)}")
         return response
     
-    # For GET or POST requests - ultra minimal response
-    if request.method == 'GET':
-        response_data = {'message': 'CORS test successful (GET)', 'timestamp': datetime.now().isoformat()}
-    else:  # POST
-        response_data = {'message': 'CORS test successful (POST)', 'timestamp': datetime.now().isoformat()}
+    # For GET or POST requests
+    response_data = {
+        'message': 'CORS test successful',
+        'method': request.method,
+        'request_origin': origin,
+        'timestamp': datetime.now().isoformat()
+    }
+    
+    # If this is a POST request, include the posted data in the response
+    if request.method == 'POST' and request.is_json:
+        try:
+            posted_data = request.get_json()
+            response_data['received_data'] = posted_data
+            logger.debug(f"Received JSON data: {posted_data}")
+        except Exception as e:
+            logger.error(f"Error parsing JSON data: {str(e)}")
     
     response = jsonify(response_data)
     
-    # Explicitly set CORS headers - echo back the origin instead of using wildcard
-    response.headers['Access-Control-Allow-Origin'] = origin
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
-    # We're not using credentials here, but if we were, we would set this to 'true'
-    # response.headers['Access-Control-Allow-Credentials'] = 'true'
+    # Explicitly set CORS headers
+    response_headers = {
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+        'Access-Control-Allow-Credentials': 'true'
+    }
     
+    # Add all headers to the response
+    for key, value in response_headers.items():
+        response.headers[key] = value
+    
+    logger.debug(f"Response Headers: {dict(response.headers)}")
     return response
 
 # Diagnostic panel for connectivity troubleshooting
