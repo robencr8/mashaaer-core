@@ -163,6 +163,11 @@ def minimal_page():
     # Direct file serving of minimal HTML file
     return app.send_static_file('minimal.html')
 
+@app.route('/minimal-test')
+def minimal_test_page():
+    """Serve the minimal test page for diagnosing web application accessibility"""
+    return render_template('minimal_test.html')
+
 # Voice API test pages
 @app.route('/test-voice-api')
 def test_voice_api():
@@ -1702,6 +1707,7 @@ if __name__ == "__main__":
     # Wait for core systems to initialize
     import time
     time.sleep(2)
-
-    # Start Flask app - allow auto-reloading to work with gunicorn
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    
+    # Start the Flask app - this is run by gunicorn in production
+    # but including it ensures the app runs correctly in all environments
+    app.run(host='0.0.0.0', port=5000, debug=True)

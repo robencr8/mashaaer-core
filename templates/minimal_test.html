@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .api-result {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4a4a9e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #3a3a8e;
+        }
+    </style>
+</head>
+<body>
+    <h1>Minimal Test Page</h1>
+    <p class="success">✅ If you can see this page, basic HTML rendering is working</p>
+    
+    <h2>Test API Endpoints</h2>
+    <div>
+        <button id="test-status">Test API Status</button>
+        <button id="test-simple">Test Simple Response</button>
+    </div>
+    <div class="api-result" id="api-result">
+        API responses will appear here.
+    </div>
+    
+    <h2>Links to Main Pages</h2>
+    <ul>
+        <li><a href="/">Home/Cosmic Onboarding</a></li>
+        <li><a href="/app">Main Application</a></li>
+        <li><a href="/test-simple-html">Simple Test Page</a></li>
+    </ul>
+
+    <script>
+        document.getElementById('test-status').addEventListener('click', function() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('api-result').innerHTML = 
+                        '<p>Status API Response:</p><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                })
+                .catch(error => {
+                    document.getElementById('api-result').innerHTML = 
+                        '<p>Error calling Status API:</p><pre>' + error + '</pre>';
+                });
+        });
+
+        document.getElementById('test-simple').addEventListener('click', function() {
+            fetch('/test')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('api-result').innerHTML = 
+                        '<p>Simple Test Response:</p><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                })
+                .catch(error => {
+                    document.getElementById('api-result').innerHTML = 
+                        '<p>Error calling Test endpoint:</p><pre>' + error + '</pre>';
+                });
+        });
+    </script>
+</body>
+</html>
