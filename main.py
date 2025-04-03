@@ -1,11 +1,17 @@
 import os
 import logging
 import json
+import mimetypes
 from flask import Flask, render_template, request, jsonify, Response, redirect, url_for
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 import threading
+
+# Ensure proper MIME types are registered
+mimetypes.add_type('audio/mpeg', '.mp3')
+mimetypes.add_type('audio/wav', '.wav')
+mimetypes.add_type('audio/ogg', '.ogg')
 
 
 # Configure logging
@@ -185,6 +191,18 @@ def diagnostic_panel():
     # Serve the diagnostic HTML for testing connectivity
     return app.send_static_file('diagnostic.html')
 
+@app.route('/tts_cache/<path:filename>')
+def serve_tts_cache(filename):
+    """Serve TTS audio files with proper MIME types and headers
+    This ensures browser can properly play audio files.
+    """
+    response = Response(open(f'tts_cache/{filename}', 'rb').read())
+    response.headers['Content-Type'] = 'audio/mpeg'
+    response.headers['Content-Disposition'] = f'inline; filename="{filename}"'
+    response.headers['Cache-Control'] = 'public, max-age=31536000'
+    response.headers['Accept-Ranges'] = 'bytes'
+    return response
+
 # Helper function to get developer mode status
 def is_developer_mode():
     # Check session first (for current request)
@@ -281,6 +299,16 @@ core_launcher = CoreLauncher(
 )
 
 # Routes
+@app.route('/test-simple-html')
+def test_simple_html_page():
+    try:
+        logger.info("Simple HTML test page accessed")
+        return render_template('test.html')
+    except Exception as e:
+        error_msg = f"Error in test route: {str(e)}"
+        logger.error(error_msg)
+        return f"Error: {error_msg}", 500
+
 @app.route('/')
 def index():
     try:

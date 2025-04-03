@@ -991,7 +991,15 @@
       if (!soundEnabled) return;
       
       // Call the voice recognition API
-      fetch('/api/listen-for-voice?language=' + userLanguage)
+      fetch('/api/listen-for-voice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          language: userLanguage
+        })
+      })
         .then(response => response.json())
         .then(data => {
           if (data.success && data.text) {

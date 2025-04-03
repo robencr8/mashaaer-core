@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            color: #333;
+            text-align: center;
+        }
+        h1 {
+            color: #4a4a9e;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Page</h1>
+        <p class="success">✅ If you can see this page, Flask routing is working correctly!</p>
+        <p>This is a simple test page to verify that the Flask server and template rendering are functioning.</p>
+        <div>
+            <p>Try these links:</p>
+            <ul style="list-style: none; padding: 0;">
+                <li><a href="/">Root Page (Cosmic Onboarding)</a></li>
+                <li><a href="/app">Main Application</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

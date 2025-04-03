@@ -257,7 +257,7 @@ class ProfileManager:
             
             # Insert into database
             columns = ', '.join(profile_data.keys())
-            placeholders = ', '.join([f'${i+1}' for i in range(len(profile_data.keys()))])
+            placeholders = ', '.join(['%s' for _ in range(len(profile_data.keys()))])
             values = tuple(profile_data.values())
             
             query = f"INSERT INTO user_profile ({columns}) VALUES ({placeholders})"
@@ -298,18 +298,16 @@ class ProfileManager:
             # Build update query
             update_parts = []
             values = []
-            param_count = 1
             
             for key, value in current_profile.items():
                 if key != 'id':  # Skip ID field
-                    update_parts.append(f"{key} = ${param_count}")
+                    update_parts.append(f"{key} = %s")
                     values.append(value)
-                    param_count += 1
             
             # Add ID for WHERE clause
             values.append(profile_id)
             
-            query = f"UPDATE user_profile SET {', '.join(update_parts)} WHERE id = ${param_count}"
+            query = f"UPDATE user_profile SET {', '.join(update_parts)} WHERE id = %s"
             self.db_manager.execute_query(query, tuple(values))
             
             # Update current profile
