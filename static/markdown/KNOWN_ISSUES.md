@@ -1,43 +1,91 @@
 # Known Issues
 
-## Web Application Feedback Tool Connectivity
+## Web Application Feedback Tool Integration
 
-Despite extensive debugging and configuration efforts, the web application feedback tool consistently reports that the server is unreachable, even though all other access methods (browsers, curl, etc.) can successfully reach the server.
+### Issue: Web Server Reported as Unreachable
 
-### Symptoms
-- The web application feedback tool reports "Web server is unreachable"
-- Manual browser testing shows all endpoints are accessible 
-- curl commands to the same endpoints return successful responses
-- Server logs show no errors when processing requests
+**Description:**  
+The web application feedback tool persistently reports that the web server is unreachable despite the server being fully functional and accessible via other means.
 
-### Investigation Summary
-1. **CORS Configuration**: We've implemented maximally permissive CORS headers across all endpoints
-2. **Minimal Endpoints**: Created ultra-minimal endpoints with no dependencies
-3. **Standalone Server**: Tested with a completely independent minimal server
-4. **Network Analysis**: Confirmed network connectivity via multiple tools
-5. **Origin Checking**: Allowed all origins and tried specific origin matching
-6. **Content Types**: Ensured appropriate content types are returned
-7. **Root-Level Endpoint**: Added `/health` endpoint for minimal verification
+**Verification Steps Performed:**
+1. Direct browser access to all endpoints consistently works
+2. curl commands successfully connect to all endpoints
+3. Server logs confirm that requests are being processed
+4. Root-level health checks return expected responses
+5. Explicit CORS headers are properly configured
+6. Multiple test pages with varying levels of complexity all work via direct access
 
-### Workarounds
-- Use the browser directly to test the application functionality
-- Use the curl commands documented in the feedback tool guide
-- Use the comprehensive feedback test page for detailed diagnostics
+**Potential Causes:**
+1. CORS configuration incompatibility specific to the feedback tool
+2. Network routing issues between the feedback tool and the server
+3. Potential port access restrictions in the feedback tool's environment
+4. Specific HTTP header requirements not documented
 
-### Next Steps
-If you continue to experience issues with the web application feedback tool, please try the following:
+**Workarounds:**
+1. **Use Direct Browser Testing:**  
+   Use direct browser access to test application functionality instead of relying on the feedback tool.
 
-1. Check the browser console for any JavaScript errors
-2. Try accessing the application directly via the URL (not through the feedback tool)
-3. Test minimal endpoints like `/health` and `/api/minimal` directly
-4. Use the curl commands in the feedback tool guide for command-line testing
+2. **Use curl for API Testing:**  
+   Test API endpoints using curl commands with appropriate headers.
 
-## Other Known Issues
+3. **Use the Standalone Minimal Server:**  
+   The `standalone_minimal_server.py` script provides an ultra-minimal Flask server with no dependencies that can be used to isolate and test basic connectivity.
 
-### Voice Recognition
-- Voice recognition may not work in some browsers due to microphone access restrictions
-- Safari has limited support for some audio features
+4. **Diagnostic Endpoints:**  
+   Use `/health`, `/api/ping`, and other minimal endpoints to verify basic connectivity.
 
-### Mobile API Integration
-- Mobile API endpoints require proper authentication headers
-- Some mobile features may have reduced functionality in offline mode
+## CORS Configuration
+
+### Issue: OPTIONS Preflight Requests Not Working as Expected
+
+**Description:**  
+In some cases, CORS preflight OPTIONS requests may not be handled correctly despite proper configuration.
+
+**Workaround:**  
+Add explicit handling for OPTIONS requests to all relevant routes with proper CORS headers.
+
+```python
+@app.route('/api/your-endpoint', methods=['GET', 'POST', 'OPTIONS'])
+def your_endpoint():
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers['Access-Control-Allow-Origin'] = '*'  # Or specific origin
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Max-Age'] = '3600'
+        return response
+    
+    # Normal handler code here
+```
+
+## ElevenLabs API Integration
+
+### Issue: ElevenLabs API Occasionally Returns 429 (Too Many Requests)
+
+**Description:**  
+When using the ElevenLabs API for text-to-speech, occasionally requests may fail with a 429 status code indicating rate limiting.
+
+**Workaround:**  
+The system automatically falls back to Google TTS when ElevenLabs is unavailable or returns errors.
+
+## Mobile API Routes
+
+### Issue: Duplicate Route Definitions
+
+**Description:**  
+Some API routes are defined in multiple files, which can lead to confusion about which implementation is being used.
+
+**Workaround:**  
+Use the `api_routes.py` file as the authoritative source for API endpoint definitions. Mobile-specific routes should be exclusively in `mobile_api_routes.py`.
+
+## Web Server Stability
+
+### Issue: Occasional Web Server Unavailability
+
+**Description:**  
+The web server may occasionally become unresponsive, particularly under high load or after extended periods of inactivity.
+
+**Workaround:**  
+1. Restart the application workflow
+2. Use the health check endpoint to monitor server status
+3. Implement a watchdog script to automatically restart the server if it becomes unresponsive

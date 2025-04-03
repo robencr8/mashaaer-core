@@ -7,6 +7,7 @@ with enhanced CORS support and diagnostic information.
 import os
 import logging
 import json
+import time
 from datetime import datetime
 from flask import Blueprint, request, make_response, jsonify, send_from_directory
 
@@ -98,6 +99,46 @@ def feedback_tool_ping():
     
     return response
 
+@feedback_tool_bp.route('/feedback-tool-endpoint', methods=['GET', 'POST', 'OPTIONS'])
+def feedback_tool_endpoint():
+    """Endpoint optimized for feedback tool with explicit CORS headers and minimal response"""
+    # Get the origin from the request headers or use configured origin as fallback
+    origin = request.headers.get('Origin', FEEDBACK_TOOL_ORIGIN or '*')
+    logger.info(f"Feedback tool endpoint accessed from origin: {origin}")
+    
+    # For OPTIONS requests (preflight)
+    if request.method == 'OPTIONS':
+        logger.info(f"Handling OPTIONS preflight request for feedback tool endpoint")
+        response = make_response()
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Max-Age'] = '3600'
+        return response
+    
+    # Create response with minimal diagnostic information
+    response_data = {
+        'status': 'success',
+        'message': 'Feedback tool endpoint is working',
+        'timestamp': time.time(),
+        'request_info': {
+            'method': request.method,
+            'path': request.path,
+            'remote_addr': request.remote_addr,
+            'user_agent': request.headers.get('User-Agent', 'Unknown')
+        }
+    }
+    
+    # Create JSON response
+    response = make_response(jsonify(response_data))
+    
+    # Add explicit CORS headers
+    response.headers['Access-Control-Allow-Origin'] = origin
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    
+    return response
+
 def init_feedback_tool_routes(app):
     """Initialize feedback tool routes with the Flask app"""
     app.register_blueprint(feedback_tool_bp, url_prefix='/api')
@@ -106,6 +147,31 @@ def init_feedback_tool_routes(app):
     def feedback_redirect():
         """Redirect to the feedback tool guide"""
         return app.redirect('/api/feedback-tool-guide')
+        
+    @app.route('/feedback-tool-endpoint', methods=['GET', 'POST', 'OPTIONS'])
+    def app_feedback_tool_endpoint():
+        """Root level endpoint for feedback tool with explicit CORS headers"""
+        origin = request.headers.get('Origin', FEEDBACK_TOOL_ORIGIN or '*')
+        
+        if request.method == 'OPTIONS':
+            response = make_response()
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = '*'
+            response.headers['Access-Control-Max-Age'] = '3600'
+            return response
+            
+        response_data = {
+            'status': 'success',
+            'message': 'Root level feedback tool endpoint is working',
+            'timestamp': time.time()
+        }
+        
+        response = make_response(jsonify(response_data))
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        return response
     
     logger.info("Feedback tool routes initialized")
     return feedback_tool_bp

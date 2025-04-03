@@ -1,46 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultra Minimal Test Page</title>
+    <title>Ultra Minimal Test</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px auto;
-            max-width: 650px;
-            padding: 0 20px;
-            line-height: 1.6;
-        }
-        h1 { color: #333; }
-        .success { color: green; }
-        .error { color: red; }
+        body { font-family: Arial; margin: 20px; }
+        button { padding: 10px; margin: 5px; }
+        #results { margin-top: 20px; padding: 10px; background: #f0f0f0; }
     </style>
 </head>
 <body>
     <h1>Ultra Minimal Test Page</h1>
-    <p class="success">✅ This page is successfully loaded from the server.</p>
+    <p>This is a minimal page for testing connectivity with the feedback tool.</p>
     
-    <div id="time">Current server time: Loading...</div>
+    <div>
+        <button onclick="testEndpoint('/health')">Test Health</button>
+        <button onclick="testEndpoint('/api/ping')">Test API Ping</button>
+        <button onclick="testEndpoint('/feedback-tool-endpoint')">Test Feedback Tool Endpoint</button>
+    </div>
     
-    <h2>Connection Test</h2>
-    <div id="test-result">Testing API connection...</div>
+    <div id="results">Results will appear here...</div>
     
     <script>
-        // Display current time
-        document.getElementById('time').textContent = 'Page loaded at: ' + new Date().toLocaleTimeString();
-        
-        // Test API connection
-        fetch('/api/ping')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('test-result').innerHTML = 
-                    `<p class="success">✅ API connection successful! Server says: ${data.message}</p>`;
-            })
-            .catch(error => {
-                document.getElementById('test-result').innerHTML = 
-                    `<p class="error">❌ API connection failed: ${error}</p>`;
-            });
+        function testEndpoint(endpoint) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `Testing ${endpoint}...`;
+            
+            fetch(endpoint)
+                .then(response => response.text())
+                .then(data => {
+                    resultsDiv.innerHTML = `Success! Response from ${endpoint}: ${data}`;
+                })
+                .catch(error => {
+                    resultsDiv.innerHTML = `Error from ${endpoint}: ${error.message}`;
+                });
+        }
     </script>
 </body>
 </html>

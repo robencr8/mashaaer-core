@@ -2288,6 +2288,11 @@ def serve_markdown(filename):
 def feedback_tool_guide():
     """Serve the feedback tool integration guide HTML page"""
     return send_from_directory('static', 'feedback_tool_guide.html')
+    
+@app.route('/feedback-tool-test')
+def feedback_tool_test_page():
+    """Serve the minimal feedback tool test page"""
+    return send_from_directory('static', 'feedback_tool_test.html')
 
 @app.route('/feedback-comprehensive-test')
 def comprehensive_feedback_test():
@@ -2303,3 +2308,13 @@ def cors_diagnostic_page():
 def ultra_minimal_test_page():
     """Serve the ultra minimal test page for diagnosing web application accessibility"""
     return render_template('ultra_minimal.html')
+
+@app.route('/health')
+def health_check_root():
+    """Ultra minimal health check endpoint at root level for maximum accessibility"""
+    response = make_response("OK")
+    response.headers['Content-Type'] = 'text/plain'
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    return response

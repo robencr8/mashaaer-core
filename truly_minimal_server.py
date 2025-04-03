@@ -1,52 +1,40 @@
-#!/usr/bin/env python3
 """
-Truly Minimal Server - No CSS, no fancy formatting, just plain HTML and JSON
+Truly Minimal Server for testing the web application feedback tool
+
+This is an absolute minimal Flask application with zero dependencies beyond Flask itself.
+It includes a single endpoint with properly configured CORS headers.
 """
 
-import os
-from flask import Flask, jsonify
+from flask import Flask, make_response
 
 app = Flask(__name__)
 
-@app.route('/')
-def index():
-    """Simplest possible home page"""
-    return """
-    <!DOCTYPE html>
-    <html>
-    <head><title>Minimal Server</title></head>
-    <body>
-        <h1>Minimal Server</h1>
-        <p>Server is running!</p>
-        <p><a href="/api/test">Test API Endpoint</a></p>
-    </body>
-    </html>
-    """
-
-@app.route('/api/test')
-def test_api():
-    """Simple API test endpoint"""
-    return jsonify({"status": "success", "message": "API is working"})
-
-@app.route('/health')
-def health():
-    """Ultra minimal health check endpoint"""
-    return "OK"
-
-@app.route('/echo')
-def echo():
-    """Echo request info"""
-    return "Echo endpoint is working"
-
 @app.after_request
 def add_cors_headers(response):
-    """Add CORS headers to every response"""
-    response.headers['Access-Control-Allow-Origin'] = '*'
+    """Add CORS headers to all responses"""
+    origin = '*'
+    response.headers['Access-Control-Allow-Origin'] = origin
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = '*'
     return response
 
+@app.route('/')
+def index():
+    """Root endpoint - returns a simple text response"""
+    return "OK - Truly Minimal Server is running"
+
+@app.route('/health')
+def health():
+    """Health check endpoint"""
+    return "OK"
+
+@app.route('/test')
+def test():
+    """Test endpoint with JSON-like response"""
+    response = make_response('{"status": "ok", "message": "Test endpoint is working"}')
+    response.headers['Content-Type'] = 'application/json'
+    return response
+
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8080))
-    print(f"Starting minimal server on port {port}")
-    app.run(host='0.0.0.0', port=port, debug=True)
+    print("Starting Truly Minimal Server on http://0.0.0.0:5000")
+    app.run(host='0.0.0.0', port=5000)

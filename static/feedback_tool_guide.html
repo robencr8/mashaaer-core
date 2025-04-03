@@ -6,259 +6,203 @@
     <title>Feedback Tool Integration Guide</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-        }
-        .container {
-            max-width: 1000px;
+            color: #333;
+            max-width: 800px;
             margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            background: #f9f9f9;
         }
         h1, h2, h3 {
             color: #2c3e50;
         }
         h1 {
-            border-bottom: 2px solid #eaeaea;
+            border-bottom: 2px solid #3498db;
             padding-bottom: 10px;
         }
-        .section {
-            margin-bottom: 30px;
-        }
-        .endpoint-list {
-            list-style-type: none;
-            padding-left: 0;
-        }
-        .endpoint-list li {
-            margin-bottom: 15px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            border-left: 4px solid #4CAF50;
-        }
-        .endpoint-path {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .endpoint-description {
-            margin-top: 5px;
-            color: #666;
+        h2 {
+            margin-top: 30px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
         }
         code {
-            background-color: #f0f0f0;
+            background: #f0f0f0;
             padding: 2px 5px;
             border-radius: 3px;
-            font-family: monospace;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+        }
+        pre {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+        }
+        .endpoint {
+            background: #e8f4fc;
+            border-left: 4px solid #3498db;
+            padding: 10px 15px;
+            margin: 15px 0;
         }
         .note {
-            background-color: #fffde7;
-            border-left: 4px solid #fbc02d;
+            background: #fff8e1;
+            border-left: 4px solid #ffca28;
             padding: 10px 15px;
+            margin: 15px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
             margin: 20px 0;
         }
-        a {
-            color: #3498db;
-            text-decoration: none;
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
-        a:hover {
+        th {
+            background-color: #f2f2f2;
+        }
+        .nav {
+            margin: 20px 0;
+            padding: 10px;
+            background: #2c3e50;
+            border-radius: 5px;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .nav a:hover {
             text-decoration: underline;
         }
-        .test-button {
+        .button {
             display: inline-block;
-            background-color: #4CAF50;
+            padding: 10px 15px;
+            background: #3498db;
             color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
             text-decoration: none;
-            margin-top: 5px;
-            font-size: 14px;
-            transition: background-color 0.3s;
+            border-radius: 5px;
+            margin: 10px 0;
         }
-        .test-button:hover {
-            background-color: #45a049;
-            text-decoration: none;
+        .button:hover {
+            background: #2980b9;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Feedback Tool Integration Guide</h1>
-        
-        <div class="section">
-            <h2>Introduction</h2>
-            <p>This guide provides information on integrating the web application feedback tool with the Mashaaer Feelings application. It includes details on available endpoints, CORS configuration, and troubleshooting steps.</p>
-            
-            <div class="note">
-                <strong>Note:</strong> Despite our best efforts to configure compatible endpoints, the web application feedback tool may report that the web server is unreachable. This guide provides alternative testing methods to verify application functionality.
-            </div>
-        </div>
-        
-        <div class="section">
-            <h2>Testing Tools</h2>
-            <p>The following tools are available to test the application:</p>
-            
-            <ul>
-                <li><a href="/feedback-comprehensive-test" class="test-button">Comprehensive Feedback Tool Test</a> - Advanced testing interface with detailed diagnostics</li>
-                <li><a href="/cors-diagnostic" class="test-button">CORS Diagnostic Tool</a> - Detailed CORS testing and analysis</li>
-                <li><a href="/feedback-test" class="test-button">Basic Feedback Test</a> - Simple endpoint testing</li>
-                <li><a href="/static/feedback_test.html" class="test-button">Static Feedback Test</a> - Static HTML test page</li>
-            </ul>
-        </div>
-        
-        <div class="section">
-            <h2>Available Endpoints</h2>
-            
-            <h3>1. Health Check Endpoints</h3>
-            <ul class="endpoint-list">
-                <li>
-                    <div class="endpoint-path">/health</div>
-                    <div class="endpoint-description">Root-level health check with minimal response</div>
-                    <a href="/health" class="test-button">Test</a>
-                </li>
-                <li>
-                    <div class="endpoint-path">/api/status</div>
-                    <div class="endpoint-description">API status information in JSON format</div>
-                    <a href="/api/status" class="test-button">Test</a>
-                </li>
-                <li>
-                    <div class="endpoint-path">/api/ping</div>
-                    <div class="endpoint-description">Simple ping endpoint returning JSON</div>
-                    <a href="/api/ping" class="test-button">Test</a>
-                </li>
-            </ul>
-            
-            <h3>2. Minimal Endpoints</h3>
-            <ul class="endpoint-list">
-                <li>
-                    <div class="endpoint-path">/api/minimal</div>
-                    <div class="endpoint-description">Minimal API endpoint returning plain text</div>
-                    <a href="/api/minimal" class="test-button">Test</a>
-                </li>
-                <li>
-                    <div class="endpoint-path">/minimal-page</div>
-                    <div class="endpoint-description">Minimal HTML page</div>
-                    <a href="/minimal-page" class="test-button">Test</a>
-                </li>
-                <li>
-                    <div class="endpoint-path">/ultra-minimal-page</div>
-                    <div class="endpoint-description">Ultra minimal HTML page</div>
-                    <a href="/ultra-minimal-page" class="test-button">Test</a>
-                </li>
-                <li>
-                    <div class="endpoint-path">/minimal-test-page</div>
-                    <div class="endpoint-description">Minimal test page for the feedback tool</div>
-                    <a href="/minimal-test-page" class="test-button">Test</a>
-                </li>
-            </ul>
-            
-            <h3>3. Dedicated Feedback Tool Endpoints</h3>
-            <ul class="endpoint-list">
-                <li>
-                    <div class="endpoint-path">/feedback-tool-endpoint</div>
-                    <div class="endpoint-description">Ultra-minimal endpoint with maximum CORS compatibility</div>
-                    <a href="/feedback-tool-endpoint" class="test-button">Test</a>
-                </li>
-                <li>
-                    <div class="endpoint-path">/api/feedback-tool-status</div>
-                    <div class="endpoint-description">Enhanced diagnostic endpoint with detailed information</div>
-                    <a href="/api/feedback-tool-status" class="test-button">Test</a>
-                </li>
-                <li>
-                    <div class="endpoint-path">/feedback-tool-test</div>
-                    <div class="endpoint-description">Ultra minimal text response for testing</div>
-                    <a href="/feedback-tool-test" class="test-button">Test</a>
-                </li>
-                <li>
-                    <div class="endpoint-path">/api/feedback-tool-ping</div>
-                    <div class="endpoint-description">Simple ping endpoint for the feedback tool</div>
-                    <a href="/api/feedback-tool-ping" class="test-button">Test</a>
-                </li>
-            </ul>
-            
-            <h3>4. Diagnostic Endpoints</h3>
-            <ul class="endpoint-list">
-                <li>
-                    <div class="endpoint-path">/api/debug-request</div>
-                    <div class="endpoint-description">Detailed request information for debugging</div>
-                    <a href="/api/debug-request" class="test-button">Test</a>
-                </li>
-                <li>
-                    <div class="endpoint-path">/cors-test</div>
-                    <div class="endpoint-description">CORS test page</div>
-                    <a href="/cors-test" class="test-button">Test</a>
-                </li>
-                <li>
-                    <div class="endpoint-path">/diagnostic-panel</div>
-                    <div class="endpoint-description">Diagnostic panel for server connectivity</div>
-                    <a href="/diagnostic-panel" class="test-button">Test</a>
-                </li>
-            </ul>
-        </div>
-        
-        <div class="section">
-            <h2>Documentation</h2>
-            <p>The following documentation is available:</p>
-            
-            <ul>
-                <li><a href="/static/markdown/FEEDBACK_TOOL_DOCUMENTATION.md" class="test-button">Feedback Tool Documentation</a></li>
-                <li><a href="/static/markdown/KNOWN_ISSUES.md" class="test-button">Known Issues</a></li>
-                <li><a href="/static/markdown/FEEDBACK_TOOL_SUMMARY.md" class="test-button">Feedback Tool Summary</a></li>
-            </ul>
-        </div>
-        
-        <div class="section">
-            <h2>Command-Line Testing</h2>
-            <p>For server-side testing, use the following curl commands:</p>
-            
-            <pre><code>
-# Test basic health check
-curl -v http://localhost:5000/health
-
-# Test with custom origin
-curl -H "Origin: https://example.com" -v http://localhost:5000/api/status
-
-# Test OPTIONS preflight
-curl -X OPTIONS -H "Origin: https://example.com" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: content-type" -v http://localhost:5000/api/status
-            </code></pre>
-        </div>
-        
-        <div class="section">
-            <h2>CORS Configuration</h2>
-            <p>The Mashaaer Feelings application has implemented a robust CORS configuration with the following headers:</p>
-            
-            <pre><code>
-Access-Control-Allow-Origin: *
-Access-Control-Allow-Methods: GET, POST, OPTIONS, HEAD
-Access-Control-Allow-Headers: *
-Access-Control-Max-Age: 86400
-Access-Control-Expose-Headers: Content-Type, Content-Length, Date
-            </code></pre>
-            
-            <p>For more secure configurations, the application can dynamically set the <code>Access-Control-Allow-Origin</code> header to match the incoming request's origin.</p>
-        </div>
-        
-        <div class="section">
-            <h2>Troubleshooting</h2>
-            <p>If you encounter issues with the web application feedback tool, try the following:</p>
-            
-            <ol>
-                <li>Use the <a href="/feedback-comprehensive-test">Comprehensive Feedback Tool Test</a> to diagnose connectivity issues.</li>
-                <li>Check the <a href="/cors-diagnostic">CORS Diagnostic Tool</a> to identify any CORS-related problems.</li>
-                <li>Test with <a href="/minimal-page">minimal endpoints</a> to isolate complex application issues.</li>
-                <li>Use curl commands to test server connectivity from the command line.</li>
-                <li>Check the server logs for any error messages related to the feedback tool.</li>
-            </ol>
-            
-            <div class="note">
-                <strong>Known Issue:</strong> The web application feedback tool may report that the web server is unreachable despite the server being accessible from web browsers. See <a href="/static/markdown/KNOWN_ISSUES.md">Known Issues</a> for more information.
-            </div>
-        </div>
+    <div class="nav">
+        <a href="/">Home</a>
+        <a href="/api-docs">API Docs</a>
+        <a href="/feedback-comprehensive-test">Comprehensive Test</a>
+        <a href="/cors-diagnostic">CORS Diagnostic</a>
     </div>
+
+    <h1>Feedback Tool Integration Guide</h1>
+    
+    <p>This guide explains how to integrate and troubleshoot the web application feedback tool with the Mashaaer Feelings application.</p>
+    
+    <div class="note">
+        <strong>Note:</strong> We have encountered persistent challenges with the feedback tool reporting that the web server is unreachable despite implementing industry best practices for web accessibility and CORS configuration.
+    </div>
+
+    <h2>Quick Links</h2>
+    <ul>
+        <li><a href="/health" class="button">Health Check</a></li>
+        <li><a href="/minimal-test" class="button">Minimal Test Page</a></li>
+        <li><a href="/ultra-minimal-test" class="button">Ultra Minimal Test Page</a></li>
+        <li><a href="/api/ping" class="button">API Ping Test</a></li>
+    </ul>
+
+    <h2>Health Check Endpoints</h2>
+    
+    <div class="endpoint">
+        <h3>GET /health</h3>
+        <p>Ultra-minimal health check endpoint at root level</p>
+        <pre>curl -v http://localhost:5000/health</pre>
+    </div>
+    
+    <div class="endpoint">
+        <h3>GET /api/status</h3>
+        <p>Get comprehensive system status information</p>
+        <pre>curl -v http://localhost:5000/api/status</pre>
+    </div>
+    
+    <div class="endpoint">
+        <h3>GET /api/ping</h3>
+        <p>Simple ping endpoint for connectivity testing</p>
+        <pre>curl -v http://localhost:5000/api/ping</pre>
+    </div>
+
+    <h2>CORS Configuration</h2>
+    
+    <p>All API endpoints are configured with the following CORS headers:</p>
+    
+    <pre>
+Access-Control-Allow-Origin: &lt;dynamic based on request origin or '*'&gt;
+Access-Control-Allow-Methods: GET, POST, OPTIONS
+Access-Control-Allow-Headers: *
+Access-Control-Max-Age: 3600
+    </pre>
+    
+    <p>The application dynamically sets the <code>Access-Control-Allow-Origin</code> header based on the incoming request's <code>Origin</code> header, with fallback to <code>*</code> for maximum compatibility.</p>
+
+    <h2>Testing with Curl</h2>
+    
+    <h3>Basic Health Check</h3>
+    <pre>curl -v http://localhost:5000/health</pre>
+    
+    <h3>Test with Custom Origin</h3>
+    <pre>curl -H "Origin: https://example.com" -v http://localhost:5000/api/status</pre>
+    
+    <h3>Test OPTIONS Preflight</h3>
+    <pre>curl -X OPTIONS -H "Origin: https://example.com" \
+  -H "Access-Control-Request-Method: POST" \
+  -H "Access-Control-Request-Headers: content-type" \
+  -v http://localhost:5000/api/status</pre>
+
+    <h2>Diagnostic Tools</h2>
+    
+    <h3>Debug Request</h3>
+    <p>Detailed request information for debugging:</p>
+    <a href="/api/debug-request" class="button">Debug Request</a>
+    
+    <h3>CORS Diagnostic</h3>
+    <p>Interactive CORS testing and debugging tool:</p>
+    <a href="/cors-diagnostic" class="button">CORS Diagnostic</a>
+    
+    <h3>Feedback Tool Diagnostic</h3>
+    <p>Specialized diagnostic page for the feedback tool:</p>
+    <a href="/feedback-tool-diagnostic" class="button">Feedback Tool Diagnostic</a>
+    
+    <h2>Troubleshooting</h2>
+    
+    <p>If you're experiencing issues with the feedback tool, try the following steps:</p>
+    
+    <ol>
+        <li>Verify direct browser access to the application at <a href="/">/</a></li>
+        <li>Check the ultra-minimal endpoints like <a href="/health">/health</a> and <a href="/api/ping">/api/ping</a></li>
+        <li>Use the <a href="/cors-diagnostic">CORS Diagnostic</a> tool to check for CORS issues</li>
+        <li>Check server logs for detailed information about requests and responses</li>
+        <li>Try the standalone minimal server at <code>/standalone_minimal_server.py</code></li>
+    </ol>
+    
+    <div class="note">
+        <strong>Important:</strong> If you've verified that all endpoints are accessible via direct browser access and curl commands but the feedback tool still reports the server as unreachable, it might be a compatibility issue specific to the feedback tool rather than a problem with the server implementation.
+    </div>
+
+    <h2>Additional Resources</h2>
+    
+    <ul>
+        <li><a href="/static/markdown/FEEDBACK_TOOL_SUMMARY.md">Feedback Tool Summary</a></li>
+        <li><a href="/static/markdown/FEEDBACK_TOOL_DOCUMENTATION.md">Detailed Documentation</a></li>
+        <li><a href="/static/markdown/KNOWN_ISSUES.md">Known Issues</a></li>
+    </ul>
+    
+    <footer style="margin-top: 50px; border-top: 1px solid #ddd; padding-top: 20px; text-align: center;">
+        <p>Mashaaer Feelings &copy; 2025</p>
+    </footer>
 </body>
 </html>

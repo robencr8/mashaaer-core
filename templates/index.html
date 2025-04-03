@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -34,11 +33,33 @@
       font-size: 1.2em;
       color: #8888ff;
     }
+    .nav-links {
+      margin-top: 30px;
+      font-size: 0.9em;
+    }
+    .nav-links a {
+      color: #8888ff;
+      margin: 0 10px;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover {
+      color: #cfcfff;
+      text-shadow: 0 0 5px #8888ff;
+    }
   </style>
 </head>
 <body>
   <div class="logo">مشاعر</div>
   <div class="logo-en">Feelings</div>
   <div class="subtitle">أنا هنا لأفهمك.. لا فقط لأجيبك.</div>
+  
+  <div class="nav-links">
+    <a href="/api-docs">API Docs</a> | 
+    <a href="/admin">Admin</a> | 
+    <a href="/cosmic-onboarding">Cosmic Onboarding</a> | 
+    <a href="/feedback-tool-guide">Feedback Tool Guide</a> |
+    <a href="/cors-diagnostic">CORS Diagnostic</a>
+  </div>
 </body>
 </html>
