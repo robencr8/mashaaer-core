@@ -120,6 +120,59 @@ def verify_single_test(test_file):
         logger.error(f"💥 Error running test {test_file}: {str(e)}")
         return False
 
+def verify_cache_entry(db_session, cache_key):
+    """
+    Verify if a specific cache entry exists and return its details.
+    
+    Args:
+        db_session: SQLAlchemy database session
+        cache_key: The cache key to look for
+        
+    Returns:
+        Tuple of (entry_exists, value, metadata) where:
+        - entry_exists: Boolean indicating if the entry exists
+        - value: The cached value (deserialized if JSON) or None
+        - metadata: Dictionary of metadata including hit_count, created_at, expires_at
+    """
+    try:
+        from database.models import Cache
+        import json
+        
+        # Query the database for the cache entry
+        cache_entry = db_session.query(Cache).filter(Cache.key == cache_key).first()
+        
+        if not cache_entry:
+            logger.info(f"No cache entry found for key: {cache_key}")
+            return False, None, {}
+            
+        # Attempt to deserialize the value if it's JSON
+        value = cache_entry.value
+        try:
+            deserialized_value = json.loads(value)
+            value = deserialized_value  # Use the deserialized value if successful
+        except (json.JSONDecodeError, TypeError):
+            # Not JSON or invalid JSON, use the raw value
+            logger.debug(f"Cache value for key {cache_key} is not valid JSON, using raw value")
+        
+        # Extract metadata
+        metadata = {
+            'hit_count': cache_entry.hit_count,
+            'created_at': cache_entry.created_at.isoformat() if cache_entry.created_at else None,
+            'expires_at': cache_entry.expires_at.isoformat() if cache_entry.expires_at else None,
+            'last_hit_at': cache_entry.last_hit_at.isoformat() if cache_entry.last_hit_at else None
+        }
+        
+        logger.info(f"Found cache entry for key: {cache_key}")
+        logger.info(f"Hit count: {metadata['hit_count']}")
+        logger.info(f"Created at: {metadata['created_at']}")
+        logger.info(f"Expires at: {metadata['expires_at']}")
+        
+        return True, value, metadata
+        
+    except Exception as e:
+        logger.error(f"Error verifying cache entry for key '{cache_key}': {e}")
+        return False, None, {}
+
 def verify_direct_cache_functionality():
     """Directly verify cache functionality using a real database connection."""
     logger.info("=== Starting Direct Cache Functionality Verification ===")
@@ -198,28 +251,33 @@ def verify_direct_cache_functionality():
         
         logger.info("✅ Successfully retrieved cached value")
         
-        # Step 5: Verify the retrieved value
-        logger.info("Verifying cached value content...")
-        try:
-            cached_data = json.loads(cached_value) if isinstance(cached_value, str) else cached_value
+        # Step 5: Verify the retrieved value using the verify_cache_entry helper
+        logger.info("Verifying cached value content using verify_cache_entry...")
+        with Session() as session:
+            entry_exists, entry_value, entry_metadata = verify_cache_entry(session, cache_key)
+            
+            if not entry_exists:
+                logger.error("❌ Cache entry not found in direct verification")
+                return False
             
             # Check that the cached data matches what we stored
-            assert cached_data.get("primary_emotion") == test_data["primary_emotion"], \
-                f"Cached primary_emotion {cached_data.get('primary_emotion')} doesn't match original {test_data['primary_emotion']}"
-            
-            assert cached_data.get("confidence") == test_data["confidence"], \
-                f"Cached confidence {cached_data.get('confidence')} doesn't match original {test_data['confidence']}"
-            
-            logger.info("✅ Cached value content is correct")
-        except Exception as e:
-            logger.error(f"❌ Cache verification failed: {str(e)}")
-            return False
+            try:
+                assert entry_value.get("primary_emotion") == test_data["primary_emotion"], \
+                    f"Cached primary_emotion {entry_value.get('primary_emotion')} doesn't match original {test_data['primary_emotion']}"
+                
+                assert entry_value.get("confidence") == test_data["confidence"], \
+                    f"Cached confidence {entry_value.get('confidence')} doesn't match original {test_data['confidence']}"
+                
+                logger.info("✅ Cached value content is correct")
+            except Exception as e:
+                logger.error(f"❌ Cache verification failed: {str(e)}")
+                return False
         
         # Step 6: Verify hit count incrementing
         logger.info("Verifying hit count incrementing...")
         
-        # Initial hit count should be 1 after the first get
-        initial_hit_count = metadata.get("hit_count", 0)
+        # Initial hit count from the entry_metadata
+        initial_hit_count = entry_metadata.get("hit_count", 0)
         logger.info(f"Initial hit count: {initial_hit_count}")
         
         # Get the cached value again to increment hit count
@@ -234,20 +292,21 @@ def verify_direct_cache_functionality():
             
         logger.info("✅ Hit count incremented correctly")
         
-        # Step 7: Verify direct database hit count
+        # Step 7: Verify updated database hit count using verify_cache_entry
         logger.info("Verifying database hit count...")
         with Session() as session:
-            db_entry = session.query(Cache).filter(Cache.key == cache_key).first()
+            entry_exists, _, updated_metadata = verify_cache_entry(session, cache_key)
             
-            if not db_entry:
-                logger.error("❌ Cache entry not found in database")
+            if not entry_exists:
+                logger.error("❌ Cache entry not found in database during hit count verification")
                 return False
                 
-            logger.info(f"Database hit count: {db_entry.hit_count}")
+            db_hit_count = updated_metadata.get("hit_count", 0)
+            logger.info(f"Database hit count: {db_hit_count}")
             
             # The database hit count should match the metadata hit count
-            if db_entry.hit_count != second_hit_count:
-                logger.error(f"❌ Database hit count {db_entry.hit_count} doesn't match metadata hit count {second_hit_count}")
+            if db_hit_count != second_hit_count:
+                logger.error(f"❌ Database hit count {db_hit_count} doesn't match metadata hit count {second_hit_count}")
                 return False
                 
             logger.info("✅ Database hit count matches metadata hit count")
@@ -305,5 +364,9 @@ def run_verification():
     return all_tests_passed
 
 if __name__ == "__main__":
-    success = run_verification()
-    sys.exit(0 if success else 1)
+    try:
+        success = run_verification()
+        sys.exit(0 if success else 1)
+    except Exception as e:
+        logger.error(f"Verification script failed with error: {e}", exc_info=True)
+        sys.exit(1)
