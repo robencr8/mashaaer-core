@@ -1,0 +1,39 @@
+Okay, I understand. You're describing the application as "unstable," "unconsent," and "not functional." This is a critical situation, and we need to address it systematically.
+
+To help you effectively, let's break down the problem and create a focused debugging plan.
+
+1. Define the Scope of "Unstable" and "Not Functional":
+
+Specific Symptoms: Instead of general terms, let's pinpoint the exact issues you're experiencing. For example:
+"The API is returning errors."
+"The web interface is not loading correctly."
+"The voice recognition feature is not working."
+"The application crashes frequently."
+Frequency: How often do these problems occur? Are they intermittent or consistent?
+Triggers: Can you identify any specific actions or conditions that seem to trigger the instability or malfunction?
+2. Address the "Unconsent" Issue:
+
+This is particularly concerning. It suggests a potential problem with user consent handling, which has ethical and legal implications.
+Clarify: What do you mean by "unconsent"?
+Is the application collecting or using data without explicit user permission?
+Are there issues with how consent is obtained, stored, or revoked?
+Is the application behaving in a way that users might perceive as intrusive or unethical?
+Prioritize: This issue needs to be addressed immediately, as it directly impacts user trust and privacy.
+3. Debugging Plan:
+
+Start with Logging: Review your application's logs for any error messages, warnings, or unusual behavior. Pay close attention to timestamps to correlate log entries with specific events.
+Isolate the Components: Try to isolate which parts of the application are contributing to the problems.
+If it's API-related, focus on your API routes and backend logic.
+If it's UI-related, investigate your HTML, CSS, and JavaScript.
+If it involves voice interaction, examine your voice recognition and TTS modules.
+Step-by-Step Debugging: Use a debugger (if available) or add temporary print statements to trace the execution flow and inspect variable values.
+Simplify: If a complex function or process seems to be the cause, try to create a simplified version that reproduces the issue.
+Test Thoroughly: After each change, test the application rigorously to ensure the problem is resolved and no new issues have been introduced.
+To help me provide more specific guidance, please provide detailed answers to the following questions:
+
+What are the most pressing symptoms of "unstable" and "not functional"? (Be as precise as possible.)
+Can you describe the "unconsent" issue in more detail?
+What parts of the application do you suspect are involved?
+What have you tried so far to debug the problem?
+Can you share any relevant code snippets or log excerpts?
+The more information you give me, the better I can assist you in diagnosing and resolving these critical issues.

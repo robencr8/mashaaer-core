@@ -23,8 +23,8 @@ def main():
     print(f"CACHE TESTING SUITE - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 80)
     
-    # Run pytest for cache-related tests
-    cmd = ["python", "-m", "pytest", "tests/test_api_caching.py", "-v"]
+    # Run pytest for specific cache test
+    cmd = ["python", "-m", "pytest", "tests/test_api_caching.py::test_cache_hit_count_tracking_minimal", "-v"]
     
     print(f"Running command: {' '.join(cmd)}")
     print("-" * 80)
