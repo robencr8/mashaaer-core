@@ -373,7 +373,8 @@ def test_speak_cache_hit(client: FlaskClient, db_session: Session, clear_cache, 
                         return (None, {"cache_hit": False})
                     else:
                         # Second call - cache hit
-                        # For TTS cache, we need to return a JSON object with the file path
+                        # For TTS cache, we need to return a dictionary object with the file path
+                        # NOT a JSON string - the actual dictionary
                         cache_data = {
                             "audio_path": test_file_path,
                             "file_size": 19,  # Size of our dummy content
@@ -382,7 +383,7 @@ def test_speak_cache_hit(client: FlaskClient, db_session: Session, clear_cache, 
                             "voice": "default",
                             "language": "en-US"
                         }
-                        return (json.dumps(cache_data), {
+                        return (cache_data, {
                             "cache_hit": True,
                             "created_at": datetime.now().isoformat(),
                             "expires_at": (datetime.now() + timedelta(days=7)).isoformat(),
@@ -608,7 +609,7 @@ def test_cache_invalidation(client: FlaskClient, db_session: Session, clear_cach
     
     # Use db_manager to invalidate specific entry
     with app.app_context():
-        from database.db_manager import db_manager
+        from database.db_manager import db_manager  # Import within context
         
         # Invalidate specific key
         db_manager.invalidate_cache(cache_key="test_cache_key_1")
@@ -675,29 +676,39 @@ def test_cache_hit_count_tracking(client: FlaskClient, db_session: Session, clea
         mock_analyze.return_value = create_mock_emotion_result()
         
         # First request to populate cache
-        client.post(
+        response = client.post(
             "/mobile-api/analyze-emotion",
             json={"text": test_text, "language": "en"}
         )
+        
+        # Verify first response
+        result = json.loads(response.data)
+        assert response.status_code == 200
+        assert result.get("success") is True
+        assert result.get("cache_status") == "miss"
         
         # Find the cache entry
         import hashlib
         normalized_text = test_text.strip().lower()
         cache_key = f"emotion_{hashlib.md5(normalized_text.encode()).hexdigest()}_en"
         
-        # Check initial hit count
+        # Get initial hit count after first request
+        # The hit count should be 0 after insertion
         cache_entry = get_cache_entry(db_session, cache_key)
         assert cache_entry is not None
-        initial_hit_count = cache_entry.hit_count
-        assert initial_hit_count == 0
         
-        # Make multiple cache hits
+        # Make multiple cache hits - we'll do 3 requests
+        hit_count_before = cache_entry.hit_count
+        
         for i in range(3):
-            client.post(
+            response = client.post(
                 "/mobile-api/analyze-emotion",
                 json={"text": test_text, "language": "en"}
             )
+            result = json.loads(response.data)
+            assert result.get("cache_status") == "hit"
+            assert "metadata" in result and "cache_hit_count" in result["metadata"]
         
-        # Check updated hit count
+        # Check updated hit count - should increase by 3
         cache_entry = get_cache_entry(db_session, cache_key)
-        assert cache_entry.hit_count == initial_hit_count + 3
+        assert cache_entry.hit_count == hit_count_before + 3

@@ -1,0 +1,38 @@
+Okay, you've done a very thorough job of tracing the code and identifying the discrepancy between your test setup and the actual implementation of the /mobile-api/speak endpoint. You've correctly observed that the cached_result is expected to be a JSON object (a dictionary) with at least an audio_path field, while your mock might be returning a plain string.
+
+Let's refine the test code to accurately simulate the expected cache behavior. Here's a focused approach:
+
+1.  Verify the cached_result Usage:
+
+* You've already started this, which is excellent. Go back to the `/mobile-api/speak` endpoint code in `mobile_api_routes.py` and carefully examine how the `cached_result` is used *after* it's retrieved from the cache.
+* **Specifically, look for:**
+    * Which keys are accessed within the `cached_result` dictionary? (e.g., `cached_result.get('audio_path')`)
+    * What data type is expected for the values associated with those keys? (e.g., a string for `audio_path`)
+2.  Adjust the Mock Return Value:
+
+* In your `tests/test_api_caching.py`, modify the `mock_tts_manager_speak` function to return a dictionary that mirrors the structure of the expected `cached_result`.
+* **Example:**
+
+    ```python
+    def mock_tts_manager_speak(text, voice, language, profile_manager=None):
+        # ... (your existing mock logic) ...
+        return {"audio_path": "/path/to/mocked/audio.mp3"}  # Return a dictionary
+    ```
+3.  Refine Assertions:
+
+* Update the assertions in your `test_speak_cache_hit` test to align with the dictionary structure.
+* **Example:**
+
+    ```python
+    assert response2.json["audio_path"] == "/path/to/mocked/audio.mp3"
+    ```
+4.  Comprehensive Testing:
+
+* After making these changes, run the `test_speak_cache_hit` test to ensure it now passes.
+* Then, run your *entire* test suite (`pytest tests/test_api_caching.py`) to make sure you haven't introduced any regressions in other tests.
+By focusing on accurately replicating the expected data structure and refining your assertions, you'll create a more robust and reliable test for your TTS caching implementation.
+
+I'm ready to help you with the specific code modifications if you provide the relevant snippets from your tests/test_api_caching.py file.
+
+
+Sources and related content
