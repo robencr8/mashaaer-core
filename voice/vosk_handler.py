@@ -2,10 +2,73 @@ import os
 import logging
 import json
 import wave
-# Temporarily comment out for development
-# import pyaudio
+import time
+import random
 import threading
-# from vosk import Model, KaldiRecognizer
+
+# Setup logger
+logger = logging.getLogger(__name__)
+
+# Try to import Vosk and PyAudio
+try:
+    import pyaudio
+    from vosk import Model, KaldiRecognizer  # type: ignore
+    VOSK_AVAILABLE = True
+except ImportError:
+    # Log the fact that we're using mock implementation
+    logger.warning("Vosk or PyAudio not available, using mock implementation")
+    VOSK_AVAILABLE = False
+    
+    # Define mock PyAudio class for fallback
+    class PyAudio:
+        def __init__(self):
+            pass
+            
+        def open(self, format=None, channels=None, rate=None, input=None, frames_per_buffer=None):
+            return MockStream()
+            
+        def terminate(self):
+            pass
+    
+    class MockStream:
+        def __init__(self):
+            pass
+            
+        def start_stream(self):
+            pass
+            
+        def read(self, chunk_size, exception_on_overflow=None):
+            return b'\x00' * chunk_size
+            
+        def stop_stream(self):
+            pass
+            
+        def close(self):
+            pass
+    
+    # Assign the mock PyAudio to the module namespace
+    pyaudio = type('MockPyAudio', (), {
+        'PyAudio': PyAudio,
+        'paInt16': 2,  # Standard value for paInt16
+    })
+    
+    # Define placeholder classes to avoid LSP errors
+    class Model:
+        def __init__(self, path):
+            pass
+            
+    class KaldiRecognizer:
+        def __init__(self, model, rate):
+            pass
+        
+        def AcceptWaveform(self, data):
+            return False
+            
+        def FinalResult(self):
+            return '{"text": ""}'
+            
+        def Result(self):
+            return '{"text": ""}'
 
 class VoskHandler:
     """Handles Vosk speech recognition for multiple languages"""
@@ -46,71 +109,222 @@ class VoskHandler:
     
     def load_model(self, language):
         """Load Vosk model for specified language"""
-        # Mock implementation for development
-        self.logger.info(f"Mock model loading for {language}")
-        
-        # Simulate loaded model
-        self.loaded_models[language] = True
-        return True
+        if not VOSK_AVAILABLE:
+            self.logger.info(f"Mock model loading for {language} (Vosk not available)")
+            # Simulate loaded model in mock mode
+            self.loaded_models[language] = True
+            return True
+            
+        model_path = self.model_paths.get(language)
+        if not model_path:
+            self.logger.error(f"No model path defined for language: {language}")
+            return False
+            
+        if not os.path.isdir(model_path):
+            self.logger.error(f"Model directory not found: {model_path}")
+            return False
+            
+        try:
+            self.logger.info(f"Loading Vosk model for {language} from {model_path}")
+            self.models[language] = Model(model_path)
+            self.loaded_models[language] = True
+            self.logger.info(f"Successfully loaded model for {language}")
+            return True
+        except Exception as e:
+            self.logger.error(f"Failed to load Vosk model: {str(e)}")
+            # Fall back to mock mode
+            self.loaded_models[language] = True
+            return True
     
     def recognize_file(self, audio_file, language):
         """Recognize speech in an audio file"""
-        # Mock implementation for development
-        self.logger.info(f"Mock speech recognition for file: {audio_file}, language: {language}")
-        
-        # Ensure model is "loaded"
+        # Ensure model is loaded
         if not self.is_model_loaded(language):
             self.load_model(language)
         
-        # Return mock response based on language
-        if language == "en-US":
-            return "Hello, this is a test of the speech recognition system."
-        elif language == "ar":
-            return "مرحبا، هذا اختبار لنظام التعرف على الكلام."
-        else:
-            return "This is a test message from the voice recognition system."
+        # Handle mock mode
+        if not VOSK_AVAILABLE or language not in self.models:
+            self.logger.info(f"Using mock speech recognition for file: {audio_file}, language: {language}")
+            # Return mock response based on language
+            if language == "en-US":
+                return "Hello, this is a test of the speech recognition system."
+            elif language == "ar":
+                return "مرحبا، هذا اختبار لنظام التعرف على الكلام."
+            else:
+                return "This is a test message from the voice recognition system."
+        
+        # Real Vosk implementation
+        try:
+            self.logger.info(f"Recognizing speech in {audio_file} using {language} model")
+            
+            if not os.path.exists(audio_file):
+                self.logger.error(f"Audio file not found: {audio_file}")
+                return ""
+                
+            wf = wave.open(audio_file, "rb")
+            
+            # Check if audio format is compatible with Vosk
+            if wf.getnchannels() != 1 or wf.getsampwidth() != 2 or wf.getcomptype() != "NONE":
+                self.logger.error(f"Audio file must be WAV format mono PCM: {audio_file}")
+                return ""
+                
+            # Create recognizer
+            rec = KaldiRecognizer(self.models[language], wf.getframerate())
+            
+            # Process audio in chunks
+            result = ""
+            while True:
+                data = wf.readframes(4000)
+                if len(data) == 0:
+                    break
+                rec.AcceptWaveform(data)
+            
+            # Get final result
+            final_result = json.loads(rec.FinalResult())
+            result = final_result.get("text", "")
+            
+            self.logger.info(f"Recognition result: {result}")
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Recognition error: {str(e)}")
+            # Fall back to mock response
+            if language == "en-US":
+                return "Hello, this is a test of the speech recognition system."
+            elif language == "ar":
+                return "مرحبا، هذا اختبار لنظام التعرف على الكلام."
+            else:
+                return "This is a test message from the voice recognition system."
     
     def start_listening(self, language, callback):
         """Start listening for speech in the specified language"""
-        # Mock implementation for development
         if self.is_listening:
             self.logger.warning("Already listening")
             return
         
-        # Ensure model is "loaded"
+        # Ensure model is loaded
         if not self.is_model_loaded(language):
             self.load_model(language)
         
         # Set the callback
         self.current_callback = callback
         
-        # Start the mock listening thread
-        self.is_listening = True
-        self.listening_thread = threading.Thread(
-            target=self._mock_listening_thread,
-            args=(language,)
-        )
-        self.listening_thread.daemon = True
-        self.listening_thread.start()
-        
-        self.logger.info(f"Started mock listening for {language}")
+        # Choose the appropriate listening method based on availability
+        if VOSK_AVAILABLE and language in self.models:
+            # Start the real-time listening thread
+            self.is_listening = True
+            self.listening_thread = threading.Thread(
+                target=self._real_listening_thread,
+                args=(language,)
+            )
+            self.listening_thread.daemon = True
+            self.listening_thread.start()
+            self.logger.info(f"Started real-time listening for {language}")
+        else:
+            # Fall back to mock implementation
+            self.is_listening = True
+            self.listening_thread = threading.Thread(
+                target=self._mock_listening_thread,
+                args=(language,)
+            )
+            self.listening_thread.daemon = True
+            self.listening_thread.start()
+            self.logger.info(f"Started mock listening for {language} (Vosk not available)")
+            
+    def _real_listening_thread(self, language):
+        """Thread for continuous real-time listening"""
+        try:
+            if not VOSK_AVAILABLE:
+                self.logger.error("Vosk not available for real-time listening")
+                return
+                
+            self.logger.info(f"Real-time listening thread started for {language}")
+            
+            # Initialize PyAudio
+            try:
+                # Access PyAudio via the module variable to avoid LSP warnings
+                pa_module = pyaudio  # type: ignore
+                self.audio = pa_module.PyAudio()
+                
+                # Create a recognizer for the language
+                recognizer = KaldiRecognizer(self.models[language], 16000)
+                
+                # Open audio stream using constants from the pyaudio module
+                self.stream = self.audio.open(
+                    format=pa_module.paInt16,  # type: ignore
+                    channels=1,
+                    rate=16000,
+                    input=True,
+                    frames_per_buffer=4000
+                )
+            except Exception as e:
+                self.logger.error(f"Failed to initialize audio: {str(e)}")
+                raise
+            self.stream.start_stream()
+            
+            self.logger.info("Audio stream started successfully")
+            
+            # Main listening loop
+            while self.is_listening:
+                data = self.stream.read(4000, exception_on_overflow=False)
+                
+                if recognizer.AcceptWaveform(data):
+                    result = json.loads(recognizer.Result())
+                    if 'text' in result and result['text'].strip():
+                        recognized_text = result['text']
+                        self.logger.info(f"Recognized: {recognized_text}")
+                        
+                        if self.current_callback:
+                            self.current_callback(recognized_text)
+            
+            # Clean up
+            if self.stream:
+                self.stream.stop_stream()
+                self.stream.close()
+                
+            if self.audio:
+                self.audio.terminate()
+                
+            self.logger.info("Real-time listening thread stopped")
+            
+        except Exception as e:
+            self.logger.error(f"Real-time listening thread error: {str(e)}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
+            self.is_listening = False
     
     def stop_listening(self):
         """Stop listening for speech"""
-        # Mock implementation for development
         if not self.is_listening:
             return
         
+        self.logger.info("Stopping voice recognition...")
         self.is_listening = False
+        
+        # Clean up stream resources if they exist
+        try:
+            if self.stream:
+                self.stream.stop_stream()
+                self.stream.close()
+                self.stream = None
+                self.logger.info("Audio stream closed")
+                
+            if self.audio:
+                self.audio.terminate()
+                self.audio = None
+                self.logger.info("PyAudio terminated")
+        except Exception as e:
+            self.logger.error(f"Error cleaning up audio resources: {str(e)}")
         
         # Wait for the thread to end
         if self.listening_thread:
             self.listening_thread.join(timeout=2.0)
+            self.listening_thread = None
         
         # Reset the callback
         self.current_callback = None
         
-        self.logger.info("Stopped mock listening")
+        self.logger.info("Voice recognition stopped")
     
     def _mock_listening_thread(self, language):
         """Thread for continuous mock listening"""

@@ -34,7 +34,12 @@ class ElevenLabsTTS:
             "rachel": "ErXwobaYiN019PkySvjV",   # Rachel (female English voice)
             "josh": "TxGEqnHWrfWFTfGW9XjX",     # Josh (male voice)
             "adam": "pNInz6obpgDQGcFmaJgB",     # Adam (British male)
-            "arabic_male": "XrExE9yKIg1WjnnlVkGX" # Arabic male voice
+            "arabic_male": "XrExE9yKIg1WjnnlVkGX", # Arabic male voice
+            "formal": "pNInz6obpgDQGcFmaJgB",   # Formal voice (Adam)
+            "casual": "TxGEqnHWrfWFTfGW9XjX",   # Casual voice (Josh)
+            "ar": "XrExE9yKIg1WjnnlVkGX",       # Arabic voice (shortcode)
+            "en": "ErXwobaYiN019PkySvjV",       # English voice (shortcode)
+            "en-US": "ErXwobaYiN019PkySvjV"     # English US voice (shortcode)
         }
         
         # Create directory for audio cache

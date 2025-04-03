@@ -269,12 +269,18 @@ class TTSManager:
         """
         # If language is specified but voice is default, use the appropriate voice
         if language and voice == "default":
-            if language.startswith("ar"):
+            # Use the language code as the voice identifier if possible
+            # This will map directly to our enriched voice dictionary
+            if language in self.elevenlabs.voices:
+                voice = language
+            elif language.startswith("ar"):
                 # Use Arabic voice
                 voice = "arabic"
             elif language.startswith("en"):
                 # Use English voice
                 voice = "english"
+            
+            self.logger.info(f"Mapped language '{language}' to voice '{voice}'")
         
         # Call the speak method to handle the actual TTS generation
         return self.speak(text, voice, language)
