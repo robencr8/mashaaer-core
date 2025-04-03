@@ -68,3 +68,4 @@ class Cache(Base):
     expires_at = Column(DateTime)
     content_type = Column(String(50), default='application/json')  # For flexibility in caching different content types
     hit_count = Column(Integer, default=0)  # Track cache usage statistics
+    last_hit_at = Column(DateTime, nullable=True)  # Track when the cache was last accessed

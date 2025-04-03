@@ -39,7 +39,20 @@ class DatabaseManager:
 
         # Connection pool (thread-local)
         self.local = threading.local()
-        self.engine = create_engine(f'sqlite:///{self.db_path}')  # Update for ORM
+        
+        # Use the appropriate SQLAlchemy engine based on configuration
+        if self.use_postgres:
+            self.engine = create_engine(
+                config.DATABASE_URL,
+                connect_args={
+                    'connect_timeout': 30  # 30 seconds timeout
+                },
+                pool_pre_ping=True,  # Test connection before using it
+                pool_recycle=300     # Recycle connections after 5 minutes
+            )
+        else:
+            self.engine = create_engine(f'sqlite:///{self.db_path}')  # SQLite for ORM
+            
         self.Session = sessionmaker(bind=self.engine)
 
     def initialize_db(self):
@@ -387,8 +400,9 @@ class DatabaseManager:
                 ).first()
                 
                 if cache_entry:
-                    # Update hit count
+                    # Update hit count and last_hit_at timestamp
                     cache_entry.hit_count += 1
+                    cache_entry.last_hit_at = datetime.now()
                     session.commit()
                     
                     # Return cached data
@@ -398,6 +412,7 @@ class DatabaseManager:
                             "created_at": cache_entry.created_at.isoformat() if cache_entry.created_at else None,
                             "expires_at": cache_entry.expires_at.isoformat() if cache_entry.expires_at else None,
                             "hit_count": cache_entry.hit_count,
+                            "last_hit_at": cache_entry.last_hit_at.isoformat() if cache_entry.last_hit_at else None,
                             "content_type": cache_entry.content_type
                         }
                     except json.JSONDecodeError:
@@ -407,6 +422,7 @@ class DatabaseManager:
                             "created_at": cache_entry.created_at.isoformat() if cache_entry.created_at else None,
                             "expires_at": cache_entry.expires_at.isoformat() if cache_entry.expires_at else None,
                             "hit_count": cache_entry.hit_count,
+                            "last_hit_at": cache_entry.last_hit_at.isoformat() if cache_entry.last_hit_at else None,
                             "content_type": cache_entry.content_type
                         }
                         
@@ -454,7 +470,8 @@ class DatabaseManager:
                         key=cache_key,
                         value=value,
                         expires_at=expires_at,
-                        content_type=content_type
+                        content_type=content_type,
+                        last_hit_at=None  # Will be set on first hit
                     )
                     session.add(cache_entry)
                     
