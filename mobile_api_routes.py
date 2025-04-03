@@ -285,7 +285,17 @@ def mobile_analyze_emotion():
         
         # Perform emotion analysis
         try:
-            emotion_result = emotion_tracker.analyze_text(text)
+            # Use fallback model if OpenAI is not available (quota exceeded)
+            try:
+                emotion_result = emotion_tracker.analyze_text(text)
+            except Exception as e:
+                if "quota" in str(e).lower() or "insufficient_quota" in str(e).lower():
+                    logger.warning(f"OpenAI quota exceeded, using fallback emotion analysis: {str(e)}")
+                    # Fallback to basic emotion detection
+                    emotion_result = emotion_tracker.analyze_text_basic(text) if hasattr(emotion_tracker, 'analyze_text_basic') else "neutral"
+                else:
+                    # Re-raise other exceptions
+                    raise
             
             # Handle different result formats from emotion tracker
             if isinstance(emotion_result, str):
@@ -317,43 +327,43 @@ def mobile_analyze_emotion():
                         logger.warning(f"Failed to cache emotion result: {str(e)}")
             
                 # Calculate response time
-                end_time = time.time()
-                processing_time_ms = int((end_time - start_time) * 1000)
-            
-                # Create response based on format preference
-                if response_format == 'minimal':
-                    # Minimal format for low-bandwidth scenarios
-                    return jsonify({
-                        "s": True,  # success
-                        "e": dominant_emotion,  # emotion
-                        "i": confidence,  # intensity
-                        "c": confidence,  # confidence
-                        "t": processing_time_ms  # processing time
-                    })
-                else:
-                    # Full response with complete details
-                    result = {
-                        "primary_emotion": dominant_emotion,
-                        "intensity": confidence,
-                        "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-                    }
-                    
-                    # Include detailed emotion breakdown if requested
-                    if include_details:
-                        result["emotions"] = all_emotions
-                        result["metadata"] = {
-                            "source": "emotion-analysis-v2",
-                            "confidence": confidence,
-                            "language": language,
-                            "processing_time_ms": processing_time_ms
-                        }
-                    
-                    return jsonify({
-                        "success": True,
-                        "result": result,
-                        "cache_status": cache_status,
+            end_time = time.time()
+            processing_time_ms = int((end_time - start_time) * 1000)
+        
+            # Create response based on format preference
+            if response_format == 'minimal':
+                # Minimal format for low-bandwidth scenarios
+                return jsonify({
+                    "s": True,  # success
+                    "e": dominant_emotion,  # emotion
+                    "i": confidence,  # intensity
+                    "c": confidence,  # confidence
+                    "t": processing_time_ms  # processing time
+                })
+            else:
+                # Full response with complete details
+                result = {
+                    "primary_emotion": dominant_emotion,
+                    "intensity": confidence,
+                    "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+                }
+                
+                # Include detailed emotion breakdown if requested
+                if include_details:
+                    result["emotions"] = all_emotions
+                    result["metadata"] = {
+                        "source": "emotion-analysis-v2",
+                        "confidence": confidence,
+                        "language": language,
                         "processing_time_ms": processing_time_ms
-                    })
+                    }
+                
+                return jsonify({
+                    "success": True,
+                    "result": result,
+                    "cache_status": cache_status,
+                    "processing_time_ms": processing_time_ms
+                })
                 
         except Exception as e:
             logger.error(f"Mobile API: Emotion analysis error: {str(e)}")
@@ -372,6 +382,12 @@ def mobile_analyze_emotion():
     except Exception as e:
         logger.error(f"Mobile API: Unexpected error in emotion analysis: {str(e)}")
         logger.error(traceback.format_exc())
+        
+        # Get response format from the request, defaulting to 'json'
+        try:
+            response_format = data.get('format', 'json')
+        except:
+            response_format = 'json'
         
         # Fallback error response
         if response_format == 'minimal':
@@ -455,16 +471,18 @@ def mobile_speak():
         cache_status = "disabled" if bypass_cache else "miss"
         
         # Check cache if not bypassing
+        cached_result = None
+        cache_metadata = {}
         if not bypass_cache and db_manager and hasattr(db_manager, 'get_cached_response'):
             try:
-                cached_result = db_manager.get_cached_response(cache_key)
-                if cached_result:
-                    logger.debug(f"Cache hit for TTS: {cache_key}")
-                    cache_status = "hit"
+                cached_result, cache_metadata = db_manager.get_cached_response(cache_key)
+                cache_status = "hit" if cache_metadata.get("cache_hit", False) else "miss"
+                
+                if cached_result and cache_metadata.get("cache_hit", False):
+                    logger.debug(f"Cache hit for TTS: {cache_key}, hit count: {cache_metadata.get('hit_count', 0)}")
                     
-                    # Parse cached result
-                    cached_data = json.loads(cached_result)
-                    cached_audio_path = cached_data.get('audio_path')
+                    # Get cached audio path
+                    cached_audio_path = cached_result.get('audio_path')
                     
                     # Verify the audio file exists
                     if os.path.exists(cached_audio_path) and os.path.getsize(cached_audio_path) > 0:
@@ -490,6 +508,7 @@ def mobile_speak():
                                         'X-TTS-Voice': voice,
                                         'X-TTS-Language': language,
                                         'X-Cache-Status': 'hit',
+                                        'X-Cache-Hits': str(cache_metadata.get('hit_count', 1)),
                                         'X-Processing-Time': str(processing_time_ms)
                                     }
                                 )
@@ -498,7 +517,7 @@ def mobile_speak():
                                 # Fall through to regenerate
                         else:
                             # Standard JSON response with cached path
-                            return jsonify({
+                            response = {
                                 'success': True,
                                 'audio_path': cached_audio_path,
                                 'text': text,
@@ -506,7 +525,20 @@ def mobile_speak():
                                 'language': language,
                                 'cache_status': cache_status,
                                 'processing_time_ms': processing_time_ms
-                            })
+                            }
+                            
+                            # Add cache metadata for debugging/monitoring
+                            if config and getattr(config, 'DEBUG', False):
+                                response['cache_metadata'] = {
+                                    'hit_count': cache_metadata.get('hit_count', 1),
+                                    'created_at': cache_metadata.get('created_at'),
+                                    'expires_at': cache_metadata.get('expires_at')
+                                }
+                                
+                            return jsonify(response)
+                    else:
+                        logger.warning(f"Cached audio file not found or empty: {cached_audio_path}")
+                        # Fall through to regenerate
             except Exception as e:
                 logger.warning(f"Failed to retrieve cached TTS result: {str(e)}")
                 # Fall through to regular processing
