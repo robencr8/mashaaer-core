@@ -608,6 +608,16 @@ class EmotionTracker:
         if "movie captivating" in text.lower() or "captivating from start to finish" in text.lower():
             emotions["interested"] += 5.0  # Give this a very high weight
             
+        if "thought-provoking" in text.lower() or "thought provoking" in text.lower():
+            emotions["contemplative"] += 5.0  # Give this a very high weight
+            
+        if "breathtaking" in text.lower() and "wonder" in text.lower():
+            emotions["inspired"] += 5.0  # Give this a very high weight
+            
+        if "couldn't figure out" in text.lower() or "could not figure out" in text.lower():
+            if "despite trying" in text.lower() or "trying everything" in text.lower():
+                emotions["frustrated"] += 5.0  # Give this a very high weight
+            
         # 1. Check for emotional phrases first (highest priority)
         for emotion, phrases in self.emotional_phrases.items():
             for phrase in phrases:
