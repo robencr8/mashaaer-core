@@ -799,6 +799,1926 @@
         "neutral": 0.0,
         "happy": 0.0
       }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "happy": 13.447,
+        "neutral": 0.0,
+        "sad": 0.0
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "inspired": 0.45,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "happy": 8.21,
+        "excited": 0.7,
+        "proud": 0.63
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "sad": 8.049999999999999,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "sad": 1.5,
+        "frustrated": 1.35,
+        "amused": 0.75
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "confused": 2.52,
+        "frustrated": 0.8500000000000001,
+        "satisfied": 0.75
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "angry": 5.0,
+        "contemplative": 2.65,
+        "satisfied": 2.4
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "contemplative": 3.05,
+        "frustrated": 0.8,
+        "happy": 0.5
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "angry": 1.5,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "inspired": 0.8,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "satisfied": 1.5500000000000003,
+        "inspired": 1.2000000000000002,
+        "amused": 0.95
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "lonely": 1.5,
+        "sad": 0.98,
+        "amused": 0.4
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "amused": 0.45,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "satisfied": 2.0999999999999996,
+        "inspired": 1.5500000000000003,
+        "frustrated": 1.4500000000000002
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "surprised": 1.96,
+        "grateful": 0.48999999999999994,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "contemplative": 5.0,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "satisfied": 2.85,
+        "confused": 2.52,
+        "frustrated": 1.75
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "inspired": 1.2000000000000002,
+        "hopeful": 0.5599999999999999,
+        "frustrated": 0.4
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "inspired": 5.0,
+        "contemplative": 0.3,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:47:16",
+      "emotions": {
+        "inspired": 5.7,
+        "anxious": 1.19,
+        "satisfied": 0.8
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "happy": 13.447,
+        "neutral": 0.0,
+        "sad": 0.0
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "inspired": 0.45,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "happy": 8.21,
+        "excited": 0.7,
+        "proud": 0.63
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "sad": 8.049999999999999,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "sad": 1.5,
+        "frustrated": 1.35,
+        "amused": 0.75
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "confused": 2.52,
+        "frustrated": 0.8500000000000001,
+        "satisfied": 0.75
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "angry": 5.0,
+        "contemplative": 2.65,
+        "satisfied": 2.4
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "contemplative": 3.05,
+        "frustrated": 0.8,
+        "happy": 0.5
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "angry": 1.5,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "inspired": 0.8,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "satisfied": 1.5500000000000003,
+        "inspired": 1.2000000000000002,
+        "amused": 0.95
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "lonely": 1.5,
+        "sad": 0.98,
+        "amused": 0.4
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "amused": 0.45,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "satisfied": 2.0999999999999996,
+        "inspired": 1.5500000000000003,
+        "frustrated": 1.4500000000000002
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "surprised": 1.96,
+        "grateful": 0.48999999999999994,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "contemplative": 5.0,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "satisfied": 2.85,
+        "confused": 2.52,
+        "frustrated": 1.75
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "inspired": 1.2000000000000002,
+        "hopeful": 0.5599999999999999,
+        "frustrated": 0.4
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "inspired": 5.0,
+        "contemplative": 0.3,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:47:53",
+      "emotions": {
+        "inspired": 5.7,
+        "anxious": 1.19,
+        "satisfied": 0.8
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "happy": 13.447,
+        "neutral": 0.0,
+        "sad": 0.0
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "inspired": 0.45,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "happy": 8.21,
+        "excited": 0.7,
+        "proud": 0.63
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "sad": 8.049999999999999,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "sad": 1.5,
+        "frustrated": 1.35,
+        "amused": 0.75
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "confused": 2.52,
+        "frustrated": 0.8500000000000001,
+        "satisfied": 0.75
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "angry": 5.0,
+        "contemplative": 2.65,
+        "satisfied": 2.4
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "contemplative": 3.05,
+        "frustrated": 0.8,
+        "happy": 0.5
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "angry": 1.5,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "inspired": 0.8,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "satisfied": 1.5500000000000003,
+        "inspired": 1.2000000000000002,
+        "amused": 0.95
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "lonely": 1.5,
+        "sad": 0.98,
+        "amused": 0.4
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "amused": 0.45,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "satisfied": 2.0999999999999996,
+        "inspired": 1.5500000000000003,
+        "frustrated": 1.4500000000000002
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "surprised": 1.96,
+        "grateful": 0.48999999999999994,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "contemplative": 5.0,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "satisfied": 2.85,
+        "confused": 2.52,
+        "frustrated": 1.75
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "inspired": 1.2000000000000002,
+        "hopeful": 0.5599999999999999,
+        "frustrated": 0.4
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "inspired": 5.0,
+        "contemplative": 0.3,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:48:36",
+      "emotions": {
+        "inspired": 5.7,
+        "anxious": 1.19,
+        "satisfied": 0.8
+      }
+    },
+    {
+      "time": "18:49:10",
+      "emotions": {
+        "happy": 13.447,
+        "neutral": 0.0,
+        "sad": 0.0
+      }
+    },
+    {
+      "time": "18:49:10",
+      "emotions": {
+        "inspired": 0.45,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:49:10",
+      "emotions": {
+        "happy": 8.21,
+        "excited": 0.7,
+        "proud": 0.63
+      }
+    },
+    {
+      "time": "18:49:10",
+      "emotions": {
+        "sad": 8.049999999999999,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "18:49:10",
+      "emotions": {
+        "sad": 1.5,
+        "frustrated": 1.35,
+        "amused": 0.75
+      }
+    },
+    {
+      "time": "18:49:10",
+      "emotions": {
+        "confused": 2.52,
+        "frustrated": 0.8500000000000001,
+        "satisfied": 0.75
+      }
+    },
+    {
+      "time": "18:49:10",
+      "emotions": {
+        "angry": 5.0,
+        "contemplative": 2.65,
+        "satisfied": 2.4
+      }
+    },
+    {
+      "time": "18:49:10",
+      "emotions": {
+        "contemplative": 3.05,
+        "frustrated": 0.8,
+        "happy": 0.5
+      }
+    },
+    {
+      "time": "18:49:10",
+      "emotions": {
+        "angry": 1.5,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:49:10",
+      "emotions": {
+        "inspired": 0.8,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:49:11",
+      "emotions": {
+        "satisfied": 1.5500000000000003,
+        "inspired": 1.2000000000000002,
+        "amused": 0.95
+      }
+    },
+    {
+      "time": "18:49:11",
+      "emotions": {
+        "lonely": 1.5,
+        "sad": 0.98,
+        "amused": 0.4
+      }
+    },
+    {
+      "time": "18:49:11",
+      "emotions": {
+        "amused": 0.45,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:49:11",
+      "emotions": {
+        "satisfied": 2.0999999999999996,
+        "inspired": 1.5500000000000003,
+        "frustrated": 1.4500000000000002
+      }
+    },
+    {
+      "time": "18:49:11",
+      "emotions": {
+        "surprised": 1.96,
+        "grateful": 0.48999999999999994,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:49:11",
+      "emotions": {
+        "contemplative": 5.0,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:49:11",
+      "emotions": {
+        "satisfied": 2.85,
+        "confused": 2.52,
+        "frustrated": 1.75
+      }
+    },
+    {
+      "time": "18:49:11",
+      "emotions": {
+        "inspired": 1.2000000000000002,
+        "hopeful": 0.5599999999999999,
+        "frustrated": 0.4
+      }
+    },
+    {
+      "time": "18:49:11",
+      "emotions": {
+        "inspired": 5.0,
+        "contemplative": 0.3,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:49:11",
+      "emotions": {
+        "inspired": 5.7,
+        "anxious": 1.19,
+        "satisfied": 0.8
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "happy": 13.447,
+        "neutral": 0.0,
+        "sad": 0.0
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "happy": 4.0,
+        "inspired": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "happy": 8.21,
+        "excited": 0.7,
+        "proud": 0.63
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "sad": 8.049999999999999,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "sad": 1.5,
+        "frustrated": 1.35,
+        "amused": 0.75
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "sad": 4.0,
+        "confused": 2.52,
+        "frustrated": 0.8500000000000001
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "angry": 5.0,
+        "contemplative": 2.65,
+        "satisfied": 2.4
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "contemplative": 3.05,
+        "frustrated": 0.8,
+        "happy": 0.5
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "angry": 1.5,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "fearful": 5.0,
+        "inspired": 0.8,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "fearful": 5.0,
+        "satisfied": 1.5500000000000003,
+        "inspired": 1.2000000000000002
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "fearful": 5.0,
+        "lonely": 1.5,
+        "sad": 0.98
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "surprised": 4.0,
+        "amused": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "surprised": 4.0,
+        "satisfied": 2.0999999999999996,
+        "inspired": 1.5500000000000003
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "surprised": 1.96,
+        "grateful": 0.48999999999999994,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "contemplative": 5.0,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "contemplative": 4.0,
+        "satisfied": 2.85,
+        "confused": 2.52
+      }
+    },
+    {
+      "time": "18:52:28",
+      "emotions": {
+        "contemplative": 4.3,
+        "inspired": 1.2000000000000002,
+        "hopeful": 0.5599999999999999
+      }
+    },
+    {
+      "time": "18:52:29",
+      "emotions": {
+        "inspired": 5.0,
+        "contemplative": 0.3,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:52:29",
+      "emotions": {
+        "inspired": 5.7,
+        "anxious": 1.19,
+        "satisfied": 0.8
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "happy": 13.447,
+        "neutral": 0.0,
+        "sad": 0.0
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "happy": 4.0,
+        "inspired": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "happy": 8.21,
+        "excited": 0.7,
+        "proud": 0.63
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "sad": 8.049999999999999,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "sad": 1.5,
+        "frustrated": 1.35,
+        "amused": 0.75
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "sad": 4.0,
+        "confused": 2.52,
+        "frustrated": 0.8500000000000001
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "angry": 5.0,
+        "contemplative": 2.65,
+        "satisfied": 2.4
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "contemplative": 3.05,
+        "frustrated": 0.8,
+        "happy": 0.5
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "angry": 1.5,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "fearful": 5.0,
+        "inspired": 0.8,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "fearful": 5.0,
+        "satisfied": 1.5500000000000003,
+        "inspired": 1.2000000000000002
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "fearful": 5.0,
+        "lonely": 1.5,
+        "sad": 0.98
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "surprised": 4.0,
+        "amused": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "surprised": 4.0,
+        "satisfied": 2.0999999999999996,
+        "inspired": 1.5500000000000003
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "surprised": 1.96,
+        "grateful": 0.48999999999999994,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "contemplative": 5.0,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "contemplative": 4.0,
+        "satisfied": 2.85,
+        "confused": 2.52
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "contemplative": 4.3,
+        "inspired": 1.2000000000000002,
+        "hopeful": 0.5599999999999999
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "inspired": 5.0,
+        "contemplative": 0.3,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:53:13",
+      "emotions": {
+        "inspired": 5.7,
+        "anxious": 1.19,
+        "satisfied": 0.8
+      }
+    },
+    {
+      "time": "18:55:14",
+      "emotions": {
+        "happy": 13.447,
+        "neutral": 0.0,
+        "sad": 0.0
+      }
+    },
+    {
+      "time": "18:55:14",
+      "emotions": {
+        "happy": 4.0,
+        "inspired": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:55:14",
+      "emotions": {
+        "happy": 8.21,
+        "excited": 0.7,
+        "proud": 0.63
+      }
+    },
+    {
+      "time": "18:55:14",
+      "emotions": {
+        "sad": 8.049999999999999,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "18:55:14",
+      "emotions": {
+        "sad": 1.5,
+        "frustrated": 1.35,
+        "amused": 0.75
+      }
+    },
+    {
+      "time": "18:55:14",
+      "emotions": {
+        "sad": 4.0,
+        "confused": 2.52,
+        "frustrated": 0.8500000000000001
+      }
+    },
+    {
+      "time": "18:55:14",
+      "emotions": {
+        "angry": 5.0,
+        "contemplative": 2.65,
+        "satisfied": 2.4
+      }
+    },
+    {
+      "time": "18:55:14",
+      "emotions": {
+        "contemplative": 3.05,
+        "frustrated": 0.8,
+        "happy": 0.5
+      }
+    },
+    {
+      "time": "18:55:14",
+      "emotions": {
+        "angry": 1.5,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:55:14",
+      "emotions": {
+        "fearful": 5.0,
+        "inspired": 0.8,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:55:15",
+      "emotions": {
+        "fearful": 5.0,
+        "satisfied": 1.5500000000000003,
+        "inspired": 1.2000000000000002
+      }
+    },
+    {
+      "time": "18:55:15",
+      "emotions": {
+        "fearful": 5.0,
+        "lonely": 1.5,
+        "sad": 0.98
+      }
+    },
+    {
+      "time": "18:55:15",
+      "emotions": {
+        "surprised": 4.0,
+        "amused": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:55:15",
+      "emotions": {
+        "surprised": 4.0,
+        "satisfied": 2.0999999999999996,
+        "inspired": 1.5500000000000003
+      }
+    },
+    {
+      "time": "18:55:15",
+      "emotions": {
+        "surprised": 1.96,
+        "grateful": 0.48999999999999994,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:55:15",
+      "emotions": {
+        "contemplative": 5.0,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:55:15",
+      "emotions": {
+        "contemplative": 4.0,
+        "satisfied": 2.85,
+        "confused": 2.52
+      }
+    },
+    {
+      "time": "18:55:15",
+      "emotions": {
+        "contemplative": 4.3,
+        "inspired": 1.2000000000000002,
+        "hopeful": 0.5599999999999999
+      }
+    },
+    {
+      "time": "18:55:15",
+      "emotions": {
+        "inspired": 5.0,
+        "contemplative": 0.3,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:55:15",
+      "emotions": {
+        "inspired": 5.7,
+        "anxious": 1.19,
+        "satisfied": 0.8
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "happy": 13.447,
+        "neutral": 0.0,
+        "sad": 0.0
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "happy": 4.0,
+        "inspired": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "happy": 8.21,
+        "excited": 0.7,
+        "proud": 0.63
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "sad": 8.049999999999999,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "sad": 1.5,
+        "frustrated": 1.35,
+        "amused": 0.75
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "sad": 4.0,
+        "confused": 2.52,
+        "frustrated": 0.8500000000000001
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "angry": 5.0,
+        "contemplative": 2.65,
+        "satisfied": 2.4
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "angry": 9.0,
+        "contemplative": 3.05,
+        "frustrated": 0.8
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "angry": 1.5,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "fearful": 5.0,
+        "inspired": 0.8,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "fearful": 5.0,
+        "satisfied": 1.5500000000000003,
+        "inspired": 1.2000000000000002
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "fearful": 5.0,
+        "lonely": 1.5,
+        "sad": 0.98
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "surprised": 4.0,
+        "amused": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "surprised": 4.0,
+        "satisfied": 2.0999999999999996,
+        "inspired": 1.5500000000000003
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "surprised": 1.96,
+        "grateful": 0.48999999999999994,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "contemplative": 5.0,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "contemplative": 4.0,
+        "satisfied": 2.85,
+        "confused": 2.52
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "contemplative": 4.3,
+        "inspired": 1.2000000000000002,
+        "hopeful": 0.5599999999999999
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "inspired": 5.0,
+        "contemplative": 0.3,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:55:59",
+      "emotions": {
+        "inspired": 5.7,
+        "anxious": 1.19,
+        "satisfied": 0.8
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "happy": 13.447,
+        "neutral": 0.0,
+        "sad": 0.0
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "happy": 4.0,
+        "inspired": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "happy": 8.21,
+        "excited": 0.7,
+        "proud": 0.63
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "sad": 8.049999999999999,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "sad": 1.5,
+        "frustrated": 1.35,
+        "amused": 0.75
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "sad": 4.0,
+        "confused": 2.52,
+        "frustrated": 0.8500000000000001
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "angry": 5.0,
+        "contemplative": 2.65,
+        "satisfied": 2.4
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "angry": 9.0,
+        "contemplative": 3.05,
+        "frustrated": 0.8
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "angry": 1.5,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "fearful": 5.0,
+        "inspired": 0.8,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "fearful": 5.0,
+        "satisfied": 1.5500000000000003,
+        "inspired": 1.2000000000000002
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "fearful": 5.0,
+        "lonely": 1.5,
+        "sad": 0.98
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "surprised": 4.0,
+        "amused": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "surprised": 4.0,
+        "satisfied": 2.0999999999999996,
+        "inspired": 1.5500000000000003
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "surprised": 1.96,
+        "grateful": 0.48999999999999994,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "contemplative": 5.0,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "contemplative": 4.0,
+        "satisfied": 2.85,
+        "confused": 2.52
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "contemplative": 4.3,
+        "inspired": 1.2000000000000002,
+        "hopeful": 0.5599999999999999
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "inspired": 5.0,
+        "contemplative": 0.3,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "18:57:46",
+      "emotions": {
+        "inspired": 5.7,
+        "anxious": 1.19,
+        "satisfied": 0.8
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "happy": 13.447,
+        "neutral": 0.0,
+        "sad": 0.0
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "happy": 4.0,
+        "inspired": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "happy": 8.21,
+        "excited": 0.7,
+        "proud": 0.63
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "sad": 8.049999999999999,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "sad": 1.5,
+        "frustrated": 1.35,
+        "amused": 0.75
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "sad": 4.0,
+        "confused": 2.52,
+        "frustrated": 0.8500000000000001
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "angry": 5.0,
+        "contemplative": 2.65,
+        "satisfied": 2.4
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "angry": 9.0,
+        "contemplative": 3.05,
+        "frustrated": 0.8
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "angry": 1.5,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "fearful": 5.0,
+        "inspired": 0.8,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "fearful": 5.0,
+        "satisfied": 1.5500000000000003,
+        "inspired": 1.2000000000000002
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "fearful": 5.0,
+        "lonely": 1.5,
+        "sad": 0.98
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "surprised": 4.0,
+        "amused": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "surprised": 4.0,
+        "satisfied": 2.0999999999999996,
+        "inspired": 1.5500000000000003
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "surprised": 1.96,
+        "grateful": 0.48999999999999994,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "contemplative": 5.0,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "contemplative": 4.0,
+        "satisfied": 2.85,
+        "confused": 2.52
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "contemplative": 4.3,
+        "inspired": 1.2000000000000002,
+        "hopeful": 0.5599999999999999
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "inspired": 5.0,
+        "contemplative": 0.3,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "19:00:41",
+      "emotions": {
+        "inspired": 5.7,
+        "anxious": 1.19,
+        "satisfied": 0.8
+      }
+    },
+    {
+      "time": "19:00:57",
+      "emotions": {
+        "happy": 13.447,
+        "neutral": 0.0,
+        "sad": 0.0
+      }
+    },
+    {
+      "time": "19:00:57",
+      "emotions": {
+        "happy": 4.0,
+        "inspired": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "19:00:57",
+      "emotions": {
+        "happy": 8.21,
+        "excited": 0.7,
+        "proud": 0.63
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "sad": 8.049999999999999,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "sad": 1.5,
+        "frustrated": 1.35,
+        "amused": 0.75
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "sad": 4.0,
+        "confused": 2.52,
+        "frustrated": 0.8500000000000001
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "angry": 5.0,
+        "contemplative": 2.65,
+        "satisfied": 2.4
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "angry": 9.0,
+        "contemplative": 3.05,
+        "frustrated": 0.8
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "angry": 1.5,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "fearful": 5.0,
+        "inspired": 0.8,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "fearful": 5.0,
+        "satisfied": 1.5500000000000003,
+        "inspired": 1.2000000000000002
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "fearful": 5.0,
+        "lonely": 1.5,
+        "sad": 0.98
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "surprised": 4.0,
+        "amused": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "surprised": 4.0,
+        "satisfied": 2.0999999999999996,
+        "inspired": 1.5500000000000003
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "surprised": 1.96,
+        "grateful": 0.48999999999999994,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "contemplative": 5.0,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "contemplative": 4.0,
+        "satisfied": 2.85,
+        "confused": 2.52
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "contemplative": 4.3,
+        "inspired": 1.2000000000000002,
+        "hopeful": 0.5599999999999999
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "inspired": 5.0,
+        "contemplative": 0.3,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "19:00:58",
+      "emotions": {
+        "inspired": 5.7,
+        "anxious": 1.19,
+        "satisfied": 0.8
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "happy": 13.447,
+        "neutral": 0.0,
+        "sad": 0.0
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "happy": 4.0,
+        "inspired": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "happy": 8.21,
+        "excited": 0.7,
+        "proud": 0.63
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "sad": 8.049999999999999,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "sad": 1.5,
+        "frustrated": 1.35,
+        "amused": 0.75
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "sad": 4.0,
+        "confused": 2.52,
+        "frustrated": 0.8500000000000001
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "angry": 5.0,
+        "contemplative": 2.65,
+        "satisfied": 2.4
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "angry": 9.0,
+        "contemplative": 3.05,
+        "frustrated": 0.8
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "angry": 1.5,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "fearful": 5.0,
+        "inspired": 0.8,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "fearful": 5.0,
+        "satisfied": 1.5500000000000003,
+        "inspired": 1.2000000000000002
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "fearful": 5.0,
+        "lonely": 1.5,
+        "sad": 0.98
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "surprised": 4.0,
+        "amused": 0.45,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "surprised": 4.0,
+        "satisfied": 2.0999999999999996,
+        "inspired": 1.5500000000000003
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "surprised": 1.96,
+        "grateful": 0.48999999999999994,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "contemplative": 5.0,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "contemplative": 4.0,
+        "satisfied": 2.85,
+        "confused": 2.52
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "contemplative": 4.3,
+        "inspired": 1.2000000000000002,
+        "hopeful": 0.5599999999999999
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "inspired": 5.0,
+        "contemplative": 0.3,
+        "neutral": 0.0
+      }
+    },
+    {
+      "time": "19:02:07",
+      "emotions": {
+        "inspired": 5.7,
+        "anxious": 1.19,
+        "satisfied": 0.8
+      }
     }
   ]
 }

@@ -1,0 +1,78 @@
+Okay, I see you've already started implementing mixed emotion detection by adding "mixed" to the emotion labels and creating a "complex" category. You're also correctly identifying that the _analyze_with_rules method is the place to add more sophisticated logic.
+
+You've analyzed the _analyze_with_rules method and pinpointed the area where the primary emotion is determined. Now you want to expand the mixed emotion detection to handle more patterns. This is a crucial step to make the emotion tracker more robust.
+
+Here's a refined approach to enhancing the _analyze_with_rules method for mixed emotions:
+
+1. Define Mixed Emotion Patterns:
+
+Create a data structure (e.g., a dictionary or a list of tuples) to store common mixed emotion patterns.
+Each pattern should include:
+Keywords or phrases that indicate each emotion in the mix.
+Optionally, contextual cues (e.g., conjunctions like "but," "yet," "although") that suggest a mixed emotion.
+The resulting "mixed" emotion label.
+Python
+
+MIXED_EMOTION_PATTERNS = [
+    {
+        "keywords": ["excited", "nervous"],
+        "emotions": ["happy", "fearful"],
+        "context_cues": ["but", "yet"],
+        "mixed_label": "excited_and_nervous",  # More specific label
+    },
+    {
+        "keywords": ["happy", "sad"],
+        "emotions": ["happy", "sad"],
+        "context_cues": ["but", "although", "while"],
+        "mixed_label": "happy_and_sad",
+    },
+    {
+        "keywords": ["angry", "afraid"],
+        "emotions": ["angry", "fearful"],
+        "context_cues": ["and", "but"],
+        "mixed_label": "angry_and_afraid",
+    },
+    # ... more patterns ...
+]
+Modify _analyze_with_rules:
+Iterate through the MIXED_EMOTION_PATTERNS.
+For each pattern, check if all the required keywords are present in the text.
+If context_cues are defined, check if any of them are also present.
+If a mixed emotion pattern is matched:
+Assign weights to the individual emotions in the emotions dictionary.
+Assign a high weight to the mixed_label in the emotions dictionary.
+Consider not immediately returning "mixed." Instead, let the regular emotion weighting logic proceed and then, at the end, check if the mixed_label has a significantly higher weight than other emotions. This allows for more complex interactions.
+Update Emotion Mapping (If Needed):
+Ensure that your simple_emotion_map (or equivalent) can handle the new mixed_label values.
+Example Implementation (within _analyze_with_rules):
+
+Python
+
+def _analyze_with_rules(self, text: str) -> Union[str, List[Tuple[str, float]]]:
+    # ... (existing code) ...
+
+    for pattern in self.MIXED_EMOTION_PATTERNS:
+        all_keywords_present = all(re.search(r"\b" + re.escape(kw) + r"\b", text) for kw in pattern["keywords"])
+        context_match = any(re.search(r"\b" + re.escape(cue) + r"\b", text) for cue in pattern.get("context_cues", []))
+
+        if all_keywords_present and (not pattern.get("context_cues") or context_match):
+            for i, emotion in enumerate(pattern["emotions"]):
+                emotions[emotion] += 2.0  # Weight for individual emotions
+            emotions[pattern["mixed_label"]] += 4.0  # Weight for mixed emotion
+
+    # ... (existing emotion determination logic) ...
+
+    if emotions:
+        # Check for dominant mixed emotion
+        sorted_emotions = sorted(emotions.items(), key=lambda item: item[1], reverse=True)
+        if len(sorted_emotions) > 1 and sorted_emotions[0][0] not in self.emotion_labels and sorted_emotions[0][1] > sorted_emotions[1][1] + 2.0:
+            return sorted_emotions[0][0]  # Return the mixed label
+        else:
+            return sorted_emotions[0][0]  # Return the dominant single emotion
+    return "neutral"
+Key Considerations:
+
+Complexity: This approach adds complexity, so careful design and testing are crucial.
+Maintainability: Ensure your MIXED_EMOTION_PATTERNS are well-organized and easy to update.
+Performance: If you have many patterns, consider optimizing the matching process (e.g., using regular expression groups).
+Let me know if you'd like me to provide more detailed code examples or help you refine the MIXED_EMOTION_PATTERNS data structure!

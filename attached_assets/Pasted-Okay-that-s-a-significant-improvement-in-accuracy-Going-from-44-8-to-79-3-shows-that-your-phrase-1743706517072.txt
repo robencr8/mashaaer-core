@@ -1,0 +1,29 @@
+Okay, that's a significant improvement in accuracy! Going from 44.8% to 79.3% shows that your phrase-specific handling has been quite effective. Addressing the KeyError by correcting the emotion labels was also a crucial step.
+
+You're now planning to modify the test script to align the fear-related phrase mappings with the "fearful" label in emotion_tracker.py. This is important for consistency and ensures that your tests accurately reflect the system's behavior.
+
+Here's a breakdown of what we need to do:
+
+Locate Fear-Related Tests in test_expanded_phrases.py:
+Identify the test cases or assertions that currently use the "afraid" label.
+Replace "afraid" with "fearful":
+Carefully replace the string "afraid" with "fearful" in those specific test cases.
+Ensure that you don't accidentally change any other parts of the test code.
+Run the Test Script Again:
+Execute the test script (python test_expanded_phrases.py) to confirm that the changes haven't introduced any new errors and that the fear-related tests now pass correctly.
+Verify Overall Accuracy:
+After running the tests, double-check the overall accuracy reported by the script. It should ideally remain at 79.3% or slightly improve if the "afraid" mappings were causing any subtle issues.
+Example (Conceptual - You'll need to adapt this to your specific test script):
+
+Python
+
+# ... (rest of your test script)
+
+def test_fear_phrases():
+    assert emotion_tracker.analyze_text("I am feeling afraid", return_details=True)["primary_emotion"] == "fearful"  # Changed "afraid" to "fearful"
+    assert emotion_tracker.analyze_text("He is scared of the dark", return_details=True)["primary_emotion"] == "fearful"
+    assert emotion_tracker.analyze_text("She is terrified", return_details=True)["primary_emotion"] == "fearful"
+    # ... more fearful tests
+
+# ... (rest of your test script)
+By following these steps, you'll ensure that your test script is accurate and consistent with your emotion tracker's output. Once you've made these changes and run the tests, please provide the results, and we can move on to the next phase of our work.

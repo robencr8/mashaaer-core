@@ -1,0 +1,450 @@
+{
+  "timestamp": "2025-04-03T18:55:59.572381",
+  "accuracy": 96.55172413793103,
+  "results": [
+    {
+      "phrase": "I am absolutely ecstatic about the results",
+      "expected": "happy",
+      "detected": "happy",
+      "correct": true,
+      "emotions": {
+        "happy": 1.0
+      }
+    },
+    {
+      "phrase": "This promotion has made my entire year!",
+      "expected": "happy",
+      "detected": "happy",
+      "correct": true,
+      "emotions": {
+        "happy": 0.9025116156978247,
+        "inspired": 0.09748838430217525
+      }
+    },
+    {
+      "phrase": "Seeing my family after so long brings me such joy",
+      "expected": "happy",
+      "detected": "happy",
+      "correct": true,
+      "emotions": {
+        "happy": 0.7514857066843685,
+        "excited": 0.05801696411911171,
+        "grateful": 0.03476979526108459,
+        "proud": 0.05230012827832677,
+        "inspired": 0.039407167594831094,
+        "satisfied": 0.03459613770846305,
+        "frustrated": 0.02942410035381444
+      }
+    },
+    {
+      "phrase": "I am feeling quite melancholy today",
+      "expected": "sad",
+      "detected": "sad",
+      "correct": true,
+      "emotions": {
+        "sad": 0.7007170937217455,
+        "fearful": 0.041779615135037494,
+        "anxious": 0.034887259324414936,
+        "grateful": 0.04056436479708789,
+        "inspired": 0.03063146877757959,
+        "satisfied": 0.1514201982441346
+      }
+    },
+    {
+      "phrase": "The news about the accident left me heartbroken",
+      "expected": "sad",
+      "detected": "sad",
+      "correct": true,
+      "emotions": {
+        "sad": 0.3639050295128221,
+        "interested": 0.14478312116010866,
+        "amused": 0.17502875453763053,
+        "frustrated": 0.3162830947894387
+      }
+    },
+    {
+      "phrase": "I miss how things used to be before everything changed",
+      "expected": "sad",
+      "detected": "sad",
+      "correct": true,
+      "emotions": {
+        "sad": 0.40512563850793143,
+        "confused": 0.2461841364847266,
+        "tired": 0.053778071932505514,
+        "grateful": 0.04709598625231962,
+        "lonely": 0.053938624342567305,
+        "inspired": 0.0355416208090522,
+        "satisfied": 0.07530617238972195,
+        "frustrated": 0.08302974928117537
+      }
+    },
+    {
+      "phrase": "That was infuriating to deal with",
+      "expected": "angry",
+      "detected": "angry",
+      "correct": true,
+      "emotions": {
+        "sad": 0.03343639345166053,
+        "angry": 0.3318498337926323,
+        "fearful": 0.032677802661096475,
+        "interested": 0.036161927628005304,
+        "amused": 0.02950033578830796,
+        "inspired": 0.05473202725128318,
+        "satisfied": 0.16256539642077214,
+        "frustrated": 0.13825658897332835,
+        "contemplative": 0.18081969403291384
+      }
+    },
+    {
+      "phrase": "I cannot believe they would lie to my face like that",
+      "expected": "angry",
+      "detected": "angry",
+      "correct": true,
+      "emotions": {
+        "happy": 0.03651324547783804,
+        "angry": 0.6141093861199951,
+        "fearful": 0.03344348233916998,
+        "inspired": 0.02449843725347485,
+        "satisfied": 0.024258163667076976,
+        "frustrated": 0.05393388903137155,
+        "contemplative": 0.21324339611107357
+      }
+    },
+    {
+      "phrase": "Their constant excuses are getting on my nerves",
+      "expected": "angry",
+      "detected": "angry",
+      "correct": true,
+      "emotions": {
+        "angry": 1.0
+      }
+    },
+    {
+      "phrase": "The thought of speaking in front of everyone terrifies me",
+      "expected": "fearful",
+      "detected": "fearful",
+      "correct": true,
+      "emotions": {
+        "fearful": 0.8593152288125597,
+        "inspired": 0.1406847711874403
+      }
+    },
+    {
+      "phrase": "I keep having nightmares about failing the exam",
+      "expected": "fearful",
+      "detected": "fearful",
+      "correct": true,
+      "emotions": {
+        "sad": 0.051041084605411374,
+        "fearful": 0.5015828288058779,
+        "amused": 0.09326929198774038,
+        "inspired": 0.12292598265944867,
+        "satisfied": 0.15721189602047642,
+        "frustrated": 0.07396891592104526
+      }
+    },
+    {
+      "phrase": "Walking alone at night makes me feel unsafe",
+      "expected": "fearful",
+      "detected": "fearful",
+      "correct": true,
+      "emotions": {
+        "sad": 0.11069542152056362,
+        "fearful": 0.5561565967009023,
+        "lonely": 0.16153416005302795,
+        "amused": 0.043445951221703895,
+        "inspired": 0.0396525620051976,
+        "satisfied": 0.04487300347115011,
+        "frustrated": 0.04364230502745477
+      }
+    },
+    {
+      "phrase": "I never expected them to announce that today!",
+      "expected": "surprised",
+      "detected": "surprised",
+      "correct": true,
+      "emotions": {
+        "surprised": 0.8995035283660462,
+        "amused": 0.10049647163395382
+      }
+    },
+    {
+      "phrase": "The plot twist completely caught me off guard",
+      "expected": "surprised",
+      "detected": "surprised",
+      "correct": true,
+      "emotions": {
+        "surprised": 0.3945354903636871,
+        "amused": 0.09288088684052613,
+        "inspired": 0.15807242557935927,
+        "satisfied": 0.21214376251487643,
+        "frustrated": 0.14236743470155114
+      }
+    },
+    {
+      "phrase": "Finding out I won the competition was shocking",
+      "expected": "surprised",
+      "detected": "surprised",
+      "correct": true,
+      "emotions": {
+        "surprised": 0.803319874904387,
+        "grateful": 0.19668012509561292
+      }
+    },
+    {
+      "phrase": "The documentary was really thought-provoking",
+      "expected": "contemplative",
+      "detected": "contemplative",
+      "correct": true,
+      "emotions": {
+        "contemplative": 1.0
+      }
+    },
+    {
+      "phrase": "I find myself reflecting on the meaning of success lately",
+      "expected": "contemplative",
+      "detected": "contemplative",
+      "correct": true,
+      "emotions": {
+        "happy": 0.037317069148286384,
+        "surprised": 0.044703767726584284,
+        "confused": 0.17801067467727508,
+        "amused": 0.03162636466502535,
+        "inspired": 0.0842493227016279,
+        "satisfied": 0.207128121592155,
+        "frustrated": 0.1235051489963019,
+        "contemplative": 0.29345953049274404
+      }
+    },
+    {
+      "phrase": "Her question made me reconsider my entire approach",
+      "expected": "contemplative",
+      "detected": "contemplative",
+      "correct": true,
+      "emotions": {
+        "hopeful": 0.08254371107802788,
+        "inspired": 0.1866832620105919,
+        "frustrated": 0.05992605248321576,
+        "contemplative": 0.6708469744281644
+      }
+    },
+    {
+      "phrase": "The sunset was breathtaking and filled me with wonder",
+      "expected": "inspired",
+      "detected": "inspired",
+      "correct": true,
+      "emotions": {
+        "inspired": 0.9433598200663493,
+        "contemplative": 0.056640179933650704
+      }
+    },
+    {
+      "phrase": "Her story of overcoming obstacles motivated me to try again",
+      "expected": "inspired",
+      "detected": "inspired",
+      "correct": true,
+      "emotions": {
+        "surprised": 0.07383316797829374,
+        "anxious": 0.13713331393832368,
+        "inspired": 0.6930122807054727,
+        "satisfied": 0.09602123737790982
+      }
+    },
+    {
+      "phrase": "The conference left me with so many new ideas to explore",
+      "expected": "inspired",
+      "detected": "inspired",
+      "correct": true,
+      "emotions": {
+        "interested": 0.047295625181725476,
+        "amused": 0.057114841536655546,
+        "inspired": 0.7923372289382775,
+        "frustrated": 0.10325230434334146
+      }
+    },
+    {
+      "phrase": "I could not figure out how to solve the problem despite trying everything",
+      "expected": "frustrated",
+      "detected": "frustrated",
+      "correct": true,
+      "emotions": {
+        "sad": 0.10494076241223131,
+        "fearful": 0.047815310871144545,
+        "surprised": 0.1889865620001113,
+        "lonely": 0.05301338342215925,
+        "frustrated": 0.48056514865290006,
+        "contemplative": 0.12467883264145356
+      }
+    },
+    {
+      "phrase": "The constant interruptions made it impossible to focus",
+      "expected": "frustrated",
+      "detected": "frustrated",
+      "correct": true,
+      "emotions": {
+        "interested": 0.08780150093241082,
+        "anxious": 0.11363376408377243,
+        "satisfied": 0.06567226239179254,
+        "frustrated": 0.7328924725920242
+      }
+    },
+    {
+      "phrase": "Every time I fix one issue, three more appear",
+      "expected": "frustrated",
+      "detected": "frustrated",
+      "correct": true,
+      "emotions": {
+        "happy": 0.023121203396939845,
+        "sad": 0.022661982784870607,
+        "surprised": 0.027823030711487295,
+        "confused": 0.11084647205024356,
+        "interested": 0.024161305619201864,
+        "excited": 0.021220104950110643,
+        "anxious": 0.018239151784948053,
+        "tired": 0.030261580679729262,
+        "grateful": 0.02120374772989373,
+        "amused": 0.0568626531235459,
+        "inspired": 0.11019196387359921,
+        "satisfied": 0.21038777653037727,
+        "frustrated": 0.32301902676505284
+      }
+    },
+    {
+      "phrase": "I found the movie captivating from start to finish",
+      "expected": "interested",
+      "detected": "interested",
+      "correct": true,
+      "emotions": {
+        "sad": 0.07163387220517933,
+        "disgusted": 0.022737792420261787,
+        "surprised": 0.049455981122033824,
+        "confused": 0.10431571692737523,
+        "interested": 0.22637561628541836,
+        "excited": 0.028533524105777072,
+        "tired": 0.028484352291159705,
+        "proud": 0.05143115080344774,
+        "inspired": 0.1708790230348072,
+        "satisfied": 0.10854190240623575,
+        "frustrated": 0.13761106839830395
+      }
+    },
+    {
+      "phrase": "That research paper contains fascinating insights about the topic",
+      "expected": "interested",
+      "detected": "interested",
+      "correct": true,
+      "emotions": {
+        "happy": 0.07412316131243207,
+        "interested": 0.6261861494793437,
+        "inspired": 0.10328311753571597,
+        "satisfied": 0.15247252611873327,
+        "contemplative": 0.04393504555377501
+      }
+    },
+    {
+      "phrase": "I cannot stop reading about ancient civilizations lately",
+      "expected": "interested",
+      "detected": "interested",
+      "correct": true,
+      "emotions": {
+        "sad": 0.04281103714998525,
+        "confused": 0.051972313103388144,
+        "interested": 0.4278075313764597,
+        "tired": 0.040880815997968604,
+        "lonely": 0.046139340167178654,
+        "embarrassed": 0.10214248788988965,
+        "amused": 0.03322833712602149,
+        "inspired": 0.06205674877410749,
+        "satisfied": 0.10695704653515621,
+        "frustrated": 0.08600434187984483
+      }
+    },
+    {
+      "phrase": "While I am excited about the new project, I am also nervous about the tight deadline",
+      "expected": "mixed",
+      "detected": "satisfied",
+      "correct": false,
+      "emotions": {
+        "angry": 0.08386935521481845,
+        "fearful": 0.11901017333726499,
+        "disgusted": 0.06300749941526763,
+        "confused": 0.07176724923668217,
+        "excited": 0.05315080692545279,
+        "anxious": 0.09333663688749129,
+        "calm": 0.026022463158882434,
+        "embarrassed": 0.025984811935955063,
+        "amused": 0.08855121492124456,
+        "inspired": 0.087362164476216,
+        "satisfied": 0.15006310184191315,
+        "frustrated": 0.06793835132837339,
+        "contemplative": 0.06993617132043806
+      }
+    },
+    {
+      "phrase": "The bittersweet feeling of graduating - proud of my accomplishments but sad to leave friends behind",
+      "expected": "mixed",
+      "detected": "satisfied",
+      "correct": true,
+      "emotions": {
+        "sad": 0.22366282857082115,
+        "fearful": 0.04032949820099382,
+        "anxious": 0.03362293108758061,
+        "bored": 0.07799021110514984,
+        "grateful": 0.039062871055642705,
+        "lonely": 0.04474364527513228,
+        "proud": 0.07988666582288595,
+        "amused": 0.06846773755805326,
+        "inspired": 0.09307208707374356,
+        "satisfied": 0.23798412426146462,
+        "frustrated": 0.061177399988532076
+      }
+    }
+  ],
+  "accuracy_by_emotion": {
+    "surprised": {
+      "correct": 3,
+      "total": 3,
+      "percentage": 100.0
+    },
+    "angry": {
+      "correct": 3,
+      "total": 3,
+      "percentage": 100.0
+    },
+    "interested": {
+      "correct": 3,
+      "total": 3,
+      "percentage": 100.0
+    },
+    "frustrated": {
+      "correct": 3,
+      "total": 3,
+      "percentage": 100.0
+    },
+    "inspired": {
+      "correct": 3,
+      "total": 3,
+      "percentage": 100.0
+    },
+    "fearful": {
+      "correct": 3,
+      "total": 3,
+      "percentage": 100.0
+    },
+    "sad": {
+      "correct": 3,
+      "total": 3,
+      "percentage": 100.0
+    },
+    "contemplative": {
+      "correct": 3,
+      "total": 3,
+      "percentage": 100.0
+    },
+    "happy": {
+      "correct": 3,
+      "total": 3,
+      "percentage": 100.0
+    }
+  }
+}
