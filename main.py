@@ -18,10 +18,17 @@ if os.path.exists('logging.yaml'):
     logging.config.dictConfig(config)
 else:
     logging.basicConfig(
-        level=logging.DEBUG,  # Fallback setup
+        level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[logging.StreamHandler()]
     )
+
+# Enable CORS for specific origins
+CORS(app, origins=["http://your-mobile-app.com", "http://localhost:8080"],
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "X-Custom-Header"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     expose_headers=["Content-Type", "Content-Length", "Date"])
 logger = logging.getLogger(__name__)
 logger.info("========== Server Starting ==========")
 logger.info(f"Python version: {os.sys.version}")
@@ -116,7 +123,7 @@ def api_status():
 @app.route('/connection-test')
 def connection_test_page():
     return render_template('connection_test.html')
-    
+
 @app.route('/connection-test-enhanced')
 def connection_test_enhanced_page():
     return app.send_static_file('connection_test_enhanced.html')
@@ -153,18 +160,18 @@ def diagnostic_static_page():
 def minimal_page():
     # Direct file serving of minimal HTML file
     return app.send_static_file('minimal.html')
-    
+
 # Voice API test pages
 @app.route('/test-voice-api')
 def test_voice_api():
     # Direct file serving of advanced voice API test page
     return app.send_static_file('test_voice_endpoint.html')
-    
+
 @app.route('/voice-api-test')
 def voice_api_test():
     # Direct file serving of simple voice API test page
     return app.send_static_file('voice_api_test.html')
-    
+
 @app.route('/mobile-api-test')
 def mobile_api_test():
     # Direct file serving of mobile API test page
@@ -228,7 +235,7 @@ def log_request_info():
                 api_info['json'] = request.get_json()
             except:
                 api_info['json'] = 'Error parsing JSON'
-                
+
         logger.info(f"🔍 API Request: {api_info}")
     else:
         # Simple logging for regular routes
@@ -305,28 +312,28 @@ def index():
 def startup():
     welcome_message_en = "Welcome to Mashaaer Feelings. Create the future, I'm listening."
     welcome_message_ar = "مرحبًا بك في مشاعر. اصنع المستقبل، أنا أسمعك."
-    
+
     # Play both languages for maximum accessibility
     try:
         tts_manager.speak(welcome_message_en, 'default', 'en-US', profile_manager)
         tts_manager.speak(welcome_message_ar, 'arabic', 'ar', profile_manager)
     except Exception as e:
         logger.error(f"Error speaking welcome message: {str(e)}")
-    
+
     # Check if interactive splash screen is enabled
     interactive_splash = os.environ.get('INTERACTIVE_SPLASH', 'true').lower() == 'true'
-    
+
     if interactive_splash:
         return render_template('interactive_cosmic_splash.html')
     else:
         # Check if cosmic onboarding is enabled
         cosmic_onboarding = os.environ.get('COSMIC_ONBOARDING', 'true').lower() == 'true'
-        
+
         if cosmic_onboarding:
             return render_template('cosmic_onboarding.html')
         else:
             return render_template('startup_standalone.html')
-        
+
 @app.route('/app')
 def app_main():
     """Main application page after onboarding"""
@@ -342,7 +349,7 @@ def user_settings_page():
     """User settings page"""
     try:
         logger.info("User settings page accessed")
-        
+
         # Get settings from database
         settings = {
             'language': db_manager.get_setting('language', 'en'),
@@ -352,18 +359,18 @@ def user_settings_page():
             'storeHistory': db_manager.get_setting('store_history', 'true').lower() == 'true',
             'faceRecognition': db_manager.get_setting('face_recognition_enabled', 'true').lower() == 'true'
         }
-        
+
         # Check if a user profile exists
         user_profile = profile_manager.get_current_profile()
         if user_profile:
             settings['fullName'] = user_profile.get('full_name', '')
             settings['nickname'] = user_profile.get('nickname', '')
-        
+
         return render_template('user_settings.html', settings=settings)
     except Exception as e:
         logger.error(f"Error in user settings page: {str(e)}")
         return render_template('error.html', error=str(e))
-        
+
 @app.route('/theme2-example')
 def theme2_example():
     """Example page demonstrating Theme 2: Falling Stars"""
@@ -373,16 +380,16 @@ def theme2_example():
     except Exception as e:
         logger.error(f"Error in Theme 2 example page: {str(e)}")
         return render_template('error.html', error=str(e))
-        
+
 @app.route('/themes')
 def themes_showcase():
     """Showcase of available themes"""
     try:
         logger.info("Themes showcase page accessed")
-        
+
         # Retrieve current theme setting
         current_theme = db_manager.get_setting('theme', 'cosmic')
-        
+
         themes = [
             {
                 'id': 'cosmic',
@@ -401,22 +408,22 @@ def themes_showcase():
                 'js_file': 'falling-stars.js'
             }
         ]
-        
+
         return render_template('themes.html', themes=themes, current_theme=current_theme)
     except Exception as e:
         logger.error(f"Error in themes showcase page: {str(e)}")
         return render_template('error.html', error=str(e))
-        
+
 @app.route('/cultural-loaders')
 def cultural_loaders_showcase():
     """Showcase of cultural themed loading animations"""
     try:
         logger.info("Cultural loaders showcase page accessed")
-        
+
         # Retrieve current theme and language settings
         current_theme = db_manager.get_setting('theme', 'cosmic')
         current_language = db_manager.get_setting('language', 'en')
-        
+
         return render_template('cultural-loaders.html', 
                               current_theme=current_theme,
                               current_language=current_language)
@@ -428,20 +435,20 @@ def cultural_loaders_showcase():
 def interactive_splash():
     """Interactive splash screen with animated cosmic sphere"""
     welcome_message_ar = "مرحبًا بك في مشاعر. اصنع المستقبل، أنا أسمعك."
-    
+
     # Play welcome message in Arabic as default
     try:
         tts_manager.speak(welcome_message_ar, 'arabic', 'ar', profile_manager)
     except Exception as e:
         logger.error(f"Error speaking welcome message: {str(e)}")
-    
+
     return render_template('interactive_cosmic_splash.html')
 
 @app.route('/api/play-cosmic-sound', methods=['POST'])
 def play_cosmic_sound():
     """Play a cosmic sound effect and get voice feedback"""
     sound_type = request.json.get('sound_type', 'click')
-    
+
     try:
         # Different sound effects for different interactions
         sound_file = 'click.mp3'
@@ -451,7 +458,7 @@ def play_cosmic_sound():
             sound_file = 'cosmic_ambient.mp3'
         elif sound_type == 'welcome':
             sound_file = 'welcome.mp3'
-            
+
             # For welcome sound, also play voice greeting
             language = request.json.get('language', 'ar')
             if language == 'ar':
@@ -460,10 +467,10 @@ def play_cosmic_sound():
             else:
                 welcome_message = "Welcome to Mashaaer Feelings. Create the future, I'm listening."
                 tts_manager.speak(welcome_message, 'default', 'en-US', profile_manager)
-        
+
         # Return sound file path 
         sound_path = f'/static/audio/{sound_file}'
-        
+
         return jsonify({
             'success': True,
             'sound_path': sound_path
@@ -476,13 +483,13 @@ def play_cosmic_sound():
 def cosmic_onboarding():
     """Cosmic onboarding experience with voice interaction"""
     welcome_message_ar = "مرحبًا بك في مشاعر. اصنع المستقبل، أنا أسمعك."
-    
+
     # Play welcome message in Arabic as default
     try:
         tts_manager.speak(welcome_message_ar, 'arabic', 'ar', profile_manager)
     except Exception as e:
         logger.error(f"Error speaking welcome message: {str(e)}")
-    
+
     return render_template('cosmic_onboarding.html')
 
 @app.route('/consent')
@@ -535,7 +542,7 @@ def admin():
 
     # Get AI learning stats
     learning_status = auto_learning.get_learning_status()
-    
+
     # Check Twilio availability using our new API
     import twilio_api
     sms_available = twilio_api.is_twilio_configured()
@@ -557,23 +564,23 @@ def sms_notifications():
     # Only accessible in developer mode
     if not is_developer_mode():
         return redirect(url_for('index'))
-    
+
     # Import Twilio API helpers
     import twilio_api
-    
+
     # Check if Twilio is available
     twilio_status = twilio_api.is_twilio_configured()
-    
+
     # Get Twilio account information (truncated for security)
     twilio_sid = os.environ.get('TWILIO_ACCOUNT_SID', '')
     twilio_phone = os.environ.get('TWILIO_PHONE_NUMBER', '')
-    
+
     # Get message history from Twilio API
     sms_history = twilio_api.get_message_history()
-    
+
     # Prepare status message
     twilio_status_message = "SMS notifications are active and ready." if twilio_status else "SMS notifications unavailable. Check Twilio credentials."
-    
+
     return render_template(
         'sms_notifications.html', 
         dev_mode=True,
@@ -651,29 +658,29 @@ def speak():
 
     # Log the request details for debugging
     logger.info(f"TTS Request: text='{text[:30]}...', voice={voice}, language={language}, use_profile={use_profile}")
-    
+
     try:
         # Check TTS provider status first
         elevenlabs_available = hasattr(tts_manager, 'use_elevenlabs') and tts_manager.use_elevenlabs
         gtts_available = hasattr(tts_manager, 'use_gtts') and tts_manager.use_gtts
-        
+
         provider_status = {
             'elevenlabs': elevenlabs_available,
             'gtts': gtts_available
         }
-        
+
         logger.info(f"TTS Provider Status: {provider_status}")
-        
+
         # Basic validation for language
         if language not in ['en', 'en-US', 'ar']:
             logger.warning(f"Unsupported language requested: {language}, falling back to 'en-US'")
             language = 'en-US'
-            
+
         # Use profile manager to get personalized voice and adapted text
         if use_profile:
             # Adapt text based on preferred tone
             adapted_text = profile_manager.adapt_response(text, language)
-            
+
             # Log adaptation for debugging
             if adapted_text != text:
                 logger.debug(f"Adapted text: '{adapted_text[:30]}...'")
@@ -721,16 +728,16 @@ def speak():
         logger.error(f"TTS error: {str(e)}")
         import traceback
         logger.error(f"TTS error traceback: {traceback.format_exc()}")
-        
+
         # Create a fallback path even when errors occur
         fallback_path = os.path.join("tts_cache", "error.mp3")
         if not os.path.exists(os.path.dirname(fallback_path)):
             os.makedirs(os.path.dirname(fallback_path), exist_ok=True)
-            
+
         if not os.path.exists(fallback_path):
             with open(fallback_path, 'wb') as f:
                 f.write(b'')  # Create empty file as last resort
-                
+
         return jsonify({
             'success': False, 
             'error': str(e),
@@ -746,13 +753,13 @@ def listen():
         # In a real implementation, this would be rejected with a 400 error
         # But for the cosmic onboarding demo, we'll simulate a reasonable response
         logger.info("No audio data provided, using simulated response for onboarding")
-        
+
         # Get some context about what we're listening for
         context = request.form.get('context', '')
-        
+
         # Generate simulated responses for different contexts
         simulated_text = "نعم، أوافق"  # Default "Yes, I agree" in Arabic
-        
+
         if 'name' in context.lower():
             simulated_text = "محمد أحمد"  # A common Arabic name
         elif 'nickname' in context.lower():
@@ -761,11 +768,11 @@ def listen():
             simulated_text = "example@email.com"
         elif 'terms' in context.lower() or 'agree' in context.lower():
             simulated_text = "نعم، أوافق"  # "Yes, I agree" in Arabic
-        
+
         # Process with the simulated text
         emotion = emotion_tracker.analyze_text(simulated_text)
         intent = intent_classifier.classify(simulated_text)
-        
+
         return jsonify({
             'success': True, 
             'text': simulated_text, 
@@ -1008,28 +1015,28 @@ def send_sms():
     """Send SMS notification"""
     if not is_developer_mode():
         return jsonify({'success': False, 'error': 'Not authorized'}), 403
-        
+
     try:
         data = request.json
         phone_number = data.get('phone_number')
         message = data.get('message')
-        
+
         if not phone_number or not message:
             return jsonify({'success': False, 'error': 'Phone number and message are required'}), 400
-            
+
         # Import Twilio API helpers
         import twilio_api
-        
+
         # Check if Twilio is available
         if not twilio_api.is_twilio_configured():
             return jsonify({
                 'success': False, 
                 'error': 'Twilio service is not available. Check credentials.'
             }), 503
-            
+
         # Send the message
         result = twilio_api.send_sms(phone_number, message)
-        
+
         if result:
             return jsonify({
                 'success': True,
@@ -1041,7 +1048,7 @@ def send_sms():
                 'success': False,
                 'error': 'Failed to send SMS'
             }), 500
-            
+
     except Exception as e:
         logger.error(f"Error sending SMS: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -1051,31 +1058,31 @@ def send_sms_alert():
     """Send a pre-formatted SMS alert notification"""
     if not is_developer_mode():
         return jsonify({'success': False, 'error': 'Not authorized'}), 403
-        
+
     try:
         data = request.json
         phone_number = data.get('phone_number')
         alert_type = data.get('alert_type')
-        
+
         if not phone_number or not alert_type:
             return jsonify({'success': False, 'error': 'Phone number and alert type are required'}), 400
-            
+
         # Import Twilio API helpers
         import twilio_api
-        
+
         # Check if Twilio is available
         if not twilio_api.is_twilio_configured():
             return jsonify({
                 'success': False, 
                 'error': 'Twilio service is not available. Check credentials.'
             }), 503
-            
+
         # Prepare alert message based on type
         result = None
         title = ""
         message = ""
         level = "info"
-        
+
         if alert_type == 'emotion_detected':
             title = "Emotion Detection"
             message = "An emotional response of 'happiness' was detected with 85% confidence."
@@ -1099,10 +1106,10 @@ def send_sms_alert():
             level = "alert"
         else:
             return jsonify({'success': False, 'error': 'Invalid alert type'}), 400
-            
+
         # Send the notification
         result = twilio_api.send_notification(phone_number, title, message, level)
-            
+
         if result:
             return jsonify({
                 'success': True,
@@ -1114,7 +1121,7 @@ def send_sms_alert():
                 'success': False,
                 'error': 'Failed to send alert notification'
             }), 500
-            
+
     except Exception as e:
         logger.error(f"Error sending SMS alert: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -1124,21 +1131,21 @@ def get_sms_status():
     """Get SMS notification status"""
     if not is_developer_mode():
         return jsonify({'success': False, 'error': 'Not authorized'}), 403
-        
+
     try:
         # Import Twilio API helpers
         import twilio_api
-        
+
         # Check if Twilio is available
         available = twilio_api.is_twilio_configured()
-        
+
         return jsonify({
             'success': True,
             'available': available,
             'account_sid': os.environ.get('TWILIO_ACCOUNT_SID', '')[:8] + '...' if available else '',
             'phone_number': os.environ.get('TWILIO_PHONE_NUMBER', '') if available else ''
         })
-            
+
     except Exception as e:
         logger.error(f"Error getting SMS status: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -1148,14 +1155,14 @@ def get_sms_history():
     """Get SMS message history"""
     if not is_developer_mode():
         return jsonify({'success': False, 'error': 'Not authorized'}), 403
-        
+
     try:
         # Import Twilio API helpers
         import twilio_api
-        
+
         # Get message history
         messages = twilio_api.get_message_history()
-        
+
         # Format messages for display (already in the correct format from twilio_api)
         history = []
         for msg in messages:
@@ -1165,12 +1172,12 @@ def get_sms_history():
                 'body': msg.get('message', ''),
                 'timestamp': msg.get('timestamp', '')
             })
-            
+
         return jsonify({
             'success': True,
             'history': history
         })
-            
+
     except Exception as e:
         logger.error(f"Error getting SMS history: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -1180,50 +1187,50 @@ def cosmic_onboarding_profile():
     """Update user profile during cosmic onboarding experience"""
     try:
         data = request.json
-        
+
         # Get basic profile data
         full_name = data.get('full_name')
         nickname = data.get('nickname')
         language = data.get('language_preference', 'ar')
         onboarding_complete = data.get('onboarding_complete', False)
-        
+
         logger.info(f"Cosmic onboarding profile update: name={full_name}, nickname={nickname}, language={language}, onboarding_complete={onboarding_complete}")
-        
+
         # Store in session
         from flask import session
         session['language'] = language
         session['nickname'] = nickname
         session['full_name'] = full_name
-        
+
         # Update the profile in database
         profile_data = {
             'full_name': full_name,
             'nickname': nickname,
             'language': language
         }
-        
+
         # Update the user profile
         profile_manager.update_profile(profile_data)
-        
+
         # Save onboarding_complete flag in database
         if onboarding_complete:
             logger.info("Setting onboarding_complete flag to true in database")
             db_manager.set_setting('onboarding_complete', 'true')
-        
+
         # Get appropriate voice for selected language
         tts_voice = profile_manager.get_tts_voice_for_language(language)
-        
+
         # Use nickname or first name if nickname is empty
         user_name = nickname
         if not user_name and full_name:
             user_name = full_name.split(' ')[0]
-        
+
         # Create welcome message based on user's language
         if language == 'ar':
             welcome_msg = f"مرحبًا بك يا {user_name} في مشاعر. أنا سعيد بوجودك معنا."
         else:
             welcome_msg = f"Welcome {user_name} to Mashaaer Feelings. I'm glad to have you with us."
-        
+
         # Speak welcome message
         try:
             audio_path = tts_manager.speak(welcome_msg, tts_voice, language, profile_manager)
@@ -1233,11 +1240,11 @@ def cosmic_onboarding_profile():
             import traceback
             logger.error(f"TTS error traceback: {traceback.format_exc()}")
             audio_path = None
-        
+
         # Check TTS provider status
         elevenlabs_available = hasattr(tts_manager, 'use_elevenlabs') and tts_manager.use_elevenlabs
         gtts_available = hasattr(tts_manager, 'use_gtts') and tts_manager.use_gtts
-        
+
         return jsonify({
             'success': True,
             'message': 'Profile updated successfully',
@@ -1249,7 +1256,7 @@ def cosmic_onboarding_profile():
                 'provider': config.TTS_PROVIDER
             }
         })
-    
+
     except Exception as e:
         logger.error(f"Error updating profile: {str(e)}")
         import traceback
@@ -1275,11 +1282,11 @@ def set_consent():
             # Set in session
             from flask import session
             session['language'] = language
-            
+
         # Store interaction mode preference
         db_manager.set_setting('interaction_mode', interaction_mode)
         logger.info(f"User interaction mode set to: {interaction_mode}")
-        
+
         # Enable or disable voice recognition based on interaction mode
         voice_enabled = (interaction_mode == 'voice')
         db_manager.set_setting('voice_recognition_enabled', 'true' if voice_enabled else 'false')
@@ -1619,30 +1626,30 @@ def user_logout():
     except Exception as e:
         logger.error(f"Error logging out: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
-        
+
 @app.route('/api/set-theme', methods=['POST'])
 def set_theme():
     """Set the user's theme preference"""
     try:
         # Get theme from form data
         theme = request.form.get('theme')
-        
+
         if not theme:
             return jsonify({'success': False, 'error': 'Theme parameter is required'}), 400
-            
+
         # Validate theme
         valid_themes = ['cosmic', 'falling-stars']
         if theme not in valid_themes:
             return jsonify({'success': False, 'error': f'Invalid theme. Valid options are: {", ".join(valid_themes)}'}), 400
-            
+
         # Save theme to database
         db_manager.set_setting('theme', theme)
-        
+
         logger.info(f"User theme set to: {theme}")
-        
+
         # Determine redirect location
         redirect_url = request.form.get('redirect', '/themes')
-        
+
         # Return success with redirect URL
         return redirect(redirect_url)
     except Exception as e:
@@ -1657,31 +1664,31 @@ def send_sms_legacy():
     # Only allow in developer mode
     if not is_developer_mode():
         return jsonify({'success': False, 'error': 'Developer mode required'}), 403
-    
+
     # Get request parameters
     data = request.json
     to_number = data.get('to_number')
     message = data.get('message')
-    
+
     if not to_number or not message:
         return jsonify({'success': False, 'error': 'Phone number and message are required'}), 400
-    
+
     # Import Twilio API helpers
     import twilio_api
-    
+
     # Check if SMS service is available
     if not twilio_api.is_twilio_configured():
-        return jsonify({'success': False, 'error': 'SMS service is not available. Check Twilio credentials.'}), 503
-    
+        return jsonify({'success': False, 'error':'SMS service is not available. Check Twilio credentials.'}), 503
+
     # Send the SMS
     try:
         result = twilio_api.send_sms(to_number, message)
-        
+
         if result:
             return jsonify({'success': True, 'message': 'SMS sent successfully', 'sid': result.get('sid', '')})
         else:
             return jsonify({'success': False, 'error': 'Failed to send SMS'}), 500
-            
+
     except Exception as e:
         logger.error(f"SMS sending error: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -1692,27 +1699,27 @@ def send_sms_alert_legacy():
     # Only allow in developer mode
     if not is_developer_mode():
         return jsonify({'success': False, 'error': 'Developer mode required'}), 403
-    
+
     # Get request parameters
     data = request.json
     to_number = data.get('to_number')
     notification_type = data.get('alert_type', 'alert')  # Default to alert type
     message = data.get('message', 'Alert notification')
-    
+
     if not to_number:
         return jsonify({'success': False, 'error': 'Phone number is required'}), 400
-    
+
     # Import Twilio API helpers
     import twilio_api
-    
+
     # Check if SMS service is available
     if not twilio_api.is_twilio_configured():
         return jsonify({'success': False, 'error': 'SMS service is not available. Check Twilio credentials.'}), 503
-    
+
     # Prepare notification parameters
     title = notification_type.replace('_', ' ').title()
     level = data.get('alert_level', 'info')
-    
+
     # Customize message based on notification type
     if notification_type == 'emotion_detected':
         emotion = data.get('emotion', 'unknown')
@@ -1722,11 +1729,11 @@ def send_sms_alert_legacy():
         name = data.get('name', 'someone')
         time = data.get('time', 'just now')
         message = f"Face recognized: {name} was seen {time}"
-    
+
     # Send the notification
     try:
         result = twilio_api.send_notification(to_number, title, message, level)
-        
+
         if result:
             return jsonify({
                 'success': True, 
@@ -1735,7 +1742,7 @@ def send_sms_alert_legacy():
             })
         else:
             return jsonify({'success': False, 'error': 'Failed to send notification'}), 500
-            
+
     except Exception as e:
         logger.error(f"SMS notification error: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -1748,6 +1755,7 @@ if __name__ == "__main__":
     threading.Thread(target=core_launcher.start).start()
 
     # Wait for core systems to initialize
+    import time
     time.sleep(2)
 
     # Start Flask app - allow auto-reloading to work with gunicorn
