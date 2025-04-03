@@ -1,5 +1,6 @@
 {pkgs}: {
   deps = [
+    pkgs.python312Packages.pyngrok
     pkgs.iproute2
     pkgs.geckodriver
     pkgs.pkg-config
