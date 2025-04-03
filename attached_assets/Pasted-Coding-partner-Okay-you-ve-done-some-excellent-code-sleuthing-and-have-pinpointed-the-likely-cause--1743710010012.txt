@@ -1,0 +1,50 @@
+Coding partner
+Okay, you've done some excellent code sleuthing and have pinpointed the likely cause of the test_speak_cache_hit failure! You've correctly identified that the cached_result is expected to be a JSON object (specifically, a dictionary with an audio_path field), but your mock setup might be providing a plain string instead.
+
+Here's a refined approach to fixing the test, building on your analysis:
+
+1.  Confirm the cached_result Structure:
+
+* **Re-examine `mobile_api_routes.py`:** Go back to the `/mobile-api/speak` endpoint and carefully review the code that retrieves and uses `cached_result`.
+* **Focus on:**
+    * How `cached_result` is accessed (e.g., `cached_result.get('audio_path')`).
+    * What data type is expected by the code that uses `cached_result`.
+2.  Adjust the Mock Return Value:
+
+* In your `tests/test_api_caching.py`, modify the `mock_tts_manager_speak` function to return a dictionary that matches the expected structure of `cached_result`.
+* **Example:**
+
+    ```python
+    def mock_tts_manager_speak(text, voice, language, profile_manager=None):
+        # ... (your existing mock logic) ...
+        return {"audio_path": "/path/to/mocked/audio.mp3"}  # Return a dictionary
+    ```
+3.  Verify Cache Key Consistency:
+
+* Double-check that the cache key you're generating in your test *exactly* matches how the cache key is generated in the `/mobile-api/speak` endpoint.
+* Pay close attention to:
+    * The order of the parameters.
+    * Any string formatting or encoding.
+    * The use of hashing functions.
+4.  Refine Assertions:
+
+* Adjust your assertions in `test_speak_cache_hit` to reflect the expected dictionary structure.
+* **Example:**
+
+    ```python
+    assert response2.json["audio_path"] == "/path/to/mocked/audio.mp3"
+    ```
+5.  Test Thoroughly:
+
+* After making these changes, run the `test_speak_cache_hit` test again.
+* If it passes, run your *entire* test suite to ensure you haven't introduced any regressions.
+By following these steps and focusing on the expected data structure, you should be able to resolve the TypeError and ensure that your TTS caching tests are accurate and reliable.
+
+Please share the relevant code snippets from your tests/test_api_caching.py file, and I'll be happy to provide more tailored guidance.
+
+
+Sources and related content
+Screenshot...-03 120135
+
+JPG
+Screensh

@@ -230,8 +230,50 @@ def test_analyze_emotion_cache_expiration(client: FlaskClient, db_session: Sessi
     # For this test, we'll use mocks to simulate cache expiration
     test_text = "This text is for testing cache expiration"
     
+    # Prepare the cache data that will be returned on the second call
+    happy_cache_data = {
+        "primary_emotion": "happy",
+        "confidence": 0.85,
+        "emotions": {
+            "happy": 0.85,
+            "neutral": 0.10,
+            "sad": 0.05
+        },
+        "language": "en",
+        "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Use a callable for side_effect to have more control over the behavior
+    call_count = 0
+    def mock_get_cache_side_effect(cache_key):
+        nonlocal call_count
+        call_count += 1
+        print(f"Mock get_cached_response called (call #{call_count}) with key: {cache_key}")
+        
+        # For the bypass_cache=True case, the cache lookup doesn't happen
+        # So we only need to handle cases 1 and 2:
+        if call_count == 1:
+            # First call - cache miss
+            return (None, {"cache_hit": False})
+        elif call_count == 2:
+            # Second call - cache hit
+            return (happy_cache_data, {
+                "cache_hit": True,
+                "created_at": datetime.now().isoformat(),
+                "expires_at": (datetime.now() + timedelta(days=3)).isoformat(),
+                "hit_count": 1,
+                "content_type": "application/json" 
+            })
+        else:
+            # Fallback for any unexpected calls
+            print(f"Unexpected get_cached_response call #{call_count}")
+            return (None, {"cache_hit": False})
+    
     # First, mock get_cached_response to return no cache hit initially
     with patch('database.db_manager.DatabaseManager.get_cached_response') as mock_get_cache:
+        # Use our callable side_effect
+        mock_get_cache.side_effect = mock_get_cache_side_effect
+        
         # Mock the db store method
         with patch('database.db_manager.DatabaseManager.store_cached_response') as mock_store_cache:
             mock_store_cache.return_value = True
@@ -241,37 +283,6 @@ def test_analyze_emotion_cache_expiration(client: FlaskClient, db_session: Sessi
                 # First call returns "happy"
                 happy_result = create_mock_emotion_result(test_text, "happy")
                 mock_analyze.return_value = happy_result
-                
-                # Configure cache response behavior:
-                # 1. First call: miss (no cached data)
-                # 2. Second call: hit (return "happy")
-                # 3. Third call: disabled (bypass cache)
-                
-                # Prepare the cache result that will be returned on the second call
-                happy_cache_data = {
-                    "primary_emotion": "happy",
-                    "confidence": 0.85,
-                    "emotions": {
-                        "happy": 0.85,
-                        "neutral": 0.10,
-                        "sad": 0.05
-                    },
-                    "language": "en",
-                    "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
-                }
-                
-                # First call - no cache hit
-                mock_get_cache.side_effect = [
-                    (None, {"cache_hit": False}),  # First call - miss
-                    (happy_cache_data, {          # Second call - hit
-                        "cache_hit": True,
-                        "created_at": datetime.now().isoformat(),
-                        "expires_at": (datetime.now() + timedelta(days=3)).isoformat(),
-                        "hit_count": 1,
-                        "content_type": "application/json" 
-                    }),
-                    (None, {"cache_hit": False})   # Third call would hit this, but we'll bypass cache
-                ]
                 
                 # First request - creates cache entry with "happy"
                 print("Making first request - should miss cache and store 'happy'")
@@ -332,9 +343,11 @@ def test_speak_cache_hit(client: FlaskClient, db_session: Session, clear_cache, 
     """Tests that the TTS endpoint correctly uses cache."""
     clear_cache()
     
-    # Create an actual file for the mock to return
+    # Create a unique file path for this test
     import os
-    test_file_path = "tts_cache/test_speech.mp3"
+    import uuid
+    unique_id = str(uuid.uuid4())[:8]
+    test_file_path = f"tts_cache/test_speech_{unique_id}.mp3"
     os.makedirs(os.path.dirname(test_file_path), exist_ok=True)
     
     # Create a dummy file
@@ -344,52 +357,86 @@ def test_speak_cache_hit(client: FlaskClient, db_session: Session, clear_cache, 
     try:
         # Setup mock for TTS generation
         with patch('tts.tts_manager.TTSManager.generate_tts') as mock_tts:
-            # Configure the mock to return a file path
+            # Configure the mock to return our unique file path
             mock_tts.return_value = test_file_path
             
-            # First request - should miss cache
-            response = client.post(
-                "/mobile-api/speak",
-                json={
-                    "text": "This is a test of text to speech caching",
-                    "language": "en-US",
-                    "voice": "default"
-                }
-            )
-            
-            # Verify first response
-            assert response.status_code == 200
-            result = json.loads(response.data)
-            assert result.get("success") is True
-            # Cache status might be miss or unspecified
-            if "cache_status" in result:
-                assert result.get("cache_status") in ["miss", None]
-            assert "audio_path" in result
-            
-            # Verify that generate_tts was called once
-            assert mock_tts.call_count == 1
-            
-            # Second request with same parameters - should hit cache
-            response2 = client.post(
-                "/mobile-api/speak", 
-                json={
-                    "text": "This is a test of text to speech caching",
-                    "language": "en-US",
-                    "voice": "default"
-                }
-            )
-            
-            # Verify second response
-            assert response2.status_code == 200
-            result2 = json.loads(response2.data)
-            assert result2.get("success") is True
-            # Cache should hit if implemented
-            if "cache_status" in result2:
-                assert result2.get("cache_status") in ["hit", None]
-            assert "audio_path" in result2
-            
-            # Verify that generate_tts was not called again or only called once more
-            assert mock_tts.call_count <= 2
+            # Mock the database cache lookup to ensure a miss on first call
+            with patch('database.db_manager.DatabaseManager.get_cached_response') as mock_get_cache:
+                call_count = 0
+                def mock_get_cache_side_effect(cache_key):
+                    nonlocal call_count
+                    call_count += 1
+                    print(f"Mock get_cached_response called (call #{call_count}) with key: {cache_key}")
+                    
+                    if call_count == 1:
+                        # First call - cache miss
+                        return (None, {"cache_hit": False})
+                    else:
+                        # Second call - cache hit
+                        # For TTS cache, we need to return a JSON object with the file path
+                        cache_data = {
+                            "audio_path": test_file_path,
+                            "file_size": 19,  # Size of our dummy content
+                            "format": "mp3",
+                            "duration": 1.0,
+                            "voice": "default",
+                            "language": "en-US"
+                        }
+                        return (json.dumps(cache_data), {
+                            "cache_hit": True,
+                            "created_at": datetime.now().isoformat(),
+                            "expires_at": (datetime.now() + timedelta(days=7)).isoformat(),
+                            "hit_count": 1,
+                            "content_type": "application/json" 
+                        })
+                
+                mock_get_cache.side_effect = mock_get_cache_side_effect
+                
+                # First request - should miss cache
+                print("Making first request - should miss cache")
+                response = client.post(
+                    "/mobile-api/speak",
+                    json={
+                        "text": f"Test TTS caching text {unique_id}",
+                        "language": "en-US",
+                        "voice": "default"
+                    }
+                )
+                
+                # Verify first response
+                print(f"First response status code: {response.status_code}")
+                result = json.loads(response.data)
+                print(f"First response data: {result}")
+                assert response.status_code == 200
+                assert result.get("success") is True
+                assert result.get("cache_status") == "miss"
+                assert "audio_path" in result
+                
+                # Verify that generate_tts was called once
+                assert mock_tts.call_count == 1
+                
+                # Second request with same parameters - should hit cache
+                print("\nMaking second request - should hit cache")
+                response2 = client.post(
+                    "/mobile-api/speak", 
+                    json={
+                        "text": f"Test TTS caching text {unique_id}",
+                        "language": "en-US",
+                        "voice": "default"
+                    }
+                )
+                
+                # Verify second response
+                print(f"Second response status code: {response2.status_code}")
+                result2 = json.loads(response2.data)
+                print(f"Second response data: {result2}")
+                assert response2.status_code == 200
+                assert result2.get("success") is True
+                assert result2.get("cache_status") == "hit"
+                assert "audio_path" in result2
+                
+                # Verify that generate_tts was not called again
+                assert mock_tts.call_count == 1
     finally:
         # Clean up the test file
         if os.path.exists(test_file_path):
@@ -399,17 +446,19 @@ def test_speak_different_voice_parameters(client: FlaskClient, db_session: Sessi
     """Tests that the TTS endpoint creates different cache entries for different voices."""
     clear_cache()
     
-    test_text = "Test voice parameter variations"
+    import uuid
+    unique_id = str(uuid.uuid4())[:8]
+    test_text = f"Test voice parameter variations {unique_id}"
     
     # Create an actual file directory for the mock to return files
     import os
     os.makedirs("tts_cache", exist_ok=True)
     
-    # Create test files
+    # Create test files with unique names to avoid collision
     test_files = [
-        "tts_cache/default_en-US.mp3",
-        "tts_cache/voice_2_en-US.mp3",
-        "tts_cache/default_ar.mp3"
+        f"tts_cache/default_en-US_{unique_id}.mp3",
+        f"tts_cache/voice_2_en-US_{unique_id}.mp3",
+        f"tts_cache/default_ar_{unique_id}.mp3"
     ]
     
     try:
@@ -423,55 +472,70 @@ def test_speak_different_voice_parameters(client: FlaskClient, db_session: Sessi
             # Configure the mock to return different paths for different voices
             def mock_generate_tts(text, voice=None, language=None):
                 if voice == "voice_2":
-                    return "tts_cache/voice_2_en-US.mp3"
+                    return test_files[1]  # voice_2 file
                 elif language == "ar":
-                    return "tts_cache/default_ar.mp3"
+                    return test_files[2]  # Arabic file
                 else:
-                    return "tts_cache/default_en-US.mp3"
+                    return test_files[0]  # default file
             
             mock_tts.side_effect = mock_generate_tts
             
-            # First request with default voice
-            response1 = client.post(
-                "/mobile-api/speak",
-                json={
-                    "text": test_text,
-                    "language": "en-US",
-                    "voice": "default"
-                }
-            )
-            
-            # Second request with different voice
-            response2 = client.post(
-                "/mobile-api/speak", 
-                json={
-                    "text": test_text,
-                    "language": "en-US",
-                    "voice": "voice_2"
-                }
-            )
-            
-            # Third request with different language
-            response3 = client.post(
-                "/mobile-api/speak", 
-                json={
-                    "text": test_text,
-                    "language": "ar",
-                    "voice": "default"
-                }
-            )
-            
-            # Verify all got different cache entries
-            result1 = json.loads(response1.data)
-            result2 = json.loads(response2.data)
-            result3 = json.loads(response3.data)
-            
-            assert result1.get("audio_path") != result2.get("audio_path")
-            assert result1.get("audio_path") != result3.get("audio_path")
-            assert result2.get("audio_path") != result3.get("audio_path")
-            
-            # Verify TTS generation was called for each unique parameter set
-            assert mock_tts.call_count == 3
+            # Mock the database cache lookup to ensure cache misses
+            with patch('database.db_manager.DatabaseManager.get_cached_response') as mock_get_cache:
+                # Always return cache miss
+                mock_get_cache.return_value = (None, {"cache_hit": False})
+                
+                # First request with default voice
+                print("\nMaking request with default voice and English")
+                response1 = client.post(
+                    "/mobile-api/speak",
+                    json={
+                        "text": test_text,
+                        "language": "en-US",
+                        "voice": "default"
+                    }
+                )
+                result1 = json.loads(response1.data)
+                print(f"Response 1: {result1}")
+                
+                # Second request with different voice
+                print("\nMaking request with voice_2 and English")
+                response2 = client.post(
+                    "/mobile-api/speak", 
+                    json={
+                        "text": test_text,
+                        "language": "en-US",
+                        "voice": "voice_2"
+                    }
+                )
+                result2 = json.loads(response2.data)
+                print(f"Response 2: {result2}")
+                
+                # Third request with different language
+                print("\nMaking request with default voice and Arabic")
+                response3 = client.post(
+                    "/mobile-api/speak", 
+                    json={
+                        "text": test_text,
+                        "language": "ar",
+                        "voice": "default"
+                    }
+                )
+                result3 = json.loads(response3.data)
+                print(f"Response 3: {result3}")
+                
+                # Verify response structure
+                assert result1.get("success") is True
+                assert result2.get("success") is True
+                assert result3.get("success") is True
+                
+                # Verify all got different paths
+                assert result1.get("audio_path") != result2.get("audio_path")
+                assert result1.get("audio_path") != result3.get("audio_path")
+                assert result2.get("audio_path") != result3.get("audio_path")
+                
+                # Verify TTS generation was called for each unique parameter set
+                assert mock_tts.call_count == 3
     finally:
         # Clean up the test files
         for file_path in test_files:

@@ -1,0 +1,102 @@
+Okay, you're taking a consistent approach by using a callable function for the side_effect in the test_analyze_emotion_cache_expiration test as well. This is a good practice, as it often provides more flexibility and control over the mock's behavior, especially when dealing with dynamic scenarios like cache expiration.
+
+Here's a refined breakdown of how to approach this, along with some key considerations:
+
+1. Review the Existing test_analyze_emotion_cache_expiration Test:
+
+Carefully examine the current implementation of this test in tests/test_api_caching.py.
+Identify how the emotion analysis logic is currently being mocked.
+Note how the test simulates the passage of time (e.g., using time.sleep or a mock).
+Pay attention to the assertions that verify cache expiration behavior.
+2.  Implement Callable side_effect:
+
+Modify the mock setup to use a function as the side_effect for your emotion analysis mock.
+This function should:
+Accept the input arguments of the analyze_text function (e.g., the text string).
+Return different values or raise different exceptions based on the test's logic.
+Potentially keep track of how many times it's been called (using a counter) if you need to assert call counts.
+3.  Example Implementation (Illustrative - Adapt to Your Code):
+
+Python
+
+import time
+from unittest.mock import MagicMock, patch, call
+from flask import Flask
+from flask.testing import FlaskClient
+from sqlalchemy.orm import Session
+import pytest
+from your_app.database.models import Cache  # Replace with your actual Cache model
+from your_app.db_manager import DatabaseManager  # Replace with your actual db_manager
+
+def test_analyze_emotion_cache_expiration(
+    client: FlaskClient, db_session: Session, clear_cache, app: Flask, monkeypatch
+) -> None:
+    """Tests that cache entries for emotion analysis expire correctly."""
+    clear_cache()  # Ensure cache is empty
+
+    # Keep track of function calls
+    call_count = 0
+
+    def mock_analyze_text(text: str, language: str = "en") -> dict:  # Adapt to your actual signature
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            return {"emotion": "happy", "text": text, "language": language}
+        else:
+            return {"emotion": "sad", "text": text, "language": language}  # Simulate different result after expiry
+
+    # Mock the analyze_text function
+    with patch(
+        "your_app.emotion_analysis.analyze_text", mock_analyze_text
+    ) as mocked_analyze_text:  # Replace with your actual module path
+        # First call - cache population with expiry
+        response1 = client.post(
+            "/mobile-api/analyze-emotion",
+            json={"text": "Expire text", "language": "en", "expiry": 2},  # Assuming you have an 'expiry' parameter
+        )
+        assert response1.status_code == 200
+        assert response1.json["emotion"] == "happy"
+        # Assert cache status
+
+        # Verify cache entry creation and expiry time
+        cache_entry = db_session.query(Cache).filter_by(
+            key="emotion_expire_text_en"  # Replace with your actual cache key
+        ).first()
+        assert cache_entry is not None
+        assert cache_entry.expires_at is not None
+        assert cache_entry.expires_at > datetime.now()  # Check if expiry is in the future
+
+        # Wait for expiry (mock time.sleep for faster testing)
+        def mock_sleep(seconds):
+            pass
+
+        monkeypatch.setattr("time.sleep", mock_sleep)
+        time.sleep(3)  # Wait longer than the expiry time
+
+        # Second call - after expiry
+        response2 = client.post(
+            "/mobile-api/analyze-emotion", json={"text": "Expire text", "language": "en"}
+        )
+        assert response2.status_code == 200
+        assert response2.json["emotion"] == "sad"  # Assert different result after expiry
+        # Assert cache status
+
+        # Verify that the logic was re-executed
+        assert mocked_analyze_text.call_count == 2
+4.  Key Considerations:
+
+* **Function Signature:** Ensure that the `mock_analyze_text` function (or whatever you name your callable `side_effect`) has the *exact* same signature as the actual `analyze_text` function in your emotion analysis module. This includes argument names, types (if you're using type hints), and default values.
+* **State Management:** If your mock function needs to maintain state (e.g., a call counter), use the `nonlocal` keyword to modify variables in the enclosing function's scope.
+* **Return Values:** Carefully define the return values of your mock function to simulate different scenarios, such as:
+    * The first call returning a cached result.
+    * Subsequent calls returning a new result after cache expiration.
+    * Simulating errors by raising exceptions.
+* **Assertions:** Be specific in your assertions to verify the expected behavior:
+    * Assert the return values of the API calls.
+    * Assert the contents of the database (using `db_session.query`).
+    * Assert the `call_count` of the mock function.
+    * Assert any cache status flags in the API response.
+By implementing these refinements, you'll create a more robust and reliable test for cache expiration. Please provide the code snippet for your updated test_analyze_emotion_cache_expiration function, and I'll be happy to review it and offer further suggestions.
+
+
+Sources and related content
