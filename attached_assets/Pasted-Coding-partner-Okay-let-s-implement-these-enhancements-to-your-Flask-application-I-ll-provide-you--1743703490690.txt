@@ -1,0 +1,250 @@
+Coding partner
+Okay, let's implement these enhancements to your Flask application. I'll provide you with the code snippets and explanations to guide you through the process.
+
+1. Logging Configuration
+
+First, create the logging.yaml file in your project's root directory:
+
+YAML
+
+# logging.yaml
+version: 1
+formatters:
+  default:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  detailed:
+    format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: default
+    level: INFO
+  file:
+    class: logging.handlers.RotatingFileHandler
+    formatter: detailed
+    filename: logs/application.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 5
+    level: DEBUG
+root:
+  level: INFO
+  handlers: [console, file]
+loggers:
+  werkzeug:
+    level: WARN
+    propagate: no
+  sqlalchemy.engine:
+    level: INFO
+2. Flask App Updates (main.py)
+
+Here's how to integrate the logging.yaml and refine CORS:
+
+Python
+
+import os
+import logging.config
+import yaml
+import json
+from flask import Flask, render_template, request, jsonify, Response, redirect, url_for, Blueprint
+from flask_cors import CORS
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime, timedelta
+import threading
+from werkzeug.exceptions import HTTPException
+
+# Configure logging
+if os.path.exists('logging.yaml'):
+    with open('logging.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+    logging.config.dictConfig(config)
+else:
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[logging.StreamHandler()]
+    )
+
+logger = logging.getLogger(__name__)
+logger.info("========== Server Starting ==========")
+logger.info(f"Python version: {os.sys.version}")
+logger.info(f"Current working directory: {os.getcwd()}")
+logger.info(f"Files in templates folder: {os.listdir('templates') if os.path.exists('templates') else 'No templates dir'}")
+
+# Import core components
+from config import Config
+from core_launcher import CoreLauncher
+from emotion_tracker import EmotionTracker
+from intent_classifier import IntentClassifier
+from database.db_manager import DatabaseManager
+from tts.tts_manager import TTSManager
+from auto_learning import AutoLearning
+from voice.recognition import VoiceRecognition
+from vision.face_detector import FaceDetector
+import twilio_api
+import mobile_api_routes  # Mobile-optimized API routes
+
+# Initialize Flask app
+app = Flask(__name__)
+app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
+
+# Enable CORS for specific origins and headers
+CORS(app, origins=["http://your-mobile-app.com", "http://localhost:8080"],
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "X-Custom-Header"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     expose_headers=["Content-Type", "Content-Length", "Date"])
+
+# Initialize components
+config = Config()
+db_manager = DatabaseManager(config=config, db_path=config.DB_PATH)
+emotion_tracker = EmotionTracker(db_manager)
+tts_manager = TTSManager(config)
+# Initialize TTS providers
+tts_manager.initialize()
+intent_classifier = IntentClassifier()
+voice_recognition = VoiceRecognition(config)
+face_detector = FaceDetector(config, db_manager)
+auto_learning = AutoLearning(db_manager)
+# Note: Twilio API is imported directly as needed
+from profile_manager import ProfileManager
+profile_manager = ProfileManager(db_manager)
+
+# Create API Blueprint
+api_bp = Blueprint('api', __name__, url_prefix='/api')
+
+# Initialize API routes
+from api_routes import init_api
+init_api(api_bp, db_manager, emotion_tracker, face_detector,
+         tts_manager, voice_recognition, intent_classifier, config)
+app.register_blueprint(api_bp)
+
+# Create Mobile API Blueprint
+mobile_api_bp = Blueprint('mobile_api', __name__, url_prefix='/mobile/api')
+
+# Initialize Mobile API routes
+from mobile_api_routes import init_mobile_api
+init_mobile_api(mobile_api_bp, db_manager, emotion_tracker, tts_manager, voice_recognition,
+                intent_classifier, config, profile_manager)
+app.register_blueprint(mobile_api_bp)
+
+# Developer mode constants
+DEVELOPER_NAME = os.environ.get("DEVELOPER_NAME", "Roben Edwan")
+DEVELOPER_MODE_FLAG = "dev_mode_enabled"
+
+# ... (rest of your code, including routes, scheduler, etc.)
+Key Changes:
+
+Logging:
+Import logging.config and yaml.
+Load logging configuration from logging.yaml if it exists, otherwise, use basic configuration.
+Enhanced logging configuration with file and console handlers, different log levels, and formatters.
+CORS:
+Use flask-cors to handle CORS.
+Specify allowed origins, headers, and methods.
+Removed the @app.after_request and @app.route('/api/cors-preflight', methods=['OPTIONS']) handlers.
+Blueprints:
+Created api_bp and mobile_api_bp using Blueprint.
+Registered the blueprints with the Flask app.
+Adjusted route imports to use the blueprints.
+3. Error Handling (app.py)
+
+Python
+
+from flask import Flask, jsonify
+from werkzeug.exceptions import HTTPException
+import logging
+
+app = Flask(__name__)
+logger = logging.getLogger(__name__)
+
+class APIError(Exception):
+    def __init__(self, message, status_code=400, payload=None):
+        super().__init__(message)
+        self.message = message
+        self.status_code = status_code
+        self.payload = payload
+
+@app.errorhandler(APIError)
+def handle_api_error(error):
+    response = jsonify(error.payload if error.payload else {'error': error.message})
+    response.status_code = error.status_code
+    logger.error(f"API Error: {error.message} (Status: {error.status_code})")
+    return response
+
+@app.errorhandler(HTTPException)
+def handle_http_exception(error):
+    response = jsonify({'error': error.description})
+    response.status_code = error.code
+    logger.error(f"HTTP Exception: {error.description} (Status: {error.code})")
+    return response
+
+@app.errorhandler(Exception)
+def handle_unexpected_exception(error):
+    logger.exception("Unexpected exception occurred")
+    response = jsonify({'error': 'An unexpected error occurred'})
+    response.status_code = 500
+    return response
+
+@app.route('/api/example')
+def example_route():
+    data = request.get_json()
+    if not isinstance(data, dict):
+        raise APIError("Invalid input: Expected a JSON object", 400)
+    if 'value' not in data:
+        raise APIError("Missing 'value' in request", 400, {'details': 'The request should include a value field.'})
+    try:
+        value = int(data['value'])
+    except ValueError:
+        raise APIError("Invalid 'value': Must be an integer", 400)
+
+    # ... process value ...
+    return jsonify({'result': f'Processed value: {value}'})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+Key Changes:
+
+Custom APIError exception for your application-specific errors.
+@app.errorhandler decorators to handle APIError, HTTPException, and general Exception.
+Logging of errors with more details (including traceback for unexpected exceptions).
+Example route (/api/example) demonstrating how to raise custom errors.
+4. Security: Input Validation (schemas.py)
+
+Python
+
+from marshmallow import Schema, fields, validate
+
+class UserSchema(Schema):
+    name = fields.String(required=True, validate=validate.Length(min=1, max=255))
+    email = fields.Email(required=True)
+    age = fields.Integer(validate=validate.Range(min=18, max=120))
+
+# Example usage in a route
+from flask import Flask, request, jsonify
+from marshmallow import ValidationError
+
+app = Flask(__name__)
+
+@app.route('/api/users', methods=['POST'])
+def create_user():
+    try:
+        schema = UserSchema()
+        data = schema.load(request.get_json())
+        # Process the validated data (e.g., save to database)
+        return jsonify({'message': 'User created', 'data': data}), 201
+    except ValidationError as err:
+        return jsonify({'errors': err.messages}), 400
+
+if __name__ == '__main__':
+    app.run(debug=True)
+Key Changes:
+
+Define a UserSchema using marshmallow to validate user input.
+Use schema.load() to validate the request data.
+Catch ValidationError and return appropriate error responses.
+Important Notes:
+
+Install the necessary packages: pip install flask pyyaml marshmallow
+Adapt the example code to your specific routes and data structures.
+Thoroughly test your error handling and input validation.
+This comprehensive approach will significantly improve the robustness, security, and maintainability of your Flask application.
