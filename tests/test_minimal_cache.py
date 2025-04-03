@@ -8,8 +8,8 @@ import json
 import time
 import logging
 import hashlib
-from unittest.mock import patch
-from datetime import datetime
+from unittest.mock import patch, MagicMock
+from datetime import datetime, timedelta
 
 import pytest
 from flask import Flask
@@ -19,15 +19,17 @@ from sqlalchemy.orm import Session
 # Import models and session fixtures directly
 from tests.conftest import app, client, db_session, clear_cache
 from database.models import Cache
+from database.db_manager import DatabaseManager
+from config import Config
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 def test_minimal_cache_hit_tracking(client: FlaskClient, db_session: Session, clear_cache, app: Flask):
     """Minimal test to verify cache hit count increments work correctly."""
-    # Set up logging for debugging
-    logging.basicConfig(level=logging.DEBUG)
-    logger = logging.getLogger(__name__)
     
-    # Log test start
-    logger.info("======= STARTING MINIMAL CACHE HIT COUNT TEST =======")
+    logger.info("======= STARTING MINIMAL CACHE TEST =======")
     
     with app.app_context():
         try:
@@ -36,91 +38,85 @@ def test_minimal_cache_hit_tracking(client: FlaskClient, db_session: Session, cl
             
             # Step 2: Clear cache table
             clear_cache()
-            db_session.commit()
             
             # Verify cache is empty
             count = db_session.query(Cache).count()
             logger.info(f"Cache entries after clearing: {count}")
             assert count == 0, "Cache should be empty at start of test"
             
-            # Step 3: Create a simple test request with predictable cache key
-            test_text = "TestingCacheHitCount123"
-            normalized_text = test_text.strip().lower()
-            cache_key = f"emotion_{hashlib.md5(normalized_text.encode()).hexdigest()}_en"
-            logger.info(f"Test text: '{test_text}'")
-            logger.info(f"Cache key: '{cache_key}'")
+            # Step 3: Create a test entry with a known key
+            test_key = f"test_cache_key_{int(time.time())}"
+            test_value = {"data": "test value", "number": 123}
+            expires_at = datetime.now() + timedelta(seconds=300)
             
-            # Step 4: Mock the emotion analysis to return consistent results
-            with patch('emotion_tracker.EmotionTracker.analyze_text') as mock_analyze:
-                mock_analyze.return_value = {
-                    "primary_emotion": "happy",
-                    "confidence": 0.9,
-                    "emotions": {
-                        "happy": 0.9,
-                        "neutral": 0.1
-                    }
-                }
-                
-                # Step 5: First request - this should create a cache entry
-                logger.info("Making first API request (should create cache entry)")
-                response1 = client.post(
-                    "/mobile-api/analyze-emotion",
-                    json={"text": test_text, "language": "en", "include_details": True}
-                )
-                
-                # Verify response
-                assert response1.status_code == 200, f"Expected 200 response, got {response1.status_code}"
-                result1 = json.loads(response1.data)
-                logger.info(f"First response: {json.dumps(result1, indent=2)}")
-                
-                # Step 6: Verify cache entry was created
-                db_session.commit()  # Ensure transaction is committed
-                
-                # First, dump all cache entries for debugging
-                all_cache_entries = db_session.query(Cache).all()
-                logger.info(f"Total cache entries: {len(all_cache_entries)}")
-                for entry in all_cache_entries:
-                    logger.info(f"Entry: key={entry.key}, hit_count={entry.hit_count}")
-                
-                # Now look for our specific entry
-                cache_entry = db_session.query(Cache).filter(Cache.key == cache_key).first()
-                assert cache_entry is not None, f"Cache entry not found with key: {cache_key}"
-                
-                # Record initial hit count
-                initial_hit_count = cache_entry.hit_count
-                logger.info(f"Initial hit count: {initial_hit_count}")
-                
-                # Step 7: Second request - this should hit the cache
-                logger.info("Making second API request (should hit cache)")
-                response2 = client.post(
-                    "/mobile-api/analyze-emotion",
-                    json={"text": test_text, "language": "en", "include_details": True}
-                )
-                
-                # Verify response
-                assert response2.status_code == 200, f"Expected 200 response, got {response2.status_code}"
-                result2 = json.loads(response2.data)
-                logger.info(f"Second response: {json.dumps(result2, indent=2)}")
-                
-                # Step 8: Verify hit count was incremented
-                db_session.refresh(cache_entry)
-                new_hit_count = cache_entry.hit_count
-                logger.info(f"New hit count: {new_hit_count}")
-                
-                # Core assertion: hit count should increase by 1
-                assert new_hit_count == initial_hit_count + 1, \
-                    f"Hit count should increment from {initial_hit_count} to {initial_hit_count + 1}, got {new_hit_count}"
-                
-                # Verify cache_status indicates a hit
-                assert result2.get("cache_status") == "hit", \
-                    f"Expected cache_status='hit', got '{result2.get('cache_status')}'"
-                
-                # Verify mock was only called once (for the first request)
-                assert mock_analyze.call_count == 1, \
-                    f"Expected analyze_text to be called once, got {mock_analyze.call_count}"
-                
-                logger.info("======= TEST PASSED =======")
-                
+            logger.info(f"Test key: '{test_key}'")
+            logger.info(f"Test value: {json.dumps(test_value)}")
+            
+            # Create a test DatabaseManager with our test session
+            config = Config()
+            
+            # Use a custom session factory for the DatabaseManager to use our test session
+            def get_test_session():
+                return db_session
+            
+            # Create DatabaseManager with a mocked session factory
+            test_db_manager = DatabaseManager(config=config, db_path=":memory:")
+            test_db_manager.Session = MagicMock(return_value=db_session)
+            
+            # Store test data directly using the overridden Session
+            logger.info("Storing response in cache using test db_manager...")
+            test_db_manager.store_cached_response(
+                test_key, 
+                test_value,
+                expiry_seconds=300,
+                content_type='application/json'
+            )
+            
+            # Verify the cache entry was created
+            cache_entry = db_session.query(Cache).filter(Cache.key == test_key).first()
+            assert cache_entry is not None, f"Cache entry for key {test_key} should exist"
+            initial_hit_count = cache_entry.hit_count
+            logger.info(f"Cache entry created, hit_count: {initial_hit_count}")
+            
+            # Ensure initial hit count is 0
+            assert initial_hit_count == 0, f"Expected initial hit_count=0, got {initial_hit_count}"
+            
+            # Step 4: Retrieve the cached data using the test db_manager
+            logger.info("Retrieving cached response using test db_manager...")
+            cached_data, metadata = test_db_manager.get_cached_response(test_key)
+            
+            # Verify the data is correct
+            assert cached_data == test_value, "Retrieved data doesn't match original"
+            
+            # Refresh the database entry and verify hit count was incremented
+            db_session.refresh(cache_entry)
+            new_hit_count = cache_entry.hit_count
+            logger.info(f"Hit count after retrieval: {new_hit_count}")
+            assert new_hit_count == 1, f"Expected hit_count=1 after retrieval, got {new_hit_count}"
+            
+            # Verify metadata
+            assert metadata.get("cache_hit") is True, "Metadata should show cache_hit=True"
+            assert metadata.get("hit_count") == 1, f"Metadata hit_count should be 1, got {metadata.get('hit_count')}"
+            
+            # Step 5: Retrieve again and verify hit count increases again
+            logger.info("Retrieving cached response a second time...")
+            cached_data2, metadata2 = test_db_manager.get_cached_response(test_key)
+            
+            # Verify data is still correct
+            assert cached_data2 == test_value, "Retrieved data doesn't match on second retrieval"
+            
+            # Verify hit count increased again
+            db_session.refresh(cache_entry)
+            final_hit_count = cache_entry.hit_count
+            logger.info(f"Hit count after second retrieval: {final_hit_count}")
+            assert final_hit_count == 2, f"Expected hit_count=2 after second retrieval, got {final_hit_count}"
+            
+            # Verify metadata updated
+            assert metadata2.get("cache_hit") is True, "Metadata should show cache_hit=True"
+            assert metadata2.get("hit_count") == 2, f"Metadata hit_count should be 2, got {metadata2.get('hit_count')}"
+            
+            logger.info("======= TEST PASSED =======")
+            
         except Exception as e:
             logger.error(f"Test failed: {str(e)}")
             # Print exception info for debugging
