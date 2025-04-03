@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer Mobile API Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .api-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #3498db;
+        }
+        h2 {
+            color: #3498db;
+            margin-top: 0;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .response {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .success {
+            border-left: 4px solid #2ecc71;
+        }
+        .error {
+            border-left: 4px solid #e74c3c;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+            background-color: #e74c3c;
+        }
+        .status-indicator.connected {
+            background-color: #2ecc71;
+        }
+        .status-display {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 8px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .audio-player {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .recorder-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .recording-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #e74c3c;
+            margin-right: 10px;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mashaaer Mobile API Test</h1>
+        
+        <div class="status-display">
+            <div id="statusIndicator" class="status-indicator"></div>
+            <div id="connectionStatus">Checking connection...</div>
+        </div>
+        
+        <div class="api-section">
+            <h2>Mobile API Status</h2>
+            <button id="checkStatus">Check API Status</button>
+            <div id="statusResponse" class="response">Response will appear here...</div>
+        </div>
+        
+        <div class="api-section">
+            <h2>Emotion Analysis</h2>
+            <label for="emotionText">Text to analyze:</label>
+            <textarea id="emotionText" rows="3" placeholder="Enter text to analyze for emotions...">I feel so happy today, everything is wonderful!</textarea>
+            
+            <label for="emotionLanguage">Language:</label>
+            <select id="emotionLanguage">
+                <option value="en">English</option>
+                <option value="ar">Arabic</option>
+            </select>
+            
+            <label for="responseFormat">Response Format:</label>
+            <select id="responseFormat">
+                <option value="json">JSON (Full)</option>
+                <option value="minimal">Minimal</option>
+            </select>
+            
+            <button id="analyzeEmotion">Analyze Emotion</button>
+            <div id="emotionResponse" class="response">Response will appear here...</div>
+        </div>
+        
+        <div class="api-section">
+            <h2>Text-to-Speech</h2>
+            <label for="ttsText">Text to speak:</label>
+            <textarea id="ttsText" rows="3" placeholder="Enter text to convert to speech...">Welcome to Mashaaer Feelings mobile application!</textarea>
+            
+            <label for="ttsLanguage">Language:</label>
+            <select id="ttsLanguage">
+                <option value="en-US">English</option>
+                <option value="ar">Arabic</option>
+            </select>
+            
+            <label for="ttsVoice">Voice:</label>
+            <select id="ttsVoice">
+                <option value="default">Default</option>
+                <option value="ErXwobaYiN019PkySvjV">Rachel (English)</option>
+                <option value="21m00Tcm4TlvDq8ikWAM">Youssef (Arabic)</option>
+            </select>
+            
+            <button id="generateSpeech">Generate Speech</button>
+            <button id="streamSpeech">Stream Speech</button>
+            <div id="ttsResponse" class="response">Response will appear here...</div>
+            <audio id="audioPlayer" class="audio-player" controls></audio>
+        </div>
+        
+        <div class="api-section">
+            <h2>Voice Recognition</h2>
+            <p>Record your voice to test the speech recognition API:</p>
+            
+            <label for="recognitionLanguage">Recognition Language:</label>
+            <select id="recognitionLanguage">
+                <option value="en">English</option>
+                <option value="ar">Arabic</option>
+            </select>
+            
+            <label for="recognitionContext">Context:</label>
+            <select id="recognitionContext">
+                <option value="general">General</option>
+                <option value="name">Name</option>
+                <option value="nickname">Nickname</option>
+                <option value="terms-agree">Terms Agreement</option>
+            </select>
+            
+            <div class="recorder-controls">
+                <button id="startRecording">Start Recording</button>
+                <button id="stopRecording" disabled>Stop Recording</button>
+                <div id="recordingIndicator" class="recording-indicator hidden"></div>
+            </div>
+            <div id="recognitionResponse" class="response">Response will appear here...</div>
+        </div>
+        
+        <div class="api-section">
+            <h2>Batch Analysis</h2>
+            <p>Test multiple text analysis in a single request:</p>
+            
+            <label for="batchTexts">Texts (one per line):</label>
+            <textarea id="batchTexts" rows="4" placeholder="Enter multiple texts to analyze, one per line...">I'm feeling happy today
+Why am I so sad?
+This makes me angry!</textarea>
+            
+            <button id="batchAnalyze">Batch Analyze</button>
+            <div id="batchResponse" class="response">Response will appear here...</div>
+        </div>
+        
+        <div class="api-section">
+            <h2>Cached Resources</h2>
+            <button id="getCachedResources">Get Cached Resources</button>
+            <div id="resourcesResponse" class="response">Response will appear here...</div>
+        </div>
+    </div>
+
+    <script>
+        // Base URL for API calls
+        const API_BASE_URL = '/mobile-api';
+        
+        // Helper function to display responses
+        function displayResponse(elementId, data, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            
+            if (typeof data === 'object') {
+                element.textContent = JSON.stringify(data, null, 2);
+            } else {
+                element.textContent = data;
+            }
+            
+            // Clear existing classes and add appropriate one
+            element.className = 'response ' + (isSuccess ? 'success' : 'error');
+        }
+        
+        // API Status check
+        document.getElementById('checkStatus').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/status`);
+                const data = await response.json();
+                displayResponse('statusResponse', data);
+                
+                // Update connection status indicator
+                const statusIndicator = document.getElementById('statusIndicator');
+                const connectionStatus = document.getElementById('connectionStatus');
+                
+                if (data.success) {
+                    statusIndicator.classList.add('connected');
+                    connectionStatus.textContent = `Connected to Mashaaer API v${data.api_version}`;
+                } else {
+                    statusIndicator.classList.remove('connected');
+                    connectionStatus.textContent = 'Connection failed';
+                }
+            } catch (error) {
+                displayResponse('statusResponse', `Error: ${error.message}`, false);
+                document.getElementById('statusIndicator').classList.remove('connected');
+                document.getElementById('connectionStatus').textContent = 'Connection failed';
+            }
+        });
+        
+        // Emotion analysis
+        document.getElementById('analyzeEmotion').addEventListener('click', async () => {
+            const text = document.getElementById('emotionText').value;
+            const language = document.getElementById('emotionLanguage').value;
+            const format = document.getElementById('responseFormat').value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/analyze-emotion`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        text,
+                        language,
+                        format,
+                        include_details: true
+                    })
+                });
+                
+                const data = await response.json();
+                displayResponse('emotionResponse', data);
+            } catch (error) {
+                displayResponse('emotionResponse', `Error: ${error.message}`, false);
+            }
+        });
+        
+        // Text-to-speech
+        document.getElementById('generateSpeech').addEventListener('click', async () => {
+            const text = document.getElementById('ttsText').value;
+            const language = document.getElementById('ttsLanguage').value;
+            const voice = document.getElementById('ttsVoice').value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/speak`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        text,
+                        language,
+                        voice,
+                        format: 'mp3',
+                        stream: false
+                    })
+                });
+                
+                const data = await response.json();
+                displayResponse('ttsResponse', data);
+                
+                // Play audio if successful
+                if (data.success) {
+                    const audioPlayer = document.getElementById('audioPlayer');
+                    audioPlayer.src = data.audio_path;
+                    audioPlayer.load();
+                }
+            } catch (error) {
+                displayResponse('ttsResponse', `Error: ${error.message}`, false);
+            }
+        });
+        
+        // Stream speech
+        document.getElementById('streamSpeech').addEventListener('click', async () => {
+            const text = document.getElementById('ttsText').value;
+            const language = document.getElementById('ttsLanguage').value;
+            const voice = document.getElementById('ttsVoice').value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/speak`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        text,
+                        language,
+                        voice,
+                        format: 'mp3',
+                        stream: true
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server error: ${errorText}`);
+                }
+                
+                // Get the audio blob and create a URL
+                const audioBlob = await response.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+                
+                // Update the audio player
+                const audioPlayer = document.getElementById('audioPlayer');
+                audioPlayer.src = audioUrl;
+                audioPlayer.load();
+                audioPlayer.play();
+                
+                displayResponse('ttsResponse', {
+                    success: true,
+                    message: 'Audio streaming successfully',
+                    content_type: response.headers.get('Content-Type'),
+                    voice: response.headers.get('X-TTS-Voice'),
+                    language: response.headers.get('X-TTS-Language')
+                });
+            } catch (error) {
+                displayResponse('ttsResponse', `Error: ${error.message}`, false);
+            }
+        });
+        
+        // Voice recognition with MediaRecorder
+        let mediaRecorder;
+        let audioChunks = [];
+        
+        document.getElementById('startRecording').addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    await processAudio(audioBlob);
+                    
+                    // Release microphone
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                
+                // Start recording
+                mediaRecorder.start();
+                
+                // Update UI
+                document.getElementById('startRecording').disabled = true;
+                document.getElementById('stopRecording').disabled = false;
+                document.getElementById('recordingIndicator').classList.remove('hidden');
+                
+                displayResponse('recognitionResponse', 'Recording... speak now');
+            } catch (error) {
+                displayResponse('recognitionResponse', `Microphone error: ${error.message}`, false);
+            }
+        });
+        
+        document.getElementById('stopRecording').addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                
+                // Update UI
+                document.getElementById('startRecording').disabled = false;
+                document.getElementById('stopRecording').disabled = true;
+                document.getElementById('recordingIndicator').classList.add('hidden');
+                
+                displayResponse('recognitionResponse', 'Processing audio...');
+            }
+        });
+        
+        async function processAudio(audioBlob) {
+            const language = document.getElementById('recognitionLanguage').value;
+            const context = document.getElementById('recognitionContext').value;
+            
+            try {
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.wav');
+                formData.append('language', language);
+                formData.append('context', context);
+                
+                const response = await fetch(`${API_BASE_URL}/voice-recognition`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                displayResponse('recognitionResponse', data);
+            } catch (error) {
+                displayResponse('recognitionResponse', `Error: ${error.message}`, false);
+            }
+        }
+        
+        // Batch analysis
+        document.getElementById('batchAnalyze').addEventListener('click', async () => {
+            const batchTexts = document.getElementById('batchTexts').value.split('\n')
+                .filter(text => text.trim() !== '')
+                .map((text, index) => ({
+                    id: `text_${index + 1}`,
+                    text: text.trim(),
+                    language: 'en'
+                }));
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/batch-analyze`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        texts: batchTexts,
+                        format: 'json'
+                    })
+                });
+                
+                const data = await response.json();
+                displayResponse('batchResponse', data);
+            } catch (error) {
+                displayResponse('batchResponse', `Error: ${error.message}`, false);
+            }
+        });
+        
+        // Cached resources
+        document.getElementById('getCachedResources').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/cached-resources`);
+                const data = await response.json();
+                displayResponse('resourcesResponse', data);
+            } catch (error) {
+                displayResponse('resourcesResponse', `Error: ${error.message}`, false);
+            }
+        });
+        
+        // Initial status check
+        document.getElementById('checkStatus').click();
+    </script>
+</body>
+</html>

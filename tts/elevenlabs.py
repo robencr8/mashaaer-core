@@ -29,7 +29,12 @@ class ElevenLabsTTS:
             "male": "TxGEqnHWrfWFTfGW9XjX",     # Josh (male voice)
             "female": "21m00Tcm4TlvDq8ikWAM",   # Rachel (female voice)
             "british": "pNInz6obpgDQGcFmaJgB",  # Adam (British male)
-            "arabic": "XrExE9yKIg1WjnnlVkGX"    # Arabic male voice
+            "arabic": "XrExE9yKIg1WjnnlVkGX",   # Arabic male voice
+            "english": "ErXwobaYiN019PkySvjV",  # Rachel (female English voice)
+            "rachel": "ErXwobaYiN019PkySvjV",   # Rachel (female English voice)
+            "josh": "TxGEqnHWrfWFTfGW9XjX",     # Josh (male voice)
+            "adam": "pNInz6obpgDQGcFmaJgB",     # Adam (British male)
+            "arabic_male": "XrExE9yKIg1WjnnlVkGX" # Arabic male voice
         }
         
         # Create directory for audio cache
@@ -110,9 +115,29 @@ class ElevenLabsTTS:
                 self.logger.error("Failed to retrieve ElevenLabs API key from environment")
                 raise ValueError("ElevenLabs API key not set and not found in environment")
         
-        # Get voice ID
-        voice_id = self.voices.get(voice.lower(), self.voices["default"])
-        self.logger.info(f"Mapped voice '{voice}' to ElevenLabs voice ID: {voice_id}")
+        # Special handling for known ElevenLabs voice IDs
+        if voice == "ErXwobaYiN019PkySvjV":
+            # This is the Rachel (English) voice
+            voice_id = "ErXwobaYiN019PkySvjV"
+            self.logger.info(f"Using English voice Rachel: {voice_id}")
+        elif voice == "21m00Tcm4TlvDq8ikWAM":
+            # This is the Arabic voice
+            voice_id = "21m00Tcm4TlvDq8ikWAM"
+            self.logger.info(f"Using Arabic voice: {voice_id}")
+        elif voice == "XrExE9yKIg1WjnnlVkGX":
+            # This is another Arabic voice
+            voice_id = "XrExE9yKIg1WjnnlVkGX"
+            self.logger.info(f"Using Arabic voice (direct ID): {voice_id}")
+        # Fallback to dictionary for other voices
+        else:
+            # Get voice ID - try to check if it's a direct ElevenLabs ID (usually 21-24 chars)
+            if len(voice) >= 21 and all(c in '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' for c in voice):
+                voice_id = voice  # Use the ID directly
+                self.logger.info(f"Using voice ID directly: {voice_id}")
+            else:
+                # Otherwise, look up in our voice dictionary
+                voice_id = self.voices.get(voice.lower(), self.voices["default"])
+                self.logger.info(f"Mapped voice '{voice}' to ElevenLabs voice ID: {voice_id}")
         
         # Create a cache filename based on text and voice
         import hashlib

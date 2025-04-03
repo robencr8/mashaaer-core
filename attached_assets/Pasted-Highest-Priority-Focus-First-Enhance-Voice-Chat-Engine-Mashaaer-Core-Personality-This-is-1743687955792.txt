@@ -1,0 +1,38 @@
+Highest Priority (Focus First):
+
+🧠 Enhance Voice + Chat Engine (Mashaaer Core Personality): This is the core of Mashaaer's interaction. Upgrading process_user_input() for emotionally intelligent replies, memory, and multilingual switching will significantly enhance the user experience regardless of the UI. Adding emotion-based voice tone response is also a high-impact feature.
+📖 Emotion + Intent Module Polish: Improving the sensitivity of these modules directly feeds into the intelligence of the chat engine. Auto-detecting emotions and updating the response log are crucial for creating a more aware and personalized experience.
+Medium Priority (Can be worked on in parallel or next):
+
+🧪 Add Unit Tests for Key Modules: Writing tests now will ensure the stability and correctness of the core modules we are enhancing (TTS, voice, main routes, emotion tracking). This is a good practice to do alongside feature development.
+📄 Documentation Starter Kit: Starting the documentation now, especially the project structure and module setup, will be valuable for future development and will not be affected by the web interface issue.
+Lower Priority (Can be addressed once the web interface is stable or later in the phase):
+
+👁️‍🗨️ Vision + Face Recognition Enhancements: While exciting, testing the "greeting known faces" and connecting profiles to preferences will be difficult without a working web interface to simulate user interactions and profile management. However, we could potentially work on the emotion detection from facial expressions as a more isolated component if the underlying libraries and camera access (if needed for local testing) are functional within the Replit environment.
+🎨 Refine UI/UX — Homepage + Profile Page: These tasks are heavily dependent on being able to see and interact with the web interface. It's best to tackle these once the connection issue is resolved.
+Proposed Action Plan:
+
+Let's start by focusing on Enhancing the Voice + Chat Engine and Polishing the Emotion + Intent Modules. We can also begin working on the Unit Tests for the relevant modules and the Documentation Starter Kit in parallel.  Now Initiating: Mashaaer Core Intelligence Upgrade
+I'll begin with:
+
+✅ Step 1: Enhance process_user_input()
+Add emotional context parsing
+
+Implement memory buffer (e.g., short-term response recall)
+
+Switch voice tone based on mood (calm/happy/sad)
+
+Route Arabic/English automatically
+
+✅ Step 2: Refactor Emotion + Intent Logic
+Fine-tune sentiment thresholds
+
+Update emotional logs per session
+
+Build a personality-adjustment hook (e.g., user is consistently sad → Mashaaer becomes more nurturing)
+
+🧪 While this runs, I’ll also prepare:
+
+Unit test scaffolding for tts_manager, voice_router, and emotion_tracker
+
+README and dev-docs boilerplate (markdown-ready)

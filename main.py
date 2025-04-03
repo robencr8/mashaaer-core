@@ -6,7 +6,7 @@ from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 import threading
-import time
+
 
 # Configure logging
 logging.basicConfig(
@@ -34,6 +34,7 @@ from auto_learning import AutoLearning
 from voice.recognition import VoiceRecognition
 from vision.face_detector import FaceDetector
 import twilio_api
+import mobile_api_routes  # Mobile-optimized API routes
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -77,6 +78,11 @@ profile_manager = ProfileManager(db_manager)
 from api_routes import init_api
 init_api(app, db_manager, emotion_tracker, face_detector, 
          tts_manager, voice_recognition, intent_classifier, config)
+
+# Initialize Mobile API routes
+from mobile_api_routes import init_mobile_api
+init_mobile_api(app, db_manager, emotion_tracker, tts_manager, voice_recognition,
+                intent_classifier, config, profile_manager)
 
 # Developer mode constants
 DEVELOPER_NAME = os.environ.get("DEVELOPER_NAME", "Roben Edwan")
@@ -153,6 +159,11 @@ def test_voice_api():
 def voice_api_test():
     # Direct file serving of simple voice API test page
     return app.send_static_file('voice_api_test.html')
+    
+@app.route('/mobile-api-test')
+def mobile_api_test():
+    # Direct file serving of mobile API test page
+    return app.send_static_file('mobile_api_test.html')
 
 # Test page route (direct HTML without templates)
 @app.route('/test-page')
