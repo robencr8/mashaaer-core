@@ -84,6 +84,13 @@ def clear_cache(db_session):
     def _clear_cache():
         db_session.query(Cache).delete()
         db_session.commit()
+        # Log that cache has been cleared for debugging purposes
+        print("Cache table cleared - all entries deleted and committed")
+        # Verify the cache is empty
+        count = db_session.query(Cache).count()
+        print(f"Cache entries after clearing: {count}")
+        if count > 0:
+            print("WARNING: Cache was not properly cleared!")
     return _clear_cache
 
 @pytest.fixture

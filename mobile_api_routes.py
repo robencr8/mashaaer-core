@@ -132,6 +132,8 @@ def mobile_status():
 
 @mobile_api.route('/analyze-emotion', methods=['POST'])
 def mobile_analyze_emotion():
+    print("\n===== ANALYZE EMOTION API CALLED =====")
+    print(f"Request method: {request.method}")
     """
     Mobile-optimized emotion analysis endpoint
     
@@ -211,6 +213,11 @@ def mobile_analyze_emotion():
         normalized_text = text.strip().lower()
         cache_key = f"emotion_{hashlib.md5(normalized_text.encode()).hexdigest()}_{language}"
         cache_status = "disabled" if bypass_cache else "miss"
+        
+        # Debug logging for testing
+        print(f"DEBUG: Normalized text: '{normalized_text}'")
+        print(f"DEBUG: Generated cache key: '{cache_key}'")
+        print(f"DEBUG: Bypass cache: {bypass_cache}")
         
         # Check cache if not bypassing
         cached_result = None
@@ -310,6 +317,9 @@ def mobile_analyze_emotion():
                 # Cache the result for future requests
                 if not bypass_cache and db_manager and hasattr(db_manager, 'store_cached_response'):
                     try:
+                        # Debug print for cache decision
+                        print(f"DEBUG: Storing in cache, bypass_cache={bypass_cache}, db_manager exists={db_manager is not None}")
+                        
                         # Prepare data to cache
                         cache_data = {
                             "primary_emotion": dominant_emotion,
@@ -319,11 +329,26 @@ def mobile_analyze_emotion():
                             "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
                         }
                         
+                        print(f"DEBUG: cache_data prepared: {json.dumps(cache_data)}")
+                        print(f"DEBUG: cache_key for storage: {cache_key}")
+                        
                         # Store in cache with an expiration time (3 days)
                         cache_expiry = 259200  # 3 days in seconds
-                        db_manager.store_cached_response(cache_key, json.dumps(cache_data), expiry_seconds=cache_expiry)
+                        store_success = db_manager.store_cached_response(cache_key, json.dumps(cache_data), expiry_seconds=cache_expiry)
+                        print(f"DEBUG: Cache storage result: {store_success}")
+                        
+                        # Verify cache entry was created
+                        from database.models import Cache
+                        with db_manager.Session() as sess:
+                            entry = sess.query(Cache).filter(Cache.key == cache_key).first()
+                            print(f"DEBUG: Cache entry after storage: {entry is not None}")
+                            if entry:
+                                print(f"DEBUG: Cache key: {entry.key}, Created: {entry.created_at}, Hit count: {entry.hit_count}")
+                        
                         logger.debug(f"Cached emotion analysis for key: {cache_key}")
                     except Exception as e:
+                        print(f"DEBUG ERROR: Failed to cache result: {str(e)}")
+                        print(f"DEBUG ERROR: Exception type: {type(e)}")
                         logger.warning(f"Failed to cache emotion result: {str(e)}")
             
                 # Calculate response time

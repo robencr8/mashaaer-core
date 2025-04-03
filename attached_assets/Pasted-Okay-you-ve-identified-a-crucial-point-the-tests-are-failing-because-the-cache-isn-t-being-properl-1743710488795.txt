@@ -1,0 +1,106 @@
+Okay, you've identified a crucial point: the tests are failing because the cache isn't being properly cleared before the test_cache_hit_count_tracking test runs. This is a common pitfall in testing, and it highlights the importance of ensuring a clean state before each test.
+
+You're now correctly focusing on conftest.py to address this. Here's a refined approach to ensure reliable cache clearing:
+
+1.  Review Your clear_cache Fixture:
+
+* Open your `conftest.py` file and carefully examine the `clear_cache` fixture.
+* **Verify:**
+    * It correctly deletes all entries from the `Cache` table.
+    * It commits the changes to the database session.
+    * It doesn't have any unintended side effects.
+2.  Enhance clear_cache (If Necessary):
+
+* **Explicit Commit:** Ensure that you have an explicit `db_session.commit()` call *after* deleting the cache entries.
+* **Session Scope:** If you're using a session scope that persists longer than the individual test, consider using a more granular session scope (e.g., `function` instead of `session`) to ensure that each test gets a fresh session. However, your `db_session` fixture should already handle this.
+* **Engine Disposal (If Needed):** In some cases, you might need to dispose of the SQLAlchemy engine or clear its connection pool. This is rarely necessary with in-memory SQLite databases but might be relevant with other database backends.
+3.  Robust Test Structure:
+
+* **Explicit Clearing:** In your `test_api_caching.py`, add an explicit call to `clear_cache()` at the very beginning of the `test_cache_hit_count_tracking` function, even though you're using the `clear_cache` fixture. This provides an extra layer of safety.
+* **Database Inspection:** Use `db_session.query(Cache).count()` to assert that the `Cache` table is indeed empty at the start of the test. This is more reliable than relying solely on the fixture.
+4.  Example Code (Illustrative - Adapt to Your Code):
+
+```python
+# tests/conftest.py
+import pytest
+from flask import Flask
+from flask.testing import FlaskClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+from your_app import create_app  # Replace with your actual app factory
+from your_app.database.models import Base, Cache  # Replace with your actual models
+
+@pytest.fixture(scope='session')
+def app() -> Flask:
+    """Creates a test Flask app instance."""
+    test_app = create_app()  # Replace with your app factory
+    test_app.config['TESTING'] = True
+    test_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # In-memory SQLite for speed
+    with test_app.app_context():
+        engine = create_engine(test_app.config['SQLALCHEMY_DATABASE_URI'])
+        Base.metadata.create_all(engine)  # Create tables
+        yield test_app
+        Base.metadata.drop_all(engine)  # Drop tables (optional, but good practice)
+
+@pytest.fixture
+def client(app: Flask) -> FlaskClient:
+    """A Flask test client for making requests."""
+    return app.test_client()
+
+@pytest.fixture
+def db_session(app: Flask) -> Session:
+    """A SQLAlchemy session for database interactions."""
+    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    TestingSessionLocal = sessionmaker(bind=engine)
+    session = TestingSessionLocal()
+    yield session
+    session.rollback()  # Rollback any changes after the test
+    session.close()
+
+@pytest.fixture
+def clear_cache(db_session: Session):
+    """Clears the cache table before each test."""
+    def _clear_cache():
+        db_session.query(Cache).delete()
+        db_session.commit()  # Ensure changes are committed
+    return _clear_cache
+```
+
+```python
+# tests/test_api_caching.py
+import json
+from flask import Flask
+from flask.testing import FlaskClient
+from sqlalchemy.orm import Session
+import pytest
+from unittest.mock import MagicMock, patch, call
+from your_app.database.models import Cache  # Replace with your actual Cache model
+from your_app.db_manager import DatabaseManager  # Replace with your actual db_manager
+import logging
+
+logger = logging.getLogger(__name__)  # Get a logger for this test file
+
+# --- Helper Functions ---
+
+def generate_tts_cache_key(text: str, voice: str, language: str) -> str:
+    """Helper function to generate the cache key for TTS requests."""
+    text_hash = hashlib.md5(text.encode('utf-8')).hexdigest()
+    return f"tts_{text_hash}_{voice}_{language}"
+
+# ... (Your test setup and other test functions)
+
+def test_cache_hit_count_tracking(
+    client: FlaskClient, db_session: Session, clear_cache, app: Flask, monkeypatch
+) -> None:
+    """Tests that the cache hit count is tracked correctly."""
+    clear_cache()  # Explicitly clear the cache at the beginning
+
+    # Assert that the cache is empty
+    assert db_session.query(Cache).count() == 0
+
+    # ... (Rest of your test logic)
+```
+By implementing these changes, you can ensure that your tests are starting with a clean slate and accurately reflecting the behavior of your caching mechanism. Please share the code snippets for your conftest.py and tests/test_api_caching.py files, and I'll be happy to provide more tailored guidance.
+
+
+Sources and related content
