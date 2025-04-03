@@ -28,6 +28,40 @@ Responses are stored in the database with:
 - Expiration timestamp
 - Hit counter for tracking usage
 
+#### Cache Key Generation
+
+Cache keys are generated using the following approach:
+
+```python
+# For emotion analysis
+import hashlib
+cache_key = f"emotion_analysis_{hashlib.md5((text + language).encode()).hexdigest()}"
+
+# For TTS responses
+cache_key = f"tts_{hashlib.md5((text + voice_id + language).encode()).hexdigest()}"
+```
+
+This ensures:
+- Consistent key generation across API calls
+- Unique keys based on the exact content and parameters
+- Keys that can be regenerated for subsequent requests with the same parameters
+
+#### Database Schema
+
+The cache is stored in the `response_cache` table with the following structure:
+
+| Column      | Type        | Description                                      |
+|-------------|-------------|--------------------------------------------------|
+| id          | INTEGER     | Primary key, auto-incremented                    |
+| key         | VARCHAR     | Unique cache key for identifying the entry       |
+| value       | TEXT        | Serialized response data (usually JSON string)   |
+| created_at  | TIMESTAMP   | When the cache entry was created                 |
+| expires_at  | TIMESTAMP   | When the cache entry expires                     |
+| last_hit_at | TIMESTAMP   | When the cache was last accessed                 |
+| hit_count   | INTEGER     | Number of times this cache entry has been used   |
+
+For TTS responses that include audio files, the serialized value contains a path to the audio file, and the audio content itself is stored in the file system.
+
 ### 2. Cache Hit Tracking
 
 Each time a cached response is retrieved:
