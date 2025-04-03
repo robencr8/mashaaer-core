@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer Feelings - Diagnostic Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background-color: #f0f0f0;
+        }
+        .status {
+            padding: 20px;
+            background-color: #e1f5fe;
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        .header {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="header">Mashaaer Feelings Server Diagnostic</h1>
+    
+    <div class="status">
+        <h2 class="success">Server is running</h2>
+        <p>If you can see this page, the web server is accessible.</p>
+        <p>Timestamp: <span id="timestamp"></span></p>
+    </div>
+
+    <script>
+        // Display current timestamp
+        document.getElementById('timestamp').textContent = new Date().toISOString();
+    </script>
+</body>
+</html>

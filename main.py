@@ -211,11 +211,35 @@ def diagnostic_panel():
 def api_ping():
     """Simple endpoint that returns JSON to test connectivity"""
     # Return JSON response (CORS headers added automatically by Flask-CORS)
-    return jsonify({
+    response = jsonify({
         'status': 'ok',
         'message': 'Server is running',
         'timestamp': datetime.now().isoformat()
     })
+    
+    # Add explicit CORS headers to ensure compatibility with feedback tool
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    
+    return response
+
+@app.route('/api/minimal', methods=['GET'])
+def minimal_api():
+    """Ultra minimal endpoint that returns plain text with explicit CORS headers"""
+    # Create minimal response to maximize compatibility
+    response = make_response("Server is running. Status: OK. Timestamp: " + 
+                           datetime.now().isoformat())
+    
+    # Set content type to plain text
+    response.headers['Content-Type'] = 'text/plain'
+    
+    # Add explicit CORS headers to ensure compatibility with feedback tool
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    
+    return response
 
 # Advanced diagnostic endpoint for CORS troubleshooting
 @app.route('/api/debug-request', methods=['GET', 'POST', 'OPTIONS'])
