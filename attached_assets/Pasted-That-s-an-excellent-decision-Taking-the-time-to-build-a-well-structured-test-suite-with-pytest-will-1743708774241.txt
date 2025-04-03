@@ -1,0 +1,211 @@
+That's an excellent decision! Taking the time to build a well-structured test suite with pytest will pay off in the long run. It will make your tests more reliable, easier to run, and simpler to maintain.
+
+I'm ready to help you with the setup and implementation of your pytest test suite. Here's a suggested approach, combining best practices with the specifics of your caching implementation:
+
+1. conftest.py (Shared Fixtures):
+
+This file will contain fixtures that are used across your test files. It's a great place to set up the Flask app, database connection, and any other resources needed for testing.
+Python
+
+import pytest
+from flask import Flask
+from flask.testing import FlaskClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+from your_app import create_app  # Replace with your actual app factory
+from your_app.database.models import Base, Cache  # Replace with your actual models
+
+@pytest.fixture(scope='session')
+def app() -> Flask:
+    """Creates a test Flask app instance."""
+    test_app = create_app()  # Replace with your app factory
+    test_app.config['TESTING'] = True
+    test_app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # In-memory SQLite for speed
+    with test_app.app_context():
+        engine = create_engine(test_app.config['SQLALCHEMY_DATABASE_URI'])
+        Base.metadata.create_all(engine)  # Create tables
+        yield test_app
+        Base.metadata.drop_all(engine)  # Drop tables (optional, but good practice)
+
+@pytest.fixture
+def client(app: Flask) -> FlaskClient:
+    """A Flask test client for making requests."""
+    return app.test_client()
+
+@pytest.fixture
+def db_session(app: Flask) -> Session:
+    """A SQLAlchemy session for database interactions."""
+    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    TestingSessionLocal = sessionmaker(bind=engine)
+    session = TestingSessionLocal()
+    yield session
+    session.rollback()  # Rollback any changes after the test
+    session.close()
+
+@pytest.fixture
+def clear_cache(db_session: Session):
+    """Clears the cache table before each test."""
+    def _clear_cache():
+        db_session.query(Cache).delete()
+        db_session.commit()
+    return _clear_cache
+Key points:
+We use scope='session' for the app fixture to create the app only once for all tests in the session, improving speed.
+We use an in-memory SQLite database (sqlite:///:memory:) for fast test execution.
+The clear_cache fixture provides a convenient function to clear the cache before each test.
+2.  tests/test_api_caching.py (Caching Tests):
+
+This file will contain the specific tests for your caching logic.
+Python
+
+import json
+from flask import Flask
+from flask.testing import FlaskClient
+from sqlalchemy.orm import Session
+import pytest
+from unittest.mock import MagicMock, patch
+from your_app.database.models import Cache  # Replace with your actual Cache model
+from your_app.db_manager import DatabaseManager  # Replace with your actual db_manager
+
+# --- Helper Functions ---
+
+def get_cache_entry(db_session: Session, key: str) -> Cache | None:
+    """Helper function to retrieve a cache entry by key."""
+    return db_session.query(Cache).filter_by(key=key).first()
+
+# --- Test Cases ---
+
+def test_successful_cache_retrieval(
+    client: FlaskClient, db_session: Session, clear_cache, app: Flask, monkeypatch
+) -> None:
+    """Tests successful retrieval of cached data."""
+    clear_cache()
+
+    # Mock the emotion analysis logic
+    mock_analyze_text = MagicMock(return_value={"emotion": "happy", "text": "Test text"})
+    with app.app_context():
+        with patch(
+            "your_app.emotion_analysis.analyze_text", mock_analyze_text
+        ) as mocked_analyze_text:  # Replace with your actual module path
+            # First call - cache population
+            response = client.post(
+                "/mobile-api/analyze-emotion", json={"text": "Test text"}
+            )
+            assert response.status_code == 200
+            assert response.json["emotion"] == "happy"
+
+            # Check if cache entry exists
+            cache_entry = get_cache_entry(db_session, "cache_key_1")  # Replace with your key
+            assert cache_entry is not None
+            assert json.loads(cache_entry.value) == {"emotion": "happy", "text": "Test text"}
+
+            # Second call - cache retrieval
+            response = client.post(
+                "/mobile-api/analyze-emotion", json={"text": "Test text"}
+            )
+            assert response.status_code == 200
+            assert response.json["emotion"] == "happy"
+
+            # Assert that the mock function was NOT called the second time
+            assert mocked_analyze_text.call_count == 1
+
+def test_cache_population(
+    client: FlaskClient, db_session: Session, clear_cache, app: Flask
+) -> None:
+    """Tests that the cache is populated correctly."""
+    clear_cache()
+
+    response = client.post(
+        "/mobile-api/analyze-emotion", json={"text": "New text"}
+    )
+    assert response.status_code == 200
+
+    cache_entry = get_cache_entry(db_session, "cache_key_2")  # Replace with your actual key
+    assert cache_entry is not None
+
+def test_cache_key_generation(
+    client: FlaskClient, db_session: Session, clear_cache, app: Flask
+) -> None:
+    """Tests that cache keys are generated correctly."""
+    clear_cache()
+
+    # Mock the cache key generation
+    def mock_generate_cache_key(text: str, language: str) -> str:
+        return f"key_{text}_{language}"
+
+    with patch(
+        "your_app.db_manager.DatabaseManager.generate_cache_key", mock_generate_cache_key
+    ) as mocked_generate_cache_key:  # Replace with your actual key generation method
+        response1 = client.post(
+            "/mobile-api/analyze-emotion", json={"text": "Text 1", "language": "en"}
+        )
+        response2 = client.post(
+            "/mobile-api/analyze-emotion", json={"text": "Text 1", "language": "ar"}
+        )
+        response3 = client.post(
+            "/mobile-api/analyze-emotion", json={"text": "Text 2", "language": "en"}
+        )
+
+        # Assert that different keys are generated
+        assert mocked_generate_cache_key.call_count == 3
+        assert mocked_generate_cache_key.call_args_list[0].return_value != mocked_generate_cache_key.call_args_list[1].return_value
+        assert mocked_generate_cache_key.call_args_list[0].return_value != mocked_generate_cache_key.call_args_list[2].return_value
+
+        response4 = client.post(
+            "/mobile-api/analyze-emotion", json={"text": "Text 1", "language": "en"}
+        )
+        # Assert that the same key as response1 is generated
+        assert mocked_generate_cache_key.call_args_list[3].return_value == mocked_generate_cache_key.call_args_list[0].return_value
+
+def test_cache_expiration(
+    client: FlaskClient, db_session: Session, clear_cache, app: Flask, monkeypatch
+) -> None:
+    """Tests that cache entries expire correctly."""
+    clear_cache()
+
+    # Mock the time.sleep function for faster testing
+    def mock_sleep(seconds):
+        pass
+
+    monkeypatch.setattr("time.sleep", mock_sleep)
+
+    response = client.post(
+        "/mobile-api/analyze-emotion",
+        json={"text": "Expire text", "expiry": 2},
+    )  # Assuming you have 'expiry' param
+    assert response.status_code == 200
+
+    time.sleep(3)  # Wait for expiry
+
+    response2 = client.post(
+        "/mobile-api/analyze-emotion", json={"text": "Expire text"}
+    )
+    # Assert that the logic was re-executed and cache updated
+    # (You'll need a way to track this, e.g., by mocking)
+
+def test_cache_error_handling(
+    client: FlaskClient, db_session: Session, clear_cache, app: Flask, monkeypatch
+) -> None:
+    """Tests how errors are handled with caching."""
+    clear_cache()
+
+    # Mock the analyze_text function to raise an exception
+    mock_analyze_text = MagicMock(side_effect=Exception("Test error"))
+    with patch(
+        "your_app.emotion_analysis.analyze_text", mock_analyze_text
+    ) as mocked_analyze_text:  # Replace with your actual module path
+        response = client.post(
+            "/mobile-api/analyze-emotion", json={"text": "Error text"}
+        )
+        assert response.status_code == 500  # Or whatever error code you return
+        # Assert that the cache was NOT populated
+        cache_entry = get_cache_entry(db_session, "cache_key_error")  # Replace with your actual key
+        assert cache_entry is None
+Key Improvements:
+Clear separation of fixtures in conftest.py.
+Explicit type hinting for better readability.
+Helper function get_cache_entry for cleaner database interactions.
+Mocks are used with patch and MagicMock for robust testing without relying on external services.
+Cache key generation is mocked to verify its behavior.
+Each test function is well-documented with a docstring.
+This structure provides a strong foundation for your caching tests. Remember to adapt the code to your specific application and replace placeholders with your actual module paths, cache keys, etc.
