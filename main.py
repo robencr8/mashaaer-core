@@ -290,13 +290,28 @@ def log_request_info():
 @app.route('/api/cors-preflight', methods=['OPTIONS'])
 def handle_cors_preflight():
     response = make_response()
-    response.headers.add('Access-Control-Allow-Origin', '*')
+    
+    # Get the origin from the request
+    origin = request.headers.get('Origin', '*')
+    
+    # If the origin is from a specific allowed domain, set it explicitly
+    if origin in ['https://replit.com'] or origin.endswith('.replit.app') or origin.endswith('.repl.co'):
+        response.headers.add('Access-Control-Allow-Origin', origin)
+    else:
+        # Default to wildcard for other origins
+        response.headers.add('Access-Control-Allow-Origin', '*')
+    
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin,X-Custom-Header')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     response.headers.add('Access-Control-Expose-Headers', 'Content-Length,Content-Type,Date')
     response.headers.add('Cross-Origin-Resource-Policy', 'cross-origin')
     response.headers.add('X-Content-Type-Options', 'nosniff')
+    
+    # Log the origin for debugging
+    if config.DEBUG:
+        logger.debug(f"CORS preflight request from origin: {origin}")
+    
     return response
 
 # Global OPTIONS request handler to ensure proper CORS for all routes
