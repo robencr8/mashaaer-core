@@ -1,6 +1,20 @@
 # Google Drive Sync for Mashaaer | Feelings
 
-This document outlines the process for syncing the "Mashaaer | Feelings" (Robin AI Enhanced) project to Roben Edwan's Google Drive.
+This document outlines the process for syncing the "مشاعر | Mashaaer" project to Roben Edwan's Google Drive.
+
+## Version-Based Sync (New Feature)
+
+For version-controlled sync with automatic versioning:
+
+1. Run the versioned sync script: `./sync_versioned_to_drive.sh`
+2. Specify the version increment:
+   - `./sync_versioned_to_drive.sh --major` (for major version changes)
+   - `./sync_versioned_to_drive.sh --minor` (for feature additions)
+   - `./sync_versioned_to_drive.sh --patch` (for bug fixes, default)
+3. Add a note about the update: `./sync_versioned_to_drive.sh --note "Added voice features"`
+4. Follow authentication instructions if needed
+
+This creates a new folder with the version number and date (e.g., "مشاعر | Mashaaer v1.2.3 - 20250403")
 
 ## Prerequisites
 
