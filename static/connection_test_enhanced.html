@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Connection Test</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .test-container {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+        .test-result {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 13px;
+            border: 1px solid #e9ecef;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .tab-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .tab-buttons {
+            display: flex;
+            background-color: #f1f1f1;
+        }
+        .tab-button {
+            border: none;
+            background-color: inherit;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 14px;
+            color: #333;
+        }
+        .tab-button:hover {
+            background-color: #ddd;
+        }
+        .tab-button.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            padding: 15px;
+            border-top: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-indicator.green {
+            background-color: #2ecc71;
+        }
+        .status-indicator.red {
+            background-color: #e74c3c;
+        }
+        .status-indicator.yellow {
+            background-color: #f39c12;
+        }
+        .collapsed {
+            max-height: 50px;
+            overflow: hidden;
+        }
+        .expanded {
+            max-height: none;
+        }
+        .toggle-expand {
+            color: #3498db;
+            text-decoration: underline;
+            cursor: pointer;
+            margin-top: 5px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Enhanced Connection Test Tool</h1>
+    <p>This diagnostic tool tests network connectivity to the Mashaaer API and server components.</p>
+    
+    <div class="tab-container">
+        <div class="tab-buttons">
+            <button class="tab-button active" onclick="openTab(event, 'basic-tests')">Basic Tests</button>
+            <button class="tab-button" onclick="openTab(event, 'api-tests')">API Tests</button>
+            <button class="tab-button" onclick="openTab(event, 'advanced-tests')">Advanced Tests</button>
+            <button class="tab-button" onclick="openTab(event, 'cors-tests')">CORS Tests</button>
+            <button class="tab-button" onclick="openTab(event, 'logs')">Logs</button>
+        </div>
+        
+        <div id="basic-tests" class="tab-content active">
+            <h2>Basic Connectivity Tests</h2>
+            <button onclick="runBasicTests()">Run All Basic Tests</button>
+            
+            <div class="test-grid">
+                <div class="test-container">
+                    <div class="test-header">
+                        <div class="test-title">Server Status</div>
+                        <span id="server-status-indicator" class="status-indicator"></span>
+                    </div>
+                    <button onclick="testServerStatus()">Test Server Status</button>
+                    <div id="server-status-result" class="test-result"></div>
+                </div>
+                
+                <div class="test-container">
+                    <div class="test-header">
+                        <div class="test-title">API Status</div>
+                        <span id="api-status-indicator" class="status-indicator"></span>
+                    </div>
+                    <button onclick="testApiStatus()">Test API Status</button>
+                    <div id="api-status-result" class="test-result"></div>
+                </div>
+                
+                <div class="test-container">
+                    <div class="test-header">
+                        <div class="test-title">Ping Test (200ms)</div>
+                        <span id="ping-indicator" class="status-indicator"></span>
+                    </div>
+                    <button onclick="testPing()">Test Ping</button>
+                    <div id="ping-result" class="test-result"></div>
+                </div>
+                
+                <div class="test-container">
+                    <div class="test-header">
+                        <div class="test-title">Server Info</div>
+                        <span id="server-info-indicator" class="status-indicator"></span>
+                    </div>
+                    <button onclick="getServerInfo()">Get Server Info</button>
+                    <div id="server-info-result" class="test-result collapsed">
+                        <pre id="server-info-data"></pre>
+                    </div>
+                    <span class="toggle-expand" onclick="toggleExpand('server-info-result')">Show more</span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="api-tests" class="tab-content">
+            <h2>API Endpoint Tests</h2>
+            <button onclick="runApiTests()">Test All Endpoints</button>
+            
+            <div class="test-grid">
+                <div class="test-container">
+                    <div class="test-header">
+                        <div class="test-title">GET /api/status</div>
+                        <span id="status-endpoint-indicator" class="status-indicator"></span>
+                    </div>
+                    <button onclick="testEndpoint('/api/status', 'GET', null, 'status-endpoint-result', 'status-endpoint-indicator')">Test Endpoint</button>
+                    <div id="status-endpoint-result" class="test-result"></div>
+                </div>
+                
+                <div class="test-container">
+                    <div class="test-header">
+                        <div class="test-title">POST /api/listen-for-voice</div>
+                        <span id="voice-endpoint-indicator" class="status-indicator"></span>
+                    </div>
+                    <button onclick="testVoiceEndpoint()">Test Voice Endpoint</button>
+                    <div id="voice-endpoint-result" class="test-result"></div>
+                </div>
+                
+                <div class="test-container">
+                    <div class="test-header">
+                        <div class="test-title">POST /api/analyze-emotion</div>
+                        <span id="emotion-endpoint-indicator" class="status-indicator"></span>
+                    </div>
+                    <button onclick="testEmotionEndpoint()">Test Emotion Analysis</button>
+                    <div id="emotion-endpoint-result" class="test-result"></div>
+                </div>
+                
+                <div class="test-container">
+                    <div class="test-header">
+                        <div class="test-title">Custom API Call</div>
+                        <span id="custom-endpoint-indicator" class="status-indicator"></span>
+                    </div>
+                    <input type="text" id="custom-endpoint" placeholder="/api/endpoint" style="width: 100%; margin-bottom: 10px; padding: 5px;">
+                    <select id="custom-method" style="margin-bottom: 10px; padding: 5px;">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                    <button onclick="testCustomEndpoint()">Test Custom Endpoint</button>
+                    <div id="custom-endpoint-result" class="test-result"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="advanced-tests" class="tab-content">
+            <h2>Advanced Diagnostics</h2>
+            
+            <div class="test-container">
+                <div class="test-header">
+                    <div class="test-title">Network Latency Test</div>
+                    <span id="latency-indicator" class="status-indicator"></span>
+                </div>
+                <button onclick="testNetworkLatency()">Test Network Latency</button>
+                <div id="latency-result" class="test-result"></div>
+            </div>
+            
+            <div class="test-container">
+                <div class="test-header">
+                    <div class="test-title">Network Information</div>
+                </div>
+                <button onclick="getNetworkInfo()">Get Network Info</button>
+                <div id="network-info-result" class="test-result"></div>
+            </div>
+            
+            <div class="test-container">
+                <div class="test-header">
+                    <div class="test-title">Connection Stability Test</div>
+                    <span id="stability-indicator" class="status-indicator"></span>
+                </div>
+                <button onclick="testConnectionStability()">Test Connection Stability</button>
+                <div id="stability-result" class="test-result">
+                    <div id="stability-progress" style="display:none;">
+                        <progress id="stability-progress-bar" value="0" max="100"></progress>
+                        <span id="stability-progress-text">0%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="test-container">
+                <div class="test-header">
+                    <div class="test-title">Browser Capabilities</div>
+                </div>
+                <button onclick="checkBrowserCapabilities()">Check Browser Capabilities</button>
+                <div id="browser-capabilities-result" class="test-result"></div>
+            </div>
+        </div>
+        
+        <div id="cors-tests" class="tab-content">
+            <h2>CORS Tests</h2>
+            
+            <div class="test-container">
+                <div class="test-header">
+                    <div class="test-title">CORS Preflight Test</div>
+                    <span id="cors-preflight-indicator" class="status-indicator"></span>
+                </div>
+                <button onclick="testCORSPreflight()">Test CORS Preflight</button>
+                <div id="cors-preflight-result" class="test-result"></div>
+            </div>
+            
+            <div class="test-container">
+                <div class="test-header">
+                    <div class="test-title">POST with CORS Headers</div>
+                    <span id="cors-post-indicator" class="status-indicator"></span>
+                </div>
+                <button onclick="testCORSPost()">Test CORS POST</button>
+                <div id="cors-post-result" class="test-result"></div>
+            </div>
+            
+            <div class="test-container">
+                <div class="test-header">
+                    <div class="test-title">Credentials with CORS</div>
+                    <span id="cors-credentials-indicator" class="status-indicator"></span>
+                </div>
+                <button onclick="testCORSWithCredentials()">Test CORS with Credentials</button>
+                <div id="cors-credentials-result" class="test-result"></div>
+            </div>
+            
+            <div class="test-container">
+                <div class="test-header">
+                    <div class="test-title">CORS Headers Check</div>
+                    <span id="cors-headers-indicator" class="status-indicator"></span>
+                </div>
+                <button onclick="checkCORSHeaders()">Check CORS Headers</button>
+                <div id="cors-headers-result" class="test-result collapsed">
+                    <pre id="cors-headers-data"></pre>
+                </div>
+                <span class="toggle-expand" onclick="toggleExpand('cors-headers-result')">Show more</span>
+            </div>
+        </div>
+        
+        <div id="logs" class="tab-content">
+            <h2>Test Logs</h2>
+            <button onclick="clearLogs()">Clear Logs</button>
+            <div class="test-container">
+                <pre id="log-container" style="max-height: 400px; overflow-y: auto; white-space: pre-wrap;"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Logging function
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('log-container');
+            const timestamp = new Date().toISOString();
+            const logEntry = `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+            logContainer.innerHTML += logEntry + '\n';
+            logContainer.scrollTop = logContainer.scrollHeight;
+            console.log(logEntry);
+        }
+        
+        function clearLogs() {
+            document.getElementById('log-container').innerHTML = '';
+            log('Logs cleared');
+        }
+        
+        // Tab functionality
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+            
+            const tabButtons = document.getElementsByClassName('tab-button');
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove('active');
+            }
+            
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+        
+        // Toggle expanded content
+        function toggleExpand(elementId) {
+            const element = document.getElementById(elementId);
+            const toggleButton = element.nextElementSibling;
+            
+            if (element.classList.contains('collapsed')) {
+                element.classList.remove('collapsed');
+                element.classList.add('expanded');
+                toggleButton.textContent = 'Show less';
+            } else {
+                element.classList.remove('expanded');
+                element.classList.add('collapsed');
+                toggleButton.textContent = 'Show more';
+            }
+        }
+        
+        // Update status indicator
+        function updateStatusIndicator(id, status) {
+            const indicator = document.getElementById(id);
+            indicator.classList.remove('green', 'red', 'yellow');
+            
+            if (status === 'success') {
+                indicator.classList.add('green');
+            } else if (status === 'error') {
+                indicator.classList.add('red');
+            } else if (status === 'warning') {
+                indicator.classList.add('yellow');
+            }
+        }
+        
+        // Basic tests
+        async function testServerStatus() {
+            const resultElement = document.getElementById('server-status-result');
+            resultElement.innerHTML = 'Testing server status...';
+            log('Testing server status');
+            
+            try {
+                const startTime = performance.now();
+                const response = await fetch('/test');
+                const endTime = performance.now();
+                const responseTime = (endTime - startTime).toFixed(2);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultElement.innerHTML = `
+                        <div class="success">
+                            Server is reachable! Response time: ${responseTime}ms<br>
+                            Status: ${data.status}<br>
+                            Message: ${data.message}<br>
+                            Timestamp: ${data.timestamp}
+                        </div>
+                    `;
+                    updateStatusIndicator('server-status-indicator', 'success');
+                    log(`Server status check successful: ${responseTime}ms`, 'success');
+                } else {
+                    resultElement.innerHTML = `
+                        <div class="error">
+                            Server responded with status: ${response.status}<br>
+                            ${response.statusText}
+                        </div>
+                    `;
+                    updateStatusIndicator('server-status-indicator', 'error');
+                    log(`Server status check failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                resultElement.innerHTML = `
+                    <div class="error">
+                        Cannot connect to server: ${error.message}
+                    </div>
+                `;
+                updateStatusIndicator('server-status-indicator', 'error');
+                log(`Server status check error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testApiStatus() {
+            const resultElement = document.getElementById('api-status-result');
+            resultElement.innerHTML = 'Testing API status...';
+            log('Testing API status');
+            
+            try {
+                const startTime = performance.now();
+                const response = await fetch('/api/status');
+                const endTime = performance.now();
+                const responseTime = (endTime - startTime).toFixed(2);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultElement.innerHTML = `
+                        <div class="success">
+                            API is online! Response time: ${responseTime}ms<br>
+                            Status: ${data.status}<br>
+                            Service: ${data.service_name}<br>
+                            Version: ${data.version}
+                        </div>
+                    `;
+                    updateStatusIndicator('api-status-indicator', 'success');
+                    log(`API status check successful: ${responseTime}ms`, 'success');
+                } else {
+                    resultElement.innerHTML = `
+                        <div class="error">
+                            API responded with status: ${response.status}<br>
+                            ${response.statusText}
+                        </div>
+                    `;
+                    updateStatusIndicator('api-status-indicator', 'error');
+                    log(`API status check failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                resultElement.innerHTML = `
+                    <div class="error">
+                        Cannot connect to API: ${error.message}
+                    </div>
+                `;
+                updateStatusIndicator('api-status-indicator', 'error');
+                log(`API status check error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testPing() {
+            const resultElement = document.getElementById('ping-result');
+            resultElement.innerHTML = 'Testing ping...';
+            log('Testing ping');
+            
+            try {
+                const pingTimes = [];
+                for (let i = 0; i < 5; i++) {
+                    const startTime = performance.now();
+                    const response = await fetch('/test');
+                    const endTime = performance.now();
+                    pingTimes.push(endTime - startTime);
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+                
+                const avgPing = (pingTimes.reduce((a, b) => a + b, 0) / pingTimes.length).toFixed(2);
+                const minPing = Math.min(...pingTimes).toFixed(2);
+                const maxPing = Math.max(...pingTimes).toFixed(2);
+                
+                if (avgPing < 200) {
+                    resultElement.innerHTML = `
+                        <div class="success">
+                            Ping test successful!<br>
+                            Average: ${avgPing}ms<br>
+                            Min: ${minPing}ms<br>
+                            Max: ${maxPing}ms
+                        </div>
+                    `;
+                    updateStatusIndicator('ping-indicator', 'success');
+                } else if (avgPing < 500) {
+                    resultElement.innerHTML = `
+                        <div class="warning">
+                            Ping test completed with moderate latency<br>
+                            Average: ${avgPing}ms<br>
+                            Min: ${minPing}ms<br>
+                            Max: ${maxPing}ms
+                        </div>
+                    `;
+                    updateStatusIndicator('ping-indicator', 'warning');
+                } else {
+                    resultElement.innerHTML = `
+                        <div class="error">
+                            Ping test completed with high latency<br>
+                            Average: ${avgPing}ms<br>
+                            Min: ${minPing}ms<br>
+                            Max: ${maxPing}ms
+                        </div>
+                    `;
+                    updateStatusIndicator('ping-indicator', 'error');
+                }
+                log(`Ping test complete: Avg=${avgPing}ms, Min=${minPing}ms, Max=${maxPing}ms`, 'success');
+            } catch (error) {
+                resultElement.innerHTML = `
+                    <div class="error">
+                        Ping test failed: ${error.message}
+                    </div>
+                `;
+                updateStatusIndicator('ping-indicator', 'error');
+                log(`Ping test error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function getServerInfo() {
+            const resultElement = document.getElementById('server-info-result');
+            const dataElement = document.getElementById('server-info-data');
+            resultElement.innerHTML = 'Getting server info...';
+            dataElement.innerHTML = '';
+            log('Getting server info');
+            
+            try {
+                // Get server information from multiple sources
+                const [statusRes, testRes] = await Promise.all([
+                    fetch('/api/status'),
+                    fetch('/test')
+                ]);
+                
+                if (statusRes.ok && testRes.ok) {
+                    const [statusData, testData] = await Promise.all([
+                        statusRes.json(),
+                        testRes.json()
+                    ]);
+                    
+                    // Get headers from the response
+                    const headers = {};
+                    statusRes.headers.forEach((value, key) => {
+                        headers[key] = value;
+                    });
+                    
+                    const serverInfo = {
+                        status: statusData,
+                        test: testData,
+                        headers: headers,
+                        browser: {
+                            userAgent: navigator.userAgent,
+                            platform: navigator.platform,
+                            language: navigator.language,
+                            cookiesEnabled: navigator.cookieEnabled
+                        }
+                    };
+                    
+                    dataElement.textContent = JSON.stringify(serverInfo, null, 2);
+                    resultElement.classList.add('success');
+                    updateStatusIndicator('server-info-indicator', 'success');
+                    log('Server info retrieved successfully', 'success');
+                } else {
+                    dataElement.textContent = `Error retrieving server info: ${statusRes.status} ${statusRes.statusText}`;
+                    resultElement.classList.add('error');
+                    updateStatusIndicator('server-info-indicator', 'error');
+                    log(`Server info error: ${statusRes.status} ${statusRes.statusText}`, 'error');
+                }
+            } catch (error) {
+                dataElement.textContent = `Error: ${error.message}`;
+                resultElement.classList.add('error');
+                updateStatusIndicator('server-info-indicator', 'error');
+                log(`Server info error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function runBasicTests() {
+            log('Running all basic tests');
+            await testServerStatus();
+            await testApiStatus();
+            await testPing();
+            await getServerInfo();
+            log('All basic tests completed');
+        }
+        
+        // API endpoints tests
+        async function testEndpoint(url, method = 'GET', data = null, resultElementId, indicatorId) {
+            const resultElement = document.getElementById(resultElementId);
+            resultElement.innerHTML = `Testing ${method} ${url}...`;
+            log(`Testing endpoint: ${method} ${url}`);
+            
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                };
+                
+                if (data && (method === 'POST' || method === 'PUT')) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const startTime = performance.now();
+                const response = await fetch(url, options);
+                const endTime = performance.now();
+                const responseTime = (endTime - startTime).toFixed(2);
+                
+                // Get response headers
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                
+                if (response.ok) {
+                    try {
+                        const responseData = await response.json();
+                        resultElement.innerHTML = `
+                            <div class="success">
+                                Endpoint test successful! (${responseTime}ms)<br>
+                                Status: ${response.status} ${response.statusText}
+                            </div>
+                            <pre>${JSON.stringify(responseData, null, 2)}</pre>
+                            <details>
+                                <summary>Response Headers</summary>
+                                <pre>${JSON.stringify(headers, null, 2)}</pre>
+                            </details>
+                        `;
+                        updateStatusIndicator(indicatorId, 'success');
+                        log(`Endpoint test successful: ${method} ${url} - ${responseTime}ms`, 'success');
+                    } catch (jsonError) {
+                        const textResponse = await response.text();
+                        resultElement.innerHTML = `
+                            <div class="warning">
+                                Endpoint returned success status but invalid JSON (${responseTime}ms)<br>
+                                Status: ${response.status} ${response.statusText}
+                            </div>
+                            <pre>${textResponse}</pre>
+                            <details>
+                                <summary>Response Headers</summary>
+                                <pre>${JSON.stringify(headers, null, 2)}</pre>
+                            </details>
+                        `;
+                        updateStatusIndicator(indicatorId, 'warning');
+                        log(`Endpoint test warning: ${method} ${url} - Invalid JSON - ${responseTime}ms`, 'warning');
+                    }
+                } else {
+                    try {
+                        const errorResponse = await response.json();
+                        resultElement.innerHTML = `
+                            <div class="error">
+                                Endpoint test failed! (${responseTime}ms)<br>
+                                Status: ${response.status} ${response.statusText}
+                            </div>
+                            <pre>${JSON.stringify(errorResponse, null, 2)}</pre>
+                            <details>
+                                <summary>Response Headers</summary>
+                                <pre>${JSON.stringify(headers, null, 2)}</pre>
+                            </details>
+                        `;
+                    } catch (jsonError) {
+                        const textResponse = await response.text();
+                        resultElement.innerHTML = `
+                            <div class="error">
+                                Endpoint test failed! (${responseTime}ms)<br>
+                                Status: ${response.status} ${response.statusText}
+                            </div>
+                            <pre>${textResponse}</pre>
+                            <details>
+                                <summary>Response Headers</summary>
+                                <pre>${JSON.stringify(headers, null, 2)}</pre>
+                            </details>
+                        `;
+                    }
+                    updateStatusIndicator(indicatorId, 'error');
+                    log(`Endpoint test failed: ${method} ${url} - ${response.status} ${response.statusText} - ${responseTime}ms`, 'error');
+                }
+            } catch (error) {
+                resultElement.innerHTML = `
+                    <div class="error">
+                        Endpoint test error: ${error.message}
+                    </div>
+                `;
+                updateStatusIndicator(indicatorId, 'error');
+                log(`Endpoint test error: ${method} ${url} - ${error.message}`, 'error');
+            }
+        }
+        
+        async function testVoiceEndpoint() {
+            const resultElement = document.getElementById('voice-endpoint-result');
+            resultElement.innerHTML = 'Testing voice recognition endpoint...';
+            log('Testing voice recognition endpoint');
+            
+            try {
+                // Create a form with step parameter
+                const formData = new FormData();
+                formData.append('step', 'name');
+                
+                const startTime = performance.now();
+                const response = await fetch('/api/listen-for-voice', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const endTime = performance.now();
+                const responseTime = (endTime - startTime).toFixed(2);
+                
+                // Get response headers
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                
+                if (response.ok) {
+                    const responseData = await response.json();
+                    resultElement.innerHTML = `
+                        <div class="success">
+                            Voice endpoint test successful! (${responseTime}ms)<br>
+                            Status: ${response.status} ${response.statusText}
+                        </div>
+                        <pre>${JSON.stringify(responseData, null, 2)}</pre>
+                        <details>
+                            <summary>Response Headers</summary>
+                            <pre>${JSON.stringify(headers, null, 2)}</pre>
+                        </details>
+                    `;
+                    updateStatusIndicator('voice-endpoint-indicator', 'success');
+                    log(`Voice endpoint test successful - ${responseTime}ms`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    resultElement.innerHTML = `
+                        <div class="error">
+                            Voice endpoint test failed! (${responseTime}ms)<br>
+                            Status: ${response.status} ${response.statusText}
+                        </div>
+                        <pre>${errorText}</pre>
+                        <details>
+                            <summary>Response Headers</summary>
+                            <pre>${JSON.stringify(headers, null, 2)}</pre>
+                        </details>
+                    `;
+                    updateStatusIndicator('voice-endpoint-indicator', 'error');
+                    log(`Voice endpoint test failed: ${response.status} ${response.statusText} - ${responseTime}ms`, 'error');
+                }
+            } catch (error) {
+                resultElement.innerHTML = `
+                    <div class="error">
+                        Voice endpoint test error: ${error.message}
+                    </div>
+                `;
+                updateStatusIndicator('voice-endpoint-indicator', 'error');
+                log(`Voice endpoint test error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testEmotionEndpoint() {
+            const resultElement = document.getElementById('emotion-endpoint-result');
+            resultElement.innerHTML = 'Testing emotion analysis endpoint...';
+            log('Testing emotion analysis endpoint');
+            
+            try {
+                const testData = {
+                    text: "I am feeling happy today!",
+                    context: [],
+                    return_details: true
+                };
+                
+                const startTime = performance.now();
+                const response = await fetch('/api/analyze-emotion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                const endTime = performance.now();
+                const responseTime = (endTime - startTime).toFixed(2);
+                
+                // Get response headers
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                
+                if (response.ok) {
+                    const responseData = await response.json();
+                    resultElement.innerHTML = `
+                        <div class="success">
+                            Emotion analysis test successful! (${responseTime}ms)<br>
+                            Status: ${response.status} ${response.statusText}
+                        </div>
+                        <pre>${JSON.stringify(responseData, null, 2)}</pre>
+                        <details>
+                            <summary>Response Headers</summary>
+                            <pre>${JSON.stringify(headers, null, 2)}</pre>
+                        </details>
+                    `;
+                    updateStatusIndicator('emotion-endpoint-indicator', 'success');
+                    log(`Emotion analysis test successful - ${responseTime}ms`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    resultElement.innerHTML = `
+                        <div class="error">
+                            Emotion analysis test failed! (${responseTime}ms)<br>
+                            Status: ${response.status} ${response.statusText}
+                        </div>
+                        <pre>${errorText}</pre>
+                        <details>
+                            <summary>Response Headers</summary>
+                            <pre>${JSON.stringify(headers, null, 2)}</pre>
+                        </details>
+                    `;
+                    updateStatusIndicator('emotion-endpoint-indicator', 'error');
+                    log(`Emotion analysis test failed: ${response.status} ${response.statusText} - ${responseTime}ms`, 'error');
+                }
+            } catch (error) {
+                resultElement.innerHTML = `
+                    <div class="error">
+                        Emotion analysis test error: ${error.message}
+                    </div>
+                `;
+                updateStatusIndicator('emotion-endpoint-indicator', 'error');
+                log(`Emotion analysis test error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testCustomEndpoint() {
+            const endpoint = document.getElementById('custom-endpoint').value;
+            const method = document.getElementById('custom-method').value;
+            
+            if (!endpoint) {
+                document.getElementById('custom-endpoint-result').innerHTML = `
+                    <div class="error">
+                        Please enter an endpoint path
+                    </div>
+                `;
+                return;
+            }
+            
+            testEndpoint(
+                endpoint,
+                method,
+                method === 'POST' || method === 'PUT' ? {} : null,
+                'custom-endpoint-result',
+                'custom-endpoint-indicator'
+            );
+        }
+        
+        async function runApiTests() {
+            log('Running all API tests');
+            await testEndpoint('/api/status', 'GET', null, 'status-endpoint-result', 'status-endpoint-indicator');
+            await testVoiceEndpoint();
+            await testEmotionEndpoint();
+            log('All API tests completed');
+        }
+        
+        // Advanced tests
+        async function testNetworkLatency() {
+            const resultElement = document.getElementById('latency-result');
+            resultElement.innerHTML = 'Testing network latency...';
+            log('Testing network latency');
+            
+            try {
+                const pingTimes = [];
+                for (let i = 0; i < 10; i++) {
+                    const startTime = performance.now();
+                    const response = await fetch('/test');
+                    const endTime = performance.now();
+                    pingTimes.push(endTime - startTime);
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                const avgPing = (pingTimes.reduce((a, b) => a + b, 0) / pingTimes.length).toFixed(2);
+                const minPing = Math.min(...pingTimes).toFixed(2);
+                const maxPing = Math.max(...pingTimes).toFixed(2);
+                const stdDev = Math.sqrt(
+                    pingTimes.map(x => Math.pow(x - avgPing, 2)).reduce((a, b) => a + b, 0) / pingTimes.length
+                ).toFixed(2);
+                
+                let status = 'success';
+                let statusClass = 'success';
+                
+                if (avgPing > 300 || stdDev > 100) {
+                    status = 'warning';
+                    statusClass = 'warning';
+                }
+                
+                if (avgPing > 500 || stdDev > 200) {
+                    status = 'error';
+                    statusClass = 'error';
+                }
+                
+                resultElement.innerHTML = `
+                    <div class="${statusClass}">
+                        Latency test complete (10 requests)<br>
+                        Average: ${avgPing}ms<br>
+                        Min: ${minPing}ms<br>
+                        Max: ${maxPing}ms<br>
+                        Standard Deviation: ${stdDev}ms
+                    </div>
+                    <div>
+                        <canvas id="latencyChart" width="400" height="200"></canvas>
+                    </div>
+                `;
+                
+                // Simple chart using canvas
+                const canvas = document.getElementById('latencyChart');
+                const ctx = canvas.getContext('2d');
+                
+                // Set background
+                ctx.fillStyle = '#f8f9fa';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw axes
+                ctx.strokeStyle = '#333';
+                ctx.beginPath();
+                ctx.moveTo(40, 20);
+                ctx.lineTo(40, canvas.height - 20);
+                ctx.lineTo(canvas.width - 20, canvas.height - 20);
+                ctx.stroke();
+                
+                // Plot data points
+                const xScale = (canvas.width - 60) / pingTimes.length;
+                const maxValue = Math.max(...pingTimes) * 1.1;
+                const yScale = (canvas.height - 40) / maxValue;
+                
+                ctx.strokeStyle = '#3498db';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let i = 0; i < pingTimes.length; i++) {
+                    const x = 40 + i * xScale;
+                    const y = canvas.height - 20 - (pingTimes[i] * yScale);
+                    
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                    
+                    // Draw point
+                    ctx.fillStyle = '#2980b9';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.stroke();
+                
+                // Draw average line
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                const avgY = canvas.height - 20 - (avgPing * yScale);
+                ctx.moveTo(40, avgY);
+                ctx.lineTo(canvas.width - 20, avgY);
+                ctx.stroke();
+                
+                // Y-axis labels
+                ctx.fillStyle = '#333';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                
+                for (let i = 0; i <= 5; i++) {
+                    const value = Math.round(maxValue * i / 5);
+                    const y = canvas.height - 20 - (value * yScale);
+                    ctx.fillText(value + 'ms', 35, y);
+                }
+                
+                // X-axis labels
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'top';
+                for (let i = 0; i < pingTimes.length; i += 2) {
+                    const x = 40 + i * xScale;
+                    ctx.fillText((i + 1).toString(), x, canvas.height - 15);
+                }
+                
+                updateStatusIndicator('latency-indicator', status);
+                log(`Network latency test complete: Avg=${avgPing}ms, Min=${minPing}ms, Max=${maxPing}ms, StdDev=${stdDev}ms`, 'success');
+            } catch (error) {
+                resultElement.innerHTML = `
+                    <div class="error">
+                        Latency test failed: ${error.message}
+                    </div>
+                `;
+                updateStatusIndicator('latency-indicator', 'error');
+                log(`Network latency test error: ${error.message}`, 'error');
+            }
+        }
+        
+        function getNetworkInfo() {
+            const resultElement = document.getElementById('network-info-result');
+            log('Getting network information');
+            
+            const networkInfo = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                cookiesEnabled: navigator.cookieEnabled,
+                doNotTrack: navigator.doNotTrack,
+                hardwareConcurrency: navigator.hardwareConcurrency || 'unknown',
+                screenResolution: `${window.screen.width}x${window.screen.height}`,
+                viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+                devicePixelRatio: window.devicePixelRatio,
+                touchPoints: navigator.maxTouchPoints || 0,
+                connection: 'unknown'
+            };
+            
+            // Check for Network Information API
+            if (navigator.connection) {
+                networkInfo.connection = {
+                    effectiveType: navigator.connection.effectiveType || 'unknown',
+                    downlinkMax: navigator.connection.downlinkMax || 'unknown',
+                    downlink: navigator.connection.downlink || 'unknown',
+                    rtt: navigator.connection.rtt || 'unknown',
+                    saveData: navigator.connection.saveData || false
+                };
+            }
+            
+            // Get online status
+            networkInfo.online = navigator.onLine;
+            
+            // Display the results
+            resultElement.innerHTML = `
+                <div class="info">
+                    <h3>Network Information</h3>
+                    <strong>Online Status:</strong> ${networkInfo.online ? 'Online' : 'Offline'}<br>
+                    <strong>User Agent:</strong> ${networkInfo.userAgent}<br>
+                    <strong>Platform:</strong> ${networkInfo.platform}<br>
+                    <strong>Language:</strong> ${networkInfo.language}<br>
+                    <strong>Screen Resolution:</strong> ${networkInfo.screenResolution}<br>
+                    <strong>Viewport Size:</strong> ${networkInfo.viewportSize}<br>
+                    <strong>Device Pixel Ratio:</strong> ${networkInfo.devicePixelRatio}<br>
+                    <strong>Hardware Concurrency:</strong> ${networkInfo.hardwareConcurrency}<br>
+                    <strong>Touch Points:</strong> ${networkInfo.touchPoints}<br>
+                </div>
+                
+                <div class="info">
+                    <h3>Connection Information</h3>
+                    ${typeof networkInfo.connection === 'object' ? `
+                        <strong>Effective Type:</strong> ${networkInfo.connection.effectiveType}<br>
+                        <strong>Downlink:</strong> ${networkInfo.connection.downlink} Mbps<br>
+                        <strong>Round Trip Time:</strong> ${networkInfo.connection.rtt} ms<br>
+                        <strong>Save Data Mode:</strong> ${networkInfo.connection.saveData ? 'Enabled' : 'Disabled'}<br>
+                    ` : `
+                        Network Information API not available in this browser
+                    `}
+                </div>
+            `;
+            log('Network information collected successfully', 'success');
+        }
+        
+        async function testConnectionStability() {
+            const resultElement = document.getElementById('stability-result');
+            const progressElement = document.getElementById('stability-progress');
+            const progressBar = document.getElementById('stability-progress-bar');
+            const progressText = document.getElementById('stability-progress-text');
+            
+            resultElement.innerHTML = '';
+            progressElement.style.display = 'block';
+            progressBar.value = 0;
+            progressText.textContent = '0%';
+            log('Testing connection stability');
+            
+            try {
+                const totalTests = 20;
+                const results = [];
+                let successCount = 0;
+                
+                for (let i = 0; i < totalTests; i++) {
+                    try {
+                        const startTime = performance.now();
+                        const response = await fetch('/test');
+                        const endTime = performance.now();
+                        
+                        if (response.ok) {
+                            successCount++;
+                            results.push({
+                                success: true,
+                                latency: endTime - startTime,
+                                status: response.status
+                            });
+                        } else {
+                            results.push({
+                                success: false,
+                                latency: endTime - startTime,
+                                status: response.status,
+                                error: response.statusText
+                            });
+                        }
+                    } catch (error) {
+                        results.push({
+                            success: false,
+                            error: error.message
+                        });
+                    }
+                    
+                    // Update progress
+                    const progress = Math.round(((i + 1) / totalTests) * 100);
+                    progressBar.value = progress;
+                    progressText.textContent = `${progress}%`;
+                    
+                    // Slight delay between tests
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                }
+                
+                // Calculate statistics
+                const successRate = (successCount / totalTests) * 100;
+                const latencies = results.filter(r => r.success).map(r => r.latency);
+                
+                let avgLatency = 0;
+                let maxLatency = 0;
+                let minLatency = 0;
+                let stdDev = 0;
+                
+                if (latencies.length > 0) {
+                    avgLatency = (latencies.reduce((a, b) => a + b, 0) / latencies.length).toFixed(2);
+                    maxLatency = Math.max(...latencies).toFixed(2);
+                    minLatency = Math.min(...latencies).toFixed(2);
+                    stdDev = Math.sqrt(
+                        latencies.map(x => Math.pow(x - avgLatency, 2)).reduce((a, b) => a + b, 0) / latencies.length
+                    ).toFixed(2);
+                }
+                
+                // Determine stability score
+                let stabilityScore = 0;
+                let stabilityRating = '';
+                let stabilityClass = '';
+                
+                if (successRate === 100) {
+                    if (avgLatency < 200 && stdDev < 50) {
+                        stabilityScore = 5;
+                        stabilityRating = 'Excellent';
+                        stabilityClass = 'success';
+                    } else if (avgLatency < 350 && stdDev < 100) {
+                        stabilityScore = 4;
+                        stabilityRating = 'Good';
+                        stabilityClass = 'success';
+                    } else {
+                        stabilityScore = 3;
+                        stabilityRating = 'Fair';
+                        stabilityClass = 'warning';
+                    }
+                } else if (successRate >= 90) {
+                    stabilityScore = 2;
+                    stabilityRating = 'Poor';
+                    stabilityClass = 'warning';
+                } else {
+                    stabilityScore = 1;
+                    stabilityRating = 'Unstable';
+                    stabilityClass = 'error';
+                }
+                
+                // Display results
+                progressElement.style.display = 'none';
+                resultElement.innerHTML = `
+                    <div class="${stabilityClass}">
+                        <h3>Connection Stability: ${stabilityRating} (${stabilityScore}/5)</h3>
+                        <strong>Success Rate:</strong> ${successRate.toFixed(1)}%<br>
+                        <strong>Average Latency:</strong> ${avgLatency}ms<br>
+                        <strong>Min Latency:</strong> ${minLatency}ms<br>
+                        <strong>Max Latency:</strong> ${maxLatency}ms<br>
+                        <strong>Standard Deviation:</strong> ${stdDev}ms<br>
+                        <strong>Test Count:</strong> ${totalTests}<br>
+                    </div>
+                    
+                    <details>
+                        <summary>Test Results</summary>
+                        <pre>${JSON.stringify(results, null, 2)}</pre>
+                    </details>
+                `;
+                
+                updateStatusIndicator('stability-indicator', stabilityClass);
+                log(`Connection stability test complete: ${stabilityRating} (${stabilityScore}/5), Success Rate: ${successRate.toFixed(1)}%`, 'success');
+            } catch (error) {
+                progressElement.style.display = 'none';
+                resultElement.innerHTML = `
+                    <div class="error">
+                        Connection stability test failed: ${error.message}
+                    </div>
+                `;
+                updateStatusIndicator('stability-indicator', 'error');
+                log(`Connection stability test error: ${error.message}`, 'error');
+            }
+        }
+        
+        function checkBrowserCapabilities() {
+            const resultElement = document.getElementById('browser-capabilities-result');
+            log('Checking browser capabilities');
+            
+            const capabilities = {
+                webSockets: 'WebSocket' in window,
+                webRTC: 'RTCPeerConnection' in window,
+                webWorkers: 'Worker' in window,
+                serviceWorkers: 'serviceWorker' in navigator,
+                webGL: (function() {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        return !!(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
+                    } catch(e) {
+                        return false;
+                    }
+                })(),
+                webAudio: 'AudioContext' in window || 'webkitAudioContext' in window,
+                localStorage: (function() {
+                    try {
+                        localStorage.setItem('test', 'test');
+                        localStorage.removeItem('test');
+                        return true;
+                    } catch(e) {
+                        return false;
+                    }
+                })(),
+                sessionStorage: (function() {
+                    try {
+                        sessionStorage.setItem('test', 'test');
+                        sessionStorage.removeItem('test');
+                        return true;
+                    } catch(e) {
+                        return false;
+                    }
+                })(),
+                indexedDB: 'indexedDB' in window,
+                webSQL: 'openDatabase' in window,
+                fileSystem: 'webkitRequestFileSystem' in window,
+                geoLocation: 'geolocation' in navigator,
+                webNotifications: 'Notification' in window,
+                deviceOrientation: 'DeviceOrientationEvent' in window,
+                deviceMotion: 'DeviceMotionEvent' in window,
+                speechRecognition: 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window,
+                speechSynthesis: 'speechSynthesis' in window,
+                touchEvents: 'ontouchstart' in window,
+                fetch: 'fetch' in window,
+                promises: 'Promise' in window,
+                webComponents: 'customElements' in window && 'attachShadow' in document.createElement('div'),
+                webAnimations: 'Animation' in window
+            };
+            
+            // Count supported features
+            const supportedCount = Object.values(capabilities).filter(Boolean).length;
+            const totalCount = Object.keys(capabilities).length;
+            const supportPercentage = Math.round((supportedCount / totalCount) * 100);
+            
+            // Create report
+            let report = `<div class="info">
+                <h3>Browser Capabilities: ${supportPercentage}% (${supportedCount}/${totalCount})</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <th style="text-align: left; padding: 5px; border-bottom: 1px solid #ddd;">Feature</th>
+                        <th style="text-align: center; padding: 5px; border-bottom: 1px solid #ddd;">Supported</th>
+                    </tr>`;
+            
+            for (const [feature, supported] of Object.entries(capabilities)) {
+                const formattedFeature = feature.replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, str => str.toUpperCase());
+                
+                report += `<tr>
+                    <td style="padding: 5px; border-bottom: 1px solid #eee;">${formattedFeature}</td>
+                    <td style="text-align: center; padding: 5px; border-bottom: 1px solid #eee;">
+                        ${supported ? 
+                            '<span style="color: #2ecc71;">✓</span>' : 
+                            '<span style="color: #e74c3c;">✗</span>'}
+                    </td>
+                </tr>`;
+            }
+            
+            report += `</table></div>`;
+            
+            resultElement.innerHTML = report;
+            log(`Browser capabilities check complete: ${supportPercentage}% supported`, 'success');
+        }
+        
+        // CORS Tests
+        async function testCORSPreflight() {
+            const resultElement = document.getElementById('cors-preflight-result');
+            resultElement.innerHTML = 'Testing CORS preflight...';
+            log('Testing CORS preflight');
+            
+            try {
+                // First make OPTIONS request
+                const optionsResponse = await fetch('/api/cors-preflight', {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type, X-Custom-Header'
+                    }
+                });
+                
+                // Get preflight headers
+                const preflightHeaders = {};
+                optionsResponse.headers.forEach((value, key) => {
+                    preflightHeaders[key] = value;
+                });
+                
+                // Check if preflight succeeded
+                if (optionsResponse.ok) {
+                    // Now make actual request
+                    const startTime = performance.now();
+                    const response = await fetch('/api/status', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Origin': window.location.origin,
+                            'X-Custom-Header': 'test'
+                        }
+                    });
+                    const endTime = performance.now();
+                    const responseTime = (endTime - startTime).toFixed(2);
+                    
+                    // Get response headers
+                    const headers = {};
+                    response.headers.forEach((value, key) => {
+                        headers[key] = value;
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        resultElement.innerHTML = `
+                            <div class="success">
+                                CORS preflight test successful! (${responseTime}ms)<br>
+                                Status: ${response.status} ${response.statusText}
+                            </div>
+                            <details>
+                                <summary>Preflight Headers</summary>
+                                <pre>${JSON.stringify(preflightHeaders, null, 2)}</pre>
+                            </details>
+                            <details>
+                                <summary>Response Headers</summary>
+                                <pre>${JSON.stringify(headers, null, 2)}</pre>
+                            </details>
+                            <details>
+                                <summary>Response Data</summary>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </details>
+                        `;
+                        updateStatusIndicator('cors-preflight-indicator', 'success');
+                        log('CORS preflight test successful', 'success');
+                    } else {
+                        resultElement.innerHTML = `
+                            <div class="error">
+                                CORS preflight succeeded but actual request failed!<br>
+                                Status: ${response.status} ${response.statusText}
+                            </div>
+                            <details>
+                                <summary>Preflight Headers</summary>
+                                <pre>${JSON.stringify(preflightHeaders, null, 2)}</pre>
+                            </details>
+                            <details>
+                                <summary>Response Headers</summary>
+                                <pre>${JSON.stringify(headers, null, 2)}</pre>
+                            </details>
+                        `;
+                        updateStatusIndicator('cors-preflight-indicator', 'error');
+                        log(`CORS preflight succeeded but actual request failed: ${response.status} ${response.statusText}`, 'error');
+                    }
+                } else {
+                    resultElement.innerHTML = `
+                        <div class="error">
+                            CORS preflight request failed!<br>
+                            Status: ${optionsResponse.status} ${optionsResponse.statusText}
+                        </div>
+                        <details>
+                            <summary>Preflight Headers</summary>
+                            <pre>${JSON.stringify(preflightHeaders, null, 2)}</pre>
+                        </details>
+                    `;
+                    updateStatusIndicator('cors-preflight-indicator', 'error');
+                    log(`CORS preflight request failed: ${optionsResponse.status} ${optionsResponse.statusText}`, 'error');
+                }
+            } catch (error) {
+                resultElement.innerHTML = `
+                    <div class="error">
+                        CORS preflight test error: ${error.message}
+                    </div>
+                `;
+                updateStatusIndicator('cors-preflight-indicator', 'error');
+                log(`CORS preflight test error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testCORSPost() {
+            const resultElement = document.getElementById('cors-post-result');
+            resultElement.innerHTML = 'Testing CORS POST request...';
+            log('Testing CORS POST request');
+            
+            try {
+                const testData = {
+                    text: "Testing CORS POST request",
+                    timestamp: new Date().toISOString()
+                };
+                
+                const startTime = performance.now();
+                const response = await fetch('/api/analyze-emotion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': window.location.origin,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(testData)
+                });
+                const endTime = performance.now();
+                const responseTime = (endTime - startTime).toFixed(2);
+                
+                // Get response headers
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultElement.innerHTML = `
+                        <div class="success">
+                            CORS POST test successful! (${responseTime}ms)<br>
+                            Status: ${response.status} ${response.statusText}
+                        </div>
+                        <details>
+                            <summary>Request Data</summary>
+                            <pre>${JSON.stringify(testData, null, 2)}</pre>
+                        </details>
+                        <details>
+                            <summary>Response Headers</summary>
+                            <pre>${JSON.stringify(headers, null, 2)}</pre>
+                        </details>
+                        <details>
+                            <summary>Response Data</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    `;
+                    updateStatusIndicator('cors-post-indicator', 'success');
+                    log('CORS POST test successful', 'success');
+                } else {
+                    resultElement.innerHTML = `
+                        <div class="error">
+                            CORS POST test failed!<br>
+                            Status: ${response.status} ${response.statusText}
+                        </div>
+                        <details>
+                            <summary>Request Data</summary>
+                            <pre>${JSON.stringify(testData, null, 2)}</pre>
+                        </details>
+                        <details>
+                            <summary>Response Headers</summary>
+                            <pre>${JSON.stringify(headers, null, 2)}</pre>
+                        </details>
+                    `;
+                    updateStatusIndicator('cors-post-indicator', 'error');
+                    log(`CORS POST test failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                resultElement.innerHTML = `
+                    <div class="error">
+                        CORS POST test error: ${error.message}
+                    </div>
+                `;
+                updateStatusIndicator('cors-post-indicator', 'error');
+                log(`CORS POST test error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testCORSWithCredentials() {
+            const resultElement = document.getElementById('cors-credentials-result');
+            resultElement.innerHTML = 'Testing CORS with credentials...';
+            log('Testing CORS with credentials');
+            
+            try {
+                const startTime = performance.now();
+                const response = await fetch('/api/status', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': window.location.origin
+                    },
+                    credentials: 'include'
+                });
+                const endTime = performance.now();
+                const responseTime = (endTime - startTime).toFixed(2);
+                
+                // Get response headers
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Check if we got Access-Control-Allow-Credentials header
+                    const allowCredentials = response.headers.get('Access-Control-Allow-Credentials');
+                    
+                    if (allowCredentials === 'true') {
+                        resultElement.innerHTML = `
+                            <div class="success">
+                                CORS with credentials test successful! (${responseTime}ms)<br>
+                                Status: ${response.status} ${response.statusText}<br>
+                                Access-Control-Allow-Credentials: ${allowCredentials}
+                            </div>
+                            <details>
+                                <summary>Response Headers</summary>
+                                <pre>${JSON.stringify(headers, null, 2)}</pre>
+                            </details>
+                            <details>
+                                <summary>Response Data</summary>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </details>
+                        `;
+                        updateStatusIndicator('cors-credentials-indicator', 'success');
+                        log('CORS with credentials test successful', 'success');
+                    } else {
+                        resultElement.innerHTML = `
+                            <div class="warning">
+                                Request succeeded but Access-Control-Allow-Credentials header is missing!<br>
+                                Status: ${response.status} ${response.statusText}<br>
+                                This could cause issues with authenticated requests.
+                            </div>
+                            <details>
+                                <summary>Response Headers</summary>
+                                <pre>${JSON.stringify(headers, null, 2)}</pre>
+                            </details>
+                            <details>
+                                <summary>Response Data</summary>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </details>
+                        `;
+                        updateStatusIndicator('cors-credentials-indicator', 'warning');
+                        log('CORS with credentials test warning: Access-Control-Allow-Credentials header is missing', 'warning');
+                    }
+                } else {
+                    resultElement.innerHTML = `
+                        <div class="error">
+                            CORS with credentials test failed!<br>
+                            Status: ${response.status} ${response.statusText}
+                        </div>
+                        <details>
+                            <summary>Response Headers</summary>
+                            <pre>${JSON.stringify(headers, null, 2)}</pre>
+                        </details>
+                    `;
+                    updateStatusIndicator('cors-credentials-indicator', 'error');
+                    log(`CORS with credentials test failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                resultElement.innerHTML = `
+                    <div class="error">
+                        CORS with credentials test error: ${error.message}
+                    </div>
+                `;
+                updateStatusIndicator('cors-credentials-indicator', 'error');
+                log(`CORS with credentials test error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function checkCORSHeaders() {
+            const resultElement = document.getElementById('cors-headers-result');
+            const dataElement = document.getElementById('cors-headers-data');
+            resultElement.innerHTML = 'Checking CORS headers...';
+            dataElement.innerHTML = '';
+            log('Checking CORS headers');
+            
+            try {
+                // Check both GET and OPTIONS requests
+                const [getResponse, optionsResponse] = await Promise.all([
+                    fetch('/api/status', {
+                        method: 'GET',
+                        headers: {
+                            'Origin': window.location.origin
+                        }
+                    }),
+                    fetch('/api/status', {
+                        method: 'OPTIONS',
+                        headers: {
+                            'Origin': window.location.origin,
+                            'Access-Control-Request-Method': 'GET',
+                            'Access-Control-Request-Headers': 'Content-Type,X-Custom-Header'
+                        }
+                    })
+                ]);
+                
+                // Get headers from both responses
+                const getHeaders = {};
+                const optionsHeaders = {};
+                
+                getResponse.headers.forEach((value, key) => {
+                    getHeaders[key] = value;
+                });
+                
+                optionsResponse.headers.forEach((value, key) => {
+                    optionsHeaders[key] = value;
+                });
+                
+                // Check for important CORS headers
+                const corsHeaders = {
+                    'GET': {
+                        'Access-Control-Allow-Origin': getResponse.headers.get('Access-Control-Allow-Origin'),
+                        'Access-Control-Allow-Credentials': getResponse.headers.get('Access-Control-Allow-Credentials'),
+                        'Access-Control-Expose-Headers': getResponse.headers.get('Access-Control-Expose-Headers')
+                    },
+                    'OPTIONS': {
+                        'Access-Control-Allow-Origin': optionsResponse.headers.get('Access-Control-Allow-Origin'),
+                        'Access-Control-Allow-Methods': optionsResponse.headers.get('Access-Control-Allow-Methods'),
+                        'Access-Control-Allow-Headers': optionsResponse.headers.get('Access-Control-Allow-Headers'),
+                        'Access-Control-Allow-Credentials': optionsResponse.headers.get('Access-Control-Allow-Credentials'),
+                        'Access-Control-Max-Age': optionsResponse.headers.get('Access-Control-Max-Age')
+                    }
+                };
+                
+                // Generate report
+                const missingHeaders = [];
+                
+                if (!corsHeaders.GET['Access-Control-Allow-Origin']) {
+                    missingHeaders.push('Access-Control-Allow-Origin (GET)');
+                }
+                
+                if (!corsHeaders.OPTIONS['Access-Control-Allow-Origin']) {
+                    missingHeaders.push('Access-Control-Allow-Origin (OPTIONS)');
+                }
+                
+                if (!corsHeaders.OPTIONS['Access-Control-Allow-Methods']) {
+                    missingHeaders.push('Access-Control-Allow-Methods (OPTIONS)');
+                }
+                
+                if (!corsHeaders.OPTIONS['Access-Control-Allow-Headers']) {
+                    missingHeaders.push('Access-Control-Allow-Headers (OPTIONS)');
+                }
+                
+                // Generate header report
+                dataElement.textContent = JSON.stringify({
+                    corsHeaders: corsHeaders,
+                    fullHeaders: {
+                        GET: getHeaders,
+                        OPTIONS: optionsHeaders
+                    }
+                }, null, 2);
+                
+                if (missingHeaders.length === 0) {
+                    resultElement.classList.add('success');
+                    updateStatusIndicator('cors-headers-indicator', 'success');
+                    log('CORS headers check successful - all required headers present', 'success');
+                } else {
+                    resultElement.classList.add('warning');
+                    updateStatusIndicator('cors-headers-indicator', 'warning');
+                    log(`CORS headers check warning - missing headers: ${missingHeaders.join(', ')}`, 'warning');
+                }
+            } catch (error) {
+                dataElement.textContent = `Error checking CORS headers: ${error.message}`;
+                resultElement.classList.add('error');
+                updateStatusIndicator('cors-headers-indicator', 'error');
+                log(`CORS headers check error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Initialize
+        window.onload = function() {
+            log('Connection test tool initialized');
+        };
+    </script>
+</body>
+</html>

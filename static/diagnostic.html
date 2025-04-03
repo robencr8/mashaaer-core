@@ -1,313 +1,427 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مشاعر | Mashaaer - Diagnostic</title>
-  <script>
-    // Initialize the external API URL (Ngrok)
-    window.EXTERNAL_API_URL = 'https://<your-ngrok-id>.ngrok-free.app/api/status';
-    
-    // Function to update the external URL
-    function updateExternalUrl(url) {
-      if (!url.endsWith('/api/status')) {
-        // Make sure URL ends with /api/status for consistency
-        if (url.endsWith('/')) {
-          url = url.slice(0, -1);
+    <title>Mashaaer Diagnostic Panel</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #121212, #2c2c2c);
+            color: #e0e0e0;
         }
-        url = url + '/api/status';
-      }
-      window.EXTERNAL_API_URL = url;
-      console.log('External API URL updated to:', url);
-      // Update local storage to persist the setting
-      localStorage.setItem('externalApiUrl', url);
-      return url;
-    }
-    
-    // Check if we have a saved URL in local storage
-    document.addEventListener('DOMContentLoaded', function() {
-      const savedUrl = localStorage.getItem('externalApiUrl');
-      if (savedUrl) {
-        window.EXTERNAL_API_URL = savedUrl;
-        console.log('Using saved external API URL:', savedUrl);
-      }
-    });
-  </script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      line-height: 1.6;
-    }
-    .card {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .success { color: green; }
-    .error { color: red; }
-    .pending { color: orange; }
-    h1 { color: #333; }
-    button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 4px;
-      cursor: pointer;
-      margin: 5px 0;
-    }
-    button:hover {
-      background: #45a049;
-    }
-    pre {
-      background: #f5f5f5;
-      padding: 10px;
-      border-radius: 4px;
-      overflow-x: auto;
-    }
-    .test-group {
-      margin-bottom: 30px;
-    }
-  </style>
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(40, 40, 40, 0.7);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #00bcd4;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin-bottom: 30px;
+            background-color: rgba(60, 60, 60, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #b3e5fc;
+            font-size: 1.4rem;
+        }
+        .btn {
+            background: linear-gradient(45deg, #00b0ff, #0091ea);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: linear-gradient(45deg, #29b6f6, #0288d1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .test-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+        .success {
+            background-color: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4CAF50;
+            color: #a5d6a7;
+        }
+        .error {
+            background-color: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+            color: #ef9a9a;
+        }
+        pre {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 4px;
+            overflow: auto;
+            max-height: 200px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #444;
+        }
+        th {
+            background-color: rgba(0, 0, 0, 0.2);
+            color: #00bcd4;
+        }
+        .api-list {
+            list-style: none;
+            padding: 0;
+        }
+        .api-list li {
+            padding: 5px 10px;
+            margin-bottom: 5px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .unknown {
+            background-color: #9e9e9e;
+            color: #212121;
+        }
+        .operational {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .offline {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-  <h1>مشاعر | Mashaaer - System Diagnostic</h1>
-  
-  <div class="card">
-    <h2>Basic Connectivity Tests</h2>
-    <div class="test-group">
-      <p>API Server Status: <span id="api-status" class="pending">Checking...</span></p>
-      <button onclick="testApiStatus()">Test API Status</button>
-      <div id="api-status-result"></div>
+    <div class="container">
+        <h1>مشاعر | Mashaaer<br>Diagnostic Panel</h1>
+        
+        <div class="section">
+            <h2>Server Health Check</h2>
+            <button id="btnCheckStatus" class="btn">Check Server Status</button>
+            <button id="btnRootEndpoint" class="btn">Test Root Endpoint</button>
+            <button id="btnTestEndpoint" class="btn">Test /test Endpoint</button>
+            <div id="serverResult" class="test-result"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Voice API Test</h2>
+            <button id="btnTestVoiceApi" class="btn">Test Voice Recognition API</button>
+            <div id="voiceApiResult" class="test-result"></div>
+        </div>
+        
+        <div class="section">
+            <h2>System Information</h2>
+            <button id="btnSystemInfo" class="btn">Get System Information</button>
+            <div id="systemInfoResult" class="test-result"></div>
+        </div>
+        
+        <div class="section">
+            <h2>API Health Status</h2>
+            <button id="btnRefreshApiStatus" class="btn">Refresh API Status</button>
+            <ul id="apiStatusList" class="api-list">
+                <li>
+                    <span>/api/status</span>
+                    <span class="status-badge unknown">Unknown</span>
+                </li>
+                <li>
+                    <span>/api/listen-for-voice</span>
+                    <span class="status-badge unknown">Unknown</span>
+                </li>
+                <li>
+                    <span>/api/play-cosmic-sound</span>
+                    <span class="status-badge unknown">Unknown</span>
+                </li>
+                <li>
+                    <span>/api/analyze-emotion</span>
+                    <span class="status-badge unknown">Unknown</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>Network Troubleshooting</h2>
+            <p>If you're having trouble connecting to the server, check:</p>
+            <ul>
+                <li>Firewall settings - ensure port 5000 is accessible</li>
+                <li>Try accessing the server via different routes</li>
+                <li>Check server logs for connection errors</li>
+                <li>Verify CORS settings if accessing from a different domain</li>
+            </ul>
+            <p>Current address: <span id="currentAddress"></span></p>
+        </div>
     </div>
-    
-    <div class="test-group">
-      <p>CORS Configuration: <span id="cors-status" class="pending">Not Tested</span></p>
-      <button onclick="testCorsConfig()">Test CORS</button>
-      <div id="cors-status-result"></div>
-    </div>
-    
-    <div class="test-group">
-      <p>Voice Recognition Endpoint: <span id="voice-status" class="pending">Not Tested</span></p>
-      <button onclick="testVoiceEndpoint()">Test Voice Recognition</button>
-      <div id="voice-status-result"></div>
-    </div>
-  </div>
-  
-  <div class="card">
-    <h2>External URL Configuration</h2>
-    <p>Update the Ngrok URL to enable external access to the API:</p>
-    <input type="text" id="external-url" placeholder="https://your-ngrok-id.ngrok-free.app" 
-           style="width: 80%; padding: 8px; margin-bottom: 10px;">
-    <button onclick="setExternalUrl()">Update URL</button>
-    <p>Current External URL: <span id="current-external-url" style="font-weight: bold;">Not set</span></p>
-    <div id="external-url-result"></div>
-  </div>
-  
-  <div class="card">
-    <h2>System Information</h2>
-    <p>Browser: <span id="browser-info"></span></p>
-    <p>User Agent: <pre id="user-agent"></pre></p>
-    <p>Time: <span id="current-time"></span></p>
-  </div>
-  
-  <div class="card">
-    <h2>Manual Connection Test</h2>
-    <p>Enter endpoint to test (e.g., "/api/status"):</p>
-    <input type="text" id="manual-endpoint" value="/api/status" style="width: 300px; padding: 8px;">
-    <button onclick="testManualEndpoint()">Test Endpoint</button>
-    <div id="manual-test-result"></div>
-  </div>
 
-  <script>
-    // Display system information
-    document.getElementById('browser-info').textContent = navigator.appName + ' ' + navigator.appVersion;
-    document.getElementById('user-agent').textContent = navigator.userAgent;
-    document.getElementById('current-time').textContent = new Date().toLocaleString();
-    
-    // Update current external URL display
-    function updateExternalUrlDisplay() {
-      const currentUrlElement = document.getElementById('current-external-url');
-      if (window.EXTERNAL_API_URL) {
-        currentUrlElement.textContent = window.EXTERNAL_API_URL;
-        document.getElementById('external-url').value = window.EXTERNAL_API_URL.replace('/api/status', '');
-      } else {
-        currentUrlElement.textContent = 'Not set';
-      }
-    }
-    
-    // Set external URL function
-    function setExternalUrl() {
-      const urlInput = document.getElementById('external-url');
-      let newUrl = urlInput.value.trim();
-      const resultElement = document.getElementById('external-url-result');
-      
-      // Validate URL format
-      if (!newUrl) {
-        resultElement.innerHTML = '<p class="error">Please enter a valid URL</p>';
-        return;
-      }
-      
-      // Make sure URL has proper format
-      if (!newUrl.startsWith('http://') && !newUrl.startsWith('https://')) {
-        newUrl = 'https://' + newUrl;
-      }
-      
-      // Remove trailing slash if present
-      if (newUrl.endsWith('/')) {
-        newUrl = newUrl.slice(0, -1);
-      }
-      
-      // Add /api/status if not present
-      if (!newUrl.endsWith('/api/status')) {
-        newUrl = newUrl + '/api/status';
-      }
-      
-      // Update the global variable
-      window.EXTERNAL_API_URL = newUrl;
-      
-      // Save to local storage
-      localStorage.setItem('externalApiUrl', newUrl);
-      
-      // Update display
-      updateExternalUrlDisplay();
-      
-      // Show success message
-      resultElement.innerHTML = '<p class="success">External URL updated successfully</p>';
-      
-      // Test the new URL
-      testApiStatus();
-    }
-    
-    // Initialize external URL display
-    updateExternalUrlDisplay();
-    
-    // Test API status
-    async function testApiStatus() {
-      const statusElement = document.getElementById('api-status');
-      const resultElement = document.getElementById('api-status-result');
-      
-      statusElement.className = 'pending';
-      statusElement.textContent = 'Testing...';
-      
-      try {
-        // Get external URL from configuration or fall back to direct API call
-        const apiUrl = window.EXTERNAL_API_URL || '/api/status';
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-        
-        statusElement.className = 'success';
-        statusElement.textContent = 'Available';
-        resultElement.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-      } catch (error) {
-        statusElement.className = 'error';
-        statusElement.textContent = 'Error';
-        resultElement.innerHTML = `<p class="error">Error: ${error.message}</p>`;
-      }
-    }
-    
-    // Test CORS configuration
-    async function testCorsConfig() {
-      const statusElement = document.getElementById('cors-status');
-      const resultElement = document.getElementById('cors-status-result');
-      
-      statusElement.className = 'pending';
-      statusElement.textContent = 'Testing...';
-      
-      try {
-        // Get external URL from configuration or fall back to direct API call
-        const corsUrl = window.EXTERNAL_API_URL ? `${window.EXTERNAL_API_URL.replace('/api/status', '/api/cors-preflight')}` : '/api/cors-preflight';
-        const response = await fetch(corsUrl, {
-          method: 'OPTIONS',
-          headers: {
-            'Origin': window.location.origin,
-            'Access-Control-Request-Method': 'GET',
-            'Access-Control-Request-Headers': 'Content-Type'
-          }
+    <script>
+        // Update current address
+        document.getElementById('currentAddress').textContent = window.location.href;
+
+        // Server health check
+        document.getElementById('btnCheckStatus').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('serverResult');
+            resultDiv.innerHTML = '<div class="loading"></div> Checking server status...';
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'test-result';
+            
+            try {
+                const response = await fetch('/api/status', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `<p>Server is operational ✓</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                resultDiv.classList.add('success');
+            } catch (error) {
+                resultDiv.innerHTML = `<p>Error connecting to server ✗</p><p>${error.message}</p>`;
+                resultDiv.classList.add('error');
+            }
         });
-        
-        const headers = {};
-        for (let [key, value] of response.headers.entries()) {
-          headers[key] = value;
-        }
-        
-        statusElement.className = 'success';
-        statusElement.textContent = 'CORS Headers Present';
-        resultElement.innerHTML = `<pre>${JSON.stringify(headers, null, 2)}</pre>`;
-      } catch (error) {
-        statusElement.className = 'error';
-        statusElement.textContent = 'Error';
-        resultElement.innerHTML = `<p class="error">Error: ${error.message}</p>`;
-      }
-    }
-    
-    // Test voice recognition endpoint
-    async function testVoiceEndpoint() {
-      const statusElement = document.getElementById('voice-status');
-      const resultElement = document.getElementById('voice-status-result');
-      
-      statusElement.className = 'pending';
-      statusElement.textContent = 'Testing...';
-      
-      try {
-        const formData = new FormData();
-        formData.append('step', 'name');
-        
-        // Get external URL from configuration or fall back to direct API call
-        const voiceUrl = window.EXTERNAL_API_URL ? `${window.EXTERNAL_API_URL.replace('/api/status', '/api/listen-for-voice')}` : '/api/listen-for-voice';
-        const response = await fetch(voiceUrl, {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Accept': 'application/json'
-          }
+
+        // Test root endpoint
+        document.getElementById('btnRootEndpoint').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('serverResult');
+            resultDiv.innerHTML = '<div class="loading"></div> Testing root endpoint...';
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'test-result';
+            
+            try {
+                const response = await fetch('/', {
+                    method: 'GET'
+                });
+                
+                const text = await response.text();
+                const success = response.ok;
+                
+                if (success) {
+                    resultDiv.innerHTML = `<p>Root endpoint is accessible ✓</p><p>Status: ${response.status}</p><p>Content type: ${response.headers.get('content-type')}</p>`;
+                    resultDiv.classList.add('success');
+                } else {
+                    resultDiv.innerHTML = `<p>Root endpoint error ✗</p><p>Status: ${response.status}</p><p>${text}</p>`;
+                    resultDiv.classList.add('error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p>Error testing root endpoint ✗</p><p>${error.message}</p>`;
+                resultDiv.classList.add('error');
+            }
         });
-        
-        const data = await response.json();
-        
-        statusElement.className = 'success';
-        statusElement.textContent = 'Available';
-        resultElement.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-      } catch (error) {
-        statusElement.className = 'error';
-        statusElement.textContent = 'Error';
-        resultElement.innerHTML = `<p class="error">Error: ${error.message}</p>`;
-      }
-    }
-    
-    // Test manual endpoint
-    async function testManualEndpoint() {
-      let endpoint = document.getElementById('manual-endpoint').value;
-      const resultElement = document.getElementById('manual-test-result');
-      
-      resultElement.innerHTML = '<p class="pending">Testing...</p>';
-      
-      // If endpoint starts with /api/ and we have an external URL, use the external URL
-      if (endpoint.startsWith('/api/') && window.EXTERNAL_API_URL) {
-        const baseExternalUrl = window.EXTERNAL_API_URL.replace('/api/status', '');
-        endpoint = `${baseExternalUrl}${endpoint}`;
-      }
-      
-      try {
-        const response = await fetch(endpoint);
-        const contentType = response.headers.get('content-type');
-        
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          resultElement.innerHTML = `<p class="success">Success (${response.status})</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
-        } else {
-          const text = await response.text();
-          resultElement.innerHTML = `<p class="success">Success (${response.status})</p><pre>${text.substring(0, 500)}${text.length > 500 ? '...(truncated)' : ''}</pre>`;
-        }
-      } catch (error) {
-        resultElement.innerHTML = `<p class="error">Error: ${error.message}</p>`;
-      }
-    }
-  </script>
+
+        // Test /test endpoint
+        document.getElementById('btnTestEndpoint').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('serverResult');
+            resultDiv.innerHTML = '<div class="loading"></div> Testing /test endpoint...';
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'test-result';
+            
+            try {
+                const response = await fetch('/test', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `<p>Test endpoint is operational ✓</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                resultDiv.classList.add('success');
+            } catch (error) {
+                resultDiv.innerHTML = `<p>Error testing /test endpoint ✗</p><p>${error.message}</p>`;
+                resultDiv.classList.add('error');
+            }
+        });
+
+        // Test voice API
+        document.getElementById('btnTestVoiceApi').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('voiceApiResult');
+            resultDiv.innerHTML = '<div class="loading"></div> Testing voice recognition API...';
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'test-result';
+            
+            try {
+                // Make a test request to the voice API
+                const response = await fetch('/api/listen-for-voice', {
+                    method: 'GET'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `<p>Voice API is accessible ✓</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    resultDiv.classList.add('success');
+                } else {
+                    const text = await response.text();
+                    resultDiv.innerHTML = `<p>Voice API returned error code ${response.status} ✗</p><p>${text}</p>`;
+                    resultDiv.classList.add('error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p>Error testing voice API ✗</p><p>${error.message}</p>`;
+                resultDiv.classList.add('error');
+            }
+        });
+
+        // Get system information
+        document.getElementById('btnSystemInfo').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('systemInfoResult');
+            resultDiv.innerHTML = '<div class="loading"></div> Getting system information...';
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'test-result';
+            
+            try {
+                const response = await fetch('/api/status', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <table>
+                        <tr>
+                            <th>Property</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr>
+                            <td>Server Status</td>
+                            <td>${data.status || 'Unknown'}</td>
+                        </tr>
+                        <tr>
+                            <td>Version</td>
+                            <td>${data.version || 'Unknown'}</td>
+                        </tr>
+                        <tr>
+                            <td>Uptime</td>
+                            <td>${data.uptime || 'Unknown'}</td>
+                        </tr>
+                    </table>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                resultDiv.classList.add('success');
+            } catch (error) {
+                resultDiv.innerHTML = `<p>Error getting system information ✗</p><p>${error.message}</p>`;
+                resultDiv.classList.add('error');
+            }
+        });
+
+        // Refresh API status
+        document.getElementById('btnRefreshApiStatus').addEventListener('click', async () => {
+            const apiList = document.getElementById('apiStatusList');
+            const items = apiList.querySelectorAll('li');
+            
+            // Set all to loading state
+            items.forEach(item => {
+                const badge = item.querySelector('.status-badge');
+                badge.textContent = 'Checking...';
+                badge.className = 'status-badge unknown';
+            });
+            
+            // Check each API endpoint
+            const endpoints = [
+                '/api/status',
+                '/api/listen-for-voice',
+                '/api/play-cosmic-sound',
+                '/api/analyze-emotion'
+            ];
+            
+            for (let i = 0; i < endpoints.length; i++) {
+                const endpoint = endpoints[i];
+                const item = items[i];
+                const badge = item.querySelector('.status-badge');
+                
+                try {
+                    // Different handling for POST endpoints
+                    if (endpoint === '/api/play-cosmic-sound' || endpoint === '/api/analyze-emotion') {
+                        const response = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                // Simple test data
+                                sound_type: 'click',
+                                text: 'Test text for emotion analysis'
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            badge.textContent = 'Operational';
+                            badge.className = 'status-badge operational';
+                        } else {
+                            badge.textContent = `Error (${response.status})`;
+                            badge.className = 'status-badge offline';
+                        }
+                    } else {
+                        // GET endpoints
+                        const response = await fetch(endpoint, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json'
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            badge.textContent = 'Operational';
+                            badge.className = 'status-badge operational';
+                        } else {
+                            badge.textContent = `Error (${response.status})`;
+                            badge.className = 'status-badge offline';
+                        }
+                    }
+                } catch (error) {
+                    badge.textContent = 'Offline';
+                    badge.className = 'status-badge offline';
+                }
+            }
+        });
+    </script>
 </body>
 </html>

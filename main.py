@@ -52,6 +52,10 @@ def add_cors_headers(response):
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-Custom-Header'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    response.headers['Access-Control-Expose-Headers'] = 'Content-Length, Content-Type, Date'
+    response.headers['Cross-Origin-Resource-Policy'] = 'cross-origin'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
     return response
 
 # Initialize components
@@ -95,10 +99,14 @@ def api_status():
         'service_name': 'Mashaaer Feelings'
     })
 
-# Connection test page
+# Connection test pages
 @app.route('/connection-test')
 def connection_test_page():
     return render_template('connection_test.html')
+    
+@app.route('/connection-test-enhanced')
+def connection_test_enhanced_page():
+    return app.send_static_file('connection_test_enhanced.html')
 
 # Simple test page as root route (temporary)
 @app.route('/simple-test')
@@ -132,6 +140,29 @@ def diagnostic_static_page():
 def minimal_page():
     # Direct file serving of minimal HTML file
     return app.send_static_file('minimal.html')
+    
+# Voice API test pages
+@app.route('/test-voice-api')
+def test_voice_api():
+    # Direct file serving of advanced voice API test page
+    return app.send_static_file('test_voice_endpoint.html')
+    
+@app.route('/voice-api-test')
+def voice_api_test():
+    # Direct file serving of simple voice API test page
+    return app.send_static_file('voice_api_test.html')
+
+# Test page route (direct HTML without templates)
+@app.route('/test-page')
+def test_page():
+    # Direct file serving of test page HTML
+    return app.send_static_file('test_page.html')
+
+# Diagnostic panel for connectivity troubleshooting
+@app.route('/diagnostic-panel')
+def diagnostic_panel():
+    # Serve the diagnostic HTML for testing connectivity
+    return app.send_static_file('diagnostic.html')
 
 # Helper function to get developer mode status
 def is_developer_mode():
@@ -194,6 +225,9 @@ def handle_cors_preflight():
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin,X-Custom-Header')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
+    response.headers.add('Access-Control-Expose-Headers', 'Content-Length,Content-Type,Date')
+    response.headers.add('Cross-Origin-Resource-Policy', 'cross-origin')
+    response.headers.add('X-Content-Type-Options', 'nosniff')
     return response
 
 # Global OPTIONS request handler to ensure proper CORS for all routes
@@ -206,6 +240,9 @@ def options_handler(path):
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin,X-Custom-Header')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
+    response.headers.add('Access-Control-Expose-Headers', 'Content-Length,Content-Type,Date')
+    response.headers.add('Cross-Origin-Resource-Policy', 'cross-origin')
+    response.headers.add('X-Content-Type-Options', 'nosniff')
     return response
 
 # Scheduler for auto-learning

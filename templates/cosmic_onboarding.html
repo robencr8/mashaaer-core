@@ -232,6 +232,18 @@
       animation: fadeIn 0.5s ease-in-out;
     }
     
+    .error-message {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #e94057;
+      background-color: rgba(233, 64, 87, 0.1);
+      border-left: 3px solid #e94057;
+      padding: 10px;
+      border-radius: 4px;
+      text-align: center;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
     .pulse-dot {
       display: inline-block;
       width: 8px;
@@ -586,6 +598,8 @@
         <div class="pulse-dot"></div>
         <div class="pulse-dot"></div>
       </div>
+      
+      <div id="voice-error-message" class="error-message" style="display: none;"></div>
     </div>
     
     <!-- Step 2: Nickname -->
@@ -610,6 +624,8 @@
         <div class="pulse-dot"></div>
         <div class="pulse-dot"></div>
       </div>
+      
+      <div id="voice-error-message-nickname" class="error-message" style="display: none;"></div>
     </div>
     
     <!-- Step 3: Language -->
@@ -670,6 +686,8 @@
         <div class="pulse-dot"></div>
         <div class="pulse-dot"></div>
       </div>
+      
+      <div id="voice-error-message-terms" class="error-message" style="display: none;"></div>
     </div>
     
     <!-- Step 5: Completion -->
@@ -916,13 +934,16 @@
       const formData = new FormData();
       formData.append('step', stepId);
       
-      // Call the server's listen API
+      // Call the server's listen API with enhanced error handling
       fetch('/api/listen-for-voice', {
         method: 'POST',
         body: formData,
         headers: {
-          'Accept': 'application/json'
-        }
+          'Accept': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
       })
       .then(response => response.json())
       .then(data => {
@@ -942,6 +963,49 @@
         console.error('API error:', error);
         if (listeningIndicator) {
           listeningIndicator.style.display = 'none';
+        }
+        
+        // Show error message to user - with specific elements per step
+        let errorElement;
+        
+        if (stepId === 'name') {
+          errorElement = document.getElementById('voice-error-message');
+        } else if (stepId === 'nickname') {
+          errorElement = document.getElementById('voice-error-message-nickname');
+        } else if (stepId === 'terms-agree') {
+          errorElement = document.getElementById('voice-error-message-terms');
+        } else {
+          errorElement = document.getElementById('voice-error-message');
+        }
+        
+        if (errorElement) {
+          const errorMsg = userLanguage === 'ar' ? 
+            `خطأ في التعرف على الصوت: ${error.message}. يرجى المحاولة مرة أخرى أو كتابة الرد.` : 
+            `Voice recognition error: ${error.message}. Please try again or type your response.`;
+            
+          errorElement.textContent = errorMsg;
+          errorElement.style.display = 'block';
+          
+          // Hide error message after 5 seconds
+          setTimeout(() => {
+            errorElement.style.display = 'none';
+          }, 5000);
+        }
+        
+        // Try again after 3 seconds if we're on important steps
+        const currentStep = document.querySelector('.step.active');
+        if (currentStep && (currentStep.id === 'step-name' || currentStep.id === 'step-terms')) {
+          setTimeout(() => {
+            console.log('Retrying voice recognition after error...');
+            
+            // Clear error messages before retrying
+            if (errorElement) {
+              errorElement.style.display = 'none';
+            }
+            
+            // Retry voice input
+            startVoiceInput(fieldId);
+          }, 3000);
         }
       });
     }

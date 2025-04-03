@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice API Simple Test</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .test-container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+        }
+        .result-container {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            min-height: 50px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px 0;
+        }
+        button:hover {
+            background-color: #0069d9;
+        }
+        pre {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        select, input {
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 300px;
+        }
+        .flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .status-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #ccc;
+            display: inline-block;
+        }
+        .green {
+            background-color: #28a745;
+        }
+        .red {
+            background-color: #dc3545;
+        }
+        .yellow {
+            background-color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Voice API Simple Test</h1>
+        <div>
+            <span id="server-status-indicator" class="status-indicator"></span>
+            <span id="server-status-text">Checking server...</span>
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Simple Voice Recognition Test</h2>
+        <p>Test the voice recognition API endpoint with various steps and methods.</p>
+        
+        <div class="form-group">
+            <label for="step-select">Select step:</label>
+            <select id="step-select">
+                <option value="name">Name</option>
+                <option value="full-name">Full Name</option>
+                <option value="nickname">Nickname</option>
+                <option value="terms-agree">Terms Agreement</option>
+                <option value="language">Language Preference</option>
+                <option value="voice-style">Voice Style</option>
+            </select>
+        </div>
+        
+        <div class="flex">
+            <button onclick="testGet()">Test GET Request</button>
+            <button onclick="testPost()">Test POST Request</button>
+            <button onclick="testFormData()">Test FormData POST</button>
+        </div>
+        
+        <h3>Result:</h3>
+        <div id="simple-result" class="result-container">
+            <p>Click a button above to test the voice API.</p>
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h2>CORS Test</h2>
+        <p>Test CORS headers and preflight requests.</p>
+        
+        <div class="flex">
+            <button onclick="testCorsOptions()">Test OPTIONS Request</button>
+            <button onclick="testCorsWithCredentials()">Test With Credentials</button>
+            <button onclick="testCorsHeaders()">Check CORS Headers</button>
+        </div>
+        
+        <h3>Result:</h3>
+        <div id="cors-result" class="result-container">
+            <p>Click a button above to test CORS.</p>
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Test Response Headers</h2>
+        <p>Detailed view of response headers from the API.</p>
+        
+        <pre id="headers-display">No headers to display yet.</pre>
+    </div>
+    
+    <div class="test-container">
+        <h2>Connection Status</h2>
+        <p>Information about connection to the server.</p>
+        
+        <div class="flex">
+            <button onclick="checkServerStatus()">Check Server Status</button>
+            <button onclick="clearResults()">Clear All Results</button>
+        </div>
+        
+        <div id="status-result" class="result-container">
+            <p>Click the button to check server status.</p>
+        </div>
+    </div>
+    
+    <script>
+        // Check server status on page load
+        window.onload = function() {
+            checkServerStatus();
+        };
+        
+        // Update server status indicator
+        function updateServerStatus(status, message) {
+            const indicator = document.getElementById('server-status-indicator');
+            const text = document.getElementById('server-status-text');
+            
+            indicator.className = 'status-indicator';
+            text.textContent = message || '';
+            
+            if (status === 'online') {
+                indicator.classList.add('green');
+            } else if (status === 'offline') {
+                indicator.classList.add('red');
+            } else if (status === 'warning') {
+                indicator.classList.add('yellow');
+            }
+        }
+        
+        // Display headers in a readable format
+        function displayHeaders(headers) {
+            const headersDisplay = document.getElementById('headers-display');
+            if (!headers) {
+                headersDisplay.textContent = 'No headers to display.';
+                return;
+            }
+            
+            const headersObj = {};
+            headers.forEach((value, key) => {
+                headersObj[key] = value;
+            });
+            
+            headersDisplay.textContent = JSON.stringify(headersObj, null, 2);
+        }
+        
+        // Test GET request
+        async function testGet() {
+            const resultElement = document.getElementById('simple-result');
+            const step = document.getElementById('step-select').value;
+            
+            resultElement.className = 'result-container';
+            resultElement.innerHTML = '<p>Testing GET request...</p>';
+            
+            try {
+                const response = await fetch(`/api/listen-for-voice?step=${step}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                // Display headers
+                displayHeaders(response.headers);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultElement.className = 'result-container success';
+                    resultElement.innerHTML = `
+                        <p><strong>GET request successful!</strong></p>
+                        <p>Recognized text: ${data.text}</p>
+                        <p>Confidence: ${data.confidence}</p>
+                        <p>Step: ${data.step || step}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultElement.className = 'result-container error';
+                    resultElement.innerHTML = `
+                        <p><strong>GET request failed!</strong></p>
+                        <p>Status: ${response.status} ${response.statusText}</p>
+                    `;
+                }
+            } catch (error) {
+                resultElement.className = 'result-container error';
+                resultElement.innerHTML = `
+                    <p><strong>Error making GET request!</strong></p>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+        
+        // Test POST request with JSON
+        async function testPost() {
+            const resultElement = document.getElementById('simple-result');
+            const step = document.getElementById('step-select').value;
+            
+            resultElement.className = 'result-container';
+            resultElement.innerHTML = '<p>Testing POST request with JSON...</p>';
+            
+            try {
+                const response = await fetch('/api/listen-for-voice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ step: step })
+                });
+                
+                // Display headers
+                displayHeaders(response.headers);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultElement.className = 'result-container success';
+                    resultElement.innerHTML = `
+                        <p><strong>POST request successful!</strong></p>
+                        <p>Recognized text: ${data.text}</p>
+                        <p>Confidence: ${data.confidence}</p>
+                        <p>Step: ${data.step || step}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultElement.className = 'result-container error';
+                    resultElement.innerHTML = `
+                        <p><strong>POST request failed!</strong></p>
+                        <p>Status: ${response.status} ${response.statusText}</p>
+                    `;
+                }
+            } catch (error) {
+                resultElement.className = 'result-container error';
+                resultElement.innerHTML = `
+                    <p><strong>Error making POST request!</strong></p>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+        
+        // Test POST request with FormData
+        async function testFormData() {
+            const resultElement = document.getElementById('simple-result');
+            const step = document.getElementById('step-select').value;
+            
+            resultElement.className = 'result-container';
+            resultElement.innerHTML = '<p>Testing POST request with FormData...</p>';
+            
+            try {
+                const formData = new FormData();
+                formData.append('step', step);
+                
+                const response = await fetch('/api/listen-for-voice', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+                
+                // Display headers
+                displayHeaders(response.headers);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultElement.className = 'result-container success';
+                    resultElement.innerHTML = `
+                        <p><strong>FormData POST request successful!</strong></p>
+                        <p>Recognized text: ${data.text}</p>
+                        <p>Confidence: ${data.confidence}</p>
+                        <p>Step: ${data.step || step}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultElement.className = 'result-container error';
+                    resultElement.innerHTML = `
+                        <p><strong>FormData POST request failed!</strong></p>
+                        <p>Status: ${response.status} ${response.statusText}</p>
+                    `;
+                }
+            } catch (error) {
+                resultElement.className = 'result-container error';
+                resultElement.innerHTML = `
+                    <p><strong>Error making FormData POST request!</strong></p>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+        
+        // Test OPTIONS request for CORS
+        async function testCorsOptions() {
+            const resultElement = document.getElementById('cors-result');
+            
+            resultElement.className = 'result-container';
+            resultElement.innerHTML = '<p>Testing OPTIONS request for CORS...</p>';
+            
+            try {
+                const response = await fetch('/api/listen-for-voice', {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type, X-Requested-With'
+                    }
+                });
+                
+                // Display headers
+                displayHeaders(response.headers);
+                
+                // Check CORS headers
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                    'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials'),
+                    'Access-Control-Expose-Headers': response.headers.get('Access-Control-Expose-Headers')
+                };
+                
+                if (response.ok) {
+                    resultElement.className = 'result-container success';
+                    resultElement.innerHTML = `
+                        <p><strong>OPTIONS request successful!</strong></p>
+                        <p>Status: ${response.status} ${response.statusText}</p>
+                        <h4>CORS Headers:</h4>
+                        <pre>${JSON.stringify(corsHeaders, null, 2)}</pre>
+                    `;
+                } else {
+                    resultElement.className = 'result-container error';
+                    resultElement.innerHTML = `
+                        <p><strong>OPTIONS request failed!</strong></p>
+                        <p>Status: ${response.status} ${response.statusText}</p>
+                        <h4>CORS Headers:</h4>
+                        <pre>${JSON.stringify(corsHeaders, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultElement.className = 'result-container error';
+                resultElement.innerHTML = `
+                    <p><strong>Error making OPTIONS request!</strong></p>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+        
+        // Test CORS with credentials
+        async function testCorsWithCredentials() {
+            const resultElement = document.getElementById('cors-result');
+            const step = document.getElementById('step-select').value;
+            
+            resultElement.className = 'result-container';
+            resultElement.innerHTML = '<p>Testing CORS with credentials...</p>';
+            
+            try {
+                const response = await fetch('/api/listen-for-voice', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Origin': window.location.origin
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ step: step })
+                });
+                
+                // Display headers
+                displayHeaders(response.headers);
+                
+                // Check credentials support
+                const allowCredentials = response.headers.get('Access-Control-Allow-Credentials');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultElement.className = 'result-container success';
+                    resultElement.innerHTML = `
+                        <p><strong>CORS with credentials test successful!</strong></p>
+                        <p>Credentials supported: ${allowCredentials === 'true' ? 'Yes' : 'No'}</p>
+                        <p>Status: ${response.status} ${response.statusText}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultElement.className = 'result-container error';
+                    resultElement.innerHTML = `
+                        <p><strong>CORS with credentials test failed!</strong></p>
+                        <p>Status: ${response.status} ${response.statusText}</p>
+                    `;
+                }
+            } catch (error) {
+                resultElement.className = 'result-container error';
+                resultElement.innerHTML = `
+                    <p><strong>Error testing CORS with credentials!</strong></p>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+        
+        // Check CORS headers
+        async function testCorsHeaders() {
+            const resultElement = document.getElementById('cors-result');
+            
+            resultElement.className = 'result-container';
+            resultElement.innerHTML = '<p>Checking CORS headers...</p>';
+            
+            try {
+                // Test GET and OPTIONS requests for CORS
+                const [getResponse, optionsResponse] = await Promise.all([
+                    fetch('/api/listen-for-voice?step=name', {
+                        method: 'GET',
+                        headers: {
+                            'Origin': window.location.origin,
+                            'Accept': 'application/json'
+                        }
+                    }),
+                    fetch('/api/listen-for-voice', {
+                        method: 'OPTIONS',
+                        headers: {
+                            'Origin': window.location.origin,
+                            'Access-Control-Request-Method': 'POST',
+                            'Access-Control-Request-Headers': 'Content-Type, X-Requested-With'
+                        }
+                    })
+                ]);
+                
+                // Get headers from both responses
+                const getHeaders = {};
+                const optionsHeaders = {};
+                
+                getResponse.headers.forEach((value, key) => {
+                    getHeaders[key] = value;
+                });
+                
+                optionsResponse.headers.forEach((value, key) => {
+                    optionsHeaders[key] = value;
+                });
+                
+                // Check for important CORS headers
+                const corsHeaders = {
+                    'GET': {
+                        'Access-Control-Allow-Origin': getResponse.headers.get('Access-Control-Allow-Origin'),
+                        'Access-Control-Allow-Credentials': getResponse.headers.get('Access-Control-Allow-Credentials'),
+                        'Access-Control-Expose-Headers': getResponse.headers.get('Access-Control-Expose-Headers')
+                    },
+                    'OPTIONS': {
+                        'Access-Control-Allow-Origin': optionsResponse.headers.get('Access-Control-Allow-Origin'),
+                        'Access-Control-Allow-Methods': optionsResponse.headers.get('Access-Control-Allow-Methods'),
+                        'Access-Control-Allow-Headers': optionsResponse.headers.get('Access-Control-Allow-Headers'),
+                        'Access-Control-Allow-Credentials': optionsResponse.headers.get('Access-Control-Allow-Credentials'),
+                        'Access-Control-Max-Age': optionsResponse.headers.get('Access-Control-Max-Age')
+                    }
+                };
+                
+                // Display headers in the headers section
+                displayHeaders(optionsResponse.headers);
+                
+                // Generate report
+                const missingHeaders = [];
+                
+                if (!corsHeaders.GET['Access-Control-Allow-Origin']) {
+                    missingHeaders.push('Access-Control-Allow-Origin (GET)');
+                }
+                
+                if (!corsHeaders.OPTIONS['Access-Control-Allow-Origin']) {
+                    missingHeaders.push('Access-Control-Allow-Origin (OPTIONS)');
+                }
+                
+                if (!corsHeaders.OPTIONS['Access-Control-Allow-Methods']) {
+                    missingHeaders.push('Access-Control-Allow-Methods (OPTIONS)');
+                }
+                
+                if (!corsHeaders.OPTIONS['Access-Control-Allow-Headers']) {
+                    missingHeaders.push('Access-Control-Allow-Headers (OPTIONS)');
+                }
+                
+                if (missingHeaders.length === 0) {
+                    resultElement.className = 'result-container success';
+                    resultElement.innerHTML = `
+                        <p><strong>CORS headers check successful!</strong></p>
+                        <p>All required CORS headers are present.</p>
+                        <h4>CORS Headers:</h4>
+                        <pre>${JSON.stringify(corsHeaders, null, 2)}</pre>
+                    `;
+                } else {
+                    resultElement.className = 'result-container error';
+                    resultElement.innerHTML = `
+                        <p><strong>CORS headers check found issues!</strong></p>
+                        <p>Missing headers: ${missingHeaders.join(', ')}</p>
+                        <h4>CORS Headers:</h4>
+                        <pre>${JSON.stringify(corsHeaders, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultElement.className = 'result-container error';
+                resultElement.innerHTML = `
+                    <p><strong>Error checking CORS headers!</strong></p>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+        
+        // Check server status
+        async function checkServerStatus() {
+            const resultElement = document.getElementById('status-result');
+            
+            resultElement.className = 'result-container';
+            resultElement.innerHTML = '<p>Checking server status...</p>';
+            
+            try {
+                const startTime = performance.now();
+                const response = await fetch('/api/status');
+                const endTime = performance.now();
+                const responseTime = (endTime - startTime).toFixed(2);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultElement.className = 'result-container success';
+                    resultElement.innerHTML = `
+                        <p><strong>Server is online!</strong></p>
+                        <p>Response time: ${responseTime}ms</p>
+                        <p>Status: ${data.status}</p>
+                        <p>Server: ${data.service_name}</p>
+                        <p>Version: ${data.version}</p>
+                        <p>Timestamp: ${data.timestamp}</p>
+                    `;
+                    updateServerStatus('online', 'Server Online');
+                } else {
+                    resultElement.className = 'result-container error';
+                    resultElement.innerHTML = `
+                        <p><strong>Server responded with an error!</strong></p>
+                        <p>Status: ${response.status} ${response.statusText}</p>
+                    `;
+                    updateServerStatus('warning', `Error ${response.status}`);
+                }
+            } catch (error) {
+                resultElement.className = 'result-container error';
+                resultElement.innerHTML = `
+                    <p><strong>Cannot connect to server!</strong></p>
+                    <p>${error.message}</p>
+                `;
+                updateServerStatus('offline', 'Server Offline');
+            }
+        }
+        
+        // Clear all results
+        function clearResults() {
+            document.getElementById('simple-result').className = 'result-container';
+            document.getElementById('simple-result').innerHTML = '<p>Click a button above to test the voice API.</p>';
+            
+            document.getElementById('cors-result').className = 'result-container';
+            document.getElementById('cors-result').innerHTML = '<p>Click a button above to test CORS.</p>';
+            
+            document.getElementById('status-result').className = 'result-container';
+            document.getElementById('status-result').innerHTML = '<p>Click the button to check server status.</p>';
+            
+            document.getElementById('headers-display').textContent = 'No headers to display yet.';
+        }
+    </script>
+</body>
+</html>

@@ -679,16 +679,31 @@ def send_sms_alert():
             'error_details': error_message
         }), 500
 
-@api.route('/listen-for-voice', methods=['POST'])
+@api.route('/listen-for-voice', methods=['POST', 'GET'])
 def listen_for_voice():
     """
     Listen for voice input and convert to text
     
     This endpoint supports voice recognition for the onboarding wizard
     and other interactive components of the Mashaaer interface.
+    
+    GET method is supported for diagnostic testing via the diagnostic panel.
     """
     try:
         logger.info("API: Voice recognition request received")
+        logger.info(f"API: Request method: {request.method}")
+        logger.info(f"API: Request content type: {request.content_type}")
+        logger.info(f"API: Request headers: {dict(request.headers)}")
+        
+        # Add CORS headers for this specific endpoint
+        response_headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, X-Requested-With, Accept, Origin, Authorization',
+            'Access-Control-Allow-Credentials': 'true',
+            'Access-Control-Expose-Headers': 'Content-Length, Content-Type, Date',
+            'Cross-Origin-Resource-Policy': 'cross-origin'
+        }
         
         # Check if voice recognition module is available
         if not voice_recognition:
@@ -696,42 +711,98 @@ def listen_for_voice():
             return jsonify({
                 'success': False,
                 'error': 'Voice recognition not available',
-                'text': ''
-            }), 400
-        
-        # In a real implementation, we would process audio from the request
-        # For now, we'll simulate successful voice recognition with sample responses
+                'text': '',
+                'debug': 'Voice recognition module not initialized'
+            }), 400, response_headers
         
         # Get the current onboarding step from query params or form data
         step = request.args.get('step') or request.form.get('step') or 'name'
+        logger.info(f"API: Voice recognition step: {step}")
         
-        # Sample responses based on step context
-        sample_responses = {
-            'name': ['محمد', 'فاطمة', 'Ahmed', 'Sarah'],
-            'nickname': ['محمد', 'مها', 'Ahmed', 'Sara'],
-            'terms-agree': ['نعم', 'أوافق', 'Yes', 'I agree'],
-        }
+        # Check if we're running in test/demo mode where we use sample responses
+        is_test_mode = config.get_setting('USE_SAMPLE_VOICE_RESPONSES', 'true').lower() == 'true'
+        logger.info(f"API: Voice recognition running in test mode: {is_test_mode}")
         
-        import random
-        recognized_text = random.choice(sample_responses.get(step, [''])) 
+        if is_test_mode:
+            # Sample responses based on step context
+            sample_responses = {
+                'name': ['محمد', 'فاطمة', 'Ahmed', 'Sarah'],
+                'nickname': ['محمد', 'مها', 'Ahmed', 'Sara'],
+                'terms-agree': ['نعم', 'أوافق', 'Yes', 'I agree'],
+                'full-name': ['محمد علي', 'فاطمة احمد', 'Ahmed Ali', 'Sarah Hassan'],
+                'language': ['العربية', 'English'],
+                'voice-style': ['default', 'formal', 'casual']
+            }
+            
+            import random
+            recognized_text = random.choice(sample_responses.get(step, ['نعم']))
+            confidence = 0.95
+            logger.info(f"API: Voice recognition test mode, returning sample text: {recognized_text}")
+        else:
+            try:
+                # Get the preferred language for voice recognition
+                language = request.args.get('language') or request.form.get('language')
+                
+                # Default to Arabic if not specified
+                if not language:
+                    # Try to get from session or database
+                    language = session.get('language') or db_manager.get_setting('default_language', 'ar')
+                
+                # Map language code to recognition language
+                recognition_language = 'ar-EG' if language == 'ar' else 'en-US'
+                logger.info(f"API: Voice recognition language: {recognition_language}")
+                
+                # Perform actual voice recognition
+                result = voice_recognition.recognize_speech(language=recognition_language)
+                
+                if not result['success']:
+                    logger.warning(f"API: Voice recognition failed: {result.get('error', 'Unknown error')}")
+                    return jsonify({
+                        'success': False,
+                        'error': 'Voice recognition failed',
+                        'error_details': result.get('error', 'Unknown recognition error'),
+                        'text': '',
+                        'step': step,
+                        'debug': f"Failed to recognize speech with error: {result.get('error')}"
+                    }), 400, response_headers
+                
+                recognized_text = result['text']
+                confidence = result.get('confidence', 0.5)
+                logger.info(f"API: Voice recognition successful, returning text: {recognized_text} with confidence {confidence}")
+            except Exception as rec_error:
+                logger.error(f"API: Error during speech recognition: {str(rec_error)}")
+                logger.error(traceback.format_exc())
+                return jsonify({
+                    'success': False,
+                    'error': 'Speech recognition error',
+                    'error_details': str(rec_error),
+                    'text': '',
+                    'step': step,
+                    'debug': f"Exception during recognition: {str(rec_error)}"
+                }), 500, response_headers
         
-        logger.info(f"API: Voice recognition successful, returning text: {recognized_text}")
+        # Log the recognized text for debugging purposes
+        db_manager.log_voice_recognition(step, recognized_text, confidence)
         
         return jsonify({
             'success': True,
             'text': recognized_text,
-            'confidence': 0.85
-        })
+            'confidence': confidence,
+            'step': step
+        }), 200, response_headers
         
     except Exception as e:
         error_message = str(e)
         logger.error(f"API: Exception in voice recognition endpoint: {error_message}")
+        logger.error(traceback.format_exc())
         
         return jsonify({
             'success': False,
             'error': 'Voice recognition error',
             'error_details': error_message,
-            'text': ''
-        }), 500
+            'text': '',
+            'step': request.args.get('step') or request.form.get('step') or 'unknown',
+            'debug': f"General exception: {error_message}"
+        }), 500, response_headers
 
 # ... remaining API endpoints ...
