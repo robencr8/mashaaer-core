@@ -314,7 +314,7 @@ def play_cosmic_sound():
         
         # Handle welcome message based on language
         if sound_type == 'welcome':
-            welcome_text = "Welcome to Mashaaer" if language == 'en' else "مرحبا بكم في مشاعر"
+            welcome_text = "Welcome to Mashaaer, Create the future, I hear you" if language == 'en' else "اصنع المستقبل، أنا أسمعك"
             
             # Use TTS to generate the audio
             try:
