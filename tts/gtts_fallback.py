@@ -7,11 +7,13 @@ import io
 import importlib.util
 
 # Check if gtts is available
-gtts_spec = importlib.util.find_spec('gtts')
-if gtts_spec is not None:
+try:
     from gtts import gTTS
-else:
+    GTTS_AVAILABLE = True
+except ImportError:
+    GTTS_AVAILABLE = False
     gTTS = None
+    print("Warning: gtts module not available, using fallback silent audio")
 
 class GTTSFallback:
     """Text-to-Speech fallback implementation with cached responses"""
@@ -90,17 +92,41 @@ class GTTSFallback:
         # Always return True since we have fallbacks
         return True
     
-    def speak(self, text, voice="default"):
-        """Generate speech from text using gTTS and return path to audio file"""
-        # Map voice to language
-        lang = self.languages.get(voice.lower(), "en")
+    def speak(self, text, voice="default", language=None):
+        """
+        Generate speech from text using gTTS and return path to audio file
+        
+        Args:
+            text (str): The text to convert to speech
+            voice (str): Voice name or type
+            language (str): Optional explicit language code that overrides voice mapping
+        """
+        # Map voice to language if language not explicitly provided
+        if language:
+            # Override with explicit language if provided (e.g., 'ar', 'en')
+            if language.startswith('ar'):
+                lang = 'ar'
+            elif language.startswith('en'):
+                lang = 'en'
+            else:
+                lang = language[:2]  # Use first two chars as language code
+            self.logger.debug(f"Using explicit language override: {lang} from {language}")
+        else:
+            # Otherwise use voice mapping
+            lang = self.languages.get(voice.lower(), "en")
+            self.logger.debug(f"Mapped voice '{voice}' to language: {lang}")
+        
+        # Handling Arabic text specially (right-to-left language)
+        is_arabic = lang == 'ar'
+        if is_arabic:
+            self.logger.debug("Processing Arabic text for TTS generation")
         
         # Check for exact matches in offline responses
         text_lower = text.lower().strip()
         for key, audio_file in self.offline_responses.items():
             if key in text_lower:
                 offline_path = os.path.join(self.cache_dir, audio_file)
-                if os.path.exists(offline_path):
+                if os.path.exists(offline_path) and os.path.getsize(offline_path) > 0:
                     self.logger.debug(f"Using offline response for: {text[:20]}...")
                     return offline_path
         
@@ -110,7 +136,7 @@ class GTTSFallback:
         cache_path = os.path.join(self.cache_dir, cache_filename)
         
         # Check if we already have this audio cached
-        if os.path.exists(cache_path):
+        if os.path.exists(cache_path) and os.path.getsize(cache_path) > 0:
             self.logger.debug(f"Using cached audio for: {text[:20]}...")
             return cache_path
         
@@ -122,35 +148,67 @@ class GTTSFallback:
                 # Generate speech with gTTS
                 tts = gTTS(text=text, lang=lang, slow=False)
                 
+                # Ensure the directory exists
+                os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+                
                 # Save to file
                 tts.save(cache_path)
                 
-                return cache_path
+                # Verify the file was created successfully
+                if os.path.exists(cache_path) and os.path.getsize(cache_path) > 0:
+                    self.logger.info(f"Successfully generated speech to {cache_path}")
+                    return cache_path
+                else:
+                    self.logger.error(f"gTTS returned empty or missing file at {cache_path}")
             
             except Exception as e:
                 self.logger.error(f"gTTS speech generation failed: {str(e)}")
-                # Fall through to next section for fallback
+                import traceback
+                self.logger.error(f"gTTS traceback: {traceback.format_exc()}")
         else:
             self.logger.warning("gTTS not available, using fallback response")
         
         # If we reach here, either gTTS failed or isn't available
-        # Create a placeholder file with text content for debugging
-        with open(cache_path, 'wb') as f:
-            # Just write an empty file as placeholder
-            f.write(b'')
+        # First try returning a language-specific static response if available
+        lang_fallback = os.path.join(self.cache_dir, f"error_{lang}.mp3")
+        if os.path.exists(lang_fallback) and os.path.getsize(lang_fallback) > 0:
+            self.logger.info(f"Using language-specific fallback for {lang}")
+            return lang_fallback
             
-        self.logger.warning(f"Created empty placeholder for: {text[:50]}...")
+        # Create an empty placeholder file for this request (avoids repeated failures)
+        try:
+            with open(cache_path, 'wb') as f:
+                # Just write an empty file as placeholder
+                f.write(b'')
+            self.logger.warning(f"Created empty placeholder for: {text[:50]}...")
+        except Exception as e:
+            self.logger.error(f"Failed to create placeholder file: {str(e)}")
         
         # Return a default audio file as fallback
         fallback_path = os.path.join(self.cache_dir, "error.mp3")
-        if os.path.exists(fallback_path):
+        if os.path.exists(fallback_path) and os.path.getsize(fallback_path) > 0:
             return fallback_path
         else:
-            # Last resort fallback - create a temp file and return it
-            temp_path = os.path.join(self.cache_dir, "temp_fallback.mp3")
-            with open(temp_path, 'wb') as f:
-                f.write(b'')
-            return temp_path
+            # Create a static error sound if none exists
+            self._create_static_error_file(fallback_path)
+            return fallback_path
+    
+    def _create_static_error_file(self, filepath):
+        """Create a static error MP3 file"""
+        try:
+            if gTTS:
+                # Try using gTTS
+                error_text = "I'm sorry, I encountered an error."
+                tts = gTTS(text=error_text, lang="en", slow=False)
+                tts.save(filepath)
+                self.logger.info(f"Created static error audio at {filepath}")
+            else:
+                # Create empty file as last resort
+                with open(filepath, 'wb') as f:
+                    f.write(b'')
+                self.logger.warning(f"Created empty error file at {filepath}")
+        except Exception as e:
+            self.logger.error(f"Failed to create static error file: {str(e)}")
     
     def get_available_voices(self):
         """Get list of available voices/languages"""

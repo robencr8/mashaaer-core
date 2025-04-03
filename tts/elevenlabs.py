@@ -107,6 +107,7 @@ class ElevenLabsTTS:
                 self.logger.info("Retrieved API key directly from environment in speak method")
                 self.api_key = direct_key
             else:
+                self.logger.error("Failed to retrieve ElevenLabs API key from environment")
                 raise ValueError("ElevenLabs API key not set and not found in environment")
         
         # Get voice ID
@@ -121,11 +122,15 @@ class ElevenLabsTTS:
         
         # Check if we already have this audio cached
         if os.path.exists(cache_path):
-            self.logger.info(f"Using cached audio for: {text[:30]}...")
-            return cache_path
+            file_size = os.path.getsize(cache_path)
+            if file_size > 0:
+                self.logger.info(f"Using cached audio for: {text[:30]}... (size: {file_size} bytes)")
+                return cache_path
+            else:
+                self.logger.warning(f"Found zero-byte cached file, will regenerate: {cache_path}")
         
         try:
-            # Verify directories
+            # Verify directories exist
             os.makedirs(self.cache_dir, exist_ok=True)
             
             # Rate limiting: max 3 requests per second
@@ -147,24 +152,31 @@ class ElevenLabsTTS:
             
             data = {
                 "text": text,
-                "model_id": "eleven_multilingual_v2",  # Updated to use newer model
+                "model_id": "eleven_multilingual_v2",
                 "voice_settings": {
                     "stability": 0.5,
                     "similarity_boost": 0.5
                 }
             }
             
-            self.logger.info(f"Making ElevenLabs API request to: {self.base_url}/text-to-speech/{voice_id}")
+            self.logger.debug(f"Making ElevenLabs API request to: {self.base_url}/text-to-speech/{voice_id}")
             
             # Make API request for text-to-speech
+            start_time = time.time()
+            self.logger.debug(f"Starting API request at: {datetime.now().isoformat()}")
+            
             response = requests.post(
                 f"{self.base_url}/text-to-speech/{voice_id}",
                 headers=headers,
                 json=data,
-                timeout=15  # Add timeout to prevent hanging
+                timeout=20  # Increased timeout to prevent issues
             )
             
-            self.logger.info(f"ElevenLabs API response status: {response.status_code}")
+            request_time = time.time() - start_time
+            self.logger.info(f"ElevenLabs API response in {request_time:.2f}s - status: {response.status_code}")
+            
+            # Log detailed response info for debugging
+            self.logger.debug(f"ElevenLabs API response headers: {dict(response.headers)}")
             
             if response.status_code != 200:
                 error_msg = f"ElevenLabs API error: {response.status_code}"
@@ -183,25 +195,38 @@ class ElevenLabsTTS:
             content_type = response.headers.get('Content-Type', '')
             if not content_type.startswith('audio/'):
                 self.logger.error(f"Expected audio response but got {content_type}")
-                self.logger.error(f"Response preview: {response.content[:100]}")
+                self.logger.error(f"Response preview: {response.content[:100].hex()}")
                 raise Exception(f"Unexpected response content type: {content_type}")
-                
-            # Create directory if it doesn't exist
-            if not os.path.exists(self.cache_dir):
-                os.makedirs(self.cache_dir)
+            
+            # Get content length for verification
+            content_length = len(response.content)
+            self.logger.debug(f"Received audio content, size: {content_length} bytes")
+            
+            if content_length < 100:  # Sanity check - audio should be larger than this
+                self.logger.error(f"Audio response too small ({content_length} bytes), may be invalid")
+                self.logger.error(f"Response content (hex): {response.content.hex()}")
+                raise Exception(f"Audio response too small: {content_length} bytes")
                 
             # Save the audio file
-            with open(cache_path, "wb") as f:
-                f.write(response.content)
-            
-            # Verify the file was created
-            if os.path.exists(cache_path):
-                file_size = os.path.getsize(cache_path)
-                self.logger.info(f"Successfully generated speech and saved to {cache_path}. File size: {file_size} bytes")
-                return cache_path
-            else:
-                self.logger.error(f"Failed to save audio to {cache_path}")
-                raise Exception(f"Failed to save audio file to {cache_path}")
+            try:
+                with open(cache_path, "wb") as f:
+                    f.write(response.content)
+                
+                # Verify the file was created
+                if os.path.exists(cache_path):
+                    file_size = os.path.getsize(cache_path)
+                    self.logger.info(f"Successfully generated speech and saved to {cache_path}. File size: {file_size} bytes")
+                    if file_size < 100:
+                        self.logger.warning(f"Saved audio file is suspiciously small: {file_size} bytes")
+                    return cache_path
+                else:
+                    self.logger.error(f"Failed to save audio to {cache_path}")
+                    raise Exception(f"Failed to save audio file to {cache_path}")
+            except Exception as save_e:
+                self.logger.error(f"Error saving audio file: {str(save_e)}")
+                import traceback
+                self.logger.error(f"File save traceback: {traceback.format_exc()}")
+                raise save_e
         
         except Exception as e:
             self.logger.error(f"ElevenLabs speech generation failed: {str(e)}")

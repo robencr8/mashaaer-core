@@ -63,6 +63,8 @@ config = Config()
 db_manager = DatabaseManager(config=config, db_path=config.DB_PATH)
 emotion_tracker = EmotionTracker(db_manager)
 tts_manager = TTSManager(config)
+# Initialize TTS providers
+tts_manager.initialize()
 intent_classifier = IntentClassifier()
 voice_recognition = VoiceRecognition(config)
 face_detector = FaceDetector(config, db_manager)
@@ -565,36 +567,93 @@ def speak():
     if not text:
         return jsonify({'error': 'No text provided'}), 400
 
+    # Log the request details for debugging
+    logger.info(f"TTS Request: text='{text[:30]}...', voice={voice}, language={language}, use_profile={use_profile}")
+    
     try:
+        # Check TTS provider status first
+        elevenlabs_available = hasattr(tts_manager, 'use_elevenlabs') and tts_manager.use_elevenlabs
+        gtts_available = hasattr(tts_manager, 'use_gtts') and tts_manager.use_gtts
+        
+        provider_status = {
+            'elevenlabs': elevenlabs_available,
+            'gtts': gtts_available
+        }
+        
+        logger.info(f"TTS Provider Status: {provider_status}")
+        
+        # Basic validation for language
+        if language not in ['en', 'en-US', 'ar']:
+            logger.warning(f"Unsupported language requested: {language}, falling back to 'en-US'")
+            language = 'en-US'
+            
         # Use profile manager to get personalized voice and adapted text
         if use_profile:
             # Adapt text based on preferred tone
             adapted_text = profile_manager.adapt_response(text, language)
+            
+            # Log adaptation for debugging
+            if adapted_text != text:
+                logger.debug(f"Adapted text: '{adapted_text[:30]}...'")
 
             # Get preferred voice for language if not explicitly specified
             if voice == 'default':
                 voice = profile_manager.get_tts_voice_for_language(language)
+                logger.debug(f"Selected voice from profile: {voice}")
 
             # Speak using profile-based settings
             audio_path = tts_manager.speak(adapted_text, voice, language, profile_manager)
         else:
             # Select basic voice based on language if not specifically provided
-            if voice == 'default' and language == 'ar':
-                voice = 'arabic'
+            if voice == 'default':
+                if language.startswith('ar'):
+                    voice = 'arabic'
+                    logger.debug(f"Auto-selected Arabic voice for language: {language}")
+                else:
+                    logger.debug(f"Using default voice for language: {language}")
 
             # Use standard TTS without profile-based customization
-            audio_path = tts_manager.speak(text, voice)
+            audio_path = tts_manager.speak(text, voice, language)
+
+        # Verify the audio file exists and has content
+        if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
+            logger.info(f"TTS generation successful: {audio_path} ({os.path.getsize(audio_path)} bytes)")
+        else:
+            logger.warning(f"TTS generated path {audio_path}, but file is missing or empty")
+            # Use a fallback static audio file
+            audio_path = os.path.join("tts_cache", "error.mp3")
+            if not os.path.exists(audio_path):
+                os.makedirs(os.path.dirname(audio_path), exist_ok=True)
+                with open(audio_path, 'wb') as f:
+                    f.write(b'')  # Create empty file as last resort
 
         return jsonify({
             'success': True, 
             'audio_path': audio_path,
             'text': text,
             'voice': voice,
-            'language': language
+            'language': language,
+            'provider_status': provider_status
         })
     except Exception as e:
         logger.error(f"TTS error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        import traceback
+        logger.error(f"TTS error traceback: {traceback.format_exc()}")
+        
+        # Create a fallback path even when errors occur
+        fallback_path = os.path.join("tts_cache", "error.mp3")
+        if not os.path.exists(os.path.dirname(fallback_path)):
+            os.makedirs(os.path.dirname(fallback_path), exist_ok=True)
+            
+        if not os.path.exists(fallback_path):
+            with open(fallback_path, 'wb') as f:
+                f.write(b'')  # Create empty file as last resort
+                
+        return jsonify({
+            'success': False, 
+            'error': str(e),
+            'audio_path': fallback_path  # Still return a path so client can attempt to play something
+        }), 500
 
 @app.route('/api/listen', methods=['POST'])
 def listen():
@@ -1044,6 +1103,9 @@ def cosmic_onboarding_profile():
         full_name = data.get('full_name')
         nickname = data.get('nickname')
         language = data.get('language_preference', 'ar')
+        onboarding_complete = data.get('onboarding_complete', False)
+        
+        logger.info(f"Cosmic onboarding profile update: name={full_name}, nickname={nickname}, language={language}, onboarding_complete={onboarding_complete}")
         
         # Store in session
         from flask import session
@@ -1051,7 +1113,7 @@ def cosmic_onboarding_profile():
         session['nickname'] = nickname
         session['full_name'] = full_name
         
-        # Update the profile
+        # Update the profile in database
         profile_data = {
             'full_name': full_name,
             'nickname': nickname,
@@ -1061,29 +1123,55 @@ def cosmic_onboarding_profile():
         # Update the user profile
         profile_manager.update_profile(profile_data)
         
+        # Save onboarding_complete flag in database
+        if onboarding_complete:
+            logger.info("Setting onboarding_complete flag to true in database")
+            db_manager.set_setting('onboarding_complete', 'true')
+        
         # Get appropriate voice for selected language
         tts_voice = profile_manager.get_tts_voice_for_language(language)
         
-        # Create welcome message
+        # Use nickname or first name if nickname is empty
+        user_name = nickname
+        if not user_name and full_name:
+            user_name = full_name.split(' ')[0]
+        
+        # Create welcome message based on user's language
         if language == 'ar':
-            welcome_msg = f"مرحبًا بك يا {nickname} في مشاعر. أنا سعيد بوجودك معنا."
+            welcome_msg = f"مرحبًا بك يا {user_name} في مشاعر. أنا سعيد بوجودك معنا."
         else:
-            welcome_msg = f"Welcome {nickname} to Mashaaer Feelings. I'm glad to have you with us."
+            welcome_msg = f"Welcome {user_name} to Mashaaer Feelings. I'm glad to have you with us."
         
         # Speak welcome message
         try:
-            tts_manager.speak(welcome_msg, tts_voice, language, profile_manager)
+            audio_path = tts_manager.speak(welcome_msg, tts_voice, language, profile_manager)
+            logger.info(f"Welcome message TTS generated at: {audio_path}")
         except Exception as e:
             logger.error(f"Error speaking welcome message: {str(e)}")
+            import traceback
+            logger.error(f"TTS error traceback: {traceback.format_exc()}")
+            audio_path = None
+        
+        # Check TTS provider status
+        elevenlabs_available = hasattr(tts_manager, 'use_elevenlabs') and tts_manager.use_elevenlabs
+        gtts_available = hasattr(tts_manager, 'use_gtts') and tts_manager.use_gtts
         
         return jsonify({
             'success': True,
             'message': 'Profile updated successfully',
-            'welcome_message': welcome_msg
+            'welcome_message': welcome_msg,
+            'audio_path': audio_path,
+            'tts_status': {
+                'elevenlabs': elevenlabs_available,
+                'gtts': gtts_available,
+                'provider': config.TTS_PROVIDER
+            }
         })
     
     except Exception as e:
         logger.error(f"Error updating profile: {str(e)}")
+        import traceback
+        logger.error(f"Profile update error traceback: {traceback.format_exc()}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/set-consent', methods=['POST'])

@@ -75,42 +75,57 @@ class TTSManager:
                     start = api_key[:4] if len(api_key) >= 4 else api_key
                     end = api_key[-4:] if len(api_key) >= 8 else ""
                     self.logger.debug(f"Using ElevenLabs API key: {start}...{end}, length: {len(api_key)}")
+                    
+                    # Properly test if ElevenLabs is available
+                    try:
+                        elevenlabs_available = self.elevenlabs.is_available()
+                        if elevenlabs_available:
+                            self.use_elevenlabs = True
+                            self.logger.info("ElevenLabs TTS is available and working")
+                        else:
+                            self.logger.warning("ElevenLabs API test failed - will use fallback")
+                            self.use_elevenlabs = False
+                    except Exception as check_e:
+                        self.logger.error(f"ElevenLabs availability check error: {str(check_e)}")
+                        self.logger.error("ElevenLabs will be disabled due to API check failure")
+                        self.use_elevenlabs = False
                 else:
-                    self.logger.error("ElevenLabs API key is empty")
-                
-                # Force enable ElevenLabs for testing
-                self.use_elevenlabs = True
-                self.logger.info("ElevenLabs TTS is enabled by default")
-                
-                # Still run the availability check but don't block on it
-                try:
-                    elevenlabs_available = self.elevenlabs.is_available()
-                    if elevenlabs_available:
-                        self.logger.info("ElevenLabs API test succeeded")
-                    else:
-                        self.logger.warning("ElevenLabs API test failed but will still attempt to use it")
-                except Exception as check_e:
-                    self.logger.warning(f"ElevenLabs availability check error: {str(check_e)}")
+                    self.logger.error("ElevenLabs API key is empty or not found")
+                    self.use_elevenlabs = False
             else:
                 self.logger.info("Offline mode - not checking ElevenLabs TTS")
+                self.use_elevenlabs = False
             
             # Always check gTTS as fallback
-            if self.gtts.is_available():
-                self.use_gtts = True
-                self.logger.info("Google TTS is available as fallback")
-            else:
-                self.logger.warning("Google TTS is not available - check internet connection")
+            try:
+                if self.gtts.is_available():
+                    self.use_gtts = True
+                    self.logger.info("Google TTS is available as fallback")
+                else:
+                    self.logger.warning("Google TTS is not available - check internet connection")
+                    self.use_gtts = False
+            except Exception as gtts_e:
+                self.logger.error(f"Google TTS availability check error: {str(gtts_e)}")
+                self.use_gtts = False
             
             if not self.use_elevenlabs and not self.use_gtts:
-                self.logger.warning("No TTS providers available - all voices will fail")
+                self.logger.warning("No TTS providers available - all voices will use offline fallback")
+                # Enable offline operation with a basic fallback
+                self.gtts.is_available = lambda: True
+                self.use_gtts = True
             
+            # Report the final status
+            self.logger.info(f"TTS initialization complete: ElevenLabs={self.use_elevenlabs}, Google TTS={self.use_gtts}")
             return self.use_elevenlabs or self.use_gtts
         
         except Exception as e:
             self.logger.error(f"Failed to initialize TTS: {str(e)}")
             import traceback
             self.logger.error(f"Traceback: {traceback.format_exc()}")
-            return False
+            # Enable offline fallback mode
+            self.gtts.is_available = lambda: True
+            self.use_gtts = True
+            return True
     
     def speak(self, text, voice="default", language=None, profile_manager=None):
         """

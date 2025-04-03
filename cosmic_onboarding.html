@@ -688,6 +688,9 @@
   
   <script>
     let userLanguage = 'ar'; // Default to Arabic
+    // Audio playback fallback tracking
+    let audioPlaybackFallbackTriggered = false;
+    
     const userData = {
       full_name: '',
       nickname: '',
@@ -886,11 +889,104 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          console.log('TTS success:', data);
+          console.log('TTS API response:', data);
+          
+          // Create a function to handle fallback when all else fails
+          const attemptFinalFallback = () => {
+            console.log('Attempting final fallback audio playback');
+            if (!audioPlaybackFallbackTriggered) {
+              audioPlaybackFallbackTriggered = true;
+              
+              // Try the static error sound
+              const errorSound = new Audio('/tts_cache/error.mp3');
+              
+              // Add error handling for the fallback itself
+              errorSound.onerror = () => {
+                console.error('Final fallback audio also failed');
+                // Display a visual notification instead since audio completely failed
+                const element = document.getElementById('listening-' + currentStep);
+                if (element) {
+                  element.innerHTML = '<span style="color:red">⚠️ Audio unavailable</span>';
+                  setTimeout(() => {
+                    element.innerHTML = '';
+                  }, 3000);
+                }
+              };
+              
+              errorSound.play().catch(err => {
+                console.error('Error playing final fallback:', err);
+              });
+            }
+          };
           
           // Create audio element to play the response
           const audio = new Audio(data.audio_path);
-          audio.play().catch(e => console.error('Error playing audio:', e));
+          
+          // Add proper error handling and retry for audio
+          audio.onerror = function(e) {
+            console.error('Error playing audio:', e);
+            // Try alternative method after a short delay
+            setTimeout(() => {
+              console.log('Attempting audio playback with alternative method');
+              
+              // Add a cache-busting parameter to the URL
+              const backupAudio = new Audio(data.audio_path + '?t=' + new Date().getTime());
+              
+              // Add error handling for the backup
+              backupAudio.onerror = () => {
+                console.error('Backup audio also failed');
+                attemptFinalFallback();
+              };
+              
+              backupAudio.play().catch(err => {
+                console.error('Backup audio playback error:', err);
+                attemptFinalFallback();
+              });
+            }, 500);
+          };
+          
+          // Log success when audio plays
+          audio.onplay = function() {
+            console.log('TTS audio playback started successfully');
+            audioPlaybackFallbackTriggered = false; // Reset flag on successful play
+          };
+          
+          // Start playback
+          audio.play().catch(e => {
+            console.error('Error playing audio:', e);
+            
+            // Try a third approach with a new audio context
+            try {
+              console.log('Attempting audio playback with Audio Context');
+              
+              // Check if we have AudioContext support
+              if (window.AudioContext || window.webkitAudioContext) {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Fetch the audio file
+                fetch(data.audio_path)
+                  .then(response => response.arrayBuffer())
+                  .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+                  .then(audioBuffer => {
+                    const source = audioContext.createBufferSource();
+                    source.buffer = audioBuffer;
+                    source.connect(audioContext.destination);
+                    source.start(0);
+                    console.log('AudioContext playback started');
+                  })
+                  .catch(err => {
+                    console.error('AudioContext playback failed:', err);
+                    attemptFinalFallback();
+                  });
+              } else {
+                console.warn('AudioContext not supported, trying fallback');
+                attemptFinalFallback();
+              }
+            } catch (contextError) {
+              console.error('Error with Audio Context approach:', contextError);
+              attemptFinalFallback();
+            }
+          });
         } else {
           console.error('TTS error:', data.error);
         }
