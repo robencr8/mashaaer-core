@@ -216,36 +216,47 @@ def test_page():
     # Direct file serving of test page HTML
     return app.send_static_file('test_page.html')
 
-# CORS test page
-@app.route('/cors-test-endpoint')
-def cors_test_endpoint_page():
-    """Serve a dedicated CORS test page"""
+# Advanced CORS test page
+@app.route('/cors-test-advanced')
+def cors_test_advanced_page():
+    """Serve a dedicated advanced CORS test page"""
     return app.send_static_file('test_cors_endpoint.html')
 
-# Ultra-minimal CORS test route
+# Ultra-minimal CORS test route - Enhanced with even more explicit CORS configuration
 @app.route('/api/test-cors-minimal', methods=['GET', 'POST', 'OPTIONS'])
 def cors_test_route_minimal():
     """Ultra-minimal test endpoint specifically for CORS testing with the feedback tool"""
-    logger.info(f"Received {request.method} request to /api/test-cors-minimal from {request.headers.get('Origin', 'unknown origin')}")
+    # Get the origin from the request headers or use wildcard as fallback
+    origin = request.headers.get('Origin', '*')
+    logger.info(f"Received {request.method} request to /api/test-cors-minimal from {origin}")
     
     # For OPTIONS requests (preflight)
     if request.method == 'OPTIONS':
-        logger.info("Handling OPTIONS preflight request for minimal test endpoint")
-        response = jsonify({'message': 'Preflight request successful'})
-        # Explicitly set CORS headers
-        response.headers['Access-Control-Allow-Origin'] = '*'
+        logger.info(f"Handling OPTIONS preflight request for minimal test endpoint from {origin}")
+        response = make_response()
+        # Explicitly set CORS headers - echo back the origin instead of using wildcard
+        response.headers['Access-Control-Allow-Origin'] = origin
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
         response.headers['Access-Control-Max-Age'] = '3600'
+        # We're not using credentials here, but if we were, we would set this to 'true'
+        # response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response
     
     # For GET or POST requests - ultra minimal response
-    response = jsonify({'message': 'CORS test successful'})
+    if request.method == 'GET':
+        response_data = {'message': 'CORS test successful (GET)', 'timestamp': datetime.now().isoformat()}
+    else:  # POST
+        response_data = {'message': 'CORS test successful (POST)', 'timestamp': datetime.now().isoformat()}
     
-    # Explicitly set CORS headers
-    response.headers['Access-Control-Allow-Origin'] = '*'
+    response = jsonify(response_data)
+    
+    # Explicitly set CORS headers - echo back the origin instead of using wildcard
+    response.headers['Access-Control-Allow-Origin'] = origin
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+    # We're not using credentials here, but if we were, we would set this to 'true'
+    # response.headers['Access-Control-Allow-Credentials'] = 'true'
     
     return response
 
@@ -256,10 +267,25 @@ def diagnostic_panel():
     return app.send_static_file('diagnostic.html')
 
 # Simple API endpoint to test connectivity
-@app.route('/api/ping', methods=['GET'])
+@app.route('/api/ping', methods=['GET', 'OPTIONS'])
 def api_ping():
     """Simple endpoint that returns JSON to test connectivity"""
-    # Return JSON response (CORS headers added automatically by Flask-CORS)
+    # Get the origin from the request headers or use wildcard as fallback
+    origin = request.headers.get('Origin', '*')
+    logger.info(f"Received {request.method} request to /api/ping from {origin}")
+    
+    # For OPTIONS requests (preflight)
+    if request.method == 'OPTIONS':
+        logger.info(f"Handling OPTIONS preflight request from {origin}")
+        response = make_response()
+        # Explicitly set CORS headers - echo back the origin instead of using wildcard
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+        response.headers['Access-Control-Max-Age'] = '3600'
+        return response
+    
+    # Return JSON response (CORS headers added explicitly)
     response = jsonify({
         'status': 'ok',
         'message': 'Server is running',
@@ -267,15 +293,30 @@ def api_ping():
     })
     
     # Add explicit CORS headers to ensure compatibility with feedback tool
-    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Origin'] = origin
     response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
     
     return response
 
-@app.route('/api/minimal', methods=['GET'])
+@app.route('/api/minimal', methods=['GET', 'OPTIONS'])
 def minimal_api():
     """Ultra minimal endpoint that returns plain text with explicit CORS headers"""
+    # Get the origin from the request headers or use wildcard as fallback
+    origin = request.headers.get('Origin', '*')
+    logger.info(f"Received {request.method} request to /api/minimal from {origin}")
+    
+    # For OPTIONS requests (preflight)
+    if request.method == 'OPTIONS':
+        logger.info(f"Handling OPTIONS preflight request from {origin}")
+        response = make_response()
+        # Explicitly set CORS headers - echo back the origin instead of using wildcard
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+        response.headers['Access-Control-Max-Age'] = '3600'
+        return response
+    
     # Create minimal response to maximize compatibility
     response = make_response("Server is running. Status: OK. Timestamp: " + 
                            datetime.now().isoformat())
@@ -284,41 +325,47 @@ def minimal_api():
     response.headers['Content-Type'] = 'text/plain'
     
     # Add explicit CORS headers to ensure compatibility with feedback tool
-    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Origin'] = origin
     response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
     
     return response
 
 @app.route('/api/test-cors', methods=['GET', 'POST', 'OPTIONS'])
 def test_cors_endpoint():
     """Test endpoint specifically for CORS testing with the feedback tool"""
-    logger.info(f"Received {request.method} request to /api/test-cors from {request.headers.get('Origin', 'unknown origin')}")
+    # Get the origin from the request headers or use wildcard as fallback
+    origin = request.headers.get('Origin', '*')
+    logger.info(f"Received {request.method} request to /api/test-cors from {origin}")
     
     # For OPTIONS requests (preflight)
     if request.method == 'OPTIONS':
-        logger.info("Handling OPTIONS preflight request")
-        response = jsonify({'message': 'Preflight request successful'})
-        # Explicitly set CORS headers
-        response.headers['Access-Control-Allow-Origin'] = '*'
+        logger.info(f"Handling OPTIONS preflight request from {origin}")
+        response = make_response()
+        # Explicitly set CORS headers - echo back the origin instead of using wildcard
+        response.headers['Access-Control-Allow-Origin'] = origin
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
         response.headers['Access-Control-Max-Age'] = '3600'
+        # We're not using credentials here, but if we were, we would set this to 'true'
+        # response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response
     
     # For GET or POST requests
     response = jsonify({
         'message': 'CORS test successful',
         'method': request.method,
-        'origin': request.headers.get('Origin', 'unknown'),
+        'origin': origin,
         'timestamp': datetime.now().isoformat(),
         'headers_received': {k: v for k, v in request.headers.items()},
     })
     
-    # Explicitly set CORS headers
-    response.headers['Access-Control-Allow-Origin'] = '*'
+    # Explicitly set CORS headers - echo back the origin instead of using wildcard
+    response.headers['Access-Control-Allow-Origin'] = origin
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+    # We're not using credentials here, but if we were, we would set this to 'true'
+    # response.headers['Access-Control-Allow-Credentials'] = 'true'
     
     return response
 
@@ -326,6 +373,21 @@ def test_cors_endpoint():
 @app.route('/api/debug-request', methods=['GET', 'POST', 'OPTIONS'])
 def debug_request():
     """Advanced diagnostic endpoint for detailed request troubleshooting"""
+    # Get the origin from the request headers or use wildcard as fallback
+    origin = request.headers.get('Origin', '*')
+    logger.info(f"Received {request.method} request to /api/debug-request from {origin}")
+    
+    # For OPTIONS requests (preflight)
+    if request.method == 'OPTIONS':
+        logger.info(f"Handling OPTIONS preflight request from {origin}")
+        response = make_response()
+        # Explicitly set CORS headers - echo back the origin instead of using wildcard
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+        response.headers['Access-Control-Max-Age'] = '3600'
+        return response
+    
     headers = dict(request.headers)
     body = request.get_json(silent=True)  # Use silent=True to avoid errors if not JSON
     
@@ -343,7 +405,7 @@ def debug_request():
         'method': request.method,
         'url': request.url,
         'path': request.path,
-        'origin': request.headers.get('Origin', 'No Origin header'),
+        'origin': origin,
         'host': request.headers.get('Host', 'No Host header'),
         'referer': request.headers.get('Referer', 'No Referer header'),
         'user_agent': request.headers.get('User-Agent', 'No User-Agent header'),
@@ -365,10 +427,9 @@ def debug_request():
     response = jsonify(response_data)
     
     # Add CORS headers explicitly for this diagnostic endpoint to ensure maximum compatibility
-    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Origin'] = origin
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = '*'
-    response.headers['Access-Control-Max-Age'] = '3600'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
     
     return response
 

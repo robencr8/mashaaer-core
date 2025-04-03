@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra-Minimal CORS Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .instructions {
+            background-color: #fffbea;
+            padding: 15px;
+            border-left: 5px solid #ffd54f;
+            margin-bottom: 20px;
+        }
+        .error {
+            color: #d32f2f;
+            background-color: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .success {
+            color: #388e3c;
+            background-color: #e8f5e9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ultra-Minimal CORS Test</h1>
+    
+    <div class="instructions">
+        <h3>Instructions:</h3>
+        <p>This page tests if the API endpoints are accessible from the browser with proper CORS headers. Click the buttons below to test different endpoints and see the results.</p>
+        <p><strong>What to look for:</strong> The response should show a successful status (200 OK) and include the CORS headers that allow this page to access the API.</p>
+    </div>
+    
+    <div>
+        <h3>Test API Endpoints:</h3>
+        <button onclick="testEndpoint('/api/test-cors-minimal', 'GET')">Test Minimal (GET)</button>
+        <button onclick="testEndpoint('/api/test-cors-minimal', 'POST')">Test Minimal (POST)</button>
+        <button onclick="testEndpoint('/api/ping', 'GET')">Test Ping (GET)</button>
+        <button onclick="testEndpoint('/api/minimal', 'GET')">Test Plain Text (GET)</button>
+        <button onclick="testEndpoint('/api/debug-request', 'GET')">Test Debug Info (GET)</button>
+    </div>
+    
+    <h3>Result:</h3>
+    <div id="resultDiv"></div>
+    <pre id="resultDetails"></pre>
+    
+    <script>
+        function testEndpoint(endpoint, method) {
+            console.log(`Testing endpoint ${endpoint} with method ${method}`);
+            document.getElementById('resultDiv').textContent = `Testing ${method} request to ${endpoint}...`;
+            document.getElementById('resultDetails').textContent = '';
+            
+            fetch(endpoint, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json, text/plain, */*'
+                },
+                // Include credentials if needed (uncomment to test with credentials)
+                // credentials: 'include',
+            })
+            .then(response => {
+                // Log the complete response for debugging
+                console.log('Response:', response);
+                
+                // Log the CORS headers
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                    'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials')
+                };
+                console.log('CORS Headers:', corsHeaders);
+                
+                // Get all response headers
+                const headers = {};
+                response.headers.forEach((value, name) => {
+                    headers[name] = value;
+                });
+                
+                // Create the result message
+                const resultDiv = document.getElementById('resultDiv');
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="success">Success! Status: ${response.status} ${response.statusText}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">Failed! Status: ${response.status} ${response.statusText}</div>`;
+                }
+                
+                // For JSON responses
+                if (response.headers.get('content-type')?.includes('application/json')) {
+                    return response.json().then(data => {
+                        return {
+                            type: 'json',
+                            status: response.status,
+                            headers: headers,
+                            data: data
+                        };
+                    });
+                } 
+                // For text responses
+                else {
+                    return response.text().then(text => {
+                        return {
+                            type: 'text',
+                            status: response.status,
+                            headers: headers,
+                            data: text
+                        };
+                    });
+                }
+            })
+            .then(result => {
+                // Display the complete result
+                document.getElementById('resultDetails').textContent = JSON.stringify(result, null, 2);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('resultDiv').innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                document.getElementById('resultDetails').textContent = `Failed to connect to the server:\n${error.stack}`;
+            });
+        }
+    </script>
+</body>
+</html>
