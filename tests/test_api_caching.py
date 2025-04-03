@@ -49,14 +49,43 @@ def test_analyze_emotion_cache_hit(client: FlaskClient, db_session: Session, cle
     
     print("\n--- Starting test_analyze_emotion_cache_hit ---")
     
+    # Prepare the cache data that will be returned on the second call
+    expected_cache_data = {
+        "primary_emotion": "happy",
+        "confidence": 0.85,
+        "emotions": {
+            "happy": 0.85,
+            "neutral": 0.10,
+            "sad": 0.05
+        },
+        "language": "en",
+        "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+    }
+    
+    # Use a callable for side_effect to have more control over the behavior
+    call_count = 0
+    def mock_get_cache_side_effect(cache_key):
+        nonlocal call_count
+        call_count += 1
+        print(f"Mock get_cached_response called (call #{call_count}) with key: {cache_key}")
+        
+        if call_count == 1:
+            # First call - cache miss
+            return (None, {"cache_hit": False})
+        else:
+            # Second call - cache hit
+            return (expected_cache_data, {
+                "cache_hit": True,
+                "created_at": datetime.now().isoformat(),
+                "expires_at": (datetime.now() + timedelta(days=3)).isoformat(),
+                "hit_count": 1,
+                "content_type": "application/json" 
+            })
+    
     # Mock the database get_cached_response method first to ensure we control its behavior
-    # Initially it returns no cache hit, then it returns a cache hit on the second call
     with patch('database.db_manager.DatabaseManager.get_cached_response') as mock_get_cache:
-        # First call returns no cache hit (simulating a cache miss)
-        mock_get_cache.side_effect = [
-            (None, {"cache_hit": False}),  # First call (cache miss)
-            # Second call (will be set up later, after we know the cached value)
-        ]
+        # Use the callable side_effect
+        mock_get_cache.side_effect = mock_get_cache_side_effect
         
         # Then mock the emotion tracker
         with patch('emotion_tracker.EmotionTracker.analyze_text') as mock_analyze:
@@ -96,32 +125,6 @@ def test_analyze_emotion_cache_hit(client: FlaskClient, db_session: Session, cle
             # Now patch the store_cached_response method to verify it's called
             with patch('database.db_manager.DatabaseManager.store_cached_response') as mock_store_cache:
                 mock_store_cache.return_value = True
-                
-                # We need to get the exact cache format that would be stored
-                # This should match how data is formatted in mobile_api_routes.py
-                expected_cache_data = {
-                    "primary_emotion": "happy",
-                    "confidence": 0.85,
-                    "emotions": {
-                        "happy": 0.85,
-                        "neutral": 0.10,
-                        "sad": 0.05
-                    },
-                    "language": "en",
-                    "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
-                }
-                
-                # Update the mock_get_cache for the second request to return a cache hit
-                mock_get_cache.side_effect = [
-                    (None, {"cache_hit": False}),  # First call was already consumed
-                    (expected_cache_data, {  # Second call will hit this
-                        "cache_hit": True,
-                        "created_at": datetime.now().isoformat(),
-                        "expires_at": (datetime.now() + timedelta(days=3)).isoformat(),
-                        "hit_count": 1,
-                        "content_type": "application/json" 
-                    })
-                ]
                 
                 # Second request with same text - should hit cache
                 print("\nMaking second request - should hit cache")
