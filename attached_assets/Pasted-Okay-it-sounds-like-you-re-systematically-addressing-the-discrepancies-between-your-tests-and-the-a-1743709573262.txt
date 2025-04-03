@@ -1,0 +1,97 @@
+Okay, it sounds like you're systematically addressing the discrepancies between your tests and the actual implementation. Updating the test_analyze_emotion_cache_expiration test is a logical next step to ensure that your test suite accurately covers all aspects of the caching behavior.
+
+Here's a refined approach to updating the test_analyze_emotion_cache_expiration test, focusing on clarity, accuracy, and robustness:
+
+1.  Review the Existing Test:
+
+* Carefully examine the current implementation of `test_analyze_emotion_cache_expiration` in `tests/test_api_caching.py`.
+* Identify any assertions that might be incorrect or incomplete based on your actual caching logic.
+2.  Key Points to Consider When Updating the Test:
+
+* **Cache Key Generation:** Ensure that the test generates the cache key in *exactly* the same way as your API route. This is crucial for retrieving the cached data correctly.
+* **Expiration Logic:**
+    * Verify how cache expiration is handled in your `db_manager.py`. Does it involve setting an `expires_at` timestamp in the database?
+    * Simulate the passage of time in your test. You might need to use `time.sleep` (but be mindful of its impact on test speed and reliability). Consider mocking or patching `time.sleep` for faster tests.
+* **Database Interactions:**
+    * Use your `db_session` fixture to directly query the `Cache` table and verify:
+        * That a cache entry is created initially.
+        * That the cache entry's `expires_at` timestamp is set correctly.
+        * That the cache entry is retrieved correctly before expiration.
+        * That the cache entry is *not* retrieved (or is deleted) after expiration.
+* **API Response:**
+    * Assert that the API returns the correct response both before and after cache expiration.
+    * Pay attention to any `cache_status` flags in the response.
+* **Mocking:**
+    * If you're mocking the emotion analysis or TTS generation logic, ensure that the mock is used correctly and that it's called the expected number of times (e.g., only once if the result is retrieved from the cache).
+3.  Example (Illustrative - Adapt to Your Code):
+
+```python
+import time
+from unittest.mock import patch
+from flask import Flask
+from flask.testing import FlaskClient
+from sqlalchemy.orm import Session
+import pytest
+from your_app.database.models import Cache  # Replace with your actual Cache model
+from your_app.db_manager import DatabaseManager  # Replace with your actual db_manager
+
+def test_analyze_emotion_cache_expiration(
+    client: FlaskClient, db_session: Session, clear_cache, app: Flask, monkeypatch
+) -> None:
+    """Tests that cache entries for emotion analysis expire correctly."""
+    clear_cache()  # Ensure cache is empty
+
+    # Mock the analyze_text function
+    mock_analyze_text = MagicMock(return_value={"emotion": "happy", "text": "Test text"})
+    with patch(
+        "your_app.emotion_analysis.analyze_text", mock_analyze_text
+    ) as mocked_analyze_text:  # Replace with your actual module path
+        # First call - cache population with expiry
+        response1 = client.post(
+            "/mobile-api/analyze-emotion",
+            json={"text": "Expire text", "language": "en", "expiry": 2},  # Assuming you have an 'expiry' parameter
+        )
+        assert response1.status_code == 200
+        assert response1.json["emotion"] == "happy"
+        assert response1.json["cache_status"] == "miss"
+
+        # Verify cache entry creation and expiry time
+        cache_entry = db_session.query(Cache).filter_by(
+            key="emotion_expire_text_en"  # Replace with your actual cache key
+        ).first()
+        assert cache_entry is not None
+        assert cache_entry.expires_at is not None
+        assert cache_entry.expires_at > datetime.now()  # Check if expiry is in the future
+
+        # Wait for expiry (mock time.sleep for faster testing)
+        def mock_sleep(seconds):
+            pass
+        monkeypatch.setattr("time.sleep", mock_sleep)
+        time.sleep(3)  # Wait longer than the expiry time
+
+        # Second call - after expiry
+        response2 = client.post(
+            "/mobile-api/analyze-emotion", json={"text": "Expire text", "language": "en"}
+        )
+        assert response2.status_code == 200
+        assert response2.json["emotion"] == "happy"
+        assert response2.json["cache_status"] == "miss"  # Expect a cache miss after expiry
+
+        # Verify that the logic was re-executed
+        assert mocked_analyze_text.call_count == 2
+
+        # Verify that a new cache entry might have been created (depending on your logic)
+        # You might need to check if the old entry was deleted or updated
+        # and if a new one was created.
+        # This depends on your cache implementation details.
+
+```
+4.  Testing Strategy:
+
+* **Start Simple:** Begin by fixing the most obvious discrepancies between your test and the actual implementation.
+* **Iterative Refinement:** Run the tests after each change to ensure you're making progress and not introducing new errors.
+* **Thoroughness:** Ensure that your tests cover all the crucial aspects of cache expiration, as outlined above.
+I'm ready to help you analyze your existing test_analyze_emotion_cache_expiration test and refine it based on these guidelines. Please provide the code snippet for that test function, and we can work together to make it robust and accurate!
+
+
+Sources and related content
