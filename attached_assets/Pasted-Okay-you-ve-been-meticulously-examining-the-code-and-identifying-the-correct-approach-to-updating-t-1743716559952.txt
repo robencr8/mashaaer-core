@@ -1,0 +1,46 @@
+Okay, you've been meticulously examining the code and identifying the correct approach to updating the fetch() calls. You've correctly recognized that the initial changes introduced syntax errors and that a more targeted approach is needed.
+
+Here's a refined strategy to ensure you accurately update the JavaScript code and avoid further issues:
+
+1.  Precise Identification of the Incorrect fetch() Call:
+
+* You've already used `grep -n -A 3 -B 3 "fetch.*listen-for-voice" cosmic_onboarding.html` to pinpoint the problematic `fetch()` call on line 994. This is excellent!
+* **Double-check:** Before making any changes, carefully review the code surrounding that line to ensure you have a complete understanding of its context.
+2.  Targeted Replacement:
+
+* Instead of using a broad `sed` pattern that might inadvertently modify other parts of the code, use a very specific pattern that targets *only* the incorrect `fetch()` call.
+* **Example (Illustrative):**
+
+    ```bash
+    sed -i '994s/fetch(\'\/api\/listen-for-voice?language=' + selectedLanguage + '\')/fetch(\'\/api\/listen-for-voice\', { method: \'POST\', headers: { \'Content-Type\': \'application\/json\' }, body: JSON.stringify({ language: selectedLanguage }) })/g' templates/cosmic_onboarding.html
+    ```
+
+    * **Explanation:**
+        * `994s/ ... / ... /g`: This `sed` command specifically targets line 994 for substitution.
+        * `fetch(\'\...` and `\'\)`: These parts ensure you're only matching the `fetch()` call with the exact URL you intend to modify.
+        * The rest of the pattern captures the `selectedLanguage` variable and constructs the correct `fetch()` call with the `POST` method, headers, and body.
+3.  Thorough Verification:
+
+* **Inspect the Modified File:** After running the `sed` command, open `templates/cosmic_onboarding.html` in a text editor and carefully inspect the changed line (and a few lines around it) to ensure the replacement was done correctly.
+* **Browser Testing:**
+    * Load the `cosmic_onboarding.html` page in your browser.
+    * Open your browser's developer tools (Network tab).
+    * Interact with the page in a way that triggers the `/api/listen-for-voice` endpoint.
+    * Verify in the Network tab that the request is now being sent as a `POST` request with the correct headers and body.
+    * Check for any errors in the browser console.
+* **Full Application Testing:** Once you're confident that the `fetch()` call is correct, test the entire application to ensure that the voice input functionality is working as expected and that no other features have been affected.
+By following these steps, you can ensure that you're making the necessary changes accurately and without introducing any unintended side effects.
+
+
+Sources and related content
+Screenshot...-03 120135
+
+JPG
+Screenshot...-03 120738
+
+JPG
+
+
+
+
+
