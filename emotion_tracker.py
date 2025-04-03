@@ -12,12 +12,59 @@ import time
 import random
 from typing import Dict, List, Tuple, Optional, Union, Any
 
+import nltk
+from nltk.corpus import wordnet
+
 # Import for OpenAI integration
 try:
     from openai import OpenAI
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False
+
+nltk.download('wordnet')  # Ensure WordNet is downloaded
+
+def _get_synonyms(keyword):
+    synonyms = set()
+    for syn in wordnet.synsets(keyword):
+        for lemma in syn.lemmas():
+            synonyms.add(lemma.name())
+    return synonyms
+
+class EmotionTracker:
+    """Advanced emotion tracking system with enhanced analysis algorithms"""
+    
+    def __init__(self, db_manager):
+        self.logger = logging.getLogger(__name__)
+        self.db_manager = db_manager
+        
+        ...
+        
+    def _analyze_with_rules(self, text, context=None):
+        text = text.lower().strip()
+        emotions = {emotion: 0.0 for emotion in self.emotion_labels}
+        
+        for emotion, keywords in self.emotion_keywords.items():
+            for keyword, weight in keywords.items():
+                if re.search(r"\b" + re.escape(keyword) + r"\b", text):
+                    emotions[emotion] += weight
+                # Check synonyms
+                for synonym in _get_synonyms(keyword):
+                    if re.search(r"\b" + re.escape(synonym) + r"\b", text):
+                        emotions[emotion] += weight * 0.8
+
+        # Contextual influence
+        if context:
+            context_emotions = self._analyze_context(context)
+            for emotion, score in context_emotions.items():
+                emotions[emotion] += score * 0.3
+
+        if not emotions:
+            return "neutral"
+        
+        return max(emotions, key=emotions.get)
+        
+    ...
 
 class EmotionTracker:
     """Advanced emotion tracking system with enhanced analysis algorithms"""
