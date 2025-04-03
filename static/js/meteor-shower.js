@@ -1,6 +1,7 @@
 /**
  * Realistic Cosmic Universe Animation
  * Creates a dynamic deep space experience with celestial elements
+ * Customized for Mashaaer Feelings app with dense star field and dynamic meteors
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -15,37 +16,30 @@ document.addEventListener('DOMContentLoaded', function() {
     cosmicContainer.appendChild(starsContainer);
     
     // Create distant galaxies (3-5)
-    createCosmicElements(cosmicContainer, 'galaxy', 4, {
+    createCosmicElements(cosmicContainer, 'galaxy', 3, {
       minSize: 100,
       maxSize: 300,
       animations: ['rotateGalaxy']
     });
     
-    // Create nebulae (2-4)
-    createCosmicElements(cosmicContainer, 'nebula', 3, {
+    // Create nebulae (2-3)
+    createCosmicElements(cosmicContainer, 'nebula', 2, {
       minSize: 150, 
       maxSize: 400,
       animations: ['pulseNebula']
     });
     
-    // Create varied stars (100-300)
-    createStarField(starsContainer, 200);
+    // Create more stars (300-500) to match the screenshot
+    createStarField(starsContainer, 350);
     
-    // Create cosmic dust particles (50-100)
-    createCosmicElements(cosmicContainer, 'cosmic-dust', 75);
-    
-    // Create initial meteors
-    for (let i = 1; i <= 10; i++) {
-      const meteor = document.createElement('div');
-      meteor.className = 'meteor';
-      cosmicContainer.appendChild(meteor);
-    }
+    // Create cosmic dust particles (50-80)
+    createCosmicElements(cosmicContainer, 'cosmic-dust', 65);
     
     // Add the container to the body as the first child
     document.body.insertBefore(cosmicContainer, document.body.firstChild);
     
-    // Generate dynamic meteors
-    setInterval(createRealisticMeteor, 2000);
+    // Generate dynamic meteors with slightly longer interval (2.5-4 seconds)
+    setInterval(createRealisticMeteor, 3000 + Math.random() * 1500);
     
     // Gradually rotate galaxies and nebulae
     animateDeepSpaceElements();

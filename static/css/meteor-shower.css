@@ -13,7 +13,7 @@
   pointer-events: none;
   z-index: 0;
   background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
-  opacity: 0.6; /* Blend with the existing background */
+  opacity: 0.8; /* Better visibility of the cosmic background */
 }
 
 .stars {
@@ -37,25 +37,26 @@
 .star.tiny {
   width: 1px;
   height: 1px;
-  opacity: 0.5;
+  opacity: 0.7; /* Brighter stars */
 }
 
 .star.small {
   width: 2px;
   height: 2px;
-  opacity: 0.7;
+  opacity: 0.8; /* Brighter stars */
 }
 
 .star.medium {
   width: 3px;
   height: 3px;
-  opacity: 0.8;
+  opacity: 0.9; /* Brighter stars */
 }
 
 .star.large {
   width: 4px;
   height: 4px;
   opacity: 1;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 20px rgba(255, 255, 255, 0.4);
 }
 
 /* Distant galaxy clusters */
@@ -83,88 +84,20 @@
   opacity: 0.15;
 }
 
-/* Static Meteors (CSS-only) */
+/* Meteor base styles */
 .meteor {
-  position: absolute;
-  width: 100px;
-  height: 2px;
-  transform: rotate(-45deg);
-  background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
-  animation: meteor 5s linear infinite;
-  border-radius: 100px;
-  filter: drop-shadow(0 0 2px white);
-}
-
-.meteor:nth-child(1) {
-  top: 10%;
-  left: 10%;
-  animation-delay: 2s;
-}
-
-.meteor:nth-child(2) {
-  top: 15%;
-  left: 70%;
-  animation-delay: 1.5s;
-}
-
-.meteor:nth-child(3) {
-  top: 35%;
-  left: 30%;
-  animation-delay: 2.8s;
-}
-
-.meteor:nth-child(4) {
-  top: 45%;
-  left: 80%;
-  animation-delay: 0.8s;
-}
-
-.meteor:nth-child(5) {
-  top: 55%;
-  left: 20%;
-  animation-delay: 3.2s;
-}
-
-.meteor:nth-child(6) {
-  top: 65%;
-  left: 60%;
-  animation-delay: 1.2s;
-}
-
-.meteor:nth-child(7) {
-  top: 75%;
-  left: 40%;
-  animation-delay: 2.5s;
-}
-
-.meteor:nth-child(8) {
-  top: 80%;
-  left: 90%;
-  animation-delay: 0.5s;
-}
-
-.meteor:nth-child(9) {
-  top: 90%;
-  left: 10%;
-  animation-delay: 3.8s;
-}
-
-.meteor:nth-child(10) {
-  top: 5%;
-  left: 50%;
-  animation-delay: 4.2s;
-}
-
-/* Dynamic Meteors (JavaScript-generated) */
-.dynamic-meteor {
   position: absolute;
   border-radius: 100px;
   background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
   filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.8));
+  transform-origin: top left;
+}
+
+/* Dynamic Meteors (JavaScript-generated) */
+.dynamic-meteor {
   height: 2px;
   z-index: 1;
   opacity: 0;
-  transform-origin: top left;
 }
 
 @keyframes meteor {

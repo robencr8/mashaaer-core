@@ -17,7 +17,7 @@
       font-family: 'Inter', sans-serif;
       height: 100vh;
       overflow: hidden;
-      background: linear-gradient(145deg, #0b0c10, #1f1f2e);
+      background: linear-gradient(145deg, #0c0e14, #1a1a35);
       color: #e4e4e4;
       display: flex;
       flex-direction: column;
@@ -26,12 +26,15 @@
     }
     
     .splash-container {
+      position: relative;
       width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
+      z-index: 10;
       animation: fadeIn 2s ease-in-out;
     }
     
@@ -40,6 +43,8 @@
       width: 200px;
       height: 200px;
       margin-bottom: 40px;
+      z-index: 15;
+      pointer-events: none;
     }
     
     .sphere {
@@ -53,6 +58,30 @@
       background: radial-gradient(circle at 30% 30%, #8a2be2, #4b0082);
       box-shadow: 0 0 60px rgba(138, 43, 226, 0.8);
       animation: pulse 4s ease-in-out infinite, float 6s ease-in-out infinite;
+      z-index: 20;
+      cursor: pointer;
+      transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+    }
+    
+    .sphere:hover {
+      box-shadow: 0 0 80px rgba(138, 43, 226, 1);
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+    
+    /* New sphere glow effect */
+    .sphere-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: transparent;
+      box-shadow: 0 0 100px 30px rgba(138, 43, 226, 0.4);
+      filter: blur(5px);
+      z-index: 18;
+      pointer-events: none;
     }
     
     .orbit {
@@ -124,6 +153,59 @@
       color: #c9c9c9;
       max-width: 80%;
       font-style: italic;
+    }
+    
+    .voice-prompt-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 2rem;
+      cursor: pointer;
+      transition: 0.3s all ease;
+    }
+    
+    .voice-prompt-button i {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #8a2be2, #4b0082);
+      border-radius: 50%;
+      color: white;
+      font-size: 24px;
+      margin-bottom: 10px;
+      box-shadow: 0 0 20px rgba(138, 43, 226, 0.6);
+      transition: all 0.3s ease;
+    }
+    
+    .voice-prompt-button:hover i {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(138, 43, 226, 0.8);
+    }
+    
+    .voice-prompt-button span {
+      color: white;
+      font-size: 1.2rem;
+      text-shadow: 0 0 10px rgba(138, 43, 226, 0.8);
+    }
+    
+    .start-button {
+      background: linear-gradient(90deg, #8a2be2, #4b0082);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 30px;
+      font-size: 1.1rem;
+      margin-top: 2rem;
+      cursor: pointer;
+      box-shadow: 0 5px 20px rgba(138, 43, 226, 0.5);
+      transition: all 0.3s ease;
+    }
+    
+    .start-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(138, 43, 226, 0.6);
     }
     
     .loading-text {
@@ -570,14 +652,19 @@
       <div class="orbit">
         <div class="orbital-particle"></div>
       </div>
+      <div class="sphere-glow"></div>
       <div class="sphere"></div>
     </div>
     
     <h1 class="title" id="title">مشاعر | Mashaaer</h1>
     <p class="subtitle" id="subtitle">اصنع المستقبل، أنا أسمعك</p>
-    <p class="subtitle" id="subtitle-en">Create the future, I'm listening</p>
     
-    <div class="loading-text" id="loading">جاري التحميل...</div>
+    <div class="voice-prompt-button" id="voice-prompt-button">
+      <i class="fas fa-microphone"></i>
+      <span>قل "مرحبا" للبدء</span>
+    </div>
+    
+    <button class="start-button" id="start-button">البدء | Start</button>
   </div>
   
   <!-- Onboarding Content -->
