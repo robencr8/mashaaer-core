@@ -322,6 +322,43 @@ def startup():
         else:
             return render_template('startup_standalone.html')
         
+@app.route('/app')
+def app_main():
+    """Main application page after onboarding"""
+    try:
+        logger.info("App main route accessed")
+        return render_template('homepage.html')
+    except Exception as e:
+        logger.error(f"Error in app main route: {str(e)}")
+        return render_template('error.html', error=str(e))
+
+@app.route('/user/settings')
+def user_settings_page():
+    """User settings page"""
+    try:
+        logger.info("User settings page accessed")
+        
+        # Get settings from database
+        settings = {
+            'language': db_manager.get_setting('language', 'en'),
+            'darkMode': db_manager.get_setting('dark_mode', 'true').lower() == 'true',
+            'voiceStyle': db_manager.get_setting('voice_style', 'default'),
+            'voiceRecognition': db_manager.get_setting('voice_recognition_enabled', 'true').lower() == 'true',
+            'storeHistory': db_manager.get_setting('store_history', 'true').lower() == 'true',
+            'faceRecognition': db_manager.get_setting('face_recognition_enabled', 'true').lower() == 'true'
+        }
+        
+        # Check if a user profile exists
+        user_profile = profile_manager.get_current_profile()
+        if user_profile:
+            settings['fullName'] = user_profile.get('full_name', '')
+            settings['nickname'] = user_profile.get('nickname', '')
+        
+        return render_template('user_settings.html', settings=settings)
+    except Exception as e:
+        logger.error(f"Error in user settings page: {str(e)}")
+        return render_template('error.html', error=str(e))
+
 @app.route('/interactive-splash')
 def interactive_splash():
     """Interactive splash screen with animated cosmic sphere"""

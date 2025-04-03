@@ -15,15 +15,35 @@
     }
     
     :root {
+      /* Night mode (Arabic) - Default */
       --primary-purple: #9c27b0;
       --primary-glow: rgba(156, 39, 176, 0.6);
       --dark-bg: #0c0c1d;
+      --dark-bg-gradient: radial-gradient(circle at center, #151529 0%, #0c0c1d 100%);
       --text-color: #ffffff;
+      --star-color: #ffffff;
+      --star-opacity: 0.8;
+      --orbit-color: rgba(255, 255, 255, 0.1);
+      
+      /* Transition timing */
+      --theme-transition: 1.2s;
+    }
+    
+    /* Day mode (English) */
+    [data-theme="day"] {
+      --primary-purple: #8e24aa;
+      --primary-glow: rgba(142, 36, 170, 0.5);
+      --dark-bg: #2a2169;
+      --dark-bg-gradient: radial-gradient(circle at center, #4a3b9f 0%, #2a2169 100%);
+      --text-color: #ffffff;
+      --star-color: #ffffff;
+      --star-opacity: 0.6;
+      --orbit-color: rgba(255, 255, 255, 0.15);
     }
     
     body {
       background-color: var(--dark-bg);
-      background-image: radial-gradient(circle at center, #151529 0%, #0c0c1d 100%);
+      background-image: var(--dark-bg-gradient);
       color: var(--text-color);
       min-height: 100vh;
       display: flex;
@@ -33,6 +53,7 @@
       padding: 20px;
       overflow: hidden;
       direction: rtl;
+      transition: background-color var(--theme-transition), background-image var(--theme-transition);
     }
     
     /* Top Navigation */
@@ -115,6 +136,35 @@
     .star-medium {
       width: 3px;
       height: 3px;
+    }
+    
+    /* Falling Stars */
+    .falling-star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0) 100%);
+      opacity: 0;
+      transform-origin: left center;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    @keyframes fallingStar {
+      0% {
+        transform: translateX(0) translateY(0) rotate(35deg) scale(1);
+        opacity: 0;
+      }
+      5% {
+        opacity: 1;
+      }
+      70% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(200px) translateY(200px) rotate(35deg) scale(0.5);
+        opacity: 0;
+      }
     }
     
     /* Main Content */
@@ -566,15 +616,6 @@
     
     <h1 class="title" id="title">مشاعر | Mashaaer</h1>
     <p class="subtitle" id="subtitle">اصنع المستقبل، أنا أسمعك</p>
-    
-    <div class="voice-prompt-button" id="voice-prompt-button">
-      <div class="mic-icon">
-        <i class="fas fa-microphone"></i>
-      </div>
-      <span>قل "مرحبا" للبدء</span>
-    </div>
-    
-    <button class="start-button" id="start-button">البدء | Start</button>
   </div>
   
   <!-- Onboarding Content -->
@@ -743,6 +784,70 @@
         
         starsContainer.appendChild(star);
       }
+      
+      // Start falling star animation
+      createFallingStars();
+    }
+    
+    // Create falling stars that appear periodically
+    function createFallingStars() {
+      // Create a falling star
+      function createFallingStar() {
+        if (!document.hidden) {
+          const starsContainer = document.getElementById('stars-container');
+          const fallingStar = document.createElement('div');
+          fallingStar.classList.add('falling-star');
+          
+          // Random starting position - only from top 70% of the screen
+          const startX = Math.random() * 80 + 10; // 10-90% width
+          const startY = Math.random() * 30; // Top 30% of screen
+          
+          fallingStar.style.left = `${startX}%`;
+          fallingStar.style.top = `${startY}%`;
+          
+          // Random size
+          const size = 1 + Math.random() * 2;
+          fallingStar.style.height = `${size}px`;
+          fallingStar.style.width = `${20 + Math.random() * 30}px`;
+          
+          // Random angle
+          const angle = 30 + Math.random() * 20;
+          
+          // Random animation duration
+          const duration = 1 + Math.random() * 2;
+          
+          // Set animation
+          fallingStar.style.animation = `fallingStar ${duration}s linear forwards`;
+          
+          starsContainer.appendChild(fallingStar);
+          
+          // Remove the falling star after animation completes
+          setTimeout(() => {
+            if (fallingStar.parentNode) {
+              fallingStar.parentNode.removeChild(fallingStar);
+            }
+          }, duration * 1000 + 100);
+        }
+      }
+      
+      // Create falling stars periodically
+      function scheduleFallingStars() {
+        // Create 1-3 falling stars
+        const starCount = Math.floor(Math.random() * 3) + 1;
+        
+        for (let i = 0; i < starCount; i++) {
+          setTimeout(() => {
+            createFallingStar();
+          }, i * 300); // Stagger multiple stars
+        }
+        
+        // Schedule next falling stars in 3-10 seconds
+        const nextTime = 3000 + Math.random() * 7000;
+        setTimeout(scheduleFallingStars, nextTime);
+      }
+      
+      // Start the cycle
+      scheduleFallingStars();
     }
     
     // Create audio context on demand (required user interaction first)
@@ -807,18 +912,9 @@
         this.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
       });
       
-      // Setup cosmic sphere interaction
+      // Setup cosmic sphere as the only interaction point
       document.getElementById('cosmic-sphere').addEventListener('click', function() {
         playCosmic();
-      });
-      
-      // Setup voice prompt button
-      document.getElementById('voice-prompt-button').addEventListener('click', function() {
-        startVoiceRecognition();
-      });
-      
-      // Setup start button
-      document.getElementById('start-button').addEventListener('click', function() {
         startOnboarding();
       });
       
@@ -848,19 +944,21 @@
       userLanguage = lang;
       document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
       
+      // Update theme based on language
+      if (lang === 'ar') {
+        // Night theme for Arabic
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        // Day theme for English
+        document.documentElement.setAttribute('data-theme', 'day');
+      }
+      
       // Update active button
       document.getElementById('ar-btn').classList.toggle('active', lang === 'ar');
       document.getElementById('en-btn').classList.toggle('active', lang === 'en');
       
       // Update subtitle
       document.getElementById('subtitle').textContent = welcomeMessages[lang];
-      
-      // Update voice prompt text
-      const promptText = lang === 'ar' ? 'قل "مرحبا" للبدء' : 'Say "Hello" to start';
-      document.querySelector('#voice-prompt-button span').textContent = promptText;
-      
-      // Update start button
-      document.getElementById('start-button').textContent = lang === 'ar' ? 'البدء | Start' : 'Start | البدء';
       
       // Update terms visibility if we're in the terms step
       if (currentStep === 'terms') {
@@ -874,11 +972,20 @@
       if (!soundEnabled) return;
       
       // Request cosmic sound from server
-      fetch('/api/play-cosmic-sound?type=orb&language=' + userLanguage)
+      fetch('/api/play-cosmic-sound', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sound_type: 'click',
+          language: userLanguage
+        })
+      })
         .then(response => response.json())
         .then(data => {
-          if (data.success && data.audio_path) {
-            playAudioWithFallback(data.audio_path);
+          if (data.success && data.sound_path) {
+            playAudioWithFallback(data.sound_path);
           }
         })
         .catch(error => {
@@ -888,15 +995,12 @@
     
     // Start voice recognition
     function startVoiceRecognition() {
-      // Flash the microphone button to show it's listening
-      const micButton = document.querySelector('#voice-prompt-button .mic-icon');
-      micButton.style.animation = 'pulse 1.5s infinite';
-      
       // Call the voice recognition API
+      // We've removed the old mic button flash effects since we now use the sphere
+      
       fetch('/api/listen-for-voice?language=' + userLanguage)
         .then(response => response.json())
         .then(data => {
-          micButton.style.animation = '';
           
           if (data.success && data.text) {
             const text = data.text.toLowerCase();
@@ -931,7 +1035,6 @@
           }
         })
         .catch(error => {
-          micButton.style.animation = '';
           console.error('Error with voice recognition:', error);
         });
     }
@@ -1096,11 +1199,15 @@
     // Update UI based on selected language
     function updateLanguageDisplay() {
       if (userLanguage === 'ar') {
+        // Arabic - night theme
         document.documentElement.dir = 'rtl';
+        document.documentElement.removeAttribute('data-theme');
         document.getElementById('terms-ar').style.display = 'block';
         document.getElementById('terms-en').style.display = 'none';
       } else {
+        // English - day theme
         document.documentElement.dir = 'ltr';
+        document.documentElement.setAttribute('data-theme', 'day');
         document.getElementById('terms-ar').style.display = 'none';
         document.getElementById('terms-en').style.display = 'block';
       }
@@ -1108,7 +1215,7 @@
     
     // Submit user profile
     function submitProfile() {
-      fetch('/api/save-profile', {
+      fetch('/api/cosmic-onboarding-profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
