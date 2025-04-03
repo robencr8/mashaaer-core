@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer Connectivity Diagnostic</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #9c27b0;
+            margin-bottom: 20px;
+        }
+        
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        
+        .test-section h2 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #3f51b5;
+        }
+        
+        .test-button {
+            background-color: #9c27b0;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        
+        .test-button:hover {
+            background-color: #7b1fa2;
+        }
+        
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+            background-color: #f8f8f8;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .log-section {
+            margin-top: 30px;
+        }
+        
+        #diagnosticLog {
+            width: 100%;
+            height: 200px;
+            background-color: #263238;
+            color: #e0e0e0;
+            font-family: monospace;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mashaaer Connectivity Diagnostic</h1>
+        
+        <div class="test-section">
+            <h2>System Information</h2>
+            <div id="systemInfo" class="result">Collecting information...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test Main Server (Port 5000)</h2>
+            <button class="test-button" onclick="testMainServer()">Test Main Server</button>
+            <div id="mainServerResult" class="result">Click button to run test</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test API Endpoint</h2>
+            <button class="test-button" onclick="testApiEndpoint()">Test API Status</button>
+            <button class="test-button" onclick="testApiWithXhr()">Test with XHR</button>
+            <div id="apiEndpointResult" class="result">Click button to run test</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Test Static Server (Port 3000)</h2>
+            <button class="test-button" onclick="testStaticServer()">Test Static Server</button>
+            <div id="staticServerResult" class="result">Click button to run test</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>CORS Test</h2>
+            <button class="test-button" onclick="testCors()">Test CORS</button>
+            <div id="corsResult" class="result">Click button to run test</div>
+        </div>
+        
+        <div class="log-section">
+            <h2>Diagnostic Log</h2>
+            <div id="diagnosticLog"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize
+        const log = function(message, type = 'info') {
+            const logElement = document.getElementById('diagnosticLog');
+            const timestamp = new Date().toISOString();
+            logElement.innerHTML += `[${timestamp}] [${type}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        };
+        
+        // Get system information
+        function initializeSystemInfo() {
+            const info = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                cookiesEnabled: navigator.cookieEnabled,
+                onLine: navigator.onLine,
+                doNotTrack: navigator.doNotTrack,
+                screenWidth: window.screen.width,
+                screenHeight: window.screen.height,
+                pixelRatio: window.devicePixelRatio,
+                timestamp: new Date().toISOString()
+            };
+            
+            document.getElementById('systemInfo').textContent = JSON.stringify(info, null, 2);
+            log('System information collected');
+        }
+        
+        // Test connection to main server
+        async function testMainServer() {
+            const resultElement = document.getElementById('mainServerResult');
+            resultElement.textContent = 'Testing...';
+            resultElement.className = 'result';
+            
+            try {
+                log('Testing main server connection (port 5000)...');
+                const startTime = performance.now();
+                const response = await fetch('http://localhost:5000/', {
+                    method: 'GET',
+                    cache: 'no-cache',
+                    headers: {
+                        'pragma': 'no-cache',
+                        'cache-control': 'no-cache'
+                    }
+                });
+                const duration = (performance.now() - startTime).toFixed(2);
+                
+                if (response.ok) {
+                    const text = await response.text();
+                    resultElement.textContent = `Success! Response received in ${duration}ms`;
+                    resultElement.className = 'result success';
+                    log(`Main server test successful (${duration}ms)`, 'success');
+                } else {
+                    resultElement.textContent = `Error: ${response.status} ${response.statusText}`;
+                    resultElement.className = 'result error';
+                    log(`Main server test failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                resultElement.textContent = `Error: ${error.message}`;
+                resultElement.className = 'result error';
+                log(`Main server test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test API endpoint
+        async function testApiEndpoint() {
+            const resultElement = document.getElementById('apiEndpointResult');
+            resultElement.textContent = 'Testing...';
+            resultElement.className = 'result';
+            
+            try {
+                log('Testing API status endpoint...');
+                const startTime = performance.now();
+                const response = await fetch('http://localhost:5000/api/status', {
+                    method: 'GET',
+                    cache: 'no-cache',
+                    headers: {
+                        'pragma': 'no-cache',
+                        'cache-control': 'no-cache'
+                    }
+                });
+                const duration = (performance.now() - startTime).toFixed(2);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultElement.textContent = `Success! API responded in ${duration}ms\n${JSON.stringify(data, null, 2)}`;
+                    resultElement.className = 'result success';
+                    log(`API test successful (${duration}ms)`, 'success');
+                } else {
+                    resultElement.textContent = `Error: ${response.status} ${response.statusText}`;
+                    resultElement.className = 'result error';
+                    log(`API test failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                resultElement.textContent = `Error: ${error.message}`;
+                resultElement.className = 'result error';
+                log(`API test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test using XMLHttpRequest
+        function testApiWithXhr() {
+            const resultElement = document.getElementById('apiEndpointResult');
+            resultElement.textContent = 'Testing with XHR...';
+            resultElement.className = 'result';
+            
+            log('Testing API status using XMLHttpRequest...');
+            const xhr = new XMLHttpRequest();
+            const startTime = performance.now();
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    const duration = (performance.now() - startTime).toFixed(2);
+                    
+                    if (xhr.status === 200) {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            resultElement.textContent = `XHR Success! Response in ${duration}ms\n${JSON.stringify(data, null, 2)}`;
+                            resultElement.className = 'result success';
+                            log(`XHR API test successful (${duration}ms)`, 'success');
+                        } catch (e) {
+                            resultElement.textContent = `XHR Success but invalid JSON: ${xhr.responseText}`;
+                            resultElement.className = 'result error';
+                            log('XHR API test returned invalid JSON', 'error');
+                        }
+                    } else {
+                        resultElement.textContent = `XHR Error: ${xhr.status} ${xhr.statusText}`;
+                        resultElement.className = 'result error';
+                        log(`XHR API test failed: ${xhr.status} ${xhr.statusText}`, 'error');
+                    }
+                }
+            };
+            
+            xhr.onerror = function(error) {
+                resultElement.textContent = `XHR Network Error`;
+                resultElement.className = 'result error';
+                log('XHR API test failed with network error', 'error');
+            };
+            
+            xhr.open('GET', 'http://localhost:5000/api/status', true);
+            xhr.setRequestHeader('Cache-Control', 'no-cache');
+            xhr.send();
+        }
+        
+        // Test static server
+        async function testStaticServer() {
+            const resultElement = document.getElementById('staticServerResult');
+            resultElement.textContent = 'Testing...';
+            resultElement.className = 'result';
+            
+            try {
+                log('Testing static server connection (port 3000)...');
+                const startTime = performance.now();
+                const response = await fetch('http://localhost:3000/', {
+                    method: 'GET',
+                    cache: 'no-cache',
+                    headers: {
+                        'pragma': 'no-cache',
+                        'cache-control': 'no-cache'
+                    }
+                });
+                const duration = (performance.now() - startTime).toFixed(2);
+                
+                if (response.ok) {
+                    const text = await response.text();
+                    resultElement.textContent = `Success! Static server responded in ${duration}ms`;
+                    resultElement.className = 'result success';
+                    log(`Static server test successful (${duration}ms)`, 'success');
+                } else {
+                    resultElement.textContent = `Error: ${response.status} ${response.statusText}`;
+                    resultElement.className = 'result error';
+                    log(`Static server test failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                resultElement.textContent = `Error: ${error.message}`;
+                resultElement.className = 'result error';
+                log(`Static server test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // CORS test
+        async function testCors() {
+            const resultElement = document.getElementById('corsResult');
+            resultElement.textContent = 'Testing CORS...';
+            resultElement.className = 'result';
+            
+            try {
+                log('Testing CORS with main server...');
+                const startTime = performance.now();
+                // Using mode: 'cors' explicitly to test CORS support
+                const response = await fetch('http://localhost:5000/api/status', {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: {
+                        'pragma': 'no-cache',
+                        'cache-control': 'no-cache'
+                    }
+                });
+                const duration = (performance.now() - startTime).toFixed(2);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultElement.textContent = `CORS Success! Response in ${duration}ms`;
+                    resultElement.className = 'result success';
+                    log(`CORS test successful (${duration}ms)`, 'success');
+                } else {
+                    resultElement.textContent = `CORS Error: ${response.status} ${response.statusText}`;
+                    resultElement.className = 'result error';
+                    log(`CORS test failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                resultElement.textContent = `CORS Error: ${error.message}`;
+                resultElement.className = 'result error';
+                log(`CORS test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Initialize on page load
+        window.onload = function() {
+            log('Diagnostic page loaded');
+            initializeSystemInfo();
+        };
+    </script>
+</body>
+</html>

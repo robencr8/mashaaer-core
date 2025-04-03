@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #9c27b0;
+        }
+        
+        .test-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        
+        .button {
+            background-color: #9c27b0;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        
+        .button:hover {
+            background-color: #7b1fa2;
+        }
+        
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .success {
+            color: #2e7d32;
+        }
+        
+        .error {
+            color: #c62828;
+        }
+        
+        .log {
+            background-color: #263238;
+            color: #e0e0e0;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-family: monospace;
+            overflow-y: auto;
+            max-height: 200px;
+        }
+        
+        .input-group {
+            margin-bottom: 10px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CORS Test Page</h1>
+        <p>This page tests CORS (Cross-Origin Resource Sharing) functionality with the Mashaaer server.</p>
+        
+        <div class="test-container">
+            <h2>Configure Test</h2>
+            <div class="input-group">
+                <label for="serverUrl">Server URL:</label>
+                <input type="text" id="serverUrl" value="http://localhost:5000" placeholder="Enter server URL">
+            </div>
+            <div class="input-group">
+                <label for="apiEndpoint">API Endpoint:</label>
+                <input type="text" id="apiEndpoint" value="/api/status" placeholder="Enter API endpoint (e.g., /api/status)">
+            </div>
+        </div>
+        
+        <div class="test-container">
+            <h2>GET Request Tests</h2>
+            <button class="button" onclick="testFetch()">Test with Fetch API</button>
+            <button class="button" onclick="testXhr()">Test with XMLHttpRequest</button>
+            <div id="getResult" class="result">Results will appear here</div>
+        </div>
+        
+        <div class="test-container">
+            <h2>OPTIONS Preflight Test</h2>
+            <button class="button" onclick="testOptions()">Test OPTIONS Request</button>
+            <div id="optionsResult" class="result">Results will appear here</div>
+        </div>
+        
+        <div class="test-container">
+            <h2>Headers Test</h2>
+            <button class="button" onclick="testCustomHeaders()">Test Custom Headers</button>
+            <div id="headersResult" class="result">Results will appear here</div>
+        </div>
+        
+        <div class="log" id="logOutput">
+            [Log] CORS test page loaded
+        </div>
+    </div>
+    
+    <script>
+        // Log helper function
+        function log(message) {
+            const logElement = document.getElementById('logOutput');
+            const timestamp = new Date().toISOString();
+            logElement.innerHTML += `\n[${timestamp}] ${message}`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        // Get the full URL for testing
+        function getTestUrl() {
+            const serverUrl = document.getElementById('serverUrl').value.trim();
+            const apiEndpoint = document.getElementById('apiEndpoint').value.trim();
+            return `${serverUrl}${apiEndpoint}`;
+        }
+        
+        // Update result element
+        function updateResult(elementId, message, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = isSuccess ? 'result success' : 'result error';
+        }
+        
+        // Test Fetch API
+        async function testFetch() {
+            const testUrl = getTestUrl();
+            log(`Testing Fetch API with: ${testUrl}`);
+            updateResult('getResult', 'Testing...');
+            
+            try {
+                const startTime = performance.now();
+                const response = await fetch(testUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    cache: 'no-cache'
+                });
+                
+                const duration = (performance.now() - startTime).toFixed(2);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const message = `✅ Success (${duration}ms)\n\nResponse: ${JSON.stringify(data, null, 2)}`;
+                    updateResult('getResult', message, true);
+                    log(`Fetch request succeeded in ${duration}ms`);
+                } else {
+                    const message = `❌ Error: ${response.status} ${response.statusText} (${duration}ms)`;
+                    updateResult('getResult', message, false);
+                    log(`Fetch request failed: ${response.status} ${response.statusText}`);
+                }
+            } catch (error) {
+                const message = `❌ Error: ${error.message}\n\nThis may be a CORS issue if you see a message about blocked by CORS policy.`;
+                updateResult('getResult', message, false);
+                log(`Fetch request exception: ${error.message}`);
+            }
+        }
+        
+        // Test XMLHttpRequest
+        function testXhr() {
+            const testUrl = getTestUrl();
+            log(`Testing XMLHttpRequest with: ${testUrl}`);
+            updateResult('getResult', 'Testing with XHR...');
+            
+            const xhr = new XMLHttpRequest();
+            const startTime = performance.now();
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    const duration = (performance.now() - startTime).toFixed(2);
+                    
+                    if (xhr.status === 200) {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            const message = `✅ XHR Success (${duration}ms)\n\nResponse: ${JSON.stringify(data, null, 2)}`;
+                            updateResult('getResult', message, true);
+                            log(`XHR request succeeded in ${duration}ms`);
+                        } catch (e) {
+                            const message = `⚠️ XHR Received response but invalid JSON: ${xhr.responseText.substring(0, 100)}...`;
+                            updateResult('getResult', message, false);
+                            log(`XHR request returned invalid JSON`);
+                        }
+                    } else {
+                        const message = `❌ XHR Error: ${xhr.status} ${xhr.statusText} (${duration}ms)`;
+                        updateResult('getResult', message, false);
+                        log(`XHR request failed: ${xhr.status} ${xhr.statusText}`);
+                    }
+                }
+            };
+            
+            xhr.onerror = function() {
+                const message = `❌ XHR Network Error\n\nThis is likely a CORS issue. Check the browser console for details.`;
+                updateResult('getResult', message, false);
+                log('XHR request failed with network error (likely CORS issue)');
+            };
+            
+            xhr.open('GET', testUrl, true);
+            xhr.setRequestHeader('Cache-Control', 'no-cache');
+            xhr.send();
+        }
+        
+        // Test OPTIONS request (preflight)
+        async function testOptions() {
+            const testUrl = getTestUrl();
+            log(`Testing OPTIONS preflight with: ${testUrl}`);
+            updateResult('optionsResult', 'Testing OPTIONS...');
+            
+            try {
+                const startTime = performance.now();
+                
+                // Use fetch with no-cors mode to initiate an OPTIONS request
+                // This simulates a preflight request
+                const response = await fetch(testUrl, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'content-type',
+                        'Origin': window.location.origin
+                    }
+                });
+                
+                const duration = (performance.now() - startTime).toFixed(2);
+                
+                // Collect CORS headers
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                    'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials'),
+                    'Access-Control-Max-Age': response.headers.get('Access-Control-Max-Age')
+                };
+                
+                // Filter out null values
+                const filteredHeaders = Object.entries(corsHeaders)
+                    .filter(([key, value]) => value !== null)
+                    .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+                
+                const message = `✅ OPTIONS request completed (${duration}ms)\n\nCORS Headers:\n${JSON.stringify(filteredHeaders, null, 2)}`;
+                updateResult('optionsResult', message, true);
+                log(`OPTIONS request succeeded in ${duration}ms`);
+            } catch (error) {
+                const message = `❌ OPTIONS Error: ${error.message}`;
+                updateResult('optionsResult', message, false);
+                log(`OPTIONS request failed: ${error.message}`);
+            }
+        }
+        
+        // Test with custom headers
+        async function testCustomHeaders() {
+            const testUrl = getTestUrl();
+            log(`Testing custom headers with: ${testUrl}`);
+            updateResult('headersResult', 'Testing with custom headers...');
+            
+            try {
+                const startTime = performance.now();
+                
+                // Make request with custom headers to test CORS
+                const response = await fetch(testUrl, {
+                    method: 'GET',
+                    headers: {
+                        'X-Custom-Header': 'test-value',
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache'
+                    },
+                    mode: 'cors'
+                });
+                
+                const duration = (performance.now() - startTime).toFixed(2);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const message = `✅ Custom headers test succeeded (${duration}ms)\n\nResponse accepted custom headers`;
+                    updateResult('headersResult', message, true);
+                    log(`Custom headers test succeeded in ${duration}ms`);
+                } else {
+                    const message = `❌ Error with custom headers: ${response.status} ${response.statusText} (${duration}ms)`;
+                    updateResult('headersResult', message, false);
+                    log(`Custom headers test failed: ${response.status} ${response.statusText}`);
+                }
+            } catch (error) {
+                const message = `❌ Error with custom headers: ${error.message}\n\nThis is likely a CORS issue with the server not accepting the requested headers.`;
+                updateResult('headersResult', message, false);
+                log(`Custom headers test exception: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشاعر | Mashaaer - Cosmic Onboarding</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cosmic-header {
+            text-align: center;
+            padding: 20px;
+            background-color: #1a1a2e;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .cosmic-title {
+            font-size: 32px;
+            margin: 0;
+            background: linear-gradient(90deg, #9c27b0, #3f51b5, #2196f3, #00bcd4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: bold;
+        }
+        
+        .cosmic-subtitle {
+            font-size: 16px;
+            color: #9c27b0;
+            margin-top: 5px;
+        }
+        
+        .cosmic-sphere-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .cosmic-sphere {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #9c27b0, #3f51b5, #2196f3, #00bcd4);
+            box-shadow: 0 0 30px rgba(156, 39, 176, 0.7);
+        }
+        
+        .onboarding-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .onboarding-step {
+            display: block;
+            background-color: #1a1a2e;
+            border-radius: 10px;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .step-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #9c27b0;
+        }
+        
+        .step-description {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .form-field {
+            margin-bottom: 15px;
+        }
+        
+        .form-field label {
+            display: block;
+            margin-bottom: 5px;
+            color: #00bcd4;
+        }
+        
+        .form-field input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #2a2a3a;
+            color: #fff;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .cosmic-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #9c27b0;
+            color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .cosmic-button:hover {
+            background-color: #7b1fa2;
+        }
+        
+        .cosmic-button.secondary {
+            background-color: #2a2a3a;
+        }
+        
+        .cosmic-button.secondary:hover {
+            background-color: #3a3a4a;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background-color: #3f51b5;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+        
+        .tooltip.welcome {
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 0 10px 10px 10px;
+            border-style: solid;
+            border-color: transparent transparent #3f51b5 transparent;
+        }
+        
+        .arabic-text {
+            direction: rtl;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmic-header">
+        <h1 class="cosmic-title">مشاعر | Mashaaer</h1>
+        <p class="cosmic-subtitle">اصنع المستقبل، أنا أسمعك | Create the future, I'm listening</p>
+    </div>
+    
+    <div class="cosmic-sphere-container">
+        <div class="cosmic-sphere"></div>
+        <div class="tooltip welcome">
+            Welcome to the cosmic onboarding experience! I'll guide you through setup.
+        </div>
+    </div>
+    
+    <div class="onboarding-container">
+        <div class="onboarding-step">
+            <h2 class="step-title">Step 1: Tell us about yourself</h2>
+            <p class="step-description">Help us personalize your experience by sharing a few details.</p>
+            
+            <div class="form-field">
+                <label for="fullName">Your Name:</label>
+                <input type="text" id="fullName" placeholder="Enter your full name">
+            </div>
+            
+            <div class="form-field">
+                <label for="nickname">Preferred Nickname:</label>
+                <input type="text" id="nickname" placeholder="What should we call you?">
+            </div>
+            
+            <div class="form-field">
+                <label for="language">Preferred Language:</label>
+                <input type="text" id="language" placeholder="English or Arabic" value="English">
+            </div>
+            
+            <div class="button-container">
+                <button class="cosmic-button secondary">Skip</button>
+                <button class="cosmic-button">Continue</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- This is just a static UI without any functionality -->
+</body>
+</html>

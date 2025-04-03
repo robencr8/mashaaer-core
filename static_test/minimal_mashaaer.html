@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشاعر | Mashaaer - Cosmic Experience</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .cosmic-container {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .app-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #9c27b0, #3f51b5, #2196f3, #00bcd4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .app-subtitle {
+            font-size: 18px;
+            margin-bottom: 40px;
+            color: #bb86fc;
+        }
+        
+        .cosmic-sphere {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #9c27b0, #3f51b5, #2196f3, #00bcd4);
+            box-shadow: 0 0 30px rgba(156, 39, 176, 0.7);
+            margin: 0 auto 40px;
+            animation: pulse 4s infinite alternate;
+        }
+        
+        .action-button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            background-color: #9c27b0;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .action-button:hover {
+            background-color: #7b1fa2;
+            transform: scale(1.05);
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 30px rgba(156, 39, 176, 0.7);
+            }
+            100% {
+                transform: scale(1.05);
+                box-shadow: 0 0 50px rgba(156, 39, 176, 0.9);
+            }
+        }
+        
+        .nav-links {
+            margin-top: 40px;
+        }
+        
+        .nav-links a {
+            color: #bb86fc;
+            text-decoration: none;
+            margin: 0 15px;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: #9c27b0;
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmic-container">
+        <h1 class="app-title">مشاعر | Mashaaer</h1>
+        <p class="app-subtitle">اصنع المستقبل، أنا أسمعك | Create the future, I'm listening</p>
+        
+        <div class="cosmic-sphere"></div>
+        
+        <div>
+            <button class="action-button" onclick="window.location.href='/onboarding'">Start Onboarding</button>
+        </div>
+        
+        <div class="nav-links">
+            <a href="#">About</a>
+            <a href="#">Features</a>
+            <a href="#">Help</a>
+        </div>
+    </div>
+    
+    <!-- This is a static file for testing connectivity issues -->
+</body>
+</html>

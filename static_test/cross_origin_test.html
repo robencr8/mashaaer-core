@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Origin Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .info {
+            background-color: #e8f4fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+            white-space: pre-wrap;
+            font-family: monospace;
+            min-height: 100px;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .info-text {
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        input[type="text"] {
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cross-Origin CORS Test</h1>
+        <div class="info">
+            <p>This page is served from a different origin than the main server. It tests if cross-origin requests to the Mashaaer server work properly with CORS.</p>
+            <p>Current origin: <span id="currentOrigin"></span></p>
+        </div>
+        
+        <div>
+            <h2>Server URL:</h2>
+            <input type="text" id="serverUrl" value="http://localhost:5000" style="width: 300px;">
+            <button onclick="updateServerUrl()">Update</button>
+        </div>
+        
+        <div>
+            <h2>Test Endpoints:</h2>
+            <button onclick="testEndpoint('/test')">Test Basic Endpoint</button>
+            <button onclick="testEndpoint('/api/status')">Test API Status</button>
+            <button onclick="testOptions('/api/status')">Test OPTIONS</button>
+            <button onclick="testPreflight('/api/status')">Test Preflight</button>
+            <button onclick="testCorsPreflightEndpoint()">Test CORS Preflight Endpoint</button>
+        </div>
+        
+        <div>
+            <h2>Custom Headers:</h2>
+            <label for="customOrigin">Custom Origin:</label>
+            <input type="text" id="customOrigin" placeholder="Leave empty to use default">
+            <button onclick="setCustomOrigin()">Set Custom Origin</button>
+        </div>
+        
+        <div id="results">Results will appear here...</div>
+    </div>
+
+    <script>
+        // Display current origin
+        document.getElementById('currentOrigin').textContent = window.location.origin;
+        
+        // Results div
+        const resultsDiv = document.getElementById('results');
+        
+        // Server URL with default
+        let serverUrl = document.getElementById('serverUrl').value;
+        
+        // Custom origin for testing
+        let customOrigin = null;
+        
+        function updateServerUrl() {
+            serverUrl = document.getElementById('serverUrl').value;
+            log('Server URL updated to: ' + serverUrl);
+        }
+        
+        function setCustomOrigin() {
+            const originInput = document.getElementById('customOrigin').value;
+            customOrigin = originInput || null;
+            log('Custom origin ' + (customOrigin ? 'set to: ' + customOrigin : 'cleared'));
+        }
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toISOString();
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = `[${timestamp}] ${message}`;
+            resultsDiv.appendChild(line);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        async function testEndpoint(endpoint) {
+            const fullUrl = `${serverUrl}${endpoint}`;
+            log(`Testing endpoint: ${fullUrl}`);
+            
+            try {
+                const startTime = performance.now();
+                
+                // Build headers
+                const headers = {
+                    'Accept': 'application/json',
+                    'X-Test-Client': 'Cross-Origin-Test'
+                };
+                
+                // Add custom origin if specified
+                if (customOrigin) {
+                    headers['Origin'] = customOrigin;
+                }
+                
+                const response = await fetch(fullUrl, {
+                    method: 'GET',
+                    headers: headers
+                });
+                
+                const endTime = performance.now();
+                const duration = (endTime - startTime).toFixed(2);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Success! Response in ${duration}ms:`, 'success');
+                    log(JSON.stringify(data, null, 2));
+                    
+                    // Log CORS headers
+                    log('CORS headers:');
+                    ['Access-Control-Allow-Origin', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers']
+                        .forEach(header => {
+                            const value = response.headers.get(header);
+                            log(`  ${header}: ${value || '<not present>'}`);
+                        });
+                } else {
+                    log(`❌ Error: ${response.status} ${response.statusText} (${duration}ms)`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                log('This is likely a CORS issue. Check browser console for details.', 'error');
+            }
+        }
+        
+        async function testOptions(endpoint) {
+            const fullUrl = `${serverUrl}${endpoint}`;
+            log(`Testing OPTIONS for: ${fullUrl}`);
+            
+            try {
+                // Build headers
+                const headers = {
+                    'Accept': 'application/json',
+                    'X-Test-Client': 'Cross-Origin-Test'
+                };
+                
+                // Add custom origin if specified
+                if (customOrigin) {
+                    headers['Origin'] = customOrigin;
+                }
+                
+                const response = await fetch(fullUrl, {
+                    method: 'OPTIONS',
+                    headers: headers
+                });
+                
+                if (response.ok) {
+                    log(`✅ OPTIONS succeeded with status ${response.status}`, 'success');
+                    
+                    // Log CORS headers
+                    log('CORS headers:');
+                    ['Access-Control-Allow-Origin', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers']
+                        .forEach(header => {
+                            const value = response.headers.get(header);
+                            log(`  ${header}: ${value || '<not present>'}`);
+                        });
+                } else {
+                    log(`❌ OPTIONS failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                log('This is likely a CORS issue. Check browser console for details.', 'error');
+            }
+        }
+        
+        async function testPreflight(endpoint) {
+            const fullUrl = `${serverUrl}${endpoint}`;
+            log(`Testing preflight for: ${fullUrl}`);
+            
+            try {
+                // Build headers - simulate a complex request that triggers preflight
+                const headers = {
+                    'Origin': customOrigin || window.location.origin,
+                    'Access-Control-Request-Method': 'POST',
+                    'Access-Control-Request-Headers': 'Content-Type, X-Custom-Header'
+                };
+                
+                // Preflight request
+                const response = await fetch(fullUrl, {
+                    method: 'OPTIONS',
+                    headers: headers
+                });
+                
+                if (response.ok) {
+                    log(`✅ Preflight succeeded with status ${response.status}`, 'success');
+                    
+                    // Log CORS headers
+                    log('CORS headers:');
+                    ['Access-Control-Allow-Origin', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers']
+                        .forEach(header => {
+                            const value = response.headers.get(header);
+                            if (value) {
+                                log(`  ✅ ${header}: ${value}`);
+                            } else {
+                                log(`  ❌ ${header}: <not present>`, 'error');
+                            }
+                        });
+                        
+                    // If preflight succeeded, try actual request
+                    log('Preflight succeeded, attempting actual request...');
+                    await testEndpoint(endpoint);
+                } else {
+                    log(`❌ Preflight failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                log('This is likely a CORS issue. Check browser console for details.', 'error');
+            }
+        }
+        
+        function testCorsPreflightEndpoint() {
+            testPreflight('/api/cors-preflight');
+        }
+        
+        // Initialize with a status check
+        window.onload = function() {
+            log('Page loaded. Running initial test...');
+            testEndpoint('/api/status');
+        };
+    </script>
+</body>
+</html>

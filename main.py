@@ -28,7 +28,20 @@ import twilio_api
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
 # Enable CORS for all routes to support Flutter and mobile app integration
-CORS(app, origins="*", supports_credentials=True)
+CORS(app, 
+     origins="*", 
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "X-Custom-Header"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     expose_headers=["Content-Type", "Content-Length"])
+
+# Add explicit CORS headers to all responses
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-Custom-Header'
+    return response
 
 # Initialize components
 config = Config()
@@ -89,7 +102,8 @@ def direct_test_page():
 # CORS test page
 @app.route('/cors-test')
 def cors_test_page():
-    return render_template('cors_test.html')
+    # Use static CORS test file instead of template
+    return app.send_static_file('cors_test.html')
 
 # Comprehensive diagnostic page
 @app.route('/diagnostic')
@@ -135,7 +149,7 @@ def set_developer_mode(enabled=True):
 
     logger.info(f"Developer mode {'enabled' if enabled else 'disabled'}")
 
-from flask import request
+from flask import request, make_response
 
 @app.before_request
 def log_request_info():
@@ -160,6 +174,28 @@ def log_request_info():
         # Simple logging for regular routes
         print(f"🔍 Request to: {request.path}")
     # No need to return anything from this before_request handler
+
+# Manual CORS preflight handler for browsers that don't properly handle OPTIONS requests
+@app.route('/api/cors-preflight', methods=['OPTIONS'])
+def handle_cors_preflight():
+    response = make_response()
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin,X-Custom-Header')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
+# Global OPTIONS request handler to ensure proper CORS for all routes
+@app.route('/', defaults={'path': ''}, methods=['OPTIONS'])
+@app.route('/<path:path>', methods=['OPTIONS'])
+def options_handler(path):
+    """Handle OPTIONS requests for all routes to ensure proper CORS handling"""
+    response = make_response()
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin,X-Custom-Header')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
 
 # Scheduler for auto-learning
 scheduler = BackgroundScheduler()
