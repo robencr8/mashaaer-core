@@ -1,0 +1,300 @@
+le: {
+            ar: 'الشروط والخصوصية',
+            en: 'Terms & Privacy'
+          },
+          content: {
+            ar: 'يرجى قراءة شروط الاستخدام والخصوصية بعناية',
+            en: 'Please read the terms of use and privacy policy carefully'
+          },
+          position: 'bottom',
+          delay: 1000
+        },
+        {
+          id: 'terms-checkbox-tooltip',
+          target: '#terms-agree',
+          title: {
+            ar: 'الموافقة على الشروط',
+            en: 'Agree to Terms'
+          },
+          content: {
+            ar: 'يجب الموافقة على الشروط للمتابعة. يمكنك أيضًا <span class="tooltip-highlight">التحدث</span> بـ "أوافق" لتفعيل الخيار',
+            en: 'You must agree to continue. You can also <span class="tooltip-highlight">say</span> "I agree" to check this option'
+          },
+          position: 'right',
+          delay: 3000
+        }
+      ],
+      // Tooltips for completion step
+      complete: [
+        {
+          id: 'complete-tooltip',
+          target: '#welcome-message',
+          title: {
+            ar: 'مرحبًا بك في مشاعر!',
+            en: 'Welcome to Mashaaer!'
+          },
+          content: {
+            ar: 'تم إعداد حسابك بنجاح! سيتم توجيهك إلى التطبيق الرئيسي خلال لحظات',
+            en: 'Your profile is now set up! You\'ll be redirected to the main app in a moment'
+          },
+          position: 'bottom',
+          delay: 1000
+        }
+      ]
+    };
+    
+    // Track current tooltip and step
+    let currentTooltip = null;
+    let tooltipTimeout = null;
+    let tooltipQueue = [];
+    let currentTooltipStep = 'splash';
+    let tooltipsEnabled = true;
+    
+    // Create tooltip element
+    function createTooltip(tooltipConfig) {
+      // Check if tooltip should be shown based on condition
+      if (tooltipConfig.showCondition && !tooltipConfig.showCondition()) {
+        return null;
+      }
+      
+      // Get the target element
+      const targetElement = document.querySelector(tooltipConfig.target);
+      if (!targetElement) {
+        console.error(`Target element not found: ${tooltipConfig.target}`);
+        return null;
+      }
+      
+      // Remove existing tooltip with same ID if present
+      const existingTooltip = document.getElementById(tooltipConfig.id);
+      if (existingTooltip) {
+        existingTooltip.remove();
+      }
+      
+      // Create tooltip element
+      const tooltip = document.createElement('div');
+      tooltip.className = `tooltip ${tooltipConfig.position || 'bottom'}`;
+      tooltip.id = tooltipConfig.id;
+      
+      // Add content to tooltip
+      const titleText = tooltipConfig.title[userLanguage] || tooltipConfig.title.en;
+      const contentText = tooltipConfig.content[userLanguage] || tooltipConfig.content.en;
+      
+      tooltip.innerHTML = `
+        <span class="tooltip-title">${titleText}</span>
+        <span class="tooltip-content">${contentText}</span>
+        <span class="tooltip-dismiss">${userLanguage === 'ar' ? 'انقر في أي مكان للمتابعة' : 'Tap anywhere to continue'}</span>
+      `;
+      
+      // Add Arabic class if needed
+      if (userLanguage === 'ar') {
+        tooltip.classList.add('tooltip-ar');
+      }
+      
+      // Add tooltip to DOM
+      document.body.appendChild(tooltip);
+      
+      // Create a pulse animation at the target
+      const pulse = document.createElement('div');
+      pulse.className = 'tooltip-pulse';
+      pulse.id = `pulse-${tooltipConfig.id}`;
+      document.body.appendChild(pulse);
+      
+      // Position tooltip and pulse relative to target
+      positionTooltip(tooltip, pulse, targetElement, tooltipConfig.position || 'bottom');
+      
+      // Return the tooltip element
+      return tooltip;
+    }
+    
+    // Position tooltip based on target and position
+    function positionTooltip(tooltip, pulse, target, position) {
+      const targetRect = target.getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+      
+      // Position pulse at center of target
+      const pulseX = targetRect.left + targetRect.width / 2;
+      const pulseY = targetRect.top + targetRect.height / 2;
+      pulse.style.left = `${pulseX}px`;
+      pulse.style.top = `${pulseY}px`;
+      
+      // Position tooltip based on specified position
+      let tooltipX, tooltipY;
+      
+      switch (position) {
+        case 'top':
+          tooltipX = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+          tooltipY = targetRect.top - tooltipRect.height - 10;
+          break;
+        case 'bottom':
+          tooltipX = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+          tooltipY = targetRect.bottom + 10;
+          break;
+        case 'left':
+          tooltipX = targetRect.left - tooltipRect.width - 10;
+          tooltipY = targetRect.top + (targetRect.height / 2) - (tooltipRect.height / 2);
+          break;
+        case 'right':
+          tooltipX = targetRect.right + 10;
+          tooltipY = targetRect.top + (targetRect.height / 2) - (tooltipRect.height / 2);
+          break;
+        default:
+          tooltipX = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+          tooltipY = targetRect.bottom + 10;
+      }
+      
+      // Keep tooltip within viewport
+      if (tooltipX < 10) tooltipX = 10;
+      if (tooltipX + tooltipRect.width > window.innerWidth - 10) {
+        tooltipX = window.innerWidth - tooltipRect.width - 10;
+      }
+      if (tooltipY < 10) tooltipY = 10;
+      if (tooltipY + tooltipRect.height > window.innerHeight - 10) {
+        tooltipY = window.innerHeight - tooltipRect.height - 10;
+      }
+      
+      tooltip.style.left = `${tooltipX}px`;
+      tooltip.style.top = `${tooltipY}px`;
+    }
+    
+    // Show tooltip and manage queue
+    function showTooltip(tooltipConfig) {
+      if (!tooltipsEnabled) return null;
+      
+      // If there's a current tooltip, hide it first
+      if (currentTooltip) {
+        hideTooltip();
+      }
+      
+      // Create and show the new tooltip
+      const tooltip = createTooltip(tooltipConfig);
+      if (tooltip) {
+        currentTooltip = {
+          element: tooltip,
+          pulse: document.getElementById(`pulse-${tooltipConfig.id}`),
+          config: tooltipConfig
+        };
+        
+        // Add click event to dismiss tooltip
+        document.addEventListener('click', dismissTooltipListener);
+        
+        return tooltip;
+      }
+      return null;
+    }
+    
+    // Hide current tooltip
+    function hideTooltip() {
+      if (currentTooltip) {
+        // Remove the tooltip and pulse elements
+        currentTooltip.element.remove();
+        if (currentTooltip.pulse) {
+          currentTooltip.pulse.remove();
+        }
+        document.removeEventListener('click', dismissTooltipListener);
+        currentTooltip = null;
+      }
+      
+      // Clear any pending tooltip
+      if (tooltipTimeout) {
+        clearTimeout(tooltipTimeout);
+        tooltipTimeout = null;
+      }
+    }
+    
+    // Event listener for dismissing tooltips
+    function dismissTooltipListener() {
+      hideTooltip();
+      
+      // Show next tooltip in queue if any
+      if (tooltipQueue.length > 0) {
+        const nextTooltip = tooltipQueue.shift();
+        tooltipTimeout = setTimeout(() => {
+          showTooltip(nextTooltip);
+        }, 500);
+      }
+    }
+    
+    // Show tooltips for a step in sequence
+    function showStepTooltips(step) {
+      if (!tooltipsEnabled) return;
+      
+      // Clear any existing tooltips
+      hideTooltip();
+      tooltipQueue = [];
+      
+      // Get tooltips for this step
+      const stepTooltips = tooltips[step];
+      if (!stepTooltips || stepTooltips.length === 0) {
+        return;
+      }
+      
+      // Set current tooltip step
+      currentTooltipStep = step;
+      
+      // Show first tooltip immediately, queue others
+      const firstTooltip = stepTooltips[0];
+      tooltipTimeout = setTimeout(() => {
+        showTooltip(firstTooltip);
+        
+        // Queue remaining tooltips
+        for (let i = 1; i < stepTooltips.length; i++) {
+          tooltipQueue.push(stepTooltips[i]);
+        }
+      }, firstTooltip.delay || 500);
+    }
+    
+    // Override the showStep function to include tooltips
+    const originalShowStep = window.showStep;
+    window.showStep = function(step) {
+      // Call the original function first
+      originalShowStep(step);
+      
+      // Then show tooltips for this step
+      showStepTooltips(step);
+    };
+    
+    // Add tooltip initialization to the startOnboarding function
+    const originalStartOnboarding = window.startOnboarding;
+    window.startOnboarding = function() {
+      // Call the original function first
+      originalStartOnboarding();
+      
+      // Initialize splash screen tooltip
+      showStepTooltips('splash');
+    };
+    
+    // Add tooltip for the splash screen
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add click event to splash container to show tooltips
+      const splashContainer = document.getElementById('splash-container');
+      if (splashContainer) {
+        tooltipTimeout = setTimeout(() => {
+          showStepTooltips('splash');
+        }, 3500); // Show after initial animation completes
+      }
+      
+      // Add tooltip toggle in Developer mode (hidden from users)
+      window.toggleTooltips = function() {
+        tooltipsEnabled = !tooltipsEnabled;
+        if (!tooltipsEnabled) {
+          hideTooltip();
+        } else {
+          showStepTooltips(currentTooltipStep);
+        }
+        console.log(`Tooltips ${tooltipsEnabled ? 'enabled' : 'disabled'}`);
+        return tooltipsEnabled;
+      };
+      
+      // Make cosmic sphere clickable to start onboarding
+      const cosmicSphere = document.querySelector('.cosmic-sphere');
+      if (cosmicSphere) {
+        cosmicSphere.style.cursor = 'pointer';
+        cosmicSphere.addEventListener('click', () => {
+          hideTooltip();
+          startOnboarding();
+        });
+      }
+    });
+  </script>
+</body>
+        </html>

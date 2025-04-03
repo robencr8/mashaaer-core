@@ -277,22 +277,8 @@ core_launcher = CoreLauncher(
 def index():
     try:
         logger.info("Root route accessed - serving cosmic onboarding experience")
-        # Check if onboarding has been completed
-        onboarding_status = db_manager.get_setting('onboarding_complete', 'false')
-        onboarding_complete = False
-
-        if isinstance(onboarding_status, str):
-            onboarding_complete = onboarding_status.lower() == 'true'
-            
-        # If onboarding not complete, render the cosmic onboarding experience
-        if not onboarding_complete:
-            logger.info("Redirecting to cosmic onboarding experience")
-            return render_template('cosmic_onboarding.html')
-        else:
-            # If onboarding is complete, render the main interface
-            logger.info("Onboarding complete, rendering main interface")
-            dev_mode = is_developer_mode()
-            return render_template('index.html', dev_mode=dev_mode)
+        # Always serve the cosmic onboarding experience as the default landing page
+        return render_template('cosmic_onboarding.html')
     except Exception as e:
         error_msg = f"Error in root route: {str(e)}"
         logger.error(error_msg)
@@ -309,23 +295,6 @@ def index():
             except Exception as inner_e:
                 logger.critical(f"Critical error in error handler: {str(inner_e)}")
                 return "Server error", 500
-    
-    # Original code (commented out during debugging)
-    """
-    # Check if onboarding has been completed
-    onboarding_status = db_manager.get_setting('onboarding_complete', 'false')
-    onboarding_complete = False
-
-    if isinstance(onboarding_status, str):
-        onboarding_complete = onboarding_status.lower() == 'true'
-
-    # If onboarding not complete, redirect to startup
-    if not onboarding_complete:
-        return redirect(url_for('startup'))
-
-    dev_mode = is_developer_mode()
-    return render_template('index.html', dev_mode=dev_mode)
-    """
 
 @app.route('/startup')
 def startup():

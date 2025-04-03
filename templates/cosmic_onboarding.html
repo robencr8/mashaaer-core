@@ -1,13 +1,1477 @@
-le: {
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>مشاعر | Mashaaer</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/meteor-shower.css">
+  <script src="/static/js/meteor-shower.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(145deg, #0b0c10, #1f1f2e);
+      color: #e4e4e4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .splash-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      animation: fadeIn 2s ease-in-out;
+    }
+    
+    .cosmic-sphere {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin-bottom: 40px;
+    }
+    
+    .sphere {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #8a2be2, #4b0082);
+      box-shadow: 0 0 60px rgba(138, 43, 226, 0.8);
+      animation: pulse 4s ease-in-out infinite, float 6s ease-in-out infinite;
+    }
+    
+    .orbit {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: rotate 15s linear infinite;
+    }
+    
+    .orbit:nth-child(1) {
+      width: 150px;
+      height: 150px;
+    }
+    
+    .orbit:nth-child(2) {
+      width: 180px;
+      height: 180px;
+      animation-duration: 30s;
+      animation-direction: reverse;
+    }
+    
+    .orbit:nth-child(3) {
+      width: 210px;
+      height: 210px;
+      animation-duration: 45s;
+    }
+    
+    .orbital-particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background-color: #8a2be2;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(138, 43, 226, 0.8);
+    }
+    
+    .orbit:nth-child(1) .orbital-particle {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .orbit:nth-child(2) .orbital-particle {
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+    }
+    
+    .orbit:nth-child(3) .orbital-particle {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .title {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      color: #8a2be2;
+      text-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+      font-weight: 700;
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      color: #c9c9c9;
+      max-width: 80%;
+      font-style: italic;
+    }
+    
+    .loading-text {
+      font-size: 1.2rem;
+      color: #8a2be2;
+      margin-top: 2rem;
+      letter-spacing: 1px;
+      animation: blink 2s infinite;
+    }
+    
+    .onboarding-content {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background-color: rgba(18, 18, 18, 0.8);
+      border-radius: 1rem;
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      max-width: 600px;
+      animation: fadeIn 1s ease-in-out;
+      position: relative; /* For positioning tooltips */
+    }
+    
+    .onboarding-step {
+      display: none;
+      width: 100%;
+      animation: fadeIn 0.5s ease-in-out;
+      position: relative; /* For tooltip positioning */
+    }
+    
+    .form-group {
+      width: 100%;
+      margin-bottom: 1.5rem;
+      text-align: left;
+      position: relative; /* For tooltip positioning */
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 0.5rem;
+      color: #f8f9fa;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: #8a2be2;
+      box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+    }
+    
+    .form-select {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 0.5rem;
+      color: #f8f9fa;
+      transition: all 0.3s ease;
+    }
+    
+    .next-btn, .prev-btn {
+      background: linear-gradient(90deg, #8a2be2, #4b0082);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      border: none;
+      margin-top: 20px;
+      cursor: pointer;
+      box-shadow: 0 5px 20px rgba(138, 43, 226, 0.5);
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative; /* For tooltip positioning */
+    }
+    
+    .next-btn:hover, .prev-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(138, 43, 226, 0.6);
+    }
+    
+    .prev-btn {
+      background: transparent;
+      border: 2px solid #8a2be2;
+      margin-right: 10px;
+    }
+    
+    .btn-container {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 20px;
+      position: relative; /* For tooltip positioning */
+    }
+    
+    .listening-indicator {
+      margin-top: 15px;
+      font-size: 1rem;
+      color: #8a2be2;
+      display: none;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    .pulse-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #8a2be2;
+      margin: 0 2px;
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+    
+    .pulse-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    .pulse-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    .arabic-text {
+      font-family: 'Arial', sans-serif;
+      direction: rtl;
+      text-align: right;
+    }
+    
+    .terms-container {
+      max-height: 250px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: rgba(0, 0, 0, 0.3);
+      border-radius: 5px;
+      text-align: left;
+    }
+    
+    /* Tooltip Styles */
+    .tooltip {
+      position: absolute;
+      background: linear-gradient(135deg, rgba(138, 43, 226, 0.95), rgba(75, 0, 130, 0.95));
+      color: white;
+      padding: 1.2rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(138, 43, 226, 0.4);
+      z-index: 1000;
+      max-width: 320px;
+      backdrop-filter: blur(8px);
+      animation: tooltipFadeIn 0.5s ease-out;
+      transition: all 0.3s ease;
+      pointer-events: auto; /* Makes tooltip interactive */
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 1rem;
+      line-height: 1.5;
+      transform-origin: center center;
+    }
+    
+    .tooltip::before {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+    }
+    
+    .tooltip.top::before {
+      border-width: 10px 10px 0 10px;
+      border-color: rgba(138, 43, 226, 0.95) transparent transparent transparent;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .tooltip.bottom::before {
+      border-width: 0 10px 10px 10px;
+      border-color: transparent transparent rgba(138, 43, 226, 0.95) transparent;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .tooltip.left::before {
+      border-width: 10px 0 10px 10px;
+      border-color: transparent transparent transparent rgba(138, 43, 226, 0.95);
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    
+    .tooltip.right::before {
+      border-width: 10px 10px 10px 0;
+      border-color: transparent rgba(138, 43, 226, 0.95) transparent transparent;
+      left: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    
+    .tooltip-title {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+      color: #ffffff;
+      text-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+      letter-spacing: 0.5px;
+    }
+    
+    .tooltip-content {
+      display: block;
+      margin-bottom: 5px;
+    }
+    
+    .tooltip-highlight {
+      color: #ffcc00;
+      font-weight: bold;
+      text-shadow: 0 0 5px rgba(255, 204, 0, 0.3);
+      animation: highlightPulse 2s infinite ease-in-out;
+    }
+    
+    .tooltip-ar {
+      direction: rtl;
+      text-align: right;
+    }
+    
+    .tooltip-dismiss {
+      display: block;
+      text-align: center;
+      margin-top: 12px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      font-style: italic;
+      opacity: 0.8;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    
+    .tooltip-dismiss:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    
+    .tooltip-action-button {
+      display: block;
+      background: linear-gradient(135deg, #7c4dff 0%, #448aff 100%);
+      border: none;
+      border-radius: 20px;
+      color: white;
+      padding: 8px 15px;
+      margin: 10px 0;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      font-size: 0.95rem;
+    }
+    
+    .tooltip-action-button:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: all 0.4s ease;
+    }
+    
+    .tooltip-action-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      background: linear-gradient(135deg, #8c5dff 0%, #549aff 100%);
+    }
+    
+    .tooltip-action-button:hover:before {
+      left: 100%;
+    }
+    
+    .tooltip-action-button:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Arabic specific button styles */
+    .tooltip-ar .tooltip-action-button {
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .tooltip-pulse {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(138, 43, 226, 0.3);
+      transform: translate(-50%, -50%);
+      animation: tooltipPulse 1.5s infinite ease-out;
+      pointer-events: none;
+      z-index: 1;
+      box-shadow: 0 0 30px rgba(138, 43, 226, 0.5);
+    }
+    
+    @keyframes highlightPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    @keyframes tooltipPulse {
+      0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0.8;
+      }
+      70% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes tooltipFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { 
+        box-shadow: 0 0 40px rgba(138, 43, 226, 0.6);
+      }
+      50% { 
+        box-shadow: 0 0 70px rgba(138, 43, 226, 0.9);
+      }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translate(-50%, -50%); }
+      50% { transform: translate(-50%, -60%); }
+    }
+    
+    @keyframes rotate {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    @keyframes pulse-dot {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.2;
+      }
+      50% {
+        transform: scale(1.5);
+        opacity: 1;
+      }
+    }
+    
+    /* RTL Support */
+    html[dir="rtl"] .form-group {
+      text-align: right;
+    }
+    
+    html[dir="rtl"] .tooltip:not(.tooltip-ar) {
+      direction: rtl;
+      text-align: right;
+    }
+    
+    @media (max-width: 480px) {
+      .title {
+        font-size: 2rem;
+      }
+      
+      .subtitle {
+        font-size: 1rem;
+      }
+      
+      .cosmic-sphere {
+        width: 150px;
+        height: 150px;
+      }
+      
+      .sphere {
+        width: 90px;
+        height: 90px;
+      }
+      
+      .orbit:nth-child(1) {
+        width: 110px;
+        height: 110px;
+      }
+      
+      .orbit:nth-child(2) {
+        width: 130px;
+        height: 130px;
+      }
+      
+      .orbit:nth-child(3) {
+        width: 150px;
+        height: 150px;
+      }
+      
+      .onboarding-content {
+        width: 90%;
+        padding: 1.5rem;
+      }
+      
+      .tooltip {
+        max-width: 220px;
+        font-size: 0.8rem;
+        padding: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="splash-container" id="splash-container">
+    <div class="cosmic-sphere">
+      <div class="orbit">
+        <div class="orbital-particle"></div>
+      </div>
+      <div class="orbit">
+        <div class="orbital-particle"></div>
+      </div>
+      <div class="orbit">
+        <div class="orbital-particle"></div>
+      </div>
+      <div class="sphere"></div>
+    </div>
+    
+    <h1 class="title" id="title">مشاعر | Mashaaer</h1>
+    <p class="subtitle" id="subtitle">اصنع المستقبل، أنا أسمعك</p>
+    <p class="subtitle" id="subtitle-en">Create the future, I'm listening</p>
+    
+    <div class="loading-text" id="loading">جاري التحميل...</div>
+  </div>
+  
+  <!-- Onboarding Content -->
+  <div class="onboarding-content" id="onboarding-content">
+    <!-- Step 1: Name -->
+    <div class="onboarding-step" id="step-name">
+      <h2>أخبرني عن نفسك | Tell me about yourself</h2>
+      <div class="form-group">
+        <label>الاسم الكامل | Full Name</label>
+        <input type="text" id="full-name" class="form-control" placeholder="محمد أحمد | John Doe">
+      </div>
+      <div class="btn-container">
+        <div></div> <!-- Placeholder for alignment -->
+        <button class="next-btn" onclick="nextStep('name')">التالي | Next</button>
+      </div>
+      <div class="listening-indicator" id="listening-name">
+        أستمع إليك... | Listening...
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+      </div>
+    </div>
+    
+    <!-- Step 2: Nickname -->
+    <div class="onboarding-step" id="step-nickname">
+      <h2>كيف تفضل أن أناديك؟ | What should I call you?</h2>
+      <div class="form-group">
+        <label>الاسم المستعار | Nickname</label>
+        <input type="text" id="nickname" class="form-control" placeholder="محمد | John">
+      </div>
+      <div class="btn-container">
+        <button class="prev-btn" onclick="prevStep('nickname')">العودة | Back</button>
+        <button class="next-btn" onclick="nextStep('nickname')">التالي | Next</button>
+      </div>
+      <div class="listening-indicator" id="listening-nickname">
+        أستمع إليك... | Listening...
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+      </div>
+    </div>
+    
+    <!-- Step 3: Language -->
+    <div class="onboarding-step" id="step-language">
+      <h2>ما هي لغتك المفضلة؟ | What's your preferred language?</h2>
+      <div class="form-group">
+        <select id="language" class="form-select">
+          <option value="ar">العربية</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <div class="btn-container">
+        <button class="prev-btn" onclick="prevStep('language')">العودة | Back</button>
+        <button class="next-btn" onclick="nextStep('language')">التالي | Next</button>
+      </div>
+    </div>
+    
+    <!-- Step 4: Terms -->
+    <div class="onboarding-step" id="step-terms">
+      <h2>الشروط والخصوصية | Terms & Privacy</h2>
+      <div class="terms-container">
+        <div id="terms-ar" class="arabic-text">
+          <h3>شروط الاستخدام والخصوصية</h3>
+          <p>بالموافقة على هذه الشروط، أنت توافق على:</p>
+          <ul>
+            <li>استخدام تطبيق مشاعر لأغراض شخصية فقط</li>
+            <li>سيتم تخزين معلوماتك بشكل آمن على جهازك فقط</li>
+            <li>لن تتم مشاركة بياناتك مع أي طرف ثالث دون موافقة صريحة منك</li>
+            <li>يمكنك طلب حذف بياناتك في أي وقت</li>
+          </ul>
+        </div>
+        <div id="terms-en">
+          <h3>Terms of Use & Privacy</h3>
+          <p>By agreeing to these terms, you accept:</p>
+          <ul>
+            <li>Using Mashaaer app for personal purposes only</li>
+            <li>Your information will be stored securely on your device only</li>
+            <li>Your data will not be shared with any third party without your explicit consent</li>
+            <li>You can request deletion of your data at any time</li>
+          </ul>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><input type="checkbox" id="terms-agree"> أوافق على الشروط والأحكام | I agree to the terms and conditions</label>
+      </div>
+      <div class="btn-container">
+        <button class="prev-btn" onclick="prevStep('terms')">العودة | Back</button>
+        <button class="next-btn" onclick="nextStep('terms')" id="terms-next-btn" disabled>أوافق | Agree</button>
+      </div>
+      <div class="listening-indicator" id="listening-terms">
+        أستمع إليك... | Listening...
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+      </div>
+    </div>
+    
+    <!-- Step 5: Completion -->
+    <div class="onboarding-step" id="step-complete">
+      <h2 id="welcome-message"></h2>
+      <p>تم إعداد حسابك بنجاح | Your profile is ready</p>
+      <div class="listening-indicator" id="listening-complete" style="display: block;">
+        جاري الانتقال إلى التطبيق... | Redirecting to the app...
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let userLanguage = 'ar'; // Default to Arabic
+    // Audio playback system variables
+    let audioPlaybackFallbackTriggered = false;
+    let audioPlaybackAttempts = 0;
+    let totalAudioPlaybackAttempts = 0;
+    let lastPlayedAudioPath = '';
+    let audioContext = null;
+    
+    // Create audio context on demand (required user interaction first)
+    function getAudioContext() {
+      if (!audioContext) {
+        try {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          console.log('Audio context created successfully');
+        } catch (e) {
+          console.error('Failed to create audio context:', e);
+        }
+      }
+      return audioContext;
+    }
+    
+    const userData = {
+      full_name: '',
+      nickname: '',
+      language_preference: 'ar',
+      voice_style: 'default'
+    };
+    let currentStep = 'splash';
+    const steps = ['name', 'nickname', 'language', 'terms', 'complete'];
+    
+    // Welcome messages by language
+    const welcomeMessages = {
+      ar: "اصنع المستقبل، أنا أسمعك",
+      en: "Create the future, I'm listening"
+    };
+    
+    // Instructions by language and step
+    const instructions = {
+      name: {
+        ar: "من فضلك، أخبرني باسمك الكامل",
+        en: "Please tell me your full name"
+      },
+      nickname: {
+        ar: "كيف تفضل أن أناديك؟",
+        en: "What would you like me to call you?"
+      },
+      language: {
+        ar: "ما هي لغتك المفضلة؟",
+        en: "What is your preferred language?"
+      },
+      terms: {
+        ar: "هل توافق على شروط الاستخدام والخصوصية؟",
+        en: "Do you agree to the terms of use and privacy policy?"
+      },
+      complete: {
+        ar: "شكراً لك. أنت جاهز الآن!",
+        en: "Thank you. You're all set now!"
+      }
+    };
+    
+    // Document ready function
+    document.addEventListener('DOMContentLoaded', function() {
+      // Start splash animation
+      setTimeout(startOnboarding, 3000);
+      
+      // Setup checkbox for terms
+      document.getElementById('terms-agree').addEventListener('change', function() {
+        document.getElementById('terms-next-btn').disabled = !this.checked;
+      });
+      
+      // Setup language selector
+      document.getElementById('language').addEventListener('change', function() {
+        userLanguage = this.value;
+        updateLanguageDisplay();
+        
+        // Also update the user data
+        userData.language_preference = userLanguage;
+        
+        // Speak the language change
+        const message = userLanguage === 'ar' ? 
+          "تم تغيير اللغة إلى العربية" : 
+          "Language changed to English";
+        speakText(message);
+      });
+    });
+    
+    // Update UI elements based on selected language
+    function updateLanguageDisplay() {
+      if (userLanguage === 'ar') {
+        document.documentElement.dir = 'rtl';
+        document.getElementById('terms-ar').style.display = 'block';
+        document.getElementById('terms-en').style.display = 'none';
+      } else {
+        document.documentElement.dir = 'ltr';
+        document.getElementById('terms-ar').style.display = 'none';
+        document.getElementById('terms-en').style.display = 'block';
+      }
+    }
+    
+    // Start the onboarding process
+    function startOnboarding() {
+      document.getElementById('splash-container').style.display = 'none';
+      document.getElementById('onboarding-content').style.display = 'flex';
+      showStep('name');
+      
+      // Speak welcome message and first instruction
+      const welcomeMsg = welcomeMessages[userLanguage];
+      const nameInstructions = instructions.name[userLanguage];
+      
+      speakText(welcomeMsg + ". " + nameInstructions);
+      
+      // After speaking, show listening indicator if voice mode
+      setTimeout(() => {
+        document.getElementById('listening-name').style.display = 'block';
+        startVoiceInput('full-name');
+      }, 1000);
+    }
+    
+    // Show a specific step and hide others
+    function showStep(step) {
+      currentStep = step;
+      steps.forEach(s => {
+        document.getElementById(`step-${s}`).style.display = s === step ? 'block' : 'none';
+      });
+      
+      // If it's the complete step, prepare for redirect
+      if (step === 'complete') {
+        const welcomeMsg = userLanguage === 'ar' ? 
+          `مرحباً بك، ${userData.nickname || userData.full_name.split(' ')[0]}` : 
+          `Welcome, ${userData.nickname || userData.full_name.split(' ')[0]}`;
+        
+        document.getElementById('welcome-message').textContent = welcomeMsg;
+        
+        // Speak completion message
+        speakText(instructions.complete[userLanguage] + " " + welcomeMsg);
+        
+        // Submit profile data
+        submitProfile();
+      }
+    }
+    
+    // Go to next step
+    function nextStep(currentStepName) {
+      // Validate current step
+      if (currentStepName === 'name') {
+        const name = document.getElementById('full-name').value.trim();
+        if (!name) {
+          alert(userLanguage === 'ar' ? 'الرجاء إدخال اسمك' : 'Please enter your name');
+          return;
+        }
+        userData.full_name = name;
+        
+        // Speak next instruction
+        speakText(instructions.nickname[userLanguage]);
+        
+        // After speaking, show listening indicator
+        setTimeout(() => {
+          document.getElementById('listening-nickname').style.display = 'block';
+          startVoiceInput('nickname');
+        }, 1000);
+      } 
+      else if (currentStepName === 'nickname') {
+        const nickname = document.getElementById('nickname').value.trim();
+        userData.nickname = nickname || userData.full_name.split(' ')[0];
+        
+        // Speak next instruction
+        speakText(instructions.language[userLanguage]);
+      }
+      else if (currentStepName === 'language') {
+        userData.language_preference = document.getElementById('language').value;
+        userLanguage = userData.language_preference;
+        updateLanguageDisplay();
+        
+        // Speak terms instruction
+        speakText(instructions.terms[userLanguage]);
+        
+        // After speaking, show listening indicator
+        setTimeout(() => {
+          document.getElementById('listening-terms').style.display = 'block';
+          startVoiceInput('terms-agree');
+        }, 1000);
+      }
+      else if (currentStepName === 'terms') {
+        if (!document.getElementById('terms-agree').checked) {
+          alert(userLanguage === 'ar' ? 'الرجاء الموافقة على الشروط للمتابعة' : 'Please agree to the terms to continue');
+          return;
+        }
+      }
+      
+      // Find next step
+      const currentIndex = steps.indexOf(currentStepName);
+      if (currentIndex < steps.length - 1) {
+        showStep(steps[currentIndex + 1]);
+      }
+    }
+    
+    // Go to previous step
+    function prevStep(currentStepName) {
+      const currentIndex = steps.indexOf(currentStepName);
+      if (currentIndex > 0) {
+        showStep(steps[currentIndex - 1]);
+      }
+    }
+    
+    // Improved multi-strategy audio playback system
+    function playAudioWithFallback(audioPath, onComplete) {
+        console.log('Attempting to play audio:', audioPath);
+        lastPlayedAudioPath = audioPath;
+        audioPlaybackAttempts = 0;
+        totalAudioPlaybackAttempts++;
+        
+        // Try standard audio element first (Strategy 1)
+        tryPlayWithAudioElement(audioPath, onComplete);
+    }
+    
+    // Strategy 1: Standard Audio element
+    function tryPlayWithAudioElement(audioPath, onComplete) {
+        audioPlaybackAttempts++;
+        console.log(`Audio playback attempt ${audioPlaybackAttempts} (Strategy 1: Audio element)`);
+        
+        try {
+            const audio = new Audio(audioPath);
+            
+            // Success handler
+            audio.onplay = function() {
+                console.log('Audio playback started successfully (Strategy 1)');
+                audioPlaybackFallbackTriggered = false;
+            };
+            
+            // Ended handler - consider this a successful play
+            audio.onended = function() {
+                console.log('Audio playback completed (Strategy 1)');
+                if (onComplete) onComplete();
+            };
+            
+            // Error handler - try next strategy
+            audio.onerror = function(e) {
+                console.error('Error playing audio with Strategy 1:', e);
+                tryPlayWithCacheBusting(audioPath, onComplete);
+            };
+            
+            // Start playback
+            const playPromise = audio.play();
+            
+            // Modern browsers return a promise from play()
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.error('Audio play promise rejected:', error);
+                    // Since we got a promise, we know we're on a modern browser
+                    // Try the next strategy with a small delay
+                    setTimeout(() => {
+                        tryPlayWithCacheBusting(audioPath, onComplete);
+                    }, 300);
+                });
+            }
+        } catch (e) {
+            console.error('Exception in Audio element playback:', e);
+            tryPlayWithCacheBusting(audioPath, onComplete);
+        }
+    }
+    
+    // Strategy 2: Cache-busting approach
+    function tryPlayWithCacheBusting(audioPath, onComplete) {
+        audioPlaybackAttempts++;
+        console.log(`Audio playback attempt ${audioPlaybackAttempts} (Strategy 2: Cache busting)`);
+        
+        try {
+            // Add a cache-busting query parameter
+            const cacheBustPath = audioPath + '?cb=' + new Date().getTime();
+            const audio = new Audio(cacheBustPath);
+            
+            audio.onplay = function() {
+                console.log('Audio playback started successfully (Strategy 2)');
+                audioPlaybackFallbackTriggered = false;
+            };
+            
+            audio.onended = function() {
+                console.log('Audio playback completed (Strategy 2)');
+                if (onComplete) onComplete();
+            };
+            
+            audio.onerror = function(e) {
+                console.error('Error playing audio with Strategy 2:', e);
+                tryPlayWithAudioContext(audioPath, onComplete);
+            };
+            
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.error('Cache-busting audio play promise rejected:', error);
+                    setTimeout(() => {
+                        tryPlayWithAudioContext(audioPath, onComplete);
+                    }, 300);
+                });
+            }
+        } catch (e) {
+            console.error('Exception in cache-busting playback:', e);
+            tryPlayWithAudioContext(audioPath, onComplete);
+        }
+    }
+    
+    // Strategy 3: Web Audio API approach
+    function tryPlayWithAudioContext(audioPath, onComplete) {
+        audioPlaybackAttempts++;
+        console.log(`Audio playback attempt ${audioPlaybackAttempts} (Strategy 3: AudioContext)`);
+        
+        try {
+            // Create or get audio context
+            const ctx = getAudioContext();
+            if (!ctx) {
+                console.error('AudioContext not available');
+                tryFinalFallback(onComplete);
+                return;
+            }
+            
+            // Resume context if it's suspended (browser autoplay policy)
+            if (ctx.state === 'suspended') {
+                ctx.resume().then(() => {
+                    console.log('AudioContext resumed successfully');
+                    loadAndPlayWithAudioContext(ctx, audioPath, onComplete);
+                }).catch(err => {
+                    console.error('Failed to resume AudioContext:', err);
+                    tryFinalFallback(onComplete);
+                });
+            } else {
+                loadAndPlayWithAudioContext(ctx, audioPath, onComplete);
+            }
+        } catch (e) {
+            console.error('Exception in AudioContext setup:', e);
+            tryFinalFallback(onComplete);
+        }
+    }
+    
+    // Helper for Web Audio API playback
+    function loadAndPlayWithAudioContext(audioContext, audioPath, onComplete) {
+        fetch(audioPath)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.arrayBuffer();
+            })
+            .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+            .then(audioBuffer => {
+                const source = audioContext.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(audioContext.destination);
+                
+                // Handle completion
+                source.onended = function() {
+                    console.log('Audio playback completed (Strategy 3)');
+                    if (onComplete) onComplete();
+                };
+                
+                source.start(0);
+                console.log('AudioContext playback started successfully');
+                audioPlaybackFallbackTriggered = false;
+            })
+            .catch(err => {
+                console.error('AudioContext playback failed:', err);
+                tryFinalFallback(onComplete);
+            });
+    }
+    
+    // Strategy 4: Final fallback - static error sound
+    function tryFinalFallback(onComplete) {
+        console.log('Attempting final fallback audio playback');
+        
+        if (!audioPlaybackFallbackTriggered) {
+            audioPlaybackFallbackTriggered = true;
+            
+            try {
+                // Try the static error sound
+                const errorSound = new Audio('/tts_cache/error.mp3');
+                
+                errorSound.onended = function() {
+                    console.log('Fallback audio completed');
+                    if (onComplete) onComplete();
+                };
+                
+                errorSound.onerror = function() {
+                    console.error('Final fallback audio also failed');
+                    showVisualFeedback();
+                    if (onComplete) setTimeout(onComplete, 1000);
+                };
+                
+                const playPromise = errorSound.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(err => {
+                        console.error('Error playing final fallback:', err);
+                        showVisualFeedback();
+                        if (onComplete) setTimeout(onComplete, 1000);
+                    });
+                }
+            } catch (e) {
+                console.error('Exception in fallback playback:', e);
+                showVisualFeedback();
+                if (onComplete) setTimeout(onComplete, 1000);
+            }
+        } else {
+            console.log('Fallback already triggered, showing visual notification');
+            showVisualFeedback();
+            if (onComplete) setTimeout(onComplete, 1000);
+        }
+    }
+    
+    // Show visual notification when audio completely fails
+    function showVisualFeedback() {
+        const element = document.getElementById('listening-' + currentStep);
+        if (element) {
+            element.innerHTML = '<span style="color:orange">⚠️ ' + 
+                (userLanguage === 'ar' ? 'تعذر تشغيل الصوت' : 'Audio unavailable') + 
+                '</span>';
+            setTimeout(() => {
+                element.innerHTML = '';
+            }, 3000);
+        }
+    }
+    
+    // Function to speak text using the server's TTS API
+    function speakText(text) {
+        fetch('/api/speak', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                text: text, 
+                language: userLanguage === 'en' ? 'en-US' : 'ar'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('TTS success:', data);
+                
+                // Check if we have a valid audio path
+                if (data.audio_path) {
+                    // Try playing with our improved system
+                    playAudioWithFallback(data.audio_path);
+                } else {
+                    console.error('TTS response missing audio_path');
+                    showVisualFeedback();
+                }
+            } else {
+                console.error('TTS error:', data.error || 'Unknown error');
+                showVisualFeedback();
+            }
+        })
+        .catch(error => {
+            console.error('TTS API error:', error);
+            showVisualFeedback();
+        });
+    }
+    
+    // Start voice input for a field
+    function startVoiceInput(fieldId) {
+      // Call the server's listen API
+      fetch('/api/listen', {
+        method: 'POST',
+        body: new FormData() // This would normally contain audio data
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Handle voice input
+          handleVoiceInput(fieldId, data.text);
+        } else {
+          console.error('Voice recognition error:', data.error);
+        }
+        
+        // Hide listening indicator
+        document.getElementById(`listening-${currentStep}`).style.display = 'none';
+      })
+      .catch(error => {
+        console.error('API error:', error);
+        document.getElementById(`listening-${currentStep}`).style.display = 'none';
+      });
+    }
+    
+    // Handle voice input for different fields
+    function handleVoiceInput(fieldId, text) {
+      console.log(`Voice input for ${fieldId}: ${text}`);
+      
+      if (fieldId === 'full-name') {
+        document.getElementById('full-name').value = text;
+        // Auto-advance after a delay
+        setTimeout(() => nextStep('name'), 1000);
+      } 
+      else if (fieldId === 'nickname') {
+        document.getElementById('nickname').value = text;
+        // Auto-advance after a delay
+        setTimeout(() => nextStep('nickname'), 1000);
+      }
+      else if (fieldId === 'terms-agree') {
+        // Check if response indicates agreement
+        let agreed = false;
+        
+        if (userLanguage === 'ar') {
+          agreed = text.includes('نعم') || 
+                  text.includes('موافق') || 
+                  text.includes('أوافق');
+        } else {
+          agreed = text.toLowerCase().includes('yes') || 
+                  text.toLowerCase().includes('agree') ||
+                  text.toLowerCase().includes('ok');
+        }
+        
+        if (agreed) {
+          document.getElementById('terms-agree').checked = true;
+          document.getElementById('terms-next-btn').disabled = false;
+          // Auto-advance after a delay
+          setTimeout(() => nextStep('terms'), 1000);
+        } else {
+          // Prompt again for terms agreement
+          speakText(instructions.terms[userLanguage]);
+          setTimeout(() => {
+            document.getElementById('listening-terms').style.display = 'block';
+            startVoiceInput('terms-agree');
+          }, 1000);
+        }
+      }
+    }
+    
+    // Submit profile data to server
+    function submitProfile() {
+      fetch('/api/cosmic-onboarding-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          full_name: userData.full_name,
+          nickname: userData.nickname,
+          language_preference: userData.language_preference,
+          voice_style: userData.voice_style,
+          onboarding_complete: true
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Store user language preference in localStorage
+          localStorage.setItem('user_language', userData.language_preference);
+          
+          // Redirect to the main interface after 3 seconds
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 3000);
+        } else {
+          console.error('Error saving profile:', data.error);
+          alert(userLanguage === 'ar' 
+            ? 'خطأ في حفظ الملف الشخصي: ' + data.error 
+            : 'Error saving profile: ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert(userLanguage === 'ar' 
+          ? 'خطأ في حفظ الملف الشخصي. يرجى المحاولة مرة أخرى.' 
+          : 'Error saving profile. Please try again.');
+      });
+    }
+    
+    // Tooltip system for onboarding journey
+    const tooltips = {
+      // Tooltips for splash screen
+      splash: [
+        {
+          id: 'splash-tooltip',
+          target: '.cosmic-sphere',
+          title: {
+            ar: 'مرحبًا بك في مشاعر!',
+            en: 'Welcome to Mashaaer!'
+          },
+          content: {
+            ar: 'انقر على المجال الكوني للانتقال إلى رحلة البداية. ستساعدك هذه التجربة على إعداد تطبيق مشاعر وفقًا لتفضيلاتك',
+            en: 'Tap on the cosmic orb to begin your journey. This interactive experience will help set up Mashaaer to your preferences'
+          },
+          action: {
+            ar: 'ابدأ الآن',
+            en: 'Begin Now'
+          },
+          actionType: 'custom',
+          customAction: function() {
+            hideTooltip();
+            startOnboarding();
+          },
+          position: 'bottom'
+        },
+        {
+          id: 'splash-title-tooltip',
+          target: '.title',
+          title: {
+            ar: 'تطبيق مشاعر',
+            en: 'Mashaaer App'
+          },
+          content: {
+            ar: 'مساعدك الذكي للتعبير عن مشاعرك وفهمها بطريقة مختلفة',
+            en: 'Your intelligent companion for expressing and understanding your emotions in a unique way'
+          },
+          position: 'top',
+          delay: 3000
+        }
+      ],
+      // Tooltips for name step
+      name: [
+        {
+          id: 'name-intro-tooltip',
+          target: '#step-name h2',
+          title: {
+            ar: 'لنتعارف',
+            en: 'Let\'s get to know each other'
+          },
+          content: {
+            ar: 'سأحتاج إلى معرفة بعض المعلومات الأساسية عنك لتخصيص تجربتك معي. كل المعلومات تبقى خاصة وآمنة',
+            en: 'I\'ll need to know some basic information about you to personalize your experience. All information remains private and secure'
+          },
+          position: 'top',
+          delay: 500
+        },
+        {
+          id: 'name-input-tooltip',
+          target: '#full-name',
+          title: {
+            ar: 'أدخل اسمك الكامل',
+            en: 'Enter your full name'
+          },
+          content: {
+            ar: 'يمكنك <span class="tooltip-highlight">الكتابة</span> بالمفاتيح أو <span class="tooltip-highlight">التحدث</span> بصوتك لإدخال اسمك. أنا قادر على فهم الكلام باللغة العربية والإنجليزية',
+            en: 'You can <span class="tooltip-highlight">type</span> on your keyboard or <span class="tooltip-highlight">speak</span> using your voice to enter your name. I understand both Arabic and English speech'
+          },
+          action: {
+            ar: 'استخدم الصوت',
+            en: 'Use Voice'
+          },
+          actionType: 'speak',
+          targetInput: 'full-name',
+          position: 'bottom',
+          delay: 2000
+        },
+        {
+          id: 'voice-tooltip',
+          target: '#listening-name',
+          title: {
+            ar: 'وضع الاستماع',
+            en: 'Voice listening mode'
+          },
+          content: {
+            ar: 'أستمع إليك الآن! تحدث بوضوح وسأقوم بتحويل صوتك إلى نص. انتظر ظهور النص في الحقل',
+            en: 'I\'m listening now! Speak clearly and I\'ll convert your voice to text. Wait for the text to appear in the field'
+          },
+          position: 'top',
+          delay: 200,
+          showCondition: () => document.getElementById('listening-name').style.display === 'block'
+        },
+        {
+          id: 'name-next-tooltip',
+          target: '.next-btn',
+          title: {
+            ar: 'الانتقال للخطوة التالية',
+            en: 'Moving to the next step'
+          },
+          content: {
+            ar: 'انقر هنا عندما تنتهي من إدخال اسمك للانتقال إلى الخطوة التالية',
+            en: 'Click here when you\'ve finished entering your name to proceed to the next step'
+          },
+          position: 'left',
+          delay: 4000
+        }
+      ],
+      // Tooltips for nickname step
+      nickname: [
+        {
+          id: 'nickname-tooltip',
+          target: '#nickname',
+          title: {
+            ar: 'الاسم المفضل',
+            en: 'Preferred Name'
+          },
+          content: {
+            ar: 'كيف تفضل أن أناديك في محادثاتنا؟ يمكنك ترك هذا الحقل فارغًا وسأستخدم اسمك الأول بدلاً من ذلك',
+            en: 'What should I call you in our conversations? You can leave this empty and I\'ll use your first name instead'
+          },
+          action: {
+            ar: 'استخدم الصوت',
+            en: 'Use Voice'
+          },
+          actionType: 'speak',
+          targetInput: 'nickname',
+          position: 'bottom',
+          delay: 1000
+        },
+        {
+          id: 'navigation-tooltip',
+          target: '.btn-container',
+          title: {
+            ar: 'التنقل بين الخطوات',
+            en: 'Step Navigation'
+          },
+          content: {
+            ar: 'يمكنك <span class="tooltip-highlight">العودة</span> للخلف إذا أردت تغيير معلوماتك السابقة أو التحرك <span class="tooltip-highlight">للأمام</span> للانتقال للخطوة التالية',
+            en: 'You can <span class="tooltip-highlight">go back</span> if you want to change your previous information or move <span class="tooltip-highlight">forward</span> to the next step'
+          },
+          position: 'top',
+          delay: 3000
+        },
+        {
+          id: 'voice-nickname-tooltip',
+          target: '#listening-nickname',
+          title: {
+            ar: 'الإدخال الصوتي للاسم المفضل',
+            en: 'Voice input for nickname'
+          },
+          content: {
+            ar: 'أخبرني بالاسم الذي تفضل أن أستخدمه لمناداتك وسأتذكره دائمًا',
+            en: 'Tell me the name you prefer me to use for you and I\'ll always remember it'
+          },
+          position: 'top',
+          delay: 200,
+          showCondition: () => document.getElementById('listening-nickname').style.display === 'block'
+        }
+      ],
+      // Tooltips for language step
+      language: [
+        {
+          id: 'language-tooltip',
+          target: '#language',
+          title: {
+            ar: 'اختيار اللغة',
+            en: 'Language Selection'
+          },
+          content: {
+            ar: 'اختر لغتك المفضلة للتواصل معي. يمكنك تغييرها لاحقًا من الإعدادات. أنا أتحدث العربية والإنجليزية بطلاقة',
+            en: 'Choose your preferred language for communicating with me. You can change this later in settings. I speak both Arabic and English fluently'
+          },
+          position: 'bottom',
+          delay: 1000
+        },
+        {
+          id: 'language-experience-tooltip',
+          target: '#step-language h2',
+          title: {
+            ar: 'تجربة مخصصة',
+            en: 'Personalized Experience'
+          },
+          content: {
+            ar: 'سيتم تخصيص واجهة التطبيق والتفاعلات الصوتية بناءً على اختيارك للغة',
+            en: 'The app interface and voice interactions will be customized based on your language selection'
+          },
+          position: 'top',
+          delay: 3000
+        }
+      ],
+      // Tooltips for terms step
+      terms: [
+        {
+          id: 'terms-tooltip',
+          target: '.terms-container',
+          title: {
             ar: 'الشروط والخصوصية',
             en: 'Terms & Privacy'
           },
           content: {
-            ar: 'يرجى قراءة شروط الاستخدام والخصوصية بعناية',
-            en: 'Please read the terms of use and privacy policy carefully'
+            ar: 'يرجى قراءة شروط الاستخدام والخصوصية بعناية. نحن نحترم خصوصيتك ونحمي بياناتك',
+            en: 'Please read the terms of use and privacy policy carefully. We respect your privacy and protect your data'
           },
           position: 'bottom',
           delay: 1000
+        },
+        {
+          id: 'terms-scroll-tooltip',
+          target: '.terms-container',
+          title: {
+            ar: 'اقرأ الشروط كاملة',
+            en: 'Read Full Terms'
+          },
+          content: {
+            ar: 'يمكنك التمرير لأسفل لقراءة الشروط كاملة. هذا مهم لفهم كيفية حماية بياناتك',
+            en: 'You can scroll down to read the full terms. This is important to understand how your data is protected'
+          },
+          position: 'right',
+          delay: 3500
         },
         {
           id: 'terms-checkbox-tooltip',
@@ -17,11 +1481,32 @@ le: {
             en: 'Agree to Terms'
           },
           content: {
-            ar: 'يجب الموافقة على الشروط للمتابعة. يمكنك أيضًا <span class="tooltip-highlight">التحدث</span> بـ "أوافق" لتفعيل الخيار',
-            en: 'You must agree to continue. You can also <span class="tooltip-highlight">say</span> "I agree" to check this option'
+            ar: 'يجب الموافقة على الشروط للمتابعة. يمكنك <span class="tooltip-highlight">النقر</span> على المربع أو <span class="tooltip-highlight">التحدث</span> بكلمة "أوافق" لتفعيل الخيار',
+            en: 'You must agree to continue. You can <span class="tooltip-highlight">click</span> the checkbox or <span class="tooltip-highlight">say</span> "I agree" to check this option'
           },
+          action: {
+            ar: 'أوافق بصوتي',
+            en: 'Agree by Voice'
+          },
+          actionType: 'speak',
+          targetInput: 'terms-agree',
           position: 'right',
-          delay: 3000
+          delay: 6000
+        },
+        {
+          id: 'voice-terms-tooltip',
+          target: '#listening-terms',
+          title: {
+            ar: 'الموافقة الصوتية',
+            en: 'Voice Agreement'
+          },
+          content: {
+            ar: 'يمكنك قول "أوافق" أو "نعم" للموافقة على الشروط بصوتك',
+            en: 'You can say "I agree" or "yes" to accept the terms with your voice'
+          },
+          position: 'top',
+          delay: 200,
+          showCondition: () => document.getElementById('listening-terms').style.display === 'block'
         }
       ],
       // Tooltips for completion step
@@ -34,11 +1519,34 @@ le: {
             en: 'Welcome to Mashaaer!'
           },
           content: {
-            ar: 'تم إعداد حسابك بنجاح! سيتم توجيهك إلى التطبيق الرئيسي خلال لحظات',
-            en: 'Your profile is now set up! You\'ll be redirected to the main app in a moment'
+            ar: 'تم إعداد حسابك بنجاح! سيتم توجيهك إلى التطبيق الرئيسي خلال لحظات. استعد لتجربة كونية مميزة',
+            en: 'Your profile is now set up! You\'ll be redirected to the main app in a moment. Get ready for a cosmic experience'
+          },
+          action: {
+            ar: 'ابدأ التجربة',
+            en: 'Start Experience'
+          },
+          actionType: 'custom',
+          customAction: function() {
+            hideTooltip();
+            window.location.href = '/';
           },
           position: 'bottom',
           delay: 1000
+        },
+        {
+          id: 'journey-tooltip',
+          target: '#listening-complete',
+          title: {
+            ar: 'رحلتك تبدأ الآن',
+            en: 'Your Journey Begins Now'
+          },
+          content: {
+            ar: 'استعد لاستكشاف عالم مشاعر واكتشاف قدراته المذهلة. سأكون مرشدك في هذه الرحلة',
+            en: 'Prepare to explore the world of Mashaaer and discover its amazing capabilities. I\'ll be your guide in this journey'
+          },
+          position: 'top',
+          delay: 2500
         }
       ]
     };
@@ -79,15 +1587,49 @@ le: {
       const titleText = tooltipConfig.title[userLanguage] || tooltipConfig.title.en;
       const contentText = tooltipConfig.content[userLanguage] || tooltipConfig.content.en;
       
+      // Check for action buttons
+      let actionButtonHTML = '';
+      if (tooltipConfig.action) {
+        const actionText = tooltipConfig.action[userLanguage] || tooltipConfig.action.en;
+        actionButtonHTML = `<button class="tooltip-action-button" data-action="${tooltipConfig.actionType || 'dismiss'}">${actionText}</button>`;
+      }
+      
       tooltip.innerHTML = `
         <span class="tooltip-title">${titleText}</span>
         <span class="tooltip-content">${contentText}</span>
+        ${actionButtonHTML}
         <span class="tooltip-dismiss">${userLanguage === 'ar' ? 'انقر في أي مكان للمتابعة' : 'Tap anywhere to continue'}</span>
       `;
       
       // Add Arabic class if needed
       if (userLanguage === 'ar') {
         tooltip.classList.add('tooltip-ar');
+      }
+      
+      // Add event listener for action buttons if present
+      if (tooltipConfig.action) {
+        setTimeout(() => {
+          const actionButton = tooltip.querySelector('.tooltip-action-button');
+          if (actionButton) {
+            actionButton.addEventListener('click', function(e) {
+              e.stopPropagation(); // Prevent the document click from firing
+              const actionType = this.getAttribute('data-action');
+              
+              // Handle different action types
+              if (actionType === 'next' && currentStep) {
+                hideTooltip();
+                nextStep(currentStep);
+              } else if (actionType === 'speak') {
+                startVoiceInput(tooltipConfig.targetInput || `${currentStep}`);
+              } else if (actionType === 'custom' && tooltipConfig.customAction) {
+                tooltipConfig.customAction();
+              } else {
+                // Default is dismiss
+                dismissTooltipListener();
+              }
+            });
+          }
+        }, 100);
       }
       
       // Add tooltip to DOM
@@ -297,4 +1839,4 @@ le: {
     });
   </script>
 </body>
-        </html>
+</html>

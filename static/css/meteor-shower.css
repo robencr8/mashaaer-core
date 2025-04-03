@@ -1,0 +1,135 @@
+/**
+ * Meteor Shower Animation Styles
+ * Enhances all cosmic interfaces with an animated meteor shower effect
+ */
+
+.meteor-shower-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(1px 1px at 20% 30%, white, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 40% 70%, white, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 50% 40%, white, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 60% 80%, white, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 70% 10%, white, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 80% 50%, white, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 90% 20%, white, rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 500px 500px;
+  opacity: 0.25;
+}
+
+/* Static Meteors (CSS-only) */
+.meteor {
+  position: absolute;
+  width: 100px;
+  height: 2px;
+  transform: rotate(-45deg);
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+  animation: meteor 5s linear infinite;
+  border-radius: 100px;
+  filter: drop-shadow(0 0 2px white);
+}
+
+.meteor:nth-child(1) {
+  top: 10%;
+  left: 10%;
+  animation-delay: 2s;
+}
+
+.meteor:nth-child(2) {
+  top: 15%;
+  left: 70%;
+  animation-delay: 1.5s;
+}
+
+.meteor:nth-child(3) {
+  top: 35%;
+  left: 30%;
+  animation-delay: 2.8s;
+}
+
+.meteor:nth-child(4) {
+  top: 45%;
+  left: 80%;
+  animation-delay: 0.8s;
+}
+
+.meteor:nth-child(5) {
+  top: 55%;
+  left: 20%;
+  animation-delay: 3.2s;
+}
+
+.meteor:nth-child(6) {
+  top: 65%;
+  left: 60%;
+  animation-delay: 1.2s;
+}
+
+.meteor:nth-child(7) {
+  top: 75%;
+  left: 40%;
+  animation-delay: 2.5s;
+}
+
+.meteor:nth-child(8) {
+  top: 80%;
+  left: 90%;
+  animation-delay: 0.5s;
+}
+
+.meteor:nth-child(9) {
+  top: 90%;
+  left: 10%;
+  animation-delay: 3.8s;
+}
+
+.meteor:nth-child(10) {
+  top: 5%;
+  left: 50%;
+  animation-delay: 4.2s;
+}
+
+/* Dynamic Meteors (JavaScript-generated) */
+.dynamic-meteor {
+  position: absolute;
+  border-radius: 100px;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.8));
+  height: 2px;
+  z-index: 1;
+  opacity: 0;
+  transform-origin: top left;
+}
+
+@keyframes meteor {
+  0% {
+    opacity: 0;
+    transform: translateX(0) translateY(0) rotate(-45deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(500px) translateY(500px) rotate(-45deg);
+  }
+}
