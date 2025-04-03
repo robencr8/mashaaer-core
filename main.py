@@ -214,8 +214,8 @@ core_launcher = CoreLauncher(
 # Routes
 @app.route('/')
 def index():
-    # Serve the diagnostic page for now to help debug server connectivity issues
-    return render_template('diagnostic.html')
+    # Serve the static diagnostic page to help debug server connectivity issues
+    return app.send_static_file('diagnostic.html')
     
     # API-style response (commented out during debugging)
     """

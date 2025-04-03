@@ -919,7 +919,10 @@
       // Call the server's listen API
       fetch('/api/listen-for-voice', {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
       })
       .then(response => response.json())
       .then(data => {
