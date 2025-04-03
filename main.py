@@ -53,8 +53,9 @@ import mobile_api_routes  # Mobile-optimized API routes
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
 # Enable CORS for all routes to support Flutter, mobile app integration, and feedback tools
+# Using a more permissive configuration to ensure the feedback tool can connect
 CORS(app, 
-     origins=["*", "https://replit.com", "https://*.replit.app", "https://*.repl.co"], 
+     resources={r"/*": {"origins": "*"}},  # Allow all origins for all routes
      supports_credentials=True,
      allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "X-Custom-Header"],
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
