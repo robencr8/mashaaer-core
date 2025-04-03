@@ -10,6 +10,8 @@ This document provides a comprehensive testing checklist for verifying the funct
 - [ ] Set up test devices representing the minimum supported configurations
 - [ ] Prepare test data and test scenarios
 - [ ] Create or reset test user accounts as needed
+- [ ] Set up Ngrok for external API access (see NGROK_SETUP.md)
+- [ ] Configure diagnostic page with Ngrok URL for remote testing
 
 ## Core Functionality Tests
 

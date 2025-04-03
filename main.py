@@ -214,10 +214,13 @@ core_launcher = CoreLauncher(
 # Routes
 @app.route('/')
 def index():
-    # Serve the static diagnostic page to help debug server connectivity issues
-    return app.send_static_file('diagnostic.html')
+    # Serve the cosmic onboarding experience
+    return render_template('cosmic_onboarding.html')
     
-    # API-style response (commented out during debugging)
+    # Uncomment below to serve the diagnostic page for debugging
+    # return app.send_static_file('diagnostic.html')
+    
+    # API-style response (uncomment if needed)
     """
     try:
         return jsonify({

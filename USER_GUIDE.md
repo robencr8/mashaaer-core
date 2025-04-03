@@ -176,6 +176,13 @@ Customize your notification preferences:
 - Verify that Mashaaer has permission to access the internet
 - Try switching between Wi-Fi and mobile data
 
+#### External API Access Issues
+- For testing with external devices, ensure Ngrok is properly configured
+- Visit the diagnostic page at `http://0.0.0.0:5000/diagnostic.html`
+- Update the external URL with your current Ngrok URL
+- Test API connectivity using the diagnostic tools
+- For detailed setup instructions, refer to the NGROK_SETUP.md file
+
 #### Application Crashes
 - Ensure your device meets the minimum requirements
 - Update to the latest version of Mashaaer

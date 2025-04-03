@@ -4,6 +4,35 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>مشاعر | Mashaaer - Diagnostic</title>
+  <script>
+    // Initialize the external API URL (Ngrok)
+    window.EXTERNAL_API_URL = 'https://<your-ngrok-id>.ngrok-free.app/api/status';
+    
+    // Function to update the external URL
+    function updateExternalUrl(url) {
+      if (!url.endsWith('/api/status')) {
+        // Make sure URL ends with /api/status for consistency
+        if (url.endsWith('/')) {
+          url = url.slice(0, -1);
+        }
+        url = url + '/api/status';
+      }
+      window.EXTERNAL_API_URL = url;
+      console.log('External API URL updated to:', url);
+      // Update local storage to persist the setting
+      localStorage.setItem('externalApiUrl', url);
+      return url;
+    }
+    
+    // Check if we have a saved URL in local storage
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedUrl = localStorage.getItem('externalApiUrl');
+      if (savedUrl) {
+        window.EXTERNAL_API_URL = savedUrl;
+        console.log('Using saved external API URL:', savedUrl);
+      }
+    });
+  </script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -71,6 +100,16 @@
   </div>
   
   <div class="card">
+    <h2>External URL Configuration</h2>
+    <p>Update the Ngrok URL to enable external access to the API:</p>
+    <input type="text" id="external-url" placeholder="https://your-ngrok-id.ngrok-free.app" 
+           style="width: 80%; padding: 8px; margin-bottom: 10px;">
+    <button onclick="setExternalUrl()">Update URL</button>
+    <p>Current External URL: <span id="current-external-url" style="font-weight: bold;">Not set</span></p>
+    <div id="external-url-result"></div>
+  </div>
+  
+  <div class="card">
     <h2>System Information</h2>
     <p>Browser: <span id="browser-info"></span></p>
     <p>User Agent: <pre id="user-agent"></pre></p>
@@ -91,6 +130,63 @@
     document.getElementById('user-agent').textContent = navigator.userAgent;
     document.getElementById('current-time').textContent = new Date().toLocaleString();
     
+    // Update current external URL display
+    function updateExternalUrlDisplay() {
+      const currentUrlElement = document.getElementById('current-external-url');
+      if (window.EXTERNAL_API_URL) {
+        currentUrlElement.textContent = window.EXTERNAL_API_URL;
+        document.getElementById('external-url').value = window.EXTERNAL_API_URL.replace('/api/status', '');
+      } else {
+        currentUrlElement.textContent = 'Not set';
+      }
+    }
+    
+    // Set external URL function
+    function setExternalUrl() {
+      const urlInput = document.getElementById('external-url');
+      let newUrl = urlInput.value.trim();
+      const resultElement = document.getElementById('external-url-result');
+      
+      // Validate URL format
+      if (!newUrl) {
+        resultElement.innerHTML = '<p class="error">Please enter a valid URL</p>';
+        return;
+      }
+      
+      // Make sure URL has proper format
+      if (!newUrl.startsWith('http://') && !newUrl.startsWith('https://')) {
+        newUrl = 'https://' + newUrl;
+      }
+      
+      // Remove trailing slash if present
+      if (newUrl.endsWith('/')) {
+        newUrl = newUrl.slice(0, -1);
+      }
+      
+      // Add /api/status if not present
+      if (!newUrl.endsWith('/api/status')) {
+        newUrl = newUrl + '/api/status';
+      }
+      
+      // Update the global variable
+      window.EXTERNAL_API_URL = newUrl;
+      
+      // Save to local storage
+      localStorage.setItem('externalApiUrl', newUrl);
+      
+      // Update display
+      updateExternalUrlDisplay();
+      
+      // Show success message
+      resultElement.innerHTML = '<p class="success">External URL updated successfully</p>';
+      
+      // Test the new URL
+      testApiStatus();
+    }
+    
+    // Initialize external URL display
+    updateExternalUrlDisplay();
+    
     // Test API status
     async function testApiStatus() {
       const statusElement = document.getElementById('api-status');
@@ -100,7 +196,9 @@
       statusElement.textContent = 'Testing...';
       
       try {
-        const response = await fetch('/api/status');
+        // Get external URL from configuration or fall back to direct API call
+        const apiUrl = window.EXTERNAL_API_URL || '/api/status';
+        const response = await fetch(apiUrl);
         const data = await response.json();
         
         statusElement.className = 'success';
@@ -122,7 +220,9 @@
       statusElement.textContent = 'Testing...';
       
       try {
-        const response = await fetch('/api/cors-preflight', {
+        // Get external URL from configuration or fall back to direct API call
+        const corsUrl = window.EXTERNAL_API_URL ? `${window.EXTERNAL_API_URL.replace('/api/status', '/api/cors-preflight')}` : '/api/cors-preflight';
+        const response = await fetch(corsUrl, {
           method: 'OPTIONS',
           headers: {
             'Origin': window.location.origin,
@@ -158,7 +258,9 @@
         const formData = new FormData();
         formData.append('step', 'name');
         
-        const response = await fetch('/api/listen-for-voice', {
+        // Get external URL from configuration or fall back to direct API call
+        const voiceUrl = window.EXTERNAL_API_URL ? `${window.EXTERNAL_API_URL.replace('/api/status', '/api/listen-for-voice')}` : '/api/listen-for-voice';
+        const response = await fetch(voiceUrl, {
           method: 'POST',
           body: formData,
           headers: {
@@ -180,10 +282,16 @@
     
     // Test manual endpoint
     async function testManualEndpoint() {
-      const endpoint = document.getElementById('manual-endpoint').value;
+      let endpoint = document.getElementById('manual-endpoint').value;
       const resultElement = document.getElementById('manual-test-result');
       
       resultElement.innerHTML = '<p class="pending">Testing...</p>';
+      
+      // If endpoint starts with /api/ and we have an external URL, use the external URL
+      if (endpoint.startsWith('/api/') && window.EXTERNAL_API_URL) {
+        const baseExternalUrl = window.EXTERNAL_API_URL.replace('/api/status', '');
+        endpoint = `${baseExternalUrl}${endpoint}`;
+      }
       
       try {
         const response = await fetch(endpoint);

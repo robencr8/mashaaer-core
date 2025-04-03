@@ -107,3 +107,39 @@ python main.py
 - واجهة عربية + إنجليزية
 - تحليل مشاعر تلقائي
 - تفاعل صوتي
+- تجربة إعداد كونية تفاعلية
+- دعم الوصول الخارجي عبر Ngrok
+
+## اختبار API الخارجي
+
+للوصول إلى واجهة API من الأجهزة الخارجية:
+
+1. قم بتثبيت وتشغيل Ngrok:
+```bash
+ngrok http 5000
+```
+
+2. افتح صفحة التشخيص: `http://0.0.0.0:5000/diagnostic.html`
+
+3. أدخل عنوان Ngrok في حقل "External URL Configuration"
+
+4. اختبر الاتصال بالنقر على "Test API Status"
+
+*للمزيد من المعلومات، راجع ملف `NGROK_SETUP.md`*
+
+## External API Testing (English)
+
+To access the API from external devices:
+
+1. Install and run Ngrok:
+```bash
+ngrok http 5000
+```
+
+2. Open the diagnostic page: `http://0.0.0.0:5000/diagnostic.html`
+
+3. Enter your Ngrok URL in the "External URL Configuration" field
+
+4. Test the connection by clicking "Test API Status"
+
+*For more information, see `NGROK_SETUP.md`*

@@ -269,20 +269,21 @@
     /* Tooltip Styles */
     .tooltip {
       position: absolute;
-      background: rgba(138, 43, 226, 0.95);
+      background: linear-gradient(135deg, rgba(138, 43, 226, 0.95), rgba(75, 0, 130, 0.95));
       color: white;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+      padding: 1.2rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(138, 43, 226, 0.4);
       z-index: 1000;
-      max-width: 280px;
-      backdrop-filter: blur(5px);
+      max-width: 320px;
+      backdrop-filter: blur(8px);
       animation: tooltipFadeIn 0.5s ease-out;
-      transition: opacity 0.3s ease;
-      pointer-events: none; /* Allows clicking through tooltip */
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      font-size: 0.9rem;
-      line-height: 1.4;
+      transition: all 0.3s ease;
+      pointer-events: auto; /* Makes tooltip interactive */
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 1rem;
+      line-height: 1.5;
+      transform-origin: center center;
     }
     
     .tooltip::before {
@@ -291,36 +292,37 @@
       width: 0;
       height: 0;
       border-style: solid;
+      filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
     }
     
     .tooltip.top::before {
-      border-width: 8px 8px 0 8px;
+      border-width: 10px 10px 0 10px;
       border-color: rgba(138, 43, 226, 0.95) transparent transparent transparent;
-      bottom: -8px;
+      bottom: -10px;
       left: 50%;
       transform: translateX(-50%);
     }
     
     .tooltip.bottom::before {
-      border-width: 0 8px 8px 8px;
+      border-width: 0 10px 10px 10px;
       border-color: transparent transparent rgba(138, 43, 226, 0.95) transparent;
-      top: -8px;
+      top: -10px;
       left: 50%;
       transform: translateX(-50%);
     }
     
     .tooltip.left::before {
-      border-width: 8px 0 8px 8px;
+      border-width: 10px 0 10px 10px;
       border-color: transparent transparent transparent rgba(138, 43, 226, 0.95);
-      right: -8px;
+      right: -10px;
       top: 50%;
       transform: translateY(-50%);
     }
     
     .tooltip.right::before {
-      border-width: 8px 8px 8px 0;
+      border-width: 10px 10px 10px 0;
       border-color: transparent rgba(138, 43, 226, 0.95) transparent transparent;
-      left: -8px;
+      left: -10px;
       top: 50%;
       transform: translateY(-50%);
     }
@@ -328,18 +330,23 @@
     .tooltip-title {
       display: block;
       font-weight: bold;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
+      font-size: 1.1rem;
       color: #ffffff;
-      text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      text-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+      letter-spacing: 0.5px;
     }
     
     .tooltip-content {
       display: block;
+      margin-bottom: 5px;
     }
     
     .tooltip-highlight {
       color: #ffcc00;
       font-weight: bold;
+      text-shadow: 0 0 5px rgba(255, 204, 0, 0.3);
+      animation: highlightPulse 2s infinite ease-in-out;
     }
     
     .tooltip-ar {
@@ -350,22 +357,86 @@
     .tooltip-dismiss {
       display: block;
       text-align: center;
-      margin-top: 10px;
+      margin-top: 12px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
       font-style: italic;
       opacity: 0.8;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    
+    .tooltip-dismiss:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    
+    .tooltip-action-button {
+      display: block;
+      background: linear-gradient(135deg, #7c4dff 0%, #448aff 100%);
+      border: none;
+      border-radius: 20px;
+      color: white;
+      padding: 8px 15px;
+      margin: 10px 0;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      font-size: 0.95rem;
+    }
+    
+    .tooltip-action-button:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: all 0.4s ease;
+    }
+    
+    .tooltip-action-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      background: linear-gradient(135deg, #8c5dff 0%, #549aff 100%);
+    }
+    
+    .tooltip-action-button:hover:before {
+      left: 100%;
+    }
+    
+    .tooltip-action-button:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Arabic specific button styles */
+    .tooltip-ar .tooltip-action-button {
+      font-family: 'Cairo', sans-serif;
     }
     
     .tooltip-pulse {
       position: absolute;
-      width: 40px;
-      height: 40px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       background: rgba(138, 43, 226, 0.3);
       transform: translate(-50%, -50%);
       animation: tooltipPulse 1.5s infinite ease-out;
       pointer-events: none;
       z-index: 1;
+      box-shadow: 0 0 30px rgba(138, 43, 226, 0.5);
+    }
+    
+    @keyframes highlightPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
     }
     
     @keyframes tooltipPulse {
@@ -950,10 +1021,33 @@
             en: 'Welcome to Mashaaer!'
           },
           content: {
-            ar: 'انقر على المجال الكوني للانتقال إلى رحلة البداية',
-            en: 'Tap on the cosmic orb to begin your journey'
+            ar: 'انقر على المجال الكوني للانتقال إلى رحلة البداية. ستساعدك هذه التجربة على إعداد تطبيق مشاعر وفقًا لتفضيلاتك',
+            en: 'Tap on the cosmic orb to begin your journey. This interactive experience will help set up Mashaaer to your preferences'
+          },
+          action: {
+            ar: 'ابدأ الآن',
+            en: 'Begin Now'
+          },
+          actionType: 'custom',
+          customAction: function() {
+            hideTooltip();
+            startOnboarding();
           },
           position: 'bottom'
+        },
+        {
+          id: 'splash-title-tooltip',
+          target: '.title',
+          title: {
+            ar: 'تطبيق مشاعر',
+            en: 'Mashaaer App'
+          },
+          content: {
+            ar: 'مساعدك الذكي للتعبير عن مشاعرك وفهمها بطريقة مختلفة',
+            en: 'Your intelligent companion for expressing and understanding your emotions in a unique way'
+          },
+          position: 'top',
+          delay: 3000
         }
       ],
       // Tooltips for name step
@@ -966,8 +1060,8 @@
             en: 'Let\'s get to know each other'
           },
           content: {
-            ar: 'سأحتاج إلى معرفة بعض المعلومات الأساسية عنك لتخصيص تجربتك',
-            en: 'I\'ll need to know some basic information about you to personalize your experience'
+            ar: 'سأحتاج إلى معرفة بعض المعلومات الأساسية عنك لتخصيص تجربتك معي. كل المعلومات تبقى خاصة وآمنة',
+            en: 'I\'ll need to know some basic information about you to personalize your experience. All information remains private and secure'
           },
           position: 'top',
           delay: 500
@@ -980,9 +1074,15 @@
             en: 'Enter your full name'
           },
           content: {
-            ar: 'يمكنك <span class="tooltip-highlight">الكتابة</span> أو <span class="tooltip-highlight">التحدث</span> لإدخال اسمك',
-            en: 'You can <span class="tooltip-highlight">type</span> or <span class="tooltip-highlight">speak</span> to enter your name'
+            ar: 'يمكنك <span class="tooltip-highlight">الكتابة</span> بالمفاتيح أو <span class="tooltip-highlight">التحدث</span> بصوتك لإدخال اسمك. أنا قادر على فهم الكلام باللغة العربية والإنجليزية',
+            en: 'You can <span class="tooltip-highlight">type</span> on your keyboard or <span class="tooltip-highlight">speak</span> using your voice to enter your name. I understand both Arabic and English speech'
           },
+          action: {
+            ar: 'استخدم الصوت',
+            en: 'Use Voice'
+          },
+          actionType: 'speak',
+          targetInput: 'full-name',
           position: 'bottom',
           delay: 2000
         },
@@ -994,12 +1094,26 @@
             en: 'Voice listening mode'
           },
           content: {
-            ar: 'يمكنك التحدث الآن وسأقوم بتحويل صوتك إلى نص',
-            en: 'You can speak now and I\'ll convert your voice to text'
+            ar: 'أستمع إليك الآن! تحدث بوضوح وسأقوم بتحويل صوتك إلى نص. انتظر ظهور النص في الحقل',
+            en: 'I\'m listening now! Speak clearly and I\'ll convert your voice to text. Wait for the text to appear in the field'
           },
           position: 'top',
-          delay: 500,
+          delay: 200,
           showCondition: () => document.getElementById('listening-name').style.display === 'block'
+        },
+        {
+          id: 'name-next-tooltip',
+          target: '.next-btn',
+          title: {
+            ar: 'الانتقال للخطوة التالية',
+            en: 'Moving to the next step'
+          },
+          content: {
+            ar: 'انقر هنا عندما تنتهي من إدخال اسمك للانتقال إلى الخطوة التالية',
+            en: 'Click here when you\'ve finished entering your name to proceed to the next step'
+          },
+          position: 'left',
+          delay: 4000
         }
       ],
       // Tooltips for nickname step
@@ -1012,9 +1126,15 @@
             en: 'Preferred Name'
           },
           content: {
-            ar: 'كيف تفضل أن أناديك؟ يمكنك ترك هذا الحقل فارغًا وسأستخدم اسمك الأول',
-            en: 'What should I call you? You can leave this empty and I\'ll use your first name'
+            ar: 'كيف تفضل أن أناديك في محادثاتنا؟ يمكنك ترك هذا الحقل فارغًا وسأستخدم اسمك الأول بدلاً من ذلك',
+            en: 'What should I call you in our conversations? You can leave this empty and I\'ll use your first name instead'
           },
+          action: {
+            ar: 'استخدم الصوت',
+            en: 'Use Voice'
+          },
+          actionType: 'speak',
+          targetInput: 'nickname',
           position: 'bottom',
           delay: 1000
         },
@@ -1026,11 +1146,26 @@
             en: 'Step Navigation'
           },
           content: {
-            ar: 'يمكنك <span class="tooltip-highlight">العودة</span> للخلف أو التحرك <span class="tooltip-highlight">للأمام</span> باستخدام هذه الأزرار',
-            en: 'You can <span class="tooltip-highlight">go back</span> or move <span class="tooltip-highlight">forward</span> using these buttons'
+            ar: 'يمكنك <span class="tooltip-highlight">العودة</span> للخلف إذا أردت تغيير معلوماتك السابقة أو التحرك <span class="tooltip-highlight">للأمام</span> للانتقال للخطوة التالية',
+            en: 'You can <span class="tooltip-highlight">go back</span> if you want to change your previous information or move <span class="tooltip-highlight">forward</span> to the next step'
           },
           position: 'top',
           delay: 3000
+        },
+        {
+          id: 'voice-nickname-tooltip',
+          target: '#listening-nickname',
+          title: {
+            ar: 'الإدخال الصوتي للاسم المفضل',
+            en: 'Voice input for nickname'
+          },
+          content: {
+            ar: 'أخبرني بالاسم الذي تفضل أن أستخدمه لمناداتك وسأتذكره دائمًا',
+            en: 'Tell me the name you prefer me to use for you and I\'ll always remember it'
+          },
+          position: 'top',
+          delay: 200,
+          showCondition: () => document.getElementById('listening-nickname').style.display === 'block'
         }
       ],
       // Tooltips for language step
@@ -1043,11 +1178,25 @@
             en: 'Language Selection'
           },
           content: {
-            ar: 'اختر لغتك المفضلة للتواصل معي. يمكنك تغييرها لاحقًا من الإعدادات',
-            en: 'Choose your preferred language for communicating with me. You can change this later in settings'
+            ar: 'اختر لغتك المفضلة للتواصل معي. يمكنك تغييرها لاحقًا من الإعدادات. أنا أتحدث العربية والإنجليزية بطلاقة',
+            en: 'Choose your preferred language for communicating with me. You can change this later in settings. I speak both Arabic and English fluently'
           },
           position: 'bottom',
           delay: 1000
+        },
+        {
+          id: 'language-experience-tooltip',
+          target: '#step-language h2',
+          title: {
+            ar: 'تجربة مخصصة',
+            en: 'Personalized Experience'
+          },
+          content: {
+            ar: 'سيتم تخصيص واجهة التطبيق والتفاعلات الصوتية بناءً على اختيارك للغة',
+            en: 'The app interface and voice interactions will be customized based on your language selection'
+          },
+          position: 'top',
+          delay: 3000
         }
       ],
       // Tooltips for terms step
@@ -1060,11 +1209,25 @@
             en: 'Terms & Privacy'
           },
           content: {
-            ar: 'يرجى قراءة شروط الاستخدام والخصوصية بعناية',
-            en: 'Please read the terms of use and privacy policy carefully'
+            ar: 'يرجى قراءة شروط الاستخدام والخصوصية بعناية. نحن نحترم خصوصيتك ونحمي بياناتك',
+            en: 'Please read the terms of use and privacy policy carefully. We respect your privacy and protect your data'
           },
           position: 'bottom',
           delay: 1000
+        },
+        {
+          id: 'terms-scroll-tooltip',
+          target: '.terms-container',
+          title: {
+            ar: 'اقرأ الشروط كاملة',
+            en: 'Read Full Terms'
+          },
+          content: {
+            ar: 'يمكنك التمرير لأسفل لقراءة الشروط كاملة. هذا مهم لفهم كيفية حماية بياناتك',
+            en: 'You can scroll down to read the full terms. This is important to understand how your data is protected'
+          },
+          position: 'right',
+          delay: 3500
         },
         {
           id: 'terms-checkbox-tooltip',
@@ -1074,11 +1237,32 @@
             en: 'Agree to Terms'
           },
           content: {
-            ar: 'يجب الموافقة على الشروط للمتابعة. يمكنك أيضًا <span class="tooltip-highlight">التحدث</span> بـ "أوافق" لتفعيل الخيار',
-            en: 'You must agree to continue. You can also <span class="tooltip-highlight">say</span> "I agree" to check this option'
+            ar: 'يجب الموافقة على الشروط للمتابعة. يمكنك <span class="tooltip-highlight">النقر</span> على المربع أو <span class="tooltip-highlight">التحدث</span> بكلمة "أوافق" لتفعيل الخيار',
+            en: 'You must agree to continue. You can <span class="tooltip-highlight">click</span> the checkbox or <span class="tooltip-highlight">say</span> "I agree" to check this option'
           },
+          action: {
+            ar: 'أوافق بصوتي',
+            en: 'Agree by Voice'
+          },
+          actionType: 'speak',
+          targetInput: 'terms-agree',
           position: 'right',
-          delay: 3000
+          delay: 6000
+        },
+        {
+          id: 'voice-terms-tooltip',
+          target: '#listening-terms',
+          title: {
+            ar: 'الموافقة الصوتية',
+            en: 'Voice Agreement'
+          },
+          content: {
+            ar: 'يمكنك قول "أوافق" أو "نعم" للموافقة على الشروط بصوتك',
+            en: 'You can say "I agree" or "yes" to accept the terms with your voice'
+          },
+          position: 'top',
+          delay: 200,
+          showCondition: () => document.getElementById('listening-terms').style.display === 'block'
         }
       ],
       // Tooltips for completion step
@@ -1091,11 +1275,34 @@
             en: 'Welcome to Mashaaer!'
           },
           content: {
-            ar: 'تم إعداد حسابك بنجاح! سيتم توجيهك إلى التطبيق الرئيسي خلال لحظات',
-            en: 'Your profile is now set up! You\'ll be redirected to the main app in a moment'
+            ar: 'تم إعداد حسابك بنجاح! سيتم توجيهك إلى التطبيق الرئيسي خلال لحظات. استعد لتجربة كونية مميزة',
+            en: 'Your profile is now set up! You\'ll be redirected to the main app in a moment. Get ready for a cosmic experience'
+          },
+          action: {
+            ar: 'ابدأ التجربة',
+            en: 'Start Experience'
+          },
+          actionType: 'custom',
+          customAction: function() {
+            hideTooltip();
+            window.location.href = '/';
           },
           position: 'bottom',
           delay: 1000
+        },
+        {
+          id: 'journey-tooltip',
+          target: '#listening-complete',
+          title: {
+            ar: 'رحلتك تبدأ الآن',
+            en: 'Your Journey Begins Now'
+          },
+          content: {
+            ar: 'استعد لاستكشاف عالم مشاعر واكتشاف قدراته المذهلة. سأكون مرشدك في هذه الرحلة',
+            en: 'Prepare to explore the world of Mashaaer and discover its amazing capabilities. I\'ll be your guide in this journey'
+          },
+          position: 'top',
+          delay: 2500
         }
       ]
     };
@@ -1136,15 +1343,49 @@
       const titleText = tooltipConfig.title[userLanguage] || tooltipConfig.title.en;
       const contentText = tooltipConfig.content[userLanguage] || tooltipConfig.content.en;
       
+      // Check for action buttons
+      let actionButtonHTML = '';
+      if (tooltipConfig.action) {
+        const actionText = tooltipConfig.action[userLanguage] || tooltipConfig.action.en;
+        actionButtonHTML = `<button class="tooltip-action-button" data-action="${tooltipConfig.actionType || 'dismiss'}">${actionText}</button>`;
+      }
+      
       tooltip.innerHTML = `
         <span class="tooltip-title">${titleText}</span>
         <span class="tooltip-content">${contentText}</span>
+        ${actionButtonHTML}
         <span class="tooltip-dismiss">${userLanguage === 'ar' ? 'انقر في أي مكان للمتابعة' : 'Tap anywhere to continue'}</span>
       `;
       
       // Add Arabic class if needed
       if (userLanguage === 'ar') {
         tooltip.classList.add('tooltip-ar');
+      }
+      
+      // Add event listener for action buttons if present
+      if (tooltipConfig.action) {
+        setTimeout(() => {
+          const actionButton = tooltip.querySelector('.tooltip-action-button');
+          if (actionButton) {
+            actionButton.addEventListener('click', function(e) {
+              e.stopPropagation(); // Prevent the document click from firing
+              const actionType = this.getAttribute('data-action');
+              
+              // Handle different action types
+              if (actionType === 'next' && currentStep) {
+                hideTooltip();
+                nextStep(currentStep);
+              } else if (actionType === 'speak') {
+                startVoiceInput(tooltipConfig.targetInput || `${currentStep}`);
+              } else if (actionType === 'custom' && tooltipConfig.customAction) {
+                tooltipConfig.customAction();
+              } else {
+                // Default is dismiss
+                dismissTooltipListener();
+              }
+            });
+          }
+        }, 100);
       }
       
       // Add tooltip to DOM

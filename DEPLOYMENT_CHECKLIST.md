@@ -93,6 +93,8 @@ This document provides a comprehensive checklist for deploying the Mashaaer Feel
 - [ ] Performance is acceptable under expected load
 - [ ] Error handling works correctly
 - [ ] Database interactions work properly
+- [ ] External API access via Ngrok is configured and tested
+- [ ] CORS settings are properly configured for external access
 
 ## Data Management
 
@@ -112,6 +114,15 @@ This document provides a comprehensive checklist for deploying the Mashaaer Feel
 - [ ] Version control for synchronized files is working
 
 ## External Services Integration
+
+### External API Access
+
+- [ ] Ngrok setup is documented and tested (see NGROK_SETUP.md)
+- [ ] External URL configuration is saved in local storage
+- [ ] API diagnostic page is accessible and working
+- [ ] CORS settings are properly configured for cross-domain access
+- [ ] API endpoints are accessible from external devices
+- [ ] Error handling for external access is implemented
 
 ### Twilio
 
