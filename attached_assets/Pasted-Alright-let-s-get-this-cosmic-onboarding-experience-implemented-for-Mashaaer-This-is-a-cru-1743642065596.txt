@@ -1,0 +1,72 @@
+Alright, let's get this cosmic onboarding experience implemented for Mashaaer | مشاعر. This is a crucial first impression for the user, so we'll execute it with precision.
+Implementation Plan:
+ * Cosmic Splash Design:
+   * Action: Replace the existing startup screen with the cosmic orb design from /mobile/splash.
+   * Details:
+     * Use the provided orb image as the central element.
+     * Implement a floating animation for the orb.
+     * Add a subtle background animation with stars or particles using CSS or JavaScript.
+     * Ensure no buttons, topbars, menus, or text boxes are visible initially.
+ * Voice-Based Welcome Flow:
+   * Action: Trigger the welcome voice message immediately on app load using TTS.
+   * Details:
+     * Use the provided Arabic and English welcome messages.
+     * After the message finishes, trigger a subtle orb pulse/glow animation.
+     * Use TTS to ask "Please enter your name."
+     * Show an input box with a "Next" button after a 1-second delay.
+ * Guided Voice-Based Onboarding:
+   * Action: Implement voice prompts for email, date of birth, nationality, and a short bio.
+   * Details:
+     * Use TTS to speak each prompt.
+     * Display the corresponding input field (text box, date selector, dropdown) after each prompt.
+     * Maintain a sequential flow for these prompts.
+ * Terms & Privacy:
+   * Action: Display the Terms of Service and Privacy Policy in a floating window.
+   * Details:
+     * Require the user to click "Agree" to continue.
+     * Upon agreement, trigger a soft glow and whisper using TTS: "Thank you. You’re ready now."
+ * Transition to Main App:
+   * Action: Fade out the cosmic orb and transition to the main app screen.
+   * Details:
+     * Implement a smooth fade-out animation for the orb.
+     * Load the main interaction screen (chat or voice, based on user's initial choice).
+     * Save the user's data (name, email, etc.) to session/profile.json.
+ * Interaction Modes:
+   * Action: Maintain the existing voice and text-only interaction modes.
+   * Details:
+     * Ensure the voice interaction mode activates STT and TTS.
+     * Ensure the text-only chat mode disables voice modules.
+ * Rules to Respect:
+   * Action: Adhere to all specified rules.
+   * Details:
+     * Do not rename the app or change its identity.
+     * Do not use external APIs that require credits.
+     * Do not modify backend logic unless absolutely necessary.
+     * Use the existing TTS and STT modules.
+Implementation Steps (Replit Agent):
+ * Replace Startup Screen:
+   * Modify the relevant HTML/CSS files to implement the cosmic orb design.
+ * Implement Welcome Flow:
+   * Use JavaScript to trigger the welcome voice message and animations.
+   * Create the name input field and "Next" button.
+ * Implement Onboarding Prompts:
+   * Use JavaScript and HTML to create the email, date, nationality, and bio input fields.
+   * Use TTS to speak the prompts.
+ * Implement Terms & Privacy:
+   * Create a floating window with the Terms of Service and Privacy Policy.
+   * Add an "Agree" button and trigger the confirmation voice message.
+ * Implement Transition:
+   * Use CSS and JavaScript to create the fade-out animation.
+   * Load the main app screen.
+   * Save user data to session/profile.json.
+ * Test Thoroughly:
+   * Test the entire onboarding flow, including voice prompts and animations.
+   * Verify that user data is saved correctly.
+   * Test both voice and text-only interaction modes.
+Confirmation to Roben:
+Once the implementation is complete, I will provide:
+ * ✅ Link to preview
+ * ✅ Confirmation that voice flow works
+ * ✅ JSON session saved
+ * ✅ Ready for APK/iOS packaging
+Let's begin execution now.

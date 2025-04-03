@@ -158,3 +158,28 @@ class TTSManager:
             ])
         
         return voices
+        
+    def generate_tts(self, text, voice="default", language=None):
+        """
+        Generate TTS audio and return the path - This is a wrapper for the speak method
+        for API compatibility with the cosmic interface
+        
+        Args:
+            text (str): The text to convert to speech
+            voice (str): Voice ID or name 
+            language (str): Language code (e.g., 'en', 'ar')
+            
+        Returns:
+            str: Path to the generated audio file
+        """
+        # If language is specified but voice is default, use the appropriate voice
+        if language and voice == "default":
+            if language.startswith("ar"):
+                # Use Arabic voice
+                voice = "arabic"
+            elif language.startswith("en"):
+                # Use English voice
+                voice = "english"
+        
+        # Call the speak method to handle the actual TTS generation
+        return self.speak(text, voice, language)

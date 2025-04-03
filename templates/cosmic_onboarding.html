@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>مشاعر | Mashaaer</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(145deg, #0b0c10, #1f1f2e);
+      color: #e4e4e4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .splash-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      animation: fadeIn 2s ease-in-out;
+    }
+    
+    .cosmic-sphere {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin-bottom: 40px;
+    }
+    
+    .sphere {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #8a2be2, #4b0082);
+      box-shadow: 0 0 60px rgba(138, 43, 226, 0.8);
+      animation: pulse 4s ease-in-out infinite, float 6s ease-in-out infinite;
+    }
+    
+    .orbit {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: rotate 15s linear infinite;
+    }
+    
+    .orbit:nth-child(1) {
+      width: 150px;
+      height: 150px;
+    }
+    
+    .orbit:nth-child(2) {
+      width: 180px;
+      height: 180px;
+      animation-duration: 30s;
+      animation-direction: reverse;
+    }
+    
+    .orbit:nth-child(3) {
+      width: 210px;
+      height: 210px;
+      animation-duration: 45s;
+    }
+    
+    .orbital-particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background-color: #8a2be2;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(138, 43, 226, 0.8);
+    }
+    
+    .orbit:nth-child(1) .orbital-particle {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .orbit:nth-child(2) .orbital-particle {
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+    }
+    
+    .orbit:nth-child(3) .orbital-particle {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .title {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      color: #8a2be2;
+      text-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+      font-weight: 700;
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      color: #c9c9c9;
+      max-width: 80%;
+      font-style: italic;
+    }
+    
+    .loading-text {
+      font-size: 1.2rem;
+      color: #8a2be2;
+      margin-top: 2rem;
+      letter-spacing: 1px;
+      animation: blink 2s infinite;
+    }
+    
+    .onboarding-content {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background-color: rgba(18, 18, 18, 0.8);
+      border-radius: 1rem;
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      max-width: 600px;
+      animation: fadeIn 1s ease-in-out;
+    }
+    
+    .onboarding-step {
+      display: none;
+      width: 100%;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    .form-group {
+      width: 100%;
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 0.5rem;
+      color: #f8f9fa;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: #8a2be2;
+      box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+    }
+    
+    .form-select {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 0.5rem;
+      color: #f8f9fa;
+      transition: all 0.3s ease;
+    }
+    
+    .next-btn, .prev-btn {
+      background: linear-gradient(90deg, #8a2be2, #4b0082);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      border: none;
+      margin-top: 20px;
+      cursor: pointer;
+      box-shadow: 0 5px 20px rgba(138, 43, 226, 0.5);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .next-btn:hover, .prev-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(138, 43, 226, 0.6);
+    }
+    
+    .prev-btn {
+      background: transparent;
+      border: 2px solid #8a2be2;
+      margin-right: 10px;
+    }
+    
+    .btn-container {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 20px;
+    }
+    
+    .listening-indicator {
+      margin-top: 15px;
+      font-size: 1rem;
+      color: #8a2be2;
+      display: none;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    .pulse-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #8a2be2;
+      margin: 0 2px;
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+    
+    .pulse-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    
+    .pulse-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    .arabic-text {
+      font-family: 'Arial', sans-serif;
+      direction: rtl;
+      text-align: right;
+    }
+    
+    .terms-container {
+      max-height: 250px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: rgba(0, 0, 0, 0.3);
+      border-radius: 5px;
+      text-align: left;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { 
+        box-shadow: 0 0 40px rgba(138, 43, 226, 0.6);
+      }
+      50% { 
+        box-shadow: 0 0 70px rgba(138, 43, 226, 0.9);
+      }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translate(-50%, -50%); }
+      50% { transform: translate(-50%, -60%); }
+    }
+    
+    @keyframes rotate {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    @keyframes pulse-dot {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.2;
+      }
+      50% {
+        transform: scale(1.5);
+        opacity: 1;
+      }
+    }
+    
+    /* RTL Support */
+    html[dir="rtl"] .form-group {
+      text-align: right;
+    }
+    
+    @media (max-width: 480px) {
+      .title {
+        font-size: 2rem;
+      }
+      
+      .subtitle {
+        font-size: 1rem;
+      }
+      
+      .cosmic-sphere {
+        width: 150px;
+        height: 150px;
+      }
+      
+      .sphere {
+        width: 90px;
+        height: 90px;
+      }
+      
+      .orbit:nth-child(1) {
+        width: 110px;
+        height: 110px;
+      }
+      
+      .orbit:nth-child(2) {
+        width: 130px;
+        height: 130px;
+      }
+      
+      .orbit:nth-child(3) {
+        width: 150px;
+        height: 150px;
+      }
+      
+      .onboarding-content {
+        width: 90%;
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="splash-container" id="splash-container">
+    <div class="cosmic-sphere">
+      <div class="orbit">
+        <div class="orbital-particle"></div>
+      </div>
+      <div class="orbit">
+        <div class="orbital-particle"></div>
+      </div>
+      <div class="orbit">
+        <div class="orbital-particle"></div>
+      </div>
+      <div class="sphere"></div>
+    </div>
+    
+    <h1 class="title" id="title">مشاعر | Mashaaer</h1>
+    <p class="subtitle" id="subtitle">اصنع المستقبل، أنا أسمعك</p>
+    <p class="subtitle" id="subtitle-en">Create the future, I'm listening</p>
+    
+    <div class="loading-text" id="loading">جاري التحميل...</div>
+  </div>
+  
+  <!-- Onboarding Content -->
+  <div class="onboarding-content" id="onboarding-content">
+    <!-- Step 1: Name -->
+    <div class="onboarding-step" id="step-name">
+      <h2>أخبرني عن نفسك | Tell me about yourself</h2>
+      <div class="form-group">
+        <label>الاسم الكامل | Full Name</label>
+        <input type="text" id="full-name" class="form-control" placeholder="محمد أحمد | John Doe">
+      </div>
+      <div class="btn-container">
+        <div></div> <!-- Placeholder for alignment -->
+        <button class="next-btn" onclick="nextStep('name')">التالي | Next</button>
+      </div>
+      <div class="listening-indicator" id="listening-name">
+        أستمع إليك... | Listening...
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+      </div>
+    </div>
+    
+    <!-- Step 2: Nickname -->
+    <div class="onboarding-step" id="step-nickname">
+      <h2>كيف تفضل أن أناديك؟ | What should I call you?</h2>
+      <div class="form-group">
+        <label>الاسم المستعار | Nickname</label>
+        <input type="text" id="nickname" class="form-control" placeholder="محمد | John">
+      </div>
+      <div class="btn-container">
+        <button class="prev-btn" onclick="prevStep('nickname')">العودة | Back</button>
+        <button class="next-btn" onclick="nextStep('nickname')">التالي | Next</button>
+      </div>
+      <div class="listening-indicator" id="listening-nickname">
+        أستمع إليك... | Listening...
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+      </div>
+    </div>
+    
+    <!-- Step 3: Language -->
+    <div class="onboarding-step" id="step-language">
+      <h2>ما هي لغتك المفضلة؟ | What's your preferred language?</h2>
+      <div class="form-group">
+        <select id="language" class="form-select">
+          <option value="ar">العربية</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <div class="btn-container">
+        <button class="prev-btn" onclick="prevStep('language')">العودة | Back</button>
+        <button class="next-btn" onclick="nextStep('language')">التالي | Next</button>
+      </div>
+    </div>
+    
+    <!-- Step 4: Terms -->
+    <div class="onboarding-step" id="step-terms">
+      <h2>الشروط والخصوصية | Terms & Privacy</h2>
+      <div class="terms-container">
+        <div id="terms-ar" class="arabic-text">
+          <h3>شروط الاستخدام والخصوصية</h3>
+          <p>بالموافقة على هذه الشروط، أنت توافق على:</p>
+          <ul>
+            <li>استخدام تطبيق مشاعر لأغراض شخصية فقط</li>
+            <li>سيتم تخزين معلوماتك بشكل آمن على جهازك فقط</li>
+            <li>لن تتم مشاركة بياناتك مع أي طرف ثالث دون موافقة صريحة منك</li>
+            <li>يمكنك طلب حذف بياناتك في أي وقت</li>
+          </ul>
+        </div>
+        <div id="terms-en">
+          <h3>Terms of Use & Privacy</h3>
+          <p>By agreeing to these terms, you accept:</p>
+          <ul>
+            <li>Using Mashaaer app for personal purposes only</li>
+            <li>Your information will be stored securely on your device only</li>
+            <li>Your data will not be shared with any third party without your explicit consent</li>
+            <li>You can request deletion of your data at any time</li>
+          </ul>
+        </div>
+      </div>
+      <div class="form-group">
+        <label><input type="checkbox" id="terms-agree"> أوافق على الشروط والأحكام | I agree to the terms and conditions</label>
+      </div>
+      <div class="btn-container">
+        <button class="prev-btn" onclick="prevStep('terms')">العودة | Back</button>
+        <button class="next-btn" onclick="nextStep('terms')" id="terms-next-btn" disabled>أوافق | Agree</button>
+      </div>
+      <div class="listening-indicator" id="listening-terms">
+        أستمع إليك... | Listening...
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+      </div>
+    </div>
+    
+    <!-- Step 5: Completion -->
+    <div class="onboarding-step" id="step-complete">
+      <h2 id="welcome-message"></h2>
+      <p>تم إعداد حسابك بنجاح | Your profile is ready</p>
+      <div class="listening-indicator" id="listening-complete" style="display: block;">
+        جاري الانتقال إلى التطبيق... | Redirecting to the app...
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+        <div class="pulse-dot"></div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let userLanguage = 'ar'; // Default to Arabic
+    const userData = {
+      full_name: '',
+      nickname: '',
+      language_preference: 'ar',
+      voice_style: 'default'
+    };
+    let currentStep = 'splash';
+    const steps = ['name', 'nickname', 'language', 'terms', 'complete'];
+    
+    // Welcome messages by language
+    const welcomeMessages = {
+      ar: "اصنع المستقبل، أنا أسمعك",
+      en: "Create the future, I'm listening"
+    };
+    
+    // Instructions by language and step
+    const instructions = {
+      name: {
+        ar: "من فضلك، أخبرني باسمك الكامل",
+        en: "Please tell me your full name"
+      },
+      nickname: {
+        ar: "كيف تفضل أن أناديك؟",
+        en: "What would you like me to call you?"
+      },
+      language: {
+        ar: "ما هي لغتك المفضلة؟",
+        en: "What is your preferred language?"
+      },
+      terms: {
+        ar: "هل توافق على شروط الاستخدام والخصوصية؟",
+        en: "Do you agree to the terms of use and privacy policy?"
+      },
+      complete: {
+        ar: "شكراً لك. أنت جاهز الآن!",
+        en: "Thank you. You're all set now!"
+      }
+    };
+    
+    // Document ready function
+    document.addEventListener('DOMContentLoaded', function() {
+      // Start splash animation
+      setTimeout(startOnboarding, 3000);
+      
+      // Setup checkbox for terms
+      document.getElementById('terms-agree').addEventListener('change', function() {
+        document.getElementById('terms-next-btn').disabled = !this.checked;
+      });
+      
+      // Setup language selector
+      document.getElementById('language').addEventListener('change', function() {
+        userLanguage = this.value;
+        updateLanguageDisplay();
+        
+        // Also update the user data
+        userData.language_preference = userLanguage;
+        
+        // Speak the language change
+        const message = userLanguage === 'ar' ? 
+          "تم تغيير اللغة إلى العربية" : 
+          "Language changed to English";
+        speakText(message);
+      });
+    });
+    
+    // Update UI elements based on selected language
+    function updateLanguageDisplay() {
+      if (userLanguage === 'ar') {
+        document.documentElement.dir = 'rtl';
+        document.getElementById('terms-ar').style.display = 'block';
+        document.getElementById('terms-en').style.display = 'none';
+      } else {
+        document.documentElement.dir = 'ltr';
+        document.getElementById('terms-ar').style.display = 'none';
+        document.getElementById('terms-en').style.display = 'block';
+      }
+    }
+    
+    // Start the onboarding process
+    function startOnboarding() {
+      document.getElementById('splash-container').style.display = 'none';
+      document.getElementById('onboarding-content').style.display = 'flex';
+      showStep('name');
+      
+      // Speak welcome message and first instruction
+      const welcomeMsg = welcomeMessages[userLanguage];
+      const nameInstructions = instructions.name[userLanguage];
+      
+      speakText(welcomeMsg + ". " + nameInstructions);
+      
+      // After speaking, show listening indicator if voice mode
+      setTimeout(() => {
+        document.getElementById('listening-name').style.display = 'block';
+        startVoiceInput('full-name');
+      }, 1000);
+    }
+    
+    // Show a specific step and hide others
+    function showStep(step) {
+      currentStep = step;
+      steps.forEach(s => {
+        document.getElementById(`step-${s}`).style.display = s === step ? 'block' : 'none';
+      });
+      
+      // If it's the complete step, prepare for redirect
+      if (step === 'complete') {
+        const welcomeMsg = userLanguage === 'ar' ? 
+          `مرحباً بك، ${userData.nickname || userData.full_name.split(' ')[0]}` : 
+          `Welcome, ${userData.nickname || userData.full_name.split(' ')[0]}`;
+        
+        document.getElementById('welcome-message').textContent = welcomeMsg;
+        
+        // Speak completion message
+        speakText(instructions.complete[userLanguage] + " " + welcomeMsg);
+        
+        // Submit profile data
+        submitProfile();
+      }
+    }
+    
+    // Go to next step
+    function nextStep(currentStepName) {
+      // Validate current step
+      if (currentStepName === 'name') {
+        const name = document.getElementById('full-name').value.trim();
+        if (!name) {
+          alert(userLanguage === 'ar' ? 'الرجاء إدخال اسمك' : 'Please enter your name');
+          return;
+        }
+        userData.full_name = name;
+        
+        // Speak next instruction
+        speakText(instructions.nickname[userLanguage]);
+        
+        // After speaking, show listening indicator
+        setTimeout(() => {
+          document.getElementById('listening-nickname').style.display = 'block';
+          startVoiceInput('nickname');
+        }, 1000);
+      } 
+      else if (currentStepName === 'nickname') {
+        const nickname = document.getElementById('nickname').value.trim();
+        userData.nickname = nickname || userData.full_name.split(' ')[0];
+        
+        // Speak next instruction
+        speakText(instructions.language[userLanguage]);
+      }
+      else if (currentStepName === 'language') {
+        userData.language_preference = document.getElementById('language').value;
+        userLanguage = userData.language_preference;
+        updateLanguageDisplay();
+        
+        // Speak terms instruction
+        speakText(instructions.terms[userLanguage]);
+        
+        // After speaking, show listening indicator
+        setTimeout(() => {
+          document.getElementById('listening-terms').style.display = 'block';
+          startVoiceInput('terms-agree');
+        }, 1000);
+      }
+      else if (currentStepName === 'terms') {
+        if (!document.getElementById('terms-agree').checked) {
+          alert(userLanguage === 'ar' ? 'الرجاء الموافقة على الشروط للمتابعة' : 'Please agree to the terms to continue');
+          return;
+        }
+      }
+      
+      // Find next step
+      const currentIndex = steps.indexOf(currentStepName);
+      if (currentIndex < steps.length - 1) {
+        showStep(steps[currentIndex + 1]);
+      }
+    }
+    
+    // Go to previous step
+    function prevStep(currentStepName) {
+      const currentIndex = steps.indexOf(currentStepName);
+      if (currentIndex > 0) {
+        showStep(steps[currentIndex - 1]);
+      }
+    }
+    
+    // Function to speak text using the server's TTS API
+    function speakText(text) {
+      fetch('/api/speak', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          text: text, 
+          language: userLanguage === 'en' ? 'en-US' : 'ar'
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('TTS success:', data);
+          
+          // Create audio element to play the response
+          const audio = new Audio(data.audio_path);
+          audio.play().catch(e => console.error('Error playing audio:', e));
+        } else {
+          console.error('TTS error:', data.error);
+        }
+      })
+      .catch(error => {
+        console.error('TTS API error:', error);
+      });
+    }
+    
+    // Start voice input for a field
+    function startVoiceInput(fieldId) {
+      // Call the server's listen API
+      fetch('/api/listen', {
+        method: 'POST',
+        body: new FormData() // This would normally contain audio data
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Handle voice input
+          handleVoiceInput(fieldId, data.text);
+        } else {
+          console.error('Voice recognition error:', data.error);
+        }
+        
+        // Hide listening indicator
+        document.getElementById(`listening-${currentStep}`).style.display = 'none';
+      })
+      .catch(error => {
+        console.error('API error:', error);
+        document.getElementById(`listening-${currentStep}`).style.display = 'none';
+      });
+    }
+    
+    // Handle voice input for different fields
+    function handleVoiceInput(fieldId, text) {
+      console.log(`Voice input for ${fieldId}: ${text}`);
+      
+      if (fieldId === 'full-name') {
+        document.getElementById('full-name').value = text;
+        // Auto-advance after a delay
+        setTimeout(() => nextStep('name'), 1000);
+      } 
+      else if (fieldId === 'nickname') {
+        document.getElementById('nickname').value = text;
+        // Auto-advance after a delay
+        setTimeout(() => nextStep('nickname'), 1000);
+      }
+      else if (fieldId === 'terms-agree') {
+        // Check if response indicates agreement
+        let agreed = false;
+        
+        if (userLanguage === 'ar') {
+          agreed = text.includes('نعم') || 
+                  text.includes('موافق') || 
+                  text.includes('أوافق');
+        } else {
+          agreed = text.toLowerCase().includes('yes') || 
+                  text.toLowerCase().includes('agree') ||
+                  text.toLowerCase().includes('ok');
+        }
+        
+        if (agreed) {
+          document.getElementById('terms-agree').checked = true;
+          document.getElementById('terms-next-btn').disabled = false;
+          // Auto-advance after a delay
+          setTimeout(() => nextStep('terms'), 1000);
+        } else {
+          // Prompt again for terms agreement
+          speakText(instructions.terms[userLanguage]);
+          setTimeout(() => {
+            document.getElementById('listening-terms').style.display = 'block';
+            startVoiceInput('terms-agree');
+          }, 1000);
+        }
+      }
+    }
+    
+    // Submit profile data to server
+    function submitProfile() {
+      fetch('/api/cosmic-onboarding-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          full_name: userData.full_name,
+          nickname: userData.nickname,
+          language_preference: userData.language_preference,
+          voice_style: userData.voice_style,
+          onboarding_complete: true
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Store user language preference in localStorage
+          localStorage.setItem('user_language', userData.language_preference);
+          
+          // Redirect to the main interface after 3 seconds
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 3000);
+        } else {
+          console.error('Error saving profile:', data.error);
+          alert(userLanguage === 'ar' 
+            ? 'خطأ في حفظ الملف الشخصي: ' + data.error 
+            : 'Error saving profile: ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert(userLanguage === 'ar' 
+          ? 'خطأ في حفظ الملف الشخصي. يرجى المحاولة مرة أخرى.' 
+          : 'Error saving profile. Please try again.');
+      });
+    }
+  </script>
+</body>
+</html>

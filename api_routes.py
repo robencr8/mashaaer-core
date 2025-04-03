@@ -281,6 +281,208 @@ def send_sms():
         }), 500
 
 
+@api.route('/play-cosmic-sound', methods=['POST'])
+def play_cosmic_sound():
+    """Generate and return a sound for the cosmic interface based on the type and language"""
+    try:
+        # Parse request data
+        if request.is_json:
+            data = request.json
+        else:
+            data = request.form.to_dict()
+        
+        sound_type = data.get('sound_type', 'welcome')
+        language = data.get('language', 'en')
+        
+        # Log the request
+        logger.info(f"API: Cosmic sound request: {sound_type} in {language}")
+        
+        # Validate sound type
+        valid_sound_types = ['welcome', 'greeting', 'click', 'hover', 'listen_start', 'listen_stop']
+        if sound_type not in valid_sound_types:
+            return jsonify({
+                'success': False,
+                'error': f'Invalid sound type. Valid options are: {", ".join(valid_sound_types)}'
+            }), 400
+        
+        # Check if TTS manager is available for voice sounds
+        if sound_type in ['welcome', 'greeting'] and tts_manager is None:
+            return jsonify({
+                'success': False,
+                'error': 'Text-to-speech service not available'
+            }), 503
+        
+        # Handle welcome message based on language
+        if sound_type == 'welcome':
+            welcome_text = "Welcome to Mashaaer" if language == 'en' else "مرحبا بكم في مشاعر"
+            
+            # Use TTS to generate the audio
+            try:
+                # Generate TTS audio
+                audio_path = tts_manager.generate_tts(welcome_text, language=language)
+                
+                if audio_path:
+                    # Return the audio file path
+                    return jsonify({
+                        'success': True,
+                        'sound_path': audio_path
+                    })
+                else:
+                    return jsonify({
+                        'success': False,
+                        'error': 'Failed to generate welcome audio'
+                    }), 500
+            except Exception as e:
+                logger.error(f"Error generating welcome TTS: {str(e)}")
+                return jsonify({
+                    'success': False,
+                    'error': f'TTS generation error: {str(e)}'
+                }), 500
+        
+        # Handle greeting message
+        elif sound_type == 'greeting':
+            greeting_text = "I'm listening to you" if language == 'en' else "أنا أستمع إليك"
+            
+            # Generate greeting audio
+            try:
+                audio_path = tts_manager.generate_tts(greeting_text, language=language)
+                
+                if audio_path:
+                    return jsonify({
+                        'success': True,
+                        'sound_path': audio_path
+                    })
+                else:
+                    return jsonify({
+                        'success': False,
+                        'error': 'Failed to generate greeting audio'
+                    }), 500
+            except Exception as e:
+                logger.error(f"Error generating greeting TTS: {str(e)}")
+                return jsonify({
+                    'success': False,
+                    'error': f'TTS generation error: {str(e)}'
+                }), 500
+        
+        # For non-voice sounds, just return the path to the static sound file
+        else:
+            sound_file = f"{sound_type}.mp3"
+            sound_path = f"/static/audio/{sound_file}"
+            
+            # Check if the file exists
+            import os
+            full_path = os.path.join('static', 'audio', sound_file)
+            if not os.path.exists(full_path):
+                logger.warning(f"API: Cosmic sound file not found: {full_path}")
+                
+                # Return fallback sound if available
+                return jsonify({
+                    'success': True,
+                    'sound_path': '/static/audio/click.mp3',
+                    'warning': f'Requested sound {sound_file} not found, using fallback'
+                })
+            
+            return jsonify({
+                'success': True,
+                'sound_path': sound_path
+            })
+    
+    except Exception as e:
+        logger.error(f"API: Error in play_cosmic_sound: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'Internal server error: {str(e)}'
+        }), 500
+
+@api.route('/analyze-emotion', methods=['POST'])
+def analyze_emotion():
+    """Analyze text for emotional content and return the detected emotion"""
+    try:
+        # Parse request data
+        if request.is_json:
+            data = request.json
+        else:
+            data = request.form.to_dict()
+        
+        text = data.get('text', '')
+        language = data.get('language', 'en')
+        
+        if not text:
+            return jsonify({
+                'success': False,
+                'error': 'Text is required for emotion analysis'
+            }), 400
+        
+        # Check if emotion tracker is available
+        if emotion_tracker is None:
+            return jsonify({
+                'success': False,
+                'error': 'Emotion analysis service not available'
+            }), 503
+        
+        # Log the request (without the full text for privacy)
+        text_preview = text[:20] + '...' if len(text) > 20 else text
+        logger.info(f"API: Emotion analysis request: '{text_preview}' in {language}")
+        
+        # Analyze emotion
+        try:
+            emotion_result = emotion_tracker.analyze_text(text)
+            
+            # Handle string or dict result types
+            if isinstance(emotion_result, str):
+                dominant_emotion = emotion_result
+                confidence = 0.8
+                all_emotions = {dominant_emotion: 1.0, "neutral": 0.2}
+            else:
+                dominant_emotion = emotion_result.get('primary_emotion', 'neutral')
+                confidence = emotion_result.get('confidence', 0.8)
+                all_emotions = emotion_result.get('emotions', {})
+            
+            # Map complex emotions to simpler ones for the cosmic UI
+            simple_emotion_map = {
+                'joy': 'happy',
+                'happiness': 'happy',
+                'excitement': 'happy',
+                'optimism': 'happy',
+                'sadness': 'sad',
+                'grief': 'sad',
+                'disappointment': 'sad',
+                'anger': 'angry',
+                'annoyance': 'angry',
+                'frustration': 'angry',
+                'neutral': 'neutral'
+            }
+            
+            # Convert to simple emotion for UI
+            if isinstance(dominant_emotion, str):
+                simple_emotion = simple_emotion_map.get(dominant_emotion.lower(), 'neutral')
+            else:
+                simple_emotion = 'neutral'
+            
+            return jsonify({
+                'success': True,
+                'emotion': simple_emotion,
+                'detailed_emotion': dominant_emotion,
+                'confidence': confidence,
+                'all_emotions': all_emotions
+            })
+            
+        except Exception as e:
+            logger.error(f"Error analyzing emotion: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': f'Emotion analysis error: {str(e)}'
+            }), 500
+    
+    except Exception as e:
+        logger.error(f"API: Error in analyze_emotion: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'Internal server error: {str(e)}'
+        }), 500
+
 @api.route('/sms-alert', methods=['POST'])
 def send_sms_alert():
     """Send SMS notification with pre-formatted alert message with enhanced error handling"""
