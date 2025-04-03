@@ -1,176 +1,128 @@
+#!/usr/bin/env python3
 """
-Server Connectivity Test Script for Mashaaer API
+Test script for validating server connectivity and CORS configuration
 
-This script provides a simple way to verify server connectivity
-by testing multiple endpoints and displaying detailed results.
+This script performs a series of tests against various endpoints to verify 
+that the server is accessible and properly configured for CORS.
+
+Usage:
+    python test_server_connectivity.py [base_url]
+    - If base_url is not provided, defaults to http://localhost:5000
 """
 
-import requests
-import json
 import sys
+import json
 import time
+import requests
 from datetime import datetime
 
-# Configuration
-BASE_URL = "http://localhost:5000"  # Local development server
-TIMEOUT = 5  # seconds
-TEST_ENDPOINTS = [
-    "/",
-    "/test",
-    "/api/minimal",
-    "/api/status",
-    "/api/ping",
-    "/api/test-cors"
-]
+def format_headers(headers):
+    """Format headers for display in a more readable way"""
+    return "\n".join([f"  {k}: {v}" for k, v in headers.items()])
 
-def print_header(text):
-    """Print a formatted header."""
-    print("\n" + "=" * 60)
-    print(f" {text}")
-    print("=" * 60)
-
-def get_timestamp():
-    """Get current timestamp string."""
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-def test_endpoint(url, method="GET", data=None, headers=None):
-    """Test a specific endpoint and return results."""
-    if headers is None:
-        headers = {"Origin": "http://localhost"}
+def test_endpoint(session, url, origin=None, method="GET", data=None, description=None):
+    """Test a specific endpoint with detailed logging"""
+    print(f"\n{'=' * 50}")
+    print(f"Testing: {url}")
+    if description:
+        print(f"Description: {description}")
+    print(f"Method: {method}")
+    print(f"Origin: {origin or 'Not specified'}")
+    print(f"Time: {datetime.now().isoformat()}")
     
+    # Set request headers
+    headers = {}
+    if origin:
+        headers["Origin"] = origin
+    
+    # Record start time
     start_time = time.time()
+    
     try:
+        # Make the request
         if method.upper() == "GET":
-            response = requests.get(url, headers=headers, timeout=TIMEOUT)
+            response = session.get(url, headers=headers, timeout=5)
         elif method.upper() == "POST":
-            response = requests.post(url, json=data, headers=headers, timeout=TIMEOUT)
+            response = session.post(url, headers=headers, json=data, timeout=5)
+        elif method.upper() == "OPTIONS":
+            response = session.options(url, headers=headers, timeout=5)
         else:
-            return {
-                "success": False,
-                "status_code": None,
-                "message": f"Unsupported method: {method}",
-                "response_time": 0,
-                "headers": None,
-                "content": None
-            }
+            print(f"Error: Unsupported method {method}")
+            return
         
-        response_time = time.time() - start_time
+        # Calculate duration
+        duration = (time.time() - start_time) * 1000
         
-        # Try to parse JSON, but don't fail if it's not JSON
-        try:
-            content = response.json()
-            content_type = "json"
-        except json.JSONDecodeError:
-            content = response.text
-            content_type = "text"
-            
-        return {
-            "success": 200 <= response.status_code < 300,
-            "status_code": response.status_code,
-            "message": "OK" if 200 <= response.status_code < 300 else f"HTTP {response.status_code}",
-            "response_time": response_time,
-            "headers": dict(response.headers),
-            "content": content,
-            "content_type": content_type
-        }
-    except requests.exceptions.Timeout:
-        response_time = time.time() - start_time
-        return {
-            "success": False,
-            "status_code": None,
-            "message": "Request timed out",
-            "response_time": response_time,
-            "headers": None,
-            "content": None,
-            "content_type": None
-        }
-    except requests.exceptions.ConnectionError:
-        response_time = time.time() - start_time
-        return {
-            "success": False,
-            "status_code": None,
-            "message": "Connection error",
-            "response_time": response_time,
-            "headers": None,
-            "content": None,
-            "content_type": None
-        }
-    except Exception as e:
-        response_time = time.time() - start_time
-        return {
-            "success": False,
-            "status_code": None,
-            "message": f"Error: {str(e)}",
-            "response_time": response_time,
-            "headers": None,
-            "content": None,
-            "content_type": None
-        }
-
-def run_server_tests():
-    """Run all server connectivity tests."""
-    print_header(f"MASHAAER SERVER CONNECTIVITY TEST - {get_timestamp()}")
-    print(f"Base URL: {BASE_URL}")
-    print(f"Timeout: {TIMEOUT} seconds")
-    
-    # Test results summary
-    results = {
-        "total": len(TEST_ENDPOINTS),
-        "success": 0,
-        "failed": 0,
-        "total_time": 0
-    }
-    
-    for endpoint in TEST_ENDPOINTS:
-        url = f"{BASE_URL}{endpoint}"
+        # Print results
+        print(f"\nResponse Status: {response.status_code} {response.reason}")
+        print(f"Response Time: {duration:.2f}ms")
+        print("\nResponse Headers:")
+        print(format_headers(response.headers))
         
-        print(f"\n> Testing endpoint: {endpoint}")
-        print(f"  URL: {url}")
+        # Print CORS-specific headers if present
+        cors_headers = [h for h in response.headers.keys() if h.lower().startswith("access-control")]
+        if cors_headers:
+            print("\nCORS Headers:")
+            for header in cors_headers:
+                print(f"  {header}: {response.headers[header]}")
         
-        # Test GET request
-        print("  Method: GET")
-        result = test_endpoint(url)
-        results["total_time"] += result["response_time"]
-        
-        if result["success"]:
-            results["success"] += 1
-            print(f"  ✅ Success: HTTP {result['status_code']} ({result['response_time']:.2f}s)")
+        # Print response content
+        content_type = response.headers.get("Content-Type", "")
+        print("\nResponse Content:")
+        if "application/json" in content_type:
+            try:
+                json_content = response.json()
+                print(json.dumps(json_content, indent=2))
+            except:
+                print(response.text[:500] + "..." if len(response.text) > 500 else response.text)
         else:
-            results["failed"] += 1
-            print(f"  ❌ Failed: {result['message']} ({result['response_time']:.2f}s)")
+            print(response.text[:500] + "..." if len(response.text) > 500 else response.text)
         
-        # Show response headers related to CORS
-        if result["headers"]:
-            cors_headers = {k: v for k, v in result["headers"].items() if "access-control" in k.lower()}
-            if cors_headers:
-                print("\n  CORS Headers:")
-                for name, value in cors_headers.items():
-                    print(f"  - {name}: {value}")
-        
-        # Show response content (truncated if too long)
-        if result["content"]:
-            print("\n  Response Content:")
-            if result["content_type"] == "json":
-                content_str = json.dumps(result["content"], indent=2)
-                if len(content_str) > 500:
-                    content_str = content_str[:500] + "... [truncated]"
-                print(f"  {content_str}")
+        # Evaluate CORS compliance
+        if origin:
+            acao = response.headers.get("Access-Control-Allow-Origin")
+            if acao:
+                if acao == "*" or acao == origin:
+                    print("\n✅ CORS: Access-Control-Allow-Origin is properly set.")
+                else:
+                    print(f"\n❌ CORS: Access-Control-Allow-Origin is '{acao}' but expected '{origin}' or '*'.")
             else:
-                content_str = str(result["content"])
-                if len(content_str) > 500:
-                    content_str = content_str[:500] + "... [truncated]"
-                print(f"  {content_str}")
+                print("\n❌ CORS: Access-Control-Allow-Origin header is missing.")
+        
+        return response
     
-    # Print summary
-    print_header("TEST SUMMARY")
-    print(f"Total endpoints tested: {results['total']}")
-    print(f"Successful tests: {results['success']}")
-    print(f"Failed tests: {results['failed']}")
-    print(f"Success rate: {results['success'] / results['total'] * 100:.1f}%")
-    print(f"Total response time: {results['total_time']:.2f} seconds")
+    except requests.exceptions.RequestException as e:
+        print(f"\n❌ Error: {e}")
+        return None
+
+def run_tests(base_url):
+    """Run a series of connectivity and CORS tests"""
+    print(f"Testing server at {base_url}")
+    print(f"Test started at: {datetime.now().isoformat()}")
     
-    return results["failed"] == 0
+    # Create a session for connection reuse
+    session = requests.Session()
+    
+    # Test regular endpoints
+    test_endpoint(session, f"{base_url}/api/status", description="Regular API status endpoint")
+    test_endpoint(session, f"{base_url}/api/ping", description="Simple ping endpoint")
+    
+    # Test minimal endpoints
+    test_endpoint(session, f"{base_url}/api/minimal", description="Minimal endpoint with plain text response")
+    test_endpoint(session, f"{base_url}/feedback-tool-endpoint", description="Special endpoint for feedback tool")
+    
+    # Test CORS with specific origins
+    feedback_tool_origin = "https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev"
+    test_endpoint(session, f"{base_url}/api/feedback-tool-status", origin=feedback_tool_origin, 
+                 description="Feedback tool status endpoint with specific origin")
+    
+    # Test with OPTIONS method (preflight)
+    test_endpoint(session, f"{base_url}/api/feedback-tool-status", origin=feedback_tool_origin, 
+                 method="OPTIONS", description="Preflight request to feedback tool status endpoint")
+    
+    print("\nTests completed!")
 
 if __name__ == "__main__":
-    success = run_server_tests()
-    sys.exit(0 if success else 1)
+    # Use command line argument as base URL if provided, otherwise use default
+    base_url = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:5000"
+    run_tests(base_url)

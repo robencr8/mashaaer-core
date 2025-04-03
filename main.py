@@ -347,6 +347,14 @@ def cors_test_route_minimal():
     logger.debug(f"Response Headers: {dict(response.headers)}")
     return response
 
+# Special endpoint optimized specifically for the web application feedback tool
+# This route has been moved below to include POST method support
+# @app.route('/feedback-tool-endpoint', methods=['GET', 'OPTIONS'])
+# def feedback_tool_endpoint_old():
+#     """Endpoint optimized for the web application feedback tool with all CORS headers"""
+#     # This function has been replaced by the implementation below
+#     pass
+
 # Diagnostic panel for connectivity troubleshooting
 @app.route('/diagnostic-panel')
 def diagnostic_panel():
@@ -844,10 +852,10 @@ def startup():
 
 @app.route('/app')
 def app_main():
-    """Main application page after onboarding"""
+    """Main application page after onboarding with cosmic theme"""
     try:
-        logger.info("App main route accessed")
-        return render_template('homepage.html')
+        logger.info("App main route accessed - serving cosmic theme")
+        return render_template('cosmic_homepage.html')
     except Exception as e:
         logger.error(f"Error in app main route: {str(e)}")
         return render_template('error.html', error=str(e))
@@ -2200,3 +2208,98 @@ if __name__ == "__main__":
     # Start the Flask app - this is run by gunicorn in production
     # but including it ensures the app runs correctly in all environments
     app.run(host='0.0.0.0', port=5000, debug=True)
+@app.route('/feedback-test-comprehensive')
+def feedback_test_comprehensive():
+    """Serve the comprehensive feedback tool test page"""
+    return app.send_static_file('feedback_tool_test.html')
+
+@app.route('/feedback-tool-endpoint', methods=['POST', 'OPTIONS'])
+def feedback_tool_endpoint():
+    """Endpoint optimized for the feedback tool with all CORS headers"""
+    origin = request.headers.get('Origin', FEEDBACK_TOOL_ORIGIN or '*')
+    logger.info(f"⭐ Feedback tool endpoint accessed from origin: {origin}")
+    
+    # For OPTIONS requests
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Max-Age'] = '3600'
+        return response
+    
+    # Process POST request
+    try:
+        data = request.get_json()
+        logger.info(f"Received feedback tool test data: {data}")
+        response_data = {
+            "status": "success",
+            "message": "Feedback tool endpoint working correctly",
+            "received_data": data
+        }
+        response = jsonify(response_data)
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        return response
+    except Exception as e:
+        logger.error(f"Error in feedback tool endpoint: {str(e)}")
+        response = jsonify({
+            "status": "error",
+            "message": str(e)
+        })
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        return response, 500
+
+# Root-level health check specifically for the feedback tool
+@app.route('/health', methods=['GET', 'OPTIONS'])
+def health_check():
+    """Ultra minimal health check endpoint at root level with maximum CORS headers"""
+    origin = request.headers.get('Origin', FEEDBACK_TOOL_ORIGIN or '*')
+    logger.info(f"⭐ Health check endpoint accessed from origin: {origin}")
+    
+    # For OPTIONS requests
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Max-Age'] = '3600'
+        return response
+    
+    # For GET requests - absolute minimal plain text response
+    response = make_response("OK")
+    response.headers['Content-Type'] = 'text/plain'
+    response.headers['Access-Control-Allow-Origin'] = origin
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    return response
+
+@app.route('/static/markdown/<path:filename>')
+def serve_markdown(filename):
+    """Serve markdown files from the static/markdown directory with proper headers"""
+    response = make_response(send_from_directory('static/markdown', filename))
+    response.headers['Content-Type'] = 'text/markdown'
+    return response
+    
+@app.route('/feedback-tool-guide')
+def feedback_tool_guide():
+    """Serve the feedback tool integration guide HTML page"""
+    return send_from_directory('static', 'feedback_tool_guide.html')
+
+@app.route('/feedback-comprehensive-test')
+def comprehensive_feedback_test():
+    """Serve the comprehensive feedback tool test page"""
+    return send_from_directory('static', 'feedback_comprehensive_test.html')
+
+@app.route('/cors-diagnostic')
+def cors_diagnostic_page():
+    """Serve the CORS diagnostic tool page"""
+    return send_from_directory('static', 'cors_diagnostic.html')
+
+@app.route('/ultra-minimal-test')
+def ultra_minimal_test_page():
+    """Serve the ultra minimal test page for diagnosing web application accessibility"""
+    return render_template('ultra_minimal.html')

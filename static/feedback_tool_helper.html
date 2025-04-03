@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Tool Helper</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #5c2d91;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #fff;
+        }
+        button {
+            background-color: #5c2d91;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 0;
+        }
+        button:hover {
+            background-color: #4a2370;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        #responseData {
+            min-height: 200px;
+        }
+        .endpoint-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .endpoint-list li {
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .endpoint-list button {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Feedback Tool Helper</h1>
+    <p>This page helps diagnose issues with the web application feedback tool.</p>
+
+    <div class="card">
+        <h2>CORS Configuration</h2>
+        <div id="corsInfo">Loading CORS configuration...</div>
+        <button onclick="testCors()">Test CORS Configuration</button>
+    </div>
+
+    <div class="card">
+        <h2>Optimized Test Endpoints</h2>
+        <p>These endpoints are specifically optimized for the web application feedback tool:</p>
+        <ul class="endpoint-list">
+            <li>
+                <code>/api/minimal</code> - Ultra-minimal text response
+                <button onclick="testEndpoint('/api/minimal')">Test</button>
+            </li>
+            <li>
+                <code>/api/ping</code> - Simple JSON response
+                <button onclick="testEndpoint('/api/ping')">Test</button>
+            </li>
+            <li>
+                <code>/api/feedback-tool-ping</code> - Dedicated feedback tool endpoint
+                <button onclick="testEndpoint('/api/feedback-tool-ping')">Test</button>
+            </li>
+            <li>
+                <code>/feedback-tool-test</code> - Plain text response for feedback tool
+                <button onclick="testEndpoint('/feedback-tool-test')">Test</button>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>Response Data</h2>
+        <div id="responseData">Make a request to see the response data here...</div>
+    </div>
+
+    <div class="card">
+        <h2>Diagnostic Information</h2>
+        <div id="diagnosticInfo">
+            <h3>User Agent</h3>
+            <pre id="userAgent"></pre>
+            
+            <h3>Location Information</h3>
+            <pre id="locationInfo"></pre>
+            
+            <h3>Connection Information</h3>
+            <pre id="connectionInfo"></pre>
+        </div>
+    </div>
+
+    <script>
+        // Display user agent information
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        
+        // Display location information
+        document.getElementById('locationInfo').textContent = `
+Location: ${window.location.href}
+Protocol: ${window.location.protocol}
+Hostname: ${window.location.hostname}
+Port: ${window.location.port}
+Origin: ${window.location.origin}
+        `;
+        
+        // Display connection information
+        if (navigator.connection) {
+            document.getElementById('connectionInfo').textContent = `
+Effective Type: ${navigator.connection.effectiveType || 'Unknown'}
+Downlink: ${navigator.connection.downlink || 'Unknown'} Mbps
+RTT: ${navigator.connection.rtt || 'Unknown'} ms
+        `;
+        } else {
+            document.getElementById('connectionInfo').textContent = 'Connection API not available';
+        }
+        
+        // Load CORS configuration
+        async function loadCorsInfo() {
+            try {
+                const response = await fetch('/api/feedback-tool-status');
+                if (response.ok) {
+                    const data = await response.json();
+                    let corsInfo = '<h3>Current Configuration</h3>';
+                    
+                    corsInfo += `<p><strong>Origin:</strong> ${data.request.origin || 'Not detected'}</p>`;
+                    
+                    // Display access control headers
+                    corsInfo += '<h3>CORS Headers</h3><pre>';
+                    for (const [key, value] of Object.entries(response.headers)) {
+                        if (key.toLowerCase().startsWith('access-control-')) {
+                            corsInfo += `${key}: ${value}\n`;
+                        }
+                    }
+                    corsInfo += '</pre>';
+                    
+                    // Display Replit information
+                    corsInfo += '<h3>Replit Information</h3>';
+                    corsInfo += `<p><strong>Domain:</strong> ${data.replit_info.domain}</p>`;
+                    
+                    document.getElementById('corsInfo').innerHTML = corsInfo;
+                } else {
+                    document.getElementById('corsInfo').innerHTML = `<p class="error">Error loading CORS info: ${response.status} ${response.statusText}</p>`;
+                }
+            } catch (error) {
+                document.getElementById('corsInfo').innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Test CORS configuration
+        async function testCors() {
+            const responseDiv = document.getElementById('responseData');
+            responseDiv.innerHTML = '<p>Testing CORS configuration...</p>';
+            
+            try {
+                const response = await fetch('/api/test-cors');
+                if (response.ok) {
+                    const data = await response.json();
+                    responseDiv.innerHTML = `
+                        <p class="success">CORS test successful</p>
+                        <h3>Response Headers:</h3>
+                        <pre>${formatHeaders(response.headers)}</pre>
+                        <h3>Response Data:</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    responseDiv.innerHTML = `<p class="error">CORS test failed: ${response.status} ${response.statusText}</p>`;
+                }
+            } catch (error) {
+                responseDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Test specific endpoint
+        async function testEndpoint(endpoint) {
+            const responseDiv = document.getElementById('responseData');
+            responseDiv.innerHTML = `<p>Testing endpoint: ${endpoint}...</p>`;
+            
+            try {
+                const startTime = performance.now();
+                const response = await fetch(endpoint);
+                const endTime = performance.now();
+                const responseTime = (endTime - startTime).toFixed(2);
+                
+                if (response.ok) {
+                    const contentType = response.headers.get('content-type') || '';
+                    
+                    responseDiv.innerHTML = `
+                        <p class="success">Endpoint test successful</p>
+                        <p><strong>Response Time:</strong> ${responseTime}ms</p>
+                        <h3>Response Headers:</h3>
+                        <pre>${formatHeaders(response.headers)}</pre>
+                        <h3>Response Body:</h3>
+                        <pre id="responseBody">Loading...</pre>
+                    `;
+                    
+                    // Handle different content types
+                    if (contentType.includes('application/json')) {
+                        const data = await response.json();
+                        document.getElementById('responseBody').textContent = JSON.stringify(data, null, 2);
+                    } else {
+                        const text = await response.text();
+                        document.getElementById('responseBody').textContent = text;
+                    }
+                } else {
+                    responseDiv.innerHTML = `<p class="error">Endpoint test failed: ${response.status} ${response.statusText}</p>`;
+                }
+            } catch (error) {
+                responseDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Format headers for display
+        function formatHeaders(headers) {
+            let result = '';
+            for (const [key, value] of headers.entries()) {
+                result += `${key}: ${value}\n`;
+            }
+            return result;
+        }
+        
+        // Load CORS information on page load
+        window.onload = loadCorsInfo;
+    </script>
+</body>
+</html>

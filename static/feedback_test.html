@@ -3,117 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feedback Tool Test Page</title>
+    <title>Feedback Tool Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f5f5f5;
-            color: #333;
-        }
-        h1 {
-            color: #5c2d91;
-        }
-        .success {
-            color: green;
-            font-weight: bold;
-        }
-        .container {
-            background-color: white;
+            margin: 0;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            max-width: 800px;
-            margin: 0 auto;
+            background-color: #f5f5f5;
         }
-        code {
-            background-color: #f0f0f0;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-family: monospace;
+        .test-card {
+            background-color: white;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         button {
-            background-color: #5c2d91;
+            background-color: #4CAF50;
             color: white;
+            padding: 8px 12px;
             border: none;
-            padding: 8px 16px;
             border-radius: 4px;
             cursor: pointer;
+            margin-right: 5px;
+        }
+        .result {
             margin-top: 10px;
-        }
-        button:hover {
-            background-color: #4a2370;
-        }
-        #result {
-            margin-top: 20px;
             padding: 10px;
-            border: 1px solid #ddd;
+            background-color: #f9f9f9;
             border-radius: 4px;
-            min-height: 100px;
+        }
+        h1, h2 {
+            color: #333;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Feedback Tool Test Page</h1>
-        <p>This page is specifically designed for testing compatibility with the Replit web application feedback tool.</p>
-        
-        <div>
-            <p>Server status: <span id="status">Checking...</span></p>
-            <button onclick="testServer()">Test Server Connection</button>
-        </div>
-        
-        <div id="result">
-            <p>Click the button above to test the connection to the server.</p>
-        </div>
+    <h1>Feedback Tool Test</h1>
+    <p>Use this page to test connectivity with the web application feedback tool.</p>
+    
+    <div class="test-card">
+        <h2>1. Basic API Test</h2>
+        <button onclick="testApi('/api/status')">Test API Status</button>
+        <button onclick="testApi('/api/ping')">Test API Ping</button>
+        <button onclick="testApi('/health')">Test Health Check</button>
+        <div id="apiResult" class="result">Results will appear here...</div>
     </div>
-
+    
+    <div class="test-card">
+        <h2>2. Minimal Endpoint Tests</h2>
+        <button onclick="testApi('/api/minimal')">Test Minimal API</button>
+        <button onclick="testApi('/minimal-page')">Test Minimal Page</button>
+        <button onclick="testApi('/ultra-simple')">Test Ultra Simple</button>
+        <div id="minimalResult" class="result">Results will appear here...</div>
+    </div>
+    
+    <div class="test-card">
+        <h2>3. Dedicated Feedback Tool Endpoints</h2>
+        <button onclick="testApi('/feedback-tool-endpoint')">Test Feedback Tool Endpoint</button>
+        <button onclick="testApi('/api/feedback-tool-status')">Test Feedback Tool Status</button>
+        <button onclick="testApi('/feedback-tool-test')">Test Feedback Tool Text</button>
+        <div id="feedbackResult" class="result">Results will appear here...</div>
+    </div>
+    
     <script>
-        // Test the server connection when the page loads
-        window.onload = function() {
-            testServer();
-        };
-
-        // Function to test the server connection
-        function testServer() {
-            const resultElement = document.getElementById('result');
-            const statusElement = document.getElementById('status');
+        async function testApi(endpoint) {
+            let resultElement;
+            if (endpoint.includes('feedback')) {
+                resultElement = document.getElementById('feedbackResult');
+            } else if (endpoint.includes('minimal') || endpoint.includes('simple')) {
+                resultElement = document.getElementById('minimalResult');
+            } else {
+                resultElement = document.getElementById('apiResult');
+            }
             
-            resultElement.innerHTML = 'Testing connection to server...';
-            statusElement.textContent = 'Testing...';
+            resultElement.innerHTML = `Testing ${endpoint}...`;
             
-            // Make a simple GET request to the server
-            fetch('/api/feedback-tool-ping')
-                .then(response => {
-                    if (response.ok) {
-                        statusElement.textContent = 'Connected ✓';
-                        statusElement.className = 'success';
-                        return response.text();
-                    } else {
-                        throw new Error(`Server responded with status ${response.status}`);
-                    }
-                })
-                .then(data => {
-                    resultElement.innerHTML = `
-                        <p class="success">Successfully connected to the server!</p>
-                        <p>Response from server: ${data}</p>
-                        <p>This confirms that the server is up and running, and the CORS configuration is working correctly.</p>
-                    `;
-                })
-                .catch(error => {
-                    statusElement.textContent = 'Disconnected ✗';
-                    statusElement.style.color = 'red';
-                    
-                    resultElement.innerHTML = `
-                        <p style="color: red;">Failed to connect to the server: ${error.message}</p>
-                        <p>This could be due to one of the following reasons:</p>
-                        <ul>
-                            <li>The server is not running</li>
-                            <li>There is a CORS issue preventing the browser from accessing the server</li>
-                            <li>Network connectivity problems</li>
-                        </ul>
-                    `;
-                });
+            try {
+                const startTime = performance.now();
+                const response = await fetch(endpoint);
+                const endTime = performance.now();
+                const duration = Math.round(endTime - startTime);
+                
+                let responseData;
+                const contentType = response.headers.get('Content-Type');
+                
+                if (contentType && contentType.includes('application/json')) {
+                    responseData = await response.json();
+                    responseData = JSON.stringify(responseData, null, 2);
+                } else {
+                    responseData = await response.text();
+                }
+                
+                resultElement.innerHTML = `
+                <strong>Status:</strong> ${response.status} ${response.statusText}<br>
+                <strong>Response Time:</strong> ${duration}ms<br>
+                <strong>Content-Type:</strong> ${contentType || 'not specified'}<br>
+                <strong>Response:</strong><br>
+                <pre>${responseData}</pre>
+                `;
+            } catch (error) {
+                resultElement.innerHTML = `
+                <strong>Error:</strong> ${error.message}<br>
+                <pre>${error.stack}</pre>
+                `;
+            }
         }
     </script>
 </body>

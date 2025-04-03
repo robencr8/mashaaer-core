@@ -38,6 +38,8 @@ This document serves as a central index for all documentation related to the Mas
 - [API Routes](api_routes.py) - API endpoints and functionality
 - [Database Schema](#) - Database structure and relationships
 - [AI Model Router](ai_model_router.py) - AI model integration and routing
+- [Cosmic Theme Implementation](COSMIC_THEME_IMPLEMENTATION.md) - Cosmic UI design and implementation
+- [Caching Implementation](CACHING_IMPLEMENTATION.md) - Cache system architecture and strategies
 - [Testing Guide](#) - How to run and write tests
 
 ### Deployment and Operations

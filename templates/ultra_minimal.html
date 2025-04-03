@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra Minimal Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px auto;
+            max-width: 650px;
+            padding: 0 20px;
+            line-height: 1.6;
+        }
+        h1 { color: #333; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Ultra Minimal Test Page</h1>
+    <p class="success">✅ This page is successfully loaded from the server.</p>
+    
+    <div id="time">Current server time: Loading...</div>
+    
+    <h2>Connection Test</h2>
+    <div id="test-result">Testing API connection...</div>
+    
+    <script>
+        // Display current time
+        document.getElementById('time').textContent = 'Page loaded at: ' + new Date().toLocaleTimeString();
+        
+        // Test API connection
+        fetch('/api/ping')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('test-result').innerHTML = 
+                    `<p class="success">✅ API connection successful! Server says: ${data.message}</p>`;
+            })
+            .catch(error => {
+                document.getElementById('test-result').innerHTML = 
+                    `<p class="error">❌ API connection failed: ${error}</p>`;
+            });
+    </script>
+</body>
+</html>

@@ -4,62 +4,91 @@ Routes specifically designed for feedback tool compatibility.
 These routes provide endpoints optimized for the web application feedback tool
 with enhanced CORS support and diagnostic information.
 """
-
-from flask import Blueprint, request, jsonify, make_response, render_template, current_app
-import logging
 import os
+import logging
+import json
 from datetime import datetime
+from flask import Blueprint, request, make_response, jsonify, send_from_directory
 
 logger = logging.getLogger(__name__)
+
+FEEDBACK_TOOL_ORIGIN = os.environ.get('FEEDBACK_TOOL_ORIGIN', None)
 
 feedback_tool_bp = Blueprint('feedback_tool', __name__)
 
 @feedback_tool_bp.route('/feedback-tool-guide')
 def feedback_tool_guide():
     """Serve the feedback tool integration guide HTML page"""
-    return current_app.send_static_file('feedback_tool_guide.html')
+    return send_from_directory('static', 'feedback_tool_guide.html')
 
-@feedback_tool_bp.route('/api/feedback-tool-status')
+@feedback_tool_bp.route('/feedback-tool-status')
 def feedback_tool_status():
-    """Status endpoint optimized for feedback tool with explicit CORS headers"""
-    origin = request.headers.get('Origin', '*')
+    """Status endpoint optimized for feedback tool with explicit CORS headers and request details."""
+    # Get the origin from the request headers or use configured origin as fallback
+    origin = request.headers.get('Origin', FEEDBACK_TOOL_ORIGIN or '*')
     logger.info(f"Feedback tool status endpoint accessed from origin: {origin}")
+    
+    # Log detailed request information
+    logger.info(f"Request method: {request.method}")
     logger.info(f"Request headers: {dict(request.headers)}")
+    logger.info(f"Request remote address: {request.remote_addr}")
     
-    # Create response with extra diagnostic information
-    response = jsonify({
-        'status': 'online',
-        'message': 'Server is accessible by the feedback tool',
+    # For OPTIONS requests (preflight)
+    if request.method == 'OPTIONS':
+        logger.info(f"Handling OPTIONS preflight request for feedback tool status")
+        response = make_response()
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Max-Age'] = '86400'
+        return response
+    
+    # Create response with detailed diagnostic information
+    status_info = {
+        'message': 'Server is running and configured for feedback tool compatibility',
         'timestamp': datetime.now().isoformat(),
-        'request': {
-            'headers': {k: v for k, v in request.headers.items()},
-            'origin': origin,
-            'method': request.method,
-            'remote_addr': request.remote_addr
+        'cors_config': {
+            'feedback_tool_origin': FEEDBACK_TOOL_ORIGIN,
+            'request_origin': origin,
+            'access_control_origin': origin if origin != '*' else '*'
         },
-        'replit_info': {
-            'domain': os.environ.get('REPL_SLUG', 'unknown') + '.' + os.environ.get('REPL_OWNER', 'unknown') + '.repl.co',
-            'id': os.environ.get('REPL_ID', 'unknown'),
-            'slug': os.environ.get('REPL_SLUG', 'unknown')
+        'request_info': {
+            'method': request.method,
+            'path': request.path,
+            'remote_addr': request.remote_addr,
+            'host': request.host,
+            'user_agent': request.user_agent.string,
+            'headers': {k: v for k, v in request.headers.items()}
         }
-    })
+    }
     
-    # Add explicit CORS headers
+    # Create JSON response
+    response = make_response(jsonify(status_info))
+    
+    # Add explicit CORS headers to ensure compatibility with feedback tool
     response.headers['Access-Control-Allow-Origin'] = origin
     response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
-    response.headers['Access-Control-Expose-Headers'] = 'Content-Type, Content-Length'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    response.headers['Access-Control-Expose-Headers'] = 'Content-Type, Content-Length, Date'
     
     return response
 
-@feedback_tool_bp.route('/api/feedback-tool-ping')
+@feedback_tool_bp.route('/feedback-tool-ping')
 def feedback_tool_ping():
     """Ultra-minimal ping endpoint for feedback tool with plain text response"""
-    origin = request.headers.get('Origin', '*')
-    logger.info(f"Feedback tool ping endpoint accessed from origin: {origin}")
+    # Get the origin from the request headers or use configured origin as fallback
+    origin = request.headers.get('Origin', FEEDBACK_TOOL_ORIGIN or '*')
     
-    # Create simple text response
-    response = make_response("PONG - Server is accessible by the feedback tool")
+    # For OPTIONS requests (preflight)
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        return response
+    
+    # Create minimal response
+    response = make_response("PONG")
     response.headers['Content-Type'] = 'text/plain'
     
     # Add explicit CORS headers
@@ -71,11 +100,12 @@ def feedback_tool_ping():
 
 def init_feedback_tool_routes(app):
     """Initialize feedback tool routes with the Flask app"""
-    app.register_blueprint(feedback_tool_bp)
-    logger.info("Feedback tool routes initialized")
+    app.register_blueprint(feedback_tool_bp, url_prefix='/api')
     
-    # Create a route at the app level for maximum compatibility
-    @app.route('/feedback')
+    @app.route('/feedback-tool-redirect')
     def feedback_redirect():
         """Redirect to the feedback tool guide"""
-        return app.send_static_file('feedback_tool_guide.html')
+        return app.redirect('/api/feedback-tool-guide')
+    
+    logger.info("Feedback tool routes initialized")
+    return feedback_tool_bp

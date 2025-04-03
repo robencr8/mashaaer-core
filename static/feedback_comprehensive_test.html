@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Feedback Tool Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        .test-section {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .endpoint-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .endpoint-list li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .test-card {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #logOutput {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Comprehensive Feedback Tool Test</h1>
+    <p>This page provides a comprehensive set of tests to diagnose and resolve connectivity issues with the web application feedback tool.</p>
+    
+    <div class="test-section">
+        <h2>1. Server Status Check</h2>
+        <button onclick="checkServerStatus()">Check Server Status</button>
+        <div id="serverStatus" class="status info">Click button to check server status...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. CORS Test</h2>
+        <button onclick="testCORS()">Test CORS Configuration</button>
+        <div id="corsStatus" class="status info">Click button to test CORS configuration...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Minimal Endpoint Test</h2>
+        <button onclick="testMinimalEndpoint()">Test Minimal Endpoint</button>
+        <div id="minimalEndpointStatus" class="status info">Click button to test minimal endpoint...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Health Check Endpoint Test</h2>
+        <button onclick="testHealthCheck()">Test Health Check</button>
+        <div id="healthCheckStatus" class="status info">Click button to test health check endpoint...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. Feedback Tool Endpoint Test</h2>
+        <button onclick="testFeedbackToolEndpoint()">Test Feedback Tool Endpoint</button>
+        <div id="feedbackToolStatus" class="status info">Click button to test feedback tool endpoint...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>6. Request Information</h2>
+        <button onclick="getRequestInfo()">Get Request Information</button>
+        <div id="requestInfo" class="status info">Click button to get request information...</div>
+        <pre id="requestDetails"></pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>7. Available Test Endpoints</h2>
+        <ul class="endpoint-list">
+            <li>
+                <strong>/</strong> - Root endpoint (Index page)
+                <button onclick="testEndpoint('/')">Test</button>
+            </li>
+            <li>
+                <strong>/health</strong> - Health check endpoint
+                <button onclick="testEndpoint('/health')">Test</button>
+            </li>
+            <li>
+                <strong>/api/status</strong> - API status endpoint
+                <button onclick="testEndpoint('/api/status')">Test</button>
+            </li>
+            <li>
+                <strong>/api/minimal</strong> - Minimal API endpoint
+                <button onclick="testEndpoint('/api/minimal')">Test</button>
+            </li>
+            <li>
+                <strong>/feedback-tool-endpoint</strong> - Feedback tool optimized endpoint
+                <button onclick="testEndpoint('/feedback-tool-endpoint')">Test</button>
+            </li>
+            <li>
+                <strong>/api/feedback-tool-status</strong> - Feedback tool status endpoint
+                <button onclick="testEndpoint('/api/feedback-tool-status')">Test</button>
+            </li>
+            <li>
+                <strong>/api/test-cors-minimal</strong> - Minimal CORS test endpoint
+                <button onclick="testEndpoint('/api/test-cors-minimal')">Test</button>
+            </li>
+            <li>
+                <strong>/api/ping</strong> - Simple ping endpoint
+                <button onclick="testEndpoint('/api/ping')">Test</button>
+            </li>
+            <li>
+                <strong>/api/debug-request</strong> - Debug request information
+                <button onclick="testEndpoint('/api/debug-request')">Test</button>
+            </li>
+            <li>
+                <strong>/test-simple</strong> - Simple HTML test page
+                <button onclick="testEndpoint('/test-simple')">Test</button>
+            </li>
+            <li>
+                <strong>/minimal-page</strong> - Minimal HTML page
+                <button onclick="testEndpoint('/minimal-page')">Test</button>
+            </li>
+            <li>
+                <strong>/ultra-minimal-page</strong> - Ultra minimal HTML page
+                <button onclick="testEndpoint('/ultra-minimal-page')">Test</button>
+            </li>
+            <li>
+                <strong>/minimal-test-page</strong> - Minimal test page
+                <button onclick="testEndpoint('/minimal-test-page')">Test</button>
+            </li>
+            <li>
+                <strong>/feedback-test-page</strong> - Feedback tool test page
+                <button onclick="testEndpoint('/feedback-test-page')">Test</button>
+            </li>
+            <li>
+                <strong>/feedback-tool-test</strong> - Ultra minimal text response
+                <button onclick="testEndpoint('/feedback-tool-test')">Test</button>
+            </li>
+            <li>
+                <strong>/ultra-simple</strong> - Ultra simple text response
+                <button onclick="testEndpoint('/ultra-simple')">Test</button>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>8. Test Log</h2>
+        <button onclick="clearLog()">Clear Log</button>
+        <pre id="logOutput"></pre>
+    </div>
+    
+    <script>
+        const logOutput = document.getElementById('logOutput');
+        
+        function log(message) {
+            const timestamp = new Date().toISOString();
+            logOutput.innerHTML += `[${timestamp}] ${message}\n`;
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+        
+        function clearLog() {
+            logOutput.innerHTML = '';
+        }
+        
+        async function checkServerStatus() {
+            const serverStatus = document.getElementById('serverStatus');
+            serverStatus.className = 'status info';
+            serverStatus.textContent = 'Checking server status...';
+            
+            try {
+                log('Checking server status...');
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                serverStatus.className = 'status success';
+                serverStatus.textContent = `Server is running. Status: ${data.message || 'OK'}`;
+                log(`Server status check: SUCCESS - ${JSON.stringify(data)}`);
+            } catch (error) {
+                serverStatus.className = 'status error';
+                serverStatus.textContent = `Server status check failed: ${error.message}`;
+                log(`Server status check: FAILED - ${error.message}`);
+            }
+        }
+        
+        async function testCORS() {
+            const corsStatus = document.getElementById('corsStatus');
+            corsStatus.className = 'status info';
+            corsStatus.textContent = 'Testing CORS configuration...';
+            
+            try {
+                log('Testing CORS configuration...');
+                // Use a different origin for the test
+                const testUrl = new URL('/api/test-cors-minimal', window.location.href);
+                
+                const response = await fetch(testUrl.toString(), {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.text();
+                
+                // Check CORS headers
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+                };
+                
+                const corsHeadersText = Object.entries(corsHeaders)
+                    .map(([key, value]) => `${key}: ${value || 'Not present'}`)
+                    .join('\n');
+                
+                corsStatus.className = 'status success';
+                corsStatus.innerHTML = `CORS test succeeded. Response: ${data}<br><br>CORS Headers:<br>${corsHeadersText}`;
+                log(`CORS test: SUCCESS - ${data}`);
+                log(`CORS headers: ${JSON.stringify(corsHeaders)}`);
+            } catch (error) {
+                corsStatus.className = 'status error';
+                corsStatus.textContent = `CORS test failed: ${error.message}`;
+                log(`CORS test: FAILED - ${error.message}`);
+            }
+        }
+        
+        async function testMinimalEndpoint() {
+            const minimalEndpointStatus = document.getElementById('minimalEndpointStatus');
+            minimalEndpointStatus.className = 'status info';
+            minimalEndpointStatus.textContent = 'Testing minimal endpoint...';
+            
+            try {
+                log('Testing minimal endpoint...');
+                const response = await fetch('/api/minimal');
+                const data = await response.text();
+                
+                minimalEndpointStatus.className = 'status success';
+                minimalEndpointStatus.textContent = `Minimal endpoint test succeeded. Response: ${data}`;
+                log(`Minimal endpoint test: SUCCESS - ${data}`);
+            } catch (error) {
+                minimalEndpointStatus.className = 'status error';
+                minimalEndpointStatus.textContent = `Minimal endpoint test failed: ${error.message}`;
+                log(`Minimal endpoint test: FAILED - ${error.message}`);
+            }
+        }
+        
+        async function testHealthCheck() {
+            const healthCheckStatus = document.getElementById('healthCheckStatus');
+            healthCheckStatus.className = 'status info';
+            healthCheckStatus.textContent = 'Testing health check endpoint...';
+            
+            try {
+                log('Testing health check endpoint...');
+                const response = await fetch('/health');
+                const data = await response.text();
+                
+                healthCheckStatus.className = 'status success';
+                healthCheckStatus.textContent = `Health check test succeeded. Response: ${data}`;
+                log(`Health check test: SUCCESS - ${data}`);
+            } catch (error) {
+                healthCheckStatus.className = 'status error';
+                healthCheckStatus.textContent = `Health check test failed: ${error.message}`;
+                log(`Health check test: FAILED - ${error.message}`);
+            }
+        }
+        
+        async function testFeedbackToolEndpoint() {
+            const feedbackToolStatus = document.getElementById('feedbackToolStatus');
+            feedbackToolStatus.className = 'status info';
+            feedbackToolStatus.textContent = 'Testing feedback tool endpoint...';
+            
+            try {
+                log('Testing feedback tool endpoint...');
+                const response = await fetch('/feedback-tool-endpoint');
+                const data = await response.text();
+                
+                feedbackToolStatus.className = 'status success';
+                feedbackToolStatus.textContent = `Feedback tool endpoint test succeeded. Response: ${data}`;
+                log(`Feedback tool endpoint test: SUCCESS - ${data}`);
+            } catch (error) {
+                feedbackToolStatus.className = 'status error';
+                feedbackToolStatus.textContent = `Feedback tool endpoint test failed: ${error.message}`;
+                log(`Feedback tool endpoint test: FAILED - ${error.message}`);
+            }
+        }
+        
+        async function getRequestInfo() {
+            const requestInfo = document.getElementById('requestInfo');
+            const requestDetails = document.getElementById('requestDetails');
+            
+            requestInfo.className = 'status info';
+            requestInfo.textContent = 'Getting request information...';
+            requestDetails.textContent = '';
+            
+            try {
+                log('Getting request information...');
+                const response = await fetch('/api/debug-request');
+                const data = await response.json();
+                
+                requestInfo.className = 'status success';
+                requestInfo.textContent = 'Request information retrieved successfully';
+                requestDetails.textContent = JSON.stringify(data, null, 2);
+                log('Request information retrieved successfully');
+            } catch (error) {
+                requestInfo.className = 'status error';
+                requestInfo.textContent = `Failed to get request information: ${error.message}`;
+                log(`Failed to get request information: ${error.message}`);
+            }
+        }
+        
+        async function testEndpoint(endpoint) {
+            log(`Testing endpoint: ${endpoint}`);
+            
+            try {
+                const response = await fetch(endpoint);
+                
+                // Get information about the response
+                const contentType = response.headers.get('Content-Type') || 'unknown';
+                const contentLength = response.headers.get('Content-Length') || 'unknown';
+                const status = response.status;
+                const statusText = response.statusText;
+                
+                let responseData;
+                
+                if (contentType.includes('application/json')) {
+                    responseData = await response.json();
+                    responseData = JSON.stringify(responseData);
+                } else if (contentType.includes('text/html')) {
+                    responseData = '(HTML content)';
+                } else {
+                    responseData = await response.text();
+                }
+                
+                log(`Endpoint ${endpoint} test: SUCCESS - Status: ${status} ${statusText}, Content-Type: ${contentType}, Content-Length: ${contentLength}, Response: ${responseData.substring(0, 100)}${responseData.length > 100 ? '...' : ''}`);
+            } catch (error) {
+                log(`Endpoint ${endpoint} test: FAILED - ${error.message}`);
+            }
+        }
+        
+        // Initialize with server status check
+        window.onload = function() {
+            log('Test page loaded');
+            checkServerStatus();
+        };
+    </script>
+</body>
+</html>
