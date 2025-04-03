@@ -286,7 +286,7 @@ def send_sms():
         }), 500
 
 
-@api.route('/log-voice-error', methods=['POST'])
+@api.route('/log-voice-error', methods=['POST', 'GET'])
 def log_voice_error():
     """Log voice input errors from the client side with enhanced error categorization
     
@@ -359,21 +359,25 @@ def log_voice_error():
         }), 500
 
 
-@api.route('/play-cosmic-sound', methods=['POST'])
+@api.route('/play-cosmic-sound', methods=['POST', 'GET'])
 def play_cosmic_sound():
     """Generate and return a sound for the cosmic interface based on the type and language"""
     # Import os here to ensure it's available in the function scope
     import os
     
     try:
-        # Parse request data
-        if request.is_json:
-            data = request.json
-        else:
-            data = request.form.to_dict()
-        
-        sound_type = data.get('sound_type', 'welcome')
-        language = data.get('language', 'en')
+        # Parse request data based on request method
+        if request.method == 'GET':
+            sound_type = request.args.get('sound_type', 'welcome')
+            language = request.args.get('language', 'en')
+        else:  # POST
+            if request.is_json:
+                data = request.json
+            else:
+                data = request.form.to_dict()
+            
+            sound_type = data.get('sound_type', 'welcome')
+            language = data.get('language', 'en')
         
         # Log the request
         logger.info(f"API: Cosmic sound request: {sound_type} in {language}")
@@ -521,19 +525,24 @@ def play_cosmic_sound():
             'error': f'Internal server error: {str(e)}'
         }), 500
 
-@api.route('/analyze-emotion', methods=['POST'])
+@api.route('/analyze-emotion', methods=['POST', 'GET'])
 def analyze_emotion():
     """Analyze text for emotional content and return the detected emotion"""
     try:
-        # Parse request data
-        if request.is_json:
-            data = request.json
-        else:
-            data = request.form.to_dict()
-        
-        text = data.get('text', '')
-        language = data.get('language', 'en')
-        return_details = data.get('return_details', False)
+        # Parse request data based on request method
+        if request.method == 'GET':
+            text = request.args.get('text', '')
+            language = request.args.get('language', 'en')
+            return_details = request.args.get('return_details', 'false').lower() == 'true'
+        else:  # POST
+            if request.is_json:
+                data = request.json
+            else:
+                data = request.form.to_dict()
+            
+            text = data.get('text', '')
+            language = data.get('language', 'en')
+            return_details = data.get('return_details', False)
         
         if not text:
             return jsonify({
