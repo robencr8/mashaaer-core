@@ -67,6 +67,16 @@ class TestEmotionTracker:
                 "confidence": 0.8
             }
         
+
+def test_analyze_with_rules_synonyms(emotion_tracker):
+    text = "I am joyful and gleeful today."
+    assert emotion_tracker._analyze_with_rules(text) == "happy"
+
+def test_analyze_with_rules_contextual(emotion_tracker):
+    text = "I can't be happier about the new updates."
+    context = ["These updates really made my day"]
+    assert emotion_tracker.analyze_text(text, context) == "happy"
+
         # Replace the actual method with our mock
         tracker._analyze_with_model = mock_analyze_text
         
