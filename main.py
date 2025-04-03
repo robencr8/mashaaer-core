@@ -9,14 +9,24 @@ import threading
 
 
 # Configure logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('logs/application.log'),
-        logging.StreamHandler()
-    ]
-)
+import logging.config
+import yaml
+
+if os.path.exists('logging.yaml'):
+    with open('logging.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+    logging.config.dictConfig(config)
+else:
+    logging.basicConfig(
+        level=logging.DEBUG,  # Fallback setup
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[logging.StreamHandler()]
+    )
+
+CORS(app, origins=["http://your-mobile-app.com", "http://localhost:8080"],
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization"],
+     methods=["GET", "POST", "OPTIONS"])
 logger = logging.getLogger(__name__)
 logger.info("========== Server Starting ==========")
 logger.info(f"Python version: {os.sys.version}")
