@@ -52,22 +52,24 @@ import mobile_api_routes  # Mobile-optimized API routes
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
-# Temporarily using a maximally permissive CORS configuration to diagnose accessibility issues
-# Using the most permissive configuration possible for web application feedback tool
-logger.info("Configuring maximally permissive CORS for diagnostic purposes")
-CORS(app, 
-     # Allow any origin by using wildcard '*'
-     origins="*",
-     # Allow all methods
+# Refined CORS configuration specifically targeting the web application feedback tool
+# Determine the exact origin of the feedback tool
+FEEDBACK_TOOL_ORIGIN = os.environ.get('FEEDBACK_TOOL_ORIGIN', None)
+if not FEEDBACK_TOOL_ORIGIN:
+    logger.warning("FEEDBACK_TOOL_ORIGIN environment variable not set! Using wildcard CORS configuration.")
+    allowed_origins = ["*"]  # Allow all origins as fallback
+else:
+    logger.info(f"Using specific origin for CORS: {FEEDBACK_TOOL_ORIGIN}")
+    allowed_origins = [FEEDBACK_TOOL_ORIGIN]
+
+logger.info(f"Configuring CORS with origins: {allowed_origins}")
+CORS(app,
+     origins=allowed_origins,
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
-     # Allow all headers with wildcard
-     allow_headers="*",
-     # Don't use credentials (which would be incompatible with wildcard origin)
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
      supports_credentials=False,
-     # Expose all headers in responses
-     expose_headers="*",
-     # Allow pre-flight requests to be cached for a day
-     max_age=86400)
+     expose_headers=["Content-Type", "Content-Length", "Date"],
+     max_age=3600)
 
 # Initialize components
 config = Config()

@@ -3,285 +3,1492 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mashaaer Diagnostic</title>
+    <title>Mashaaer Diagnostic Panel</title>
     <style>
+        :root {
+            --primary-color: #5c2d91;
+            --primary-light: #7b46b8;
+            --primary-dark: #3a1b5d;
+            --accent-color: #ff5a5f;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --gray-light: #f8f9fa;
+            --gray-medium: #e9ecef;
+            --gray-dark: #343a40;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--gray-light);
+            color: var(--gray-dark);
+            line-height: 1.6;
         }
-        h1 {
-            color: #333;
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
             text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
         .card {
             background-color: white;
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            overflow: hidden;
         }
-        .success {
-            color: green;
-            font-weight: bold;
-        }
-        .error {
-            color: red;
-            font-weight: bold;
-        }
-        button {
-            background-color: #4CAF50;
-            border: none;
+        
+        .card-header {
+            background-color: var(--primary-light);
             color: white;
-            padding: 10px 15px;
-            text-align: center;
-            text-decoration: none;
+            padding: 1rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .status-indicator {
             display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-success {
+            background-color: var(--success-color);
+        }
+        
+        .status-warning {
+            background-color: var(--warning-color);
+        }
+        
+        .status-error {
+            background-color: var(--danger-color);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+        
+        th, td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--gray-medium);
+        }
+        
+        th {
+            background-color: var(--gray-medium);
+        }
+        
+        tr:hover {
+            background-color: var(--gray-light);
+        }
+        
+        button, .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
             cursor: pointer;
-            border-radius: 4px;
+            font-size: 14px;
+            transition: background-color 0.3s;
         }
-        pre {
-            background-color: #f8f8f8;
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 4px;
-            overflow-x: auto;
+        
+        button:hover, .btn:hover {
+            background-color: var(--primary-dark);
         }
-        .test-group {
-            margin-bottom: 30px;
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 12px;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .input-group {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+        
+        input, select, textarea {
+            padding: 0.5rem;
+            border: 1px solid var(--gray-medium);
+            border-radius: 4px;
+            flex-grow: 1;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-medium);
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background-color: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: bold;
+            color: var(--gray-dark);
+        }
+        
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .result-container {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-top: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        
+        .collapse-toggle {
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .collapse-toggle::after {
+            content: "▼";
+            margin-left: 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .collapse-toggle.collapsed::after {
+            content: "►";
+        }
+        
+        .collapse-content {
+            display: block;
+        }
+        
+        .collapse-content.collapsed {
+            display: none;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 10px;
+            margin-left: 0.5rem;
+        }
+        
+        .badge-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .badge-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .badge-warning {
+            background-color: var(--warning-color);
+            color: #212529;
+        }
+        
+        .badge-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .status-text {
+            font-weight: bold;
+        }
+        
+        .status-text.success {
+            color: var(--success-color);
+        }
+        
+        .status-text.warning {
+            color: var(--warning-color);
+        }
+        
+        .status-text.error {
+            color: var(--danger-color);
+        }
+        
+        .copy-btn {
+            margin-left: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 12px;
+            background-color: var(--gray-medium);
+            color: var(--gray-dark);
+        }
+        
+        .endpoints-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .endpoint-card {
+            border: 1px solid var(--gray-medium);
+            border-radius: 4px;
+            padding: 1rem;
+        }
+        
+        .endpoint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .endpoint-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: var(--primary-color);
+        }
+        
+        .method-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .method-get {
+            background-color: #28a745;
+        }
+        
+        .method-post {
+            background-color: #007bff;
+        }
+        
+        .method-put {
+            background-color: #fd7e14;
+        }
+        
+        .method-delete {
+            background-color: #dc3545;
+        }
+        
+        .endpoint-description {
+            font-size: 14px;
+            margin-bottom: 0.5rem;
+            color: var(--gray-dark);
+        }
+        
+        .endpoint-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+        
+        .json-key {
+            color: #dc3545;
+        }
+        
+        .json-string {
+            color: #28a745;
+        }
+        
+        .json-number {
+            color: #007bff;
+        }
+        
+        .json-boolean {
+            color: #fd7e14;
+        }
+        
+        .json-null {
+            color: #6c757d;
+        }
+        
+        @media (max-width: 768px) {
+            main {
+                padding: 1rem;
+            }
+            
+            .endpoints-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Mashaaer Diagnostic Page</h1>
+    <header>
+        <h1>Mashaaer Diagnostic Panel</h1>
+        <p>Comprehensive testing and monitoring for Mashaaer application</p>
+    </header>
     
-    <div class="card">
-        <h2>Server Information</h2>
-        <div id="server-info">Loading...</div>
-    </div>
-    
-    <div class="card">
-        <h2>API Status</h2>
-        <button id="check-api">Check API Status</button>
-        <div id="api-status">Click button to check API status</div>
-    </div>
-    
-    <div class="card">
-        <h2>CORS Test</h2>
-        <button id="cors-test">Test CORS</button>
-        <div id="cors-result">Click button to test CORS</div>
-    </div>
-    
-    <div class="card">
-        <h2>Browser Information</h2>
-        <div id="browser-info"></div>
-    </div>
-    
-    <div class="card">
-        <h2>Request Methods</h2>
-        <div class="test-group">
-            <h3>Fetch API</h3>
-            <button id="fetch-test">Test Fetch</button>
-            <div id="fetch-result">Click button to test Fetch API</div>
+    <main>
+        <div class="card">
+            <div class="card-header">
+                Server Status
+                <span id="server-status-badge" class="badge badge-warning">Checking...</span>
+            </div>
+            <div class="card-body">
+                <div id="server-status-alert" class="alert alert-warning">
+                    Checking server status...
+                </div>
+                
+                <div>
+                    <strong>Server URL:</strong> <span id="server-url"></span>
+                </div>
+                <div>
+                    <strong>Last Checked:</strong> <span id="last-checked"></span>
+                </div>
+                <div>
+                    <strong>Response Time:</strong> <span id="response-time">-</span>
+                </div>
+                
+                <div class="input-group" style="margin-top: 1rem;">
+                    <button id="refresh-status" class="btn">Refresh Status</button>
+                </div>
+            </div>
         </div>
         
-        <div class="test-group">
-            <h3>XMLHttpRequest</h3>
-            <button id="xhr-test">Test XHR</button>
-            <div id="xhr-result">Click button to test XMLHttpRequest</div>
+        <div class="card">
+            <div class="card-header">
+                API Test Center
+            </div>
+            <div class="card-body">
+                <div class="tabs">
+                    <button class="tab active" data-tab="endpoints">Endpoints</button>
+                    <button class="tab" data-tab="custom-request">Custom Request</button>
+                    <button class="tab" data-tab="curl-command">Curl Command</button>
+                </div>
+                
+                <div id="endpoints-tab" class="tab-content active">
+                    <div class="alert alert-warning">
+                        <strong>Note:</strong> Click on any endpoint to test it directly.
+                    </div>
+                    
+                    <div class="endpoints-grid" id="endpoints-grid">
+                        <!-- Endpoint cards will be generated here -->
+                    </div>
+                </div>
+                
+                <div id="custom-request-tab" class="tab-content">
+                    <div class="input-group">
+                        <select id="request-method">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                            <option value="OPTIONS">OPTIONS</option>
+                        </select>
+                        <input type="text" id="request-url" placeholder="Enter endpoint URL (e.g., /api/status)" value="/api/status">
+                        <button id="send-request" class="btn">Send</button>
+                    </div>
+                    
+                    <div id="request-body-container" style="display: none;">
+                        <textarea id="request-body" rows="5" placeholder="Enter request body (JSON)" style="width: 100%;"></textarea>
+                    </div>
+                    
+                    <div>
+                        <strong>Response:</strong>
+                        <div id="custom-response" class="result-container">
+                            Response will appear here...
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="curl-command-tab" class="tab-content">
+                    <div class="input-group">
+                        <input type="text" id="curl-command" placeholder="Enter curl command" value="curl -v http://localhost:5000/api/status">
+                        <button id="execute-curl" class="btn">Execute</button>
+                    </div>
+                    
+                    <div>
+                        <strong>Output:</strong>
+                        <div id="curl-output" class="result-container">
+                            Curl output will appear here...
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-
+        
+        <div class="card">
+            <div class="card-header">
+                CORS Diagnostics
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>Info:</strong> This section tests Cross-Origin Resource Sharing (CORS) configuration.
+                </div>
+                
+                <h3>CORS Test Results</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Test</th>
+                            <th>Status</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cors-tests">
+                        <tr>
+                            <td>Simple GET Request</td>
+                            <td><span class="status-text warning">Pending</span></td>
+                            <td>Not tested yet</td>
+                        </tr>
+                        <tr>
+                            <td>Simple POST Request</td>
+                            <td><span class="status-text warning">Pending</span></td>
+                            <td>Not tested yet</td>
+                        </tr>
+                        <tr>
+                            <td>Preflight Request (OPTIONS)</td>
+                            <td><span class="status-text warning">Pending</span></td>
+                            <td>Not tested yet</td>
+                        </tr>
+                        <tr>
+                            <td>Credentials Support</td>
+                            <td><span class="status-text warning">Pending</span></td>
+                            <td>Not tested yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <button id="run-cors-tests" class="btn" style="margin-top: 1rem;">Run CORS Tests</button>
+                
+                <h3 style="margin-top: 2rem;">CORS Headers Analysis</h3>
+                <div id="cors-headers-results" class="result-container">
+                    CORS headers will appear here after running tests...
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                System Information
+            </div>
+            <div class="card-body">
+                <div id="system-info">
+                    <div><strong>Browser:</strong> <span id="browser-info"></span></div>
+                    <div><strong>User Agent:</strong> <span id="user-agent"></span></div>
+                    <div><strong>Screen Resolution:</strong> <span id="screen-resolution"></span></div>
+                    <div><strong>Connection Type:</strong> <span id="connection-type">Unknown</span></div>
+                    <div><strong>Local IP:</strong> <span id="local-ip">Checking...</span></div>
+                </div>
+                
+                <h3 style="margin-top: 1.5rem;">Network Diagnostics</h3>
+                <button id="run-network-test" class="btn">Run Network Test</button>
+                
+                <div id="network-results" class="result-container" style="margin-top: 1rem;">
+                    Network test results will appear here...
+                </div>
+            </div>
+        </div>
+    </main>
+    
     <script>
-        // Utility function to display JSON data
-        function displayJSON(data, elementId) {
-            const element = document.getElementById(elementId);
-            element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-        }
-        
-        // Utility function to display error
-        function displayError(error, elementId) {
-            const element = document.getElementById(elementId);
-            element.innerHTML = `<div class="error">Error: ${error.message}</div>`;
-            console.error(error);
-        }
-        
-        // Display browser information
-        function showBrowserInfo() {
-            const browserInfo = {
-                userAgent: navigator.userAgent,
-                language: navigator.language,
-                cookieEnabled: navigator.cookieEnabled,
-                doNotTrack: navigator.doNotTrack,
-                online: navigator.onLine,
-                platform: navigator.platform,
-                screenWidth: window.screen.width,
-                screenHeight: window.screen.height,
-                windowLocation: window.location.href,
-                windowOrigin: window.location.origin,
-                windowProtocol: window.location.protocol,
-                windowHost: window.location.host
-            };
-            
-            displayJSON(browserInfo, 'browser-info');
-        }
-        
-        // Test API status
-        document.getElementById('check-api').addEventListener('click', async () => {
-            const statusElement = document.getElementById('api-status');
-            statusElement.innerHTML = 'Checking API status...';
-            
-            try {
-                const response = await fetch('/api/status');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+        // Configuration
+        const baseUrl = window.location.protocol + '//' + window.location.host;
+        const endpoints = [
+            {
+                path: '/api/status',
+                method: 'GET',
+                description: 'Get system status information'
+            },
+            {
+                path: '/api/ping',
+                method: 'GET',
+                description: 'Simple connectivity test'
+            },
+            {
+                path: '/api/minimal',
+                method: 'GET',
+                description: 'Minimal API with plain text response'
+            },
+            {
+                path: '/api/test-cors',
+                method: 'GET',
+                description: 'Test CORS configuration'
+            },
+            {
+                path: '/test',
+                method: 'GET',
+                description: 'Basic test endpoint'
+            },
+            {
+                path: '/api/analyze-emotion',
+                method: 'POST',
+                description: 'Analyze text for emotional content'
+            },
+            {
+                path: '/api/cosmic-onboarding-profile',
+                method: 'POST',
+                description: 'Update user profile during cosmic onboarding'
+            },
+            {
+                path: '/api/play-cosmic-sound',
+                method: 'GET',
+                description: 'Generate and return a cosmic sound'
+            },
+            {
+                path: '/api/listen-for-voice',
+                method: 'POST',
+                description: 'Voice recognition endpoint'
+            },
+            {
+                path: '/api/log-voice-error',
+                method: 'POST',
+                description: 'Log voice input errors'
+            }
+        ];
+
+        // Utility functions
+        function formatJson(json) {
+            if (typeof json !== 'string') {
+                json = JSON.stringify(json, null, 2);
+            }
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
                 }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        function formatTimestamp() {
+            return new Date().toLocaleString();
+        }
+
+        async function fetchWithTimeout(resource, options = {}) {
+            const { timeout = 5000 } = options;
+            
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            
+            const response = await fetch(resource, {
+                ...options,
+                signal: controller.signal
+            });
+            clearTimeout(id);
+            
+            return response;
+        }
+
+        // Tab functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 
-                const data = await response.json();
-                statusElement.innerHTML = `<div class="success">API is online!</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
-            } catch (error) {
-                statusElement.innerHTML = `<div class="error">Error checking API: ${error.message}</div>`;
-                console.error('API status error:', error);
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+            });
+        });
+
+        // Toggle request body based on method
+        document.getElementById('request-method').addEventListener('change', function() {
+            const method = this.value;
+            const bodyContainer = document.getElementById('request-body-container');
+            
+            if (method === 'POST' || method === 'PUT') {
+                bodyContainer.style.display = 'block';
+            } else {
+                bodyContainer.style.display = 'none';
             }
         });
-        
-        // Test CORS
-        document.getElementById('cors-test').addEventListener('click', async () => {
-            const corsElement = document.getElementById('cors-result');
-            corsElement.innerHTML = 'Testing CORS...';
+
+        // Collapse functionality
+        document.querySelectorAll('.collapse-toggle').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                toggle.classList.toggle('collapsed');
+                const content = toggle.nextElementSibling;
+                content.classList.toggle('collapsed');
+            });
+        });
+
+        // Check server status
+        async function checkServerStatus() {
+            const statusBadge = document.getElementById('server-status-badge');
+            const statusAlert = document.getElementById('server-status-alert');
+            const serverUrl = document.getElementById('server-url');
+            const lastChecked = document.getElementById('last-checked');
+            const responseTime = document.getElementById('response-time');
+            
+            serverUrl.textContent = baseUrl;
+            lastChecked.textContent = formatTimestamp();
+            
+            statusBadge.textContent = 'Checking...';
+            statusBadge.className = 'badge badge-warning';
+            statusAlert.className = 'alert alert-warning';
+            statusAlert.textContent = 'Checking server status...';
             
             try {
-                // First try a same-origin request
-                const sameOriginResponse = await fetch('/test');
-                const sameOriginData = await sameOriginResponse.json();
+                const startTime = performance.now();
+                const response = await fetchWithTimeout(baseUrl + '/api/ping', { timeout: 5000 });
+                const endTime = performance.now();
+                const elapsedTime = endTime - startTime;
                 
-                // Then try different configurations
-                const testResults = {
-                    sameOrigin: {
-                        success: true,
-                        data: sameOriginData
-                    },
-                    withCredentials: null,
-                    withCorsMode: null
+                responseTime.textContent = `${elapsedTime.toFixed(2)}ms`;
+                
+                if (response.ok) {
+                    statusBadge.textContent = 'Online';
+                    statusBadge.className = 'badge badge-success';
+                    statusAlert.className = 'alert alert-success';
+                    statusAlert.textContent = 'Server is online and responding to requests.';
+                } else {
+                    statusBadge.textContent = 'Error';
+                    statusBadge.className = 'badge badge-danger';
+                    statusAlert.className = 'alert alert-danger';
+                    statusAlert.textContent = `Server responded with status code ${response.status} ${response.statusText}`;
+                }
+            } catch (error) {
+                statusBadge.textContent = 'Offline';
+                statusBadge.className = 'badge badge-danger';
+                statusAlert.className = 'alert alert-danger';
+                statusAlert.textContent = `Cannot connect to server: ${error.message}`;
+                responseTime.textContent = '-';
+            }
+        }
+
+        // Generate endpoint cards
+        function generateEndpointCards() {
+            const endpointsGrid = document.getElementById('endpoints-grid');
+            endpointsGrid.innerHTML = '';
+            
+            endpoints.forEach(endpoint => {
+                const card = document.createElement('div');
+                card.className = 'endpoint-card';
+                
+                const header = document.createElement('div');
+                header.className = 'endpoint-header';
+                
+                const title = document.createElement('div');
+                title.className = 'endpoint-title';
+                title.textContent = endpoint.path;
+                
+                const methodBadge = document.createElement('span');
+                methodBadge.className = `method-badge method-${endpoint.method.toLowerCase()}`;
+                methodBadge.textContent = endpoint.method;
+                
+                header.appendChild(title);
+                header.appendChild(methodBadge);
+                
+                const description = document.createElement('div');
+                description.className = 'endpoint-description';
+                description.textContent = endpoint.description;
+                
+                const actions = document.createElement('div');
+                actions.className = 'endpoint-actions';
+                
+                const testButton = document.createElement('button');
+                testButton.className = 'btn btn-sm';
+                testButton.textContent = 'Test';
+                testButton.addEventListener('click', () => {
+                    testEndpoint(endpoint.path, endpoint.method);
+                });
+                
+                actions.appendChild(testButton);
+                
+                card.appendChild(header);
+                card.appendChild(description);
+                card.appendChild(actions);
+                
+                endpointsGrid.appendChild(card);
+            });
+        }
+
+        // Test endpoint
+        async function testEndpoint(path, method = 'GET') {
+            // Switch to custom request tab
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector('[data-tab="custom-request"]').classList.add('active');
+            document.getElementById('custom-request-tab').classList.add('active');
+            
+            // Set values in the form
+            document.getElementById('request-method').value = method;
+            document.getElementById('request-url').value = path;
+            
+            // Show/hide request body
+            const bodyContainer = document.getElementById('request-body-container');
+            if (method === 'POST' || method === 'PUT') {
+                bodyContainer.style.display = 'block';
+            } else {
+                bodyContainer.style.display = 'none';
+            }
+            
+            // Trigger the send button
+            document.getElementById('send-request').click();
+        }
+
+        // Send custom request
+        async function sendCustomRequest() {
+            const method = document.getElementById('request-method').value;
+            const url = document.getElementById('request-url').value;
+            const bodyContainer = document.getElementById('request-body-container');
+            const responseContainer = document.getElementById('custom-response');
+            
+            responseContainer.innerHTML = 'Sending request...';
+            
+            const options = {
+                method: method,
+                headers: {
+                    'Accept': 'application/json, text/plain, */*'
+                }
+            };
+            
+            // Add body for POST/PUT requests
+            if ((method === 'POST' || method === 'PUT') && bodyContainer.style.display !== 'none') {
+                const bodyText = document.getElementById('request-body').value;
+                if (bodyText.trim()) {
+                    try {
+                        const bodyJson = JSON.parse(bodyText);
+                        options.body = JSON.stringify(bodyJson);
+                        options.headers['Content-Type'] = 'application/json';
+                    } catch (e) {
+                        responseContainer.innerHTML = `<span class="status-text error">Invalid JSON: ${e.message}</span>`;
+                        return;
+                    }
+                }
+            }
+            
+            try {
+                const startTime = performance.now();
+                const response = await fetchWithTimeout(baseUrl + url, {
+                    ...options,
+                    timeout: 10000
+                });
+                const endTime = performance.now();
+                const elapsedTime = endTime - startTime;
+                
+                // Get response headers
+                const headers = {};
+                response.headers.forEach((value, name) => {
+                    headers[name] = value;
+                });
+                
+                // Try to parse response as JSON
+                let responseData;
+                let isJson = false;
+                
+                try {
+                    responseData = await response.json();
+                    isJson = true;
+                } catch (e) {
+                    responseData = await response.text();
+                }
+                
+                // Format the response
+                let formattedResponse = `<div><strong>Status:</strong> <span class="status-text ${response.ok ? 'success' : 'error'}">${response.status} ${response.statusText}</span></div>`;
+                formattedResponse += `<div><strong>Response Time:</strong> ${elapsedTime.toFixed(2)}ms</div>`;
+                formattedResponse += '<div><strong>Headers:</strong></div>';
+                formattedResponse += '<pre>' + formatJson(headers) + '</pre>';
+                formattedResponse += '<div><strong>Body:</strong></div>';
+                
+                if (isJson) {
+                    formattedResponse += '<pre>' + formatJson(responseData) + '</pre>';
+                } else {
+                    formattedResponse += '<pre>' + responseData + '</pre>';
+                }
+                
+                responseContainer.innerHTML = formattedResponse;
+            } catch (error) {
+                responseContainer.innerHTML = `<span class="status-text error">Error: ${error.message}</span>`;
+            }
+        }
+
+        // Execute curl command
+        async function executeCurlCommand() {
+            const command = document.getElementById('curl-command').value;
+            const outputContainer = document.getElementById('curl-output');
+            
+            outputContainer.innerHTML = 'Executing curl command...';
+            
+            try {
+                // This is a simulated version since we can't actually execute curl from the browser
+                // In a real implementation, this would send the command to a server endpoint
+                // that would execute it and return the result
+                
+                if (!command.includes('curl')) {
+                    throw new Error('Command must be a curl command');
+                }
+                
+                // Extract the URL from curl command
+                const urlMatch = command.match(/curl\s+(-[A-Za-z]+\s+)*(['"](.*?)['"]|(https?:\/\/[^\s]+))/);
+                if (!urlMatch) {
+                    throw new Error('Could not parse URL from curl command');
+                }
+                
+                let url = urlMatch[4] || urlMatch[3];
+                if (!url.startsWith('http')) {
+                    url = baseUrl + url;
+                }
+                
+                // Check for method
+                let method = 'GET';
+                if (command.includes('-X') || command.includes('--request')) {
+                    const methodMatch = command.match(/-X\s+([A-Z]+)|--request\s+([A-Z]+)/);
+                    if (methodMatch) {
+                        method = methodMatch[1] || methodMatch[2];
+                    }
+                }
+                
+                // Check for headers
+                const headerMatches = command.match(/-H\s+(['"].*?['"]|[^\s]+)|--header\s+(['"].*?['"]|[^\s]+)/g);
+                const headers = {};
+                
+                if (headerMatches) {
+                    headerMatches.forEach(match => {
+                        const headerMatch = match.match(/-H\s+(['"](.*)['"]|([^\s]+))|--header\s+(['"](.*)['"]|([^\s]+))/);
+                        if (headerMatch) {
+                            const headerStr = headerMatch[2] || headerMatch[3] || headerMatch[5] || headerMatch[6];
+                            const separatorIndex = headerStr.indexOf(':');
+                            if (separatorIndex > 0) {
+                                const name = headerStr.substring(0, separatorIndex).trim();
+                                const value = headerStr.substring(separatorIndex + 1).trim();
+                                headers[name] = value;
+                            }
+                        }
+                    });
+                }
+                
+                // Check for data
+                let body = null;
+                const dataMatch = command.match(/-d\s+(['"].*?['"]|[^\s]+)|--data\s+(['"].*?['"]|[^\s]+)/);
+                
+                if (dataMatch) {
+                    const dataStr = dataMatch[1] || dataMatch[2];
+                    body = dataStr.replace(/^['"]|['"]$/g, '');
+                    
+                    if (!headers['Content-Type']) {
+                        headers['Content-Type'] = 'application/x-www-form-urlencoded';
+                    }
+                    
+                    // If method is still GET but we have data, change to POST
+                    if (method === 'GET') {
+                        method = 'POST';
+                    }
+                }
+                
+                // Execute the request
+                const startTime = performance.now();
+                const response = await fetch(url, {
+                    method,
+                    headers,
+                    body
+                });
+                const endTime = performance.now();
+                const elapsedTime = endTime - startTime;
+                
+                // Format curl-like output
+                let curlOutput = `> ${command}\n\n`;
+                
+                curlOutput += `* Connected to ${new URL(url).host}\n`;
+                curlOutput += `> ${method} ${new URL(url).pathname}${new URL(url).search} HTTP/1.1\n`;
+                curlOutput += `> Host: ${new URL(url).host}\n`;
+                
+                Object.entries(headers).forEach(([name, value]) => {
+                    curlOutput += `> ${name}: ${value}\n`;
+                });
+                
+                if (body) {
+                    curlOutput += `\n> ${body}\n`;
+                }
+                
+                curlOutput += `\n< HTTP/1.1 ${response.status} ${response.statusText}\n`;
+                
+                response.headers.forEach((value, name) => {
+                    curlOutput += `< ${name}: ${value}\n`;
+                });
+                
+                curlOutput += '\n';
+                
+                // Try to parse response
+                try {
+                    const responseData = await response.json();
+                    curlOutput += `${JSON.stringify(responseData, null, 2)}\n`;
+                } catch (e) {
+                    const responseText = await response.text();
+                    curlOutput += `${responseText}\n`;
+                }
+                
+                curlOutput += `\n* Request completed in ${elapsedTime.toFixed(2)}ms\n`;
+                
+                outputContainer.textContent = curlOutput;
+            } catch (error) {
+                outputContainer.innerHTML = `<span class="status-text error">Error: ${error.message}</span>`;
+            }
+        }
+
+        // Run CORS tests
+        async function runCorsTests() {
+            const corsTests = document.getElementById('cors-tests');
+            const corsHeadersResults = document.getElementById('cors-headers-results');
+            
+            // Reset test results
+            corsTests.innerHTML = `
+                <tr>
+                    <td>Simple GET Request</td>
+                    <td><span class="status-text warning">Running...</span></td>
+                    <td>Test in progress</td>
+                </tr>
+                <tr>
+                    <td>Simple POST Request</td>
+                    <td><span class="status-text warning">Pending</span></td>
+                    <td>Not tested yet</td>
+                </tr>
+                <tr>
+                    <td>Preflight Request (OPTIONS)</td>
+                    <td><span class="status-text warning">Pending</span></td>
+                    <td>Not tested yet</td>
+                </tr>
+                <tr>
+                    <td>Credentials Support</td>
+                    <td><span class="status-text warning">Pending</span></td>
+                    <td>Not tested yet</td>
+                </tr>
+            `;
+            
+            corsHeadersResults.textContent = 'Running CORS tests...';
+            
+            const testResults = {
+                simpleGet: { success: false, details: '', headers: {} },
+                simplePost: { success: false, details: '', headers: {} },
+                preflight: { success: false, details: '', headers: {} },
+                credentials: { success: false, details: '', headers: {} }
+            };
+            
+            // Test 1: Simple GET Request
+            try {
+                const response = await fetch(baseUrl + '/api/test-cors', {
+                    method: 'GET',
+                    headers: {
+                        'Origin': baseUrl
+                    }
+                });
+                
+                // Get CORS headers
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                    'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials'),
+                    'Access-Control-Expose-Headers': response.headers.get('Access-Control-Expose-Headers')
                 };
                 
-                // Test with credentials
-                try {
-                    const credsResponse = await fetch('/test', {
-                        credentials: 'include'
-                    });
-                    const credsData = await credsResponse.json();
-                    testResults.withCredentials = {
-                        success: true,
-                        data: credsData
-                    };
-                } catch (error) {
-                    testResults.withCredentials = {
-                        success: false,
-                        error: error.message
-                    };
-                }
-                
-                // Test with explicit CORS mode
-                try {
-                    const corsResponse = await fetch('/test', {
-                        mode: 'cors'
-                    });
-                    const corsData = await corsResponse.json();
-                    testResults.withCorsMode = {
-                        success: true,
-                        data: corsData
-                    };
-                } catch (error) {
-                    testResults.withCorsMode = {
-                        success: false,
-                        error: error.message
-                    };
-                }
-                
-                displayJSON(testResults, 'cors-result');
-            } catch (error) {
-                corsElement.innerHTML = `<div class="error">CORS test failed: ${error.message}</div>`;
-                console.error('CORS test error:', error);
-            }
-        });
-        
-        // Test Fetch API
-        document.getElementById('fetch-test').addEventListener('click', async () => {
-            const fetchElement = document.getElementById('fetch-result');
-            fetchElement.innerHTML = 'Testing Fetch API...';
-            
-            try {
-                const response = await fetch('/test');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                fetchElement.innerHTML = `<div class="success">Fetch API working!</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
-            } catch (error) {
-                fetchElement.innerHTML = `<div class="error">Fetch API error: ${error.message}</div>`;
-                console.error('Fetch error:', error);
-            }
-        });
-        
-        // Test XMLHttpRequest
-        document.getElementById('xhr-test').addEventListener('click', () => {
-            const xhrElement = document.getElementById('xhr-result');
-            xhrElement.innerHTML = 'Testing XMLHttpRequest...';
-            
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', '/test');
-            
-            xhr.onload = function() {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    try {
-                        const data = JSON.parse(xhr.responseText);
-                        xhrElement.innerHTML = `<div class="success">XMLHttpRequest working!</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
-                    } catch (error) {
-                        xhrElement.innerHTML = `<div class="error">Error parsing response: ${error.message}</div>`;
+                // Store headers
+                Object.keys(corsHeaders).forEach(key => {
+                    if (corsHeaders[key]) {
+                        testResults.simpleGet.headers[key] = corsHeaders[key];
                     }
+                });
+                
+                // Check if the request was successful
+                if (response.ok && corsHeaders['Access-Control-Allow-Origin']) {
+                    testResults.simpleGet.success = true;
+                    testResults.simpleGet.details = 'CORS headers properly set for GET request';
                 } else {
-                    xhrElement.innerHTML = `<div class="error">XMLHttpRequest failed with status: ${xhr.status}</div>`;
+                    testResults.simpleGet.details = 'Missing required CORS headers';
                 }
-            };
+            } catch (error) {
+                testResults.simpleGet.details = `Error: ${error.message}`;
+            }
             
-            xhr.onerror = function() {
-                xhrElement.innerHTML = `<div class="error">Network error occurred</div>`;
-            };
+            // Update UI for test 1
+            corsTests.innerHTML = `
+                <tr>
+                    <td>Simple GET Request</td>
+                    <td><span class="status-text ${testResults.simpleGet.success ? 'success' : 'error'}">${testResults.simpleGet.success ? 'Pass' : 'Fail'}</span></td>
+                    <td>${testResults.simpleGet.details}</td>
+                </tr>
+                <tr>
+                    <td>Simple POST Request</td>
+                    <td><span class="status-text warning">Running...</span></td>
+                    <td>Test in progress</td>
+                </tr>
+                <tr>
+                    <td>Preflight Request (OPTIONS)</td>
+                    <td><span class="status-text warning">Pending</span></td>
+                    <td>Not tested yet</td>
+                </tr>
+                <tr>
+                    <td>Credentials Support</td>
+                    <td><span class="status-text warning">Pending</span></td>
+                    <td>Not tested yet</td>
+                </tr>
+            `;
             
-            xhr.send();
-        });
-        
-        // Get server information
-        async function getServerInfo() {
-            const infoElement = document.getElementById('server-info');
+            // Test 2: Simple POST Request
+            try {
+                const response = await fetch(baseUrl + '/api/test-cors', {
+                    method: 'POST',
+                    headers: {
+                        'Origin': baseUrl,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ test: true })
+                });
+                
+                // Get CORS headers
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                    'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials'),
+                    'Access-Control-Expose-Headers': response.headers.get('Access-Control-Expose-Headers')
+                };
+                
+                // Store headers
+                Object.keys(corsHeaders).forEach(key => {
+                    if (corsHeaders[key]) {
+                        testResults.simplePost.headers[key] = corsHeaders[key];
+                    }
+                });
+                
+                // Check if the request was successful
+                if (response.ok && corsHeaders['Access-Control-Allow-Origin']) {
+                    testResults.simplePost.success = true;
+                    testResults.simplePost.details = 'CORS headers properly set for POST request';
+                } else {
+                    testResults.simplePost.details = 'Missing required CORS headers';
+                }
+            } catch (error) {
+                testResults.simplePost.details = `Error: ${error.message}`;
+            }
+            
+            // Update UI for test 2
+            corsTests.innerHTML = `
+                <tr>
+                    <td>Simple GET Request</td>
+                    <td><span class="status-text ${testResults.simpleGet.success ? 'success' : 'error'}">${testResults.simpleGet.success ? 'Pass' : 'Fail'}</span></td>
+                    <td>${testResults.simpleGet.details}</td>
+                </tr>
+                <tr>
+                    <td>Simple POST Request</td>
+                    <td><span class="status-text ${testResults.simplePost.success ? 'success' : 'error'}">${testResults.simplePost.success ? 'Pass' : 'Fail'}</span></td>
+                    <td>${testResults.simplePost.details}</td>
+                </tr>
+                <tr>
+                    <td>Preflight Request (OPTIONS)</td>
+                    <td><span class="status-text warning">Running...</span></td>
+                    <td>Test in progress</td>
+                </tr>
+                <tr>
+                    <td>Credentials Support</td>
+                    <td><span class="status-text warning">Pending</span></td>
+                    <td>Not tested yet</td>
+                </tr>
+            `;
+            
+            // Test 3: Preflight Request (OPTIONS)
+            try {
+                const response = await fetch(baseUrl + '/api/test-cors', {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': baseUrl,
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type, Authorization'
+                    }
+                });
+                
+                // Get CORS headers
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                    'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials'),
+                    'Access-Control-Max-Age': response.headers.get('Access-Control-Max-Age')
+                };
+                
+                // Store headers
+                Object.keys(corsHeaders).forEach(key => {
+                    if (corsHeaders[key]) {
+                        testResults.preflight.headers[key] = corsHeaders[key];
+                    }
+                });
+                
+                // Check if the preflight request was successful
+                if (
+                    response.ok && 
+                    corsHeaders['Access-Control-Allow-Origin'] && 
+                    corsHeaders['Access-Control-Allow-Methods'] && 
+                    corsHeaders['Access-Control-Allow-Headers']
+                ) {
+                    testResults.preflight.success = true;
+                    testResults.preflight.details = 'Preflight response contains all required headers';
+                } else {
+                    testResults.preflight.details = 'Missing required preflight response headers';
+                }
+            } catch (error) {
+                testResults.preflight.details = `Error: ${error.message}`;
+            }
+            
+            // Update UI for test 3
+            corsTests.innerHTML = `
+                <tr>
+                    <td>Simple GET Request</td>
+                    <td><span class="status-text ${testResults.simpleGet.success ? 'success' : 'error'}">${testResults.simpleGet.success ? 'Pass' : 'Fail'}</span></td>
+                    <td>${testResults.simpleGet.details}</td>
+                </tr>
+                <tr>
+                    <td>Simple POST Request</td>
+                    <td><span class="status-text ${testResults.simplePost.success ? 'success' : 'error'}">${testResults.simplePost.success ? 'Pass' : 'Fail'}</span></td>
+                    <td>${testResults.simplePost.details}</td>
+                </tr>
+                <tr>
+                    <td>Preflight Request (OPTIONS)</td>
+                    <td><span class="status-text ${testResults.preflight.success ? 'success' : 'error'}">${testResults.preflight.success ? 'Pass' : 'Fail'}</span></td>
+                    <td>${testResults.preflight.details}</td>
+                </tr>
+                <tr>
+                    <td>Credentials Support</td>
+                    <td><span class="status-text warning">Running...</span></td>
+                    <td>Test in progress</td>
+                </tr>
+            `;
+            
+            // Test 4: Credentials Support
+            try {
+                const response = await fetch(baseUrl + '/api/test-cors', {
+                    method: 'GET',
+                    headers: {
+                        'Origin': baseUrl
+                    },
+                    credentials: 'include'
+                });
+                
+                // Get CORS headers
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials')
+                };
+                
+                // Store headers
+                Object.keys(corsHeaders).forEach(key => {
+                    if (corsHeaders[key]) {
+                        testResults.credentials.headers[key] = corsHeaders[key];
+                    }
+                });
+                
+                // Check if credentials are supported
+                if (
+                    response.ok && 
+                    corsHeaders['Access-Control-Allow-Credentials'] === 'true'
+                ) {
+                    testResults.credentials.success = true;
+                    testResults.credentials.details = 'Credentials are supported';
+                } else if (corsHeaders['Access-Control-Allow-Origin'] === '*') {
+                    testResults.credentials.details = 'Credentials cannot be supported with wildcard origin (*)';
+                } else {
+                    testResults.credentials.details = 'Credentials are not supported';
+                }
+            } catch (error) {
+                testResults.credentials.details = `Error: ${error.message}`;
+            }
+            
+            // Update UI for test 4
+            corsTests.innerHTML = `
+                <tr>
+                    <td>Simple GET Request</td>
+                    <td><span class="status-text ${testResults.simpleGet.success ? 'success' : 'error'}">${testResults.simpleGet.success ? 'Pass' : 'Fail'}</span></td>
+                    <td>${testResults.simpleGet.details}</td>
+                </tr>
+                <tr>
+                    <td>Simple POST Request</td>
+                    <td><span class="status-text ${testResults.simplePost.success ? 'success' : 'error'}">${testResults.simplePost.success ? 'Pass' : 'Fail'}</span></td>
+                    <td>${testResults.simplePost.details}</td>
+                </tr>
+                <tr>
+                    <td>Preflight Request (OPTIONS)</td>
+                    <td><span class="status-text ${testResults.preflight.success ? 'success' : 'error'}">${testResults.preflight.success ? 'Pass' : 'Fail'}</span></td>
+                    <td>${testResults.preflight.details}</td>
+                </tr>
+                <tr>
+                    <td>Credentials Support</td>
+                    <td><span class="status-text ${testResults.credentials.success ? 'success' : 'error'}">${testResults.credentials.success ? 'Pass' : 'Fail'}</span></td>
+                    <td>${testResults.credentials.details}</td>
+                </tr>
+            `;
+            
+            // Display all headers
+            let headersOutput = '<strong>CORS Headers Summary:</strong>\n\n';
+            
+            headersOutput += '<strong>Simple GET Request Headers:</strong>\n';
+            headersOutput += Object.keys(testResults.simpleGet.headers).length > 0 
+                ? JSON.stringify(testResults.simpleGet.headers, null, 2) 
+                : 'No CORS headers found';
+            
+            headersOutput += '\n\n<strong>Simple POST Request Headers:</strong>\n';
+            headersOutput += Object.keys(testResults.simplePost.headers).length > 0 
+                ? JSON.stringify(testResults.simplePost.headers, null, 2) 
+                : 'No CORS headers found';
+            
+            headersOutput += '\n\n<strong>Preflight Request Headers:</strong>\n';
+            headersOutput += Object.keys(testResults.preflight.headers).length > 0 
+                ? JSON.stringify(testResults.preflight.headers, null, 2) 
+                : 'No CORS headers found';
+            
+            headersOutput += '\n\n<strong>Credentials Request Headers:</strong>\n';
+            headersOutput += Object.keys(testResults.credentials.headers).length > 0 
+                ? JSON.stringify(testResults.credentials.headers, null, 2) 
+                : 'No CORS headers found';
+            
+            corsHeadersResults.innerHTML = headersOutput;
+        }
+
+        // Run network test
+        async function runNetworkTest() {
+            const resultsContainer = document.getElementById('network-results');
+            resultsContainer.textContent = 'Running network tests...';
+            
+            const tests = [
+                { name: 'DNS Resolution', url: baseUrl, expectedStatus: 200 },
+                { name: 'HTTP Connection', url: baseUrl + '/api/ping', expectedStatus: 200 },
+                { name: 'Response Time', url: baseUrl + '/api/minimal', expectedStatus: 200 }
+            ];
+            
+            let results = '';
+            
+            for (const test of tests) {
+                results += `Testing ${test.name}... `;
+                
+                try {
+                    const startTime = performance.now();
+                    const response = await fetchWithTimeout(test.url, { timeout: 5000 });
+                    const endTime = performance.now();
+                    const elapsedTime = endTime - startTime;
+                    
+                    if (response.status === test.expectedStatus) {
+                        results += `PASS (${elapsedTime.toFixed(2)}ms)\n`;
+                    } else {
+                        results += `FAIL - Expected status ${test.expectedStatus}, got ${response.status}\n`;
+                    }
+                } catch (error) {
+                    results += `FAIL - ${error.message}\n`;
+                }
+            }
+            
+            // Add latency test
+            results += '\nLatency Test:\n';
+            
+            const latencyResults = [];
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const startTime = performance.now();
+                    await fetchWithTimeout(baseUrl + '/api/ping', { timeout: 5000 });
+                    const endTime = performance.now();
+                    latencyResults.push(endTime - startTime);
+                    results += `Request ${i + 1}: ${latencyResults[i].toFixed(2)}ms\n`;
+                } catch (error) {
+                    results += `Request ${i + 1}: FAILED - ${error.message}\n`;
+                }
+                
+                // Add a small delay between requests
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            // Calculate average latency
+            if (latencyResults.length > 0) {
+                const avgLatency = latencyResults.reduce((sum, val) => sum + val, 0) / latencyResults.length;
+                results += `\nAverage Latency: ${avgLatency.toFixed(2)}ms\n`;
+                
+                // Evaluate connection quality
+                let quality = 'Excellent';
+                if (avgLatency > 500) {
+                    quality = 'Poor';
+                } else if (avgLatency > 200) {
+                    quality = 'Fair';
+                } else if (avgLatency > 100) {
+                    quality = 'Good';
+                }
+                
+                results += `Connection Quality: ${quality}\n`;
+            }
+            
+            resultsContainer.textContent = results;
+        }
+
+        // Populate system information
+        function populateSystemInfo() {
+            const browserInfo = document.getElementById('browser-info');
+            const userAgent = document.getElementById('user-agent');
+            const screenResolution = document.getElementById('screen-resolution');
+            const connectionType = document.getElementById('connection-type');
+            
+            const ua = navigator.userAgent;
+            let browser = 'Unknown';
+            
+            if (ua.includes('Firefox')) {
+                browser = 'Firefox';
+            } else if (ua.includes('Chrome') && !ua.includes('Edg')) {
+                browser = 'Chrome';
+            } else if (ua.includes('Safari') && !ua.includes('Chrome')) {
+                browser = 'Safari';
+            } else if (ua.includes('Edg')) {
+                browser = 'Edge';
+            } else if (ua.includes('Opera') || ua.includes('OPR')) {
+                browser = 'Opera';
+            }
+            
+            browserInfo.textContent = browser;
+            userAgent.textContent = ua;
+            screenResolution.textContent = `${window.screen.width} x ${window.screen.height}`;
+            
+            // Connection type (if available)
+            if (navigator.connection) {
+                connectionType.textContent = navigator.connection.effectiveType || 'Unknown';
+            }
+            
+            // Try to get local IP (this is not reliable and may not work in all browsers)
+            const localIp = document.getElementById('local-ip');
             
             try {
-                const response = await fetch('/');
+                const RTCPeerConnection = window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                if (RTCPeerConnection) {
+                    const pc = new RTCPeerConnection({ iceServers: [] });
+                    
+                    pc.createDataChannel('');
+                    
+                    pc.onicecandidate = function(e) {
+                        if (!e.candidate) return;
+                        
+                        let ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3})/;
+                        let ipMatch = ipRegex.exec(e.candidate.candidate);
+                        
+                        if (ipMatch && ipMatch[1].substr(0, 3) !== '127') {
+                            localIp.textContent = ipMatch[1];
+                            pc.close();
+                        }
+                    };
+                    
+                    pc.createOffer()
+                        .then(offer => pc.setLocalDescription(offer))
+                        .catch(() => {
+                            localIp.textContent = 'Could not determine (permission denied)';
+                        });
+                    
+                    setTimeout(() => {
+                        if (localIp.textContent === 'Checking...') {
+                            localIp.textContent = 'Could not determine (timeout)';
+                            pc.close();
+                        }
+                    }, 5000);
+                } else {
+                    localIp.textContent = 'Not supported in this browser';
                 }
-                
-                const data = await response.json();
-                infoElement.innerHTML = `<div class="success">Server is online!</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
-            } catch (error) {
-                infoElement.innerHTML = `<div class="error">Error getting server info: ${error.message}</div>`;
-                console.error('Server info error:', error);
+            } catch (e) {
+                localIp.textContent = 'Error determining IP: ' + e.message;
             }
         }
-        
+
         // Initialize page
-        window.addEventListener('DOMContentLoaded', () => {
-            showBrowserInfo();
-            getServerInfo();
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check server status
+            checkServerStatus();
+            
+            // Generate endpoint cards
+            generateEndpointCards();
+            
+            // Populate system information
+            populateSystemInfo();
+            
+            // Setup event listeners
+            document.getElementById('refresh-status').addEventListener('click', checkServerStatus);
+            document.getElementById('send-request').addEventListener('click', sendCustomRequest);
+            document.getElementById('execute-curl').addEventListener('click', executeCurlCommand);
+            document.getElementById('run-cors-tests').addEventListener('click', runCorsTests);
+            document.getElementById('run-network-test').addEventListener('click', runNetworkTest);
         });
     </script>
 </body>
