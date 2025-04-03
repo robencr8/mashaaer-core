@@ -1,11 +1,12 @@
 modules = ["python-3.11"]
+
 [workflows]
 runButton = "Project"
 
 [[workflows.workflow]]
 name = "Run"
 author = 41048457
-mode = "sequential"
+mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"

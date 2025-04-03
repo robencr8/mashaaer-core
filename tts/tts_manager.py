@@ -67,35 +67,30 @@ class TTSManager:
         try:
             # Check which TTS providers are available
             if not self.config.is_offline():
-                elevenlabs_available = self.elevenlabs.is_available()
-                if elevenlabs_available:
-                    self.use_elevenlabs = True
-                    self.logger.info("ElevenLabs TTS is available and working")
+                self.logger.info("Checking ElevenLabs availability...")
+                
+                # Debug the API key being used
+                api_key = self.elevenlabs.api_key
+                if api_key:
+                    start = api_key[:4] if len(api_key) >= 4 else api_key
+                    end = api_key[-4:] if len(api_key) >= 8 else ""
+                    self.logger.debug(f"Using ElevenLabs API key: {start}...{end}, length: {len(api_key)}")
                 else:
-                    self.logger.error("ElevenLabs TTS is not available - API key may be invalid or expired")
-                    # Try to log the specific error from the elevenlabs module
-                    try:
-                        headers = {
-                            "xi-api-key": self.elevenlabs.api_key,
-                            "Content-Type": "application/json"
-                        }
-                        
-                        # Safely log a portion of the API key
-                        api_key = self.elevenlabs.api_key
-                        if api_key:
-                            start = api_key[:4] if len(api_key) >= 4 else api_key
-                            end = api_key[-4:] if len(api_key) >= 8 else ""
-                            self.logger.debug(f"Testing ElevenLabs API key: {start}...{end}")
-                        else:
-                            self.logger.debug("Testing ElevenLabs API key: None")
-                        import requests
-                        response = requests.get(
-                            "https://api.elevenlabs.io/v1/voices",
-                            headers=headers
-                        )
-                        self.logger.debug(f"ElevenLabs test response: {response.status_code} - {response.text[:200]}")
-                    except Exception as e:
-                        self.logger.error(f"Error testing ElevenLabs API: {str(e)}")
+                    self.logger.error("ElevenLabs API key is empty")
+                
+                # Force enable ElevenLabs for testing
+                self.use_elevenlabs = True
+                self.logger.info("ElevenLabs TTS is enabled by default")
+                
+                # Still run the availability check but don't block on it
+                try:
+                    elevenlabs_available = self.elevenlabs.is_available()
+                    if elevenlabs_available:
+                        self.logger.info("ElevenLabs API test succeeded")
+                    else:
+                        self.logger.warning("ElevenLabs API test failed but will still attempt to use it")
+                except Exception as check_e:
+                    self.logger.warning(f"ElevenLabs availability check error: {str(check_e)}")
             else:
                 self.logger.info("Offline mode - not checking ElevenLabs TTS")
             
@@ -113,6 +108,8 @@ class TTSManager:
         
         except Exception as e:
             self.logger.error(f"Failed to initialize TTS: {str(e)}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
             return False
     
     def speak(self, text, voice="default", language=None, profile_manager=None):
@@ -125,6 +122,15 @@ class TTSManager:
             language (str): Language code (en, ar) - determines voice selection
             profile_manager: Optional profile manager to get voice preferences
         """
+        # Create a guaranteed fallback file early
+        fallback_path = os.path.join("tts_cache", "error.mp3")
+        if not os.path.exists(os.path.dirname(fallback_path)):
+            os.makedirs(os.path.dirname(fallback_path), exist_ok=True)
+            
+        if not os.path.exists(fallback_path):
+            with open(fallback_path, 'wb') as f:
+                f.write(b'')
+                
         if not text:
             self.logger.warning("Empty text provided to TTS")
             empty_audio = os.path.join("tts_cache", "empty.mp3")
@@ -143,49 +149,61 @@ class TTSManager:
         
         with self.tts_lock:
             try:
-                # Create a guaranteed fallback file
-                fallback_path = os.path.join("tts_cache", "error.mp3")
-                if not os.path.exists(fallback_path):
-                    os.makedirs("tts_cache", exist_ok=True)
-                    with open(fallback_path, 'wb') as f:
-                        f.write(b'')
+                self.logger.info(f"Generating speech for text: '{text[:30]}...' with voice: {voice}")
                 
                 # Try ElevenLabs first if available and preferred
                 if self.use_elevenlabs and self.config.TTS_PROVIDER == "elevenlabs":
                     try:
-                        self.logger.debug(f"Using ElevenLabs for: {text[:20]}... (voice: {voice})")
+                        self.logger.info(f"Using ElevenLabs for: {text[:30]}... (voice: {voice})")
                         audio_path = self.elevenlabs.speak(text, voice)
                         if audio_path and os.path.exists(audio_path):
+                            self.logger.info(f"ElevenLabs successfully generated audio: {audio_path}")
                             self._play_audio(audio_path)
                             return audio_path
+                        else:
+                            self.logger.warning(f"ElevenLabs returned invalid path: {audio_path}")
                     except Exception as e:
                         self.logger.warning(f"ElevenLabs TTS failed, falling back to gTTS: {str(e)}")
+                        import traceback
+                        self.logger.warning(f"ElevenLabs error traceback: {traceback.format_exc()}")
                 
                 # Fall back to gTTS
                 if self.use_gtts:
                     try:
-                        self.logger.debug(f"Using gTTS for: {text[:20]}... (voice: {voice})")
+                        self.logger.info(f"Using gTTS for: {text[:30]}... (voice: {voice})")
                         audio_path = self.gtts.speak(text, voice)
                         if audio_path and os.path.exists(audio_path):
+                            self.logger.info(f"gTTS successfully generated audio: {audio_path}")
                             self._play_audio(audio_path)
                             return audio_path
+                        else:
+                            self.logger.warning(f"gTTS returned invalid path: {audio_path}")
                     except Exception as e:
                         self.logger.warning(f"gTTS failed: {str(e)}")
+                        import traceback
+                        self.logger.warning(f"gTTS error traceback: {traceback.format_exc()}")
                 
                 # If we reach here, we need to return a fallback
                 self.logger.error("All TTS providers failed, using fallback")
+                
                 # Force gtts to be available in GTTSFallback mode
                 self.gtts.is_available = lambda: True
                 
                 try:
                     # Try to get a simple cached response
-                    return self.gtts.speak("I'm sorry, I encountered an error.", voice)
-                except Exception:
-                    # Last resort fallback
-                    return fallback_path
+                    fallback_audio = self.gtts.speak("I'm sorry, I encountered an error.", voice)
+                    if fallback_audio and os.path.exists(fallback_audio):
+                        return fallback_audio
+                except Exception as fallback_e:
+                    self.logger.error(f"Error generating fallback audio: {str(fallback_e)}")
+                
+                # Last resort fallback
+                return fallback_path
             
             except Exception as e:
                 self.logger.error(f"TTS error: {str(e)}")
+                import traceback
+                self.logger.error(f"TTS error traceback: {traceback.format_exc()}")
                 # Return the fallback path as a last resort
                 return fallback_path
     

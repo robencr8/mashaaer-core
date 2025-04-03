@@ -97,6 +97,8 @@ class ElevenLabsTTS:
     
     def speak(self, text, voice="default"):
         """Generate speech from text and return path to audio file"""
+        self.logger.info(f"ElevenLabs TTS generating speech for: '{text[:30]}...' with voice: {voice}")
+        
         if not self.api_key:
             self.logger.error("ElevenLabs API key not set - attempting direct environment lookup")
             # Last attempt to get the key directly from environment
@@ -107,17 +109,9 @@ class ElevenLabsTTS:
             else:
                 raise ValueError("ElevenLabs API key not set and not found in environment")
         
-        # Rate limiting: max 3 requests per second
-        current_time = time.time()
-        if self.last_request_time and (current_time - self.last_request_time) < 0.33:
-            time.sleep(0.33 - (current_time - self.last_request_time))
-        
-        self.last_request_time = time.time()
-        self.request_count += 1
-        
         # Get voice ID
         voice_id = self.voices.get(voice.lower(), self.voices["default"])
-        self.logger.debug(f"Using voice ID: {voice_id} for voice name: {voice}")
+        self.logger.info(f"Mapped voice '{voice}' to ElevenLabs voice ID: {voice_id}")
         
         # Create a cache filename based on text and voice
         import hashlib
@@ -127,10 +121,23 @@ class ElevenLabsTTS:
         
         # Check if we already have this audio cached
         if os.path.exists(cache_path):
-            self.logger.debug(f"Using cached audio for: {text[:20]}...")
+            self.logger.info(f"Using cached audio for: {text[:30]}...")
             return cache_path
         
         try:
+            # Verify directories
+            os.makedirs(self.cache_dir, exist_ok=True)
+            
+            # Rate limiting: max 3 requests per second
+            current_time = time.time()
+            if self.last_request_time and (current_time - self.last_request_time) < 0.33:
+                delay_time = 0.33 - (current_time - self.last_request_time)
+                self.logger.debug(f"Rate limiting - waiting {delay_time:.2f} seconds")
+                time.sleep(delay_time)
+            
+            self.last_request_time = time.time()
+            self.request_count += 1
+            
             # Prepare API request
             headers = {
                 "xi-api-key": self.api_key,
@@ -140,25 +147,24 @@ class ElevenLabsTTS:
             
             data = {
                 "text": text,
-                "model_id": "eleven_monolingual_v1",
+                "model_id": "eleven_multilingual_v2",  # Updated to use newer model
                 "voice_settings": {
                     "stability": 0.5,
                     "similarity_boost": 0.5
                 }
             }
             
-            self.logger.debug(f"Making ElevenLabs API request to: {self.base_url}/text-to-speech/{voice_id}")
-            self.logger.debug(f"Request data: {json.dumps(data)}")
+            self.logger.info(f"Making ElevenLabs API request to: {self.base_url}/text-to-speech/{voice_id}")
             
             # Make API request for text-to-speech
             response = requests.post(
                 f"{self.base_url}/text-to-speech/{voice_id}",
                 headers=headers,
-                json=data
+                json=data,
+                timeout=15  # Add timeout to prevent hanging
             )
             
-            self.logger.debug(f"ElevenLabs API response status: {response.status_code}")
-            self.logger.debug(f"ElevenLabs API response headers: {dict(response.headers)}")
+            self.logger.info(f"ElevenLabs API response status: {response.status_code}")
             
             if response.status_code != 200:
                 error_msg = f"ElevenLabs API error: {response.status_code}"
@@ -180,20 +186,29 @@ class ElevenLabsTTS:
                 self.logger.error(f"Response preview: {response.content[:100]}")
                 raise Exception(f"Unexpected response content type: {content_type}")
                 
+            # Create directory if it doesn't exist
+            if not os.path.exists(self.cache_dir):
+                os.makedirs(self.cache_dir)
+                
             # Save the audio file
             with open(cache_path, "wb") as f:
                 f.write(response.content)
             
-            file_size = os.path.getsize(cache_path)
-            self.logger.info(f"Generated speech for: {text[:50]}... File size: {file_size} bytes")
-            
-            return cache_path
+            # Verify the file was created
+            if os.path.exists(cache_path):
+                file_size = os.path.getsize(cache_path)
+                self.logger.info(f"Successfully generated speech and saved to {cache_path}. File size: {file_size} bytes")
+                return cache_path
+            else:
+                self.logger.error(f"Failed to save audio to {cache_path}")
+                raise Exception(f"Failed to save audio file to {cache_path}")
         
         except Exception as e:
             self.logger.error(f"ElevenLabs speech generation failed: {str(e)}")
             import traceback
             self.logger.error(f"Traceback: {traceback.format_exc()}")
-            raise
+            # Create a more detailed error message
+            raise Exception(f"ElevenLabs TTS failed: {str(e)} (voice: {voice}, voice_id: {voice_id})")
     
     def get_available_voices(self):
         """Get list of available voices from the API"""
