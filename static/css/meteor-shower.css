@@ -1,6 +1,6 @@
 /**
- * Meteor Shower Animation Styles
- * Enhances all cosmic interfaces with an animated meteor shower effect
+ * Cosmic Universe Animation Styles
+ * Creates a realistic cosmic background with deep space elements
  */
 
 .meteor-shower-container {
@@ -12,6 +12,8 @@
   overflow: hidden;
   pointer-events: none;
   z-index: 0;
+  background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+  opacity: 0.6; /* Blend with the existing background */
 }
 
 .stars {
@@ -20,17 +22,65 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: 
-    radial-gradient(1px 1px at 20% 30%, white, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 40% 70%, white, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 50% 40%, white, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 60% 80%, white, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 70% 10%, white, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 80% 50%, white, rgba(0,0,0,0)),
-    radial-gradient(1px 1px at 90% 20%, white, rgba(0,0,0,0));
-  background-repeat: repeat;
-  background-size: 500px 500px;
-  opacity: 0.25;
+  background: transparent;
+}
+
+/* Varied star sizes and brightness for depth */
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(255, 255, 255, 0.3);
+  animation: starTwinkle var(--twinkle-duration) ease-in-out infinite;
+}
+
+.star.tiny {
+  width: 1px;
+  height: 1px;
+  opacity: 0.5;
+}
+
+.star.small {
+  width: 2px;
+  height: 2px;
+  opacity: 0.7;
+}
+
+.star.medium {
+  width: 3px;
+  height: 3px;
+  opacity: 0.8;
+}
+
+.star.large {
+  width: 4px;
+  height: 4px;
+  opacity: 1;
+}
+
+/* Distant galaxy clusters */
+.galaxy {
+  position: absolute;
+  background: radial-gradient(ellipse at center, 
+    rgba(111, 78, 222, 0.3) 0%, 
+    rgba(111, 78, 222, 0.1) 40%,
+    rgba(0, 0, 0, 0) 70%);
+  border-radius: 50%;
+  opacity: 0.4;
+  filter: blur(3px);
+  transform: rotate(var(--rotation));
+}
+
+/* Nebula effect */
+.nebula {
+  position: absolute;
+  background: radial-gradient(ellipse at center, 
+    rgba(29, 43, 100, 0.2) 0%,
+    rgba(29, 43, 100, 0.1) 50%, 
+    rgba(0, 0, 0, 0) 70%);
+  filter: blur(8px);
+  border-radius: 50%;
+  opacity: 0.15;
 }
 
 /* Static Meteors (CSS-only) */
@@ -132,4 +182,69 @@
     opacity: 0;
     transform: translateX(500px) translateY(500px) rotate(-45deg);
   }
+}
+
+@keyframes starTwinkle {
+  0%, 100% {
+    opacity: var(--base-opacity);
+    transform: scale(1);
+  }
+  50% {
+    opacity: calc(var(--base-opacity) * 0.5);
+    transform: scale(0.8);
+  }
+}
+
+@keyframes rotateGalaxy {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1.1);
+  }
+}
+
+@keyframes pulseNebula {
+  0%, 100% {
+    opacity: 0.15;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.2;
+    transform: scale(1.05);
+  }
+}
+
+/* Cosmic dust particles floating in deep space */
+.cosmic-dust {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 1px rgba(255, 255, 255, 0.1);
+  animation: floatDust 15s linear infinite;
+}
+
+@keyframes floatDust {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-10px) translateX(5px);
+  }
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+}
+
+/* Meteor particles */
+.meteor-particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.8), 0 0 8px rgba(255, 200, 100, 0.4);
+  z-index: 2;
+  pointer-events: none;
 }
