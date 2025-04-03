@@ -46,6 +46,22 @@ def init_api(app, _db_manager, _emotion_tracker, _face_detector,
     # Register the blueprint with the app
     app.register_blueprint(api, url_prefix='/api')
     
+    # Set up before_request handler for all API routes
+    @api.before_request
+    def log_api_request():
+        # Log all API requests
+        path = request.path
+        method = request.method
+        query = request.query_string.decode('utf-8')
+        client_ip = request.remote_addr
+        user_agent = request.headers.get('User-Agent', 'Unknown')
+        
+        # Get or create a session ID
+        session_id = _get_or_create_session_id()
+        
+        # Log the request
+        logger.info(f"API Request: {method} {path}?{query} | Session: {session_id} | IP: {client_ip} | UA: {user_agent}")
+    
     # Log the initialization
     logger.info(f"API Blueprint initialized with {len(api.deferred_functions)} routes")
     
