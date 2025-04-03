@@ -56,9 +56,19 @@ app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
 # This allows from all origins during testing to identify the feedback tool's origin
 logger.info("Configuring permissive CORS for diagnostic purposes")
 CORS(app, 
-     origins="*",  # Allow all origins temporarily for diagnostic purposes
+     origins=[
+         # The exact origin used by the feedback tool
+         "https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000",
+         # Variations that might be used
+         "https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev",
+         # For local testing
+         "http://localhost:5000",
+         "http://localhost",
+         # Fallback to all origins if specific ones don't work
+         "*"
+     ],
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Cache-Control"],
      supports_credentials=False)
 
 # Initialize components
@@ -207,6 +217,62 @@ def api_ping():
         'timestamp': datetime.now().isoformat()
     })
 
+# Advanced diagnostic endpoint for CORS troubleshooting
+@app.route('/api/debug-request', methods=['GET', 'POST', 'OPTIONS'])
+def debug_request():
+    """Advanced diagnostic endpoint for detailed request troubleshooting"""
+    headers = dict(request.headers)
+    body = request.get_json(silent=True)  # Use silent=True to avoid errors if not JSON
+    
+    # Capture all environment variables that might be relevant to the connection
+    env_vars = {
+        'PORT': os.environ.get('PORT', '5000'),
+        'SERVER_NAME': os.environ.get('SERVER_NAME', 'Not set'),
+        'SERVER_PORT': os.environ.get('SERVER_PORT', 'Not set'),
+        'REPLIT_DEPLOYMENT_ID': os.environ.get('REPLIT_DEPLOYMENT_ID', 'Not set'),
+        'REPLIT_OWNER': os.environ.get('REPLIT_OWNER', 'Not set'),
+        'REPLIT_SLUG': os.environ.get('REPLIT_SLUG', 'Not set'),
+    }
+
+    response_data = {
+        'method': request.method,
+        'url': request.url,
+        'path': request.path,
+        'origin': request.headers.get('Origin', 'No Origin header'),
+        'host': request.headers.get('Host', 'No Host header'),
+        'referer': request.headers.get('Referer', 'No Referer header'),
+        'user_agent': request.headers.get('User-Agent', 'No User-Agent header'),
+        'x_forwarded_host': request.headers.get('X-Forwarded-Host', 'No X-Forwarded-Host header'),
+        'x_forwarded_for': request.headers.get('X-Forwarded-For', 'No X-Forwarded-For header'),
+        'x_forwarded_proto': request.headers.get('X-Forwarded-Proto', 'No X-Forwarded-Proto header'),
+        'remote_addr': request.remote_addr,
+        'full_headers': headers,
+        'body': body,
+        'cookies': {k: v for k, v in request.cookies.items()},
+        'args': {k: v for k, v in request.args.items()},
+        'environment': env_vars,
+        'timestamp': datetime.now().isoformat()
+    }
+    
+    logger.info(f"Debug Request: {json.dumps(response_data, default=str, indent=2)}")
+    
+    # Return detailed information about the request
+    response = jsonify(response_data)
+    
+    # Add CORS headers explicitly for this diagnostic endpoint to ensure maximum compatibility
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    response.headers['Access-Control-Max-Age'] = '3600'
+    
+    return response
+
+# Keep the original cors-diagnostic endpoint for backward compatibility
+@app.route('/api/cors-diagnostic', methods=['GET', 'POST', 'OPTIONS'])
+def cors_diagnostic():
+    """Redirects to the new debug-request endpoint"""
+    return debug_request()
+
 @app.route('/tts_cache/<path:filename>')
 def serve_tts_cache(filename):
     """Serve TTS audio files with proper MIME types and headers
@@ -314,17 +380,39 @@ def test_simple_html_page():
 @app.route('/')
 def index():
     try:
-        logger.info("Root route accessed - serving static test page")
-        # Use a simple static page to help with web application feedback tool
+        # Log detailed information about the request
+        logger.info("Root route accessed - detailed diagnostics:")
+        logger.info(f"Request method: {request.method}")
+        logger.info(f"Request headers: {dict(request.headers)}")
+        logger.info(f"Request remote address: {request.remote_addr}")
+        
+        # If this is a HEAD request (often used by monitoring tools), provide a minimal response
+        if request.method == 'HEAD':
+            logger.info("Responding to HEAD request")
+            response = make_response('')
+            response.headers['X-Mashaaer-Status'] = 'OK'
+            return response
+            
+        # For GET requests, return a simple text-only response to maximize compatibility
+        if request.args.get('format') == 'text':
+            logger.info("Serving plain text response")
+            response = make_response("Mashaaer Feelings server is running. This is a diagnostic plain text response.")
+            response.headers['Content-Type'] = 'text/plain'
+            return response
+            
+        # Try serving a simple static HTML file
+        logger.info("Serving simple test HTML page")
         return app.send_static_file('simple_test.html')
     except Exception as e:
         error_msg = f"Error in root route: {str(e)}"
         logger.error(error_msg)
         try:
-            # Try our ultra-simple status message as fallback
-            logger.info("Falling back to simple text response")
+            # Ultra-simple fallback response with explicit CORS headers
+            logger.info("Falling back to ultra-simple text response")
             response = make_response("Server is running. If you see this, the server is accessible.")
-            # CORS headers are handled automatically by Flask-CORS
+            response.headers['Content-Type'] = 'text/plain'
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Methods'] = 'GET, HEAD, OPTIONS'
             return response
         except Exception as inner_e:
             logger.critical(f"Critical error in error handler: {str(inner_e)}")
