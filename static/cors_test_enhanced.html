@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enhanced CORS Test Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+        }
+        h1 {
+            color: #8a2be2;
+        }
+        button {
+            background-color: #8a2be2;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            text-align: left;
+            width: 100%;
+            min-height: 50px;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #F44336; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>مشاعر | Mashaaer</h1>
+        <h2>CORS Test Page</h2>
+        
+        <div>
+            <button onclick="testEndpoint('/api/status')">Test API Status</button>
+            <button onclick="testEndpoint('/api/ping')">Test API Ping</button>
+            <button onclick="testEndpoint('/test')">Test Simple Endpoint</button>
+        </div>
+        
+        <div id="result">Results will appear here...</div>
+        
+        <p>Origin: <span id="origin"></span></p>
+        <p>Server Time: <span id="server-time"></span></p>
+    </div>
+    
+    <script>
+        // Display origin
+        document.getElementById('origin').textContent = window.location.origin;
+        
+        // Update time
+        document.getElementById('server-time').textContent = new Date().toISOString();
+        
+        // Test an endpoint
+        function testEndpoint(endpoint) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<p>Testing endpoint: ${endpoint}</p>`;
+            resultDiv.className = '';
+            
+            fetch(endpoint)
+                .then(response => {
+                    resultDiv.innerHTML += `<p>Status: ${response.status} ${response.statusText}</p>`;
+                    return response.json();
+                })
+                .then(data => {
+                    resultDiv.innerHTML += `<p class="success">Success! Response data:</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    resultDiv.className = 'success';
+                })
+                .catch(error => {
+                    resultDiv.innerHTML += `<p class="error">Error: ${error.message}</p>`;
+                    resultDiv.className = 'error';
+                    console.error('Fetch error:', error);
+                });
+        }
+    </script>
+</body>
+</html>

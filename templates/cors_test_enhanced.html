@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced CORS Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #8a2be2;
+        }
+        .test-section {
+            background-color: #1e1e1e;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #8a2be2;
+        }
+        .test-section h2 {
+            margin-top: 0;
+        }
+        .result {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            font-family: monospace;
+        }
+        .success {
+            background-color: rgba(76, 175, 80, 0.2);
+            border-left: 4px solid #4CAF50;
+        }
+        .error {
+            background-color: rgba(244, 67, 54, 0.2);
+            border-left: 4px solid #F44336;
+        }
+        .info {
+            background-color: rgba(33, 150, 243, 0.2);
+            border-left: 4px solid #2196F3;
+        }
+        button {
+            background-color: #8a2be2;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #6a1cb7;
+        }
+        .debug-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mashaaer Enhanced CORS Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Basic Server Connectivity Test</h2>
+        <button onclick="testPingEndpoint()">Test Server Ping</button>
+        <div id="ping-result" class="result info">Waiting for test...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. API Status Test</h2>
+        <button onclick="testApiStatus()">Test API Status</button>
+        <div id="api-status-result" class="result info">Waiting for test...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. CORS Headers Test</h2>
+        <button onclick="testCorsHeaders()">Test CORS Headers</button>
+        <div id="cors-headers-result" class="result info">Waiting for test...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. CORS with Options Preflight Test</h2>
+        <button onclick="testPreflightCors()">Test CORS Preflight</button>
+        <div id="preflight-result" class="result info">Waiting for test...</div>
+    </div>
+
+    <div class="debug-info">
+        <h3>Browser Details</h3>
+        <p>User Agent: <span id="user-agent"></span></p>
+        <p>Origin: <span id="origin"></span></p>
+        <p>Current URL: <span id="current-url"></span></p>
+    </div>
+
+    <script>
+        // Fill browser details
+        document.getElementById('user-agent').textContent = navigator.userAgent;
+        document.getElementById('origin').textContent = window.location.origin;
+        document.getElementById('current-url').textContent = window.location.href;
+
+        // Helper to display results
+        function displayResult(elementId, success, message, details = null) {
+            const element = document.getElementById(elementId);
+            element.className = `result ${success ? 'success' : 'error'}`;
+            
+            let displayText = message;
+            if (details) {
+                displayText += '\n\nDetails:\n' + JSON.stringify(details, null, 2);
+            }
+            
+            element.textContent = displayText;
+        }
+
+        // Test 1: Basic server ping
+        async function testPingEndpoint() {
+            const pingResult = document.getElementById('ping-result');
+            pingResult.className = 'result info';
+            pingResult.textContent = 'Testing server connectivity...';
+            
+            try {
+                const startTime = Date.now();
+                const response = await fetch('/api/ping');
+                const responseTime = Date.now() - startTime;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    displayResult('ping-result', true, `Success! Server responded in ${responseTime}ms.`, {
+                        status: response.status,
+                        statusText: response.statusText,
+                        data: data,
+                        responseTime: `${responseTime}ms`
+                    });
+                } else {
+                    displayResult('ping-result', false, `Failed with status: ${response.status} ${response.statusText}`, {
+                        status: response.status,
+                        statusText: response.statusText,
+                        responseTime: `${responseTime}ms`
+                    });
+                }
+            } catch (error) {
+                displayResult('ping-result', false, `Error: ${error.message}`);
+            }
+        }
+
+        // Test 2: API Status
+        async function testApiStatus() {
+            const apiStatusResult = document.getElementById('api-status-result');
+            apiStatusResult.className = 'result info';
+            apiStatusResult.textContent = 'Testing API status...';
+            
+            try {
+                const startTime = Date.now();
+                const response = await fetch('/api/status');
+                const responseTime = Date.now() - startTime;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    displayResult('api-status-result', true, `Success! API is online. Response time: ${responseTime}ms.`, {
+                        status: response.status,
+                        statusText: response.statusText,
+                        data: data,
+                        responseTime: `${responseTime}ms`,
+                        headers: {
+                            'content-type': response.headers.get('content-type'),
+                            'access-control-allow-origin': response.headers.get('access-control-allow-origin')
+                        }
+                    });
+                } else {
+                    displayResult('api-status-result', false, `Failed with status: ${response.status} ${response.statusText}`, {
+                        status: response.status,
+                        statusText: response.statusText,
+                        responseTime: `${responseTime}ms`
+                    });
+                }
+            } catch (error) {
+                displayResult('api-status-result', false, `Error: ${error.message}`);
+            }
+        }
+
+        // Test 3: CORS Headers
+        async function testCorsHeaders() {
+            const corsResult = document.getElementById('cors-headers-result');
+            corsResult.className = 'result info';
+            corsResult.textContent = 'Testing CORS headers...';
+            
+            try {
+                const response = await fetch('/api/status', {
+                    method: 'GET',
+                    headers: {
+                        'Origin': window.location.origin
+                    }
+                });
+                
+                const headersList = {};
+                for (const [key, value] of response.headers.entries()) {
+                    headersList[key] = value;
+                }
+                
+                const corsHeaders = {
+                    'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
+                    'access-control-allow-methods': response.headers.get('access-control-allow-methods'),
+                    'access-control-allow-headers': response.headers.get('access-control-allow-headers'),
+                    'access-control-allow-credentials': response.headers.get('access-control-allow-credentials')
+                };
+                
+                const hasValidCorsHeaders = corsHeaders['access-control-allow-origin'] && 
+                    (corsHeaders['access-control-allow-origin'] === '*' || 
+                     corsHeaders['access-control-allow-origin'] === window.location.origin);
+                
+                if (hasValidCorsHeaders) {
+                    displayResult('cors-headers-result', true, 'Success! CORS headers are properly configured.', {
+                        corsHeaders: corsHeaders,
+                        allHeaders: headersList,
+                        requestOrigin: window.location.origin
+                    });
+                } else {
+                    displayResult('cors-headers-result', false, 'CORS headers are missing or invalid.', {
+                        corsHeaders: corsHeaders,
+                        allHeaders: headersList,
+                        requestOrigin: window.location.origin
+                    });
+                }
+            } catch (error) {
+                displayResult('cors-headers-result', false, `Error: ${error.message}`);
+            }
+        }
+
+        // Test 4: CORS with Options Preflight
+        async function testPreflightCors() {
+            const preflightResult = document.getElementById('preflight-result');
+            preflightResult.className = 'result info';
+            preflightResult.textContent = 'Testing CORS preflight requests...';
+            
+            try {
+                // First, test a simple POST request to see if CORS is properly configured
+                const response = await fetch('/api/status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': window.location.origin
+                    },
+                    body: JSON.stringify({ test: 'data' })
+                });
+                
+                const headersList = {};
+                for (const [key, value] of response.headers.entries()) {
+                    headersList[key] = value;
+                }
+                
+                displayResult('preflight-result', response.ok, 
+                    response.ok ? 'Success! CORS preflight is properly configured.' : 'CORS preflight test failed.', 
+                    {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: headersList
+                    }
+                );
+            } catch (error) {
+                displayResult('preflight-result', false, `Error: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>

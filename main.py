@@ -52,34 +52,26 @@ import mobile_api_routes  # Mobile-optimized API routes
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
-# Enable CORS for all routes to support Flutter, mobile app integration, and feedback tools
-# Using a more permissive configuration to ensure the feedback tool can connect
+# Fix CORS configuration to allow specific origins when using credentials
+# Can't use wildcard (*) with supports_credentials=True
 CORS(app, 
-     resources={r"/*": {"origins": "*"}},  # Allow all origins for all routes
+     resources={r"/*": {"origins": ["https://replit.com", "https://*.replit.app", "https://*.repl.co", "http://localhost:*", "http://127.0.0.1:*"]}},
      supports_credentials=True,
      allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "X-Custom-Header"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
      expose_headers=["Content-Type", "Content-Length", "Date"])
 
-# Add explicit CORS headers to all responses
+# Also add CORS middleware to ensure all responses have proper headers
 @app.after_request
 def add_cors_headers(response):
-    # Get the origin from the request
-    origin = request.headers.get('Origin', '*')
-    
-    # If the origin is from a specific allowed domain, set it explicitly
-    if origin in ['https://replit.com'] or origin.endswith('.replit.app') or origin.endswith('.repl.co'):
-        response.headers['Access-Control-Allow-Origin'] = origin
-    else:
-        # Default to wildcard for other origins
-        response.headers['Access-Control-Allow-Origin'] = '*'
-    
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-Custom-Header'
-    response.headers['Access-Control-Allow-Credentials'] = 'true'
-    response.headers['Access-Control-Expose-Headers'] = 'Content-Length, Content-Type, Date'
-    response.headers['Cross-Origin-Resource-Policy'] = 'cross-origin'
-    response.headers['X-Content-Type-Options'] = 'nosniff'
+    origin = request.headers.get('Origin')
+    if origin:
+        # If origin header exists, set CORS headers
+        if origin.startswith('https://replit.com') or '.replit.app' in origin or '.repl.co' in origin or origin.startswith('http://localhost:') or origin.startswith('http://127.0.0.1:'):
+            response.headers.add('Access-Control-Allow-Origin', origin)
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin,X-Custom-Header')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,HEAD,PATCH')
     return response
 
 # Initialize components
@@ -156,6 +148,11 @@ def cors_test_page():
     # Use static CORS test file instead of template
     return app.send_static_file('cors_test.html')
 
+@app.route('/cors-test-enhanced')
+def cors_test_enhanced_page():
+    # Use enhanced CORS test file with interactive elements
+    return app.send_static_file('cors_test_enhanced.html')
+
 # Comprehensive diagnostic page
 @app.route('/diagnostic')
 def diagnostic_page():
@@ -220,7 +217,18 @@ def api_ping():
         'message': 'Server is running',
         'timestamp': datetime.now().isoformat()
     })
-    return add_cors_headers(response)
+    
+    # Add CORS headers manually
+    origin = request.headers.get('Origin', '*')
+    if origin in ['https://replit.com'] or origin.endswith('.replit.app') or origin.endswith('.repl.co'):
+        response.headers['Access-Control-Allow-Origin'] = origin
+    else:
+        # Default to wildcard for other origins
+        response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-Custom-Header'
+    
+    return response
 
 @app.route('/tts_cache/<path:filename>')
 def serve_tts_cache(filename):
