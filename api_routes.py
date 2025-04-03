@@ -24,13 +24,14 @@ intent_classifier = None
 config = None
 context_assistant = None
 model_router = None
+profile_manager = None
 
 def init_api(app, _db_manager, _emotion_tracker, _face_detector, 
             _tts_manager, _voice_recognition, _intent_classifier, _config,
-            _context_assistant=None, _model_router=None):
+            _context_assistant=None, _model_router=None, _profile_manager=None):
     """Initialize the API blueprint with necessary dependencies"""
     global db_manager, emotion_tracker, face_detector, tts_manager, voice_recognition
-    global intent_classifier, config, context_assistant, model_router
+    global intent_classifier, config, context_assistant, model_router, profile_manager
     
     # Set global references
     db_manager = _db_manager
@@ -42,6 +43,7 @@ def init_api(app, _db_manager, _emotion_tracker, _face_detector,
     config = _config
     context_assistant = _context_assistant
     model_router = _model_router
+    profile_manager = _profile_manager
     
     # Register the blueprint with the app
     app.register_blueprint(api, url_prefix='/api')
@@ -300,10 +302,13 @@ def log_voice_error():
     """
     try:
         # Parse request data
-        if request.is_json:
-            data = request.json
-        else:
-            data = request.form.to_dict()
+        if request.method == 'GET':
+            data = request.args.to_dict()
+        else:  # POST
+            if request.is_json:
+                data = request.json
+            else:
+                data = request.form.to_dict()
         
         # Extract parameters
         step = data.get('step', 'unknown')
@@ -333,13 +338,12 @@ def log_voice_error():
         db_manager.log_voice_recognition(
             session_id=session_id,
             language=language,
-            error_type=error_type,
+            error_type=f"{error_type}: {error_message}",
             raw_input=None,
             recognized_text=None,
             success=False,
             device_info=device_info,
-            context=step,
-            error_details=error_message
+            context=step
         )
         
         # Return success response
@@ -358,26 +362,115 @@ def log_voice_error():
             'error_details': str(e)
         }), 500
 
+@api.route('/cosmic-onboarding-profile', methods=['POST'])
+def cosmic_onboarding_profile():
+    """Update user profile during cosmic onboarding experience
+    
+    This endpoint should be accessed via POST since it creates/updates profile data.
+    """
+    try:
+        # Parse request data from POST
+        if request.is_json:
+            data = request.json
+        else:
+            data = request.form.to_dict()
 
-@api.route('/play-cosmic-sound', methods=['POST', 'GET'])
+        # Get basic profile data
+        full_name = data.get('full_name')
+        nickname = data.get('nickname')
+        language = data.get('language_preference', 'ar')
+        onboarding_complete = data.get('onboarding_complete', False)
+
+        logger.info(f"Cosmic onboarding profile update: name={full_name}, nickname={nickname}, language={language}, onboarding_complete={onboarding_complete}")
+
+        # Store in session
+        from flask import session
+        session['language'] = language
+        session['nickname'] = nickname
+        session['full_name'] = full_name
+
+        # Update the profile in database
+        profile_data = {
+            'full_name': full_name,
+            'nickname': nickname,
+            'language': language
+        }
+
+        # Update the user profile
+        if profile_manager is None:
+            logger.error("Cannot update profile - profile_manager not initialized")
+            return jsonify({
+                'success': False,
+                'error': 'Profile manager not available'
+            }), 503
+        profile_manager.update_profile(profile_data)
+
+        # Save onboarding_complete flag in database
+        if onboarding_complete:
+            logger.info("Setting onboarding_complete flag to true in database")
+            db_manager.set_setting('onboarding_complete', 'true')
+
+        # Get appropriate voice for selected language
+        tts_voice = profile_manager.get_tts_voice_for_language(language)
+
+        # Use nickname or first name if nickname is empty
+        user_name = nickname
+        if not user_name and full_name:
+            user_name = full_name.split(' ')[0]
+
+        # Create welcome message based on user's language
+        if language == 'ar':
+            welcome_msg = f"مرحبًا بك يا {user_name} في مشاعر. أنا سعيد بوجودك معنا."
+        else:
+            welcome_msg = f"Welcome {user_name} to Mashaaer Feelings. I'm glad to have you with us."
+
+        # Speak welcome message
+        try:
+            audio_path = tts_manager.speak(welcome_msg, tts_voice, language, profile_manager)
+            logger.info(f"Welcome message TTS generated at: {audio_path}")
+        except Exception as e:
+            logger.error(f"Error speaking welcome message: {str(e)}")
+            import traceback
+            logger.error(f"TTS error traceback: {traceback.format_exc()}")
+            audio_path = None
+
+        # Check TTS provider status
+        elevenlabs_available = hasattr(tts_manager, 'use_elevenlabs') and tts_manager.use_elevenlabs
+        gtts_available = hasattr(tts_manager, 'use_gtts') and tts_manager.use_gtts
+
+        return jsonify({
+            'success': True,
+            'message': 'Profile updated successfully',
+            'welcome_message': welcome_msg,
+            'audio_path': audio_path,
+            'tts_status': {
+                'elevenlabs': elevenlabs_available,
+                'gtts': gtts_available,
+                'provider': config.TTS_PROVIDER
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Error updating profile: {str(e)}")
+        import traceback
+        logger.error(f"Profile update error traceback: {traceback.format_exc()}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@api.route('/play-cosmic-sound', methods=['GET'])
 def play_cosmic_sound():
-    """Generate and return a sound for the cosmic interface based on the type and language"""
+    """Generate and return a sound for the cosmic interface based on the type and language
+    
+    This endpoint should be accessed via GET since it retrieves sound data without 
+    making server-side changes.
+    """
     # Import os here to ensure it's available in the function scope
     import os
     
     try:
-        # Parse request data based on request method
-        if request.method == 'GET':
-            sound_type = request.args.get('sound_type', 'welcome')
-            language = request.args.get('language', 'en')
-        else:  # POST
-            if request.is_json:
-                data = request.json
-            else:
-                data = request.form.to_dict()
-            
-            sound_type = data.get('sound_type', 'welcome')
-            language = data.get('language', 'en')
+        # Parse request data from GET parameters
+        sound_type = request.args.get('sound_type', 'welcome')
+        language = request.args.get('language', 'en')
         
         # Log the request
         logger.info(f"API: Cosmic sound request: {sound_type} in {language}")
@@ -525,24 +618,23 @@ def play_cosmic_sound():
             'error': f'Internal server error: {str(e)}'
         }), 500
 
-@api.route('/analyze-emotion', methods=['POST', 'GET'])
+@api.route('/analyze-emotion', methods=['POST'])
 def analyze_emotion():
-    """Analyze text for emotional content and return the detected emotion"""
+    """Analyze text for emotional content and return the detected emotion
+    
+    This endpoint should be accessed via POST since it performs analysis on 
+    the provided text data and may store results in the cache.
+    """
     try:
-        # Parse request data based on request method
-        if request.method == 'GET':
-            text = request.args.get('text', '')
-            language = request.args.get('language', 'en')
-            return_details = request.args.get('return_details', 'false').lower() == 'true'
-        else:  # POST
-            if request.is_json:
-                data = request.json
-            else:
-                data = request.form.to_dict()
-            
-            text = data.get('text', '')
-            language = data.get('language', 'en')
-            return_details = data.get('return_details', False)
+        # Parse request data from POST
+        if request.is_json:
+            data = request.json
+        else:
+            data = request.form.to_dict()
+        
+        text = data.get('text', '')
+        language = data.get('language', 'en')
+        return_details = data.get('return_details', False)
         
         if not text:
             return jsonify({
@@ -839,7 +931,7 @@ def send_sms_alert():
             'error_details': error_message
         }), 500
 
-@api.route('/listen-for-voice', methods=['POST', 'GET'])
+@api.route('/listen-for-voice', methods=['POST'])
 def listen_for_voice():
     """
     Listen for voice input and convert to text
@@ -847,7 +939,7 @@ def listen_for_voice():
     This endpoint supports voice recognition for the onboarding wizard
     and other interactive components of the Mashaaer interface.
     
-    GET method is supported for diagnostic testing via the diagnostic panel.
+    Uses POST method as it processes audio data and stores voice recognition results.
     """
     try:
         logger.info("API: Voice recognition request received")

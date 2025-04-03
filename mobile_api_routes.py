@@ -130,7 +130,7 @@ def mobile_status():
         "latency_ms": latency_ms
     })
 
-@mobile_api.route('/analyze-emotion', methods=['POST', 'GET'])
+@mobile_api.route('/analyze-emotion', methods=['POST'])
 def mobile_analyze_emotion():
     print("\n===== ANALYZE EMOTION API CALLED =====")
     print(f"Request method: {request.method}")
@@ -433,7 +433,7 @@ def mobile_analyze_emotion():
                 "error_details": str(e)
             }), 500
 
-@mobile_api.route('/speak', methods=['POST', 'GET'])
+@mobile_api.route('/speak', methods=['POST'])
 def mobile_speak():
     """
     Mobile-optimized text-to-speech endpoint
@@ -472,28 +472,18 @@ def mobile_speak():
         # Record start time for performance metrics
         start_time = time.time()
         
-        # Parse request data based on request method
-        if request.method == 'GET':
-            text = request.args.get('text', '')
-            voice = request.args.get('voice', 'default')
-            language = request.args.get('language', 'en-US')
-            audio_format = request.args.get('format', 'mp3')
-            stream_str = request.args.get('stream', 'false')
-            stream = stream_str.lower() == 'true' if isinstance(stream_str, str) else False
-            bypass_cache_str = request.args.get('bypass_cache', 'false')
-            bypass_cache = bypass_cache_str.lower() == 'true' if isinstance(bypass_cache_str, str) else False
-        else:  # POST
-            if request.is_json:
-                data = request.json
-            else:
-                data = request.form.to_dict()
-            
-            text = data.get('text', '')
-            voice = data.get('voice', 'default')
-            language = data.get('language', 'en-US')
-            audio_format = data.get('format', 'mp3')
-            stream = data.get('stream', False)
-            bypass_cache = data.get('bypass_cache', False)
+        # Parse request data from POST
+        if request.is_json:
+            data = request.json
+        else:
+            data = request.form.to_dict()
+        
+        text = data.get('text', '')
+        voice = data.get('voice', 'default')
+        language = data.get('language', 'en-US')
+        audio_format = data.get('format', 'mp3')
+        stream = data.get('stream', False)
+        bypass_cache = data.get('bypass_cache', False)
         
         # Validate required fields
         if not text:
@@ -718,7 +708,7 @@ def mobile_speak():
             "error_details": str(e)
         }), 500
 
-@mobile_api.route('/voice-recognition', methods=['POST', 'GET'])
+@mobile_api.route('/voice-recognition', methods=['POST'])
 def mobile_voice_recognition():
     """
     Mobile-optimized voice recognition endpoint
@@ -755,13 +745,9 @@ def mobile_voice_recognition():
         logger.info(f"Mobile API: Voice recognition request received for session {session_id}")
         logger.info(f"Mobile API: Request content type: {request.content_type}")
         
-        # Extract parameters based on request method
-        if request.method == 'GET':
-            language = request.args.get('language', 'ar')
-            context = request.args.get('context', 'general')
-        else:  # POST
-            language = request.form.get('language', 'ar')
-            context = request.form.get('context', 'general')
+        # Extract parameters from POST
+        language = request.form.get('language', 'ar')
+        context = request.form.get('context', 'general')
         
         # Map to full language code for voice recognition
         recognition_language = 'ar-EG' if language == 'ar' else 'en-US'
@@ -999,7 +985,7 @@ def mobile_voice_recognition():
             "text": ""
         }), 500
 
-@mobile_api.route('/batch-analyze', methods=['POST', 'GET'])
+@mobile_api.route('/batch-analyze', methods=['POST'])
 def batch_analyze():
     """
     Batch analysis endpoint for mobile clients
@@ -1028,26 +1014,16 @@ def batch_analyze():
     }
     """
     try:
-        # Parse request data based on request method
-        if request.method == 'GET':
-            # GET method requires a simplified approach - only a single text at a time
-            text = request.args.get('text', '')
-            language = request.args.get('language', 'en')
-            item_id = request.args.get('id', str(uuid.uuid4()))
-            response_format = request.args.get('format', 'json')
-            
-            # Create a single-item list to use existing processing logic
-            texts = [{'id': item_id, 'text': text, 'language': language}]
-        else:  # POST
-            if not request.is_json:
-                return jsonify({
-                    "success": False,
-                    "error": "Request must be JSON"
-                }), 400
-            
-            data = request.json
-            texts = data.get('texts', [])
-            response_format = data.get('format', 'json')
+        # Parse request data from POST
+        if not request.is_json:
+            return jsonify({
+                "success": False,
+                "error": "Request must be JSON"
+            }), 400
+        
+        data = request.json
+        texts = data.get('texts', [])
+        response_format = data.get('format', 'json')
         
         if not texts or not isinstance(texts, list):
             return jsonify({

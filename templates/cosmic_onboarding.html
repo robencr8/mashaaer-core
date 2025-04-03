@@ -1002,7 +1002,15 @@
       // Call the voice recognition API
       // We've removed the old mic button flash effects since we now use the sphere
       
-      fetch('/api/listen-for-voice?language=' + userLanguage)
+      fetch('/api/listen-for-voice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          language: userLanguage
+        })
+      })
         .then(response => response.json())
         .then(data => {
           

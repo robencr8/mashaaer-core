@@ -84,7 +84,8 @@ profile_manager = ProfileManager(db_manager)
 # Initialize API routes
 from api_routes import init_api
 init_api(app, db_manager, emotion_tracker, face_detector, 
-         tts_manager, voice_recognition, intent_classifier, config)
+         tts_manager, voice_recognition, intent_classifier, config,
+         _profile_manager=profile_manager)
 
 # Initialize Mobile API routes
 from mobile_api_routes import init_mobile_api
@@ -1177,86 +1178,7 @@ def get_sms_history():
         logger.error(f"Error getting SMS history: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/cosmic-onboarding-profile', methods=['POST'])
-def cosmic_onboarding_profile():
-    """Update user profile during cosmic onboarding experience"""
-    try:
-        data = request.json
-
-        # Get basic profile data
-        full_name = data.get('full_name')
-        nickname = data.get('nickname')
-        language = data.get('language_preference', 'ar')
-        onboarding_complete = data.get('onboarding_complete', False)
-
-        logger.info(f"Cosmic onboarding profile update: name={full_name}, nickname={nickname}, language={language}, onboarding_complete={onboarding_complete}")
-
-        # Store in session
-        from flask import session
-        session['language'] = language
-        session['nickname'] = nickname
-        session['full_name'] = full_name
-
-        # Update the profile in database
-        profile_data = {
-            'full_name': full_name,
-            'nickname': nickname,
-            'language': language
-        }
-
-        # Update the user profile
-        profile_manager.update_profile(profile_data)
-
-        # Save onboarding_complete flag in database
-        if onboarding_complete:
-            logger.info("Setting onboarding_complete flag to true in database")
-            db_manager.set_setting('onboarding_complete', 'true')
-
-        # Get appropriate voice for selected language
-        tts_voice = profile_manager.get_tts_voice_for_language(language)
-
-        # Use nickname or first name if nickname is empty
-        user_name = nickname
-        if not user_name and full_name:
-            user_name = full_name.split(' ')[0]
-
-        # Create welcome message based on user's language
-        if language == 'ar':
-            welcome_msg = f"مرحبًا بك يا {user_name} في مشاعر. أنا سعيد بوجودك معنا."
-        else:
-            welcome_msg = f"Welcome {user_name} to Mashaaer Feelings. I'm glad to have you with us."
-
-        # Speak welcome message
-        try:
-            audio_path = tts_manager.speak(welcome_msg, tts_voice, language, profile_manager)
-            logger.info(f"Welcome message TTS generated at: {audio_path}")
-        except Exception as e:
-            logger.error(f"Error speaking welcome message: {str(e)}")
-            import traceback
-            logger.error(f"TTS error traceback: {traceback.format_exc()}")
-            audio_path = None
-
-        # Check TTS provider status
-        elevenlabs_available = hasattr(tts_manager, 'use_elevenlabs') and tts_manager.use_elevenlabs
-        gtts_available = hasattr(tts_manager, 'use_gtts') and tts_manager.use_gtts
-
-        return jsonify({
-            'success': True,
-            'message': 'Profile updated successfully',
-            'welcome_message': welcome_msg,
-            'audio_path': audio_path,
-            'tts_status': {
-                'elevenlabs': elevenlabs_available,
-                'gtts': gtts_available,
-                'provider': config.TTS_PROVIDER
-            }
-        })
-
-    except Exception as e:
-        logger.error(f"Error updating profile: {str(e)}")
-        import traceback
-        logger.error(f"Profile update error traceback: {traceback.format_exc()}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+# Cosmic onboarding profile endpoint moved to api_routes.py for better organization and API consistency
 
 @app.route('/api/set-consent', methods=['POST'])
 def set_consent():
