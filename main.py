@@ -9,8 +9,19 @@ import threading
 import time
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('logs/application.log'),
+        logging.StreamHandler()
+    ]
+)
 logger = logging.getLogger(__name__)
+logger.info("========== Server Starting ==========")
+logger.info(f"Python version: {os.sys.version}")
+logger.info(f"Current working directory: {os.getcwd()}")
+logger.info(f"Files in templates folder: {os.listdir('templates') if os.path.exists('templates') else 'No templates dir'}")
 
 # Import core components
 from config import Config
@@ -214,24 +225,40 @@ core_launcher = CoreLauncher(
 # Routes
 @app.route('/')
 def index():
-    # Serve the cosmic onboarding experience
-    return render_template('cosmic_onboarding.html')
-    
-    # Uncomment below to serve the diagnostic page for debugging
-    # return app.send_static_file('diagnostic.html')
-    
-    # API-style response (uncomment if needed)
-    """
     try:
-        return jsonify({
-            "status": "online",
-            "message": "Mashaaer server is running",
-            "timestamp": datetime.now().isoformat(),
-        })
+        logger.info("Root route accessed - serving cosmic onboarding experience")
+        # Check if onboarding has been completed
+        onboarding_status = db_manager.get_setting('onboarding_complete', 'false')
+        onboarding_complete = False
+
+        if isinstance(onboarding_status, str):
+            onboarding_complete = onboarding_status.lower() == 'true'
+            
+        # If onboarding not complete, render the cosmic onboarding experience
+        if not onboarding_complete:
+            logger.info("Redirecting to cosmic onboarding experience")
+            return render_template('cosmic_onboarding.html')
+        else:
+            # If onboarding is complete, render the main interface
+            logger.info("Onboarding complete, rendering main interface")
+            dev_mode = is_developer_mode()
+            return render_template('index.html', dev_mode=dev_mode)
     except Exception as e:
-        logger.error(f"Error in root route: {str(e)}")
-        return str(e), 500
-    """
+        error_msg = f"Error in root route: {str(e)}"
+        logger.error(error_msg)
+        try:
+            # Try our ultra-simple status page as fallback
+            logger.info("Falling back to simple_status.html")
+            return app.send_static_file('simple_status.html')
+        except Exception as simple_e:
+            error_msg2 = f"Error serving simple_status.html: {str(simple_e)}"
+            logger.error(error_msg2)
+            try:
+                # Just return a simple text response as last resort
+                return f"Server is running, but encountered errors:\n1. {error_msg}\n2. {error_msg2}", 500
+            except Exception as inner_e:
+                logger.critical(f"Critical error in error handler: {str(inner_e)}")
+                return "Server error", 500
     
     # Original code (commented out during debugging)
     """

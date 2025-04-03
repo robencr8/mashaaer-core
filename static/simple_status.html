@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mashaaer Server Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        .status-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 500px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #8a2be2;
+            text-align: center;
+        }
+        .status {
+            font-size: 18px;
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #e6f7ff;
+            border-radius: 4px;
+        }
+        .links {
+            margin-top: 20px;
+        }
+        .links a {
+            display: block;
+            margin: 10px 0;
+            color: #8a2be2;
+            text-decoration: none;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+        .timestamp {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="status-card">
+        <h1>مشاعر | Mashaaer</h1>
+        <div class="status">Server is running</div>
+        
+        <div class="links">
+            <a href="/test">API Test</a>
+            <a href="/api/status">API Status</a>
+            <a href="/diagnostic">Full Diagnostic</a>
+            <a href="/cosmic-onboarding">Cosmic Onboarding</a>
+            <a href="/startup">Interactive Splash</a>
+        </div>
+        
+        <div class="timestamp">
+            Last updated: <span id="timestamp"></span>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('timestamp').innerText = new Date().toLocaleString();
+    </script>
+</body>
+</html>
