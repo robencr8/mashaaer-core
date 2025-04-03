@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer Static Diagnostic</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .test-group {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mashaaer Static Diagnostic Page</h1>
+    
+    <div class="card">
+        <h2>Static HTML Test</h2>
+        <p>This is a static HTML file served directly from the file system.</p>
+        <p>If you can see this page, it means static file serving is working properly.</p>
+    </div>
+    
+    <div class="card">
+        <h2>Server Information</h2>
+        <div id="server-info">Loading...</div>
+    </div>
+    
+    <div class="card">
+        <h2>API Status</h2>
+        <button id="check-api">Check API Status</button>
+        <div id="api-status">Click button to check API status</div>
+    </div>
+    
+    <div class="card">
+        <h2>CORS Test</h2>
+        <button id="cors-test">Test CORS</button>
+        <div id="cors-result">Click button to test CORS</div>
+    </div>
+    
+    <div class="card">
+        <h2>Browser Information</h2>
+        <div id="browser-info"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Request Methods</h2>
+        <div class="test-group">
+            <h3>Fetch API</h3>
+            <button id="fetch-test">Test Fetch</button>
+            <div id="fetch-result">Click button to test Fetch API</div>
+        </div>
+        
+        <div class="test-group">
+            <h3>XMLHttpRequest</h3>
+            <button id="xhr-test">Test XHR</button>
+            <div id="xhr-result">Click button to test XMLHttpRequest</div>
+        </div>
+    </div>
+
+    <script>
+        // Utility function to display JSON data
+        function displayJSON(data, elementId) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+        
+        // Utility function to display error
+        function displayError(error, elementId) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            console.error(error);
+        }
+        
+        // Display browser information
+        function showBrowserInfo() {
+            const browserInfo = {
+                userAgent: navigator.userAgent,
+                language: navigator.language,
+                cookieEnabled: navigator.cookieEnabled,
+                doNotTrack: navigator.doNotTrack,
+                online: navigator.onLine,
+                platform: navigator.platform,
+                screenWidth: window.screen.width,
+                screenHeight: window.screen.height,
+                windowLocation: window.location.href,
+                windowOrigin: window.location.origin,
+                windowProtocol: window.location.protocol,
+                windowHost: window.location.host
+            };
+            
+            displayJSON(browserInfo, 'browser-info');
+        }
+        
+        // Test API status
+        document.getElementById('check-api').addEventListener('click', async () => {
+            const statusElement = document.getElementById('api-status');
+            statusElement.innerHTML = 'Checking API status...';
+            
+            try {
+                const response = await fetch('/api/status');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                statusElement.innerHTML = `<div class="success">API is online!</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                statusElement.innerHTML = `<div class="error">Error checking API: ${error.message}</div>`;
+                console.error('API status error:', error);
+            }
+        });
+        
+        // Test CORS
+        document.getElementById('cors-test').addEventListener('click', async () => {
+            const corsElement = document.getElementById('cors-result');
+            corsElement.innerHTML = 'Testing CORS...';
+            
+            try {
+                // First try a same-origin request
+                const sameOriginResponse = await fetch('/test');
+                const sameOriginData = await sameOriginResponse.json();
+                
+                // Then try different configurations
+                const testResults = {
+                    sameOrigin: {
+                        success: true,
+                        data: sameOriginData
+                    },
+                    withCredentials: null,
+                    withCorsMode: null
+                };
+                
+                // Test with credentials
+                try {
+                    const credsResponse = await fetch('/test', {
+                        credentials: 'include'
+                    });
+                    const credsData = await credsResponse.json();
+                    testResults.withCredentials = {
+                        success: true,
+                        data: credsData
+                    };
+                } catch (error) {
+                    testResults.withCredentials = {
+                        success: false,
+                        error: error.message
+                    };
+                }
+                
+                // Test with explicit CORS mode
+                try {
+                    const corsResponse = await fetch('/test', {
+                        mode: 'cors'
+                    });
+                    const corsData = await corsResponse.json();
+                    testResults.withCorsMode = {
+                        success: true,
+                        data: corsData
+                    };
+                } catch (error) {
+                    testResults.withCorsMode = {
+                        success: false,
+                        error: error.message
+                    };
+                }
+                
+                displayJSON(testResults, 'cors-result');
+            } catch (error) {
+                corsElement.innerHTML = `<div class="error">CORS test failed: ${error.message}</div>`;
+                console.error('CORS test error:', error);
+            }
+        });
+        
+        // Test Fetch API
+        document.getElementById('fetch-test').addEventListener('click', async () => {
+            const fetchElement = document.getElementById('fetch-result');
+            fetchElement.innerHTML = 'Testing Fetch API...';
+            
+            try {
+                const response = await fetch('/test');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                fetchElement.innerHTML = `<div class="success">Fetch API working!</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                fetchElement.innerHTML = `<div class="error">Fetch API error: ${error.message}</div>`;
+                console.error('Fetch error:', error);
+            }
+        });
+        
+        // Test XMLHttpRequest
+        document.getElementById('xhr-test').addEventListener('click', () => {
+            const xhrElement = document.getElementById('xhr-result');
+            xhrElement.innerHTML = 'Testing XMLHttpRequest...';
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '/test');
+            
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        xhrElement.innerHTML = `<div class="success">XMLHttpRequest working!</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    } catch (error) {
+                        xhrElement.innerHTML = `<div class="error">Error parsing response: ${error.message}</div>`;
+                    }
+                } else {
+                    xhrElement.innerHTML = `<div class="error">XMLHttpRequest failed with status: ${xhr.status}</div>`;
+                }
+            };
+            
+            xhr.onerror = function() {
+                xhrElement.innerHTML = `<div class="error">Network error occurred</div>`;
+            };
+            
+            xhr.send();
+        });
+        
+        // Get server information
+        async function getServerInfo() {
+            const infoElement = document.getElementById('server-info');
+            
+            try {
+                const response = await fetch('/');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const text = await response.text();
+                
+                // Check if the response is HTML (not JSON)
+                if (text.trim().startsWith('<!DOCTYPE html>') || text.trim().startsWith('<html>')) {
+                    infoElement.innerHTML = `<div class="success">Server is serving HTML content</div>`;
+                } else {
+                    // Try to parse as JSON
+                    try {
+                        const data = JSON.parse(text);
+                        infoElement.innerHTML = `<div class="success">Server is online!</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    } catch (e) {
+                        infoElement.innerHTML = `<div class="success">Server returned: ${text.substring(0, 100)}${text.length > 100 ? '...' : ''}</div>`;
+                    }
+                }
+            } catch (error) {
+                infoElement.innerHTML = `<div class="error">Error getting server info: ${error.message}</div>`;
+                console.error('Server info error:', error);
+            }
+        }
+        
+        // Initialize page
+        window.addEventListener('DOMContentLoaded', () => {
+            showBrowserInfo();
+            getServerInfo();
+        });
+    </script>
+</body>
+</html>

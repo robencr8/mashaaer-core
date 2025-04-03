@@ -81,6 +81,33 @@ def connection_test_page():
 def simple_test_page():
     return render_template('simple_test.html')
 
+# Direct connection test page for debugging
+@app.route('/direct-test')
+def direct_test_page():
+    return render_template('direct_test.html')
+
+# CORS test page
+@app.route('/cors-test')
+def cors_test_page():
+    return render_template('cors_test.html')
+
+# Comprehensive diagnostic page
+@app.route('/diagnostic')
+def diagnostic_page():
+    return render_template('diagnostic.html')
+
+# Static diagnostic page (direct HTML, no template rendering)
+@app.route('/diagnostic-static')
+def diagnostic_static_page():
+    # Direct file serving (bypassing template engine)
+    return app.send_static_file('diagnostic_static.html')
+
+# Minimal static HTML page with no JavaScript
+@app.route('/minimal')
+def minimal_page():
+    # Direct file serving of minimal HTML file
+    return app.send_static_file('minimal.html')
+
 # Helper function to get developer mode status
 def is_developer_mode():
     # Check session first (for current request)
@@ -151,9 +178,21 @@ core_launcher = CoreLauncher(
 # Routes
 @app.route('/')
 def index():
-    # TEMPORARY: Serve the simple test page for debugging server connectivity
-    # Return our simple test page directly to bypass any potential redirect issues
-    return render_template('simple_test.html')
+    # Serve the diagnostic page for now to help debug server connectivity issues
+    return render_template('diagnostic.html')
+    
+    # API-style response (commented out during debugging)
+    """
+    try:
+        return jsonify({
+            "status": "online",
+            "message": "Mashaaer server is running",
+            "timestamp": datetime.now().isoformat(),
+        })
+    except Exception as e:
+        logger.error(f"Error in root route: {str(e)}")
+        return str(e), 500
+    """
     
     # Original code (commented out during debugging)
     """
