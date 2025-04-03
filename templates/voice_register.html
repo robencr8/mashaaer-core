@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشاعر | Mashaaer</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #121212;
+            color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .cosmic-sphere {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle at 30% 30%, #8a2be2, #4b0082);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 60px 30px rgba(138, 43, 226, 0.7),
+                0 0 100px 60px rgba(75, 0, 130, 0.5);
+            animation: float 6s ease-in-out infinite, glow 4s ease-in-out infinite alternate;
+            z-index: -1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .cosmic-sphere::before {
+            content: '';
+            position: absolute;
+            top: 15%;
+            left: 15%;
+            width: 20%;
+            height: 20%;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            filter: blur(5px);
+        }
+
+        .register-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .register-icon {
+            font-size: 4rem;
+            color: #8a2be2;
+            margin-bottom: 2rem;
+        }
+
+        .register-content {
+            font-size: 1.6rem;
+            margin-bottom: 2rem;
+            max-width: 800px;
+            background-color: rgba(18, 18, 18, 0.8);
+            border-radius: 1rem;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .arabic-text {
+            font-family: 'Arial', sans-serif;
+            direction: rtl;
+        }
+
+        .register-form {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #8a2be2;
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #8a2be2, #4b0082);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px rgba(138, 43, 226, 0.7);
+        }
+
+        .listening-indicator {
+            margin-top: 2rem;
+            font-size: 1rem;
+            color: #8a2be2;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .listening-indicator.active {
+            opacity: 1;
+        }
+
+        .pulse-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #8a2be2;
+            margin: 0 2px;
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+
+        .pulse-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .pulse-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.2;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 1;
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(-50%, -50%);
+            }
+            50% {
+                transform: translate(-50%, -60%);
+            }
+        }
+
+        @keyframes glow {
+            0% {
+                box-shadow: 
+                    0 0 60px 30px rgba(138, 43, 226, 0.5),
+                    0 0 100px 60px rgba(75, 0, 130, 0.3);
+            }
+            100% {
+                box-shadow: 
+                    0 0 80px 40px rgba(138, 43, 226, 0.7),
+                    0 0 120px 80px rgba(75, 0, 130, 0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmic-sphere"></div>
+    
+    <div class="register-container">
+        <div class="register-icon">
+            <i class="fas fa-user-astronaut"></i>
+        </div>
+
+        <div class="register-content">
+            <h1 id="register-title-en" style="display:none;">Tell me about yourself</h1>
+            <h1 id="register-title-ar" class="arabic-text" style="display:none;">أخبرني عن نفسك</h1>
+            
+            <p id="register-subtitle-en" style="display:none;">Let's create your profile to personalize your experience</p>
+            <p id="register-subtitle-ar" class="arabic-text" style="display:none;">لنقم بإنشاء ملفك الشخصي لتخصيص تجربتك</p>
+            
+            <div class="register-form">
+                <div class="form-group">
+                    <label for="full-name" class="form-label">
+                        <span class="en-text" style="display:none;">Your Name</span>
+                        <span class="ar-text arabic-text" style="display:none;">اسمك</span>
+                    </label>
+                    <input type="text" id="full-name" class="form-control" placeholder="John Doe / جون دو">
+                </div>
+                
+                <div class="form-group">
+                    <label for="nickname" class="form-label">
+                        <span class="en-text" style="display:none;">Nickname (how should I call you?)</span>
+                        <span class="ar-text arabic-text" style="display:none;">اسم مستعار (كيف أناديك؟)</span>
+                    </label>
+                    <input type="text" id="nickname" class="form-control" placeholder="John / جون">
+                </div>
+                
+                <div class="form-group">
+                    <label for="language" class="form-label">
+                        <span class="en-text" style="display:none;">Preferred Language</span>
+                        <span class="ar-text arabic-text" style="display:none;">اللغة المفضلة</span>
+                    </label>
+                    <select id="language" class="form-select">
+                        <option value="en">English</option>
+                        <option value="ar">العربية</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="voice-style" class="form-label">
+                        <span class="en-text" style="display:none;">Voice Style</span>
+                        <span class="ar-text arabic-text" style="display:none;">نمط الصوت</span>
+                    </label>
+                    <select id="voice-style" class="form-select">
+                        <option value="default">
+                            <span class="en-text">Default</span>
+                            <span class="ar-text">افتراضي</span>
+                        </option>
+                        <option value="calm">
+                            <span class="en-text">Calm</span>
+                            <span class="ar-text">هادئ</span>
+                        </option>
+                        <option value="formal">
+                            <span class="en-text">Formal</span>
+                            <span class="ar-text">رسمي</span>
+                        </option>
+                        <option value="friendly">
+                            <span class="en-text">Friendly</span>
+                            <span class="ar-text">ودود</span>
+                        </option>
+                    </select>
+                </div>
+                
+                <button id="submit-btn" class="btn btn-primary">
+                    <span class="en-text" style="display:none;">Complete Profile</span>
+                    <span class="ar-text" style="display:none;">إكمال الملف الشخصي</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="listening-indicator" class="listening-indicator">
+            <p class="en-text" style="display:none;">Listening <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
+            <p class="ar-text arabic-text" style="display:none;">أستمع <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get language and interaction mode from localStorage
+            const userLanguage = localStorage.getItem('user_language') || 'en';
+            const interactionMode = localStorage.getItem('interaction_mode') || 'text';
+            
+            // Set the initial form language
+            setLanguage(userLanguage);
+            
+            // Set the language dropdown to match stored preference
+            document.getElementById('language').value = userLanguage;
+            
+            // Add subtle parallax effect to sphere
+            document.addEventListener('mousemove', (e) => {
+                const sphere = document.querySelector('.cosmic-sphere');
+                const x = (window.innerWidth / 2 - e.pageX) / 50;
+                const y = (window.innerHeight / 2 - e.pageY) / 50;
+                sphere.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+            });
+            
+            // Submit button event listener
+            document.getElementById('submit-btn').addEventListener('click', submitProfile);
+            
+            // Language select change event
+            document.getElementById('language').addEventListener('change', function() {
+                setLanguage(this.value);
+            });
+            
+            // If voice mode is enabled, speak the welcome message
+            if (interactionMode === 'voice') {
+                const welcomeText = userLanguage === 'en' 
+                    ? "Let's create your profile to personalize your experience. Please tell me your name."
+                    : "لنقم بإنشاء ملفك الشخصي لتخصيص تجربتك. من فضلك، أخبرني باسمك.";
+                    
+                speakText(welcomeText, userLanguage);
+                
+                // Add voice input listeners for each field in voice mode
+                if (interactionMode === 'voice') {
+                    setupVoiceInputForField('full-name', 'name');
+                }
+            }
+            
+            // Function to set the language for the UI
+            function setLanguage(lang) {
+                if (lang === 'en') {
+                    document.getElementById('register-title-en').style.display = 'block';
+                    document.getElementById('register-title-ar').style.display = 'none';
+                    document.getElementById('register-subtitle-en').style.display = 'block';
+                    document.getElementById('register-subtitle-ar').style.display = 'none';
+                    document.querySelectorAll('.en-text').forEach(el => el.style.display = 'block');
+                    document.querySelectorAll('.ar-text').forEach(el => el.style.display = 'none');
+                } else {
+                    document.getElementById('register-title-en').style.display = 'none';
+                    document.getElementById('register-title-ar').style.display = 'block';
+                    document.getElementById('register-subtitle-en').style.display = 'none';
+                    document.getElementById('register-subtitle-ar').style.display = 'block';
+                    document.querySelectorAll('.en-text').forEach(el => el.style.display = 'none');
+                    document.querySelectorAll('.ar-text').forEach(el => el.style.display = 'block');
+                }
+            }
+            
+            // Function to submit the profile
+            function submitProfile() {
+                const fullName = document.getElementById('full-name').value;
+                const nickname = document.getElementById('nickname').value || fullName.split(' ')[0];
+                const language = document.getElementById('language').value;
+                const voiceStyle = document.getElementById('voice-style').value;
+                
+                if (!fullName) {
+                    alert(language === 'en' ? 'Please enter your name' : 'الرجاء إدخال اسمك');
+                    return;
+                }
+                
+                // Submit profile data to API
+                fetch('/api/update-profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        full_name: fullName,
+                        nickname: nickname,
+                        language_preference: language,
+                        voice_style: voiceStyle,
+                        onboarding_complete: true
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Store user language preference in localStorage
+                        localStorage.setItem('user_language', language);
+                        
+                        // Redirect to the main interface
+                        window.location.href = '/';
+                    } else {
+                        alert(language === 'en' 
+                            ? 'Error saving profile: ' + data.error 
+                            : 'خطأ في حفظ الملف الشخصي: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert(language === 'en' 
+                        ? 'Error saving profile. Please try again.' 
+                        : 'خطأ في حفظ الملف الشخصي. يرجى المحاولة مرة أخرى.');
+                });
+            }
+            
+            // Setup voice input for a specific field (only used in voice mode)
+            function setupVoiceInputForField(fieldId, fieldType) {
+                const field = document.getElementById(fieldId);
+                
+                field.addEventListener('focus', function() {
+                    // Show listening indicator
+                    document.getElementById('listening-indicator').classList.add('active');
+                    
+                    // Start voice recognition for this field
+                    startVoiceRecognition(fieldId, fieldType);
+                });
+                
+                field.addEventListener('blur', function() {
+                    // Hide listening indicator
+                    document.getElementById('listening-indicator').classList.remove('active');
+                });
+            }
+            
+            // Function to start voice recognition for a field
+            function startVoiceRecognition(fieldId, fieldType) {
+                if (interactionMode !== 'voice') return;
+                
+                // In production, this would use the Web Speech API or a custom endpoint
+                // For now, we'll simulate voice input for demonstration purposes
+                
+                fetch('/api/listen', {
+                    method: 'POST',
+                    body: new FormData() // This would normally contain audio data
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Process the recognized text based on field type
+                        const recognizedText = data.text;
+                        const field = document.getElementById(fieldId);
+                        
+                        if (fieldType === 'name') {
+                            // Extract name from recognized text
+                            // For demo purposes, just use the whole text
+                            field.value = recognizedText;
+                            
+                            // Also populate nickname field with first word
+                            const nickField = document.getElementById('nickname');
+                            if (!nickField.value) {
+                                nickField.value = recognizedText.split(' ')[0];
+                            }
+                            
+                            // Move to next field or submit
+                            // Here we would normally focus the next field
+                        }
+                    }
+                    
+                    // Hide listening indicator
+                    document.getElementById('listening-indicator').classList.remove('active');
+                })
+                .catch(error => {
+                    console.error('API error:', error);
+                    document.getElementById('listening-indicator').classList.remove('active');
+                });
+            }
+            
+            // Function to speak text using TTS
+            function speakText(text, language) {
+                fetch('/api/speak', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        text: text, 
+                        language: language === 'en' ? 'en-US' : 'ar'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('TTS success:', data);
+                        
+                        // Create audio element to play the response
+                        const audio = new Audio(data.audio_path);
+                        audio.play().catch(e => console.error('Error playing audio:', e));
+                    } else {
+                        console.error('TTS error:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('TTS API error:', error);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

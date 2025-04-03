@@ -1,0 +1,580 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+  .startup-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 90vh;
+    position: relative;
+  }
+
+  .sphere-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin-bottom: 40px;
+  }
+
+  .sphere {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #6baef2, #1a56c0);
+    box-shadow: 0 0 60px 20px rgba(106, 174, 242, 0.4);
+    animation: float 6s ease-in-out infinite, pulse 8s ease-in-out infinite;
+  }
+
+  .glow {
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: 0 0 60px 30px rgba(106, 174, 242, 0.2);
+    animation: pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 60px 20px rgba(106, 174, 242, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 80px 30px rgba(106, 174, 242, 0.7);
+    }
+    100% {
+      box-shadow: 0 0 60px 20px rgba(106, 174, 242, 0.4);
+    }
+  }
+
+  .question-container {
+    text-align: center;
+    opacity: 0;
+    transition: opacity 1s ease;
+    margin-top: 30px;
+  }
+
+  .question-text {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+
+  .language-selector {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  .listening-indicator {
+    margin-top: 20px;
+    font-size: 1rem;
+    color: var(--bs-info);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .listening-indicator.active {
+    opacity: 1;
+  }
+
+  .pulse-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--bs-info);
+    margin: 0 2px;
+    animation: pulse-dot 1.5s ease-in-out infinite;
+  }
+
+  .pulse-dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .pulse-dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.2;
+    }
+    50% {
+      transform: scale(1.5);
+      opacity: 1;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="startup-container">
+  <div class="sphere-container">
+    <div class="sphere"></div>
+    <div class="glow"></div>
+  </div>
+
+  <div id="question-container" class="question-container">
+    <h2 id="question-text" class="question-text">Please choose your preferred language</h2>
+
+    <div id="language-selector" class="language-selector">
+      <button id="english-btn" class="btn btn-primary btn-lg">English</button>
+      <button id="arabic-btn" class="btn btn-info btn-lg">العربية</button>
+    </div>
+
+    <div id="listening-indicator" class="listening-indicator">
+      <p>Listening <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/voice_recorder.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Global variables
+    let userLanguage = '';
+    let currentStep = 'language';
+    let userProfile = {
+      full_name: '',
+      age: null,
+      nickname: '',
+      preferred_voice_style: '',
+      theme: '',
+      language_preference: '',
+      onboarding_complete: false
+    };
+
+    // Wait for animation to complete before showing questions
+    setTimeout(() => {
+      document.getElementById('question-container').style.opacity = '1';
+    }, 1000);
+
+    // Language selection buttons
+    document.getElementById('english-btn').addEventListener('click', () => {
+      setLanguage('en');
+    });
+
+    document.getElementById('arabic-btn').addEventListener('click', () => {
+      setLanguage('ar');
+    });
+
+    // Function to set the language and proceed
+    function setLanguage(lang) {
+      userLanguage = lang;
+      userProfile.language_preference = lang;
+
+      // Hide language selector
+      document.getElementById('language-selector').style.display = 'none';
+
+      // Begin onboarding flow
+      playWelcomeMessage();
+    }
+
+    // Function to play welcome message
+    function playWelcomeMessage() {
+      const welcomeText = userLanguage === 'en' ? 
+        "Shape your future... I am now listening..." : 
+        "اصنع مستقبلك... أنا أسمعك الآن...";
+
+      document.getElementById('question-text').textContent = welcomeText;
+
+      // Simulate speech
+      speakText(welcomeText);
+
+      // After welcome message, proceed to privacy consent
+      setTimeout(() => {
+        askPrivacyConsent();
+      }, 5000);
+    }
+
+    // Function to ask for privacy consent
+    function askPrivacyConsent() {
+      currentStep = 'privacy';
+
+      const consentText = userLanguage === 'en' ? 
+        "Before we begin, do you agree to store your information securely on this device only?" : 
+        "قبل أن أبدأ، هل توافق على أن أحتفظ بمعلوماتك في هذا الجهاز فقط؟";
+
+      document.getElementById('question-text').textContent = consentText;
+
+      // Simulate speech
+      speakText(consentText);
+
+      // Start listening for response
+      startListening();
+    }
+
+    // Function to process privacy consent response
+    function processPrivacyResponse(text) {
+      text = text.toLowerCase();
+      let consent = false;
+
+      if (userLanguage === 'en') {
+        consent = text.includes('yes') || text.includes('yeah') || text.includes('sure') || text.includes('agree');
+      } else {
+        consent = text.includes('نعم') || text.includes('موافق');
+      }
+
+      if (consent) {
+        // If consent granted, proceed to registration
+        askFullName();
+      } else {
+        // If consent denied, exit gracefully
+        const exitMessage = userLanguage === 'en' ?
+          "I understand. Thank you for your time. Exiting now." :
+          "أتفهم ذلك. شكرا لوقتك. جاري الخروج الآن.";
+
+        document.getElementById('question-text').textContent = exitMessage;
+        speakText(exitMessage);
+
+        // Redirect to home after a delay
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 5000);
+      }
+    }
+
+    // Function to ask for full name
+    function askFullName() {
+      currentStep = 'name';
+
+      const nameQuestion = userLanguage === 'en' ? 
+        "What is your full name?" : 
+        "ما اسمك الكامل؟";
+
+      document.getElementById('question-text').textContent = nameQuestion;
+      speakText(nameQuestion);
+      startListening();
+    }
+
+    // Function to process name response
+    function processNameResponse(text) {
+      userProfile.full_name = text;
+      askAge();
+    }
+
+    // Function to ask for age
+    function askAge() {
+      currentStep = 'age';
+
+      const ageQuestion = userLanguage === 'en' ? 
+        "How old are you?" : 
+        "كم عمرك؟";
+
+      document.getElementById('question-text').textContent = ageQuestion;
+      speakText(ageQuestion);
+      startListening();
+    }
+
+    // Function to process age response
+    function processAgeResponse(text) {
+      // Try to extract a number from the response
+      const age = parseInt(text.match(/\d+/));
+
+      if (!isNaN(age)) {
+        userProfile.age = age;
+        askNickname();
+      } else {
+        // If no valid number found, ask again
+        const retryMessage = userLanguage === 'en' ?
+          "I didn't get your age. Please tell me how old you are with a number." :
+          "لم أفهم عمرك. يرجى إخباري بعمرك برقم.";
+
+        document.getElementById('question-text').textContent = retryMessage;
+        speakText(retryMessage);
+        setTimeout(() => startListening(), 3000);
+      }
+    }
+
+    // Function to ask for nickname
+    function askNickname() {
+      currentStep = 'nickname';
+
+      const nicknameQuestion = userLanguage === 'en' ? 
+        "What would you like me to call you?" : 
+        "ما الذي تحب أن أُطلقه عليك؟";
+
+      document.getElementById('question-text').textContent = nicknameQuestion;
+      speakText(nicknameQuestion);
+      startListening();
+    }
+
+    // Function to process nickname response
+    function processNicknameResponse(text) {
+      userProfile.nickname = text;
+      askVoiceStyle();
+    }
+
+    // Function to ask for preferred voice style
+    function askVoiceStyle() {
+      currentStep = 'voice';
+
+      const voiceQuestion = userLanguage === 'en' ? 
+        "How would you like my voice to sound? (soft, formal, playful...)" : 
+        "كيف تفضل صوتي؟ (ناعم، رسمي، مشاغب...)";
+
+      document.getElementById('question-text').textContent = voiceQuestion;
+      speakText(voiceQuestion);
+      startListening();
+    }
+
+    // Function to process voice style response
+    function processVoiceResponse(text) {
+      userProfile.preferred_voice_style = text;
+      askTheme();
+    }
+
+    // Function to ask for theme preference
+    function askTheme() {
+      currentStep = 'theme';
+
+      const themeQuestion = userLanguage === 'en' ? 
+        "Do you prefer dark mode or light mode?" : 
+        "هل تفضل الوضع الداكن أم الفاتح؟";
+
+      document.getElementById('question-text').textContent = themeQuestion;
+      speakText(themeQuestion);
+      startListening();
+    }
+
+    // Function to process theme response
+    function processThemeResponse(text) {
+      text = text.toLowerCase();
+
+      if (userLanguage === 'en') {
+        if (text.includes('dark')) {
+          userProfile.theme = 'dark';
+        } else if (text.includes('light')) {
+          userProfile.theme = 'light';
+        } else {
+          userProfile.theme = 'dark'; // Default to dark
+        }
+      } else {
+        if (text.includes('داكن') || text.includes('أسود')) {
+          userProfile.theme = 'dark';
+        } else if (text.includes('فاتح') || text.includes('أبيض')) {
+          userProfile.theme = 'light';
+        } else {
+          userProfile.theme = 'dark'; // Default to dark
+        }
+      }
+
+      // Complete registration
+      completeRegistration();
+    }
+
+    // Function to complete registration
+    function completeRegistration() {
+      userProfile.onboarding_complete = true;
+
+      // Send profile data to server
+      fetch('/api/update-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(userProfile)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Show completion message
+          const completionMessage = userLanguage === 'en' ?
+            `Thank you, ${userProfile.nickname}! Your profile has been set up. Let's get started!` :
+            `شكرًا لك، ${userProfile.nickname}! تم إعداد ملفك الشخصي. دعنا نبدأ!`;
+
+          document.getElementById('question-text').textContent = completionMessage;
+          speakText(completionMessage);
+
+          // Redirect to main page after a delay
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 5000);
+        } else {
+          console.error('Error saving profile:', data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    }
+
+    // Function to speak text using the actual TTS API
+    function speakText(text) {
+      console.log('Speaking:', text);
+
+      // Call actual TTS API
+      fetch('/api/speak', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          text: text, 
+          language: userLanguage === 'en' ? 'en-US' : 'ar'
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('TTS success:', data);
+          
+          // Create audio element to play the response
+          const audio = new Audio(data.audio_path);
+          audio.play().catch(e => console.error('Error playing audio:', e));
+        } else {
+          console.error('TTS error:', data.error);
+        }
+      })
+      .catch(error => {
+        console.error('TTS API error:', error);
+      });
+    }
+
+    // Initialize voice recorder
+    const voiceRecorder = new VoiceRecorder({
+      onStart: () => {
+        console.log('Recording started');
+        document.getElementById('listening-indicator').classList.add('active');
+      },
+      onStop: () => {
+        console.log('Recording stopped');
+      },
+      onResult: (data) => {
+        console.log('Voice recognition result:', data);
+        document.getElementById('listening-indicator').classList.remove('active');
+        
+        // Check for Roben/Developer name
+        if (data.text && data.text.toLowerCase().includes('roben')) {
+          console.log('Developer name detected!');
+          // Special handling for developer
+          if (currentStep === 'name') {
+            const devWelcomeMsg = userLanguage === 'en' ?
+              'Welcome back, Roben. Robin AI is fully operational.' :
+              'مرحبًا بعودتك، روبن. روبن الذكاء الاصطناعي جاهز للعمل.';
+            
+            speakText(devWelcomeMsg);
+            
+            // Automatically switch to admin mode
+            setTimeout(() => {
+              window.location.href = '/admin';
+            }, 3000);
+            return;
+          }
+        }
+        
+        // Process regular response
+        processResponse(data.text);
+      },
+      onError: (error) => {
+        console.error('Voice recognition error:', error);
+        document.getElementById('listening-indicator').classList.remove('active');
+        
+        // Fallback to simulated response in case of error
+        const simulatedResponse = simulateResponseForStep(currentStep);
+        processResponse(simulatedResponse);
+      },
+      maxRecordingTime: 7000 // 7 seconds max
+    });
+    
+    // Function to start real voice input
+    function startListening() {
+      // Show listening indicator if not already shown by recorder
+      if (!document.getElementById('listening-indicator').classList.contains('active')) {
+        document.getElementById('listening-indicator').classList.add('active');
+      }
+      
+      // Try to use the voice recorder
+      try {
+        voiceRecorder.start();
+      } catch (error) {
+        console.error('Failed to start voice recorder:', error);
+        
+        // Fallback to simulation if recorder fails
+        console.warn('Falling back to simulated responses');
+        setTimeout(() => {
+          const simulatedResponse = simulateResponseForStep(currentStep);
+          processResponse(simulatedResponse);
+        }, 5000);
+      }
+    }
+
+    // Function to stop listening indicator
+    function stopListening() {
+      document.getElementById('listening-indicator').classList.remove('active');
+    }
+
+    // Process response based on current step
+    function processResponse(text) {
+      stopListening();
+
+      console.log(`Processing ${currentStep} response: ${text}`);
+
+      switch(currentStep) {
+        case 'privacy':
+          processPrivacyResponse(text);
+          break;
+        case 'name':
+          processNameResponse(text);
+          break;
+        case 'age':
+          processAgeResponse(text);
+          break;
+        case 'nickname':
+          processNicknameResponse(text);
+          break;
+        case 'voice':
+          processVoiceResponse(text);
+          break;
+        case 'theme':
+          processThemeResponse(text);
+          break;
+      }
+    }
+
+    // Helper function to simulate voice responses for each step (for demonstration)
+    function simulateResponseForStep(step) {
+      // In a real implementation, this would be replaced with actual voice recognition
+      switch(step) {
+        case 'privacy':
+          return userLanguage === 'en' ? 'Yes, I agree' : 'نعم، أوافق';
+        case 'name':
+          return userLanguage === 'en' ? 'John Smith' : 'محمد سعيد';
+        case 'age':
+          return '32';
+        case 'nickname':
+          return userLanguage === 'en' ? 'Johnny' : 'محمد';
+        case 'voice':
+          return userLanguage === 'en' ? 'I prefer a soft voice' : 'أفضل صوت ناعم';
+        case 'theme':
+          return userLanguage === 'en' ? 'Dark mode please' : 'الوضع الداكن من فضلك';
+        default:
+          return '';
+      }
+    }
+  });
+</script>
+{% endblock %}

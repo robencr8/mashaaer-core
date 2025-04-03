@@ -1,0 +1,616 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .profile-card {
+        transition: transform 0.3s ease;
+        height: 100%;
+        margin-bottom: 20px;
+    }
+    
+    .profile-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .profile-img-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 50%;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto 20px;
+        background-color: var(--bs-dark);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .profile-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .profile-placeholder {
+        font-size: 4rem;
+        color: var(--bs-secondary);
+    }
+    
+    .last-seen {
+        font-size: 0.8rem;
+        color: var(--bs-info);
+    }
+    
+    .profile-metadata {
+        margin-top: 15px;
+    }
+    
+    .profile-actions {
+        margin-top: 20px;
+    }
+    
+    .add-profile-card {
+        border: 2px dashed var(--bs-secondary);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        height: 100%;
+    }
+    
+    .add-profile-card:hover {
+        border-color: var(--bs-info);
+        background-color: rgba(13, 202, 240, 0.1);
+    }
+    
+    .profile-stats {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 15px;
+    }
+    
+    .profile-stat {
+        text-align: center;
+    }
+    
+    .profile-stat .value {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .profile-stat .label {
+        font-size: 0.8rem;
+        color: var(--bs-secondary);
+    }
+    
+    #add-profile-modal .modal-body {
+        padding: 20px;
+    }
+    
+    .camera-container {
+        width: 100%;
+        max-width: 400px;
+        height: 300px;
+        margin: 0 auto;
+        background-color: var(--bs-dark);
+        position: relative;
+        overflow: hidden;
+        border-radius: 10px;
+    }
+    
+    #camera-feed {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .capture-btn {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-user-circle me-2"></i>Face Profiles</h2>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#add-profile-modal">
+                    <i class="fas fa-plus me-1"></i>Add Profile
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if profiles %}
+                        {% for profile in profiles %}
+                        <div class="col-md-4 col-sm-6">
+                            <div class="card profile-card">
+                                <div class="card-body text-center">
+                                    <div class="profile-img-container">
+                                        {% if profile.image_path %}
+                                        <img src="{{ profile.image_path }}" alt="{{ profile.name }}" class="profile-img">
+                                        {% else %}
+                                        <i class="fas fa-user profile-placeholder"></i>
+                                        {% endif %}
+                                    </div>
+                                    <h4 class="card-title">{{ profile.name }}</h4>
+                                    {% if profile.last_seen %}
+                                    <p class="last-seen"><i class="fas fa-clock me-1"></i>Last seen: {{ profile.last_seen }}</p>
+                                    {% endif %}
+                                    
+                                    <div class="profile-stats">
+                                        <div class="profile-stat">
+                                            <div class="value">{{ profile.interactions|default(0) }}</div>
+                                            <div class="label">Interactions</div>
+                                        </div>
+                                        <div class="profile-stat">
+                                            <div class="value">{{ profile.recognition_rate|default(0) }}%</div>
+                                            <div class="label">Recognition</div>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if profile.metadata %}
+                                    <div class="profile-metadata">
+                                        <small class="text-muted">
+                                            {% for key, value in profile.metadata.items() %}
+                                            <div><strong>{{ key }}:</strong> {{ value }}</div>
+                                            {% endfor %}
+                                        </small>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="profile-actions">
+                                        <button class="btn btn-sm btn-info me-2" onclick="editProfile('{{ profile.id }}')">
+                                            <i class="fas fa-edit me-1"></i>Edit
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteProfile('{{ profile.id }}')">
+                                            <i class="fas fa-trash me-1"></i>Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="col-12 text-center">
+                            <div class="p-5">
+                                <i class="fas fa-user-slash mb-3" style="font-size: 3rem; color: var(--bs-secondary);"></i>
+                                <h4>No profiles found</h4>
+                                <p class="text-muted">Add a new profile to start recognizing faces.</p>
+                                <button class="btn btn-info mt-3" data-bs-toggle="modal" data-bs-target="#add-profile-modal">
+                                    <i class="fas fa-plus me-1"></i>Add Your First Profile
+                                </button>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Profile Statistics -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3><i class="fas fa-chart-pie me-2"></i>Recognition Statistics</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="recognition-chart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3><i class="fas fa-info-circle me-2"></i>Face Recognition Info</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-lightbulb me-2"></i>How Face Recognition Works</h5>
+                    <p>Robin AI uses facial recognition to identify and remember people across sessions. When a face is detected, it's compared against saved profiles.</p>
+                </div>
+                
+                <h5 class="mt-4">Recognition Process:</h5>
+                <ol class="list-group list-group-numbered mb-3">
+                    <li class="list-group-item">Face detection using computer vision</li>
+                    <li class="list-group-item">Feature extraction from facial landmarks</li>
+                    <li class="list-group-item">Comparison with stored profiles</li>
+                    <li class="list-group-item">Identity confirmation and personalization</li>
+                </ol>
+                
+                <div class="text-center mt-4">
+                    <p><strong>Developer Mode Activation:</strong></p>
+                    <div class="alert alert-warning">
+                        When the system recognizes <strong>{{ dev_name|default('Roben Edwan') }}</strong>, developer mode is automatically activated!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Profile Modal -->
+<div class="modal fade" id="add-profile-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="profile-form">
+                    <div class="mb-3">
+                        <label for="profile-name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="profile-name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Profile Image</label>
+                        <div class="camera-container mb-3">
+                            <video id="camera-feed" autoplay muted></video>
+                            <button type="button" class="btn btn-info capture-btn" id="capture-btn">
+                                <i class="fas fa-camera me-1"></i>Capture
+                            </button>
+                        </div>
+                        <div class="text-center">
+                            <canvas id="captured-image" style="display: none; max-width: 100%;"></canvas>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <button type="button" class="btn btn-secondary" id="retake-btn" style="display: none;">
+                                <i class="fas fa-redo me-1"></i>Retake
+                            </button>
+                            <div>
+                                <label class="btn btn-outline-info">
+                                    <i class="fas fa-upload me-1"></i>Upload Image
+                                    <input type="file" id="profile-image-upload" accept="image/*" style="display: none;">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Metadata (Optional)</label>
+                        <div class="row g-2" id="metadata-container">
+                            <div class="col-md-5">
+                                <input type="text" class="form-control metadata-key" placeholder="Key">
+                            </div>
+                            <div class="col-md-5">
+                                <input type="text" class="form-control metadata-value" placeholder="Value">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-outline-info w-100" id="add-metadata-btn">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="save-profile-btn">Save Profile</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Chart for recognition statistics
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sample data - would be replaced with real data
+        const profiles = {{ profiles|tojson }};
+        
+        if (profiles && profiles.length > 0) {
+            // Extract data for chart
+            const labels = profiles.map(p => p.name);
+            const interactionData = profiles.map(p => p.interactions || 0);
+            const recognitionRates = profiles.map(p => p.recognition_rate || 0);
+            
+            // Create chart
+            const ctx = document.getElementById('recognition-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Interactions',
+                            data: interactionData,
+                            backgroundColor: 'rgba(13, 202, 240, 0.7)',
+                            borderColor: 'rgba(13, 202, 240, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Recognition Rate (%)',
+                            data: recognitionRates,
+                            backgroundColor: 'rgba(255, 193, 7, 0.7)',
+                            borderColor: 'rgba(255, 193, 7, 1)',
+                            borderWidth: 1,
+                            type: 'line',
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Interactions'
+                            }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            max: 100,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Recognition Rate (%)'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            // If no profiles, show placeholder
+            const ctx = document.getElementById('recognition-chart').getContext('2d');
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#6c757d';
+            ctx.fillText('No profile data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+        }
+        
+        // Camera handling for profile creation
+        const cameraFeed = document.getElementById('camera-feed');
+        const captureBtn = document.getElementById('capture-btn');
+        const retakeBtn = document.getElementById('retake-btn');
+        const capturedCanvas = document.getElementById('captured-image');
+        const imageUpload = document.getElementById('profile-image-upload');
+        let stream = null;
+        
+        // Start camera when modal is shown
+        $('#add-profile-modal').on('shown.bs.modal', function() {
+            startCamera();
+        });
+        
+        // Stop camera when modal is hidden
+        $('#add-profile-modal').on('hidden.bs.modal', function() {
+            stopCamera();
+        });
+        
+        // Start camera
+        function startCamera() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(function(mediaStream) {
+                        stream = mediaStream;
+                        cameraFeed.srcObject = mediaStream;
+                        cameraFeed.play();
+                        capturedCanvas.style.display = 'none';
+                        cameraFeed.style.display = 'block';
+                        captureBtn.style.display = 'block';
+                        retakeBtn.style.display = 'none';
+                    })
+                    .catch(function(error) {
+                        console.error('Camera error:', error);
+                        // Show error message
+                        const cameraContainer = document.querySelector('.camera-container');
+                        cameraContainer.innerHTML = `
+                            <div class="text-center p-4">
+                                <i class="fas fa-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                                <h5 class="mt-3">Camera access error</h5>
+                                <p class="text-muted">Please make sure camera permissions are granted or use the upload option.</p>
+                            </div>
+                        `;
+                    });
+            }
+        }
+        
+        // Stop camera
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+        }
+        
+        // Capture image
+        captureBtn.addEventListener('click', function() {
+            const context = capturedCanvas.getContext('2d');
+            capturedCanvas.width = cameraFeed.videoWidth;
+            capturedCanvas.height = cameraFeed.videoHeight;
+            context.drawImage(cameraFeed, 0, 0, capturedCanvas.width, capturedCanvas.height);
+            
+            // Show captured image
+            capturedCanvas.style.display = 'block';
+            cameraFeed.style.display = 'none';
+            captureBtn.style.display = 'none';
+            retakeBtn.style.display = 'block';
+        });
+        
+        // Retake photo
+        retakeBtn.addEventListener('click', function() {
+            capturedCanvas.style.display = 'none';
+            cameraFeed.style.display = 'block';
+            captureBtn.style.display = 'block';
+            retakeBtn.style.display = 'none';
+        });
+        
+        // Handle image upload
+        imageUpload.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    // Stop camera first
+                    stopCamera();
+                    
+                    // Create image to get dimensions
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = capturedCanvas;
+                        const context = canvas.getContext('2d');
+                        
+                        // Set canvas dimensions to match image
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        
+                        // Draw image on canvas
+                        context.drawImage(img, 0, 0);
+                        
+                        // Show captured image
+                        capturedCanvas.style.display = 'block';
+                        cameraFeed.style.display = 'none';
+                        captureBtn.style.display = 'none';
+                        retakeBtn.style.display = 'block';
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        
+        // Add metadata button
+        document.getElementById('add-metadata-btn').addEventListener('click', function() {
+            const container = document.getElementById('metadata-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'row g-2 mt-2';
+            newRow.innerHTML = `
+                <div class="col-md-5">
+                    <input type="text" class="form-control metadata-key" placeholder="Key">
+                </div>
+                <div class="col-md-5">
+                    <input type="text" class="form-control metadata-value" placeholder="Value">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-danger w-100 remove-metadata-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            container.appendChild(newRow);
+            
+            // Add remove button handler
+            newRow.querySelector('.remove-metadata-btn').addEventListener('click', function() {
+                container.removeChild(newRow);
+            });
+        });
+        
+        // Save profile
+        document.getElementById('save-profile-btn').addEventListener('click', function() {
+            const name = document.getElementById('profile-name').value.trim();
+            
+            if (!name) {
+                alert('Please enter a name for the profile');
+                return;
+            }
+            
+            // Check if we have an image
+            const imageCanvas = document.getElementById('captured-image');
+            if (imageCanvas.style.display === 'none') {
+                alert('Please capture or upload an image');
+                return;
+            }
+            
+            // Get metadata
+            const metadata = {};
+            const keyInputs = document.querySelectorAll('.metadata-key');
+            const valueInputs = document.querySelectorAll('.metadata-value');
+            
+            for (let i = 0; i < keyInputs.length; i++) {
+                const key = keyInputs[i].value.trim();
+                const value = valueInputs[i].value.trim();
+                if (key && value) {
+                    metadata[key] = value;
+                }
+            }
+            
+            // Get image data
+            const imageData = imageCanvas.toDataURL('image/jpeg');
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('image', dataURItoBlob(imageData), 'profile.jpg');
+            formData.append('metadata', JSON.stringify(metadata));
+            
+            // Send to server
+            fetch('/api/add-face-profile', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close modal and reload
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('add-profile-modal'));
+                    modal.hide();
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to save profile. Please try again.');
+            });
+        });
+        
+        // Helper function to convert data URI to Blob
+        function dataURItoBlob(dataURI) {
+            const byteString = atob(dataURI.split(',')[1]);
+            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            
+            return new Blob([ab], {type: mimeString});
+        }
+    });
+    
+    // Delete profile function
+    function deleteProfile(profileId) {
+        if (confirm('Are you sure you want to delete this profile? This action cannot be undone.')) {
+            fetch(`/api/delete-face-profile/${profileId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to delete profile. Please try again.');
+            });
+        }
+    }
+    
+    // Edit profile function
+    function editProfile(profileId) {
+        alert('Edit functionality will be implemented in a future update.');
+        // This would fetch the profile details and open the modal pre-filled
+    }
+</script>
+{% endblock %}

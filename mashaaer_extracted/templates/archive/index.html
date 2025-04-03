@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Robin AI - Personal Assistant</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
+  <style>
+    :root {
+      --background-deep: #0a0e17;
+      --background-surface: #141824;
+      --accent-primary: #4f46e5;
+      --accent-secondary: #6366f1;
+      --accent-tertiary: #3730a3;
+      --text-primary: #f1f1f1;
+      --text-secondary: #a0a0a0;
+      --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-hard: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+      --border-radius: 12px;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.8; }
+    }
+
+    @keyframes orbit {
+      0% { transform: rotate(0deg) translateX(10px) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(10px) rotate(-360deg); }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--background-deep);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0a0e17 0%, #141824 50%, #1a1c23 100%);
+      background-size: 200% 200%;
+      animation: gradient 15s ease infinite;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%232d2f39' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+      opacity: 0.5;
+      z-index: -1;
+    }
+
+    header {
+      text-align: center;
+      position: relative;
+      width: 100%;
+      animation: float 6s ease-in-out infinite;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(to right, #4f46e5, #6366f1, #3730a3);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    h2 {
+      font-weight: 400;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      font-size: 1.2rem;
+    }
+
+    .cosmic-orb {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 3rem;
+    }
+
+    .orb {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #6366f1, #4f46e5, #3730a3);
+      box-shadow: 
+        0 0 10px rgba(99, 102, 241, 0.5),
+        0 0 20px rgba(99, 102, 241, 0.3),
+        0 0 30px rgba(99, 102, 241, 0.2);
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    .orbit {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 50%;
+    }
+
+    .orbit::before {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: var(--accent-secondary);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-secondary);
+      animation: orbit 8s linear infinite;
+    }
+
+    .orbit:nth-child(2) {
+      width: 90%;
+      height: 90%;
+      margin: 5%;
+      transform: rotate(45deg);
+    }
+
+    .orbit:nth-child(2)::before {
+      animation-duration: 12s;
+    }
+
+    .orbit:nth-child(3) {
+      width: 80%;
+      height: 80%;
+      margin: 10%;
+      transform: rotate(90deg);
+    }
+
+    .orbit:nth-child(3)::before {
+      animation-duration: 6s;
+      width: 8px;
+      height: 8px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      max-width: 700px;
+      width: 100%;
+      margin-bottom: 2.5rem;
+    }
+
+    .feature {
+      background: var(--background-surface);
+      color: var(--text-primary);
+      padding: 1.25rem;
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .feature:active {
+      transform: translateY(2px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .feature::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s;
+    }
+
+    .feature:hover::before {
+      transform: translateX(100%);
+    }
+
+    .cta {
+      margin-top: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .cta a {
+      display: inline-block;
+      text-decoration: none;
+      background: linear-gradient(45deg, var(--accent-tertiary), var(--accent-primary));
+      color: white;
+      padding: 1rem 0;
+      border-radius: var(--border-radius);
+      font-weight: 600;
+      text-align: center;
+      box-shadow: var(--shadow-hard);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+    }
+
+    .cta a:hover {
+      box-shadow: 0 6px 15px -3px rgba(0, 0, 0, 0.3);
+    }
+
+    .cta a:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .cta a::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s;
+    }
+
+    .cta a:hover::before {
+      transform: translateX(100%);
+    }
+
+    .presentation {
+      margin-top: 3rem;
+      width: 100%;
+      max-width: 800px;
+      background: var(--background-surface);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-hard);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .presentation h2 {
+      padding: 1.5rem;
+      margin: 0;
+      color: var(--text-primary);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    iframe {
+      width: 100%;
+      height: 450px;
+      border: none;
+      display: block;
+    }
+
+    .footer-links {
+      margin-top: 3rem;
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+      position: relative;
+    }
+
+    .footer-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--accent-primary);
+      transition: width 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .footer-links a:hover::after {
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .features {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .cta {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 700px;
+      }
+      
+      .cta a {
+        min-width: 200px;
+        max-width: 250px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2.5rem;
+      }
+      
+      body {
+        padding: 1.5rem;
+      }
+      
+      .presentation {
+        margin-top: 2rem;
+      }
+      
+      iframe {
+        height: 300px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      h2 {
+        font-size: 1rem;
+      }
+      
+      .cosmic-orb {
+        width: 120px;
+        height: 120px;
+        margin-bottom: 2rem;
+      }
+      
+      .orb {
+        width: 80px;
+        height: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🚀 Robin AI</h1>
+    <h2>Smart. Private. Emotional. Built by Roben Edwan.</h2>
+    
+    <div class="cosmic-orb">
+      <div class="orbit"></div>
+      <div class="orbit"></div>
+      <div class="orbit"></div>
+      <div class="orb"></div>
+    </div>
+  </header>
+  
+  <div class="features">
+    <div class="feature">🎙️ Multilingual Voice Interaction (Arabic + English)</div>
+    <div class="feature">🧠 Emotional Awareness & Pattern Recognition</div>
+    <div class="feature">👁️ Real-time Face & Object Recognition</div>
+    <div class="feature">📶 Fully Offline Capable Neural Network</div>
+    <div class="feature">💻 Mobile Companion App with Cosmic UI</div>
+    <div class="feature">🔐 Advanced Developer Mode for Roben</div>
+  </div>
+  
+  <div class="cta">
+    <a href="/startup">🚀 Start Robin AI</a>
+    <a href="/mobile">📱 Mobile Interface</a>
+    <a href="/admin" {% if not dev_mode %}style="display:none"{% endif %}>⚙️ Admin Dashboard</a>
+  </div>
+  
+  <div class="presentation">
+    <h2>📽️ Explore Robin AI Presentation</h2>
+    <iframe src="https://gamma.app/embed/a7bnglpz97ljhuz" allow="fullscreen" title="Robin AI Intro"></iframe>
+  </div>
+  
+  <div class="footer-links">
+    <a href="/admin">Admin Dashboard</a>
+    <a href="/live-view">Live Camera</a>
+    <a href="/session-report">Session Report</a>
+    <a href="/emotion-timeline">Emotion Timeline</a>
+    <a href="/profile">Face Profiles</a>
+  </div>
+</body>
+</html>

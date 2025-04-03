@@ -1,0 +1,1026 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .camera-container {
+        position: relative;
+        width: 100%;
+        border-radius: 10px;
+        overflow: hidden;
+        background-color: #1a1a2e;
+    }
+    
+    #camera-feed {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+    
+    .camera-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+        color: white;
+        padding: 15px;
+    }
+    
+    .face-box {
+        position: absolute;
+        border: 3px solid var(--bs-info);
+        border-radius: 5px;
+        pointer-events: none;
+    }
+    
+    .face-label {
+        position: absolute;
+        background-color: var(--bs-info);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+    
+    .camera-controls {
+        margin-top: 15px;
+    }
+    
+    .recognition-log {
+        height: 400px;
+        overflow-y: auto;
+        border-radius: 10px;
+    }
+    
+    .log-entry {
+        padding: 10px;
+        margin-bottom: 8px;
+        border-radius: 5px;
+        background-color: var(--bs-dark);
+        border-left: 4px solid var(--bs-info);
+        transition: all 0.3s ease;
+    }
+    
+    .log-entry:hover {
+        transform: translateX(5px);
+    }
+    
+    .log-entry .timestamp {
+        font-size: 0.8rem;
+        color: var(--bs-secondary);
+    }
+    
+    .log-entry .emotion {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        margin-left: 5px;
+    }
+    
+    .profile-stats {
+        background-color: var(--bs-dark);
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    
+    .profile-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .profile-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin-right: 15px;
+    }
+    
+    .profile-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .profile-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--bs-dark);
+        color: var(--bs-secondary);
+        font-size: 2rem;
+    }
+    
+    .stats-container {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+    
+    .stat-item {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+        padding: 10px;
+        border-radius: 8px;
+        margin: 5px;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--bs-info);
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--bs-secondary);
+    }
+    
+    .unknown-user-form {
+        background-color: var(--bs-dark);
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-video me-2"></i>Live Face Recognition</h2>
+                <div>
+                    <span id="status-indicator" class="badge bg-warning me-2">
+                        <i class="fas fa-circle me-1"></i>Initializing
+                    </span>
+                    <button id="toggle-camera-btn" class="btn btn-primary">
+                        <i class="fas fa-video me-1"></i>Start Camera
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-7">
+                        <!-- Camera Feed -->
+                        <div class="camera-container">
+                            <video id="camera-feed" autoplay muted playsinline></video>
+                            <canvas id="overlay-canvas" style="position:absolute; top:0; left:0; width:100%; height:100%;"></canvas>
+                            <div class="camera-overlay">
+                                <span id="recognition-status">Camera is offline</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Camera Controls -->
+                        <div class="camera-controls d-flex justify-content-between">
+                            <div>
+                                <button id="capture-btn" class="btn btn-info" disabled>
+                                    <i class="fas fa-camera me-1"></i>Capture
+                                </button>
+                                <button id="add-profile-btn" class="btn btn-success ms-2" disabled>
+                                    <i class="fas fa-user-plus me-1"></i>Add Profile
+                                </button>
+                            </div>
+                            <div>
+                                <select id="camera-select" class="form-select">
+                                    <option value="" selected>Default camera</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Unknown User Form -->
+                        <div id="unknown-user-form" class="unknown-user-form">
+                            <h4><i class="fas fa-user-plus me-2"></i>Add New Profile</h4>
+                            <p class="text-muted">We detected an unknown face. Would you like to add this person to your profiles?</p>
+                            
+                            <form id="new-profile-form">
+                                <div class="mb-3">
+                                    <label for="new-profile-name" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="new-profile-name" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Optional Metadata</label>
+                                    <div class="row g-2" id="metadata-container">
+                                        <div class="col-md-5">
+                                            <input type="text" class="form-control metadata-key" placeholder="Key">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <input type="text" class="form-control metadata-value" placeholder="Value">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn btn-outline-info w-100" id="add-metadata-btn">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary" id="cancel-add-profile-btn">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Save Profile</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Profile Stats -->
+                        <div id="profile-stats" class="profile-stats" style="display:none;">
+                            <div class="profile-header">
+                                <div class="profile-image">
+                                    <div id="profile-image-container">
+                                        <div class="profile-placeholder">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 id="profile-name">No one recognized</h3>
+                                    <p id="profile-last-seen" class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>Last seen: Never
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="stats-container">
+                                <div class="stat-item">
+                                    <div class="stat-value" id="interactions-count">0</div>
+                                    <div class="stat-label">Interactions</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="recognition-rate">0%</div>
+                                    <div class="stat-label">Recognition Rate</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value" id="primary-emotion">-</div>
+                                    <div class="stat-label">Primary Emotion</div>
+                                </div>
+                            </div>
+                            
+                            <div id="profile-metadata" class="mt-3">
+                                <!-- Metadata will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recognition Log -->
+                    <div class="col-lg-5">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-history me-2"></i>Recognition Log</h3>
+                            </div>
+                            <div class="card-body recognition-log" id="recognition-log">
+                                <div class="text-center p-5 text-muted">
+                                    <i class="fas fa-clock" style="font-size: 3rem;"></i>
+                                    <p class="mt-3">No recognition events yet</p>
+                                    <p>Start the camera to begin face detection</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    class LiveFaceRecognition {
+        constructor() {
+            // DOM elements
+            this.cameraFeed = document.getElementById('camera-feed');
+            this.cameraSelect = document.getElementById('camera-select');
+            this.toggleCameraBtn = document.getElementById('toggle-camera-btn');
+            this.captureBtn = document.getElementById('capture-btn');
+            this.addProfileBtn = document.getElementById('add-profile-btn');
+            this.statusIndicator = document.getElementById('status-indicator');
+            this.recognitionStatus = document.getElementById('recognition-status');
+            this.recognitionLog = document.getElementById('recognition-log');
+            this.overlayCanvas = document.getElementById('overlay-canvas');
+            this.profileStats = document.getElementById('profile-stats');
+            this.unknownUserForm = document.getElementById('unknown-user-form');
+            this.newProfileForm = document.getElementById('new-profile-form');
+            this.cancelAddProfileBtn = document.getElementById('cancel-add-profile-btn');
+            
+            // Canvas context
+            this.ctx = this.overlayCanvas.getContext('2d');
+            
+            // State
+            this.stream = null;
+            this.isRunning = false;
+            this.detectionInterval = null;
+            this.capturedImage = null;
+            this.lastDetectionTime = 0;
+            this.detectionCooldown = 2000; // 2 seconds cooldown between detections
+            this.recognizedFaces = [];
+            this.currentProfile = null;
+            
+            // Initialize
+            this.init();
+        }
+        
+        init() {
+            // Set up event listeners
+            this.toggleCameraBtn.addEventListener('click', () => this.toggleCamera());
+            this.captureBtn.addEventListener('click', () => this.captureImage());
+            this.addProfileBtn.addEventListener('click', () => this.showAddProfileForm());
+            this.cancelAddProfileBtn.addEventListener('click', () => this.hideAddProfileForm());
+            this.newProfileForm.addEventListener('submit', (e) => this.handleNewProfileSubmit(e));
+            this.cameraSelect.addEventListener('change', () => this.startCamera());
+            
+            // Add metadata button handler
+            document.getElementById('add-metadata-btn').addEventListener('click', () => this.addMetadataField());
+            
+            // Enumerate cameras
+            this.enumerateCameras();
+            
+            // Set canvas size based on video dimensions when loaded
+            this.cameraFeed.addEventListener('loadedmetadata', () => {
+                this.resizeOverlay();
+            });
+            
+            // Resize overlay when window resizes
+            window.addEventListener('resize', () => this.resizeOverlay());
+            
+            // Update UI
+            this.updateStatus('ready');
+        }
+        
+        resizeOverlay() {
+            // Set canvas dimensions to match video display size
+            const rect = this.cameraFeed.getBoundingClientRect();
+            this.overlayCanvas.width = rect.width;
+            this.overlayCanvas.height = rect.height;
+        }
+        
+        enumerateCameras() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+                console.log('Enumerating media devices is not supported');
+                return;
+            }
+            
+            navigator.mediaDevices.enumerateDevices()
+                .then(devices => {
+                    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                    this.cameraSelect.innerHTML = '<option value="" selected>Default camera</option>';
+                    
+                    videoDevices.forEach((device, index) => {
+                        const option = document.createElement('option');
+                        option.value = device.deviceId;
+                        option.text = device.label || `Camera ${index + 1}`;
+                        this.cameraSelect.appendChild(option);
+                    });
+                })
+                .catch(err => {
+                    console.error('Error enumerating devices:', err);
+                });
+        }
+        
+        toggleCamera() {
+            if (this.isRunning) {
+                this.stopCamera();
+            } else {
+                this.startCamera();
+            }
+        }
+        
+        startCamera() {
+            if (this.isRunning) {
+                this.stopCamera();
+            }
+            
+            const constraints = {
+                video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            };
+            
+            // If a specific camera is selected
+            const cameraId = this.cameraSelect.value;
+            if (cameraId) {
+                constraints.video.deviceId = { exact: cameraId };
+            }
+            
+            this.updateStatus('connecting');
+            
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then(stream => {
+                    this.stream = stream;
+                    this.cameraFeed.srcObject = stream;
+                    this.isRunning = true;
+                    
+                    // Update UI
+                    this.toggleCameraBtn.innerHTML = '<i class="fas fa-video-slash me-1"></i>Stop Camera';
+                    this.captureBtn.disabled = false;
+                    this.addProfileBtn.disabled = false;
+                    this.updateStatus('running');
+                    this.recognitionStatus.textContent = 'Camera is active. Detecting faces...';
+                    
+                    // Start face detection
+                    this.startFaceDetection();
+                })
+                .catch(err => {
+                    console.error('Error accessing camera:', err);
+                    this.updateStatus('error');
+                    this.recognitionStatus.textContent = `Camera error: ${err.message}`;
+                });
+        }
+        
+        stopCamera() {
+            if (this.stream) {
+                this.stream.getTracks().forEach(track => track.stop());
+                this.stream = null;
+            }
+            
+            // Stop detection interval
+            if (this.detectionInterval) {
+                clearInterval(this.detectionInterval);
+                this.detectionInterval = null;
+            }
+            
+            // Clear canvas
+            this.ctx.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
+            
+            // Update UI
+            this.isRunning = false;
+            this.toggleCameraBtn.innerHTML = '<i class="fas fa-video me-1"></i>Start Camera';
+            this.captureBtn.disabled = true;
+            this.addProfileBtn.disabled = true;
+            this.updateStatus('ready');
+            this.recognitionStatus.textContent = 'Camera is offline';
+            
+            // Hide profile stats
+            this.hideProfileStats();
+            this.hideAddProfileForm();
+        }
+        
+        startFaceDetection() {
+            // Clear previous interval
+            if (this.detectionInterval) {
+                clearInterval(this.detectionInterval);
+            }
+            
+            // Start detection interval
+            this.detectionInterval = setInterval(() => {
+                this.detectFaces();
+            }, 1000); // Check every second
+        }
+        
+        detectFaces() {
+            if (!this.isRunning) return;
+            
+            // Skip if we're within cooldown
+            const now = Date.now();
+            if (now - this.lastDetectionTime < this.detectionCooldown) return;
+            
+            // Capture frame from video
+            this.captureFrame()
+                .then(imageData => {
+                    // Send to server for detection
+                    this.sendFrameForDetection(imageData);
+                    this.lastDetectionTime = now;
+                })
+                .catch(err => {
+                    console.error('Error capturing frame:', err);
+                });
+        }
+        
+        captureFrame() {
+            return new Promise((resolve, reject) => {
+                if (!this.isRunning || !this.stream) {
+                    reject(new Error('Camera is not running'));
+                    return;
+                }
+                
+                const canvas = document.createElement('canvas');
+                const video = this.cameraFeed;
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                
+                const ctx = canvas.getContext('2d');
+                // Flip horizontally to mirror camera
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Get the image data as blob
+                canvas.toBlob(blob => {
+                    resolve(blob);
+                }, 'image/jpeg', 0.8);
+            });
+        }
+        
+        captureImage() {
+            if (!this.isRunning) return;
+            
+            this.captureFrame()
+                .then(imageBlob => {
+                    this.capturedImage = imageBlob;
+                    this.showAddProfileForm();
+                })
+                .catch(err => {
+                    console.error('Error capturing image:', err);
+                    alert('Failed to capture image. Please try again.');
+                });
+        }
+        
+        sendFrameForDetection(imageBlob) {
+            // Create form data for the API request
+            const formData = new FormData();
+            formData.append('image', imageBlob);
+            
+            // Show detection in progress
+            this.updateStatus('detecting');
+            
+            // Send to server
+            fetch('/api/detect-face', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.handleDetectionResult(data.result);
+                } else {
+                    console.error('Detection error:', data.error);
+                    this.recognitionStatus.textContent = `Detection error: ${data.error}`;
+                }
+                this.updateStatus('running');
+            })
+            .catch(err => {
+                console.error('API error:', err);
+                this.recognitionStatus.textContent = 'Connection error. Try again.';
+                this.updateStatus('error');
+            });
+        }
+        
+        handleDetectionResult(result) {
+            // Clear previous face boxes
+            this.ctx.clearRect(0, 0, this.overlayCanvas.width, this.overlayCanvas.height);
+            
+            if (result.count === 0) {
+                this.recognitionStatus.textContent = 'No faces detected';
+                this.hideProfileStats();
+                return;
+            }
+            
+            // Store detected faces
+            this.recognizedFaces = result.faces || [];
+            
+            // Get the main detected face
+            const mainFace = this.recognizedFaces[0];
+            
+            // Update recognition status
+            if (mainFace.recognized) {
+                // Log the recognition
+                this.logRecognition(mainFace);
+                
+                // Get and display profile
+                this.getProfileDetails(mainFace.name);
+                
+                // Show recognition status with greeting if available
+                if (mainFace.greeting) {
+                    this.recognitionStatus.textContent = mainFace.greeting;
+                    
+                    // Speak the greeting if available
+                    this.speakGreeting(mainFace.greeting);
+                } else {
+                    this.recognitionStatus.textContent = `Recognized: ${mainFace.name} (${Math.round(mainFace.confidence * 100)}% confident)`;
+                }
+                
+                // Draw face box
+                this.drawFaceBox(mainFace);
+            } else {
+                this.recognitionStatus.textContent = 'Unknown face detected';
+                this.hideProfileStats();
+                
+                // Ask to add new profile
+                this.showAddProfileForm(true);
+                
+                // Store the image for new profile
+                this.captureFrame()
+                    .then(imageBlob => {
+                        this.capturedImage = imageBlob;
+                    })
+                    .catch(err => {
+                        console.error('Error capturing unknown face:', err);
+                    });
+            }
+        }
+        
+        drawFaceBox(face) {
+            if (!face.location) return;
+            
+            // Get video and canvas dimensions to calculate scaling
+            const videoWidth = this.cameraFeed.videoWidth;
+            const videoHeight = this.cameraFeed.videoHeight;
+            const canvasWidth = this.overlayCanvas.width;
+            const canvasHeight = this.overlayCanvas.height;
+            
+            // Calculate scale between video and canvas
+            const scaleX = canvasWidth / videoWidth;
+            const scaleY = canvasHeight / videoHeight;
+            
+            // Get face coordinates
+            const [top, right, bottom, left] = face.location;
+            
+            // Calculate box dimensions with scaling
+            const x = left * scaleX;
+            const y = top * scaleY;
+            const width = (right - left) * scaleX;
+            const height = (bottom - top) * scaleY;
+            
+            // Flip horizontally for mirrored view
+            const mirrorX = canvasWidth - x - width;
+            
+            // Draw face box
+            this.ctx.strokeStyle = face.recognized ? '#0dcaf0' : '#ffc107';
+            this.ctx.lineWidth = 3;
+            this.ctx.strokeRect(mirrorX, y, width, height);
+            
+            // Draw name label
+            const labelText = face.recognized ? face.name : 'Unknown';
+            const labelWidth = this.ctx.measureText(labelText).width + 20;
+            
+            this.ctx.fillStyle = face.recognized ? '#0dcaf0' : '#ffc107';
+            this.ctx.fillRect(mirrorX, y - 30, labelWidth, 25);
+            
+            this.ctx.fillStyle = '#fff';
+            this.ctx.font = '16px Arial';
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText(labelText, mirrorX + 10, y - 12);
+        }
+        
+        logRecognition(face) {
+            // Create log entry
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            
+            // Format timestamp
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            
+            // Get emotion if available
+            const emotion = face.emotion || 'neutral';
+            const emotionColor = this.getEmotionColor(emotion);
+            
+            logEntry.innerHTML = `
+                <div class="d-flex justify-content-between">
+                    <strong>${face.name}</strong>
+                    <span class="timestamp">${timeString}</span>
+                </div>
+                <div>
+                    Confidence: ${Math.round(face.confidence * 100)}%
+                    <span class="emotion" style="background-color: ${emotionColor}">
+                        ${emotion}
+                    </span>
+                </div>
+            `;
+            
+            // Add to log
+            const emptyLog = this.recognitionLog.querySelector('.text-center');
+            if (emptyLog) {
+                this.recognitionLog.innerHTML = '';
+            }
+            
+            this.recognitionLog.insertBefore(logEntry, this.recognitionLog.firstChild);
+            
+            // Send recognition data to server
+            this.logRecognitionToServer(face);
+        }
+        
+        logRecognitionToServer(face) {
+            // Prepare data
+            const data = {
+                name: face.name,
+                confidence: face.confidence,
+                emotion: face.emotion || 'neutral',
+                timestamp: new Date().toISOString()
+            };
+            
+            // Send to server
+            fetch('/api/log-recognition', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (!result.success) {
+                    console.error('Failed to log recognition:', result.error);
+                }
+            })
+            .catch(err => {
+                console.error('Error logging recognition:', err);
+            });
+        }
+        
+        getProfileDetails(name) {
+            fetch(`/api/profile/${encodeURIComponent(name)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.currentProfile = data.profile;
+                        this.showProfileStats(data.profile);
+                    } else {
+                        console.error('Failed to get profile:', data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching profile:', err);
+                });
+        }
+        
+        showProfileStats(profile) {
+            // Show the profile stats container
+            this.profileStats.style.display = 'block';
+            
+            // Update profile details
+            document.getElementById('profile-name').textContent = profile.name;
+            
+            // Format last seen
+            let lastSeen = 'Never';
+            if (profile.last_seen) {
+                try {
+                    const lastSeenDate = new Date(profile.last_seen);
+                    lastSeen = lastSeenDate.toLocaleString();
+                } catch (e) {
+                    lastSeen = profile.last_seen;
+                }
+            }
+            document.getElementById('profile-last-seen').innerHTML = `<i class="fas fa-clock me-1"></i>Last seen: ${lastSeen}`;
+            
+            // Update stats
+            document.getElementById('interactions-count').textContent = profile.interactions || 0;
+            document.getElementById('recognition-rate').textContent = `${profile.recognition_rate || 0}%`;
+            document.getElementById('primary-emotion').textContent = profile.primary_emotion || '-';
+            
+            // Update profile image if available
+            const imageContainer = document.getElementById('profile-image-container');
+            if (profile.image_path) {
+                imageContainer.innerHTML = `<img src="${profile.image_path}" alt="${profile.name}">`;
+            } else {
+                imageContainer.innerHTML = `
+                    <div class="profile-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                `;
+            }
+            
+            // Update metadata
+            const metadataContainer = document.getElementById('profile-metadata');
+            metadataContainer.innerHTML = '';
+            
+            if (profile.metadata && Object.keys(profile.metadata).length > 0) {
+                const metadataTable = document.createElement('table');
+                metadataTable.className = 'table table-sm table-dark';
+                
+                const tableBody = document.createElement('tbody');
+                
+                for (const [key, value] of Object.entries(profile.metadata)) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${key}</strong></td>
+                        <td>${value}</td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+                
+                metadataTable.appendChild(tableBody);
+                metadataContainer.appendChild(metadataTable);
+            }
+        }
+        
+        hideProfileStats() {
+            this.profileStats.style.display = 'none';
+            this.currentProfile = null;
+        }
+        
+        showAddProfileForm(unknownDetected = false) {
+            // Reset the form
+            this.newProfileForm.reset();
+            
+            // Clear extra metadata fields
+            const metadataContainer = document.getElementById('metadata-container');
+            const rows = metadataContainer.querySelectorAll('.row:not(:first-child)');
+            rows.forEach(row => metadataContainer.removeChild(row));
+            
+            // Show the form
+            this.unknownUserForm.style.display = 'block';
+            
+            // Hide profile stats
+            this.hideProfileStats();
+            
+            // If this was triggered by an unknown face detection
+            if (unknownDetected) {
+                // Pause detection interval temporarily
+                if (this.detectionInterval) {
+                    clearInterval(this.detectionInterval);
+                    this.detectionInterval = null;
+                }
+            }
+        }
+        
+        hideAddProfileForm() {
+            this.unknownUserForm.style.display = 'none';
+            
+            // Restart detection if it was stopped
+            if (this.isRunning && !this.detectionInterval) {
+                this.startFaceDetection();
+            }
+        }
+        
+        handleNewProfileSubmit(e) {
+            e.preventDefault();
+            
+            if (!this.capturedImage) {
+                alert('No image captured. Please capture an image first.');
+                return;
+            }
+            
+            const name = document.getElementById('new-profile-name').value.trim();
+            if (!name) {
+                alert('Please enter a name for the profile.');
+                return;
+            }
+            
+            // Collect metadata
+            const metadata = {};
+            const keyInputs = document.querySelectorAll('.metadata-key');
+            const valueInputs = document.querySelectorAll('.metadata-value');
+            
+            for (let i = 0; i < keyInputs.length; i++) {
+                const key = keyInputs[i].value.trim();
+                const value = valueInputs[i].value.trim();
+                if (key && value) {
+                    metadata[key] = value;
+                }
+            }
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('image', this.capturedImage);
+            formData.append('metadata', JSON.stringify(metadata));
+            
+            // Send to server
+            fetch('/api/add-face-profile', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Hide form and restart detection
+                    this.hideAddProfileForm();
+                    
+                    // Add to log
+                    const logEntry = document.createElement('div');
+                    logEntry.className = 'log-entry';
+                    logEntry.innerHTML = `
+                        <div class="d-flex justify-content-between">
+                            <strong>${name}</strong>
+                            <span class="timestamp">${new Date().toLocaleTimeString()}</span>
+                        </div>
+                        <div>
+                            <span class="badge bg-success">New profile created</span>
+                        </div>
+                    `;
+                    
+                    const emptyLog = this.recognitionLog.querySelector('.text-center');
+                    if (emptyLog) {
+                        this.recognitionLog.innerHTML = '';
+                    }
+                    
+                    this.recognitionLog.insertBefore(logEntry, this.recognitionLog.firstChild);
+                    
+                    // Show success message
+                    this.recognitionStatus.textContent = `Profile created for ${name}`;
+                    
+                    // Restart detection but give a moment for the profile to be added
+                    setTimeout(() => {
+                        this.detectFaces();
+                    }, 2000);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Failed to create profile. Please try again.');
+            });
+        }
+        
+        addMetadataField() {
+            const container = document.getElementById('metadata-container');
+            const row = document.createElement('div');
+            row.className = 'row g-2 mt-2';
+            row.innerHTML = `
+                <div class="col-md-5">
+                    <input type="text" class="form-control metadata-key" placeholder="Key">
+                </div>
+                <div class="col-md-5">
+                    <input type="text" class="form-control metadata-value" placeholder="Value">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-danger w-100 remove-metadata-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(row);
+            
+            // Add remove button handler
+            row.querySelector('.remove-metadata-btn').addEventListener('click', () => {
+                container.removeChild(row);
+            });
+        }
+        
+        updateStatus(status) {
+            switch (status) {
+                case 'ready':
+                    this.statusIndicator.className = 'badge bg-secondary me-2';
+                    this.statusIndicator.innerHTML = '<i class="fas fa-circle me-1"></i>Ready';
+                    break;
+                case 'connecting':
+                    this.statusIndicator.className = 'badge bg-warning me-2';
+                    this.statusIndicator.innerHTML = '<i class="fas fa-circle me-1"></i>Connecting...';
+                    break;
+                case 'running':
+                    this.statusIndicator.className = 'badge bg-success me-2';
+                    this.statusIndicator.innerHTML = '<i class="fas fa-circle me-1"></i>Running';
+                    break;
+                case 'detecting':
+                    this.statusIndicator.className = 'badge bg-info me-2';
+                    this.statusIndicator.innerHTML = '<i class="fas fa-circle me-1"></i>Detecting';
+                    break;
+                case 'error':
+                    this.statusIndicator.className = 'badge bg-danger me-2';
+                    this.statusIndicator.innerHTML = '<i class="fas fa-circle me-1"></i>Error';
+                    break;
+            }
+        }
+        
+        speakGreeting(greeting) {
+            // Send the greeting to text-to-speech API
+            fetch('/api/speak', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: greeting,
+                    voice: 'default'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.audio_url) {
+                    // Play the audio
+                    const audio = new Audio(data.audio_url);
+                    audio.play();
+                } else {
+                    console.error('Failed to get speech audio:', data.error);
+                }
+            })
+            .catch(err => {
+                console.error('Error calling TTS API:', err);
+            });
+        }
+        
+        getEmotionColor(emotion) {
+            const colors = {
+                happy: 'rgba(75, 192, 192, 0.7)',
+                sad: 'rgba(201, 203, 207, 0.7)',
+                angry: 'rgba(255, 99, 132, 0.7)',
+                neutral: 'rgba(54, 162, 235, 0.7)',
+                fearful: 'rgba(255, 205, 86, 0.7)',
+                surprised: 'rgba(153, 102, 255, 0.7)'
+            };
+            
+            return colors[emotion.toLowerCase()] || 'rgba(54, 162, 235, 0.7)';
+        }
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        const liveRecognition = new LiveFaceRecognition();
+    });
+</script>
+{% endblock %}

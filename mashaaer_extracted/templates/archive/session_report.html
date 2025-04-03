@@ -1,0 +1,111 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .session-summary {
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+    .chart-container {
+        height: 400px;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    .stat-card {
+        padding: 1.5rem;
+        border-radius: 10px;
+        text-align: center;
+        height: 100%;
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 1rem 0;
+        color: var(--bs-info);
+    }
+    .emotion-indicator {
+        display: inline-block;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+    .timeline-container {
+        position: relative;
+        margin: 2rem 0;
+    }
+    .timeline-point {
+        position: relative;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 10px;
+    }
+    .timeline-point::before {
+        content: '';
+        position: absolute;
+        left: -20px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: var(--bs-info);
+    }
+    .timeline-line {
+        position: absolute;
+        left: -14px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: rgba(var(--bs-info-rgb), 0.5);
+    }
+    .interaction-list {
+        margin-top: 1.5rem;
+    }
+    .session-selector {
+        margin-bottom: 2rem;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Session Report</h2>
+
+  <canvas id="emotionChart" width="400" height="200"></canvas>
+
+  <script>
+    const ctx = document.getElementById('emotionChart').getContext('2d');
+    const emotionChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Happy', 'Sad', 'Angry', 'Surprised', 'Fearful', 'Disgusted', 'Neutral'],
+        datasets: [{
+          label: 'Emotion Frequency',
+          data: [12, 5, 3, 7, 2, 1, 8],
+          backgroundColor: 'rgba(54, 162, 235, 0.5)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  </script>
+
+  <a href="/download/session.csv" class="btn btn-success mt-3">Download CSV</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- No additional scripts needed for the simplified version -->
+{% endblock %}

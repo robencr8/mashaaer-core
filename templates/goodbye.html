@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشاعر | Mashaaer</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #121212;
+            color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .cosmic-sphere {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle at 30% 30%, #8a2be2, #4b0082);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 60px 30px rgba(138, 43, 226, 0.7),
+                0 0 100px 60px rgba(75, 0, 130, 0.5);
+            animation: float 6s ease-in-out infinite, glow 4s ease-in-out infinite alternate;
+            z-index: -1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .cosmic-sphere::before {
+            content: '';
+            position: absolute;
+            top: 15%;
+            left: 15%;
+            width: 20%;
+            height: 20%;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            filter: blur(5px);
+        }
+
+        .goodbye-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .goodbye-icon {
+            font-size: 4rem;
+            color: #8a2be2;
+            margin-bottom: 2rem;
+        }
+
+        .goodbye-content {
+            font-size: 1.6rem;
+            margin-bottom: 2rem;
+            max-width: 800px;
+            background-color: rgba(18, 18, 18, 0.8);
+            border-radius: 1rem;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .arabic-text {
+            font-family: 'Arial', sans-serif;
+            direction: rtl;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #8a2be2, #4b0082);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+            margin-top: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px rgba(138, 43, 226, 0.7);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(-50%, -50%);
+            }
+            50% {
+                transform: translate(-50%, -60%);
+            }
+        }
+
+        @keyframes glow {
+            0% {
+                box-shadow: 
+                    0 0 60px 30px rgba(138, 43, 226, 0.5),
+                    0 0 100px 60px rgba(75, 0, 130, 0.3);
+            }
+            100% {
+                box-shadow: 
+                    0 0 80px 40px rgba(138, 43, 226, 0.7),
+                    0 0 120px 80px rgba(75, 0, 130, 0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmic-sphere"></div>
+    
+    <div class="goodbye-container">
+        <div class="goodbye-icon">
+            <i class="fas fa-hand-peace"></i>
+        </div>
+
+        <div class="goodbye-content">
+            <h1>مشاعر | Mashaaer</h1>
+            
+            <p id="goodbye-message-en" style="display:none;">Thank you for your time. We respect your decision.</p>
+            <p id="goodbye-message-ar" class="arabic-text" style="display:none;">شكرًا لوقتك. نحن نحترم قرارك.</p>
+            
+            <p id="goodbye-note-en" style="display:none;">Mashaaer requires consent to store information locally to provide a personalized experience.</p>
+            <p id="goodbye-note-ar" class="arabic-text" style="display:none;">يتطلب مشاعر موافقتك على تخزين المعلومات محليًا لتقديم تجربة مخصصة.</p>
+            
+            <a href="/startup" class="btn btn-primary">
+                <span class="en-text" style="display:none;">Start Over</span>
+                <span class="ar-text" style="display:none;">البدء من جديد</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get language preference from localStorage
+            const userLanguage = localStorage.getItem('user_language') || 'en';
+            
+            // Set text language
+            if (userLanguage === 'en') {
+                document.getElementById('goodbye-message-en').style.display = 'block';
+                document.getElementById('goodbye-note-en').style.display = 'block';
+                document.querySelectorAll('.en-text').forEach(el => el.style.display = 'block');
+            } else {
+                document.getElementById('goodbye-message-ar').style.display = 'block';
+                document.getElementById('goodbye-note-ar').style.display = 'block';
+                document.querySelectorAll('.ar-text').forEach(el => el.style.display = 'block');
+            }
+            
+            // Add subtle parallax effect to sphere
+            document.addEventListener('mousemove', (e) => {
+                const sphere = document.querySelector('.cosmic-sphere');
+                const x = (window.innerWidth / 2 - e.pageX) / 50;
+                const y = (window.innerHeight / 2 - e.pageY) / 50;
+                sphere.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+            });
+        });
+    </script>
+</body>
+</html>

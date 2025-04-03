@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+
+{% block title %}SMS Notifications - Robin AI Enhanced{% endblock %}
+
+{% block styles %}
+<style>
+    .sms-history-container {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    .message-box {
+        border-left: 4px solid #0d6efd;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 0 5px 5px 0;
+        background-color: rgba(13, 110, 253, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .message-box:hover {
+        transform: translateX(5px);
+    }
+    
+    .message-box.sent {
+        border-left-color: #198754;
+        background-color: rgba(25, 135, 84, 0.1);
+    }
+    
+    .message-box.failed {
+        border-left-color: #dc3545;
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+    
+    .message-time {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .message-content {
+        margin-top: 5px;
+    }
+    
+    .message-recipient {
+        font-weight: 500;
+    }
+    
+    .message-status {
+        float: right;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    
+    .status-sent {
+        background-color: rgba(25, 135, 84, 0.2);
+        color: #198754;
+    }
+    
+    .status-failed {
+        background-color: rgba(220, 53, 69, 0.2);
+        color: #dc3545;
+    }
+    
+    .status-pending {
+        background-color: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+    }
+    
+    .form-floating .form-control {
+        background-color: rgba(33, 37, 41, 0.8);
+    }
+    
+    .cosmic-pulse {
+        animation: cosmic-pulse 2s infinite;
+    }
+    
+    @keyframes cosmic-pulse {
+        0% { box-shadow: 0 0 0 0 rgba(123, 104, 238, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(123, 104, 238, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(123, 104, 238, 0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h1 class="display-5 mb-4">
+                <i class="fas fa-sms me-2 text-primary"></i>
+                SMS Notifications
+            </h1>
+            <p class="lead">
+                Send SMS notifications to users based on Robin AI events and alerts.
+                <span class="badge rounded-pill text-bg-{{ 'success' if twilio_status else 'danger' }}">
+                    Twilio {{ 'Connected' if twilio_status else 'Disconnected' }}
+                </span>
+            </p>
+        </div>
+        <div class="col-lg-4">
+            <div class="card pulse-animation">
+                <div class="card-body text-center">
+                    <h5 class="card-title">SMS Status</h5>
+                    <div class="display-1 mb-2">
+                        <i class="fas fa-{{ 'check-circle text-success' if twilio_status else 'times-circle text-danger' }}"></i>
+                    </div>
+                    <p class="mb-0">{{ twilio_status_message }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Send SMS Form -->
+        <div class="col-lg-5">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-paper-plane me-2"></i>
+                        Send SMS
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="smsForm" action="/api/send-sms" method="post">
+                        <div class="form-floating mb-3">
+                            <input type="tel" class="form-control" id="phoneNumber" name="phone_number" placeholder="+1234567890" required>
+                            <label for="phoneNumber">Recipient Phone Number (E.164 format)</label>
+                            <div class="form-text">Example: +1234567890 (include country code)</div>
+                        </div>
+                        
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="messageText" name="message" style="height: 150px" placeholder="Message text" required></textarea>
+                            <label for="messageText">Message</label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-paper-plane me-2"></i>
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bell me-2"></i>
+                        Quick Alerts
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-floating mb-3">
+                        <input type="tel" class="form-control" id="alertPhoneNumber" placeholder="+1234567890" required>
+                        <label for="alertPhoneNumber">Recipient Phone Number</label>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-primary alert-btn" data-type="emotion_detected">
+                            <i class="fas fa-smile me-2"></i>
+                            Emotion Alert
+                        </button>
+                        <button type="button" class="btn btn-outline-primary alert-btn" data-type="face_recognized">
+                            <i class="fas fa-user me-2"></i>
+                            Face Recognition Alert
+                        </button>
+                        <button type="button" class="btn btn-outline-primary alert-btn" data-type="system_status">
+                            <i class="fas fa-server me-2"></i>
+                            System Status Alert
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SMS History -->
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Message History
+                    </h5>
+                    <button id="refreshHistory" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-sync-alt me-1"></i>
+                        Refresh
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="sms-history-container" id="smsHistoryContainer">
+                        {% if sms_history and sms_history|length > 0 %}
+                            {% for message in sms_history %}
+                                <div class="message-box {{ 'sent' if message.status == 'sent' else 'failed' }}">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="message-recipient">
+                                            <i class="fas fa-user me-2"></i>
+                                            {{ message.to_number }}
+                                        </span>
+                                        <span class="message-status status-{{ message.status }}">
+                                            {{ message.status|capitalize }}
+                                        </span>
+                                    </div>
+                                    <div class="message-time">
+                                        <i class="far fa-clock me-1"></i>
+                                        {{ message.timestamp }}
+                                    </div>
+                                    <div class="message-content">
+                                        {{ message.body }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-envelope text-secondary mb-3" style="font-size: 3rem;"></i>
+                                <p class="lead mb-0">No messages sent yet</p>
+                                <p class="text-muted">Send your first SMS notification to see history</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle SMS form submission
+    const smsForm = document.getElementById('smsForm');
+    if (smsForm) {
+        smsForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const messageText = document.getElementById('messageText').value;
+            
+            // Validate input
+            if (!phoneNumber || !messageText) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Send AJAX request
+            fetch('/api/send-sms', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    phone_number: phoneNumber,
+                    message: messageText
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    alert('Message sent successfully!');
+                    document.getElementById('messageText').value = '';
+                    
+                    // Refresh the history
+                    fetchSmsHistory();
+                } else {
+                    alert('Error sending message: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while sending the message');
+            });
+        });
+    }
+    
+    // Handle quick alert buttons
+    const alertButtons = document.querySelectorAll('.alert-btn');
+    alertButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const alertType = this.getAttribute('data-type');
+            const phoneNumber = document.getElementById('alertPhoneNumber').value;
+            
+            if (!phoneNumber) {
+                alert('Please enter a phone number');
+                return;
+            }
+            
+            // Send AJAX request
+            fetch('/api/send-sms-alert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    phone_number: phoneNumber,
+                    alert_type: alertType
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Alert sent successfully!');
+                    fetchSmsHistory();
+                } else {
+                    alert('Error sending alert: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while sending the alert');
+            });
+        });
+    });
+    
+    // Refresh history button
+    const refreshBtn = document.getElementById('refreshHistory');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', fetchSmsHistory);
+    }
+    
+    // Function to fetch SMS history
+    function fetchSmsHistory() {
+        fetch('/api/get-sms-history')
+            .then(response => response.json())
+            .then(data => {
+                const historyContainer = document.getElementById('smsHistoryContainer');
+                
+                if (data.history && data.history.length > 0) {
+                    // Clear the container
+                    historyContainer.innerHTML = '';
+                    
+                    // Add messages
+                    data.history.forEach(message => {
+                        const messageHTML = `
+                            <div class="message-box ${message.status === 'sent' ? 'sent' : 'failed'}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="message-recipient">
+                                        <i class="fas fa-user me-2"></i>
+                                        ${message.to_number}
+                                    </span>
+                                    <span class="message-status status-${message.status}">
+                                        ${message.status.charAt(0).toUpperCase() + message.status.slice(1)}
+                                    </span>
+                                </div>
+                                <div class="message-time">
+                                    <i class="far fa-clock me-1"></i>
+                                    ${message.timestamp}
+                                </div>
+                                <div class="message-content">
+                                    ${message.body}
+                                </div>
+                            </div>
+                        `;
+                        
+                        historyContainer.innerHTML += messageHTML;
+                    });
+                } else {
+                    historyContainer.innerHTML = `
+                        <div class="text-center py-5">
+                            <i class="fas fa-envelope text-secondary mb-3" style="font-size: 3rem;"></i>
+                            <p class="lead mb-0">No messages sent yet</p>
+                            <p class="text-muted">Send your first SMS notification to see history</p>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching SMS history:', error);
+            });
+    }
+});
+</script>
+{% endblock %}

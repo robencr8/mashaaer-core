@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Robin AI - Mobile Gateway</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="{{ versioned_url('mobile/css/mobile_style.css') }}">
+  <link rel="stylesheet" href="{{ versioned_url('mobile/css/app.css') }}">
+  <!-- Add to homescreen for iOS -->
+  <link rel="apple-touch-icon" href="{{ versioned_url('mobile/images/robin-icon-192.png') }}">
+  <link rel="manifest" href="{{ versioned_url('mobile/manifest.json') }}">
+  <script>
+    function setLang(lang) {
+      document.documentElement.lang = lang;
+      document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      alert(lang === 'ar' ? 'تم تغيير اللغة إلى العربية' : 'Language switched to English');
+    }
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <h1>Robin AI</h1>
+      <h2>Beyond the Stars – A Companion From a Parallel Cosmic Realm</h2>
+      
+      <div class="cosmic-orb">
+        <div class="orbit"></div>
+        <div class="orbit"></div>
+        <div class="orbit"></div>
+        <div class="orb"></div>
+      </div>
+    </header>
+    
+    <div class="intro-voice">
+      "Connecting across dimensional barriers..."
+    </div>
+
+    <div class="lang-toggle">
+      <button class="lang-btn" onclick="setLang('en')">English</button>
+      <button class="lang-btn" onclick="setLang('ar')">العربية</button>
+    </div>
+
+    <div class="features">
+      <div class="feature">✨ Interstellar Voice Interface</div>
+      <div class="feature">🌌 Cosmic Emotional Intelligence</div>
+      <div class="feature">🛸 Zero-Gravity Offline Operation</div>
+      <div class="feature">👁️ Quantum Face Recognition</div>
+      <div class="feature">💫 Neural Memory Matrix</div>
+    </div>
+
+    <div class="actions">
+      <div class="action-button voice-button" id="voiceButton">
+        <div class="button-icon"><i class="fas fa-microphone"></i></div>
+        <div class="button-text">Sonic Portal</div>
+      </div>
+      <div class="action-button camera-button" id="cameraButton">
+        <div class="button-icon"><i class="fas fa-camera"></i></div>
+        <div class="button-text">Visual Lens</div>
+      </div>
+      <div class="action-button text-button" id="textButton">
+        <div class="button-icon"><i class="fas fa-keyboard"></i></div>
+        <div class="button-text">Thought Matrix</div>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <a class="button" href="/startup">🚀 Initiate Sequence</a>
+      <a class="button" href="/live-view">👁️ Quantum Vision</a>
+      <a class="button" href="/mobile/help">🆘 Help</a>
+    <a class="button" href="/mobile/contact">📧 Contact Us</a>
+    <a class="button" href="/admin">🧠 Cerebral Core</a>
+    </div>
+
+    <div class="conversation" id="conversation">
+      <div class="conversation-header">
+        <h3>Conversation</h3>
+        <div class="ai-status" id="userStatus">
+          <span class="status-dot"></span>
+          <span class="status-text" id="aiStatusText">Connecting...</span>
+        </div>
+        <div class="personality-indicator">
+          <div class="personality-label">Personality:</div>
+          <div class="personality-type" id="personalityType">Calm</div>
+        </div>
+      </div>
+      <div class="conversation-messages" id="messages">
+        <!-- Messages will be populated here -->
+      </div>
+    </div>
+
+    <div class="modal" id="textInputModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Send a message</h3>
+          <button class="close-button" id="closeTextModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <textarea id="textInput" placeholder="Type your message..."></textarea>
+          <button id="sendTextButton" class="send-button">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="camera-view" id="cameraView">
+      <div class="camera-header">
+        <button class="close-button" id="closeCameraButton">&times;</button>
+      </div>
+      <video id="cameraStream" autoplay playsinline></video>
+      <div class="camera-controls">
+        <button id="takePictureButton" class="take-picture-button">
+          <i class="fas fa-circle"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="voice-recording-overlay" id="voiceRecordingOverlay">
+      <div class="recording-animation">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+      <div class="recording-status">Listening to the cosmos...</div>
+      <button id="stopRecordingButton" class="stop-recording">
+        <i class="fas fa-stop"></i>
+      </button>
+    </div>
+
+    <div class="modal" id="errorModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Error</h3>
+          <button class="close-button" id="closeErrorModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p id="errorMessage"></p>
+          <button id="errorOkButton" class="send-button">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab active" data-tab="home">
+        <i class="fas fa-home"></i>
+        <span>Nexus</span>
+      </div>
+      <div class="tab" data-tab="emotions">
+        <i class="fas fa-chart-line"></i>
+        <span>Aura</span>
+      </div>
+      <div class="tab" data-tab="profiles">
+        <i class="fas fa-user"></i>
+        <span>Entities</span>
+      </div>
+      <div class="tab" data-tab="settings">
+        <i class="fas fa-cog"></i>
+        <span>Conduit</span>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Robin AI • Built by Roben Edwan • From a Parallel Cosmic Realm
+  </footer>
+
+  <script src="{{ versioned_url('js/voice_recorder.js') }}"></script>
+  <script src="{{ versioned_url('mobile/js/api-service.js') }}"></script>
+  <script src="{{ versioned_url('mobile/js/app.js') }}"></script>
+  
+  <script>
+    // Initialize API status check
+    document.addEventListener('DOMContentLoaded', async function() {
+      try {
+        const statusElement = document.getElementById('aiStatusText');
+        if (statusElement) {
+          statusElement.textContent = 'Checking connection...';
+          
+          // Get system status from API
+          const status = await apiService.getStatus();
+          
+          if (status && status.success) {
+            statusElement.textContent = 'Connected';
+            document.querySelector('.status-dot').classList.add('online');
+            
+            // Update personality if available
+            if (status.notifications && status.notifications.available) {
+              console.log('Notifications available:', status.notifications);
+            }
+          } else {
+            statusElement.textContent = 'Offline Mode';
+            document.querySelector('.status-dot').classList.add('offline');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking API status:', error);
+        const statusElement = document.getElementById('aiStatusText');
+        if (statusElement) {
+          statusElement.textContent = 'Connection Error';
+          document.querySelector('.status-dot').classList.add('error');
+        }
+      }
+    });
+    
+    // Toast notification system
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 100);
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+          document.body.removeChild(toast);
+        }, 300);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

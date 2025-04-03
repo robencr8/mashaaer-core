@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشاعر | Mashaaer</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #121212;
+            color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .cosmic-sphere {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle at 30% 30%, #8a2be2, #4b0082);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 60px 30px rgba(138, 43, 226, 0.7),
+                0 0 100px 60px rgba(75, 0, 130, 0.5);
+            animation: float 6s ease-in-out infinite, glow 4s ease-in-out infinite alternate;
+            z-index: -1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .cosmic-sphere::before {
+            content: '';
+            position: absolute;
+            top: 15%;
+            left: 15%;
+            width: 20%;
+            height: 20%;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            filter: blur(5px);
+        }
+
+        .consent-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .consent-icon {
+            font-size: 4rem;
+            color: #8a2be2;
+            margin-bottom: 2rem;
+        }
+
+        .consent-text {
+            font-size: 1.6rem;
+            margin-bottom: 2rem;
+            max-width: 800px;
+            background-color: rgba(18, 18, 18, 0.8);
+            border-radius: 1rem;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .arabic-text {
+            font-family: 'Arial', sans-serif;
+            direction: rtl;
+        }
+
+        .consent-buttons {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .btn-primary, .btn-success {
+            background: linear-gradient(45deg, #8a2be2, #4b0082);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #d33, #900);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(221, 51, 51, 0.5);
+        }
+
+        .btn-primary:hover, .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px rgba(138, 43, 226, 0.7);
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px rgba(221, 51, 51, 0.7);
+        }
+
+        .listening-indicator {
+            margin-top: 2rem;
+            font-size: 1rem;
+            color: #8a2be2;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .listening-indicator.active {
+            opacity: 1;
+        }
+
+        .pulse-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #8a2be2;
+            margin: 0 2px;
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+
+        .pulse-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .pulse-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.2;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 1;
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(-50%, -50%);
+            }
+            50% {
+                transform: translate(-50%, -60%);
+            }
+        }
+
+        @keyframes glow {
+            0% {
+                box-shadow: 
+                    0 0 60px 30px rgba(138, 43, 226, 0.5),
+                    0 0 100px 60px rgba(75, 0, 130, 0.3);
+            }
+            100% {
+                box-shadow: 
+                    0 0 80px 40px rgba(138, 43, 226, 0.7),
+                    0 0 120px 80px rgba(75, 0, 130, 0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmic-sphere"></div>
+    
+    <div class="consent-container">
+        <div class="consent-icon">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+
+        <div id="consent-text" class="consent-text">
+            <p id="consent-message-en" style="display:none;">Before we begin, do you agree to store your information securely on this device only?</p>
+            <p id="consent-message-ar" class="arabic-text" style="display:none;">قبل أن نبدأ، هل توافق على تخزين معلوماتك بأمان على هذا الجهاز فقط؟</p>
+        </div>
+
+        <div class="consent-buttons">
+            <button id="yes-btn" class="btn btn-success btn-lg">
+                <span class="en-text" style="display:none;">Yes, I agree</span>
+                <span class="ar-text" style="display:none;">نعم، أوافق</span>
+            </button>
+            <button id="no-btn" class="btn btn-danger btn-lg">
+                <span class="en-text" style="display:none;">No, I don't agree</span>
+                <span class="ar-text" style="display:none;">لا، لا أوافق</span>
+            </button>
+        </div>
+
+        <div id="listening-indicator" class="listening-indicator">
+            <p class="en-text" style="display:none;">Listening <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
+            <p class="ar-text" style="display:none;">أستمع <span class="pulse-dot"></span><span class="pulse-dot"></span><span class="pulse-dot"></span></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get language preference from session storage
+            const userLanguage = localStorage.getItem('user_language') || 'en';
+            const interactionMode = localStorage.getItem('interaction_mode') || 'text';
+
+            // Show text in the correct language
+            if (userLanguage === 'en') {
+                document.getElementById('consent-message-en').style.display = 'block';
+                document.querySelectorAll('.en-text').forEach(el => el.style.display = 'block');
+            } else {
+                document.getElementById('consent-message-ar').style.display = 'block';
+                document.querySelectorAll('.ar-text').forEach(el => el.style.display = 'block');
+            }
+
+            // Button event listeners
+            document.getElementById('yes-btn').addEventListener('click', () => {
+                handleConsent(true);
+            });
+
+            document.getElementById('no-btn').addEventListener('click', () => {
+                handleConsent(false);
+            });
+
+            // Add subtle parallax effect to sphere
+            document.addEventListener('mousemove', (e) => {
+                const sphere = document.querySelector('.cosmic-sphere');
+                const x = (window.innerWidth / 2 - e.pageX) / 50;
+                const y = (window.innerHeight / 2 - e.pageY) / 50;
+                sphere.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+            });
+
+            // If voice interaction is enabled, speak the consent message
+            if (interactionMode === 'voice') {
+                const consentText = userLanguage === 'en' 
+                  ? "Before we begin, do you agree to store your information securely on this device only?"
+                  : "قبل أن نبدأ، هل توافق على تخزين معلوماتك بأمان على هذا الجهاز فقط؟";
+
+                speakText(consentText, userLanguage);
+                
+                // Start listening for voice input after speaking
+                setTimeout(() => {
+                    startVoiceRecognition();
+                }, 5000);
+            }
+
+            // Voice recognition functions (only used if voice mode is enabled)
+            function startVoiceRecognition() {
+                if (interactionMode !== 'voice') return;
+                
+                // Show listening indicator
+                document.getElementById('listening-indicator').classList.add('active');
+                
+                // Simulating voice recognition for prototype
+                // In production, this would be replaced with actual voice recognition API
+                fetch('/api/listen', {
+                    method: 'POST',
+                    body: new FormData() // This would normally contain audio data
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        processVoiceResponse(data.text);
+                    } else {
+                        console.error('Voice recognition error:', data.error);
+                    }
+                    document.getElementById('listening-indicator').classList.remove('active');
+                })
+                .catch(error => {
+                    console.error('API error:', error);
+                    document.getElementById('listening-indicator').classList.remove('active');
+                });
+            }
+
+            // Function to process voice response
+            function processVoiceResponse(text) {
+                console.log('Voice response:', text);
+
+                // Check if response indicates consent
+                let consented = false;
+
+                if (userLanguage === 'en') {
+                    consented = text.toLowerCase().includes('yes') || 
+                                text.toLowerCase().includes('agree') ||
+                                text.toLowerCase().includes('ok');
+                } else {
+                    consented = text.includes('نعم') || 
+                                text.includes('موافق') ||
+                                text.includes('صح');
+                }
+
+                handleConsent(consented);
+            }
+
+            // Function to speak text using TTS
+            function speakText(text, language) {
+                fetch('/api/speak', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        text: text, 
+                        language: language === 'en' ? 'en-US' : 'ar'
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('TTS success:', data);
+                        
+                        // Create audio element to play the response
+                        const audio = new Audio(data.audio_path);
+                        audio.play().catch(e => console.error('Error playing audio:', e));
+                    } else {
+                        console.error('TTS error:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('TTS API error:', error);
+                });
+            }
+
+            // Function to handle consent response
+            function handleConsent(consented) {
+                if (consented) {
+                    // Save consent to database
+                    fetch('/api/set-consent', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            consent: true, 
+                            language: userLanguage,
+                            interaction_mode: interactionMode
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Redirect to voice registration
+                            window.location.href = '/voice-register';
+                        } else {
+                            console.error('Error setting consent:', data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                } else {
+                    // Redirect to goodbye page if user does not consent
+                    window.location.href = '/goodbye';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

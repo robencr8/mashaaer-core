@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+  .goodbye-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    text-align: center;
+  }
+  
+  .goodbye-icon {
+    font-size: 5rem;
+    color: var(--bs-info);
+    margin-bottom: 2rem;
+  }
+  
+  .goodbye-message {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    max-width: 800px;
+  }
+  
+  .fade-out {
+    animation: fadeOut 10s ease forwards;
+  }
+  
+  @keyframes fadeOut {
+    0% {
+      opacity: 1;
+    }
+    70% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="goodbye-container fade-out">
+  <div class="goodbye-icon">
+    <i class="fas fa-hand-peace"></i>
+  </div>
+  
+  <div class="goodbye-message">
+    <p id="message-en" style="display:none;">I understand. Thank you for your time. Goodbye.</p>
+    <p id="message-ar" style="display:none;">أتفهم ذلك. شكرا لوقتك. وداعاً.</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get language preference from local storage
+    const userLanguage = localStorage.getItem('user_language') || 'en';
+    
+    // Show text in the correct language
+    if (userLanguage === 'en') {
+      document.getElementById('message-en').style.display = 'block';
+    } else {
+      document.getElementById('message-ar').style.display = 'block';
+    }
+    
+    // Speak goodbye message
+    const goodbyeText = userLanguage === 'en' 
+      ? "I understand. Thank you for your time. Goodbye."
+      : "أتفهم ذلك. شكرا لوقتك. وداعاً.";
+    
+    speakText(goodbyeText, userLanguage);
+    
+    // Function to speak text using TTS
+    function speakText(text, language) {
+      fetch('/api/speak', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          text: text, 
+          language: language === 'en' ? 'en-US' : 'ar'
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          console.log('TTS success:', data);
+        } else {
+          console.error('TTS error:', data.error);
+        }
+      })
+      .catch(error => {
+        console.error('TTS API error:', error);
+      });
+    }
+  });
+</script>
+{% endblock %}

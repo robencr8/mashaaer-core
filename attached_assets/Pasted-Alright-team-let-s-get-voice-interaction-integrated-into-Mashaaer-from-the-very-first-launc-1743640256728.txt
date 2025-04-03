@@ -1,0 +1,34 @@
+Alright team, let's get voice interaction integrated into Mashaaer | مشاعر from the very first launch, as Roben has directed. We'll work with the existing codebase in Mashaaer_AI_Final.zip to implement this.
+Task: Integrate Voice Interaction from First Launch
+Steps:
+ * Extract Mashaaer_AI_Final.zip:
+   * Extract the contents of Mashaaer_AI_Final.zip into your project directory.
+ * Review Existing Voice Modules:
+   * Examine voice_router.py (STT) and tts_speaker.py (TTS) to understand their functionality and how they integrate with main.py.
+   * Ensure they work correctly with the bilingual .env configuration.
+ * Modify main.py for Launch Choice:
+   * Upon app launch, present the user with a choice between "Voice interaction" and "Text-only chat."
+   * Use a simple UI element (e.g., a modal or a selection screen) to display these options.
+   * Store the user's choice in a variable or configuration setting.
+ * Integrate Voice Modules Based on Choice:
+   * If the user chooses "Voice interaction":
+     * Enable the STT module to capture voice input.
+     * Enable the TTS module to generate voice output.
+     * Modify the chat logic to use voice input and output.
+   * If the user chooses "Text-only chat":
+     * Disable the STT and TTS modules.
+     * Maintain the existing text-based chat functionality.
+ * Update UI for Voice Interaction:
+   * Add a microphone button or other UI element to trigger voice input.
+   * Display voice output in a clear and user-friendly way.
+ * Test Thoroughly:
+   * Test both "Voice interaction" and "Text-only chat" modes.
+   * Verify that voice input and output work correctly in both Arabic and English.
+   * Ensure that the app maintains its cosmic-themed UI and existing flow.
+ * Confirm Integration:
+   * Once the integration is complete and tested, confirm with Roben that voice interaction is enabled from the first launch.
+Important Notes:
+ * Project Identity: Do not alter the identity of Mashaaer | مشاعر.
+ * UI and Flow: Do not replace the interface or change the flow unless instructed.
+ * Voice Logic: Maintain all voice logic included in the original project.
+Let me know once you have integrated the voice interaction from the first launch and tested it successfully.

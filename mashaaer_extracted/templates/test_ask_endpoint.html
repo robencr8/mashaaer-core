@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robin AI - Test Ask Endpoint</title>
+    <!-- Include Bootstrap from Replit theme -->
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <style>
+        .response-container {
+            min-height: 100px;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: var(--bs-dark);
+            color: var(--bs-light);
+        }
+        
+        .cosmic-container {
+            background: linear-gradient(135deg, #101020 0%, #1e1e3a 100%);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .model-badge {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin-left: 10px;
+            background-color: var(--bs-primary);
+            color: white;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: var(--bs-primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body data-bs-theme="dark">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="cosmic-container">
+                    <h2 class="text-center mb-4">Robin AI - Model Testing</h2>
+                    
+                    <div class="mb-4">
+                        <label for="model-select" class="form-label">AI Model:</label>
+                        <select class="form-select" id="model-select">
+                            <option value="">Default (MODEL_BACKEND setting)</option>
+                            <option value="auto">Auto (Smart Selection with Fallback)</option>
+                            <option value="gpt-4o">OpenAI GPT-4o</option>
+                            <option value="gpt-4">OpenAI GPT-4</option>
+                            <option value="openchat">Ollama (OpenChat)</option>
+                            <option value="mistral">Ollama (Mistral)</option>
+                            <option value="phi">Ollama (Phi)</option>
+                        </select>
+                        <div class="alert alert-info mt-2">
+                            <h6>💡 Pro Tip: Use Auto Mode</h6>
+                            <p class="mb-1"><code>auto</code> mode automatically switches between OpenAI and Ollama models based on availability and quota status. If OpenAI quota is exceeded, it will try to use Ollama if available.</p>
+                            <p class="mb-0"><small>Need Ollama? <a href="https://ollama.ai" target="_blank">Download it here</a> for free local AI support.</small></p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="system-prompt" class="form-label">System Prompt (Optional):</label>
+                        <textarea class="form-control" id="system-prompt" rows="2" placeholder="Enter system instructions for the AI model..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="user-input" class="form-label">Your Message:</label>
+                        <textarea class="form-control" id="user-input" rows="3" placeholder="Enter your message here..."></textarea>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end">
+                        <button id="submit-btn" class="btn btn-primary px-4">
+                            <span>Send</span>
+                        </button>
+                    </div>
+                    
+                    <div class="response-container mt-4" id="response-container">
+                        <p class="text-muted">AI response will appear here...</p>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">Status: <span id="status-message">Ready</span></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const submitBtn = document.getElementById('submit-btn');
+            const userInput = document.getElementById('user-input');
+            const modelSelect = document.getElementById('model-select');
+            const systemPrompt = document.getElementById('system-prompt');
+            const responseContainer = document.getElementById('response-container');
+            const statusMessage = document.getElementById('status-message');
+            
+            submitBtn.addEventListener('click', async function() {
+                // Validate input
+                if (!userInput.value.trim()) {
+                    statusMessage.textContent = 'Please enter a message';
+                    return;
+                }
+                
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="loading me-2"></span> Processing...';
+                statusMessage.textContent = 'Sending request...';
+                responseContainer.innerHTML = '<p class="text-muted">Processing your request...</p>';
+                
+                try {
+                    // Prepare request data
+                    const requestData = {
+                        input: userInput.value.trim()
+                    };
+                    
+                    // Add optional parameters if provided
+                    if (modelSelect.value) {
+                        requestData.model = modelSelect.value;
+                    }
+                    
+                    if (systemPrompt.value.trim()) {
+                        requestData.system_prompt = systemPrompt.value.trim();
+                    }
+                    
+                    // Send request to the /ask endpoint
+                    const response = await fetch('/ask', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+                    
+                    // Parse response
+                    const data = await response.json();
+                    
+                    // Update UI based on response
+                    if (data.status === 'success') {
+                        const modelBadge = `<span class="model-badge">${data.model || 'Unknown'}</span>`;
+                        responseContainer.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <strong>AI Response ${modelBadge}</strong>
+                            </div>
+                            <div class="ai-message">
+                                ${data.response.replace(/\n/g, '<br>')}
+                            </div>
+                        `;
+                        statusMessage.textContent = 'Request completed successfully';
+                    } else {
+                        responseContainer.innerHTML = `
+                            <div class="alert alert-danger">
+                                <strong>Error:</strong> ${data.message || 'Unknown error occurred'}
+                            </div>
+                        `;
+                        statusMessage.textContent = 'Request failed';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    responseContainer.innerHTML = `
+                        <div class="alert alert-danger">
+                            <strong>Error:</strong> ${error.message || 'Failed to connect to the server'}
+                        </div>
+                    `;
+                    statusMessage.textContent = 'Request failed';
+                } finally {
+                    // Reset button state
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span>Send</span>';
+                }
+            });
+            
+            // Enable pressing Enter to submit
+            userInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    submitBtn.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

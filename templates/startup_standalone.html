@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Robin AI Startup</title>
+    <title>مشاعر | Mashaaer</title>
     <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
     <style>
         body {
@@ -62,11 +62,22 @@
             -webkit-text-fill-color: transparent;
             text-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
         }
+        
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #f8f9fa;
+        }
 
         p {
             font-size: 1.2rem;
             margin-bottom: 2rem;
             line-height: 1.6;
+        }
+
+        .arabic-text {
+            font-family: 'Arial', sans-serif;
+            direction: rtl;
         }
 
         .btn-primary {
@@ -77,11 +88,50 @@
             border-radius: 2rem;
             transition: all 0.3s ease;
             box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+            margin: 0.5rem;
         }
 
         .btn-primary:hover {
             transform: translateY(-3px);
             box-shadow: 0 0 25px rgba(138, 43, 226, 0.7);
+        }
+        
+        .interaction-options {
+            margin-top: 2rem;
+        }
+        
+        .option-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        
+        .option-card {
+            background: rgba(25, 25, 25, 0.8);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 0 1rem;
+            width: 200px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.7);
+            border-color: #8a2be2;
+        }
+        
+        .option-card.selected {
+            border-color: #8a2be2;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.9);
+        }
+        
+        .option-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #8a2be2;
         }
 
         @keyframes float {
@@ -110,10 +160,27 @@
 <body>
     <div class="cosmic-sphere"></div>
     <div class="content">
-        <h1>Welcome to Robin AI</h1>
-        <p>Your personal AI assistant from a parallel cosmic realm, designed to understand your emotions and provide personalized assistance.</p>
-        <p>Get ready to embark on a journey of advanced artificial intelligence, emotional understanding, and personalized interactions.</p>
-        <a href="/consent" class="btn btn-primary">Begin Journey</a>
+        <h1>مشاعر | Mashaaer</h1>
+        <p class="arabic-text">اصنع المستقبل، أنا أسمعك</p>
+        <p>Create the future, I'm listening</p>
+        <p>Your cosmic companion designed to understand your emotions and provide personalized assistance.</p>
+        
+        <div class="interaction-options">
+            <h2>Choose your interaction style:</h2>
+            <div class="option-container">
+                <div class="option-card" id="voice-option">
+                    <div class="option-icon">🎤</div>
+                    <h3>Voice Interaction</h3>
+                    <p>Talk with Mashaaer using your voice</p>
+                </div>
+                <div class="option-card" id="text-option">
+                    <div class="option-icon">💬</div>
+                    <h3>Text-only Chat</h3>
+                    <p>Interact through text messages only</p>
+                </div>
+            </div>
+            <button id="continue-btn" class="btn btn-primary" disabled>Continue</button>
+        </div>
     </div>
 
     <script>
@@ -123,6 +190,34 @@
             const x = (window.innerWidth / 2 - e.pageX) / 30;
             const y = (window.innerHeight / 2 - e.pageY) / 30;
             sphere.style.transform = `translate(${x}px, ${y}px)`;
+        });
+        
+        // Interaction option selection
+        let selectedOption = null;
+        const voiceOption = document.getElementById('voice-option');
+        const textOption = document.getElementById('text-option');
+        const continueBtn = document.getElementById('continue-btn');
+        
+        voiceOption.addEventListener('click', () => {
+            voiceOption.classList.add('selected');
+            textOption.classList.remove('selected');
+            selectedOption = 'voice';
+            continueBtn.disabled = false;
+        });
+        
+        textOption.addEventListener('click', () => {
+            textOption.classList.add('selected');
+            voiceOption.classList.remove('selected');
+            selectedOption = 'text';
+            continueBtn.disabled = false;
+        });
+        
+        continueBtn.addEventListener('click', () => {
+            // Store the user's choice in localStorage
+            localStorage.setItem('interaction_mode', selectedOption);
+            
+            // Redirect to consent page
+            window.location.href = '/consent';
         });
     </script>
 </body>

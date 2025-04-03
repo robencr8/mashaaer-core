@@ -1,0 +1,317 @@
+{% extends "layout.html" %}
+
+{% block head %}
+<style>
+    .timeline-container {
+        background-color: var(--bs-dark);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .emotion-filter {
+        margin-bottom: 20px;
+    }
+    
+    .emotion-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .emotion-stat-card {
+        flex: 1;
+        min-width: 120px;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        transition: transform 0.2s;
+    }
+    
+    .emotion-stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .emotion-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    
+    .time-filter-buttons {
+        margin-bottom: 20px;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-right: 15px;
+    }
+    
+    .color-box {
+        width: 15px;
+        height: 15px;
+        display: inline-block;
+        margin-right: 5px;
+        border-radius: 3px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2><i class="fas fa-chart-line me-2"></i>Emotion Timeline</h2>
+            </div>
+            <div class="card-body">
+                <div class="time-filter-buttons">
+                    <div class="btn-group">
+                        <button class="btn btn-outline-primary active" data-days="7">Last 7 Days</button>
+                        <button class="btn btn-outline-primary" data-days="14">Last 14 Days</button>
+                        <button class="btn btn-outline-primary" data-days="30">Last 30 Days</button>
+                    </div>
+                </div>
+                
+                <div class="timeline-container">
+                    <canvas id="emotion-timeline-chart"></canvas>
+                </div>
+                
+                <div class="chart-legend d-flex flex-wrap mb-4">
+                    <div class="legend-item"><div class="color-box" style="background-color: rgba(54, 162, 235, 0.7)"></div> Neutral</div>
+                    <div class="legend-item"><div class="color-box" style="background-color: rgba(75, 192, 192, 0.7)"></div> Happy</div>
+                    <div class="legend-item"><div class="color-box" style="background-color: rgba(201, 203, 207, 0.7)"></div> Sad</div>
+                    <div class="legend-item"><div class="color-box" style="background-color: rgba(255, 99, 132, 0.7)"></div> Angry</div>
+                    <div class="legend-item"><div class="color-box" style="background-color: rgba(255, 205, 86, 0.7)"></div> Fearful</div>
+                    <div class="legend-item"><div class="color-box" style="background-color: rgba(153, 102, 255, 0.7)"></div> Surprised</div>
+                </div>
+                
+                <div class="emotion-filter mt-4">
+                    <h4>Filter Emotions</h4>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="filter-all" checked>
+                        <label class="form-check-label" for="filter-all">All</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="filter-neutral" checked>
+                        <label class="form-check-label" for="filter-neutral">Neutral</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="filter-happy" checked>
+                        <label class="form-check-label" for="filter-happy">Happy</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="filter-sad" checked>
+                        <label class="form-check-label" for="filter-sad">Sad</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="filter-angry" checked>
+                        <label class="form-check-label" for="filter-angry">Angry</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="filter-fearful" checked>
+                        <label class="form-check-label" for="filter-fearful">Fearful</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="filter-surprised" checked>
+                        <label class="form-check-label" for="filter-surprised">Surprised</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3><i class="fas fa-brain me-2"></i>Emotion Insights</h3>
+            </div>
+            <div class="card-body">
+                <div id="emotion-summary">
+                    <p class="lead" id="primary-emotion-text">Loading emotion data...</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-info" id="emotion-progress" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    
+                    <h5 class="mt-4">Distribution</h5>
+                    <canvas id="emotion-distribution-chart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-5">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3><i class="fas fa-tachometer-alt me-2"></i>Emotion Stats</h3>
+            </div>
+            <div class="card-body">
+                <div class="emotion-stats">
+                    <div class="emotion-stat-card bg-dark">
+                        <div class="emotion-icon">
+                            <i class="fas fa-smile text-info"></i>
+                        </div>
+                        <h5>Happy</h5>
+                        <div class="h4" id="happy-count">0</div>
+                    </div>
+                    
+                    <div class="emotion-stat-card bg-dark">
+                        <div class="emotion-icon">
+                            <i class="fas fa-meh text-primary"></i>
+                        </div>
+                        <h5>Neutral</h5>
+                        <div class="h4" id="neutral-count">0</div>
+                    </div>
+                    
+                    <div class="emotion-stat-card bg-dark">
+                        <div class="emotion-icon">
+                            <i class="fas fa-frown text-secondary"></i>
+                        </div>
+                        <h5>Sad</h5>
+                        <div class="h4" id="sad-count">0</div>
+                    </div>
+                    
+                    <div class="emotion-stat-card bg-dark">
+                        <div class="emotion-icon">
+                            <i class="fas fa-angry text-danger"></i>
+                        </div>
+                        <h5>Angry</h5>
+                        <div class="h4" id="angry-count">0</div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h5>Entries Over Time</h5>
+                    <canvas id="entries-trend-chart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/chart_renderer.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize with pre-loaded data if available
+        let emotionData = {{ emotions|tojson }};
+        
+        // Create chart renderer
+        const chartRenderer = new ChartRenderer({
+            timelineChartId: 'emotion-timeline-chart',
+            distributionChartId: 'emotion-distribution-chart',
+            entriesTrendChartId: 'entries-trend-chart'
+        });
+        
+        // Render charts with initial data
+        chartRenderer.renderTimelineChart(emotionData);
+        chartRenderer.renderDistributionChart(emotionData);
+        chartRenderer.renderEntriesTrendChart(emotionData);
+        updateEmotionStats(emotionData);
+        
+        // Time filter buttons
+        document.querySelectorAll('.time-filter-buttons button').forEach(button => {
+            button.addEventListener('click', function() {
+                // Update active button
+                document.querySelectorAll('.time-filter-buttons button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Get days filter
+                const days = parseInt(this.dataset.days);
+                
+                // Fetch new data
+                fetch(`/api/emotion-data?days=${days}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        emotionData = data;
+                        // Update charts
+                        chartRenderer.renderTimelineChart(data);
+                        chartRenderer.renderDistributionChart(data);
+                        chartRenderer.renderEntriesTrendChart(data);
+                        updateEmotionStats(data);
+                    })
+                    .catch(error => console.error('Error fetching emotion data:', error));
+            });
+        });
+        
+        // Emotion filter checkboxes
+        document.querySelectorAll('.emotion-filter input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.id === 'filter-all') {
+                    // When "All" is toggled, update all other checkboxes
+                    const checked = this.checked;
+                    document.querySelectorAll('.emotion-filter input[type="checkbox"]:not(#filter-all)').forEach(cb => {
+                        cb.checked = checked;
+                    });
+                } else {
+                    // Check if we should update the "All" checkbox
+                    const allChecked = Array.from(
+                        document.querySelectorAll('.emotion-filter input[type="checkbox"]:not(#filter-all)')
+                    ).every(cb => cb.checked);
+                    
+                    document.getElementById('filter-all').checked = allChecked;
+                }
+                
+                // Update chart visibility based on filters
+                chartRenderer.updateEmotionFilters(getActiveEmotionFilters());
+            });
+        });
+        
+        function getActiveEmotionFilters() {
+            const filters = {};
+            document.querySelectorAll('.emotion-filter input[type="checkbox"]:not(#filter-all)').forEach(checkbox => {
+                const emotion = checkbox.id.replace('filter-', '');
+                filters[emotion] = checkbox.checked;
+            });
+            return filters;
+        }
+        
+        function updateEmotionStats(data) {
+            // Calculate emotion counts from datasets
+            const emotionCounts = {};
+            let totalCount = 0;
+            
+            if (data && data.datasets) {
+                data.datasets.forEach(dataset => {
+                    const emotion = dataset.label.toLowerCase();
+                    emotionCounts[emotion] = dataset.data.reduce((sum, count) => sum + count, 0);
+                    totalCount += emotionCounts[emotion];
+                });
+            }
+            
+            // Update the count displays
+            document.getElementById('happy-count').textContent = emotionCounts['happy'] || 0;
+            document.getElementById('neutral-count').textContent = emotionCounts['neutral'] || 0;
+            document.getElementById('sad-count').textContent = emotionCounts['sad'] || 0;
+            document.getElementById('angry-count').textContent = emotionCounts['angry'] || 0;
+            
+            // Find primary emotion
+            let primaryEmotion = 'neutral';
+            let maxCount = 0;
+            
+            for (const [emotion, count] of Object.entries(emotionCounts)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    primaryEmotion = emotion;
+                }
+            }
+            
+            // Calculate percentage
+            const percentage = totalCount > 0 ? Math.round((maxCount / totalCount) * 100) : 0;
+            
+            // Update primary emotion text and progress
+            document.getElementById('primary-emotion-text').textContent = 
+                `Your primary emotion is ${primaryEmotion} (${percentage}% of all recorded emotions)`;
+            
+            document.getElementById('emotion-progress').style.width = `${percentage}%`;
+            document.getElementById('emotion-progress').textContent = `${percentage}%`;
+        }
+    });
+</script>
+{% endblock %}

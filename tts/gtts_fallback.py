@@ -60,8 +60,8 @@ class GTTSFallback:
     def _create_default_audio_files(self):
         """Create default audio files if they don't exist"""
         default_files = {
-            "hello.mp3": "Hello, I am Robin AI.",
-            "welcome.mp3": "Welcome to Robin AI.",
+            "hello.mp3": "Hello, I am Mashaaer.",
+            "welcome.mp3": "Welcome to Mashaaer. Create the future, I'm listening.",
             "thanks.mp3": "Thank you.",
             "goodbye.mp3": "Goodbye, I'll be here if you need me.",
             "error.mp3": "I'm sorry, I encountered an error.",

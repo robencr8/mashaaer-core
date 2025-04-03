@@ -77,7 +77,7 @@ class EmotionResultPopup(Popup):
         self.content = content
 
 class MashaaerApp(App):
-    """Main Application class for Mashaaer (Feelings) App"""
+    """Main Application class for Mashaaer App"""
     
     # Properties
     language = StringProperty('en')
@@ -85,7 +85,7 @@ class MashaaerApp(App):
     
     def build(self):
         """Build the application UI"""
-        self.title = "مشاعر | Mashaaer Feelings"
+        self.title = "مشاعر | Mashaaer"
         self.icon = "../data/icon.png"
         self.root = MashaaerAppLayout()
         
@@ -135,12 +135,12 @@ class MashaaerApp(App):
         """Toggle between Arabic and English"""
         if self.language == 'en':
             self.language = 'ar'
-            self.root.ids.greeting_label.text = "مرحبا بك في تطبيق مشاعر"
+            self.root.ids.greeting_label.text = "اصنع المستقبل، أنا أسمعك"
             self.root.ids.emotion_label.text = "كيف تشعر اليوم؟"
             self.root.ids.user_input.hint_text = "اكتب مشاعرك هنا..."
         else:
             self.language = 'en'
-            self.root.ids.greeting_label.text = "Welcome to Mashaaer Feelings"
+            self.root.ids.greeting_label.text = "Create the future, I'm listening"
             self.root.ids.emotion_label.text = "How are you feeling today?"
             self.root.ids.user_input.hint_text = "Type your feelings here..."
     

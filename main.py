@@ -138,8 +138,16 @@ def index():
 
 @app.route('/startup')
 def startup():
-    welcome_message = "Welcome to Robin AI. Let's get started with your onboarding."
-    tts_manager.speak(welcome_message, 'default', 'en', profile_manager)
+    welcome_message_en = "Welcome to Mashaaer Feelings. Create the future, I'm listening."
+    welcome_message_ar = "مرحبًا بك في مشاعر. اصنع المستقبل، أنا أسمعك."
+    
+    # Play both languages for maximum accessibility
+    try:
+        tts_manager.speak(welcome_message_en, 'default', 'en-US', profile_manager)
+        tts_manager.speak(welcome_message_ar, 'arabic', 'ar', profile_manager)
+    except Exception as e:
+        logger.error(f"Error speaking welcome message: {str(e)}")
+    
     return render_template('startup_standalone.html')
 
 @app.route('/consent')
@@ -360,7 +368,7 @@ def listen():
 
             # Special greeting for Roben
             if "name" in text.lower() and (DEVELOPER_NAME.lower() in text.lower()):
-                greeting = "Welcome back, Roben. Robin AI is fully operational."
+                greeting = "Welcome back, Roben. Mashaaer is fully operational."
                 tts_manager.speak(greeting, profile_manager=profile_manager)
                 logger.info("Special greeting played for creator")
 
@@ -429,7 +437,7 @@ def detect_face():
             logger.info("Developer mode activated via face recognition")
 
             # Special greeting for Roben when detected by face
-            greeting = "Welcome back, Roben. Robin AI is fully operational."
+            greeting = "Welcome back, Roben. Mashaaer is fully operational."
             tts_manager.speak(greeting, profile_manager=profile_manager)
             logger.info("Special greeting played for creator face detection")
 
@@ -657,7 +665,7 @@ def send_sms_alert():
         elif alert_type == 'system_status':
             uptime = "3 hours, 45 minutes"
             title = "System Status"
-            message = f"Robin AI system is online. Current uptime: {uptime}"
+            message = f"Mashaaer system is online. Current uptime: {uptime}"
             level = "info"
         elif alert_type == 'warning':
             title = "System Warning"
@@ -752,6 +760,7 @@ def set_consent():
         data = request.json
         consent = data.get('consent', False)
         language = data.get('language', 'en')
+        interaction_mode = data.get('interaction_mode', 'text')  # New parameter for voice/text mode
 
         # Store consent in database
         db_manager.set_setting('user_consent', 'true' if consent else 'false')
@@ -763,10 +772,18 @@ def set_consent():
             # Set in session
             from flask import session
             session['language'] = language
+            
+        # Store interaction mode preference
+        db_manager.set_setting('interaction_mode', interaction_mode)
+        logger.info(f"User interaction mode set to: {interaction_mode}")
+        
+        # Enable or disable voice recognition based on interaction mode
+        voice_enabled = (interaction_mode == 'voice')
+        db_manager.set_setting('voice_recognition_enabled', 'true' if voice_enabled else 'false')
 
         return jsonify({
             'success': True,
-            'message': 'Consent preference saved successfully'
+            'message': 'Consent and preferences saved successfully'
         })
 
     except Exception as e:

@@ -13,11 +13,11 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-logger = logging.getLogger("RobinAI-Sync")
+logger = logging.getLogger("Mashaaer-Sync")
 
 # Configuration
 GOOGLE_DRIVE_FOLDER_ID = "1wUodMcwES79gB18uul2xACChciO-X2Um"  # Roben's Google Drive folder ID
-PROJECT_NAME = "Mashaaer | Feelings"
+PROJECT_NAME = "مشاعر | Mashaaer"
 RCLONE_CONFIG_PATH = "rclone.conf"
 SOURCE_DIR = "."  # Current directory
 EXCLUDE_PATTERNS = [

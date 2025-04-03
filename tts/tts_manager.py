@@ -133,33 +133,11 @@ class TTSManager:
             self.logger.error(f"Audio file not found: {audio_path}")
             return False
         
-        try:
-            # Use different players depending on platform
-            if os.name == 'nt':  # Windows
-                subprocess.Popen(['start', audio_path], shell=True)
-            elif os.name == 'posix':  # Linux/Mac
-                # Try different players
-                players = ['mpg123', 'mpg321', 'play', 'ffplay']
-                played = False
-                
-                for player in players:
-                    try:
-                        subprocess.Popen([player, audio_path], 
-                                         stdout=subprocess.PIPE, 
-                                         stderr=subprocess.PIPE)
-                        played = True
-                        break
-                    except:
-                        pass
-                
-                if not played:
-                    self.logger.warning("No audio player found. Install mpg123, mpg321, sox, or ffmpeg.")
-            
-            return True
-        
-        except Exception as e:
-            self.logger.error(f"Failed to play audio: {str(e)}")
-            return False
+        # In web application context, we don't actually play audio through server speakers
+        # The audio file is served to the client and played in the browser
+        # This method is kept for compatibility and potential future use in desktop apps
+        self.logger.debug(f"Audio ready at path: {audio_path}")
+        return True
     
     def get_available_voices(self):
         """Get a list of all available voices across providers"""
