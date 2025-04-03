@@ -216,6 +216,39 @@ def test_page():
     # Direct file serving of test page HTML
     return app.send_static_file('test_page.html')
 
+# CORS test page
+@app.route('/cors-test-endpoint')
+def cors_test_endpoint_page():
+    """Serve a dedicated CORS test page"""
+    return app.send_static_file('test_cors_endpoint.html')
+
+# Ultra-minimal CORS test route
+@app.route('/api/test-cors-minimal', methods=['GET', 'POST', 'OPTIONS'])
+def cors_test_route_minimal():
+    """Ultra-minimal test endpoint specifically for CORS testing with the feedback tool"""
+    logger.info(f"Received {request.method} request to /api/test-cors-minimal from {request.headers.get('Origin', 'unknown origin')}")
+    
+    # For OPTIONS requests (preflight)
+    if request.method == 'OPTIONS':
+        logger.info("Handling OPTIONS preflight request for minimal test endpoint")
+        response = jsonify({'message': 'Preflight request successful'})
+        # Explicitly set CORS headers
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Max-Age'] = '3600'
+        return response
+    
+    # For GET or POST requests - ultra minimal response
+    response = jsonify({'message': 'CORS test successful'})
+    
+    # Explicitly set CORS headers
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    
+    return response
+
 # Diagnostic panel for connectivity troubleshooting
 @app.route('/diagnostic-panel')
 def diagnostic_panel():

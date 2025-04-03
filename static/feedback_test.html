@@ -1,45 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+    <title>Minimal Feedback Test</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mashaaer Feelings - Diagnostic Test</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
-            background-color: #f0f0f0;
-        }
-        .status {
-            padding: 20px;
-            background-color: #e1f5fe;
-            border-radius: 8px;
-            margin: 20px auto;
-            max-width: 600px;
-        }
-        .header {
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .success {
-            color: green;
-            font-weight: bold;
-        }
-    </style>
 </head>
 <body>
-    <h1 class="header">Mashaaer Feelings Server Diagnostic</h1>
+    <h1>Minimal Feedback Test Page</h1>
+    <p>If you can see this page, the server is accessible.</p>
+    <p>API Endpoint: <a href="/api/test-cors-minimal" target="_blank">/api/test-cors-minimal</a></p>
+    <div id="result">Click the button below to test the API</div>
+    <button id="testButton">Test API Connection</button>
     
-    <div class="status">
-        <h2 class="success">Server is running</h2>
-        <p>If you can see this page, the web server is accessible.</p>
-        <p>Timestamp: <span id="timestamp"></span></p>
-    </div>
-
     <script>
-        // Display current timestamp
-        document.getElementById('timestamp').textContent = new Date().toISOString();
+        document.getElementById('testButton').addEventListener('click', function() {
+            document.getElementById('result').textContent = 'Testing API connection...';
+            
+            fetch('/api/test-cors-minimal')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('result').textContent = 'Success! API response: ' + JSON.stringify(data);
+                })
+                .catch(error => {
+                    document.getElementById('result').textContent = 'Error: ' + error.message;
+                });
+        });
     </script>
 </body>
 </html>
