@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Connection Test</h1>
+    <p>This page tests connectivity to various endpoints of the Mashaaer application.</p>
+    
+    <div>
+        <button onclick="testEndpoint('/test')">Test Endpoint</button>
+        <button onclick="testEndpoint('/api/status')">API Status</button>
+        <button onclick="testDirectFetch()">Direct Fetch Test</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script>
+        // Test an endpoint
+        async function testEndpoint(endpoint) {
+            const resultsDiv = document.getElementById('results');
+            const resultElement = document.createElement('div');
+            resultElement.className = 'result';
+            
+            try {
+                const response = await fetch(endpoint);
+                const data = await response.json();
+                
+                resultElement.className = 'result success';
+                resultElement.innerHTML = `
+                    <h3>Success: ${endpoint}</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultElement.className = 'result error';
+                resultElement.innerHTML = `
+                    <h3>Error: ${endpoint}</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+            
+            resultsDiv.prepend(resultElement);
+        }
+        
+        // Test direct fetch to determine if it's a CORS issue
+        async function testDirectFetch() {
+            const resultsDiv = document.getElementById('results');
+            const resultElement = document.createElement('div');
+            resultElement.className = 'result';
+            
+            // Create a debugging message
+            const debugInfo = {
+                url: window.location.href,
+                protocol: window.location.protocol,
+                host: window.location.host,
+                origin: window.location.origin,
+                testEndpoint: `${window.location.origin}/test`
+            };
+            
+            try {
+                // Try to fetch the test endpoint with explicit mode and credentials
+                const response = await fetch('/test', {
+                    method: 'GET',
+                    mode: 'cors',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                resultElement.className = 'result success';
+                resultElement.innerHTML = `
+                    <h3>Direct Fetch Success</h3>
+                    <h4>Debug Info:</h4>
+                    <pre>${JSON.stringify(debugInfo, null, 2)}</pre>
+                    <h4>Response:</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultElement.className = 'result error';
+                resultElement.innerHTML = `
+                    <h3>Direct Fetch Error</h3>
+                    <h4>Debug Info:</h4>
+                    <pre>${JSON.stringify(debugInfo, null, 2)}</pre>
+                    <h4>Error:</h4>
+                    <p>${error.message}</p>
+                `;
+            }
+            
+            resultsDiv.prepend(resultElement);
+        }
+    </script>
+</body>
+</html>

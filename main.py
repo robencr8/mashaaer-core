@@ -28,7 +28,7 @@ import twilio_api
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
 # Enable CORS for all routes to support Flutter and mobile app integration
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app, origins="*", supports_credentials=True)
 
 # Initialize components
 config = Config()
@@ -51,6 +51,35 @@ init_api(app, db_manager, emotion_tracker, face_detector,
 # Developer mode constants
 DEVELOPER_NAME = os.environ.get("DEVELOPER_NAME", "Roben Edwan")
 DEVELOPER_MODE_FLAG = "dev_mode_enabled"
+
+# Simple test endpoint for connectivity checks
+@app.route('/test')
+def test_endpoint():
+    return jsonify({
+        'status': 'success',
+        'message': 'Server is reachable',
+        'timestamp': datetime.now().isoformat()
+    })
+
+# Simple API status endpoint
+@app.route('/api/status')
+def api_status():
+    return jsonify({
+        'status': 'online',
+        'timestamp': datetime.now().isoformat(),
+        'version': os.environ.get('APP_VERSION', '1.0.0'),
+        'service_name': 'Mashaaer Feelings'
+    })
+
+# Connection test page
+@app.route('/connection-test')
+def connection_test_page():
+    return render_template('connection_test.html')
+
+# Simple test page as root route (temporary)
+@app.route('/simple-test')
+def simple_test_page():
+    return render_template('simple_test.html')
 
 # Helper function to get developer mode status
 def is_developer_mode():
@@ -122,6 +151,12 @@ core_launcher = CoreLauncher(
 # Routes
 @app.route('/')
 def index():
+    # TEMPORARY: Serve the simple test page for debugging server connectivity
+    # Return our simple test page directly to bypass any potential redirect issues
+    return render_template('simple_test.html')
+    
+    # Original code (commented out during debugging)
+    """
     # Check if onboarding has been completed
     onboarding_status = db_manager.get_setting('onboarding_complete', 'false')
     onboarding_complete = False
@@ -135,6 +170,7 @@ def index():
 
     dev_mode = is_developer_mode()
     return render_template('index.html', dev_mode=dev_mode)
+    """
 
 @app.route('/startup')
 def startup():
