@@ -1,5 +1,6 @@
 {pkgs}: {
   deps = [
+    pkgs.tree
     pkgs.libyaml
     pkgs.python312Packages.pyngrok
     pkgs.iproute2
