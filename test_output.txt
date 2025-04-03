@@ -1,0 +1,147 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.10, pytest-8.3.5, pluggy-1.5.0 -- /home/runner/workspace/.pythonlibs/bin/python
+cachedir: .pytest_cache
+rootdir: /home/runner/workspace
+configfile: pytest.ini
+plugins: anyio-4.9.0, mock-3.14.0, flask-1.3.0
+collecting ... collected 1 item
+
+tests/test_api_caching.py::test_cache_hit_count_tracking_minimal 
+-------------------------------- live log call ---------------------------------
+INFO     mobile_api_routes:mobile_api_routes.py:75 Created new mobile session: acbd65b6-4d54-4f8b-9ff1-bf1ea741dcb2 (mobile app: False)
+INFO     mobile_api_routes:mobile_api_routes.py:291 Mobile API: Emotion analysis request: 'CacheHitTest_1743711...' in en
+FAILED                                                                   [100%]
+
+=================================== FAILURES ===================================
+____________________ test_cache_hit_count_tracking_minimal _____________________
+
+client = <FlaskClient <Flask 'main'>>
+db_session = <sqlalchemy.orm.session.Session object at 0x7fac5474cd90>
+clear_cache = <function clear_cache.<locals>._clear_cache at 0x7fac58932b60>
+app = <Flask 'main'>
+
+    def test_cache_hit_count_tracking_minimal(client: FlaskClient, db_session: Session, clear_cache, app: Flask):
+        """A minimal test that solely focuses on verifying cache hit count increments."""
+        logging.getLogger().setLevel(logging.DEBUG)
+        print("\n===== Starting test_cache_hit_count_tracking_minimal =====")
+    
+        with app.app_context():
+            try:
+                # Step 1: Ensure we have a clean database state
+                clear_cache()
+                db_session.commit()
+    
+                # Verify cache table is empty
+                cache_count = db_session.query(Cache).count()
+                assert cache_count == 0, f"Expected empty cache at start of test, but found {cache_count} entries"
+                print(f"Verified cache is empty: {cache_count} entries")
+    
+                # Step 2: Let's use the actual API to create a cache entry
+                test_text = f"CacheHitTest_{time.time()}"
+                print(f"Using test text: '{test_text}'")
+    
+                # Mock the emotion analysis to return a predictable result
+                with patch('emotion_tracker.EmotionTracker.analyze_text') as mock_analyze:
+                    mock_analyze.return_value = {
+                        "primary_emotion": "happy",
+                        "confidence": 0.9,
+                        "emotions": {
+                            "happy": 0.9,
+                            "neutral": 0.1
+                        }
+                    }
+    
+                    # First request to create cache entry
+                    print("\n----- First API request (create cache entry) -----")
+                    response1 = client.post(
+                        "/mobile-api/analyze-emotion",
+                        json={"text": test_text, "language": "en", "include_details": "true"}
+                    )
+                    result1 = json.loads(response1.data)
+    
+                    print(f"Response status: {response1.status_code}")
+                    print(f"Cache status: {result1.get('cache_status')}")
+                    assert response1.status_code == 200, f"Expected 200 response, got {response1.status_code}"
+                    assert result1.get("success") is True, "Expected success=True"
+                    assert result1.get("cache_status") == "miss", f"Expected cache_status='miss', got '{result1.get('cache_status')}'"
+    
+                    # Compute the expected cache key
+                    normalized_text = test_text.strip().lower()
+                    import hashlib
+                    expected_cache_key = f"emotion_{hashlib.md5(normalized_text.encode()).hexdigest()}_en"
+                    print(f"Expected cache key: '{expected_cache_key}'")
+    
+                    # Verify cache entry was created
+                    db_session.commit()  # Ensure transaction is committed
+                    cache_entry = db_session.query(Cache).filter(Cache.key == expected_cache_key).first()
+                    print(f"Cache entry found: {cache_entry is not None}")
+    
+                    if cache_entry is None:
+                        # Try a direct look at the database table
+                        print("\nDumping all cache entries for debugging:")
+                        all_cache_entries = db_session.query(Cache).all()
+                        for entry in all_cache_entries:
+                            print(f"  Key: '{entry.key}', hit_count: {entry.hit_count}")
+    
+                        # Try alternate key formats
+                        alt_cache_key = f"emotion_{hashlib.md5(test_text.encode()).hexdigest()}_en"
+                        print(f"Trying alternate cache key: '{alt_cache_key}'")
+                        alt_entry = db_session.query(Cache).filter(Cache.key == alt_cache_key).first()
+                        print(f"Alternate cache entry found: {alt_entry is not None}")
+    
+>                   assert cache_entry is not None, "Failed to create initial cache entry"
+E                   AssertionError: Failed to create initial cache entry
+E                   assert None is not None
+
+tests/test_api_caching.py:738: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+Created tables: settings, emotion_data, faces, recognition_history, voice_logs, response_cache
+----------------------------- Captured stdout call -----------------------------
+
+===== Starting test_cache_hit_count_tracking_minimal =====
+Cache table cleared - all entries deleted and committed
+Cache entries after clearing: 0
+Verified cache is empty: 0 entries
+Using test text: 'CacheHitTest_1743711474.460743'
+
+----- First API request (create cache entry) -----
+🔍 Request to: /mobile-api/analyze-emotion
+
+===== ANALYZE EMOTION API CALLED =====
+Request method: POST
+DEBUG: Normalized text: 'cachehittest_1743711474.460743'
+DEBUG: Generated cache key: 'emotion_dee2d6408dabb129c0d9c26c53c8669f_en'
+DEBUG: Bypass cache: False
+DEBUG: Storing in cache, bypass_cache=False, db_manager exists=True
+DEBUG: cache_data prepared: {"primary_emotion": "happy", "confidence": 0.9, "emotions": {"happy": 0.9, "neutral": 0.1}, "language": "en", "timestamp": "2025-04-03T20:17:54Z"}
+DEBUG: cache_key for storage: emotion_dee2d6408dabb129c0d9c26c53c8669f_en
+DEBUG: Cache storage result: True
+DEBUG: Cache entry after storage: True
+DEBUG: Cache key: emotion_dee2d6408dabb129c0d9c26c53c8669f_en, Created: 2025-04-03 20:17:54, Hit count: 0
+Response status: 200
+Cache status: miss
+Expected cache key: 'emotion_dee2d6408dabb129c0d9c26c53c8669f_en'
+Cache entry found: False
+
+Dumping all cache entries for debugging:
+Trying alternate cache key: 'emotion_c1ede0afadcbe4b9b27382ef6bbb823a_en'
+Alternate cache entry found: False
+----------------------------- Captured stderr call -----------------------------
+2025-04-03 20:17:54,464 - mobile_api_routes - INFO - Created new mobile session: acbd65b6-4d54-4f8b-9ff1-bf1ea741dcb2 (mobile app: False)
+2025-04-03 20:17:54,464 - mobile_api_routes - INFO - Mobile API: Emotion analysis request: 'CacheHitTest_1743711...' in en
+2025-04-03 20:17:54,556 - database.db_manager - DEBUG - Cached response stored with key 'emotion_dee2d6408dabb129c0d9c26c53c8669f_en', expires in 259200s
+2025-04-03 20:17:54,557 - mobile_api_routes - DEBUG - Cached emotion analysis for key: emotion_dee2d6408dabb129c0d9c26c53c8669f_en
+------------------------------ Captured log call -------------------------------
+INFO     mobile_api_routes:mobile_api_routes.py:75 Created new mobile session: acbd65b6-4d54-4f8b-9ff1-bf1ea741dcb2 (mobile app: False)
+INFO     mobile_api_routes:mobile_api_routes.py:291 Mobile API: Emotion analysis request: 'CacheHitTest_1743711...' in en
+DEBUG    database.db_manager:db_manager.py:462 Cached response stored with key 'emotion_dee2d6408dabb129c0d9c26c53c8669f_en', expires in 259200s
+DEBUG    mobile_api_routes:mobile_api_routes.py:348 Cached emotion analysis for key: emotion_dee2d6408dabb129c0d9c26c53c8669f_en
+=============================== warnings summary ===============================
+database/models.py:7
+  /home/runner/workspace/database/models.py:7: MovedIn20Warning: The ``declarative_base()`` function is now available as sqlalchemy.orm.declarative_base(). (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    Base = declarative_base()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_api_caching.py::test_cache_hit_count_tracking_minimal - Ass...
+========================= 1 failed, 1 warning in 0.24s =========================

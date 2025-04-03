@@ -5,6 +5,7 @@ Focuses on the mobile API endpoints that use caching.
 
 import json
 import time
+import logging
 from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock
 import pytest
@@ -664,6 +665,129 @@ def test_performance_metrics(client: FlaskClient, db_session: Session, clear_cac
         improvement = (first_request_time - second_request_time) / first_request_time * 100
         print(f"Performance improvement: {improvement:.2f}% faster with cache")
         assert improvement > 80  # Cache should be at least 80% faster
+
+def test_cache_hit_count_tracking_minimal(client: FlaskClient, db_session: Session, clear_cache, app: Flask):
+    """A minimal test that solely focuses on verifying cache hit count increments."""
+    logging.getLogger().setLevel(logging.DEBUG)
+    print("\n===== Starting test_cache_hit_count_tracking_minimal =====")
+
+    with app.app_context():
+        try:
+            # Step 1: Ensure we have a clean database state
+            clear_cache()
+            db_session.commit()
+            
+            # Verify cache table is empty
+            cache_count = db_session.query(Cache).count()
+            assert cache_count == 0, f"Expected empty cache at start of test, but found {cache_count} entries"
+            print(f"Verified cache is empty: {cache_count} entries")
+            
+            # Step 2: Let's use the actual API to create a cache entry
+            test_text = f"CacheHitTest_{time.time()}"
+            print(f"Using test text: '{test_text}'")
+            
+            # Mock the emotion analysis to return a predictable result
+            with patch('emotion_tracker.EmotionTracker.analyze_text') as mock_analyze:
+                mock_analyze.return_value = {
+                    "primary_emotion": "happy",
+                    "confidence": 0.9,
+                    "emotions": {
+                        "happy": 0.9,
+                        "neutral": 0.1
+                    }
+                }
+                
+                # First request to create cache entry
+                print("\n----- First API request (create cache entry) -----")
+                response1 = client.post(
+                    "/mobile-api/analyze-emotion",
+                    json={"text": test_text, "language": "en", "include_details": "true"}
+                )
+                result1 = json.loads(response1.data)
+                
+                print(f"Response status: {response1.status_code}")
+                print(f"Cache status: {result1.get('cache_status')}")
+                assert response1.status_code == 200, f"Expected 200 response, got {response1.status_code}"
+                assert result1.get("success") is True, "Expected success=True"
+                assert result1.get("cache_status") == "miss", f"Expected cache_status='miss', got '{result1.get('cache_status')}'"
+                
+                # Compute the expected cache key
+                normalized_text = test_text.strip().lower()
+                import hashlib
+                expected_cache_key = f"emotion_{hashlib.md5(normalized_text.encode()).hexdigest()}_en"
+                print(f"Expected cache key: '{expected_cache_key}'")
+                
+                # Verify cache entry was created
+                db_session.commit()  # Ensure transaction is committed
+                cache_entry = db_session.query(Cache).filter(Cache.key == expected_cache_key).first()
+                print(f"Cache entry found: {cache_entry is not None}")
+                
+                if cache_entry is None:
+                    # Try a direct look at the database table
+                    print("\nDumping all cache entries for debugging:")
+                    all_cache_entries = db_session.query(Cache).all()
+                    for entry in all_cache_entries:
+                        print(f"  Key: '{entry.key}', hit_count: {entry.hit_count}")
+                    
+                    # Try alternate key formats
+                    alt_cache_key = f"emotion_{hashlib.md5(test_text.encode()).hexdigest()}_en"
+                    print(f"Trying alternate cache key: '{alt_cache_key}'")
+                    alt_entry = db_session.query(Cache).filter(Cache.key == alt_cache_key).first()
+                    print(f"Alternate cache entry found: {alt_entry is not None}")
+                
+                assert cache_entry is not None, "Failed to create initial cache entry"
+                initial_hit_count = cache_entry.hit_count
+                print(f"Initial hit count: {initial_hit_count}")
+                
+                # Step 3: Make a second request to test hit count increment
+                print("\n----- Second API request (should hit cache) -----")
+                response2 = client.post(
+                    "/mobile-api/analyze-emotion",
+                    json={"text": test_text, "language": "en", "include_details": "true"}
+                )
+                result2 = json.loads(response2.data)
+                
+                print(f"Response status: {response2.status_code}")
+                print(f"Cache status: {result2.get('cache_status')}")
+                assert response2.status_code == 200, f"Expected 200 response, got {response2.status_code}"
+                assert result2.get("success") is True, "Expected success=True"
+                assert result2.get("cache_status") == "hit", f"Expected cache_status='hit', got '{result2.get('cache_status')}'"
+                
+                # Verify hit count was incremented
+                db_session.refresh(cache_entry)
+                new_hit_count = cache_entry.hit_count
+                print(f"New hit count: {new_hit_count}")
+                
+                assert new_hit_count == initial_hit_count + 1, \
+                    f"Expected hit count to increment from {initial_hit_count} to {initial_hit_count + 1}, but got {new_hit_count}"
+                
+                # Check if cache_hit_count is included in metadata
+                if "result" in result2 and "metadata" in result2["result"]:
+                    metadata = result2["result"]["metadata"]
+                    print(f"Response metadata: {json.dumps(metadata, indent=2)}")
+                    
+                    if "cache_hit_count" in metadata:
+                        cache_hit_count = metadata["cache_hit_count"]
+                        print(f"cache_hit_count in response: {cache_hit_count}")
+                        
+                        # Validate metadata hit count
+                        assert cache_hit_count == new_hit_count, \
+                            f"API hit_count ({cache_hit_count}) doesn't match DB hit_count ({new_hit_count})"
+                    else:
+                        print("WARNING: No cache_hit_count in API response metadata")
+                else:
+                    print("WARNING: No metadata in API response")
+                
+                # Verify mock was called exactly once
+                assert mock_analyze.call_count == 1, \
+                    f"Expected analyze_text to be called once, but was called {mock_analyze.call_count} times"
+                
+                # Cleanup at end
+                print("\n----- Test completed successfully -----")
+        
+        finally:
+            # Clean up after test
+            db_session.rollback()
 
 def test_cache_hit_count_tracking(client: FlaskClient, db_session: Session, clear_cache, app: Flask):
     """Tests that cache hit counts are properly tracked when retrieving cached emotion analysis results."""
