@@ -292,14 +292,31 @@
       top: 50%;
       transform: translateY(-50%);
       cursor: pointer;
-      width: 30px;
-      height: 30px;
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
-      background: rgba(33, 150, 243, 0.2);
+      background: rgba(138, 43, 226, 0.3);
       display: flex;
       align-items: center;
       justify-content: center;
       transition: all 0.3s ease;
+      box-shadow: 0 0 8px rgba(138, 43, 226, 0.5);
+      animation: voice-btn-pulse 2s infinite;
+    }
+    
+    @keyframes voice-btn-pulse {
+      0% {
+        box-shadow: 0 0 8px rgba(138, 43, 226, 0.5);
+        transform: translateY(-50%) scale(1);
+      }
+      50% {
+        box-shadow: 0 0 15px rgba(138, 43, 226, 0.8);
+        transform: translateY(-50%) scale(1.1);
+      }
+      100% {
+        box-shadow: 0 0 8px rgba(138, 43, 226, 0.5);
+        transform: translateY(-50%) scale(1);
+      }
     }
     
     [dir="rtl"] .voice-input-btn {
@@ -308,16 +325,17 @@
     }
     
     .voice-input-btn:hover {
-      background: rgba(33, 150, 243, 0.4);
+      background: rgba(138, 43, 226, 0.5);
     }
     
     .voice-input-btn i {
-      color: #42a5f5;
-      font-size: 14px;
+      color: #ffffff;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+      font-size: 16px;
     }
     
     .voice-input-btn:active {
-      background: rgba(33, 150, 243, 0.6);
+      background: rgba(138, 43, 226, 0.7);
       transform: translateY(-50%) scale(0.95);
     }
     
@@ -331,6 +349,12 @@
       position: relative;
       transform: none;
       top: 0;
+      margin-left: 5px;
+      animation: voice-btn-pulse 2s infinite;
+    }
+    
+    .terms-agreement .voice-input-btn:active {
+      transform: scale(0.95);
     }
 
     /* Tooltip Styles */
@@ -787,6 +811,10 @@
     function startOnboarding() {
       document.getElementById('splash-container').style.display = 'none';
       document.getElementById('onboarding-content').style.display = 'flex';
+      
+      // Initialize progress visualizer
+      createProgressVisualizer();
+      
       showStep('name');
       
       // Speak welcome message and first instruction
@@ -808,6 +836,12 @@
       steps.forEach(s => {
         document.getElementById(`step-${s}`).style.display = s === step ? 'block' : 'none';
       });
+      
+      // Update progress visualizer
+      updateProgressVisualizer(step);
+      
+      // Show tooltips for this step
+      showStepTooltips(step);
       
       // If it's the complete step, prepare for redirect
       if (step === 'complete') {
@@ -965,48 +999,8 @@
           listeningIndicator.style.display = 'none';
         }
         
-        // Show error message to user - with specific elements per step
-        let errorElement;
-        
-        if (stepId === 'name') {
-          errorElement = document.getElementById('voice-error-message');
-        } else if (stepId === 'nickname') {
-          errorElement = document.getElementById('voice-error-message-nickname');
-        } else if (stepId === 'terms-agree') {
-          errorElement = document.getElementById('voice-error-message-terms');
-        } else {
-          errorElement = document.getElementById('voice-error-message');
-        }
-        
-        if (errorElement) {
-          const errorMsg = userLanguage === 'ar' ? 
-            `خطأ في التعرف على الصوت: ${error.message}. يرجى المحاولة مرة أخرى أو كتابة الرد.` : 
-            `Voice recognition error: ${error.message}. Please try again or type your response.`;
-            
-          errorElement.textContent = errorMsg;
-          errorElement.style.display = 'block';
-          
-          // Hide error message after 5 seconds
-          setTimeout(() => {
-            errorElement.style.display = 'none';
-          }, 5000);
-        }
-        
-        // Try again after 3 seconds if we're on important steps
-        const currentStep = document.querySelector('.step.active');
-        if (currentStep && (currentStep.id === 'step-name' || currentStep.id === 'step-terms')) {
-          setTimeout(() => {
-            console.log('Retrying voice recognition after error...');
-            
-            // Clear error messages before retrying
-            if (errorElement) {
-              errorElement.style.display = 'none';
-            }
-            
-            // Retry voice input
-            startVoiceInput(fieldId);
-          }, 3000);
-        }
+        // Enhanced multilingual error handling
+        handleVoiceInputError(error, stepId, fieldId);
       });
     }
     
@@ -1052,6 +1046,367 @@
           }, 1000);
         }
       }
+    }
+    
+    // Enhanced multilingual voice input error handling
+    function handleVoiceInputError(error, stepId, fieldId) {
+      console.log(`Voice error in step ${stepId} for field ${fieldId}:`, error);
+      
+      // Get the appropriate error element for this step
+      let errorElement;
+      
+      if (stepId === 'name') {
+        errorElement = document.getElementById('voice-error-message');
+      } else if (stepId === 'nickname') {
+        errorElement = document.getElementById('voice-error-message-nickname');
+      } else if (stepId === 'terms-agree') {
+        errorElement = document.getElementById('voice-error-message-terms');
+      } else {
+        errorElement = document.getElementById('voice-error-message');
+      }
+      
+      if (!errorElement) {
+        console.error('Error element not found for step:', stepId);
+        return;
+      }
+      
+      // Determine error type and provide specific message
+      let errorType = 'unknown';
+      if (error.message) {
+        if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorType = 'network';
+        } else if (error.message.includes('microphone') || error.message.includes('permission')) {
+          errorType = 'permission';
+        } else if (error.message.includes('timeout')) {
+          errorType = 'timeout';
+        } else if (error.message.includes('no speech') || error.message.includes('quiet')) {
+          errorType = 'no_speech';
+        } else if (error.message.includes('language') || error.message.includes('not supported')) {
+          errorType = 'language';
+        }
+      }
+      
+      // Multilingual error messages with helpful recovery suggestions
+      const errorMessages = {
+        network: {
+          ar: 'خطأ في الاتصال بالشبكة. تأكد من اتصالك بالإنترنت وحاول مرة أخرى، أو استخدم لوحة المفاتيح للإدخال.',
+          en: 'Network connection error. Please check your internet connection and try again, or use the keyboard for input.'
+        },
+        permission: {
+          ar: 'لم يتم منح إذن الميكروفون. يرجى النقر على أيقونة القفل في شريط العنوان ومنح إذن الميكروفون، أو استخدم لوحة المفاتيح للإدخال.',
+          en: 'Microphone permission not granted. Please click the lock icon in the address bar and allow microphone access, or use the keyboard for input.'
+        },
+        timeout: {
+          ar: 'انتهت مهلة التعرف على الصوت. حاول التحدث بصوت أعلى أو استخدم لوحة المفاتيح للإدخال.',
+          en: 'Voice recognition timed out. Try speaking louder or use the keyboard for input.'
+        },
+        no_speech: {
+          ar: 'لم يتم اكتشاف أي كلام. تأكد من أن الميكروفون يعمل وحاول التحدث بوضوح، أو استخدم لوحة المفاتيح للإدخال.',
+          en: 'No speech detected. Make sure your microphone is working and try speaking clearly, or use the keyboard for input.'
+        },
+        language: {
+          ar: 'اللغة غير مدعومة في جهازك. جرب لغة أخرى أو استخدم لوحة المفاتيح للإدخال.',
+          en: 'Language not supported on your device. Try a different language or use the keyboard for input.'
+        },
+        unknown: {
+          ar: `خطأ في التعرف على الصوت: ${error.message || 'خطأ غير معروف'}. يرجى المحاولة مرة أخرى أو استخدام لوحة المفاتيح للإدخال.`,
+          en: `Voice recognition error: ${error.message || 'Unknown error'}. Please try again or use the keyboard for input.`
+        }
+      };
+      
+      // Get the appropriate error message
+      const errorMsg = errorMessages[errorType][userLanguage] || errorMessages.unknown[userLanguage];
+      
+      // Display error message
+      errorElement.textContent = errorMsg;
+      errorElement.style.display = 'block';
+      
+      // Hide error message after 7 seconds
+      setTimeout(() => {
+        errorElement.style.display = 'none';
+      }, 7000);
+      
+      // Speak the error message to provide audio feedback
+      speakText(errorMsg);
+      
+      // Auto-retry for certain error types on important steps
+      const retryableErrors = ['network', 'timeout', 'no_speech'];
+      const criticalSteps = ['name', 'terms-agree'];
+      
+      if (retryableErrors.includes(errorType) && criticalSteps.includes(stepId)) {
+        setTimeout(() => {
+          console.log('Auto-retrying voice recognition after error...');
+          
+          // Clear error messages before retrying
+          errorElement.style.display = 'none';
+          
+          // Try voice input again
+          startVoiceInput(fieldId);
+        }, 5000);
+      } else {
+        // Show tooltip with instructions for manual input
+        const tooltipConfig = {
+          id: 'error-recovery-tooltip',
+          target: stepId === 'name' ? '#full-name' : 
+                  stepId === 'nickname' ? '#nickname' : 
+                  stepId === 'terms-agree' ? '#terms-agree' : 
+                  '.form-control',
+          title: {
+            ar: 'جرب الإدخال اليدوي',
+            en: 'Try manual input'
+          },
+          content: {
+            ar: 'يمكنك <span class="tooltip-highlight">الكتابة</span> في هذا الحقل بدلاً من استخدام الصوت.',
+            en: 'You can <span class="tooltip-highlight">type</span> in this field instead of using voice.'
+          },
+          position: 'bottom',
+          delay: 500
+        };
+        
+        showTooltip(tooltipConfig);
+      }
+      
+      // Update progress visualizer to show error state
+      updateProgressVisualizer(currentStep, false, errorType);
+      
+      // Track error for analytics
+      try {
+        fetch('/api/log-voice-error', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            step: stepId,
+            error_type: errorType,
+            error_message: error.message || 'Unknown',
+            language: userLanguage
+          })
+        }).catch(e => console.error('Failed to log voice error:', e));
+      } catch (e) {
+        console.error('Error logging voice error:', e);
+      }
+    }
+    
+    // Create personalized journey progress visualizer
+    function createProgressVisualizer() {
+      // Create container if it doesn't exist
+      let progressContainer = document.getElementById('onboarding-progress');
+      if (!progressContainer) {
+        progressContainer = document.createElement('div');
+        progressContainer.id = 'onboarding-progress';
+        progressContainer.className = 'progress-visualizer';
+        document.getElementById('onboarding-content').appendChild(progressContainer);
+        
+        // Add CSS for the progress visualizer
+        const style = document.createElement('style');
+        style.textContent = `
+          .progress-visualizer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            padding: 10px;
+            width: 100%;
+          }
+          
+          .step-indicator {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 20%;
+            z-index: 1;
+          }
+          
+          .step-bubble {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: rgba(138, 43, 226, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 5px;
+            position: relative;
+            transition: all 0.5s ease;
+          }
+          
+          .step-bubble.active {
+            background-color: rgba(138, 43, 226, 0.9);
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.8);
+            transform: scale(1.2);
+          }
+          
+          .step-bubble.completed {
+            background-color: rgba(138, 43, 226, 0.7);
+          }
+          
+          .step-bubble.error {
+            background-color: rgba(233, 30, 99, 0.8);
+            box-shadow: 0 0 15px rgba(233, 30, 99, 0.5);
+          }
+          
+          .step-label {
+            font-size: 0.8rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            max-width: 80px;
+            transition: all 0.3s ease;
+          }
+          
+          .step-label.active {
+            color: rgba(255, 255, 255, 1);
+            font-weight: bold;
+          }
+          
+          .step-connector {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(to right, rgba(138, 43, 226, 0.7), rgba(138, 43, 226, 0.2));
+            top: 15px;
+            width: 100%;
+            left: 50%;
+            z-index: -1;
+          }
+          
+          .step-bubble i {
+            color: white;
+            font-size: 14px;
+          }
+          
+          @media (max-width: 480px) {
+            .step-bubble {
+              width: 24px;
+              height: 24px;
+            }
+            
+            .step-label {
+              font-size: 0.7rem;
+              max-width: 60px;
+            }
+            
+            .step-bubble i {
+              font-size: 12px;
+            }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+      
+      // Clear existing progress indicators
+      progressContainer.innerHTML = '';
+      
+      // Create step indicators
+      steps.forEach((step, index) => {
+        const stepIndicator = document.createElement('div');
+        stepIndicator.className = 'step-indicator';
+        stepIndicator.id = `progress-${step}`;
+        
+        const stepBubble = document.createElement('div');
+        stepBubble.className = 'step-bubble';
+        stepBubble.id = `bubble-${step}`;
+        
+        // Add appropriate icon
+        const icon = document.createElement('i');
+        if (step === 'name') {
+          icon.className = 'fas fa-user';
+        } else if (step === 'nickname') {
+          icon.className = 'fas fa-id-badge';
+        } else if (step === 'language') {
+          icon.className = 'fas fa-language';
+        } else if (step === 'terms') {
+          icon.className = 'fas fa-file-contract';
+        } else if (step === 'complete') {
+          icon.className = 'fas fa-check-circle';
+        }
+        stepBubble.appendChild(icon);
+        
+        // Add step label
+        const stepLabel = document.createElement('div');
+        stepLabel.className = 'step-label';
+        stepLabel.id = `label-${step}`;
+        
+        // Set label text based on language
+        if (step === 'name') {
+          stepLabel.textContent = userLanguage === 'ar' ? 'الاسم' : 'Name';
+        } else if (step === 'nickname') {
+          stepLabel.textContent = userLanguage === 'ar' ? 'اللقب' : 'Nickname';
+        } else if (step === 'language') {
+          stepLabel.textContent = userLanguage === 'ar' ? 'اللغة' : 'Language';
+        } else if (step === 'terms') {
+          stepLabel.textContent = userLanguage === 'ar' ? 'الشروط' : 'Terms';
+        } else if (step === 'complete') {
+          stepLabel.textContent = userLanguage === 'ar' ? 'اكتمل' : 'Done';
+        }
+        
+        // Add connector line between steps (except for first step)
+        if (index < steps.length - 1) {
+          const connector = document.createElement('div');
+          connector.className = 'step-connector';
+          connector.id = `connector-${step}`;
+          stepIndicator.appendChild(connector);
+        }
+        
+        // Add elements to DOM
+        stepIndicator.appendChild(stepBubble);
+        stepIndicator.appendChild(stepLabel);
+        progressContainer.appendChild(stepIndicator);
+      });
+      
+      // Initial update of the progress visualizer
+      updateProgressVisualizer(currentStep);
+    }
+    
+    // Update the progress visualizer
+    function updateProgressVisualizer(currentStep, isSuccess = true, errorType = null) {
+      const currentIndex = steps.indexOf(currentStep);
+      
+      // Update all steps
+      steps.forEach((step, index) => {
+        const bubble = document.getElementById(`bubble-${step}`);
+        const label = document.getElementById(`label-${step}`);
+        
+        if (!bubble || !label) return;
+        
+        // Reset classes
+        bubble.className = 'step-bubble';
+        label.className = 'step-label';
+        
+        if (index < currentIndex) {
+          // Completed steps
+          bubble.classList.add('completed');
+          bubble.innerHTML = '<i class="fas fa-check"></i>';
+        } else if (index === currentIndex) {
+          // Current step
+          bubble.classList.add('active');
+          label.classList.add('active');
+          
+          // If there was an error, show error state
+          if (!isSuccess && errorType) {
+            bubble.classList.add('error');
+            if (errorType === 'network') {
+              bubble.innerHTML = '<i class="fas fa-wifi-slash"></i>';
+            } else if (errorType === 'permission') {
+              bubble.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+            } else if (errorType === 'timeout' || errorType === 'no_speech') {
+              bubble.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            } else {
+              bubble.innerHTML = '<i class="fas fa-exclamation"></i>';
+            }
+          }
+        }
+        
+        // Update connector colors
+        const connector = document.getElementById(`connector-${step}`);
+        if (connector) {
+          if (index < currentIndex) {
+            connector.style.background = 'rgba(138, 43, 226, 0.7)';
+          } else {
+            connector.style.background = 'linear-gradient(to right, rgba(138, 43, 226, 0.7), rgba(138, 43, 226, 0.2))';
+          }
+        }
+      });
     }
     
     // Submit profile data to server
@@ -1127,6 +1482,21 @@
           },
           position: 'top',
           delay: 500
+        },
+        {
+          id: 'voice-name-tooltip',
+          target: '.voice-input-btn',
+          title: {
+            ar: 'تحدث معي مباشرة',
+            en: 'Talk to me directly'
+          },
+          content: {
+            ar: 'انقر على زر الميكروفون واخبرني باسمك، أنا أستمع إليك',
+            en: 'Click the microphone button and tell me your name, I\'m listening to you'
+          },
+          position: 'left',
+          delay: 1500,
+          highlight: true
         },
         {
           id: 'name-input-tooltip',

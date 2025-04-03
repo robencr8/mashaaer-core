@@ -364,46 +364,7 @@ class DatabaseManager:
             self.logger.error(f"Failed to log voice recognition: {str(e)}")
             return False
             
-    def log_voice_recognition(self, language, error_type, raw_input):
-        """Log voice recognition details to a JSON file."""
-        try:
-            from datetime import datetime
-            import json
-            import os
-
-            # Prepare data
-            log_entry = {
-                'timestamp': datetime.now().isoformat(),
-                'language': language,
-                'error_type': error_type,
-                'raw_input': raw_input
-            }
-
-            # Define log file path
-            log_dir = 'data'
-            log_file = os.path.join(log_dir, 'voice_logs.json')
-
-            # Ensure directory exists
-            if not os.path.exists(log_dir):
-                os.makedirs(log_dir)
-
-            # Load existing logs
-            if os.path.exists(log_file):
-                with open(log_file, 'r', encoding='utf-8') as f:
-                    logs = json.load(f)
-            else:
-                logs = []
-
-            # Append new log entry
-            logs.append(log_entry)
-
-            # Write logs back to file
-            with open(log_file, 'w', encoding='utf-8') as f:
-                json.dump(logs, f, ensure_ascii=False, indent=2)
-
-            self.logger.info("Voice recognition log added successfully.")
-        except Exception as e:
-            self.logger.error(f"Failed to log voice recognition: {str(e)}")
+# Legacy method removed - using the newer ORM version above
 
     def get_voice_logs(self, limit=50, success_only=False, error_only=False, language=None):
         """

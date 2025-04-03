@@ -17,17 +17,39 @@ class TTSManager:
         
         # Get ElevenLabs API key from config or environment
         elevenlabs_api_key = None
+        
+        # Try multiple methods to get the API key to ensure it's found
         if hasattr(config, 'ELEVENLABS_API_KEY') and config.ELEVENLABS_API_KEY:
             elevenlabs_api_key = config.ELEVENLABS_API_KEY
-            self.logger.debug(f"Using ElevenLabs API key from config")
+            self.logger.debug(f"Using ElevenLabs API key from config object, length: {len(elevenlabs_api_key)}")
         else:
+            # Try direct environment access
             elevenlabs_api_key = os.environ.get('ELEVENLABS_API_KEY')
+            
             if elevenlabs_api_key:
-                self.logger.debug(f"Using ElevenLabs API key from environment")
+                self.logger.debug(f"Using ElevenLabs API key from environment, length: {len(elevenlabs_api_key)}")
             else:
-                self.logger.error("No ElevenLabs API key found in config or environment")
+                # Last resort - try getenv explicitly in case environ.get is failing
+                try:
+                    from os import getenv
+                    elevenlabs_api_key = getenv('ELEVENLABS_API_KEY')
+                    if elevenlabs_api_key:
+                        self.logger.debug(f"Using ElevenLabs API key from os.getenv(), length: {len(elevenlabs_api_key)}")
+                except Exception as e:
+                    self.logger.error(f"Error accessing environment variable with getenv: {str(e)}")
         
-        # Initialize TTS providers
+        if not elevenlabs_api_key:
+            self.logger.error("No ElevenLabs API key found in config or environment after all attempts")
+        else:
+            # Validate key format
+            if elevenlabs_api_key and len(elevenlabs_api_key) < 32:
+                self.logger.warning(f"ElevenLabs API key looks too short: {len(elevenlabs_api_key)} chars. May not be valid.")
+            
+            # Check for typical patterns of incorrect API keys
+            if elevenlabs_api_key and elevenlabs_api_key.startswith('hf_'):
+                self.logger.error(f"Detected a Hugging Face API key (starts with 'hf_') instead of an ElevenLabs key")
+            
+        # Initialize TTS providers (pass key directly to ensure it's used)
         self.elevenlabs = ElevenLabsTTS(api_key=elevenlabs_api_key)
         self.gtts = GTTSFallback()
         
@@ -58,7 +80,14 @@ class TTSManager:
                             "Content-Type": "application/json"
                         }
                         
-                        self.logger.debug(f"Testing ElevenLabs API key: {self.elevenlabs.api_key[:4]}...{self.elevenlabs.api_key[-4:] if len(self.elevenlabs.api_key) > 8 else ''}")
+                        # Safely log a portion of the API key
+                        api_key = self.elevenlabs.api_key
+                        if api_key:
+                            start = api_key[:4] if len(api_key) >= 4 else api_key
+                            end = api_key[-4:] if len(api_key) >= 8 else ""
+                            self.logger.debug(f"Testing ElevenLabs API key: {start}...{end}")
+                        else:
+                            self.logger.debug("Testing ElevenLabs API key: None")
                         import requests
                         response = requests.get(
                             "https://api.elevenlabs.io/v1/voices",

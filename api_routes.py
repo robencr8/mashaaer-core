@@ -286,9 +286,85 @@ def send_sms():
         }), 500
 
 
+@api.route('/log-voice-error', methods=['POST'])
+def log_voice_error():
+    """Log voice input errors from the client side with enhanced error categorization
+    
+    Request body:
+    {
+        "step": "name",  // The step or context where the error occurred
+        "error_type": "network",  // Error classification (network, permission, timeout, etc.)
+        "error_message": "Failed to connect",  // The raw error message
+        "language": "ar"  // The language being used during the error
+    }
+    """
+    try:
+        # Parse request data
+        if request.is_json:
+            data = request.json
+        else:
+            data = request.form.to_dict()
+        
+        # Extract parameters
+        step = data.get('step', 'unknown')
+        error_type = data.get('error_type', 'unknown')
+        error_message = data.get('error_message', 'No error message provided')
+        language = data.get('language', 'en')
+        
+        # Get session and device info
+        session_id = _get_or_create_session_id()
+        device_info = json.dumps({
+            'user_agent': request.user_agent.string,
+            'platform': request.user_agent.platform,
+            'browser': request.user_agent.browser
+        }) if request.user_agent else None
+        
+        logger.warning(f"API: Client-side voice error in step '{step}': {error_type} - {error_message}")
+        
+        # Check if database manager is available
+        if db_manager is None:
+            logger.error("API: Cannot log voice error - database manager not available")
+            return jsonify({
+                'success': False,
+                'error': 'Database service not available'
+            }), 503
+        
+        # Log the error to the database
+        db_manager.log_voice_recognition(
+            session_id=session_id,
+            language=language,
+            error_type=error_type,
+            raw_input=None,
+            recognized_text=None,
+            success=False,
+            device_info=device_info,
+            context=step,
+            error_details=error_message
+        )
+        
+        # Return success response
+        return jsonify({
+            'success': True,
+            'message': 'Voice error logged successfully'
+        })
+        
+    except Exception as e:
+        logger.error(f"API: Exception in log_voice_error endpoint: {str(e)}")
+        logger.error(traceback.format_exc())
+        
+        return jsonify({
+            'success': False,
+            'error': 'Internal server error while logging voice error',
+            'error_details': str(e)
+        }), 500
+
+
 @api.route('/play-cosmic-sound', methods=['POST'])
 def play_cosmic_sound():
     """Generate and return a sound for the cosmic interface based on the type and language"""
+    # Import os here to ensure it's available in the function scope
+    import os
+    
     try:
         # Parse request data
         if request.is_json:
@@ -325,25 +401,60 @@ def play_cosmic_sound():
             try:
                 # Generate TTS audio
                 voice = "arabic" if language == "ar" else "default"
+                logger.debug(f"Generating welcome TTS in {language} with voice '{voice}', text: '{welcome_text}'")
+                
                 if tts_manager is not None:
+                    # Check if TTS is properly initialized
+                    if hasattr(tts_manager, 'use_elevenlabs'):
+                        logger.debug(f"TTS Manager status - ElevenLabs available: {tts_manager.use_elevenlabs}, Google TTS available: {tts_manager.use_gtts}")
+                    
+                    # Check if ElevenLabs is initialized properly with the correct API key
+                    if hasattr(tts_manager, 'elevenlabs') and tts_manager.elevenlabs:
+                        logger.debug(f"ElevenLabs API key status - Length: {len(tts_manager.elevenlabs.api_key) if tts_manager.elevenlabs.api_key else 'No key'}")
+                        
+                    # Re-initialize TTS if needed
+                    if not tts_manager.use_elevenlabs and not tts_manager.use_gtts:
+                        logger.info("Re-initializing TTS manager to ensure providers are available")
+                        tts_manager.initialize()
+                    
+                    # Generate the TTS audio
                     audio_path = tts_manager.generate_tts(welcome_text, voice=voice, language=language)
+                    logger.debug(f"TTS generated audio path: {audio_path}")
                 else:
                     logger.error("TTS Manager is not available")
                     return jsonify({'success': False, 'error': 'TTS service not available'}), 503
                 
                 if audio_path:
+                    # Check if the generated audio exists 
+                    if os.path.exists(audio_path):
+                        logger.debug(f"Audio file exists: {audio_path} - Size: {os.path.getsize(audio_path)} bytes")
+                    else:
+                        logger.warning(f"Audio file does not exist at path: {audio_path}")
+                    
                     # Return the audio file path
                     return jsonify({
                         'success': True,
                         'sound_path': audio_path
                     })
                 else:
+                    logger.error("TTS returned None for audio path")
                     return jsonify({
                         'success': False,
                         'error': 'Failed to generate welcome audio'
                     }), 500
             except Exception as e:
                 logger.error(f"Error generating welcome TTS: {str(e)}")
+                logger.error(traceback.format_exc())
+                
+                # Return a fallback path if available
+                fallback_path = os.path.join("tts_cache", "error.mp3")
+                if os.path.exists(fallback_path):
+                    return jsonify({
+                        'success': True,
+                        'sound_path': fallback_path,
+                        'warning': 'Using fallback audio due to TTS error'
+                    })
+                
                 return jsonify({
                     'success': False,
                     'error': f'TTS generation error: {str(e)}'
