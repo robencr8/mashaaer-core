@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Feedback Tool Diagnostic Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            margin: 20px;
+            line-height: 1.6;
+        }
+        pre { 
+            background-color: #f0f0f0; 
+            padding: 10px; 
+            overflow-x: auto; 
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .error { color: #d32f2f; }
+        .success { color: #388e3c; }
+        .info { color: #1976d2; }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Feedback Tool Diagnostic Page</h1>
+    <p>This page helps diagnose communication issues between the browser and server.</p>
+
+    <div class="test-section">
+        <h2>Browser Information</h2>
+        <pre id="browserInfo"></pre>
+    </div>
+
+    <div class="test-section">
+        <h2>Test API Status (GET)</h2>
+        <button id="test-status">Run Test</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Analyze Emotion (POST)</h2>
+        <button id="test-emotion">Run Test</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test CORS Endpoint (GET)</h2>
+        <button id="test-cors">Run Test</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Minimal Endpoint (GET)</h2>
+        <button id="test-minimal">Run Test</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Request Details:</h2>
+        <pre id="requestDetails">No request sent yet. Click a button above to test.</pre>
+    </div>
+
+    <div class="test-section">
+        <h2>Response Details:</h2>
+        <pre id="responseDetails"></pre>
+    </div>
+
+    <div class="test-section">
+        <h2>Console Messages:</h2>
+        <p>Please also check your browser's console (F12 > Console tab) for any error messages.</p>
+        <pre id="consoleMessages"></pre>
+    </div>
+
+    <script>
+        // Display browser information
+        function showBrowserInfo() {
+            const infoDiv = document.getElementById('browserInfo');
+            const info = {
+                'User Agent': navigator.userAgent,
+                'URL': window.location.href,
+                'Origin': window.location.origin,
+                'Protocol': window.location.protocol,
+                'Host': window.location.host
+            };
+            infoDiv.textContent = JSON.stringify(info, null, 2);
+        }
+
+        // Initialize
+        showBrowserInfo();
+
+        // Set up console logger
+        const consoleMessagesDiv = document.getElementById('consoleMessages');
+        const originalConsoleError = console.error;
+        console.error = function() {
+            originalConsoleError.apply(console, arguments);
+            const message = Array.from(arguments).join(' ');
+            consoleMessagesDiv.innerHTML += `<div class="error">ERROR: ${message}</div>`;
+        };
+
+        const requestDetailsDiv = document.getElementById('requestDetails');
+        const responseDetailsDiv = document.getElementById('responseDetails');
+        
+        function displayRequestDetails(method, url, headers, body = null) {
+            requestDetailsDiv.innerHTML = `<span class="info"><b>Request:</b> ${method} ${url}</span>\n\n`;
+            requestDetailsDiv.innerHTML += `<b>Headers:</b>\n${JSON.stringify(headers, null, 2)}\n\n`;
+            if (body) {
+                requestDetailsDiv.innerHTML += `<b>Body:</b>\n${JSON.stringify(body, null, 2)}`;
+            }
+        }
+
+        function displayResponseDetails(response, data) {
+            const headers = {};
+            for (const [key, value] of response.headers.entries()) {
+                headers[key] = value;
+            }
+            
+            responseDetailsDiv.innerHTML = `<span class="${response.ok ? 'success' : 'error'}"><b>Status:</b> ${response.status} ${response.statusText}</span>\n\n`;
+            responseDetailsDiv.innerHTML += `<b>Headers:</b>\n${JSON.stringify(headers, null, 2)}\n\n`;
+            
+            if (data !== undefined) {
+                const dataType = typeof data;
+                if (dataType === 'object') {
+                    responseDetailsDiv.innerHTML += `<b>Body (${dataType}):</b>\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    responseDetailsDiv.innerHTML += `<b>Body (${dataType}):</b>\n${data}`;
+                }
+            }
+        }
+
+        // Test API Status (GET)
+        document.getElementById('test-status').addEventListener('click', () => {
+            const headers = { 'Accept': 'application/json' };
+            displayRequestDetails('GET', '/api/status', headers);
+            responseDetailsDiv.innerHTML = '<span class="info">Sending request...</span>';
+
+            fetch('/api/status', { headers })
+                .then(response => {
+                    return response.json().then(data => {
+                        displayResponseDetails(response, data);
+                        return { response, data };
+                    }).catch(error => {
+                        // If JSON parsing fails, try to get text
+                        return response.text().then(text => {
+                            displayResponseDetails(response, text);
+                            return { response, data: text };
+                        });
+                    });
+                })
+                .catch(error => {
+                    responseDetailsDiv.innerHTML = `<span class="error">Error: ${error.message}</span>\n\nThis typically indicates:\n- The server is not running\n- CORS issues are preventing the connection\n- Network connectivity problems`;
+                    console.error('Fetch error:', error);
+                });
+        });
+
+        // Test Analyze Emotion (POST)
+        document.getElementById('test-emotion').addEventListener('click', () => {
+            const headers = { 'Content-Type': 'application/json' };
+            const body = { text: 'I am feeling happy', language: 'en' };
+            
+            displayRequestDetails('POST', '/api/analyze-emotion', headers, body);
+            responseDetailsDiv.innerHTML = '<span class="info">Sending request...</span>';
+
+            fetch('/api/analyze-emotion', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(body)
+            })
+            .then(response => {
+                return response.json().then(data => {
+                    displayResponseDetails(response, data);
+                    return { response, data };
+                }).catch(error => {
+                    // If JSON parsing fails, try to get text
+                    return response.text().then(text => {
+                        displayResponseDetails(response, text);
+                        return { response, data: text };
+                    });
+                });
+            })
+            .catch(error => {
+                responseDetailsDiv.innerHTML = `<span class="error">Error: ${error.message}</span>\n\nThis typically indicates:\n- The server is not running\n- CORS issues are preventing the connection\n- Network connectivity problems`;
+                console.error('Fetch error:', error);
+            });
+        });
+
+        // Test CORS Endpoint (GET)
+        document.getElementById('test-cors').addEventListener('click', () => {
+            const headers = {};
+            displayRequestDetails('GET', '/api/test-cors', headers);
+            responseDetailsDiv.innerHTML = '<span class="info">Sending request...</span>';
+
+            fetch('/api/test-cors', { headers })
+                .then(response => {
+                    return response.json().then(data => {
+                        displayResponseDetails(response, data);
+                        return { response, data };
+                    }).catch(error => {
+                        // If JSON parsing fails, try to get text
+                        return response.text().then(text => {
+                            displayResponseDetails(response, text);
+                            return { response, data: text };
+                        });
+                    });
+                })
+                .catch(error => {
+                    responseDetailsDiv.innerHTML = `<span class="error">Error: ${error.message}</span>\n\nThis typically indicates:\n- The server is not running\n- CORS issues are preventing the connection\n- Network connectivity problems`;
+                    console.error('Fetch error:', error);
+                });
+        });
+
+        // Test Minimal Endpoint (GET)
+        document.getElementById('test-minimal').addEventListener('click', () => {
+            const headers = {};
+            displayRequestDetails('GET', '/api/minimal', headers);
+            responseDetailsDiv.innerHTML = '<span class="info">Sending request...</span>';
+
+            fetch('/api/minimal', { headers })
+                .then(response => {
+                    return response.text().then(text => {
+                        displayResponseDetails(response, text);
+                        return { response, data: text };
+                    });
+                })
+                .catch(error => {
+                    responseDetailsDiv.innerHTML = `<span class="error">Error: ${error.message}</span>\n\nThis typically indicates:\n- The server is not running\n- CORS issues are preventing the connection\n- Network connectivity problems`;
+                    console.error('Fetch error:', error);
+                });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ultra Minimal Test</title>
+</head>
+<body>
+    <h1>Ultra Minimal Test Page</h1>
+    <p>If you can see this page, the server is reachable.</p>
+    <button onclick="testApi()">Test API Connection</button>
+    <div id="result"></div>
+
+    <script>
+        function testApi() {
+            document.getElementById('result').innerHTML = 'Testing...';
+            
+            fetch('/api/ping')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('result').innerHTML = 'Success: ' + data;
+                })
+                .catch(error => {
+                    document.getElementById('result').innerHTML = 'Error: ' + error.message;
+                });
+        }
+    </script>
+</body>
+</html>

@@ -2,7 +2,7 @@ import os
 import logging
 import json
 import mimetypes
-from flask import Flask, render_template, request, jsonify, Response, redirect, url_for
+from flask import Flask, render_template, request, jsonify, Response, redirect, url_for, send_from_directory, make_response
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
@@ -211,6 +211,14 @@ def feedback_tool_test():
     logger.info("feedback-tool-test endpoint accessed")
     logger.info(f"Request headers: {dict(request.headers)}")
     
+    return response
+
+@app.route('/ultra-simple')
+def ultra_simple():
+    """Ultra minimal endpoint returning text with no dependencies"""
+    response = make_response("OK - Server is running")
+    response.headers['Content-Type'] = 'text/plain'
+    response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
 # Voice API test pages
@@ -594,6 +602,20 @@ def diagnostic_tool():
     response.headers['Access-Control-Allow-Headers'] = '*'
     
     return response
+
+@app.route('/feedback-tool-diagnostic')
+def feedback_tool_diagnostic():
+    """Serve a more comprehensive diagnostic page specifically for the feedback tool testing"""
+    try:
+        logger.info("Feedback tool diagnostic page accessed")
+        return send_from_directory('static', 'feedback_tool_diagnostic.html')
+    except Exception as e:
+        logger.error(f"Error serving feedback tool diagnostic page: {str(e)}")
+        # Fallback to plain text response if file can't be served
+        response = make_response(f"Error serving diagnostic page: {str(e)}")
+        response.headers['Content-Type'] = 'text/plain'
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
 
 @app.route('/tts_cache/<path:filename>')
 def serve_tts_cache(filename):
