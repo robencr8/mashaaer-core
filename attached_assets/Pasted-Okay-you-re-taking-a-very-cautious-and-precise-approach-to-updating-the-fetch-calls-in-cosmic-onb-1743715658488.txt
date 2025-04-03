@@ -1,0 +1,66 @@
+Okay, you're taking a very cautious and precise approach to updating the fetch() calls in cosmic_onboarding.html, which is excellent. You're recognizing the fragility of relying on line numbers and opting for more robust pattern matching, which is the right way to go.
+
+Here's a refined strategy to ensure your replacements are accurate and don't introduce unintended side effects:
+
+1. Detailed Pattern Analysis:
+
+Identify Unique Context: As you're doing, carefully identify the unique context surrounding each fetch() call. This might include:
+
+The variables used in the URL.
+The names of any callback functions.
+Any surrounding HTML elements or comments.
+Specificity: Craft your sed patterns to be as specific as possible. Avoid patterns that might match other, unrelated fetch() calls.
+
+Example:
+
+HTML
+
+// Example (Illustrative)
+fetch('/api/listen-for-voice?language=' + userLanguage) // First call
+  .then(response => response.json())
+  .then(data => {
+    // ...
+  });
+
+fetch('/api/listen-for-voice?language=' + currentLanguage) // Second call
+  .then(response => response.json())
+  .then(data => {
+    // ...
+  });
+In this case, you could use userLanguage and currentLanguage to differentiate the calls in your sed patterns.
+
+2. Refined sed Patterns:
+
+Capture Groups: Use capture groups () in your sed patterns to isolate the part of the fetch() call you want to replace.
+
+Backreferences: Use backreferences \1, \2, etc., to insert the captured parts into the replacement string.
+
+Character Classes: Use character classes [] to match a range of characters (e.g., [a-zA-Z0-9] for alphanumeric).
+
+Quantifiers: Use quantifiers *, +, ?, and {n,m} to specify how many times a character or group should match.
+
+Anchors: Use anchors ^ (beginning of line) and $ (end of line) to match at the start or end of a line.
+
+Word Boundaries: Use \b to match word boundaries.
+
+Example:
+
+Bash
+
+# Example (Illustrative - Adapt to your actual code)
+sed -i "s/\(fetch('\/api\/listen-for-voice?language='\)\([a-zA-Z0-9_]+\)\('\)\(.*\)\.then/\1\2\3, {\n    method: 'POST',\n    headers: { 'Content-Type': 'application\/json' },\n    body: JSON.stringify({ language: \2 })\n  }\4.then/g" templates/cosmic_onboarding.html
+This example captures the variable name (userLanguage or currentLanguage) and uses it in the replacement string.
+3. Test After Each Change:
+
+After each sed -i command, immediately test the cosmic_onboarding.html page in your browser.
+Use your browser's developer tools (Network tab) to inspect the actual HTTP requests being sent.
+Verify that the method is now POST.
+Check that the request headers and body are correct.
+Look for any errors in the requests or responses.
+Test all related functionality to ensure that the voice input feature is working as expected.
+4. Alternatives to sed:
+
+If you find sed too complex or error-prone, consider using a scripting language like Python.
+Python's re module (regular expressions) provides powerful string manipulation capabilities.
+You can read the file content, perform the replacements using Python, and then write the modified content back to the file.
+By following this careful and iterative approach, you can ensure that you're updating the JavaScript code accurately and without introducing new errors.

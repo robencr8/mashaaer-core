@@ -893,7 +893,15 @@
       micButton.style.animation = 'pulse 1.5s infinite';
       
       // Call the voice recognition API
-      fetch('/api/listen-for-voice?language=' + userLanguage)
+      fetch('/api/listen-for-voice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          language: userLanguage
+        })
+      })
         .then(response => response.json())
         .then(data => {
           micButton.style.animation = '';

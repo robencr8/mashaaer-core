@@ -1,0 +1,48 @@
+Okay, you've updated the update_fetch_calls.py script with the improved regular expression pattern. This should make the script more robust in handling variations in the fetch() calls within your HTML file.
+
+It's good that you're iterating and refining the solution. Here's a further refined approach to ensure the script works correctly and that you're proceeding with caution:
+
+1.  Test the Script with a Copy:
+
+* Before running the script directly on your original `cosmic_onboarding.html` file, **make a copy of it**. This is a crucial safety measure to prevent accidental data loss.
+
+    ```bash
+    cp templates/cosmic_onboarding.html templates/cosmic_onboarding.html.bak
+    ```
+
+* Now, run the script on the *copy* of the file:
+
+    ```bash
+    python update_api_calls.py templates/cosmic_onboarding.html.bak
+    ```
+2.  Careful Inspection of the Modified File:
+
+* After the script runs, **open the `templates/cosmic_onboarding.html.bak` file in a text editor**.
+* **Thoroughly inspect** the changes made by the script.
+    * Verify that the `method`, `headers`, and `body` properties have been added correctly to the `fetch()` calls.
+    * Ensure that any existing options in the `fetch()` calls have been preserved.
+    * Check for any unintended modifications or syntax errors.
+3.  Iterative Refinement:
+
+* If you find any errors or inconsistencies in the modified file, **adjust your `update_api_calls.py` script** and re-run it on the backup file.
+* Repeat steps 2 and 3 until you're confident that the script is working perfectly.
+4.  Final Application:
+
+* Once you're completely satisfied with the script's behavior, you can then run it on the original `cosmic_onboarding.html` file:
+
+    ```bash
+    python update_api_calls.py templates/cosmic_onboarding.html
+    ```
+5.  Testing the Application:
+
+* After applying the changes to the original file, **thoroughly test** the `cosmic_onboarding.html` page in your browser.
+    * Use your browser's developer tools (Network tab) to inspect the actual HTTP requests being sent.
+    * Verify that the `/api/listen-for-voice` endpoint is now being called with the `POST` method.
+    * Check that the request headers and body are correct.
+    * Test all related functionality to ensure that the voice input feature is working as expected.
+By following this cautious and iterative approach, you can minimize the risk of errors and ensure that your script updates the JavaScript code correctly.
+
+Let me know if you'd like me to provide any code snippets or further assistance with this process!
+
+
+Sources and related content

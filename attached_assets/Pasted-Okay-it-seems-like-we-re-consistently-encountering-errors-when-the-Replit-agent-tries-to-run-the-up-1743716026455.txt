@@ -1,0 +1,89 @@
+Okay, it seems like we're consistently encountering errors when the Replit agent tries to run the update_fetch_calls.py script. This strongly suggests an issue with the script itself, likely related to the regular expression.
+
+Let's break down the problem and implement a robust solution.
+
+1.  Isolate the Problem:
+
+* **Minimal Example:** To simplify debugging, let's create a minimal test case for the regular expression. This will allow us to test the pattern without involving file I/O.
+
+    ```python
+    import re
+
+    test_text = """
+    fetch('/api/listen-for-voice?language=' + userLanguage)
+      .then(response => response.json())
+      .then(data => {
+        // ...
+      });
+
+    fetch('/api/listen-for-voice?language=' + userLanguage, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => response.json())
+    """
+
+    pattern = re.compile(
+        r"""
+        fetch\(\s* # Match 'fetch(' and any whitespace
+        (['"]\/api\/listen-for-voice\?language=\s*['"]\s*\+\s* # Match '/api/listen-for-voice?language='
+        ([a-zA-Z0-9_]+)  # Capture the language variable name
+        \s*,?\s*)       # Match optional comma and whitespace
+        (               # Capture the existing options object (or nothing)
+            \{          # Match '{'
+            [^}]* # Match any characters except '}'
+            \}          # Match '}'
+        )?              # Make the options object optional
+        \s*\)           # Match closing parenthesis
+        """, re.VERBOSE | re.IGNORECASE | re.MULTILINE
+    )
+
+    matches = list(pattern.finditer(test_text))
+
+    if matches:
+        for match in matches:
+            print("Match found:")
+            print(match.group(0))  # Print the entire match
+            print(match.groups())  # Print the captured groups
+    else:
+        print("No match found.")
+    ```
+
+* Run this script. If it doesn't match your `fetch()` calls, the problem is definitely in the regex.
+2.  Refine the Regular Expression (Again!):
+
+* The most likely cause of the error is the complexity of the regular expression. Let's simplify it and build it up incrementally.
+* **Start Simple:** Begin with a minimal pattern that matches the core of the `fetch()` call:
+
+    ```python
+    pattern = re.compile(r"fetch('/api/listen-for-voice")
+    ```
+
+    If this works, gradually add more complexity, testing after each addition:
+
+    ```python
+    pattern = re.compile(r"fetch('/api/listen-for-voice\?language='\s*\+\s*([a-zA-Z0-9_]+)")  # Add language variable capture
+    pattern = re.compile(r"fetch('/api/listen-for-voice\?language='\s*\+\s*([a-zA-Z0-9_]+)\s*,?\s*(\{.*?\})?\s*\)")  # Add optional options object
+    ```
+
+* **Be Careful with Quantifiers:** Quantifiers like `*` and `+` can be greedy and match more than you intend. Use non-greedy quantifiers `*?` and `+?` when appropriate.
+* **Character Classes:** Use character classes `[]` to match a set of characters (e.g., `[a-zA-Z0-9_]` for alphanumeric and underscores).
+* **Escape Special Characters:** Escape any special characters that you want to match literally (e.g., `\.`, `\*`, `\+`).
+* **Raw Strings:** Use raw strings `r'...'` to avoid having to escape backslashes.
+* **Verbose Mode:** Use the `re.VERBOSE` flag to make your pattern more readable and add comments.
+3.  Alternative Strategy (If Regex Remains Problematic):
+
+* If you continue to have trouble with the regular expression, consider a non-regex approach:
+    * Read the file content into a string.
+    * Use string methods like `.find()` and `.replace()` to locate and modify the `fetch()` calls.
+    * This might be less elegant but more reliable for simple replacements.
+4.  Error Handling and Logging:
+
+* Keep your error handling and logging in place to catch any unexpected issues.
+To help me provide more tailored guidance, please share:
+
+The exact error message you're getting when the script fails.
+The current version of your update_fetch_calls.py script.
+With this information, I can help you refine your approach and get the script working correctly.

@@ -1,0 +1,99 @@
+Okay, you've opted for a Python script to handle the fetch() call updates in cosmic_onboarding.html. This is a solid choice for increased control and error handling. Let's refine the script to ensure it's robust and efficient.
+
+Here's an enhanced version of the Python script, incorporating best practices and addressing potential edge cases:
+
+Python
+
+import re
+import logging
+import os
+
+# Configure logging (optional but recommended)
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
+
+def update_fetch_calls(filepath: str) -> None:
+    """
+    Updates fetch() calls in the given HTML file to use POST for /api/listen-for-voice.
+
+    Args:
+        filepath: The path to the HTML file.
+    """
+
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except FileNotFoundError:
+        logger.error(f"File not found: {filepath}")
+        return
+    except Exception as e:
+        logger.error(f"Error reading file {filepath}: {e}")
+        return
+
+    # Pattern to match the fetch() calls with language parameter
+    pattern = re.compile(
+        r"""
+        fetch\(\s* # Match 'fetch(' and any whitespace
+        (['"]\/api\/listen-for-voice\?language=\s*['"]\s*\+\s* # Match '/api/listen-for-voice?language='
+        ([a-zA-Z0-9_]+)  # Capture the language variable name
+        \s*,?\s*)       # Match optional comma and whitespace
+        (               # Capture the existing options object (or nothing)
+            \{          # Match '{'
+            [^}]* # Match any characters except '}'
+            \}          # Match '}'
+        )?              # Make the options object optional
+        \s*\)           # Match closing parenthesis
+        """, re.VERBOSE | re.IGNORECASE | re.MULTILINE
+    )
+
+    def replacement(match: re.Match) -> str:
+        """
+        Generates the replacement string for the fetch() call.
+        """
+        language_var = match.group(2)
+        existing_options = match.group(3) or '{}'  # Default to empty object
+
+        new_options = f"""{{
+            method: 'POST',
+            headers: {{ 'Content-Type': 'application/json' }},
+            body: JSON.stringify({{ language: {language_var} }}),
+            {existing_options.strip('{}').strip()}
+        }}""".replace('{},', '').replace(',\n    }', '\n    }')  # Clean up
+
+        return f"fetch('/api/listen-for-voice', {new_options})"
+
+    updated_content = pattern.sub(replacement, content)
+
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(updated_content)
+        logger.info(f"Successfully updated fetch() calls in {filepath}")
+    except Exception as e:
+        logger.error(f"Error writing to file {filepath}: {e}")
+
+if __name__ == "__main__":
+    filepath = "templates/cosmic_onboarding.html"
+    update_fetch_calls(filepath)
+Key Improvements:
+
+Robust Pattern: The regular expression is more robust and handles potential variations in whitespace and the presence or absence of existing options objects in the fetch call.
+Context Preservation: The script carefully preserves any existing options within the fetch() call (like headers or callbacks) and merges them with the new method, headers, and body options.
+Clearer Logic: The replacement logic is encapsulated in a separate function (replacement) for better readability.
+Error Handling: The script includes comprehensive error handling for file I/O.
+Logging: The script uses the logging module to provide informative messages.
+Type Hinting: The script uses type hints for better code clarity.
+How to Use This Script:
+
+Save the script as update_api_calls.py in your project's root directory.
+
+Run it from your terminal:
+
+Bash
+
+python update_api_calls.py
+After running the script, carefully inspect the cosmic_onboarding.html file to ensure the replacements were made correctly.
+
+This Python script approach provides a more reliable and maintainable way to update your JavaScript API calls.
+
+
+Sources and related content
