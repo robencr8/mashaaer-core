@@ -1,0 +1,315 @@
+{
+  "timestamp": "2025-04-03T18:13:00.173818",
+  "basic_emotions": {
+    "happy": {
+      "sentence": "I am feeling so happy and excited today!",
+      "detected": "happy",
+      "intensity": 0.75,
+      "confidence": 0.5,
+      "match": true
+    },
+    "sad": {
+      "sentence": "I feel really sad about what happened yesterday.",
+      "detected": "sad",
+      "intensity": 1.0,
+      "confidence": 1.0,
+      "match": true
+    },
+    "angry": {
+      "sentence": "This makes me so angry, I can't believe it!",
+      "detected": "angry",
+      "intensity": 1.0,
+      "confidence": 1.0,
+      "match": true
+    },
+    "fearful": {
+      "sentence": "I'm really scared about the upcoming presentation.",
+      "detected": "fearful",
+      "intensity": 1.0,
+      "confidence": 1.0,
+      "match": true
+    },
+    "disgusted": {
+      "sentence": "That food was disgusting, I couldn't eat it.",
+      "detected": "neutral",
+      "intensity": 0.1,
+      "confidence": 0.3,
+      "match": false
+    },
+    "surprised": {
+      "sentence": "Wow! I didn't expect that at all!",
+      "detected": "surprised",
+      "intensity": 1.0,
+      "confidence": 1.0,
+      "match": true
+    },
+    "confused": {
+      "sentence": "I'm not sure I understand what's happening here.",
+      "detected": "neutral",
+      "intensity": 0.1,
+      "confidence": 0.3,
+      "match": false
+    },
+    "interested": {
+      "sentence": "This topic is really fascinating, I'd like to learn more.",
+      "detected": "happy",
+      "intensity": 1.0,
+      "confidence": 1.0,
+      "match": false
+    },
+    "excited": {
+      "sentence": "I can't wait for the concert this weekend!",
+      "detected": "neutral",
+      "intensity": 0.1,
+      "confidence": 0.3,
+      "match": false
+    },
+    "anxious": {
+      "sentence": "I feel very anxious about the test results.",
+      "detected": "anxious",
+      "intensity": 0.8156498673740052,
+      "confidence": 0.5437665782493368,
+      "match": true
+    },
+    "calm": {
+      "sentence": "I'm feeling very peaceful and relaxed now.",
+      "detected": "calm",
+      "intensity": 1.0,
+      "confidence": 1.0,
+      "match": true
+    },
+    "tired": {
+      "sentence": "I'm completely exhausted after the long day.",
+      "detected": "tired",
+      "intensity": 1.0,
+      "confidence": 1.0,
+      "match": true
+    },
+    "bored": {
+      "sentence": "There's nothing to do, I'm so bored.",
+      "detected": "bored",
+      "intensity": 1.0,
+      "confidence": 1.0,
+      "match": true
+    },
+    "grateful": {
+      "sentence": "I'm so thankful for all your help.",
+      "detected": "grateful",
+      "intensity": 1.0,
+      "confidence": 1.0,
+      "match": true
+    },
+    "hopeful": {
+      "sentence": "I believe things will get better soon.",
+      "detected": "neutral",
+      "intensity": 0.1,
+      "confidence": 0.3,
+      "match": false
+    },
+    "lonely": {
+      "sentence": "I miss having people around me.",
+      "detected": "neutral",
+      "intensity": 0.1,
+      "confidence": 0.3,
+      "match": false
+    },
+    "proud": {
+      "sentence": "I accomplished my goal and I'm really proud of myself.",
+      "detected": "proud",
+      "intensity": 1.0,
+      "confidence": 0.7404395224087212,
+      "match": true
+    },
+    "embarrassed": {
+      "sentence": "I made a mistake in front of everyone and felt so awkward.",
+      "detected": "embarrassed",
+      "intensity": 1.0,
+      "confidence": 1.0,
+      "match": true
+    },
+    "amused": {
+      "sentence": "That joke was hilarious, I can't stop laughing!",
+      "detected": "amused",
+      "intensity": 1.0,
+      "confidence": 1.0,
+      "match": true
+    },
+    "inspired": {
+      "sentence": "After watching that documentary, I feel so motivated to create.",
+      "detected": "inspired",
+      "intensity": 1.0,
+      "confidence": 1.0,
+      "match": true
+    },
+    "satisfied": {
+      "sentence": "The project is complete and it turned out exactly as planned.",
+      "detected": "neutral",
+      "intensity": 0.1,
+      "confidence": 0.3,
+      "match": false
+    },
+    "frustrated": {
+      "sentence": "I've been trying to solve this problem for hours with no progress.",
+      "detected": "sad",
+      "intensity": 1.0,
+      "confidence": 1.0,
+      "match": false
+    },
+    "contemplative": {
+      "sentence": "I've been thinking deeply about the meaning of life lately.",
+      "detected": "contemplative",
+      "intensity": 1.0,
+      "confidence": 1.0,
+      "match": true
+    }
+  },
+  "emotional_phrases": {
+    "happy": {
+      "phrase": "I'm having a great time with my friends",
+      "detected": "happy",
+      "intensity": 1.0,
+      "match": true
+    },
+    "sad": {
+      "phrase": "My heart is heavy after hearing the news",
+      "detected": "sad",
+      "intensity": 1.0,
+      "match": true
+    },
+    "angry": {
+      "phrase": "This situation is making my blood boil",
+      "detected": "neutral",
+      "intensity": 0.1,
+      "match": false
+    },
+    "fearful": {
+      "phrase": "I'm worried sick about the exam results",
+      "detected": "fearful",
+      "intensity": 1.0,
+      "match": true
+    },
+    "amused": {
+      "phrase": "That movie had me cracking up the whole time",
+      "detected": "amused",
+      "intensity": 1.0,
+      "match": true
+    },
+    "inspired": {
+      "phrase": "This book gave me a burst of creativity",
+      "detected": "neutral",
+      "intensity": 0.1,
+      "match": false
+    },
+    "satisfied": {
+      "phrase": "The job is done and it checks all the boxes",
+      "detected": "satisfied",
+      "intensity": 1.0,
+      "match": true
+    },
+    "frustrated": {
+      "phrase": "I feel like I'm hitting a wall with this project",
+      "detected": "frustrated",
+      "intensity": 1.0,
+      "match": true
+    },
+    "contemplative": {
+      "phrase": "I'm lost in thought about what the future holds",
+      "detected": "contemplative",
+      "intensity": 1.0,
+      "match": true
+    }
+  },
+  "mixed_emotions": [
+    {
+      "text": "I'm excited about the new job but also anxious about the challenges ahead.",
+      "primary": "anxious",
+      "intensity": 0.5314009661835749,
+      "top_emotions": [
+        [
+          "anxious",
+          0.35426731078904994
+        ],
+        [
+          "excited",
+          0.35214848715992886
+        ],
+        [
+          "fearful",
+          0.2935842020510213
+        ]
+      ]
+    },
+    {
+      "text": "The movie made me laugh but the ending left me feeling sad and reflective.",
+      "primary": "sad",
+      "intensity": 0.791154210028382,
+      "top_emotions": [
+        [
+          "sad",
+          0.5274361400189214
+        ],
+        [
+          "contemplative",
+          0.4725638599810786
+        ]
+      ]
+    },
+    {
+      "text": "I'm proud of my work but frustrated it took so long to complete.",
+      "primary": "proud",
+      "intensity": 0.539456513395256,
+      "top_emotions": [
+        [
+          "proud",
+          0.35963767559683735
+        ],
+        [
+          "frustrated",
+          0.35695094803101257
+        ],
+        [
+          "angry",
+          0.2834113763721502
+        ]
+      ]
+    },
+    {
+      "text": "I'm disappointed about the cancellation but hopeful we can reschedule soon.",
+      "primary": "sad",
+      "intensity": 0.8650059468745871,
+      "top_emotions": [
+        [
+          "sad",
+          0.5766706312497247
+        ],
+        [
+          "hopeful",
+          0.42332936875027527
+        ]
+      ]
+    },
+    {
+      "text": "While I'm grateful for the opportunity, I'm tired from all the preparation.",
+      "primary": "tired",
+      "intensity": 0.598950233281493,
+      "top_emotions": [
+        [
+          "tired",
+          0.39930015552099535
+        ],
+        [
+          "grateful",
+          0.39696734059097977
+        ],
+        [
+          "happy",
+          0.20373250388802489
+        ]
+      ]
+    }
+  ],
+  "summary": {
+    "basic_accuracy": 65.21739130434783,
+    "phrase_accuracy": 77.77777777777779
+  }
+}

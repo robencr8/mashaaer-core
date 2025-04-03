@@ -1206,25 +1206,26 @@ class EmotionTracker:
         except Exception as e:
             self.logger.error(f"Failed to initialize emotion tracker: {str(e)}")
 
-    def analyze_text(self, text, context=None):
+    def analyze_text(self, text, context=None, return_details=False):
         """
         Analyze text to determine emotion (enhanced with advanced algorithms)
 
         Args:
             text: Text to analyze
             context: Optional context messages for improved analysis
+            return_details: If True, returns the full analysis details dict instead of just the primary emotion
 
         Returns:
             Primary emotion as string or detailed analysis dict if return_details=True
         """
         if not text:
-            return "neutral"
+            return "neutral" if not return_details else {"primary_emotion": "neutral", "emotions": {"neutral": 1.0}, "intensity": 0.5}
 
         # Use advanced analysis under the hood
         result = self.analyze_text_advanced(text, context)
 
-        # For backward compatibility, return just the primary emotion
-        return result["primary_emotion"]
+        # Return full details or just the primary emotion based on the return_details flag
+        return result if return_details else result["primary_emotion"]
 
     def analyze_voice(self, audio_path, context=None):
         """

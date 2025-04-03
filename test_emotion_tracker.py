@@ -84,7 +84,12 @@ def run_tests():
     emotion_tracker_instance = EmotionTracker(db_manager)
     
     # Set OpenAI availability to False to force rule-based analysis
-    emotion_tracker_instance._openai_available = False
+    # We'll use monkeypatching approach to set the global variable
+    import sys
+    import emotion_tracker as et_module
+    # Store the original value to restore it later if needed
+    original_openai_available = et_module.OPENAI_AVAILABLE
+    et_module.OPENAI_AVAILABLE = False
     
     # Test basic emotions
     logger.info("Testing basic emotions...")
@@ -129,7 +134,7 @@ def run_tests():
     mixed_results = []
     
     for text in mixed_emotions:
-        result = emotion_tracker.analyze_text_advanced(text)
+        result = emotion_tracker_instance.analyze_text(text, return_details=True)
         primary = result.get("primary_emotion", "unknown")
         emotions = result.get("emotions", {})
         intensity = result.get("intensity", 0)
