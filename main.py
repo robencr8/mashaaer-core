@@ -22,11 +22,6 @@ else:
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[logging.StreamHandler()]
     )
-
-CORS(app, origins=["http://your-mobile-app.com", "http://localhost:8080"],
-     supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization"],
-     methods=["GET", "POST", "OPTIONS"])
 logger = logging.getLogger(__name__)
 logger.info("========== Server Starting ==========")
 logger.info(f"Python version: {os.sys.version}")

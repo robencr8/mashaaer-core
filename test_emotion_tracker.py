@@ -80,19 +80,18 @@ def run_tests():
     
     # Initialize the emotion tracker
     db_manager = MockDBManager()
-    emotion_tracker = EmotionTracker(db_manager)
+    from emotion_tracker import EmotionTracker
+    emotion_tracker_instance = EmotionTracker(db_manager)
     
     # Set OpenAI availability to False to force rule-based analysis
-    global OPENAI_AVAILABLE
-    import emotion_tracker
-    emotion_tracker.OPENAI_AVAILABLE = False
+    emotion_tracker_instance._openai_available = False
     
     # Test basic emotions
     logger.info("Testing basic emotions...")
     results = {}
     
     for emotion, sentence in test_sentences.items():
-        result = emotion_tracker.analyze_text_advanced(sentence)
+        result = emotion_tracker_instance.analyze_text(sentence, return_details=True)
         primary = result.get("primary_emotion", "unknown")
         intensity = result.get("intensity", 0)
         confidence = result.get("metadata", {}).get("confidence", 0) if "metadata" in result else 0
@@ -112,7 +111,7 @@ def run_tests():
     phrase_results = {}
     
     for emotion, phrase in test_phrases.items():
-        result = emotion_tracker.analyze_text_advanced(phrase)
+        result = emotion_tracker_instance.analyze_text(phrase, return_details=True)
         primary = result.get("primary_emotion", "unknown")
         intensity = result.get("intensity", 0)
         

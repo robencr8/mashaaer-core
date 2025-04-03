@@ -1,0 +1,170 @@
+Coding partner
+Okay, let's refine the logging and CORS settings in your Flask application. I'll provide you with the updated code snippets and explanations.
+
+1. Logging Configuration (logging.yaml)
+
+YAML
+
+# logging.yaml
+version: 1
+formatters:
+  default:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  detailed:
+    format: '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: default
+    level: INFO
+  file:
+    class: logging.handlers.RotatingFileHandler
+    formatter: detailed
+    filename: logs/application.log
+    maxBytes: 10485760  # 10MB (10 * 1024 * 1024)
+    backupCount: 5
+    level: DEBUG
+root:
+  level: INFO
+  handlers: [console, file]
+loggers:
+  werkzeug:
+    level: WARN
+    propagate: no  # Prevent Werkzeug logs from duplicating
+  sqlalchemy.engine:
+    level: INFO
+  # Add more loggers as needed for your modules
+  emotion_tracker:
+    level: DEBUG
+  face_detector:
+    level: DEBUG
+  api_routes:
+    level: DEBUG
+Explanation of logging.yaml:
+
+version: 1: The version of the logging schema.
+formatters: Defines how log messages are formatted.
+default: A simple format.
+detailed: A more verbose format with timestamp, level, and logger name.
+handlers: Defines where log messages are sent.
+console: Sends logs to the console (standard output).
+file: Uses RotatingFileHandler to manage log files.
+filename: The path to the log file.
+maxBytes: The maximum size of the log file before it's rotated.
+backupCount: The number of backup log files to keep.
+root: The root logger configuration.
+level: The minimum severity level to log (e.g., INFO, DEBUG, WARNING, ERROR, CRITICAL).
+handlers: The handlers to use.
+loggers: Configuration for specific loggers (modules).
+werkzeug: Configures the Werkzeug logger (Flask's development server). We set it to WARN to reduce noise.
+sqlalchemy.engine: Configures SQLAlchemy's engine logging.
+emotion_tracker, face_detector, api_routes: Example configurations for your custom modules. You can set different levels for different modules to control verbosity.
+2. Flask Application Updates (main.py)
+
+Python
+
+import os
+import logging.config
+import yaml
+import json
+from flask import Flask, render_template, request, jsonify, Response, redirect, url_for, Blueprint
+from flask_cors import CORS
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime, timedelta
+import threading
+from werkzeug.exceptions import HTTPException
+
+# Configure logging
+if os.path.exists('logging.yaml'):
+    with open('logging.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+    logging.config.dictConfig(config)
+else:
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[logging.StreamHandler()]
+    )
+
+logger = logging.getLogger(__name__)
+logger.info("========== Server Starting ==========")
+logger.info(f"Python version: {os.sys.version}")
+logger.info(f"Current working directory: {os.getcwd()}")
+logger.info(f"Files in templates folder: {os.listdir('templates') if os.path.exists('templates') else 'No templates dir'}")
+
+# Import core components
+from config import Config
+from core_launcher import CoreLauncher
+from emotion_tracker import EmotionTracker
+from intent_classifier import IntentClassifier
+from database.db_manager import DatabaseManager
+from tts.tts_manager import TTSManager
+from auto_learning import AutoLearning
+from voice.recognition import VoiceRecognition
+from vision.face_detector import FaceDetector
+import twilio_api
+import mobile_api_routes  # Mobile-optimized API routes
+
+# Initialize Flask app
+app = Flask(__name__)
+app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
+
+# Configure CORS (more specific)
+allowed_origins = ["http://your-mobile-app.com", "http://localhost:8080", "http://your-web-app.com"]  # Add your actual origins
+CORS(app, origins=allowed_origins,
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "X-Custom-Header"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     expose_headers=["Content-Type", "Content-Length", "Date"])
+
+# Initialize components
+config = Config()
+db_manager = DatabaseManager(config=config, db_path=config.DB_PATH)
+emotion_tracker = EmotionTracker(db_manager)
+tts_manager = TTSManager(config)
+# Initialize TTS providers
+tts_manager.initialize()
+intent_classifier = IntentClassifier()
+voice_recognition = VoiceRecognition(config)
+face_detector = FaceDetector(config, db_manager)
+auto_learning = AutoLearning(db_manager)
+# Note: Twilio API is imported directly as needed
+from profile_manager import ProfileManager
+profile_manager = ProfileManager(db_manager)
+
+# Create API Blueprint
+api_bp = Blueprint('api', __name__, url_prefix='/api')
+
+# Initialize API routes
+from api_routes import init_api
+init_api(api_bp, db_manager, emotion_tracker, face_detector,
+         tts_manager, voice_recognition, intent_classifier, config)
+app.register_blueprint(api_bp)
+
+# Create Mobile API Blueprint
+mobile_api_bp = Blueprint('mobile_api', __name__, url_prefix='/mobile/api')
+
+# Initialize Mobile API routes
+from mobile_api_routes import init_mobile_api
+init_mobile_api(mobile_api_bp, db_manager, emotion_tracker, tts_manager, voice_recognition,
+                intent_classifier, config, profile_manager)
+app.register_blueprint(mobile_api_bp)
+
+# Developer mode constants
+DEVELOPER_NAME = os.environ.get("DEVELOPER_NAME", "Roben Edwan")
+DEVELOPER_MODE_FLAG = "dev_mode_enabled"
+
+# ... (rest of your code, including routes, scheduler, etc.)
+Key Changes:
+
+CORS:
+allowed_origins: Changed to a list of specific origins. Replace the placeholder URLs with your actual application URLs. This is crucial for security.
+Important Considerations:
+
+Testing: Thoroughly test your logging configuration to ensure that logs are being written to the correct files and that the log levels are appropriate.
+Security: Always be explicit about allowed origins in your CORS configuration. Avoid wildcards (*) in production.
+Blueprint Structure: If you have many API routes, consider organizing them into smaller Blueprints based on resource types (e.g., users_bp, emotions_bp).
+Logging Best Practices:
+Use appropriate log levels (DEBUG, INFO, WARNING, ERROR, CRITICAL).
+Log enough information to debug issues, but avoid logging sensitive data.
+Consider using structured logging (e.g., JSON format) for easier parsing and analysis.

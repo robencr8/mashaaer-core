@@ -84,18 +84,20 @@ class EmotionTracker:
             "neutral", "happy", "sad", "angry", "fearful", 
             "disgusted", "surprised", "confused", "interested",
             "excited", "anxious", "calm", "tired", "bored",
-            "grateful", "hopeful", "lonely", "proud", "embarrassed"
+            "grateful", "hopeful", "lonely", "proud", "embarrassed",
+            # New emotion types
+            "amused", "inspired", "satisfied", "frustrated", "contemplative"
         ]
 
         # Primary emotions (for aggregation and simplification)
         self.primary_emotions = {
-            "joy": ["happy", "excited", "grateful", "hopeful", "proud"],
+            "joy": ["happy", "excited", "grateful", "hopeful", "proud", "amused", "satisfied"],
             "sadness": ["sad", "lonely", "tired"],
-            "anger": ["angry", "disgusted"],
+            "anger": ["angry", "disgusted", "frustrated"],
             "fear": ["fearful", "anxious", "embarrassed"],
             "surprise": ["surprised"],
-            "neutral": ["neutral", "calm"],
-            "curiosity": ["interested", "confused"],
+            "neutral": ["neutral", "calm", "contemplative"],
+            "curiosity": ["interested", "confused", "inspired"],
             "boredom": ["bored"]
         }
 
@@ -210,6 +212,31 @@ class EmotionTracker:
             "embarrassed": {
                 "embarrassed": 1.0, "ashamed": 0.9, "humiliated": 1.0, "mortified": 1.0,
                 "self-conscious": 0.8, "awkward": 0.7, "uncomfortable": 0.7
+            },
+            "amused": {
+                "amused": 1.0, "entertained": 0.9, "laughing": 1.0, "tickled": 0.8,
+                "hilarious": 0.9, "funny": 0.8, "humorous": 0.7, "comical": 0.7,
+                "chuckled": 0.8, "giggled": 0.8, "lol": 0.7, "haha": 0.6
+            },
+            "inspired": {
+                "inspired": 1.0, "motivated": 0.9, "uplifted": 0.9, "creative": 0.8,
+                "enlightened": 0.9, "energized": 0.7, "stimulated": 0.7, "visionary": 0.8,
+                "revolutionary": 0.7, "innovative": 0.8, "groundbreaking": 0.7
+            },
+            "satisfied": {
+                "satisfied": 1.0, "fulfilled": 0.9, "accomplished": 0.8, "completed": 0.7,
+                "achieved": 0.8, "content": 0.7, "gratified": 0.9, "pleased": 0.8,
+                "completion": 0.7, "finished": 0.6, "rewarded": 0.8
+            },
+            "frustrated": {
+                "frustrated": 1.0, "stuck": 0.8, "blocked": 0.7, "hindered": 0.8,
+                "helpless": 0.9, "thwarted": 0.9, "foiled": 0.8, "exasperated": 1.0,
+                "aggravated": 0.9, "impatient": 0.7, "defeat": 0.8
+            },
+            "contemplative": {
+                "contemplative": 1.0, "reflective": 0.9, "thoughtful": 0.8, "pensive": 0.9,
+                "meditative": 0.8, "philosophical": 0.7, "introspective": 0.9,
+                "ruminating": 0.8, "pondering": 0.9, "musing": 0.8, "wondering": 0.6
             }
         }
 
@@ -234,6 +261,31 @@ class EmotionTracker:
                 "scared to death", "worried sick", "feared the worst",
                 "sends chills down my spine", "afraid of what might happen",
                 "keeps me up at night", "feel threatened by"
+            ],
+            "amused": [
+                "cracking up", "can't stop laughing", "in stitches", 
+                "rolling on the floor", "that's hilarious", "made my day",
+                "funniest thing ever", "laughing so hard"
+            ],
+            "inspired": [
+                "changed my perspective", "opened my mind", "sparked my creativity",
+                "got me thinking", "new way of seeing", "burst of ideas",
+                "made me want to create", "motivated me to start"
+            ],
+            "satisfied": [
+                "checks all the boxes", "just what I needed", "exactly right",
+                "mission accomplished", "hit the mark", "exceeded expectations",
+                "finally achieved", "wrapped up perfectly"
+            ],
+            "frustrated": [
+                "hitting a wall", "going nowhere", "running in circles",
+                "can't figure it out", "getting nowhere", "wasting my time",
+                "no matter what I try", "obstacles at every turn"
+            ],
+            "contemplative": [
+                "lost in thought", "deep in reflection", "made me wonder",
+                "thinking deeply about", "pondering the meaning", "gave me pause",
+                "led me to question", "reflecting on my life"
             ]
         }
 
@@ -241,14 +293,20 @@ class EmotionTracker:
         self.positive_indicators = [
             "love", "adore", "enjoy", "appreciate", "like", "fond", 
             "favorite", "best", "perfect", "amazing", "fantastic",
-            "worth", "recommend", "blessing", "grateful", "fortunate"
+            "worth", "recommend", "blessing", "grateful", "fortunate",
+            "brilliant", "wonderful", "excellent", "outstanding", "superb",
+            "inspired", "incredible", "genius", "insightful", "masterful",
+            "beautiful", "elegant", "impressive", "clever", "delightful"
         ]
 
         self.negative_indicators = [
             "hate", "dislike", "awful", "terrible", "worst", "useless",
             "waste", "regret", "disappointed", "sorry", "unfortunately",
             "problem", "issue", "trouble", "struggle", "difficult",
-            "annoying", "irritating", "unbearable", "fail", "mess"
+            "annoying", "irritating", "unbearable", "fail", "mess",
+            "disaster", "horrible", "dreadful", "appalling", "pathetic",
+            "mediocre", "inadequate", "frustrating", "unwanted", "unacceptable",
+            "broken", "poor", "awful", "disappointing", "subpar"
         ]
 
         # OpenAI client (initialized on demand)
