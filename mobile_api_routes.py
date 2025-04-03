@@ -214,40 +214,42 @@ def mobile_analyze_emotion():
         
         # Check cache if not bypassing
         cached_result = None
+        cache_metadata = {}
         if not bypass_cache and db_manager and hasattr(db_manager, 'get_cached_response'):
-            cached_result = db_manager.get_cached_response(cache_key)
-            if cached_result:
-                logger.debug(f"Cache hit for emotion analysis: {cache_key}")
-                cache_status = "hit"
+            try:
+                cached_result, cache_metadata = db_manager.get_cached_response(cache_key)
+                cache_status = "hit" if cache_metadata.get("cache_hit", False) else "miss"
                 
-                # Return cached result if we have one
-                try:
-                    cached_data = json.loads(cached_result)
+                if cached_result and cache_metadata.get("cache_hit", False):
+                    logger.debug(f"Cache hit for emotion analysis: {cache_key}, hit count: {cache_metadata.get('hit_count', 0)}")
                     
                     # Add cache status to response
                     if response_format == 'minimal':
                         return jsonify({
                             "s": True,
-                            "e": cached_data.get("primary_emotion", "neutral"),
-                            "i": cached_data.get("confidence", 0.8),
-                            "c": cached_data.get("confidence", 0.8),
+                            "e": cached_result.get("primary_emotion", "neutral"),
+                            "i": cached_result.get("confidence", 0.8),
+                            "c": cached_result.get("confidence", 0.8),
                             "cached": True
                         })
                     else:
                         # For full response format
                         result = {
-                            "primary_emotion": cached_data.get("primary_emotion", "neutral"),
-                            "intensity": cached_data.get("confidence", 0.8),
+                            "primary_emotion": cached_result.get("primary_emotion", "neutral"),
+                            "intensity": cached_result.get("confidence", 0.8),
                             "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
-                            "emotions": cached_data.get("emotions", {}),
+                            "emotions": cached_result.get("emotions", {}),
                         }
                         
                         if include_details:
                             result["metadata"] = {
                                 "source": "emotion-analysis-v2",
-                                "confidence": cached_data.get("confidence", 0.8),
+                                "confidence": cached_result.get("confidence", 0.8),
                                 "language": language,
-                                "processing_time_ms": 0  # Near-instant with cache
+                                "processing_time_ms": 0,  # Near-instant with cache
+                                "cache_created_at": cache_metadata.get("created_at"),
+                                "cache_expires_at": cache_metadata.get("expires_at"),
+                                "cache_hit_count": cache_metadata.get("hit_count", 1)
                             }
                         
                         # Performance metrics
@@ -260,9 +262,9 @@ def mobile_analyze_emotion():
                             "cache_status": cache_status,
                             "processing_time_ms": processing_time_ms
                         })
-                except Exception as e:
-                    logger.warning(f"Failed to parse cached result: {str(e)}")
-                    # Fall through to regular processing
+            except Exception as e:
+                logger.warning(f"Failed to process cached result: {str(e)}")
+                # Fall through to regular processing
         
         # Check emotion tracker availability
         if emotion_tracker is None:

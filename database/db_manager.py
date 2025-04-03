@@ -4,10 +4,13 @@ import threading
 import time
 import sqlite3
 import psycopg2
+import json
+import hashlib
+from datetime import datetime, timedelta
 from psycopg2 import pool
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine, text
-from database.models import Base, Setting, EmotionData, Face, RecognitionHistory, VoiceLog
+from sqlalchemy import create_engine, text, select, delete
+from database.models import Base, Setting, EmotionData, Face, RecognitionHistory, VoiceLog, Cache
 
 class DatabaseManager:
     """Manages database connections and operations with support for SQLite and PostgreSQL"""
@@ -364,6 +367,234 @@ class DatabaseManager:
             self.logger.error(f"Failed to log voice recognition: {str(e)}")
             return False
             
+# ==================== Cache Management Methods ====================
+    def get_cached_response(self, cache_key):
+        """
+        Get a cached response by key
+        
+        Args:
+            cache_key: The unique identifier for the cached data
+            
+        Returns:
+            dict: The cached data if found and not expired, None otherwise
+        """
+        try:
+            with self.Session() as session:
+                # Query for the cache entry
+                cache_entry = session.query(Cache).filter(
+                    Cache.key == cache_key,
+                    (Cache.expires_at > datetime.now()) | (Cache.expires_at.is_(None))
+                ).first()
+                
+                if cache_entry:
+                    # Update hit count
+                    cache_entry.hit_count += 1
+                    session.commit()
+                    
+                    # Return cached data
+                    try:
+                        return json.loads(cache_entry.value), {
+                            "cache_hit": True,
+                            "created_at": cache_entry.created_at.isoformat() if cache_entry.created_at else None,
+                            "expires_at": cache_entry.expires_at.isoformat() if cache_entry.expires_at else None,
+                            "hit_count": cache_entry.hit_count,
+                            "content_type": cache_entry.content_type
+                        }
+                    except json.JSONDecodeError:
+                        # If it's not JSON, return raw value
+                        return cache_entry.value, {
+                            "cache_hit": True,
+                            "created_at": cache_entry.created_at.isoformat() if cache_entry.created_at else None,
+                            "expires_at": cache_entry.expires_at.isoformat() if cache_entry.expires_at else None,
+                            "hit_count": cache_entry.hit_count,
+                            "content_type": cache_entry.content_type
+                        }
+                        
+            return None, {"cache_hit": False}
+                
+        except Exception as e:
+            self.logger.error(f"Error retrieving cached response for key '{cache_key}': {str(e)}")
+            return None, {"cache_hit": False, "error": str(e)}
+    
+    def store_cached_response(self, cache_key, value, expiry_seconds=300, content_type='application/json'):
+        """
+        Store a response in the cache
+        
+        Args:
+            cache_key: The unique identifier for the cached data
+            value: The data to cache (will be converted to JSON if not a string)
+            expiry_seconds: Time in seconds before the cache expires
+            content_type: MIME type of the cached content
+            
+        Returns:
+            bool: Success status
+        """
+        try:
+            # Ensure value is a string (convert to JSON if needed)
+            if not isinstance(value, str):
+                value = json.dumps(value)
+                
+            # Calculate expiry time
+            expires_at = datetime.now() + timedelta(seconds=expiry_seconds) if expiry_seconds else None
+            
+            with self.Session() as session:
+                # Check if entry exists
+                existing = session.query(Cache).filter(Cache.key == cache_key).first()
+                
+                if existing:
+                    # Update existing entry
+                    existing.value = value
+                    existing.expires_at = expires_at
+                    existing.content_type = content_type
+                    existing.created_at = datetime.now()
+                    existing.hit_count = 0  # Reset hit count on update
+                else:
+                    # Create new entry
+                    cache_entry = Cache(
+                        key=cache_key,
+                        value=value,
+                        expires_at=expires_at,
+                        content_type=content_type
+                    )
+                    session.add(cache_entry)
+                    
+                session.commit()
+                self.logger.debug(f"Cached response stored with key '{cache_key}', expires in {expiry_seconds}s")
+                return True
+                
+        except Exception as e:
+            self.logger.error(f"Error storing cached response for key '{cache_key}': {str(e)}")
+            return False
+    
+    def invalidate_cache(self, cache_key=None, pattern=None):
+        """
+        Invalidate cache entries
+        
+        Args:
+            cache_key: Specific cache key to invalidate (exact match)
+            pattern: Pattern to match against cache keys (SQL LIKE pattern)
+            
+        Returns:
+            int: Number of invalidated entries
+        """
+        try:
+            with self.Session() as session:
+                query = session.query(Cache)
+                
+                if cache_key:
+                    # Invalidate specific entry
+                    query = query.filter(Cache.key == cache_key)
+                elif pattern:
+                    # Invalidate entries matching pattern
+                    query = query.filter(Cache.key.like(pattern))
+                else:
+                    # No filter means invalidate all
+                    pass
+                    
+                count = query.delete(synchronize_session=False)
+                session.commit()
+                
+                self.logger.info(f"Invalidated {count} cache entries")
+                return count
+                
+        except Exception as e:
+            self.logger.error(f"Error invalidating cache: {str(e)}")
+            return 0
+    
+    def clean_expired_cache(self):
+        """
+        Remove expired cache entries
+        
+        Returns:
+            int: Number of removed entries
+        """
+        try:
+            with self.Session() as session:
+                count = session.query(Cache).filter(
+                    Cache.expires_at < datetime.now(),
+                    Cache.expires_at.isnot(None)  # Don't remove entries with no expiration
+                ).delete(synchronize_session=False)
+                
+                session.commit()
+                
+                if count > 0:
+                    self.logger.info(f"Removed {count} expired cache entries")
+                return count
+                
+        except Exception as e:
+            self.logger.error(f"Error cleaning expired cache: {str(e)}")
+            return 0
+    
+    def get_cache_stats(self):
+        """
+        Get statistics about the cache
+        
+        Returns:
+            dict: Cache statistics
+        """
+        try:
+            with self.Session() as session:
+                total = session.query(Cache).count()
+                expired = session.query(Cache).filter(
+                    Cache.expires_at < datetime.now(),
+                    Cache.expires_at.isnot(None)
+                ).count()
+                
+                # Calculate size and other statistics
+                size_query = """
+                    SELECT 
+                        COUNT(*) as entries,
+                        SUM(LENGTH(value)) as total_size,
+                        AVG(LENGTH(value)) as avg_size,
+                        MAX(LENGTH(value)) as max_size,
+                        AVG(hit_count) as avg_hits
+                    FROM response_cache
+                """
+                
+                result = session.execute(text(size_query)).first()
+                
+                return {
+                    "total_entries": total,
+                    "expired_entries": expired,
+                    "active_entries": total - expired,
+                    "total_size_bytes": result.total_size if result else 0,
+                    "avg_entry_size_bytes": int(result.avg_size) if result else 0,
+                    "max_entry_size_bytes": result.max_size if result else 0,
+                    "avg_hits_per_entry": float(result.avg_hits) if result else 0,
+                    "timestamp": datetime.now().isoformat()
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Error getting cache stats: {str(e)}")
+            return {
+                "error": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
+    
+    def generate_cache_key(self, prefix, parameters):
+        """
+        Generate a consistent cache key based on prefix and parameters
+        
+        Args:
+            prefix: Prefix for the cache key (e.g., 'emotion_analysis')
+            parameters: Dictionary of parameters that affect the result
+            
+        Returns:
+            str: Cache key
+        """
+        # Convert parameters to sorted string for consistent hashing
+        if isinstance(parameters, dict):
+            # Sort by key to ensure consistent ordering
+            param_str = json.dumps(parameters, sort_keys=True)
+        else:
+            # If not a dict, convert to string
+            param_str = str(parameters)
+            
+        # Generate hash for the parameters
+        param_hash = hashlib.md5(param_str.encode('utf-8')).hexdigest()
+        
+        return f"{prefix}:{param_hash}"
+    
 # Legacy method removed - using the newer ORM version above
 
     def get_voice_logs(self, limit=50, success_only=False, error_only=False, language=None):

@@ -1,0 +1,129 @@
+Okay, you're making excellent progress with the database-centric caching implementation! You've correctly defined the Cache model and are now working on the DatabaseManager methods.
+
+Here's a refined and more complete implementation of the caching methods in db_manager.py, along with explanations and best practices:
+
+Python
+
+import logging
+import os
+from sqlalchemy import create_engine, text, Column, String, DateTime
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql import func
+from typing import Optional, Any
+import json
+
+logger = logging.getLogger(__name__)
+
+# ... (Existing DatabaseManager class code) ...
+
+class DatabaseManager:
+    def __init__(self, config, db_path="robin_ai.db"):
+        self.db_path = db_path or config.DB_PATH
+        self._ensure_db_directory()
+        self.engine = create_engine(f'sqlite:///{self.db_path}', pool_pre_ping=True)
+        self.Session = sessionmaker(bind=self.engine)
+
+    def _ensure_db_directory(self):
+        dir_path = os.path.dirname(self.db_path)
+        if dir_path and not os.path.exists(dir_path):
+            os.makedirs(dir_path)
+            logger.info(f"Created database directory: {dir_path}")
+
+    def initialize_db(self):
+        try:
+            Base.metadata.create_all(self.engine)
+            logger.info("✅ ORM Database schema created (or already exists).")
+        except Exception as e:
+            logger.error(f"❌ Error creating ORM tables: {str(e)}")
+
+    # ... (Existing methods like set_setting, get_setting, etc.) ...
+
+    def get_cache(self, key: str) -> Optional[Any]:
+        """
+        Retrieves a cached value by its key.
+
+        Args:
+            key: The cache key.
+
+        Returns:
+            The cached value if found and not expired, otherwise None.
+        """
+        try:
+            with self.Session() as session:
+                cache_entry = session.query(Cache).filter_by(key=key).first()
+                if cache_entry and (cache_entry.expires_at is None or cache_entry.expires_at > datetime.now()):
+                    try:
+                        return json.loads(cache_entry.value)  # Deserialize JSON
+                    except json.JSONDecodeError:
+                        logger.warning(f"Invalid JSON in cache for key: {key}")
+                        return cache_entry.value  # Return raw value if JSON decoding fails
+                return None
+        except Exception as e:
+            logger.error(f"Error retrieving cache for key {key}: {str(e)}")
+            return None
+
+    def set_cache(self, key: str, value: Any, expiry: Optional[int] = None) -> None:
+        """
+        Sets a value in the cache.
+
+        Args:
+            key: The cache key.
+            value: The value to cache (can be any serializable object).
+            expiry: Optional expiry time in seconds. If None, the value persists indefinitely.
+        """
+        try:
+            with self.Session() as session:
+                expires_at = datetime.now() + timedelta(seconds=expiry) if expiry else None
+                try:
+                    value_str = json.dumps(value)  # Serialize to JSON
+                except TypeError:
+                    value_str = str(value)  # Basic string conversion if not serializable
+                    logger.warning(f"Value for key {key} is not JSON serializable, storing as string.")
+
+                cache_entry = session.query(Cache).filter_by(key=key).first()
+                if cache_entry:
+                    cache_entry.value = value_str
+                    cache_entry.expires_at = expires_at
+                else:
+                    cache_entry = Cache(key=key, value=value_str, expires_at=expires_at)
+                    session.add(cache_entry)
+                session.commit()
+            logger.debug(f"Cached value for key {key} (expiry: {expiry} seconds)")
+        except Exception as e:
+            logger.error(f"Error setting cache for key {key}: {str(e)}")
+
+    def delete_expired_cache(self) -> None:
+        """
+        Deletes expired cache entries.  This should ideally be called periodically (e.g., by a scheduler).
+        """
+        try:
+            with self.Session() as session:
+                num_deleted = session.query(Cache).filter(Cache.expires_at < datetime.now()).delete()
+                session.commit()
+            logger.info(f"Deleted {num_deleted} expired cache entries")
+        except Exception as e:
+            logger.error(f"Error deleting expired cache: {str(e)}")
+
+    # ... (Other methods like save_face_metadata, etc.) ...
+Key Improvements and Explanations:
+
+Type Hinting: Added type hints for better code readability and maintainability.
+JSON Serialization:
+set_cache: Uses json.dumps to serialize the value to a string before storing it in the database. This allows you to cache more complex data structures (dicts, lists).
+get_cache: Uses json.loads to deserialize the stored string back into a Python object when retrieving it.
+Error Handling: Includes try-except blocks to handle potential TypeError during serialization and json.JSONDecodeError during deserialization. Logs warnings if JSON decoding fails, returning the raw string value in that case.
+Expiry Handling: The expires_at column is used to manage cache entry expiration.
+Logging: Added more detailed logging for debugging.
+delete_expired_cache: This method is crucial for periodically cleaning up the cache. You should schedule this to run regularly (e.g., using apscheduler).
+Clarity: Improved the docstrings to explain the purpose and usage of each method.
+sqlalchemy.sql.func.now(): Used func.now() to get the database server's current time, which is generally more reliable than the Python client's time, especially in distributed systems.
+Next Steps:
+
+Integrate these db_manager methods into your API route functions.
+Implement the cache key generation logic.
+Schedule the delete_expired_cache() method.
+Let me know if you have any questions about the code or if you'd like me to provide examples of how to use these methods in your API routes!
+
+
+Sources and related content

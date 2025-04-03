@@ -1,6 +1,7 @@
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, Text, Boolean, BigInteger
+from sqlalchemy import Column, Integer, String, Float, Text, Boolean, BigInteger, DateTime
+from sqlalchemy.sql import func
 from datetime import datetime
 
 Base = declarative_base()
@@ -49,3 +50,21 @@ class VoiceLog(Base):
     success = Column(Boolean, default=False)
     device_info = Column(Text, nullable=True)
     context = Column(String, nullable=True)
+
+class Cache(Base):
+    """
+    Database-centric cache for storing computation-intensive operation results
+    
+    Advantages:
+    - Persistence across application restarts
+    - Shared cache across multiple instances
+    - Automatic expiration management
+    - Integration with existing database infrastructure
+    """
+    __tablename__ = 'response_cache'
+    key = Column(String(255), primary_key=True, index=True)  # Index for faster lookups
+    value = Column(Text)  # JSON serialized response data
+    created_at = Column(DateTime, server_default=func.now())
+    expires_at = Column(DateTime)
+    content_type = Column(String(50), default='application/json')  # For flexibility in caching different content types
+    hit_count = Column(Integer, default=0)  # Track cache usage statistics
