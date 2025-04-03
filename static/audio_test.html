@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Playback Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #555;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-left: 3px solid #ccc;
+            background-color: #f9f9f9;
+        }
+        #consoleOutput {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            height: 200px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Audio Playback Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Static Audio File Test</h2>
+        <p>Testing playback of a static audio file from the server</p>
+        <audio id="staticAudio" controls>
+            <source src="/static/audio/click.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <div>
+            <button onclick="document.getElementById('staticAudio').play()">Play</button>
+            <button onclick="document.getElementById('staticAudio').pause()">Pause</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. TTS Cache Audio Test</h2>
+        <p>Testing playback of a TTS generated audio file from the server</p>
+        <div id="ttsPlayer">
+            <!-- Will be populated dynamically -->
+            <p>Click the button below to load a TTS audio file</p>
+        </div>
+        <button id="loadTTSButton">Load Random TTS File</button>
+    </div>
+
+    <div class="test-section">
+        <h2>3. API Test</h2>
+        <p>Test API connectivity and audio generation</p>
+        <div>
+            <button id="testAPI">Test API Connection</button>
+            <button id="generateAudio">Generate New Audio</button>
+        </div>
+        <div class="result" id="apiResult">Results will appear here</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Debug Console</h2>
+        <div id="consoleOutput"></div>
+        <button onclick="clearConsole()">Clear Console</button>
+    </div>
+
+    <script>
+        // Console logging
+        const consoleOutput = document.getElementById('consoleOutput');
+        function logMessage(message) {
+            const timestamp = new Date().toISOString().substring(11, 19);
+            consoleOutput.innerHTML += `[${timestamp}] ${message}\n`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        function clearConsole() {
+            consoleOutput.innerHTML = '';
+        }
+
+        // Override console.log
+        const originalConsoleLog = console.log;
+        console.log = function(message) {
+            originalConsoleLog.apply(console, arguments);
+            if (typeof message === 'object') {
+                try {
+                    message = JSON.stringify(message, null, 2);
+                } catch (e) {
+                    message = message.toString();
+                }
+            }
+            logMessage(message);
+        };
+
+        // Override console.error
+        const originalConsoleError = console.error;
+        console.error = function(message) {
+            originalConsoleError.apply(console, arguments);
+            if (typeof message === 'object') {
+                try {
+                    message = 'ERROR: ' + JSON.stringify(message, null, 2);
+                } catch (e) {
+                    message = 'ERROR: ' + message.toString();
+                }
+            } else {
+                message = 'ERROR: ' + message;
+            }
+            logMessage(message);
+        };
+
+        // Test loading a TTS audio file
+        document.getElementById('loadTTSButton').addEventListener('click', function() {
+            fetch('/api/speak', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: 'This is a test of the text to speech system',
+                    language: 'en-US'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('TTS API response:', data);
+                if (data.success && data.audio_path) {
+                    const ttsPlayer = document.getElementById('ttsPlayer');
+                    ttsPlayer.innerHTML = `
+                        <p>Playing: "${data.text}"</p>
+                        <audio controls autoplay>
+                            <source src="${data.audio_path}" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <p>Audio path: ${data.audio_path}</p>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error calling TTS API:', error);
+            });
+        });
+
+        // Test API connection
+        document.getElementById('testAPI').addEventListener('click', function() {
+            console.log('Testing API connection...');
+            fetch('/api/ping')
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('API response:', data);
+                document.getElementById('apiResult').textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                console.error('API error:', error);
+                document.getElementById('apiResult').textContent = 'Error: ' + error.message;
+            });
+        });
+
+        // Generate new audio
+        document.getElementById('generateAudio').addEventListener('click', function() {
+            console.log('Generating new audio...');
+            fetch('/api/speak', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: 'Testing audio generation ' + new Date().toLocaleTimeString(),
+                    language: 'en-US'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Audio generation response:', data);
+                document.getElementById('apiResult').textContent = JSON.stringify(data, null, 2);
+                
+                if (data.success && data.audio_path) {
+                    // Create audio element
+                    const audio = new Audio(data.audio_path);
+                    
+                    // Add event listeners for debugging
+                    audio.addEventListener('canplay', () => console.log('Audio can play now'));
+                    audio.addEventListener('error', (e) => console.error('Audio error:', e));
+                    audio.addEventListener('waiting', () => console.log('Audio waiting for data'));
+                    
+                    // Try to play the audio
+                    audio.play()
+                        .then(() => console.log('Audio playing'))
+                        .catch(err => console.error('Play error:', err));
+                }
+            })
+            .catch(error => {
+                console.error('Error calling speech API:', error);
+                document.getElementById('apiResult').textContent = 'Error: ' + error.message;
+            });
+        });
+
+        // Log on page load
+        window.addEventListener('load', function() {
+            console.log('Audio test page loaded.');
+            
+            // Check browser audio support
+            const audioSupport = {
+                canPlayMp3: typeof Audio !== 'undefined' && (new Audio()).canPlayType('audio/mpeg') !== '',
+                canPlayWav: typeof Audio !== 'undefined' && (new Audio()).canPlayType('audio/wav') !== '',
+                canPlayOgg: typeof Audio !== 'undefined' && (new Audio()).canPlayType('audio/ogg') !== '',
+                webAudioApi: typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined'
+            };
+            
+            console.log('Browser audio support:', audioSupport);
+        });
+    </script>
+</body>
+</html>

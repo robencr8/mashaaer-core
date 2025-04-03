@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Playback Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #555;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-left: 3px solid #ccc;
+            background-color: #f9f9f9;
+        }
+        #consoleOutput {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            height: 200px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Audio Playback Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Static Audio File Test</h2>
+        <p>Testing playback of a static audio file from the server</p>
+        <audio id="staticAudio" controls>
+            <source src="/static/audio/click.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <div>
+            <button onclick="document.getElementById('staticAudio').play()">Play</button>
+            <button onclick="document.getElementById('staticAudio').pause()">Pause</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. TTS Cache Audio Test</h2>
+        <p>Testing playback of a TTS generated audio file from the server</p>
+        <div id="ttsPlayer">
+            <!-- Will be populated dynamically -->
+            <p>Click the button below to load a TTS audio file</p>
+        </div>
+        <button id="loadTTSButton">Load Random TTS File</button>
+    </div>
+
+    <div class="test-section">
+        <h2>3. API Test</h2>
+        <p>Test API connectivity and audio generation</p>
+        <div>
+            <button id="testAPI">Test API Connection</button>
+            <button id="generateAudio">Generate New Audio</button>
+        </div>
+        <div class="result" id="apiResult">Results will appear here</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Debug Console</h2>
+        <div id="consoleOutput"></div>
+        <button onclick="clearConsole()">Clear Console</button>
+    </div>
+
+    <script src="/static/js/audio_test.js"></script>
+</body>
+</html>

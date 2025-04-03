@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Root Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple Root Test Page</h1>
+    
+    <div class="card">
+        <p><span class="success">✓</span> If you can see this page, the server is responding correctly.</p>
+        <p>Current time: <span id="current-time"></span></p>
+    </div>
+    
+    <div class="card">
+        <h2>Quick Navigation</h2>
+        <ul>
+            <li><a href="/audio-test">Audio Test Page</a></li>
+            <li><a href="/api/ping">API Ping Endpoint</a></li>
+            <li><a href="/">Main Application</a></li>
+        </ul>
+    </div>
+
+    <script>
+        document.getElementById('current-time').textContent = new Date().toLocaleString();
+    </script>
+</body>
+</html>

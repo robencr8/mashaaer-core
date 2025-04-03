@@ -52,18 +52,27 @@ import mobile_api_routes  # Mobile-optimized API routes
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
-# Enable CORS for all routes to support Flutter and mobile app integration
+# Enable CORS for all routes to support Flutter, mobile app integration, and feedback tools
 CORS(app, 
-     origins="*", 
+     origins=["*", "https://replit.com", "https://*.replit.app", "https://*.repl.co"], 
      supports_credentials=True,
      allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "X-Custom-Header"],
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-     expose_headers=["Content-Type", "Content-Length"])
+     expose_headers=["Content-Type", "Content-Length", "Date"])
 
 # Add explicit CORS headers to all responses
 @app.after_request
 def add_cors_headers(response):
-    response.headers['Access-Control-Allow-Origin'] = '*'
+    # Get the origin from the request
+    origin = request.headers.get('Origin', '*')
+    
+    # If the origin is from a specific allowed domain, set it explicitly
+    if origin in ['https://replit.com'] or origin.endswith('.replit.app') or origin.endswith('.repl.co'):
+        response.headers['Access-Control-Allow-Origin'] = origin
+    else:
+        # Default to wildcard for other origins
+        response.headers['Access-Control-Allow-Origin'] = '*'
+    
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-Custom-Header'
     response.headers['Access-Control-Allow-Credentials'] = 'true'
@@ -195,6 +204,22 @@ def test_page():
 def diagnostic_panel():
     # Serve the diagnostic HTML for testing connectivity
     return app.send_static_file('diagnostic.html')
+
+# Simple API endpoint to test connectivity
+@app.route('/api/ping', methods=['GET', 'OPTIONS'])
+def api_ping():
+    """Simple endpoint that returns JSON to test connectivity"""
+    if request.method == 'OPTIONS':
+        # Handle CORS preflight request
+        return handle_cors_preflight()
+    
+    # Return JSON response with CORS headers
+    response = jsonify({
+        'status': 'ok',
+        'message': 'Server is running',
+        'timestamp': datetime.now().isoformat()
+    })
+    return add_cors_headers(response)
 
 @app.route('/tts_cache/<path:filename>')
 def serve_tts_cache(filename):
@@ -442,6 +467,16 @@ def themes_showcase():
     except Exception as e:
         logger.error(f"Error in themes showcase page: {str(e)}")
         return render_template('error.html', error=str(e))
+
+@app.route('/audio-test')
+def audio_test():
+    """Audio playback test page for diagnosing audio issues"""
+    try:
+        logger.info("Audio test page accessed")
+        return render_template('audio_test.html')
+    except Exception as e:
+        logger.error(f"Error in audio test page: {str(e)}")
+        return f"Error loading audio test page: {str(e)}", 500
 
 @app.route('/cultural-loaders')
 def cultural_loaders_showcase():
