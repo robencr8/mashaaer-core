@@ -2,6 +2,7 @@ import os
 import logging
 import json
 import mimetypes
+import traceback
 from flask import Flask, render_template, request, jsonify, Response, redirect, url_for, send_from_directory, make_response
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -52,7 +53,7 @@ import mobile_api_routes  # Mobile-optimized API routes
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
-# Refined CORS configuration specifically targeting the web application feedback tool
+# Enhanced CORS configuration with diagnostics for the web application feedback tool
 # Determine the exact origin of the feedback tool
 FEEDBACK_TOOL_ORIGIN = os.environ.get('FEEDBACK_TOOL_ORIGIN', None)
 if not FEEDBACK_TOOL_ORIGIN:
@@ -62,7 +63,29 @@ else:
     logger.info(f"Using specific origin for CORS: {FEEDBACK_TOOL_ORIGIN}")
     allowed_origins = [FEEDBACK_TOOL_ORIGIN]
 
+# Additional possible origins based on Replit URL patterns
+REPLIT_DOMAIN = f"https://{os.environ.get('REPL_SLUG', 'workspace')}.{os.environ.get('REPL_OWNER', 'unknown')}.repl.co"
+WORF_DOMAIN = os.environ.get('REPL_SLUG', 'workspace') + "--" + os.environ.get('REPL_OWNER', 'unknown') + ".repl.co"
+
 logger.info(f"Configuring CORS with origins: {allowed_origins}")
+logger.info(f"Current Replit domain (for reference): {REPLIT_DOMAIN}")
+logger.info(f"Possible Worf domain (for reference): {WORF_DOMAIN}")
+
+# Enhanced logging function for all requests to help diagnose CORS issues
+@app.before_request
+def log_request_details():
+    """Log detailed request information to help diagnose CORS issues."""
+    origin = request.headers.get('Origin', 'No Origin header')
+    user_agent = request.headers.get('User-Agent', 'No User-Agent header')
+    referer = request.headers.get('Referer', 'No Referer header')
+    
+    logger.info(f"⚡ Request: {request.method} {request.path}")
+    logger.info(f"⚡ Origin: {origin}")
+    logger.info(f"⚡ User-Agent: {user_agent}")
+    logger.info(f"⚡ Referer: {referer}")
+    
+    # Log all request headers for more comprehensive debugging
+    logger.debug(f"⚡ All Headers: {dict(request.headers)}")
 CORS(app,
      origins=allowed_origins,
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
@@ -96,6 +119,15 @@ init_api(app, db_manager, emotion_tracker, face_detector,
 from mobile_api_routes import init_mobile_api
 init_mobile_api(app, db_manager, emotion_tracker, tts_manager, voice_recognition,
                 intent_classifier, config, profile_manager)
+
+# Initialize Feedback Tool specific routes
+try:
+    from routes_feedback_tool import init_feedback_tool_routes
+    init_feedback_tool_routes(app)
+    logger.info("Feedback tool routes initialized successfully")
+except Exception as e:
+    logger.error(f"Failed to initialize feedback tool routes: {str(e)}")
+    logger.error(traceback.format_exc())
 
 # Developer mode constants
 DEVELOPER_NAME = os.environ.get("DEVELOPER_NAME", "Roben Edwan")
@@ -726,7 +758,13 @@ def test_simple_html_page():
 @app.route('/')
 def index():
     try:
-        # Log detailed information about the request
+        # Log additional details about the request for diagnostics
+        logger.info("🔍 Request: GET /")
+        logger.info(f"🔍 Origin: {request.headers.get('Origin', 'No Origin header')}")
+        logger.info(f"🔍 Host: {request.headers.get('Host', 'No Host header')}")
+        logger.info(f"🔍 User-Agent: {request.headers.get('User-Agent', 'No User-Agent header')}")
+        
+        # Detailed logging for diagnostic purposes
         logger.info("Root route accessed - detailed diagnostics:")
         logger.info(f"Request method: {request.method}")
         logger.info(f"Request headers: {dict(request.headers)}")
@@ -746,9 +784,23 @@ def index():
             response.headers['Content-Type'] = 'text/plain'
             return response
             
-        # Try serving a simple static HTML file
-        logger.info("Serving simple test HTML page")
-        return app.send_static_file('simple_test.html')
+        # Log key environment variables for connectivity debugging
+        logger.debug("Key environment variables for connectivity:")
+        connectivity_vars = [
+            'REPL_SLUG', 'REPL_OWNER', 'REPL_ID', 'REPL_LANGUAGE', 
+            'FEEDBACK_TOOL_ORIGIN'
+        ]
+        for key in connectivity_vars:
+            value = os.environ.get(key, 'Not set')
+            if "KEY" in key.upper() or "SECRET" in key.upper() or "TOKEN" in key.upper() or "PASSWORD" in key.upper():
+                logger.debug(f"{key}: [REDACTED]")
+            else:
+                logger.debug(f"{key}: {value}")
+        
+        # Serve the enhanced index page with diagnostic links
+        logger.info("Serving enhanced index page with diagnostic links")
+        return app.send_static_file('index.html')
+        
     except Exception as e:
         error_msg = f"Error in root route: {str(e)}"
         logger.error(error_msg)

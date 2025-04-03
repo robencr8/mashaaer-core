@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Tool Integration Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #5c2d91;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #ddd;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .info {
+            background-color: #e7f3fe;
+            border-left: 5px solid #2196F3;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #5c2d91;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4a2370;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Feedback Tool Integration Guide</h1>
+    
+    <div class="info">
+        <p><strong>Server Status:</strong> <span id="server-status">Checking...</span></p>
+    </div>
+    
+    <div class="card">
+        <h2>CORS Configuration</h2>
+        <p>Our server is configured with the following CORS settings:</p>
+        <pre id="cors-config">Loading configuration...</pre>
+        
+        <h3>Testing CORS Compatibility</h3>
+        <button onclick="testCORS()">Test CORS</button>
+        <div id="cors-result" style="margin-top: 10px;"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Recommended Endpoints</h2>
+        <table>
+            <tr>
+                <th>Endpoint</th>
+                <th>Description</th>
+                <th>Test</th>
+            </tr>
+            <tr>
+                <td><code>/api/minimal</code></td>
+                <td>Minimal API with plain text response</td>
+                <td><button onclick="testEndpoint('/api/minimal')">Test</button></td>
+            </tr>
+            <tr>
+                <td><code>/api/status</code></td>
+                <td>System status information (JSON)</td>
+                <td><button onclick="testEndpoint('/api/status')">Test</button></td>
+            </tr>
+            <tr>
+                <td><code>/api/ping</code></td>
+                <td>Basic connectivity test (JSON)</td>
+                <td><button onclick="testEndpoint('/api/ping')">Test</button></td>
+            </tr>
+            <tr>
+                <td><code>/feedback-tool-test</code></td>
+                <td>Ultra-minimal text response</td>
+                <td><button onclick="testEndpoint('/feedback-tool-test')">Test</button></td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="card">
+        <h2>Diagnostic Information</h2>
+        <h3>Browser Details</h3>
+        <pre id="browser-info"></pre>
+        
+        <h3>Request Information</h3>
+        <div id="request-info">
+            <p>Click on any endpoint test button to see request details.</p>
+        </div>
+    </div>
+
+    <script>
+        // Display browser information
+        const browserInfo = document.getElementById('browser-info');
+        browserInfo.textContent = `User Agent: ${navigator.userAgent}
+Platform: ${navigator.platform}
+Language: ${navigator.language}
+Cookies Enabled: ${navigator.cookieEnabled}
+Page URL: ${window.location.href}`;
+
+        // Check server status
+        fetch('/api/status')
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('server-status').textContent = 'Online ✓';
+                    document.getElementById('server-status').style.color = 'green';
+                    return response.json();
+                } else {
+                    throw new Error(`Server responded with status ${response.status}`);
+                }
+            })
+            .then(data => {
+                // Display server information if available
+                if (data && data.version) {
+                    document.getElementById('server-status').textContent += ` (Version: ${data.version})`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('server-status').textContent = `Offline ✗ (${error.message})`;
+                document.getElementById('server-status').style.color = 'red';
+            });
+
+        // Get CORS configuration
+        fetch('/api/test-cors')
+            .then(response => {
+                const corsHeaders = {};
+                response.headers.forEach((value, key) => {
+                    if (key.toLowerCase().startsWith('access-control-')) {
+                        corsHeaders[key] = value;
+                    }
+                });
+                
+                document.getElementById('cors-config').textContent = 
+                    `Origins: ${corsHeaders['access-control-allow-origin'] || 'Not specified'}
+Methods: ${corsHeaders['access-control-allow-methods'] || 'Not specified'}
+Headers: ${corsHeaders['access-control-allow-headers'] || 'Not specified'}
+Credentials: ${corsHeaders['access-control-allow-credentials'] || 'Not specified'}`;
+                
+                return response.json();
+            })
+            .catch(error => {
+                document.getElementById('cors-config').textContent = `Error fetching CORS configuration: ${error.message}`;
+            });
+
+        // Test CORS
+        function testCORS() {
+            const resultDiv = document.getElementById('cors-result');
+            resultDiv.textContent = 'Testing CORS...';
+            resultDiv.style.color = 'blue';
+            
+            // Test simple GET
+            fetch('/api/test-cors')
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error(`Server responded with status ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    resultDiv.textContent = 'CORS Test Successful ✓';
+                    resultDiv.style.color = 'green';
+                })
+                .catch(error => {
+                    resultDiv.textContent = `CORS Test Failed ✗ (${error.message})`;
+                    resultDiv.style.color = 'red';
+                });
+        }
+
+        // Test endpoint
+        function testEndpoint(endpoint) {
+            const requestInfo = document.getElementById('request-info');
+            requestInfo.innerHTML = `<p>Testing ${endpoint}...</p>`;
+            
+            const startTime = performance.now();
+            
+            fetch(endpoint)
+                .then(response => {
+                    const endTime = performance.now();
+                    const duration = (endTime - startTime).toFixed(2);
+                    
+                    // Display response headers
+                    let headerText = '';
+                    response.headers.forEach((value, key) => {
+                        headerText += `${key}: ${value}\n`;
+                    });
+                    
+                    if (response.ok) {
+                        requestInfo.innerHTML = `
+                            <p><strong>Endpoint:</strong> ${endpoint}</p>
+                            <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                            <p><strong>Response Time:</strong> ${duration}ms</p>
+                            <p><strong>Response Headers:</strong></p>
+                            <pre>${headerText}</pre>
+                            <p><strong>Response Body:</strong></p>
+                            <pre id="response-body">Loading...</pre>
+                        `;
+                        
+                        // Try to parse as JSON first
+                        const contentType = response.headers.get('content-type') || '';
+                        if (contentType.includes('application/json')) {
+                            return response.json().then(data => {
+                                document.getElementById('response-body').textContent = JSON.stringify(data, null, 2);
+                            });
+                        } else {
+                            return response.text().then(text => {
+                                document.getElementById('response-body').textContent = text;
+                            });
+                        }
+                    } else {
+                        throw new Error(`Server responded with status ${response.status}`);
+                    }
+                })
+                .catch(error => {
+                    requestInfo.innerHTML = `
+                        <p><strong>Endpoint:</strong> ${endpoint}</p>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    `;
+                });
+        }
+    </script>
+</body>
+</html>

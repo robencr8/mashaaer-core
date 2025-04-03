@@ -1,427 +1,316 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Mashaaer Diagnostic Panel</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer API Diagnostic</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background: linear-gradient(135deg, #121212, #2c2c2c);
-            color: #e0e0e0;
+            background-color: #f5f5f5;
         }
+        
         .container {
             max-width: 900px;
             margin: 0 auto;
+            background-color: white;
             padding: 20px;
-            background-color: rgba(40, 40, 40, 0.7);
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        h1 {
-            text-align: center;
-            color: #00bcd4;
-            margin-bottom: 30px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 10px;
-        }
-        .section {
-            margin-bottom: 30px;
-            background-color: rgba(60, 60, 60, 0.5);
-            padding: 15px;
             border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        h2 {
-            margin-top: 0;
-            color: #b3e5fc;
-            font-size: 1.4rem;
+        
+        h1 {
+            color: #5c2d91;
+            text-align: center;
+            margin-bottom: 30px;
         }
-        .btn {
-            background: linear-gradient(45deg, #00b0ff, #0091ea);
+        
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #5c2d91;
+        }
+        
+        button {
+            background-color: #5c2d91;
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin: 5px;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        .btn:hover {
-            background: linear-gradient(45deg, #29b6f6, #0288d1);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        .btn:active {
-            transform: translateY(0);
-        }
-        .test-result {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 6px;
-            display: none;
-        }
-        .success {
-            background-color: rgba(76, 175, 80, 0.2);
-            border: 1px solid #4CAF50;
-            color: #a5d6a7;
-        }
-        .error {
-            background-color: rgba(244, 67, 54, 0.2);
-            border: 1px solid #f44336;
-            color: #ef9a9a;
-        }
-        pre {
-            background-color: rgba(0, 0, 0, 0.3);
-            padding: 10px;
+            padding: 8px 16px;
             border-radius: 4px;
-            overflow: auto;
-            max-height: 200px;
-            font-family: 'Courier New', Courier, monospace;
+            cursor: pointer;
         }
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
+        
+        button:hover {
+            background-color: #4a2370;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .result {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .success {
+            color: green;
+        }
+        
+        .error {
+            color: red;
+        }
+        
+        .warning {
+            color: orange;
+        }
+        
+        .endpoint-selector {
+            margin-bottom: 15px;
+        }
+        
+        select, input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             margin-right: 10px;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 10px;
         }
-        th, td {
+        
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
             text-align: left;
-            padding: 10px;
-            border-bottom: 1px solid #444;
         }
-        th {
-            background-color: rgba(0, 0, 0, 0.2);
-            color: #00bcd4;
+        
+        table th {
+            background-color: #f2f2f2;
         }
-        .api-list {
-            list-style: none;
-            padding: 0;
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
         }
-        .api-list li {
-            padding: 5px 10px;
-            margin-bottom: 5px;
-            background-color: rgba(0, 0, 0, 0.2);
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
+        
+        .status-online {
+            background-color: green;
         }
-        .status-badge {
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            font-weight: bold;
+        
+        .status-offline {
+            background-color: red;
         }
-        .unknown {
-            background-color: #9e9e9e;
-            color: #212121;
-        }
-        .operational {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .offline {
-            background-color: #f44336;
-            color: white;
+        
+        .status-unknown {
+            background-color: gray;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>مشاعر | Mashaaer<br>Diagnostic Panel</h1>
+        <h1>Mashaaer API Diagnostic</h1>
         
-        <div class="section">
-            <h2>Server Health Check</h2>
-            <button id="btnCheckStatus" class="btn">Check Server Status</button>
-            <button id="btnRootEndpoint" class="btn">Test Root Endpoint</button>
-            <button id="btnTestEndpoint" class="btn">Test /test Endpoint</button>
-            <div id="serverResult" class="test-result"></div>
+        <div class="card">
+            <div class="card-header">Server Status</div>
+            <div id="server-status">Checking server status...</div>
+            <button onclick="checkServerStatus()">Refresh Status</button>
         </div>
         
-        <div class="section">
-            <h2>Voice API Test</h2>
-            <button id="btnTestVoiceApi" class="btn">Test Voice Recognition API</button>
-            <div id="voiceApiResult" class="test-result"></div>
+        <div class="card">
+            <div class="card-header">API Endpoints</div>
+            <div class="endpoint-selector">
+                <select id="endpoint-select">
+                    <option value="/api/status">GET /api/status</option>
+                    <option value="/api/ping">GET /api/ping</option>
+                    <option value="/api/minimal">GET /api/minimal</option>
+                    <option value="/api/test-cors">GET /api/test-cors</option>
+                    <option value="/test">GET /test</option>
+                    <option value="/feedback-tool-test">GET /feedback-tool-test</option>
+                </select>
+                <button onclick="testEndpoint()">Test Endpoint</button>
+            </div>
+            <div id="endpoint-result" class="result">Select an endpoint and click Test to see results.</div>
         </div>
         
-        <div class="section">
-            <h2>System Information</h2>
-            <button id="btnSystemInfo" class="btn">Get System Information</button>
-            <div id="systemInfoResult" class="test-result"></div>
+        <div class="card">
+            <div class="card-header">CORS Test</div>
+            <div class="button-group">
+                <button onclick="testCORS('GET')">Test GET</button>
+                <button onclick="testCORS('POST')">Test POST</button>
+                <button onclick="testCORS('OPTIONS')">Test OPTIONS</button>
+            </div>
+            <div id="cors-result" class="result">Click a button to test CORS.</div>
         </div>
         
-        <div class="section">
-            <h2>API Health Status</h2>
-            <button id="btnRefreshApiStatus" class="btn">Refresh API Status</button>
-            <ul id="apiStatusList" class="api-list">
-                <li>
-                    <span>/api/status</span>
-                    <span class="status-badge unknown">Unknown</span>
-                </li>
-                <li>
-                    <span>/api/listen-for-voice</span>
-                    <span class="status-badge unknown">Unknown</span>
-                </li>
-                <li>
-                    <span>/api/play-cosmic-sound</span>
-                    <span class="status-badge unknown">Unknown</span>
-                </li>
-                <li>
-                    <span>/api/analyze-emotion</span>
-                    <span class="status-badge unknown">Unknown</span>
-                </li>
-            </ul>
-        </div>
-        
-        <div class="section">
-            <h2>Network Troubleshooting</h2>
-            <p>If you're having trouble connecting to the server, check:</p>
-            <ul>
-                <li>Firewall settings - ensure port 5000 is accessible</li>
-                <li>Try accessing the server via different routes</li>
-                <li>Check server logs for connection errors</li>
-                <li>Verify CORS settings if accessing from a different domain</li>
-            </ul>
-            <p>Current address: <span id="currentAddress"></span></p>
+        <div class="card">
+            <div class="card-header">Request Details</div>
+            <div id="request-details" class="result">
+                User Agent: <span id="user-agent"></span>
+                <br>
+                Platform: <span id="platform"></span>
+                <br>
+                URL: <span id="current-url"></span>
+            </div>
         </div>
     </div>
 
     <script>
-        // Update current address
-        document.getElementById('currentAddress').textContent = window.location.href;
-
-        // Server health check
-        document.getElementById('btnCheckStatus').addEventListener('click', async () => {
-            const resultDiv = document.getElementById('serverResult');
-            resultDiv.innerHTML = '<div class="loading"></div> Checking server status...';
-            resultDiv.style.display = 'block';
-            resultDiv.className = 'test-result';
+        // Fill request details
+        document.getElementById('user-agent').textContent = navigator.userAgent;
+        document.getElementById('platform').textContent = navigator.platform;
+        document.getElementById('current-url').textContent = window.location.href;
+        
+        // Check server status
+        function checkServerStatus() {
+            const statusDiv = document.getElementById('server-status');
+            statusDiv.innerHTML = 'Checking server status...';
             
-            try {
-                const response = await fetch('/api/status', {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    statusDiv.innerHTML = `
+                        <p><span class="status-indicator status-online"></span> Server is online</p>
+                        <p>Timestamp: ${data.timestamp}</p>
+                        <p>Version: ${data.version}</p>
+                        <p>Service: ${data.service_name}</p>
+                    `;
+                })
+                .catch(error => {
+                    statusDiv.innerHTML = `
+                        <p><span class="status-indicator status-offline"></span> Server is offline or unreachable</p>
+                        <p class="error">Error: ${error.message}</p>
+                    `;
+                });
+        }
+        
+        // Test selected endpoint
+        function testEndpoint() {
+            const endpoint = document.getElementById('endpoint-select').value;
+            const resultDiv = document.getElementById('endpoint-result');
+            
+            resultDiv.textContent = `Testing ${endpoint}...`;
+            
+            fetch(endpoint)
+                .then(response => {
+                    resultDiv.textContent = `Status: ${response.status} ${response.statusText}\n\n`;
+                    
+                    // Add headers
+                    resultDiv.textContent += 'Headers:\n';
+                    for (const [key, value] of response.headers.entries()) {
+                        resultDiv.textContent += `${key}: ${value}\n`;
                     }
-                });
-                
-                const data = await response.json();
-                resultDiv.innerHTML = `<p>Server is operational ✓</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
-                resultDiv.classList.add('success');
-            } catch (error) {
-                resultDiv.innerHTML = `<p>Error connecting to server ✗</p><p>${error.message}</p>`;
-                resultDiv.classList.add('error');
-            }
-        });
-
-        // Test root endpoint
-        document.getElementById('btnRootEndpoint').addEventListener('click', async () => {
-            const resultDiv = document.getElementById('serverResult');
-            resultDiv.innerHTML = '<div class="loading"></div> Testing root endpoint...';
-            resultDiv.style.display = 'block';
-            resultDiv.className = 'test-result';
-            
-            try {
-                const response = await fetch('/', {
-                    method: 'GET'
-                });
-                
-                const text = await response.text();
-                const success = response.ok;
-                
-                if (success) {
-                    resultDiv.innerHTML = `<p>Root endpoint is accessible ✓</p><p>Status: ${response.status}</p><p>Content type: ${response.headers.get('content-type')}</p>`;
-                    resultDiv.classList.add('success');
-                } else {
-                    resultDiv.innerHTML = `<p>Root endpoint error ✗</p><p>Status: ${response.status}</p><p>${text}</p>`;
-                    resultDiv.classList.add('error');
-                }
-            } catch (error) {
-                resultDiv.innerHTML = `<p>Error testing root endpoint ✗</p><p>${error.message}</p>`;
-                resultDiv.classList.add('error');
-            }
-        });
-
-        // Test /test endpoint
-        document.getElementById('btnTestEndpoint').addEventListener('click', async () => {
-            const resultDiv = document.getElementById('serverResult');
-            resultDiv.innerHTML = '<div class="loading"></div> Testing /test endpoint...';
-            resultDiv.style.display = 'block';
-            resultDiv.className = 'test-result';
-            
-            try {
-                const response = await fetch('/test', {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                const data = await response.json();
-                resultDiv.innerHTML = `<p>Test endpoint is operational ✓</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
-                resultDiv.classList.add('success');
-            } catch (error) {
-                resultDiv.innerHTML = `<p>Error testing /test endpoint ✗</p><p>${error.message}</p>`;
-                resultDiv.classList.add('error');
-            }
-        });
-
-        // Test voice API
-        document.getElementById('btnTestVoiceApi').addEventListener('click', async () => {
-            const resultDiv = document.getElementById('voiceApiResult');
-            resultDiv.innerHTML = '<div class="loading"></div> Testing voice recognition API...';
-            resultDiv.style.display = 'block';
-            resultDiv.className = 'test-result';
-            
-            try {
-                // Make a test request to the voice API
-                const response = await fetch('/api/listen-for-voice', {
-                    method: 'GET'
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    resultDiv.innerHTML = `<p>Voice API is accessible ✓</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
-                    resultDiv.classList.add('success');
-                } else {
-                    const text = await response.text();
-                    resultDiv.innerHTML = `<p>Voice API returned error code ${response.status} ✗</p><p>${text}</p>`;
-                    resultDiv.classList.add('error');
-                }
-            } catch (error) {
-                resultDiv.innerHTML = `<p>Error testing voice API ✗</p><p>${error.message}</p>`;
-                resultDiv.classList.add('error');
-            }
-        });
-
-        // Get system information
-        document.getElementById('btnSystemInfo').addEventListener('click', async () => {
-            const resultDiv = document.getElementById('systemInfoResult');
-            resultDiv.innerHTML = '<div class="loading"></div> Getting system information...';
-            resultDiv.style.display = 'block';
-            resultDiv.className = 'test-result';
-            
-            try {
-                const response = await fetch('/api/status', {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                
-                const data = await response.json();
-                resultDiv.innerHTML = `
-                    <table>
-                        <tr>
-                            <th>Property</th>
-                            <th>Value</th>
-                        </tr>
-                        <tr>
-                            <td>Server Status</td>
-                            <td>${data.status || 'Unknown'}</td>
-                        </tr>
-                        <tr>
-                            <td>Version</td>
-                            <td>${data.version || 'Unknown'}</td>
-                        </tr>
-                        <tr>
-                            <td>Uptime</td>
-                            <td>${data.uptime || 'Unknown'}</td>
-                        </tr>
-                    </table>
-                    <pre>${JSON.stringify(data, null, 2)}</pre>
-                `;
-                resultDiv.classList.add('success');
-            } catch (error) {
-                resultDiv.innerHTML = `<p>Error getting system information ✗</p><p>${error.message}</p>`;
-                resultDiv.classList.add('error');
-            }
-        });
-
-        // Refresh API status
-        document.getElementById('btnRefreshApiStatus').addEventListener('click', async () => {
-            const apiList = document.getElementById('apiStatusList');
-            const items = apiList.querySelectorAll('li');
-            
-            // Set all to loading state
-            items.forEach(item => {
-                const badge = item.querySelector('.status-badge');
-                badge.textContent = 'Checking...';
-                badge.className = 'status-badge unknown';
-            });
-            
-            // Check each API endpoint
-            const endpoints = [
-                '/api/status',
-                '/api/listen-for-voice',
-                '/api/play-cosmic-sound',
-                '/api/analyze-emotion'
-            ];
-            
-            for (let i = 0; i < endpoints.length; i++) {
-                const endpoint = endpoints[i];
-                const item = items[i];
-                const badge = item.querySelector('.status-badge');
-                
-                try {
-                    // Different handling for POST endpoints
-                    if (endpoint === '/api/play-cosmic-sound' || endpoint === '/api/analyze-emotion') {
-                        const response = await fetch(endpoint, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                // Simple test data
-                                sound_type: 'click',
-                                text: 'Test text for emotion analysis'
-                            })
+                    
+                    // Try to parse as JSON, fallback to text
+                    const contentType = response.headers.get('content-type') || '';
+                    if (contentType.includes('application/json')) {
+                        return response.json().then(data => {
+                            resultDiv.textContent += '\nBody (JSON):\n' + JSON.stringify(data, null, 2);
                         });
-                        
-                        if (response.ok) {
-                            badge.textContent = 'Operational';
-                            badge.className = 'status-badge operational';
-                        } else {
-                            badge.textContent = `Error (${response.status})`;
-                            badge.className = 'status-badge offline';
-                        }
                     } else {
-                        // GET endpoints
-                        const response = await fetch(endpoint, {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json'
-                            }
+                        return response.text().then(text => {
+                            resultDiv.textContent += '\nBody (Text):\n' + text;
                         });
-                        
-                        if (response.ok) {
-                            badge.textContent = 'Operational';
-                            badge.className = 'status-badge operational';
-                        } else {
-                            badge.textContent = `Error (${response.status})`;
-                            badge.className = 'status-badge offline';
+                    }
+                })
+                .catch(error => {
+                    resultDiv.textContent = `Error: ${error.message}`;
+                });
+        }
+        
+        // Test CORS with different methods
+        function testCORS(method) {
+            const resultDiv = document.getElementById('cors-result');
+            resultDiv.textContent = `Testing CORS with ${method}...`;
+            
+            const options = {
+                method: method,
+                headers: {
+                    'Accept': 'application/json, text/plain, */*'
+                }
+            };
+            
+            // Add body for POST
+            if (method === 'POST') {
+                options.body = JSON.stringify({ test: true });
+                options.headers['Content-Type'] = 'application/json';
+            }
+            
+            fetch('/api/test-cors', options)
+                .then(response => {
+                    resultDiv.textContent = `CORS ${method} Test\n`;
+                    resultDiv.textContent += `Status: ${response.status} ${response.statusText}\n\n`;
+                    
+                    // Check for CORS headers
+                    resultDiv.textContent += 'CORS Headers:\n';
+                    const corsHeaders = [
+                        'access-control-allow-origin',
+                        'access-control-allow-methods',
+                        'access-control-allow-headers',
+                        'access-control-allow-credentials',
+                        'access-control-expose-headers',
+                        'access-control-max-age'
+                    ];
+                    
+                    let hasCorsHeaders = false;
+                    for (const header of corsHeaders) {
+                        const value = response.headers.get(header);
+                        if (value) {
+                            resultDiv.textContent += `${header}: ${value}\n`;
+                            hasCorsHeaders = true;
                         }
                     }
-                } catch (error) {
-                    badge.textContent = 'Offline';
-                    badge.className = 'status-badge offline';
-                }
-            }
-        });
+                    
+                    if (!hasCorsHeaders) {
+                        resultDiv.textContent += 'No CORS headers found in response.\n';
+                    }
+                    
+                    // Try to parse as JSON, fallback to text
+                    const contentType = response.headers.get('content-type') || '';
+                    if (contentType.includes('application/json')) {
+                        return response.json().then(data => {
+                            resultDiv.textContent += '\nBody (JSON):\n' + JSON.stringify(data, null, 2);
+                        });
+                    } else {
+                        return response.text().then(text => {
+                            resultDiv.textContent += '\nBody (Text):\n' + text;
+                        });
+                    }
+                })
+                .catch(error => {
+                    resultDiv.textContent = `CORS ${method} Test Failed\n`;
+                    resultDiv.textContent += `Error: ${error.message}\n\n`;
+                    resultDiv.textContent += 'This may be a CORS error. Check browser console for details.';
+                });
+        }
+        
+        // Initialize
+        checkServerStatus();
     </script>
 </body>
 </html>
