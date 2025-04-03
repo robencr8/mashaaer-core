@@ -688,8 +688,25 @@
   
   <script>
     let userLanguage = 'ar'; // Default to Arabic
-    // Audio playback fallback tracking
+    // Audio playback system variables
     let audioPlaybackFallbackTriggered = false;
+    let audioPlaybackAttempts = 0;
+    let totalAudioPlaybackAttempts = 0;
+    let lastPlayedAudioPath = '';
+    let audioContext = null;
+    
+    // Create audio context on demand (required user interaction first)
+    function getAudioContext() {
+      if (!audioContext) {
+        try {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          console.log('Audio context created successfully');
+        } catch (e) {
+          console.error('Failed to create audio context:', e);
+        }
+      }
+      return audioContext;
+    }
     
     const userData = {
       full_name: '',
@@ -874,126 +891,255 @@
       }
     }
     
+    // Improved multi-strategy audio playback system
+    function playAudioWithFallback(audioPath, onComplete) {
+        console.log('Attempting to play audio:', audioPath);
+        lastPlayedAudioPath = audioPath;
+        audioPlaybackAttempts = 0;
+        totalAudioPlaybackAttempts++;
+        
+        // Try standard audio element first (Strategy 1)
+        tryPlayWithAudioElement(audioPath, onComplete);
+    }
+    
+    // Strategy 1: Standard Audio element
+    function tryPlayWithAudioElement(audioPath, onComplete) {
+        audioPlaybackAttempts++;
+        console.log(`Audio playback attempt ${audioPlaybackAttempts} (Strategy 1: Audio element)`);
+        
+        try {
+            const audio = new Audio(audioPath);
+            
+            // Success handler
+            audio.onplay = function() {
+                console.log('Audio playback started successfully (Strategy 1)');
+                audioPlaybackFallbackTriggered = false;
+            };
+            
+            // Ended handler - consider this a successful play
+            audio.onended = function() {
+                console.log('Audio playback completed (Strategy 1)');
+                if (onComplete) onComplete();
+            };
+            
+            // Error handler - try next strategy
+            audio.onerror = function(e) {
+                console.error('Error playing audio with Strategy 1:', e);
+                tryPlayWithCacheBusting(audioPath, onComplete);
+            };
+            
+            // Start playback
+            const playPromise = audio.play();
+            
+            // Modern browsers return a promise from play()
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.error('Audio play promise rejected:', error);
+                    // Since we got a promise, we know we're on a modern browser
+                    // Try the next strategy with a small delay
+                    setTimeout(() => {
+                        tryPlayWithCacheBusting(audioPath, onComplete);
+                    }, 300);
+                });
+            }
+        } catch (e) {
+            console.error('Exception in Audio element playback:', e);
+            tryPlayWithCacheBusting(audioPath, onComplete);
+        }
+    }
+    
+    // Strategy 2: Cache-busting approach
+    function tryPlayWithCacheBusting(audioPath, onComplete) {
+        audioPlaybackAttempts++;
+        console.log(`Audio playback attempt ${audioPlaybackAttempts} (Strategy 2: Cache busting)`);
+        
+        try {
+            // Add a cache-busting query parameter
+            const cacheBustPath = audioPath + '?cb=' + new Date().getTime();
+            const audio = new Audio(cacheBustPath);
+            
+            audio.onplay = function() {
+                console.log('Audio playback started successfully (Strategy 2)');
+                audioPlaybackFallbackTriggered = false;
+            };
+            
+            audio.onended = function() {
+                console.log('Audio playback completed (Strategy 2)');
+                if (onComplete) onComplete();
+            };
+            
+            audio.onerror = function(e) {
+                console.error('Error playing audio with Strategy 2:', e);
+                tryPlayWithAudioContext(audioPath, onComplete);
+            };
+            
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.error('Cache-busting audio play promise rejected:', error);
+                    setTimeout(() => {
+                        tryPlayWithAudioContext(audioPath, onComplete);
+                    }, 300);
+                });
+            }
+        } catch (e) {
+            console.error('Exception in cache-busting playback:', e);
+            tryPlayWithAudioContext(audioPath, onComplete);
+        }
+    }
+    
+    // Strategy 3: Web Audio API approach
+    function tryPlayWithAudioContext(audioPath, onComplete) {
+        audioPlaybackAttempts++;
+        console.log(`Audio playback attempt ${audioPlaybackAttempts} (Strategy 3: AudioContext)`);
+        
+        try {
+            // Create or get audio context
+            const ctx = getAudioContext();
+            if (!ctx) {
+                console.error('AudioContext not available');
+                tryFinalFallback(onComplete);
+                return;
+            }
+            
+            // Resume context if it's suspended (browser autoplay policy)
+            if (ctx.state === 'suspended') {
+                ctx.resume().then(() => {
+                    console.log('AudioContext resumed successfully');
+                    loadAndPlayWithAudioContext(ctx, audioPath, onComplete);
+                }).catch(err => {
+                    console.error('Failed to resume AudioContext:', err);
+                    tryFinalFallback(onComplete);
+                });
+            } else {
+                loadAndPlayWithAudioContext(ctx, audioPath, onComplete);
+            }
+        } catch (e) {
+            console.error('Exception in AudioContext setup:', e);
+            tryFinalFallback(onComplete);
+        }
+    }
+    
+    // Helper for Web Audio API playback
+    function loadAndPlayWithAudioContext(audioContext, audioPath, onComplete) {
+        fetch(audioPath)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.arrayBuffer();
+            })
+            .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+            .then(audioBuffer => {
+                const source = audioContext.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(audioContext.destination);
+                
+                // Handle completion
+                source.onended = function() {
+                    console.log('Audio playback completed (Strategy 3)');
+                    if (onComplete) onComplete();
+                };
+                
+                source.start(0);
+                console.log('AudioContext playback started successfully');
+                audioPlaybackFallbackTriggered = false;
+            })
+            .catch(err => {
+                console.error('AudioContext playback failed:', err);
+                tryFinalFallback(onComplete);
+            });
+    }
+    
+    // Strategy 4: Final fallback - static error sound
+    function tryFinalFallback(onComplete) {
+        console.log('Attempting final fallback audio playback');
+        
+        if (!audioPlaybackFallbackTriggered) {
+            audioPlaybackFallbackTriggered = true;
+            
+            try {
+                // Try the static error sound
+                const errorSound = new Audio('/tts_cache/error.mp3');
+                
+                errorSound.onended = function() {
+                    console.log('Fallback audio completed');
+                    if (onComplete) onComplete();
+                };
+                
+                errorSound.onerror = function() {
+                    console.error('Final fallback audio also failed');
+                    showVisualFeedback();
+                    if (onComplete) setTimeout(onComplete, 1000);
+                };
+                
+                const playPromise = errorSound.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(err => {
+                        console.error('Error playing final fallback:', err);
+                        showVisualFeedback();
+                        if (onComplete) setTimeout(onComplete, 1000);
+                    });
+                }
+            } catch (e) {
+                console.error('Exception in fallback playback:', e);
+                showVisualFeedback();
+                if (onComplete) setTimeout(onComplete, 1000);
+            }
+        } else {
+            console.log('Fallback already triggered, showing visual notification');
+            showVisualFeedback();
+            if (onComplete) setTimeout(onComplete, 1000);
+        }
+    }
+    
+    // Show visual notification when audio completely fails
+    function showVisualFeedback() {
+        const element = document.getElementById('listening-' + currentStep);
+        if (element) {
+            element.innerHTML = '<span style="color:orange">⚠️ ' + 
+                (userLanguage === 'ar' ? 'تعذر تشغيل الصوت' : 'Audio unavailable') + 
+                '</span>';
+            setTimeout(() => {
+                element.innerHTML = '';
+            }, 3000);
+        }
+    }
+    
     // Function to speak text using the server's TTS API
     function speakText(text) {
-      fetch('/api/speak', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ 
-          text: text, 
-          language: userLanguage === 'en' ? 'en-US' : 'ar'
+        fetch('/api/speak', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                text: text, 
+                language: userLanguage === 'en' ? 'en-US' : 'ar'
+            })
         })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          console.log('TTS API response:', data);
-          
-          // Create a function to handle fallback when all else fails
-          const attemptFinalFallback = () => {
-            console.log('Attempting final fallback audio playback');
-            if (!audioPlaybackFallbackTriggered) {
-              audioPlaybackFallbackTriggered = true;
-              
-              // Try the static error sound
-              const errorSound = new Audio('/tts_cache/error.mp3');
-              
-              // Add error handling for the fallback itself
-              errorSound.onerror = () => {
-                console.error('Final fallback audio also failed');
-                // Display a visual notification instead since audio completely failed
-                const element = document.getElementById('listening-' + currentStep);
-                if (element) {
-                  element.innerHTML = '<span style="color:red">⚠️ Audio unavailable</span>';
-                  setTimeout(() => {
-                    element.innerHTML = '';
-                  }, 3000);
-                }
-              };
-              
-              errorSound.play().catch(err => {
-                console.error('Error playing final fallback:', err);
-              });
-            }
-          };
-          
-          // Create audio element to play the response
-          const audio = new Audio(data.audio_path);
-          
-          // Add proper error handling and retry for audio
-          audio.onerror = function(e) {
-            console.error('Error playing audio:', e);
-            // Try alternative method after a short delay
-            setTimeout(() => {
-              console.log('Attempting audio playback with alternative method');
-              
-              // Add a cache-busting parameter to the URL
-              const backupAudio = new Audio(data.audio_path + '?t=' + new Date().getTime());
-              
-              // Add error handling for the backup
-              backupAudio.onerror = () => {
-                console.error('Backup audio also failed');
-                attemptFinalFallback();
-              };
-              
-              backupAudio.play().catch(err => {
-                console.error('Backup audio playback error:', err);
-                attemptFinalFallback();
-              });
-            }, 500);
-          };
-          
-          // Log success when audio plays
-          audio.onplay = function() {
-            console.log('TTS audio playback started successfully');
-            audioPlaybackFallbackTriggered = false; // Reset flag on successful play
-          };
-          
-          // Start playback
-          audio.play().catch(e => {
-            console.error('Error playing audio:', e);
-            
-            // Try a third approach with a new audio context
-            try {
-              console.log('Attempting audio playback with Audio Context');
-              
-              // Check if we have AudioContext support
-              if (window.AudioContext || window.webkitAudioContext) {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('TTS success:', data);
                 
-                // Fetch the audio file
-                fetch(data.audio_path)
-                  .then(response => response.arrayBuffer())
-                  .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
-                  .then(audioBuffer => {
-                    const source = audioContext.createBufferSource();
-                    source.buffer = audioBuffer;
-                    source.connect(audioContext.destination);
-                    source.start(0);
-                    console.log('AudioContext playback started');
-                  })
-                  .catch(err => {
-                    console.error('AudioContext playback failed:', err);
-                    attemptFinalFallback();
-                  });
-              } else {
-                console.warn('AudioContext not supported, trying fallback');
-                attemptFinalFallback();
-              }
-            } catch (contextError) {
-              console.error('Error with Audio Context approach:', contextError);
-              attemptFinalFallback();
+                // Check if we have a valid audio path
+                if (data.audio_path) {
+                    // Try playing with our improved system
+                    playAudioWithFallback(data.audio_path);
+                } else {
+                    console.error('TTS response missing audio_path');
+                    showVisualFeedback();
+                }
+            } else {
+                console.error('TTS error:', data.error || 'Unknown error');
+                showVisualFeedback();
             }
-          });
-        } else {
-          console.error('TTS error:', data.error);
-        }
-      })
-      .catch(error => {
-        console.error('TTS API error:', error);
-      });
+        })
+        .catch(error => {
+            console.error('TTS API error:', error);
+            showVisualFeedback();
+        });
     }
     
     // Start voice input for a field

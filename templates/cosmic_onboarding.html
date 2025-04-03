@@ -9,6 +9,19 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
+    @keyframes pulse-text {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.05); text-shadow: 0 0 10px rgba(79, 189, 255, 0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    
+    /* Visual feedback when audio fails */
+    .pulse-animation {
+      animation: pulse-text 1s ease-in-out infinite;
+      color: #4fbdff !important;
+      font-weight: bold !important;
+    }
+    
     body {
       margin: 0;
       padding: 0;
@@ -939,16 +952,152 @@
         if (data.success) {
           console.log('TTS success:', data);
           
-          // Create audio element to play the response
-          const audio = new Audio(data.audio_path);
-          audio.play().catch(e => console.error('Error playing audio:', e));
+          // Multi-layered audio playback approach with fallbacks
+          playAudioWithFallbacks(data.audio_path, text);
         } else {
           console.error('TTS error:', data.error);
+          // Show visual feedback when audio fails
+          showVisualFeedback();
         }
       })
       .catch(error => {
         console.error('TTS API error:', error);
+        // Show visual feedback when audio API fails
+        showVisualFeedback();
       });
+    }
+    
+    // Multi-layered approach to audio playback with fallbacks
+    function playAudioWithFallbacks(audioPath, fallbackText) {
+      // Strategy 1: Standard Audio API
+      const audio = new Audio(audioPath);
+      
+      audio.onerror = function(e) {
+        console.error('Audio playback failed (Strategy 1), trying AudioContext (Strategy 2):', e);
+        
+        // Strategy 2: Use AudioContext for more reliable playback
+        playWithAudioContext(audioPath, fallbackText);
+      };
+      
+      audio.onended = function() {
+        console.log('Audio playback complete (Strategy 1)');
+      };
+      
+      // Start playback with standard Audio API
+      audio.play().catch(e => {
+        console.error('Error starting audio playback (Strategy 1):', e);
+        // Try AudioContext approach if standard playback fails
+        playWithAudioContext(audioPath, fallbackText);
+      });
+    }
+    
+    // Strategy 2: Play audio using AudioContext (more reliable in some browsers)
+    function playWithAudioContext(audioPath, fallbackText) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioContext();
+        
+        fetch(audioPath)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response failed when fetching audio');
+            }
+            return response.arrayBuffer();
+          })
+          .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+          .then(audioBuffer => {
+            const source = audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioContext.destination);
+            
+            source.onended = function() {
+              console.log('Audio playback complete (Strategy 2)');
+            };
+            
+            // Start playback with AudioContext
+            source.start(0);
+          })
+          .catch(e => {
+            console.error('Audio playback failed (Strategy 2), trying iframe (Strategy 3):', e);
+            // Try iframe approach as another fallback
+            playWithIframe(audioPath, fallbackText);
+          });
+      } catch (e) {
+        console.error('AudioContext initialization failed (Strategy 2):', e);
+        // Try iframe approach if AudioContext fails
+        playWithIframe(audioPath, fallbackText);
+      }
+    }
+    
+    // Strategy 3: Use iframe as a fallback method
+    function playWithIframe(audioPath, fallbackText) {
+      try {
+        // Create hidden iframe for audio playback
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = audioPath;
+        
+        // Remove iframe after playback (approximate timing)
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+          console.log('Audio playback complete (Strategy 3)');
+        }, 10000); // Generous timeout for audio completion
+        
+        document.body.appendChild(iframe);
+      } catch (e) {
+        console.error('Iframe playback failed (Strategy 3), trying local TTS (Strategy 4):', e);
+        // Final fallback - try the browser's speech synthesis if available
+        tryBrowserSpeechSynthesis(fallbackText);
+      }
+    }
+    
+    // Strategy 4: Use browser's built-in speech synthesis API as final fallback
+    function tryBrowserSpeechSynthesis(text) {
+      if (window.speechSynthesis) {
+        try {
+          const utterance = new SpeechSynthesisUtterance(text);
+          
+          // Set language based on user preference
+          utterance.lang = userLanguage === 'ar' ? 'ar-SA' : 'en-US';
+          
+          utterance.onend = function() {
+            console.log('Speech synthesis complete (Strategy 4)');
+          };
+          
+          utterance.onerror = function(e) {
+            console.error('Speech synthesis failed (Strategy 4):', e);
+            // All strategies failed, show visual feedback
+            showVisualFeedback();
+          };
+          
+          window.speechSynthesis.speak(utterance);
+        } catch (e) {
+          console.error('Browser speech synthesis failed (Strategy 4):', e);
+          // All strategies failed, show visual feedback
+          showVisualFeedback();
+        }
+      } else {
+        console.error('Browser speech synthesis not available (Strategy 4)');
+        // All strategies failed, show visual feedback
+        showVisualFeedback();
+      }
+    }
+    
+    // Show visual feedback when audio completely fails
+    function showVisualFeedback() {
+      // Display the current instruction text more prominently
+      const currentStepElement = document.getElementById(`step-${currentStep}`);
+      if (currentStepElement) {
+        // Add pulsing effect to instruction text
+        const instructionElement = currentStepElement.querySelector('.instruction-text');
+        if (instructionElement) {
+          instructionElement.classList.add('pulse-animation');
+          // Remove the animation after a few seconds
+          setTimeout(() => {
+            instructionElement.classList.remove('pulse-animation');
+          }, 3000);
+        }
+      }
     }
     
     // Start voice input for a field

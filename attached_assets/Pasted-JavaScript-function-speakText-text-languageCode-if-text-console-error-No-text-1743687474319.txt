@@ -1,0 +1,171 @@
+JavaScript
+
+function speakText(text, languageCode) {
+    if (!text) {
+        console.error("No text provided to speak.");
+        return;
+    }
+    fetch('/api/speak', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: text, language: languageCode }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.audio_url) {
+            playAudio(data.audio_url);
+        } else if (data.error) {
+            console.error("Error from /api/speak:", data.error);
+            // Attempt fallback TTS if the primary fails
+            attemptFinalFallback(text, languageCode);
+        } else {
+            console.error("Unexpected response from /api/speak:", data);
+            attemptFinalFallback(text, languageCode);
+        }
+    })
+    .catch(error => {
+        console.error("Error calling /api/speak:", error);
+        attemptFinalFallback(text, languageCode);
+    });
+}
+
+let currentAudio = null;
+let audioPlaybackFallbackTriggered = false;
+
+function playAudio(audioUrl) {
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+    }
+    currentAudio = new Audio(audioUrl);
+    currentAudio.onerror = function() {
+        console.error("Error playing audio:", audioUrl);
+        if (!audioPlaybackFallbackTriggered) {
+            // Attempt a different fallback mechanism if the audio element fails
+            const text = document.getElementById('current-question')?.textContent;
+            const lang = document.documentElement.lang;
+            if (text && lang) {
+                attemptFinalFallback(text, lang);
+                audioPlaybackFallbackTriggered = true;
+            }
+        }
+    };
+    currentAudio.play();
+}
+
+function attemptFinalFallback(text, languageCode) {
+    console.log("Attempting final audio fallback...");
+    // Implement a very basic fallback using a different TTS service or a pre-recorded sound
+    // For example, you could try using the browser's SpeechSynthesis API (if available)
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = languageCode;
+        speechSynthesis.speak(utterance);
+        utterance.onerror = function(event) {
+            console.error("SpeechSynthesis error:", event);
+            // If even the browser's API fails, you might have no other automated option
+            displayFallbackMessage("Sorry, audio playback is not available at the moment.");
+        };
+    } else {
+        displayFallbackMessage("Sorry, audio playback is not supported by your browser.");
+    }
+}
+
+function displayFallbackMessage(message) {
+    const audioFallbackDiv = document.getElementById('audio-fallback-message');
+    if (audioFallbackDiv) {
+        audioFallbackDiv.textContent = message;
+    } else {
+        console.log(message); // Log the message if the element doesn't exist
+    }
+}
+
+// Ensure the fallback message element exists in your HTML:
+// <div id="audio-fallback-message" style="color: red;"></div>
+JavaScript
+
+function speakText(text, languageCode) {
+    if (!text) {
+        console.error("No text provided to speak.");
+        return;
+    }
+    fetch('/api/speak', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: text, language: languageCode }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.audio_url) {
+            playAudioWithFallback(data.audio_url, text, languageCode);
+        } else if (data.error) {
+            console.error("Error from /api/speak:", data.error);
+            attemptSpeechSynthesisFallback(text, languageCode);
+        } else {
+            console.error("Unexpected response from /api/speak:", data);
+            attemptSpeechSynthesisFallback(text, languageCode);
+        }
+    })
+    .catch(error => {
+        console.error("Error calling /api/speak:", error);
+        attemptSpeechSynthesisFallback(text, languageCode);
+    });
+}
+
+let currentAudio = null;
+
+function playAudioWithFallback(audioUrl, originalText, languageCode) {
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+    }
+    currentAudio = new Audio(audioUrl);
+    currentAudio.onerror = function() {
+        console.error("Error playing audio:", audioUrl);
+        attemptSpeechSynthesisFallback(originalText, languageCode);
+    };
+    currentAudio.play();
+}
+
+function attemptSpeechSynthesisFallback(text, languageCode) {
+    console.log("Attempting Speech Synthesis fallback...");
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = languageCode;
+        speechSynthesis.speak(utterance);
+        utterance.onerror = function(event) {
+            console.error("SpeechSynthesis error:", event);
+            displayFallbackMessage("Sorry, audio playback is not available at the moment.");
+        };
+    } else {
+        displayFallbackMessage("Sorry, audio playback is not supported by your browser.");
+    }
+}
+
+function displayFallbackMessage(message) {
+    const audioFallbackDiv = document.getElementById('audio-fallback-message');
+    if (audioFallbackDiv) {
+        audioFallbackDiv.textContent = message;
+    } else {
+        console.log(message);
+    }
+}
+
+// Ensure the fallback message element exists in your HTML:
+// <div id="audio-fallback-message" style="color: red;"></div>
+Key improvements in this version:
+
+playAudioWithFallback Function: This function now handles the audio element creation and error. If the audio fails to play (onerror event), it directly calls attemptSpeechSynthesisFallback.
+No audioPlaybackFallbackTriggered: We no longer need this flag as the fallback is attempted directly when the <audio> element encounters an error.
+Clearer Fallback Logic: The flow is now: try to play the audio from the backend, if that fails, try speechSynthesis, if that also fails, display a message.
+Passing Original Text and Language: The playAudioWithFallback function receives the originalText and languageCode so that the speechSynthesis fallback can use the same content.
+Make sure you have an HTML element with the ID audio-fallback-message where the fallback message can be displayed to the user. For example:
+
+HTML
+
+<div id="audio-fallback-message" style="color: red;"></div>
+This revised code provides a more direct and robust approach to audio fallback in your cosmic onboarding interface.
