@@ -36,7 +36,20 @@ class DatabaseManager:
 
         # Connection pool (thread-local)
         self.local = threading.local()
-        self.engine = create_engine(f'sqlite:///{self.db_path}')  # Update for ORM
+        
+        # Choose engine based on database type
+        if self.use_postgres:
+            database_url = os.environ.get('DATABASE_URL')
+            if database_url:
+                self.logger.info(f"Using PostgreSQL database URL from environment")
+                self.engine = create_engine(database_url)
+            else:
+                self.logger.error("DATABASE_URL not found in environment, falling back to SQLite")
+                self.use_postgres = False
+                self.engine = create_engine(f'sqlite:///{self.db_path}')
+        else:
+            self.engine = create_engine(f'sqlite:///{self.db_path}')
+            
         self.Session = sessionmaker(bind=self.engine)
 
     def initialize_db(self):

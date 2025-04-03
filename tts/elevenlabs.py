@@ -33,6 +33,7 @@ class ElevenLabsTTS:
     def is_available(self):
         """Check if the ElevenLabs API is available with a valid key"""
         if not self.api_key:
+            self.logger.error("ElevenLabs API key not set or is empty")
             return False
         
         try:
@@ -42,12 +43,19 @@ class ElevenLabsTTS:
                 "Content-Type": "application/json"
             }
             
+            self.logger.debug(f"Checking ElevenLabs API availability with key: {self.api_key[:4]}...{self.api_key[-4:] if len(self.api_key) > 8 else ''}")
+            
             response = requests.get(
                 f"{self.base_url}/voices",
                 headers=headers
             )
             
-            return response.status_code == 200
+            if response.status_code == 200:
+                self.logger.info("ElevenLabs API is available and key is valid")
+                return True
+            else:
+                self.logger.error(f"ElevenLabs API returned status code {response.status_code}: {response.text}")
+                return False
         
         except Exception as e:
             self.logger.error(f"ElevenLabs API check failed: {str(e)}")

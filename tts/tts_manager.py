@@ -12,10 +12,23 @@ class TTSManager:
     
     def __init__(self, config):
         self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)
         self.config = config
         
+        # Get ElevenLabs API key from config or environment
+        elevenlabs_api_key = None
+        if hasattr(config, 'ELEVENLABS_API_KEY') and config.ELEVENLABS_API_KEY:
+            elevenlabs_api_key = config.ELEVENLABS_API_KEY
+            self.logger.debug(f"Using ElevenLabs API key from config")
+        else:
+            elevenlabs_api_key = os.environ.get('ELEVENLABS_API_KEY')
+            if elevenlabs_api_key:
+                self.logger.debug(f"Using ElevenLabs API key from environment")
+            else:
+                self.logger.error("No ElevenLabs API key found in config or environment")
+        
         # Initialize TTS providers
-        self.elevenlabs = ElevenLabsTTS(api_key=config.ELEVENLABS_API_KEY)
+        self.elevenlabs = ElevenLabsTTS(api_key=elevenlabs_api_key)
         self.gtts = GTTSFallback()
         
         # Track which provider to use
@@ -31,21 +44,41 @@ class TTSManager:
         
         try:
             # Check which TTS providers are available
-            if not self.config.is_offline() and self.elevenlabs.is_available():
-                self.use_elevenlabs = True
-                self.logger.info("ElevenLabs TTS is available")
+            if not self.config.is_offline():
+                elevenlabs_available = self.elevenlabs.is_available()
+                if elevenlabs_available:
+                    self.use_elevenlabs = True
+                    self.logger.info("ElevenLabs TTS is available and working")
+                else:
+                    self.logger.error("ElevenLabs TTS is not available - API key may be invalid or expired")
+                    # Try to log the specific error from the elevenlabs module
+                    try:
+                        headers = {
+                            "xi-api-key": self.elevenlabs.api_key,
+                            "Content-Type": "application/json"
+                        }
+                        
+                        self.logger.debug(f"Testing ElevenLabs API key: {self.elevenlabs.api_key[:4]}...{self.elevenlabs.api_key[-4:] if len(self.elevenlabs.api_key) > 8 else ''}")
+                        import requests
+                        response = requests.get(
+                            "https://api.elevenlabs.io/v1/voices",
+                            headers=headers
+                        )
+                        self.logger.debug(f"ElevenLabs test response: {response.status_code} - {response.text[:200]}")
+                    except Exception as e:
+                        self.logger.error(f"Error testing ElevenLabs API: {str(e)}")
             else:
-                self.logger.info("ElevenLabs TTS is not available")
+                self.logger.info("Offline mode - not checking ElevenLabs TTS")
             
             # Always check gTTS as fallback
             if self.gtts.is_available():
                 self.use_gtts = True
-                self.logger.info("Google TTS is available")
+                self.logger.info("Google TTS is available as fallback")
             else:
-                self.logger.info("Google TTS is not available")
+                self.logger.warning("Google TTS is not available - check internet connection")
             
             if not self.use_elevenlabs and not self.use_gtts:
-                self.logger.warning("No TTS providers available")
+                self.logger.warning("No TTS providers available - all voices will fail")
             
             return self.use_elevenlabs or self.use_gtts
         

@@ -21,6 +21,12 @@ class Config:
         # API keys - Use environment variable directly to ensure it's available
         self.ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", "")
         
+        # Debug ElevenLabs API key status
+        if self.ELEVENLABS_API_KEY:
+            self.logger.debug(f"ElevenLabs API key found, length: {len(self.ELEVENLABS_API_KEY)}")
+        else:
+            self.logger.error(f"ElevenLabs API key not found or empty")
+        
         # Database configurations - Use environment variables directly
         self.DB_PATH = os.environ.get("DB_PATH", "robin_memory.db")
         self.USE_POSTGRES = self._get_bool_env("USE_POSTGRES", True)
