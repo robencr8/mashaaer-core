@@ -139,13 +139,15 @@ def mobile_analyze_emotion():
     - Binary response format option for reducing payload size
     - Support for both text and audio input
     - Enhanced error handling for intermittent connections
+    - Response caching for improved performance
     
     Request format:
     {
         "text": "Text to analyze",
         "language": "en" | "ar",
         "format": "json" | "minimal",
-        "include_details": true | false
+        "include_details": true | false,
+        "bypass_cache": false | true
     }
     
     Response format (full):
@@ -165,7 +167,8 @@ def mobile_analyze_emotion():
                 "confidence": 0.9
             },
             "timestamp": "2025-04-03T14:22:00Z"
-        }
+        },
+        "cache_status": "hit" | "miss" | "disabled"
     }
     
     Response format (minimal):
@@ -176,6 +179,9 @@ def mobile_analyze_emotion():
         "c": 0.9
     }
     """
+    # Record start time for performance metrics
+    start_time = time.time()
+    
     try:
         # Parse request data
         if request.is_json:
@@ -187,6 +193,7 @@ def mobile_analyze_emotion():
         language = data.get('language', 'en')
         response_format = data.get('format', 'json')  # 'json' or 'minimal'
         include_details = data.get('include_details', True)
+        bypass_cache = data.get('bypass_cache', False)
         
         # Validate required fields
         if not text:
@@ -198,6 +205,64 @@ def mobile_analyze_emotion():
                     "success": False,
                     "error": "Text is required for emotion analysis"
                 }), 400
+        
+        # Generate a cache key (normalize text to ensure consistent caching)
+        import hashlib
+        normalized_text = text.strip().lower()
+        cache_key = f"emotion_{hashlib.md5(normalized_text.encode()).hexdigest()}_{language}"
+        cache_status = "disabled" if bypass_cache else "miss"
+        
+        # Check cache if not bypassing
+        cached_result = None
+        if not bypass_cache and db_manager and hasattr(db_manager, 'get_cached_response'):
+            cached_result = db_manager.get_cached_response(cache_key)
+            if cached_result:
+                logger.debug(f"Cache hit for emotion analysis: {cache_key}")
+                cache_status = "hit"
+                
+                # Return cached result if we have one
+                try:
+                    cached_data = json.loads(cached_result)
+                    
+                    # Add cache status to response
+                    if response_format == 'minimal':
+                        return jsonify({
+                            "s": True,
+                            "e": cached_data.get("primary_emotion", "neutral"),
+                            "i": cached_data.get("confidence", 0.8),
+                            "c": cached_data.get("confidence", 0.8),
+                            "cached": True
+                        })
+                    else:
+                        # For full response format
+                        result = {
+                            "primary_emotion": cached_data.get("primary_emotion", "neutral"),
+                            "intensity": cached_data.get("confidence", 0.8),
+                            "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            "emotions": cached_data.get("emotions", {}),
+                        }
+                        
+                        if include_details:
+                            result["metadata"] = {
+                                "source": "emotion-analysis-v2",
+                                "confidence": cached_data.get("confidence", 0.8),
+                                "language": language,
+                                "processing_time_ms": 0  # Near-instant with cache
+                            }
+                        
+                        # Performance metrics
+                        end_time = time.time()
+                        processing_time_ms = int((end_time - start_time) * 1000)
+                        
+                        return jsonify({
+                            "success": True,
+                            "result": result,
+                            "cache_status": cache_status,
+                            "processing_time_ms": processing_time_ms
+                        })
+                except Exception as e:
+                    logger.warning(f"Failed to parse cached result: {str(e)}")
+                    # Fall through to regular processing
         
         # Check emotion tracker availability
         if emotion_tracker is None:
@@ -229,37 +294,64 @@ def mobile_analyze_emotion():
                 dominant_emotion = emotion_result.get('primary_emotion', 'neutral')
                 confidence = emotion_result.get('confidence', 0.8)
                 all_emotions = emotion_result.get('emotions', {})
+                
+                # Cache the result for future requests
+                if not bypass_cache and db_manager and hasattr(db_manager, 'store_cached_response'):
+                    try:
+                        # Prepare data to cache
+                        cache_data = {
+                            "primary_emotion": dominant_emotion,
+                            "confidence": confidence,
+                            "emotions": all_emotions,
+                            "language": language,
+                            "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+                        }
+                        
+                        # Store in cache with an expiration time (3 days)
+                        cache_expiry = 259200  # 3 days in seconds
+                        db_manager.store_cached_response(cache_key, json.dumps(cache_data), expiry_seconds=cache_expiry)
+                        logger.debug(f"Cached emotion analysis for key: {cache_key}")
+                    except Exception as e:
+                        logger.warning(f"Failed to cache emotion result: {str(e)}")
             
-            # Create response based on format preference
-            if response_format == 'minimal':
-                # Minimal format for low-bandwidth scenarios
-                return jsonify({
-                    "s": True,  # success
-                    "e": dominant_emotion,  # emotion
-                    "i": confidence,  # intensity
-                    "c": confidence  # confidence
-                })
-            else:
-                # Full response with complete details
-                result = {
-                    "primary_emotion": dominant_emotion,
-                    "intensity": confidence,
-                    "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-                }
-                
-                # Include detailed emotion breakdown if requested
-                if include_details:
-                    result["emotions"] = all_emotions
-                    result["metadata"] = {
-                        "source": "emotion-analysis-v2",
-                        "confidence": confidence,
-                        "language": language
+                # Calculate response time
+                end_time = time.time()
+                processing_time_ms = int((end_time - start_time) * 1000)
+            
+                # Create response based on format preference
+                if response_format == 'minimal':
+                    # Minimal format for low-bandwidth scenarios
+                    return jsonify({
+                        "s": True,  # success
+                        "e": dominant_emotion,  # emotion
+                        "i": confidence,  # intensity
+                        "c": confidence,  # confidence
+                        "t": processing_time_ms  # processing time
+                    })
+                else:
+                    # Full response with complete details
+                    result = {
+                        "primary_emotion": dominant_emotion,
+                        "intensity": confidence,
+                        "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
                     }
-                
-                return jsonify({
-                    "success": True,
-                    "result": result
-                })
+                    
+                    # Include detailed emotion breakdown if requested
+                    if include_details:
+                        result["emotions"] = all_emotions
+                        result["metadata"] = {
+                            "source": "emotion-analysis-v2",
+                            "confidence": confidence,
+                            "language": language,
+                            "processing_time_ms": processing_time_ms
+                        }
+                    
+                    return jsonify({
+                        "success": True,
+                        "result": result,
+                        "cache_status": cache_status,
+                        "processing_time_ms": processing_time_ms
+                    })
                 
         except Exception as e:
             logger.error(f"Mobile API: Emotion analysis error: {str(e)}")
@@ -331,11 +423,15 @@ def mobile_speak():
         else:
             data = request.form.to_dict()
         
+        # Record start time for performance metrics
+        start_time = time.time()
+        
         text = data.get('text', '')
         voice = data.get('voice', 'default')
         language = data.get('language', 'en-US')
         audio_format = data.get('format', 'mp3')
         stream = data.get('stream', False)
+        bypass_cache = data.get('bypass_cache', False)
         
         # Validate required fields
         if not text:
@@ -350,6 +446,68 @@ def mobile_speak():
                 "success": False,
                 "error": "TTS service not available"
             }), 503
+            
+        # Generate a cache key for TTS
+        import hashlib
+        cache_key = f"tts_{voice}_{language}_{hashlib.md5(text.encode()).hexdigest()}"
+        cache_status = "disabled" if bypass_cache else "miss"
+        
+        # Check cache if not bypassing
+        if not bypass_cache and db_manager and hasattr(db_manager, 'get_cached_response'):
+            try:
+                cached_result = db_manager.get_cached_response(cache_key)
+                if cached_result:
+                    logger.debug(f"Cache hit for TTS: {cache_key}")
+                    cache_status = "hit"
+                    
+                    # Parse cached result
+                    cached_data = json.loads(cached_result)
+                    cached_audio_path = cached_data.get('audio_path')
+                    
+                    # Verify the audio file exists
+                    if os.path.exists(cached_audio_path) and os.path.getsize(cached_audio_path) > 0:
+                        logger.info(f"Mobile API: Using cached TTS audio: {cached_audio_path}")
+                        
+                        # Performance metrics
+                        end_time = time.time()
+                        processing_time_ms = int((end_time - start_time) * 1000)
+                        
+                        # Handle streaming if requested
+                        if stream:
+                            try:
+                                with open(cached_audio_path, 'rb') as audio_file:
+                                    audio_data = audio_file.read()
+                                
+                                content_type = 'audio/mpeg' if cached_audio_path.endswith('.mp3') else 'audio/wav'
+                                
+                                return Response(
+                                    audio_data,
+                                    mimetype=content_type,
+                                    headers={
+                                        'Content-Disposition': f'inline; filename={os.path.basename(cached_audio_path)}',
+                                        'X-TTS-Voice': voice,
+                                        'X-TTS-Language': language,
+                                        'X-Cache-Status': 'hit',
+                                        'X-Processing-Time': str(processing_time_ms)
+                                    }
+                                )
+                            except Exception as e:
+                                logger.error(f"Mobile API: Cached streaming error: {str(e)}")
+                                # Fall through to regenerate
+                        else:
+                            # Standard JSON response with cached path
+                            return jsonify({
+                                'success': True,
+                                'audio_path': cached_audio_path,
+                                'text': text,
+                                'voice': voice,
+                                'language': language,
+                                'cache_status': cache_status,
+                                'processing_time_ms': processing_time_ms
+                            })
+            except Exception as e:
+                logger.warning(f"Failed to retrieve cached TTS result: {str(e)}")
+                # Fall through to regular processing
             
         # Get TTS provider status for response
         elevenlabs_available = hasattr(tts_manager, 'use_elevenlabs') and tts_manager.use_elevenlabs
@@ -388,6 +546,30 @@ def mobile_speak():
             if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
                 logger.info(f"Mobile API: TTS successful: {audio_path} ({os.path.getsize(audio_path)} bytes)")
                 
+                # Cache the result for future requests (if not bypassing cache)
+                if not bypass_cache and db_manager and hasattr(db_manager, 'store_cached_response'):
+                    try:
+                        # Prepare data to cache
+                        cache_data = {
+                            "audio_path": audio_path,
+                            "voice": voice,
+                            "language": language,
+                            "text_length": len(text),
+                            "timestamp": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                            "file_size": os.path.getsize(audio_path)
+                        }
+                        
+                        # Cache for 7 days - TTS results rarely change
+                        cache_expiry = 604800  # 7 days in seconds
+                        db_manager.store_cached_response(cache_key, json.dumps(cache_data), expiry_seconds=cache_expiry)
+                        logger.debug(f"Cached TTS audio for key: {cache_key}")
+                    except Exception as e:
+                        logger.warning(f"Failed to cache TTS result: {str(e)}")
+                
+                # Calculate response time
+                end_time = time.time()
+                processing_time_ms = int((end_time - start_time) * 1000)
+                
                 # Streaming response requested
                 if stream:
                     try:
@@ -405,7 +587,9 @@ def mobile_speak():
                             headers={
                                 'Content-Disposition': f'inline; filename={os.path.basename(audio_path)}',
                                 'X-TTS-Voice': voice,
-                                'X-TTS-Language': language
+                                'X-TTS-Language': language,
+                                'X-Cache-Status': cache_status,
+                                'X-Processing-Time': str(processing_time_ms)
                             }
                         )
                     except Exception as e:
@@ -423,7 +607,9 @@ def mobile_speak():
                     'text': text,
                     'voice': voice,
                     'language': language,
-                    'provider_status': provider_status
+                    'provider_status': provider_status,
+                    'cache_status': cache_status,
+                    'processing_time_ms': processing_time_ms
                 })
             else:
                 logger.warning(f"Mobile API: TTS path {audio_path} not found or empty")
