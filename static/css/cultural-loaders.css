@@ -1,0 +1,431 @@
+/**
+ * Cultural Themed Loading Animations for Mashaaer Feelings
+ * 
+ * A collection of loading animations inspired by Middle Eastern cultural elements and storytelling.
+ * These animations integrate with both cosmic and falling-stars themes of the application.
+ */
+
+/* Common loader container styles */
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  margin: 20px 0;
+  position: relative;
+}
+
+.loader-text {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  color: var(--text-secondary, #e0d0ff);
+  text-align: center;
+  max-width: 80%;
+  opacity: 0;
+  animation: fadeInOut 4s infinite;
+}
+
+/* Cultural Story Loader - Base */
+.cultural-loader {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+}
+
+.cultural-loader:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: 0 0 30px var(--primary-glow, rgba(156, 39, 176, 0.6));
+}
+
+/* Desert Caravan Loader (General) */
+.loader-desert-caravan {
+  position: relative;
+  width: 150px;
+  height: 80px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center bottom, 
+    var(--primary-purple-dark, #6a0080) 0%, 
+    var(--dark-bg, #0f0f23) 80%);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+
+.loader-desert-caravan::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  background: linear-gradient(
+    to right,
+    var(--primary-purple-dark, #6a0080) 0%,
+    var(--primary-purple-light, #d0a0ff) 50%,
+    var(--primary-purple-dark, #6a0080) 100%
+  );
+  opacity: 0.3;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+
+.desert-camel {
+  position: absolute;
+  bottom: 15px;
+  width: 30px;
+  height: 30px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23e0d0ff' d='M480.6 164c0-11.5-8.5-55.5-8.5-55.5s-1-22.5-21-22.5c-13.5 0-19 22-19 22l-4.5 23a77.17 77.17 0 0 1-19.5-9.5c-14-9-44.5-53.5-44.5-53.5s-25-8-50-19.5-42.5-6-71.5 4-40 1.5-77 25.5-45.5 25-61.5 30S57.6 131 46.6 143s-37 30-37 30l11 15s11-4 22-4 15 7 40 9 13 8 30 5 4-9 43-3 24-4 61-4 71.5 22.5 71.5 22.5l8.5 13H361l5.5-3.5c7.18-3.05 19.97-4.07 27-4.06 7.25-6.44 31.53-12.27 62.1-12.44 15 0 17-3 22-11.5s3-22.5 3-22.5zM59.72 247.42a.71.71 0 0 0-.12-.12l.12.12z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  animation: walkCamel 15s linear infinite;
+}
+
+@keyframes walkCamel {
+  0% {
+    left: -50px;
+    transform: translateX(0) scaleX(1);
+  }
+  49% {
+    transform: translateX(calc(150px + 50px)) scaleX(1);
+  }
+  50% {
+    left: 150px;
+    transform: translateX(0) scaleX(-1);
+  }
+  99% {
+    transform: translateX(calc(-150px - 50px)) scaleX(-1);
+  }
+  100% {
+    left: -50px;
+    transform: translateX(0) scaleX(1);
+  }
+}
+
+/* Desert Stars */
+.desert-star {
+  position: absolute;
+  background-color: var(--star-color, #ffffff);
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  opacity: var(--star-opacity, 0.8);
+  animation: twinkle 3s infinite;
+}
+
+.desert-star:nth-child(1) { top: 15%; left: 10%; animation-delay: 0.1s; }
+.desert-star:nth-child(2) { top: 25%; left: 30%; animation-delay: 0.5s; }
+.desert-star:nth-child(3) { top: 10%; left: 50%; animation-delay: 0.2s; }
+.desert-star:nth-child(4) { top: 20%; left: 70%; animation-delay: 0.7s; }
+.desert-star:nth-child(5) { top: 15%; left: 90%; animation-delay: 0.4s; }
+
+/* Falaj Water System Loader (UAE Traditional Irrigation) */
+.loader-falaj {
+  position: relative;
+  width: 150px;
+  height: 60px;
+  overflow: hidden;
+}
+
+.falaj-channel {
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.falaj-water {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  width: 150px;
+  height: 4px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--primary-purple-light, #d0a0ff) 20%,
+    var(--primary-purple-light, #d0a0ff) 80%,
+    transparent
+  );
+  animation: falajFlow 3s linear infinite;
+}
+
+.falaj-plant {
+  position: absolute;
+  bottom: 18px;
+  width: 15px;
+  height: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23e0d0ff' d='M64 96H0c0 123.7 100.3 224 224 224v144c0 8.8 7.2 16 16 16h32c8.8 0 16-7.2 16-16V320C288 196.3 187.7 96 64 96zm384-64c-84.2 0-157.4 46.5-195.7 115.2 27.7 30.2 48.2 66.9 59 107.6C424 243.1 512 147.9 512 32h-64z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0;
+  animation: plantGrow 6s linear infinite;
+}
+
+.falaj-plant:nth-child(3) { left: 20%; animation-delay: 0s; }
+.falaj-plant:nth-child(4) { left: 50%; animation-delay: 2s; }
+.falaj-plant:nth-child(5) { left: 80%; animation-delay: 4s; }
+
+@keyframes falajFlow {
+  0% { transform: translateX(-150px); }
+  100% { transform: translateX(150px); }
+}
+
+@keyframes plantGrow {
+  0% { transform: scale(0); opacity: 0; }
+  20% { transform: scale(0.5); opacity: 0.5; }
+  80% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+/* Pearl Diving Loader (Traditional UAE Maritime Culture) */
+.loader-pearl-diving {
+  position: relative;
+  width: 150px;
+  height: 90px;
+  background: linear-gradient(
+    to bottom,
+    var(--primary-purple, #9c27b0) 0%,
+    var(--primary-purple-dark, #6a0080) 100%
+  );
+  opacity: 0.7;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sea-surface {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  background: linear-gradient(
+    to bottom,
+    var(--primary-purple-light, #d0a0ff) 0%,
+    transparent 100%
+  );
+  opacity: 0.3;
+}
+
+.sea-waves {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  width: 200%;
+  height: 10px;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(255, 255, 255, 0.1) 10px,
+    rgba(255, 255, 255, 0.1) 20px
+  );
+  animation: moveWaves 8s linear infinite;
+}
+
+.diver {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23e0d0ff' d='M189.61 310.58c10.08-14.41 4.09-30.57-13.91-35.86-16.98-5-36.85-6.77-52.11 6.27-14.3 12.24-17.94 31.22-11.56 48.47 6.2 16.73 21.85 24.35 38.13 20.48 18.52-4.43 30.52-22.68 39.45-39.36z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  animation: divingAnimation 10s infinite;
+}
+
+.pearl {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, white 0%, var(--primary-purple-light, #d0a0ff) 100%);
+  border-radius: 50%;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  animation: pearlAnimation 10s infinite;
+}
+
+@keyframes moveWaves {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes divingAnimation {
+  0% { top: 10px; left: 20px; opacity: 1; }
+  20% { top: 70px; left: 75px; opacity: 1; }
+  30% { top: 70px; left: 75px; opacity: 1; }
+  50% { top: 10px; left: 130px; opacity: 1; }
+  51% { opacity: 0; }
+  100% { top: 10px; left: 20px; opacity: 0; }
+}
+
+@keyframes pearlAnimation {
+  0% { opacity: 0; transform: translate(-50%, 0); }
+  25% { opacity: 0; transform: translate(-50%, 0); }
+  30% { opacity: 1; transform: translate(-50%, -5px); }
+  50% { opacity: 1; transform: translate(-50%, -40px); }
+  51% { opacity: 0; transform: translate(-50%, -40px); }
+  100% { opacity: 0; transform: translate(-50%, 0); }
+}
+
+/* Astrolabe Loader (Islamic Golden Age Science) */
+.loader-astrolabe {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at center,
+    var(--primary-purple-light, #d0a0ff) 0%,
+    var(--primary-purple, #9c27b0) 40%,
+    var(--primary-purple-dark, #6a0080) 100%
+  );
+  box-shadow: 0 0 20px var(--primary-glow, rgba(156, 39, 176, 0.6));
+}
+
+.astrolabe-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  height: 90%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: rotateRing 10s linear infinite;
+}
+
+.astrolabe-arm {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center;
+  width: 40px;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 0.8);
+  animation: rotateArm 5s ease-in-out infinite;
+}
+
+.astrolabe-mark {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+}
+
+.astrolabe-mark:nth-child(3) { top: 10%; left: 50%; }
+.astrolabe-mark:nth-child(4) { top: 90%; left: 50%; }
+.astrolabe-mark:nth-child(5) { top: 50%; left: 10%; }
+.astrolabe-mark:nth-child(6) { top: 50%; left: 90%; }
+
+@keyframes rotateRing {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes rotateArm {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  50% { transform: translate(-50%, -50%) rotate(180deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Storytelling text animations */
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; }
+  20%, 80% { opacity: 1; }
+}
+
+/* Theme-specific adaptations */
+/* Cosmic Theme */
+[data-theme="cosmic"] .cultural-loader:before {
+  box-shadow: 0 0 40px var(--primary-glow, rgba(156, 39, 176, 0.8));
+}
+
+[data-theme="cosmic"] .desert-star {
+  box-shadow: 0 0 3px var(--star-color, #ffffff);
+}
+
+[data-theme="cosmic"] .astrolabe-ring {
+  border-width: 3px;
+}
+
+/* Falling Stars Theme */
+[data-theme="falling-stars"] .cultural-loader:before {
+  animation: starGlow 3s infinite alternate;
+}
+
+[data-theme="falling-stars"] .desert-star {
+  animation: shootingStar 2s linear infinite;
+  opacity: 0;
+}
+
+[data-theme="falling-stars"] .desert-star:nth-child(1) { animation-delay: 0.5s; }
+[data-theme="falling-stars"] .desert-star:nth-child(2) { animation-delay: 1.5s; }
+[data-theme="falling-stars"] .desert-star:nth-child(3) { animation-delay: 2.5s; }
+[data-theme="falling-stars"] .desert-star:nth-child(4) { animation-delay: 3.5s; }
+[data-theme="falling-stars"] .desert-star:nth-child(5) { animation-delay: 4.5s; }
+
+@keyframes starGlow {
+  0% { box-shadow: 0 0 20px rgba(153, 51, 255, 0.6); }
+  100% { box-shadow: 0 0 40px rgba(153, 51, 255, 0.9); }
+}
+
+@keyframes shootingStar {
+  0% { 
+    top: 0;
+    left: 0;
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  100% { 
+    top: 100%;
+    left: 100%;
+    opacity: 0;
+    transform: translate(20px, 20px);
+  }
+}
+
+/* Right-to-left language support */
+html[dir="rtl"] .falaj-water {
+  animation-direction: reverse;
+}
+
+html[dir="rtl"] .sea-waves {
+  animation-direction: reverse;
+}
+
+html[dir="rtl"] .astrolabe-ring,
+html[dir="rtl"] .astrolabe-arm {
+  animation-direction: reverse;
+}
+
+/* Responsive styles */
+@media (max-width: 480px) {
+  .cultural-loader {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .loader-desert-caravan,
+  .loader-falaj,
+  .loader-pearl-diving {
+    width: 120px;
+  }
+  
+  .loader-astrolabe {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .loader-text {
+    font-size: 0.8rem;
+  }
+}

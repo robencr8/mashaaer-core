@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer Feelings - Theme Gallery</title>
+    
+    <!-- Default CSS (Cosmic Theme) -->
+    <link rel="stylesheet" href="/static/css/cosmic-theme.css">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        .themes-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            color: white;
+        }
+        
+        .themes-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .themes-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #9933ff, #3366ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+        
+        .themes-header p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        .themes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .theme-card {
+            border-radius: 15px;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+        
+        .theme-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(153, 51, 255, 0.5);
+        }
+        
+        .theme-card.active {
+            border: 2px solid #9933ff;
+            box-shadow: 0 0 20px rgba(153, 51, 255, 0.6);
+        }
+        
+        .theme-preview {
+            width: 100%;
+            height: 250px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        
+        .theme-preview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.8) 100%);
+        }
+        
+        .theme-details {
+            padding: 1.5rem;
+        }
+        
+        .theme-name {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+        
+        .theme-description {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+        
+        .theme-tag {
+            display: inline-block;
+            background: rgba(153, 51, 255, 0.2);
+            color: #9933ff;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(153, 51, 255, 0.3);
+        }
+        
+        .theme-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+        }
+        
+        .theme-button {
+            background: linear-gradient(135deg, #9933ff, #3366ff);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .theme-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(153, 51, 255, 0.6);
+        }
+        
+        .theme-button.preview {
+            background: transparent;
+            border: 1px solid #9933ff;
+        }
+        
+        .active-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #9933ff;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            z-index: 1;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        }
+        
+        .back-button {
+            display: inline-block;
+            margin-top: 2rem;
+            background: rgba(153, 51, 255, 0.2);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(153, 51, 255, 0.3);
+        }
+        
+        .back-button:hover {
+            background: rgba(153, 51, 255, 0.4);
+            transform: translateX(-5px);
+        }
+        
+        .back-button i {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="themes-container">
+        <div class="themes-header">
+            <h1>Mashaaer Feelings Theme Gallery</h1>
+            <p>Choose from our collection of beautifully designed themes to customize your Mashaaer Feelings experience. Each theme offers a unique visual style while maintaining the core functionality you love.</p>
+        </div>
+        
+        <div class="themes-grid">
+            {% for theme in themes %}
+            <div class="theme-card {% if theme.id == current_theme %}active{% endif %}">
+                {% if theme.id == current_theme %}
+                <div class="active-badge">Currently Active</div>
+                {% endif %}
+                
+                <div class="theme-preview" style="background-image: url('{{ theme.preview_image }}')"></div>
+                
+                <div class="theme-details">
+                    <h2 class="theme-name">{{ theme.name }}</h2>
+                    <p class="theme-description">{{ theme.description }}</p>
+                    
+                    <div>
+                        {% if theme.id == 'cosmic' %}
+                        <span class="theme-tag">Cosmic</span>
+                        <span class="theme-tag">Dark</span>
+                        <span class="theme-tag">Meteors</span>
+                        {% elif theme.id == 'falling-stars' %}
+                        <span class="theme-tag">Stars</span>
+                        <span class="theme-tag">Night Sky</span>
+                        <span class="theme-tag">Serene</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="theme-actions">
+                        <a href="/theme{{ '2-example' if theme.id == 'falling-stars' else '' }}" class="theme-button preview">
+                            <i class="fas fa-eye"></i> Preview
+                        </a>
+                        
+                        {% if theme.id != current_theme %}
+                        <form action="/api/set-theme" method="post">
+                            <input type="hidden" name="theme" value="{{ theme.id }}">
+                            <button type="submit" class="theme-button">
+                                <i class="fas fa-check"></i> Activate
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="theme-button" style="background: rgba(255,255,255,0.2); cursor: default;">
+                            <i class="fas fa-check"></i> Active
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="/cultural-loaders" class="back-button" style="background: linear-gradient(135deg, #9933ff, #3366ff); margin-right: 15px;">
+                <i class="fas fa-spinner"></i> Cultural Loaders Gallery
+            </a>
+            <a href="/app" class="back-button">
+                <i class="fas fa-arrow-left"></i> Back to Application
+            </a>
+        </div>
+    </div>
+    
+    <!-- Meteor shower background from Theme 1 -->
+    <div class="meteor-shower"></div>
+    
+    <!-- Include the meteor shower JavaScript for background -->
+    <script src="/static/js/meteor-shower.js"></script>
+</body>
+</html>

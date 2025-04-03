@@ -3,109 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0c0c1d">
   <title>Mashaaer Feelings - Home</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/meteor-shower.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/cosmic-theme.css') }}">
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      margin: 0;
-      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      background-color: #0f0f23;
-      color: #ffffff;
-      position: relative;
       overflow: hidden;
     }
     
     .container {
       text-align: center;
       padding: 20px;
-      max-width: 800px;
-      position: relative;
-      z-index: 1;
-    }
-    
-    h1 {
-      font-size: 2.5rem;
-      color: #d0a0ff;
-      margin-bottom: 20px;
-      font-weight: 300;
-      text-shadow: 0 0 10px rgba(208, 160, 255, 0.8);
     }
     
     .welcome-message {
       font-size: 1.2rem;
       margin-bottom: 30px;
-      color: #e0d0ff;
       line-height: 1.5;
-    }
-    
-    .cosmic-sphere {
-      width: 150px;
-      height: 150px;
-      background: radial-gradient(circle at 30% 30%, #a050ff, #6010a0);
-      border-radius: 50%;
-      margin: 30px auto;
-      box-shadow: 
-        0 0 10px #d0a0ff,
-        0 0 20px #d0a0ff,
-        0 0 30px #d0a0ff;
-      position: relative;
-      cursor: pointer;
-      animation: pulse 2s infinite alternate;
-      transition: transform 0.3s ease;
-    }
-    
-    .cosmic-sphere:hover {
-      transform: scale(1.05);
-      box-shadow: 
-        0 0 15px #d0a0ff,
-        0 0 30px #d0a0ff,
-        0 0 50px #d0a0ff;
-    }
-    
-    @keyframes pulse {
-      from {
-        box-shadow: 
-          0 0 10px #d0a0ff,
-          0 0 20px #d0a0ff,
-          0 0 30px #d0a0ff;
-      }
-      to {
-        box-shadow: 
-          0 0 15px #d0a0ff,
-          0 0 30px #d0a0ff,
-          0 0 50px #d0a0ff;
-      }
-    }
-    
-    .menu {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      margin-top: 40px;
-    }
-    
-    .menu-item {
-      background: rgba(208, 160, 255, 0.2);
-      padding: 15px 25px;
-      border-radius: 10px;
-      text-decoration: none;
-      color: #ffffff;
-      font-weight: bold;
-      transition: all 0.3s;
-      backdrop-filter: blur(5px);
-      border: 1px solid rgba(208, 160, 255, 0.3);
-    }
-    
-    .menu-item:hover {
-      background: rgba(208, 160, 255, 0.3);
-      transform: translateY(-5px);
-      box-shadow: 0 5px 15px rgba(208, 160, 255, 0.4);
     }
     
     .settings-icon {
@@ -113,29 +31,13 @@
       top: 20px;
       right: 20px;
       font-size: 24px;
-      color: #d0a0ff;
+      color: var(--primary-purple-light);
       cursor: pointer;
       transition: transform 0.3s;
     }
     
     .settings-icon:hover {
       transform: rotate(45deg);
-    }
-    
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 2rem;
-      }
-      
-      .cosmic-sphere {
-        width: 120px;
-        height: 120px;
-      }
-      
-      .menu {
-        flex-direction: column;
-        gap: 15px;
-      }
     }
   </style>
 </head>
@@ -158,6 +60,7 @@
       <a href="/voice-interaction" class="menu-item">Voice Interaction</a>
       <a href="/profile" class="menu-item">Your Profile</a>
       <a href="/insights" class="menu-item">Emotional Insights</a>
+      <a href="/cultural-loaders" class="menu-item">Cultural Loaders</a>
     </div>
   </div>
   
@@ -165,6 +68,14 @@
 
   <script src="{{ url_for('static', filename='js/meteor-shower.js') }}"></script>
   <script>
+    // Set theme based on session language
+    const userLanguage = "{{ session.get('language', 'en') }}";
+    if (userLanguage === 'en') {
+      document.documentElement.setAttribute('data-theme', 'day');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'night');
+    }
+    
     // Initialize user data
     document.addEventListener('DOMContentLoaded', function() {
       // Get user name from session (passed from backend)
@@ -186,8 +97,8 @@
       })
       .then(response => response.json())
       .then(data => {
-        if (data.success && data.audio_path) {
-          const audio = new Audio(data.audio_path);
+        if (data.success && data.sound_path) {
+          const audio = new Audio(data.sound_path);
           audio.play().catch(e => console.error('Error playing audio:', e));
         }
       })
@@ -200,6 +111,12 @@
       sphere.style.animation = 'none';
       sphere.offsetHeight; // Trigger reflow
       sphere.style.animation = 'pulse 2s infinite alternate';
+      
+      // Add extra glow effect
+      sphere.style.boxShadow = '0 0 50px var(--primary-purple-light), 0 0 80px var(--primary-purple-light)';
+      setTimeout(() => {
+        sphere.style.boxShadow = '';
+      }, 500);
     }
   </script>
 </body>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a2a" />
+      <stop offset="100%" stop-color="#1a0a29" />
+    </linearGradient>
+    
+    <radialGradient id="orbGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="50%" stop-color="#9933ff" />
+      <stop offset="100%" stop-color="#3333aa" />
+    </radialGradient>
+    
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="500" fill="url(#bgGradient)" />
+  
+  <!-- Stars -->
+  <g fill="#ffffff">
+    <circle cx="50" cy="50" r="1" opacity="0.8" />
+    <circle cx="120" cy="80" r="1.5" opacity="0.7" />
+    <circle cx="200" cy="30" r="1" opacity="0.9" />
+    <circle cx="280" cy="120" r="0.8" opacity="0.8" />
+    <circle cx="350" cy="70" r="1.2" opacity="0.7" />
+    <circle cx="420" cy="40" r="1" opacity="0.9" />
+    <circle cx="500" cy="90" r="1.5" opacity="0.8" />
+    <circle cx="580" cy="60" r="1" opacity="0.7" />
+    <circle cx="650" cy="110" r="0.8" opacity="0.9" />
+    <circle cx="720" cy="30" r="1.2" opacity="0.8" />
+    <circle cx="750" cy="80" r="1" opacity="0.7" />
+    <circle cx="100" cy="150" r="1.5" opacity="0.9" />
+    <circle cx="170" cy="180" r="1" opacity="0.8" />
+    <circle cx="250" cy="130" r="0.8" opacity="0.7" />
+    <circle cx="320" cy="170" r="1.2" opacity="0.9" />
+    <circle cx="390" cy="140" r="1" opacity="0.8" />
+    <circle cx="470" cy="190" r="1.5" opacity="0.7" />
+    <circle cx="550" cy="160" r="1" opacity="0.9" />
+    <circle cx="620" cy="210" r="0.8" opacity="0.8" />
+    <circle cx="690" cy="130" r="1.2" opacity="0.7" />
+    <circle cx="770" cy="180" r="1" opacity="0.9" />
+    <circle cx="30" cy="250" r="1.5" opacity="0.8" />
+    <circle cx="100" cy="280" r="1" opacity="0.7" />
+    <circle cx="180" cy="230" r="0.8" opacity="0.9" />
+    <circle cx="250" cy="270" r="1.2" opacity="0.8" />
+    <circle cx="320" cy="240" r="1" opacity="0.7" />
+    <circle cx="400" cy="290" r="1.5" opacity="0.9" />
+    <circle cx="480" cy="260" r="1" opacity="0.8" />
+    <circle cx="550" cy="310" r="0.8" opacity="0.7" />
+    <circle cx="620" cy="230" r="1.2" opacity="0.9" />
+    <circle cx="700" cy="280" r="1" opacity="0.8" />
+    <circle cx="770" cy="250" r="1.5" opacity="0.7" />
+    <circle cx="50" cy="350" r="1" opacity="0.9" />
+    <circle cx="120" cy="380" r="0.8" opacity="0.8" />
+    <circle cx="190" cy="330" r="1.2" opacity="0.7" />
+    <circle cx="270" cy="370" r="1" opacity="0.9" />
+    <circle cx="340" cy="340" r="1.5" opacity="0.8" />
+    <circle cx="420" cy="390" r="1" opacity="0.7" />
+    <circle cx="490" cy="360" r="0.8" opacity="0.9" />
+    <circle cx="560" cy="410" r="1.2" opacity="0.8" />
+    <circle cx="630" cy="380" r="1" opacity="0.7" />
+    <circle cx="700" cy="430" r="1.5" opacity="0.9" />
+    <circle cx="750" cy="400" r="1" opacity="0.8" />
+  </g>
+  
+  <!-- Meteors -->
+  <g stroke="#ffffff" stroke-linecap="round">
+    <line x1="650" y1="50" x2="600" y2="100" stroke-width="2" opacity="0.7">
+      <animate attributeName="x1" from="650" to="600" dur="1s" repeatCount="indefinite" />
+      <animate attributeName="y1" from="50" to="100" dur="1s" repeatCount="indefinite" />
+      <animate attributeName="x2" from="600" to="550" dur="1s" repeatCount="indefinite" />
+      <animate attributeName="y2" from="100" to="150" dur="1s" repeatCount="indefinite" />
+      <animate attributeName="opacity" from="0.7" to="0" dur="1s" repeatCount="indefinite" />
+    </line>
+    <line x1="150" y1="80" x2="200" y2="130" stroke-width="1.5" opacity="0.6">
+      <animate attributeName="x1" from="150" to="200" dur="1.5s" repeatCount="indefinite" />
+      <animate attributeName="y1" from="80" to="130" dur="1.5s" repeatCount="indefinite" />
+      <animate attributeName="x2" from="200" to="250" dur="1.5s" repeatCount="indefinite" />
+      <animate attributeName="y2" from="130" to="180" dur="1.5s" repeatCount="indefinite" />
+      <animate attributeName="opacity" from="0.6" to="0" dur="1.5s" repeatCount="indefinite" />
+    </line>
+    <line x1="700" y1="200" x2="650" y2="250" stroke-width="2" opacity="0.8">
+      <animate attributeName="x1" from="700" to="650" dur="0.8s" repeatCount="indefinite" />
+      <animate attributeName="y1" from="200" to="250" dur="0.8s" repeatCount="indefinite" />
+      <animate attributeName="x2" from="650" to="600" dur="0.8s" repeatCount="indefinite" />
+      <animate attributeName="y2" from="250" to="300" dur="0.8s" repeatCount="indefinite" />
+      <animate attributeName="opacity" from="0.8" to="0" dur="0.8s" repeatCount="indefinite" />
+    </line>
+  </g>
+  
+  <!-- Central Orb -->
+  <circle cx="400" cy="250" r="70" fill="url(#orbGradient)" filter="url(#glow)">
+    <animate attributeName="r" values="70;75;70" dur="4s" repeatCount="indefinite" />
+  </circle>
+  
+  <!-- User Interface Elements -->
+  <g opacity="0.7">
+    <!-- Top header bar -->
+    <rect x="50" y="50" width="700" height="50" rx="10" fill="#000000" fill-opacity="0.3" />
+    
+    <!-- Card panels -->
+    <rect x="50" y="340" width="220" height="120" rx="10" fill="#000000" fill-opacity="0.3" />
+    <rect x="290" y="340" width="220" height="120" rx="10" fill="#000000" fill-opacity="0.3" />
+    <rect x="530" y="340" width="220" height="120" rx="10" fill="#000000" fill-opacity="0.3" />
+  </g>
+  
+  <!-- Theme Title -->
+  <text x="400" y="480" font-family="Arial, sans-serif" font-size="24" fill="#ffffff" text-anchor="middle">Theme 1: Cosmic</text>
+</svg>

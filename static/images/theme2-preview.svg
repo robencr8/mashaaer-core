@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="500" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a2e" />
+      <stop offset="100%" stop-color="#1a0a29" />
+    </linearGradient>
+    
+    <radialGradient id="orbGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="80%" stop-color="#9933ff" />
+      <stop offset="100%" stop-color="#6600cc" />
+    </radialGradient>
+    
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    
+    <filter id="star-glow">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="500" fill="url(#bgGradient)" />
+  
+  <!-- Falling stars animation -->
+  <g>
+    <!-- First Star -->
+    <circle cx="150" cy="100" r="1.5" fill="#ffffff" filter="url(#star-glow)" opacity="0.9">
+      <animate attributeName="cy" from="100" to="400" dur="3s" begin="0s" repeatCount="indefinite" />
+      <animate attributeName="cx" from="150" to="170" dur="3s" begin="0s" repeatCount="indefinite" />
+      <animate attributeName="opacity" from="0.9" to="0" dur="3s" begin="0s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- Second Star -->
+    <circle cx="300" cy="50" r="2" fill="#ffffff" filter="url(#star-glow)" opacity="0.8">
+      <animate attributeName="cy" from="50" to="450" dur="4s" begin="0.5s" repeatCount="indefinite" />
+      <animate attributeName="cx" from="300" to="320" dur="4s" begin="0.5s" repeatCount="indefinite" />
+      <animate attributeName="opacity" from="0.8" to="0" dur="4s" begin="0.5s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- Third Star -->
+    <circle cx="500" cy="20" r="1.8" fill="#ffffff" filter="url(#star-glow)" opacity="0.7">
+      <animate attributeName="cy" from="20" to="480" dur="5s" begin="1s" repeatCount="indefinite" />
+      <animate attributeName="cx" from="500" to="510" dur="5s" begin="1s" repeatCount="indefinite" />
+      <animate attributeName="opacity" from="0.7" to="0" dur="5s" begin="1s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- Fourth Star -->
+    <circle cx="650" cy="80" r="1.2" fill="#ffffff" filter="url(#star-glow)" opacity="0.9">
+      <animate attributeName="cy" from="80" to="420" dur="3.5s" begin="1.5s" repeatCount="indefinite" />
+      <animate attributeName="cx" from="650" to="670" dur="3.5s" begin="1.5s" repeatCount="indefinite" />
+      <animate attributeName="opacity" from="0.9" to="0" dur="3.5s" begin="1.5s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- Fifth Star -->
+    <circle cx="100" cy="150" r="1.5" fill="#ffffff" filter="url(#star-glow)" opacity="0.8">
+      <animate attributeName="cy" from="150" to="450" dur="2.8s" begin="2s" repeatCount="indefinite" />
+      <animate attributeName="cx" from="100" to="110" dur="2.8s" begin="2s" repeatCount="indefinite" />
+      <animate attributeName="opacity" from="0.8" to="0" dur="2.8s" begin="2s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- Sixth Star -->
+    <circle cx="400" cy="30" r="1.3" fill="#ffffff" filter="url(#star-glow)" opacity="0.7">
+      <animate attributeName="cy" from="30" to="470" dur="4.2s" begin="2.5s" repeatCount="indefinite" />
+      <animate attributeName="cx" from="400" to="410" dur="4.2s" begin="2.5s" repeatCount="indefinite" />
+      <animate attributeName="opacity" from="0.7" to="0" dur="4.2s" begin="2.5s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- Seventh Star -->
+    <circle cx="200" cy="70" r="2" fill="#ffffff" filter="url(#star-glow)" opacity="0.9">
+      <animate attributeName="cy" from="70" to="430" dur="3.8s" begin="3s" repeatCount="indefinite" />
+      <animate attributeName="cx" from="200" to="215" dur="3.8s" begin="3s" repeatCount="indefinite" />
+      <animate attributeName="opacity" from="0.9" to="0" dur="3.8s" begin="3s" repeatCount="indefinite" />
+    </circle>
+    
+    <!-- Eighth Star -->
+    <circle cx="730" cy="100" r="1.7" fill="#ffffff" filter="url(#star-glow)" opacity="0.8">
+      <animate attributeName="cy" from="100" to="420" dur="3.2s" begin="0.2s" repeatCount="indefinite" />
+      <animate attributeName="cx" from="730" to="745" dur="3.2s" begin="0.2s" repeatCount="indefinite" />
+      <animate attributeName="opacity" from="0.8" to="0" dur="3.2s" begin="0.2s" repeatCount="indefinite" />
+    </circle>
+  </g>
+  
+  <!-- Static stars background -->
+  <g fill="#ffffff">
+    <circle cx="50" cy="50" r="1" opacity="0.8" />
+    <circle cx="120" cy="80" r="1.5" opacity="0.7" />
+    <circle cx="200" cy="30" r="1" opacity="0.9" />
+    <circle cx="280" cy="120" r="0.8" opacity="0.8" />
+    <circle cx="350" cy="70" r="1.2" opacity="0.7" />
+    <circle cx="420" cy="40" r="1" opacity="0.9" />
+    <circle cx="500" cy="90" r="1.5" opacity="0.8" />
+    <circle cx="580" cy="60" r="1" opacity="0.7" />
+    <circle cx="650" cy="110" r="0.8" opacity="0.9" />
+    <circle cx="720" cy="30" r="1.2" opacity="0.8" />
+    <circle cx="750" cy="80" r="1" opacity="0.7" />
+    <circle cx="30" cy="150" r="1.5" opacity="0.9" />
+    <circle cx="170" cy="180" r="1" opacity="0.8" />
+    <circle cx="250" cy="130" r="0.8" opacity="0.7" />
+    <circle cx="320" cy="170" r="1.2" opacity="0.9" />
+    <circle cx="390" cy="140" r="1" opacity="0.8" />
+    <circle cx="470" cy="190" r="1.5" opacity="0.7" />
+    <circle cx="550" cy="160" r="1" opacity="0.9" />
+    <circle cx="620" cy="210" r="0.8" opacity="0.8" />
+    <circle cx="690" cy="130" r="1.2" opacity="0.7" />
+    <circle cx="770" cy="180" r="1" opacity="0.9" />
+    <circle cx="30" cy="250" r="1.5" opacity="0.8" />
+    <circle cx="100" cy="280" r="1" opacity="0.7" />
+    <circle cx="180" cy="230" r="0.8" opacity="0.9" />
+    <circle cx="250" cy="270" r="1.2" opacity="0.8" />
+    <circle cx="320" cy="240" r="1" opacity="0.7" />
+    <circle cx="480" cy="260" r="1" opacity="0.8" />
+    <circle cx="550" cy="310" r="0.8" opacity="0.7" />
+    <circle cx="620" cy="230" r="1.2" opacity="0.9" />
+    <circle cx="700" cy="280" r="1" opacity="0.8" />
+    <circle cx="770" cy="250" r="1.5" opacity="0.7" />
+    <circle cx="50" cy="350" r="1" opacity="0.9" />
+    <circle cx="120" cy="380" r="0.8" opacity="0.8" />
+    <circle cx="190" cy="330" r="1.2" opacity="0.7" />
+    <circle cx="270" cy="370" r="1" opacity="0.9" />
+    <circle cx="340" cy="340" r="1.5" opacity="0.8" />
+    <circle cx="420" cy="390" r="1" opacity="0.7" />
+    <circle cx="490" cy="360" r="0.8" opacity="0.9" />
+    <circle cx="560" cy="410" r="1.2" opacity="0.8" />
+    <circle cx="630" cy="380" r="1" opacity="0.7" />
+    <circle cx="700" cy="430" r="1.5" opacity="0.9" />
+    <circle cx="750" cy="400" r="1" opacity="0.8" />
+  </g>
+  
+  <!-- Shooting star -->
+  <g>
+    <line x1="250" y1="100" x2="150" y2="200" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity="0">
+      <animate attributeName="opacity" values="0;0.9;0" dur="1.5s" begin="1s" repeatCount="indefinite" />
+    </line>
+  </g>
+  
+  <!-- Central Orb -->
+  <circle cx="400" cy="250" r="70" fill="url(#orbGradient)" filter="url(#glow)">
+    <animate attributeName="r" values="70;75;70" dur="4s" repeatCount="indefinite" />
+  </circle>
+  
+  <!-- User Interface Elements -->
+  <g opacity="0.7">
+    <!-- Top header bar -->
+    <rect x="50" y="50" width="700" height="50" rx="10" fill="#000000" fill-opacity="0.3" />
+    
+    <!-- Card panels -->
+    <rect x="50" y="340" width="220" height="120" rx="10" fill="#000000" fill-opacity="0.3" />
+    <rect x="290" y="340" width="220" height="120" rx="10" fill="#000000" fill-opacity="0.3" />
+    <rect x="530" y="340" width="220" height="120" rx="10" fill="#000000" fill-opacity="0.3" />
+  </g>
+  
+  <!-- Star trails from orb -->
+  <g>
+    <line x1="400" y1="250" x2="370" y2="220" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.6">
+      <animate attributeName="opacity" values="0.6;0" dur="2s" begin="0s" repeatCount="indefinite" />
+    </line>
+    <line x1="400" y1="250" x2="430" y2="220" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.6">
+      <animate attributeName="opacity" values="0.6;0" dur="2s" begin="0.5s" repeatCount="indefinite" />
+    </line>
+    <line x1="400" y1="250" x2="400" y2="180" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.6">
+      <animate attributeName="opacity" values="0.6;0" dur="2s" begin="1s" repeatCount="indefinite" />
+    </line>
+  </g>
+  
+  <!-- Theme Title -->
+  <text x="400" y="480" font-family="Arial, sans-serif" font-size="24" fill="#ffffff" text-anchor="middle">Theme 2: Falling Stars</text>
+</svg>

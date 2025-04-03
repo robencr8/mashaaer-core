@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme 2: Falling Stars - Mashaaer Feelings</title>
+    
+    <!-- Theme 2 CSS - Falling Stars -->
+    <link rel="stylesheet" href="/static/css/falling-stars-theme.css">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <style>
+        /* Additional page-specific styles */
+        .theme-demo-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            color: #fff;
+        }
+        
+        .theme-description {
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+        
+        .interaction-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+            margin: 2rem 0;
+        }
+        
+        .feature-box {
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .feature-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .nav-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #9933ff, #3366ff);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .nav-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(153, 51, 255, 0.6);
+        }
+        
+        .star-orb {
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, #ffffff, #9933ff);
+            border-radius: 50%;
+            box-shadow: 0 0 30px #9933ff, 0 0 50px #9933ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: pulse 3s infinite;
+            position: relative;
+        }
+        
+        .star-orb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 50px #9933ff, 0 0 70px #9933ff;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 30px #9933ff, 0 0 50px #9933ff; }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px #9933ff, 0 0 60px #9933ff; }
+            100% { transform: scale(1); box-shadow: 0 0 30px #9933ff, 0 0 50px #9933ff; }
+        }
+        
+        .star-trail {
+            position: absolute;
+            width: 2px;
+            height: 15px;
+            background: white;
+            border-radius: 10px;
+            transform-origin: center bottom;
+            animation: starTrail 2s infinite ease-out;
+            opacity: 0;
+        }
+        
+        @keyframes starTrail {
+            0% { height: 0; opacity: 1; }
+            100% { height: 30px; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars-container">
+        <!-- Stars will be dynamically added by JavaScript -->
+    </div>
+    
+    <div class="theme-demo-container">
+        <h1>Theme 2: Falling Stars</h1>
+        
+        <div class="theme-description">
+            <h2>About This Theme</h2>
+            <p>The Falling Stars theme creates a serene and magical night sky experience. It features dynamically generated stars that move across the screen, creating a peaceful ambiance while maintaining the interactive elements users love about Mashaaer Feelings.</p>
+            <p>This alternative theme offers a different aesthetic while preserving all the functionality of the application. It's perfect for users who prefer a calmer, more meditative experience.</p>
+        </div>
+        
+        <div class="interaction-area">
+            <div class="star-orb" id="interactiveOrb">
+                <span>Interact With Me</span>
+                <!-- Star trails will be added dynamically -->
+            </div>
+        </div>
+        
+        <h2>Key Features</h2>
+        <div class="feature-grid">
+            <div class="feature-box">
+                <h3><i class="fas fa-star"></i> Dynamic Star Field</h3>
+                <p>Stars continuously appear and move across the screen, creating an immersive night sky experience.</p>
+            </div>
+            <div class="feature-box">
+                <h3><i class="fas fa-moon"></i> Soothing Atmosphere</h3>
+                <p>Gentle animations and soft color palette reduce eye strain during extended use.</p>
+            </div>
+            <div class="feature-box">
+                <h3><i class="fas fa-magic"></i> Interactive Elements</h3>
+                <p>All interactive components feature subtle animations that respond to user input.</p>
+            </div>
+            <div class="feature-box">
+                <h3><i class="fas fa-palette"></i> Customizable Colors</h3>
+                <p>Color themes can be adjusted to suit user preferences while maintaining the stars effect.</p>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="/themes" class="nav-button">Back to Themes</a>
+            <a href="/app" class="nav-button">Return to App</a>
+        </div>
+    </div>
+    
+    <!-- Theme 2 JavaScript - Falling Stars -->
+    <script src="/static/js/falling-stars.js"></script>
+    
+    <script>
+        // Add star trails to the orb
+        const orb = document.getElementById('interactiveOrb');
+        
+        function createStarTrail() {
+            const trail = document.createElement('div');
+            trail.className = 'star-trail';
+            
+            // Random position around the orb
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 90; // orb radius
+            
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+            
+            trail.style.left = `calc(50% + ${x}px)`;
+            trail.style.top = `calc(50% + ${y}px)`;
+            trail.style.transform = `rotate(${angle + Math.PI/2}rad)`;
+            
+            orb.appendChild(trail);
+            
+            // Remove the trail after animation completes
+            setTimeout(() => {
+                trail.remove();
+            }, 2000);
+        }
+        
+        // Create star trails at intervals
+        setInterval(createStarTrail, 300);
+        
+        // Add interactivity to the orb
+        orb.addEventListener('click', () => {
+            orb.innerHTML = '<span>I feel your touch!</span>';
+            orb.style.boxShadow = '0 0 70px #ff33cc, 0 0 100px #ff33cc';
+            
+            // Create extra star trails on click
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => createStarTrail(), i * 50);
+            }
+            
+            // Reset after a moment
+            setTimeout(() => {
+                orb.innerHTML = '<span>Interact With Me</span>';
+                orb.style.boxShadow = '';
+            }, 2000);
+        });
+        
+        // Add hover sound effect to feature boxes
+        const featureBoxes = document.querySelectorAll('.feature-box');
+        featureBoxes.forEach(box => {
+            box.addEventListener('mouseenter', () => {
+                // Could add sound effect here if desired
+                box.style.backgroundColor = 'rgba(153, 51, 255, 0.3)';
+            });
+            
+            box.addEventListener('mouseleave', () => {
+                box.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
+            });
+        });
+    </script>
+</body>
+</html>

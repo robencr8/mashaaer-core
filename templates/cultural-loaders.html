@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cultural Loaders - Mashaaer Feelings</title>
+  
+  <!-- Core Application Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/cosmic-theme.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/falling-stars-theme.css') }}">
+  
+  <!-- Cultural Loaders Styles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/cultural-loaders.css') }}">
+  
+  <style>
+    /* Demo Page Specific Styles */
+    .demo-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .demo-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .demo-title {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #9c27b0, #d0a0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .demo-description {
+      font-size: 1.1rem;
+      opacity: 0.8;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .demo-controls {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .control-group {
+      display: flex;
+      align-items: center;
+      margin: 0 15px;
+    }
+    
+    .control-label {
+      margin-right: 10px;
+      font-weight: 500;
+    }
+    
+    .select-control {
+      padding: 8px 15px;
+      border-radius: 20px;
+      border: 2px solid rgba(156, 39, 176, 0.3);
+      background-color: rgba(10, 10, 46, 0.3);
+      color: #fff;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .select-control:hover {
+      border-color: rgba(156, 39, 176, 0.8);
+    }
+    
+    .loaders-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+    
+    .loader-card {
+      background-color: rgba(20, 20, 60, 0.4);
+      border-radius: 15px;
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .loader-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .loader-title {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 500;
+      background: linear-gradient(to right, #9c27b0, #d0a0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .cosmic-sphere {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle at 30% 30%, #d0a0ff, #9c27b0);
+      border-radius: 50%;
+      box-shadow: 0 0 30px rgba(156, 39, 176, 0.8);
+      cursor: pointer;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .cosmic-sphere:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 40px rgba(156, 39, 176, 1);
+    }
+    
+    .cosmic-sphere:before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z'/%3E%3C/svg%3E");
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z'/%3E%3C/svg%3E");
+      -webkit-mask-size: cover;
+      mask-size: cover;
+    }
+    
+    @media (max-width: 768px) {
+      .loaders-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .demo-controls {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .control-group {
+        margin: 10px 0;
+      }
+    }
+  </style>
+</head>
+<body data-theme="cosmic">
+  <div class="stars-container"></div>
+  
+  <div class="demo-container">
+    <div class="demo-header">
+      <h1 class="demo-title">Cultural Themed Loaders</h1>
+      <p class="demo-description">
+        Loading animations inspired by Middle Eastern cultural elements and storytelling.
+        These animations integrate with both cosmic and falling-stars themes of Mashaaer Feelings.
+      </p>
+    </div>
+    
+    <div class="demo-controls">
+      <div class="control-group">
+        <label class="control-label" for="theme-select">Theme:</label>
+        <select id="theme-select" class="select-control">
+          <option value="cosmic">Cosmic Theme</option>
+          <option value="falling-stars">Falling Stars Theme</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label class="control-label" for="language-select">Language:</label>
+        <select id="language-select" class="select-control">
+          <option value="en">English</option>
+          <option value="ar">Arabic (العربية)</option>
+        </select>
+      </div>
+      
+      <div class="control-group">
+        <label class="control-label" for="story-toggle">Stories:</label>
+        <select id="story-toggle" class="select-control">
+          <option value="on">On</option>
+          <option value="off">Off</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="loaders-grid">
+      <div class="loader-card">
+        <h3 class="loader-title">Desert Caravan</h3>
+        <div id="desert-loader-container"></div>
+      </div>
+      
+      <div class="loader-card">
+        <h3 class="loader-title">Falaj Irrigation</h3>
+        <div id="falaj-loader-container"></div>
+      </div>
+      
+      <div class="loader-card">
+        <h3 class="loader-title">Pearl Diving</h3>
+        <div id="pearl-loader-container"></div>
+      </div>
+      
+      <div class="loader-card">
+        <h3 class="loader-title">Astrolabe</h3>
+        <div id="astrolabe-loader-container"></div>
+      </div>
+    </div>
+  </div>
+  
+  <a href="{{ url_for('homepage') }}" class="cosmic-sphere" title="Return to Homepage"></a>
+  
+  <!-- Core Script Dependencies (if needed) -->
+  <script src="{{ url_for('static', filename='js/theme-switcher.js') }}"></script>
+  
+  <!-- Cultural Loaders Script -->
+  <script src="{{ url_for('static', filename='js/cultural-loaders.js') }}"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get control elements
+      const themeSelect = document.getElementById('theme-select');
+      const languageSelect = document.getElementById('language-select');
+      const storyToggle = document.getElementById('story-toggle');
+      
+      // Initialize loaders
+      const loader = window.culturalLoader;
+      
+      // Create all loaders
+      const desertLoader = loader.createLoader('desert-loader-container', 'desert');
+      const falajLoader = loader.createLoader('falaj-loader-container', 'falaj');
+      const pearlLoader = loader.createLoader('pearl-loader-container', 'pearl');
+      const astrolabeLoader = loader.createLoader('astrolabe-loader-container', 'astrolabe');
+      
+      // Handle theme changes
+      themeSelect.addEventListener('change', function() {
+        const newTheme = this.value;
+        document.body.setAttribute('data-theme', newTheme);
+        
+        // Dispatch theme change event for loaders
+        document.dispatchEvent(new CustomEvent('themeChanged', {
+          detail: { theme: newTheme }
+        }));
+      });
+      
+      // Handle language changes
+      languageSelect.addEventListener('change', function() {
+        const newLanguage = this.value;
+        
+        // Update document language
+        document.documentElement.lang = newLanguage;
+        document.documentElement.dir = newLanguage === 'ar' ? 'rtl' : 'ltr';
+        
+        // Dispatch language change event for loaders
+        document.dispatchEvent(new CustomEvent('languageChanged', {
+          detail: { language: newLanguage }
+        }));
+        
+        // Re-create loaders to apply RTL/LTR changes
+        recreateLoaders(storyToggle.value === 'on');
+      });
+      
+      // Handle story toggle
+      storyToggle.addEventListener('change', function() {
+        const showStories = this.value === 'on';
+        recreateLoaders(showStories);
+      });
+      
+      // Function to recreate all loaders
+      function recreateLoaders(showStories) {
+        // Remove existing loaders
+        document.querySelectorAll('.loader-container').forEach(el => {
+          loader.removeLoader(el);
+        });
+        
+        // Create new loaders with current settings
+        const language = languageSelect.value;
+        
+        loader.createLoader('desert-loader-container', 'desert', {
+          showText: showStories,
+          language: language
+        });
+        
+        loader.createLoader('falaj-loader-container', 'falaj', {
+          showText: showStories,
+          language: language
+        });
+        
+        loader.createLoader('pearl-loader-container', 'pearl', {
+          showText: showStories,
+          language: language
+        });
+        
+        loader.createLoader('astrolabe-loader-container', 'astrolabe', {
+          showText: showStories,
+          language: language
+        });
+      }
+    });
+  </script>
+</body>
+</html>

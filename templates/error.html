@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0c0c1d">
+  <title>Error - Mashaaer Feelings</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/meteor-shower.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/cosmic-theme.css') }}">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      text-align: center;
+    }
+    
+    .error-container {
+      max-width: 500px;
+    }
+    
+    .error-icon {
+      font-size: 48px;
+      color: #ff5252;
+      margin-bottom: 20px;
+    }
+    
+    .error-message {
+      background: rgba(255, 82, 82, 0.1);
+      border: 1px solid rgba(255, 82, 82, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      color: #ff9999;
+    }
+  </style>
+</head>
+<body>
+  <div id="stars"></div>
+  <div id="stars2"></div>
+  <div id="stars3"></div>
+  
+  <div class="container error-container">
+    <div class="error-icon">⚠️</div>
+    <h1>Oops! Something went wrong</h1>
+    
+    <p>An unexpected error occurred in your cosmic journey.</p>
+    
+    {% if error %}
+    <div class="error-message">
+      {{ error }}
+    </div>
+    {% endif %}
+    
+    <div class="cosmic-sphere-small" onclick="window.location.href='/'"></div>
+    
+    <p class="text-secondary">Click the sphere to return to the start</p>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/meteor-shower.js') }}"></script>
+  <script>
+    // Add click effect to cosmic sphere
+    document.querySelector('.cosmic-sphere-small').addEventListener('click', function() {
+      this.style.transform = 'scale(1.1)';
+      this.style.boxShadow = '0 0 50px var(--primary-purple-light)';
+      
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 300);
+    });
+  </script>
+</body>
+</html>

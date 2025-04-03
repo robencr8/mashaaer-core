@@ -1,0 +1,316 @@
+/**
+ * Falling Stars Theme CSS for Mashaaer Feelings
+ * Theme 2: Alternative visual style with a falling stars animation
+ */
+
+/* Base styling */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+}
+
+body {
+    background: linear-gradient(135deg, #0a0a2e 0%, #1a0a29 100%);
+    color: #fff;
+    position: relative;
+}
+
+/* Stars container */
+.stars-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+/* Content container */
+.content-container {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+}
+
+/* Header styles */
+header {
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #9933ff, #3366ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Main content */
+.main-content {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Card styles */
+.card {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(153, 51, 255, 0.3);
+}
+
+/* Button styles */
+.button {
+    background: linear-gradient(135deg, #9933ff, #3366ff);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(153, 51, 255, 0.5);
+}
+
+.button.secondary {
+    background: transparent;
+    border: 1px solid #9933ff;
+}
+
+/* Form elements */
+input, textarea, select {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.8rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    width: 100%;
+    font-size: 1rem;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #9933ff;
+    box-shadow: 0 0 10px rgba(153, 51, 255, 0.5);
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Interactive orb element (main UI element) */
+.interactive-orb {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, #ffffff, #9933ff);
+    border-radius: 50%;
+    box-shadow: 0 0 30px #9933ff, 0 0 50px #9933ff;
+    margin: 3rem auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.2rem;
+    animation: pulse 4s infinite;
+}
+
+.interactive-orb:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 50px #9933ff, 0 0 70px #9933ff;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); box-shadow: 0 0 30px #9933ff, 0 0 50px #9933ff; }
+    50% { transform: scale(1.05); box-shadow: 0 0 40px #9933ff, 0 0 60px #9933ff; }
+    100% { transform: scale(1); box-shadow: 0 0 30px #9933ff, 0 0 50px #9933ff; }
+}
+
+/* Menu styles */
+.menu {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.menu-item {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    position: relative;
+    padding: 0.5rem 0;
+    transition: color 0.3s ease;
+}
+
+.menu-item:hover, .menu-item.active {
+    color: #9933ff;
+}
+
+.menu-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #9933ff;
+    transition: width 0.3s ease;
+}
+
+.menu-item:hover::after, .menu-item.active::after {
+    width: 100%;
+}
+
+/* Footer styles */
+footer {
+    background-color: rgba(0, 0, 0, 0.4);
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: 3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+}
+
+footer p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+}
+
+/* Grid layout */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+/* Dashboard panels */
+.dashboard-panel {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    height: 100%;
+}
+
+.dashboard-panel-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-panel-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* Star trail animation for interactive elements */
+.star-trail {
+    position: absolute;
+    width: 2px;
+    height: 15px;
+    background: white;
+    border-radius: 10px;
+    transform-origin: center bottom;
+    animation: starTrail 2s ease-out;
+    opacity: 0;
+}
+
+@keyframes starTrail {
+    0% { height: 0; opacity: 1; }
+    100% { height: 30px; opacity: 0; }
+}
+
+/* Alert/message styles */
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.alert.success {
+    background: rgba(18, 128, 92, 0.3);
+    border-color: rgba(18, 128, 92, 0.5);
+}
+
+.alert.error {
+    background: rgba(203, 52, 52, 0.3);
+    border-color: rgba(203, 52, 52, 0.5);
+}
+
+.alert.info {
+    background: rgba(52, 152, 219, 0.3);
+    border-color: rgba(52, 152, 219, 0.5);
+}
+
+/* Loading spinner */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: #9933ff;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .interactive-orb {
+        width: 150px;
+        height: 150px;
+        font-size: 1rem;
+    }
+    
+    .menu {
+        display: none;
+    }
+}

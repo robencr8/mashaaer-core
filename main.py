@@ -358,6 +358,66 @@ def user_settings_page():
     except Exception as e:
         logger.error(f"Error in user settings page: {str(e)}")
         return render_template('error.html', error=str(e))
+        
+@app.route('/theme2-example')
+def theme2_example():
+    """Example page demonstrating Theme 2: Falling Stars"""
+    try:
+        logger.info("Theme 2 example page accessed")
+        return render_template('theme2_example.html')
+    except Exception as e:
+        logger.error(f"Error in Theme 2 example page: {str(e)}")
+        return render_template('error.html', error=str(e))
+        
+@app.route('/themes')
+def themes_showcase():
+    """Showcase of available themes"""
+    try:
+        logger.info("Themes showcase page accessed")
+        
+        # Retrieve current theme setting
+        current_theme = db_manager.get_setting('theme', 'cosmic')
+        
+        themes = [
+            {
+                'id': 'cosmic',
+                'name': 'Theme 1: Cosmic',
+                'description': 'Deep space theme with meteor shower and cosmic elements',
+                'preview_image': '/static/images/theme1-preview.jpg',
+                'css_file': 'cosmic-theme.css',
+                'js_file': 'meteor-shower.js'
+            },
+            {
+                'id': 'falling-stars',
+                'name': 'Theme 2: Falling Stars',
+                'description': 'Dynamic theme with falling stars animation and interactive elements',
+                'preview_image': '/static/images/theme2-preview.jpg',
+                'css_file': 'falling-stars-theme.css',
+                'js_file': 'falling-stars.js'
+            }
+        ]
+        
+        return render_template('themes.html', themes=themes, current_theme=current_theme)
+    except Exception as e:
+        logger.error(f"Error in themes showcase page: {str(e)}")
+        return render_template('error.html', error=str(e))
+        
+@app.route('/cultural-loaders')
+def cultural_loaders_showcase():
+    """Showcase of cultural themed loading animations"""
+    try:
+        logger.info("Cultural loaders showcase page accessed")
+        
+        # Retrieve current theme and language settings
+        current_theme = db_manager.get_setting('theme', 'cosmic')
+        current_language = db_manager.get_setting('language', 'en')
+        
+        return render_template('cultural-loaders.html', 
+                              current_theme=current_theme,
+                              current_language=current_language)
+    except Exception as e:
+        logger.error(f"Error in cultural loaders showcase page: {str(e)}")
+        return render_template('error.html', error=str(e))
 
 @app.route('/interactive-splash')
 def interactive_splash():
@@ -1553,6 +1613,35 @@ def user_logout():
         return jsonify({'success': True})
     except Exception as e:
         logger.error(f"Error logging out: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+        
+@app.route('/api/set-theme', methods=['POST'])
+def set_theme():
+    """Set the user's theme preference"""
+    try:
+        # Get theme from form data
+        theme = request.form.get('theme')
+        
+        if not theme:
+            return jsonify({'success': False, 'error': 'Theme parameter is required'}), 400
+            
+        # Validate theme
+        valid_themes = ['cosmic', 'falling-stars']
+        if theme not in valid_themes:
+            return jsonify({'success': False, 'error': f'Invalid theme. Valid options are: {", ".join(valid_themes)}'}), 400
+            
+        # Save theme to database
+        db_manager.set_setting('theme', theme)
+        
+        logger.info(f"User theme set to: {theme}")
+        
+        # Determine redirect location
+        redirect_url = request.form.get('redirect', '/themes')
+        
+        # Return success with redirect URL
+        return redirect(redirect_url)
+    except Exception as e:
+        logger.error(f"Error setting theme: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 # SMS Notification Routes - duplicate code removed
