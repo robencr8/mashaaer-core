@@ -25,19 +25,25 @@ def app() -> Flask:
     original_db_url = os.environ.get('DATABASE_URL')
     
     # Set up an in-memory SQLite test database
-    os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
+    test_db_url = 'sqlite:///:memory:'
+    os.environ['DATABASE_URL'] = test_db_url
     os.environ['TESTING'] = 'True'
     
     # Create the Flask app
     test_app = main.app
     test_app.config['TESTING'] = True
     test_app.config['SERVER_NAME'] = 'localhost'
+    test_app.config['SQLALCHEMY_DATABASE_URI'] = test_db_url
     
     # Set up context
     with test_app.app_context():
         # Create engine and tables
-        engine = create_engine('sqlite:///:memory:')
+        engine = create_engine(test_db_url)
         Base.metadata.create_all(engine)
+        
+        # Print tables for debugging
+        table_names = Base.metadata.tables.keys()
+        print(f"Created tables: {', '.join(table_names)}")
         
         yield test_app
         
@@ -59,15 +65,18 @@ def client(app: Flask) -> FlaskClient:
 @pytest.fixture
 def db_session(app: Flask):
     """A SQLAlchemy session for database interactions."""
-    engine = create_engine('sqlite:///:memory:')
-    TestingSessionLocal = sessionmaker(bind=engine)
-    session = TestingSessionLocal()
-    
-    try:
-        yield session
-    finally:
-        session.rollback()  # Rollback any changes after the test
-        session.close()
+    with app.app_context():
+        engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+        Base.metadata.create_all(engine)  # Ensure tables exist
+        
+        TestingSessionLocal = sessionmaker(bind=engine)
+        session = TestingSessionLocal()
+        
+        try:
+            yield session
+        finally:
+            session.rollback()  # Rollback any changes after the test
+            session.close()
 
 @pytest.fixture
 def clear_cache(db_session):
