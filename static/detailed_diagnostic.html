@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detailed CORS Diagnostic Tool</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1, h2, h3 {
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        pre {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        .success { color: #2e7d32; }
+        .error { color: #c62828; }
+        .info { color: #1565c0; }
+        .section {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Detailed CORS Diagnostic Tool</h1>
+    <p>This tool performs detailed diagnostics on CORS configuration and server connectivity.</p>
+    
+    <div class="section">
+        <h2>1. Browser Information</h2>
+        <div id="browser-info"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. Network Connectivity</h2>
+        <button onclick="testConnectivity()">Test Server Connectivity</button>
+        <div id="connectivity-results"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. CORS Configuration Test</h2>
+        <button onclick="testCORS()">Test CORS Configuration</button>
+        <div id="cors-results"></div>
+    </div>
+
+    <div class="section">
+        <h2>4. Detailed Request Analysis</h2>
+        <label for="endpoint">API Endpoint:</label>
+        <input type="text" id="endpoint" value="/api/ping" style="width: 300px; padding: 8px; margin: 10px 0;">
+        <button onclick="testEndpoint()">Test This Endpoint</button>
+        <div id="endpoint-results"></div>
+    </div>
+
+    <div class="section">
+        <h2>5. Manual Curl Command</h2>
+        <div id="curl-command"></div>
+    </div>
+
+    <script>
+        // Display browser information
+        function showBrowserInfo() {
+            const browserInfoDiv = document.getElementById('browser-info');
+            const userAgent = navigator.userAgent;
+            let browserName = "Unknown";
+            
+            if (userAgent.indexOf("Firefox") > -1) {
+                browserName = "Mozilla Firefox";
+            } else if (userAgent.indexOf("SamsungBrowser") > -1) {
+                browserName = "Samsung Internet";
+            } else if (userAgent.indexOf("Opera") > -1 || userAgent.indexOf("OPR") > -1) {
+                browserName = "Opera";
+            } else if (userAgent.indexOf("Trident") > -1) {
+                browserName = "Microsoft Internet Explorer";
+            } else if (userAgent.indexOf("Edge") > -1) {
+                browserName = "Microsoft Edge (Legacy)";
+            } else if (userAgent.indexOf("Edg") > -1) {
+                browserName = "Microsoft Edge (Chromium)";
+            } else if (userAgent.indexOf("Chrome") > -1) {
+                browserName = "Google Chrome";
+            } else if (userAgent.indexOf("Safari") > -1) {
+                browserName = "Apple Safari";
+            }
+            
+            const locationInfo = window.location.href;
+            const origin = window.location.origin;
+            
+            browserInfoDiv.innerHTML = `
+                <table>
+                    <tr><th>Browser</th><td>${browserName}</td></tr>
+                    <tr><th>User Agent</th><td>${userAgent}</td></tr>
+                    <tr><th>Current URL</th><td>${locationInfo}</td></tr>
+                    <tr><th>Origin</th><td>${origin}</td></tr>
+                </table>
+            `;
+        }
+
+        // Test server connectivity
+        async function testConnectivity() {
+            const resultsDiv = document.getElementById('connectivity-results');
+            resultsDiv.innerHTML = '<p class="info">Testing connectivity...</p>';
+            
+            try {
+                // Test with a simple ping endpoint
+                const response = await fetch('/api/ping');
+                const contentType = response.headers.get("content-type");
+                let responseData;
+                
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    responseData = await response.json();
+                } else {
+                    responseData = await response.text();
+                }
+                
+                resultsDiv.innerHTML = `
+                    <h3 class="success">✅ Server is reachable!</h3>
+                    <p>Status: ${response.status} ${response.statusText}</p>
+                    <h4>Response Headers:</h4>
+                    <pre>${formatHeaders(response.headers)}</pre>
+                    <h4>Response Data:</h4>
+                    <pre>${typeof responseData === 'object' ? JSON.stringify(responseData, null, 2) : responseData}</pre>
+                `;
+                
+                updateCurlCommand('/api/ping');
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <h3 class="error">❌ Connection error</h3>
+                    <p>Error message: ${error.message}</p>
+                    <p>Error type: ${error.name}</p>
+                    <p>This typically indicates:</p>
+                    <ul>
+                        <li>The server is not running</li>
+                        <li>CORS issues are preventing the connection</li>
+                        <li>Network connectivity problems</li>
+                    </ul>
+                `;
+                console.error('Connection test error:', error);
+            }
+        }
+
+        // Test CORS configuration
+        async function testCORS() {
+            const resultsDiv = document.getElementById('cors-results');
+            resultsDiv.innerHTML = '<p class="info">Testing CORS configuration...</p>';
+            
+            try {
+                // Test with a specific CORS test endpoint
+                const response = await fetch('/api/test-cors', {
+                    method: 'GET',
+                    headers: {
+                        'X-Test-Header': 'test-value',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                // Check if CORS headers are set correctly
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+                };
+                
+                let corsStatus = 'success';
+                let corsMessage = 'CORS is properly configured!';
+                
+                // Check if origin is properly set
+                if (!corsHeaders['Access-Control-Allow-Origin']) {
+                    corsStatus = 'error';
+                    corsMessage = 'Missing Access-Control-Allow-Origin header';
+                } else if (corsHeaders['Access-Control-Allow-Origin'] !== '*' && 
+                        corsHeaders['Access-Control-Allow-Origin'] !== window.location.origin) {
+                    corsStatus = 'error';
+                    corsMessage = 'Access-Control-Allow-Origin header does not match this page\'s origin';
+                }
+                
+                resultsDiv.innerHTML = `
+                    <h3 class="${corsStatus === 'success' ? 'success' : 'error'}">
+                        ${corsStatus === 'success' ? '✅' : '❌'} ${corsMessage}
+                    </h3>
+                    <h4>CORS Headers:</h4>
+                    <pre>${JSON.stringify(corsHeaders, null, 2)}</pre>
+                    <h4>Response Status:</h4>
+                    <p>Status: ${response.status} ${response.statusText}</p>
+                    <h4>Response Headers:</h4>
+                    <pre>${formatHeaders(response.headers)}</pre>
+                    <h4>Response Data:</h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                updateCurlCommand('/api/test-cors');
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <h3 class="error">❌ CORS Test Failed</h3>
+                    <p>Error message: ${error.message}</p>
+                    <p>Error type: ${error.name}</p>
+                    <p>This typically indicates:</p>
+                    <ul>
+                        <li>CORS is not properly configured</li>
+                        <li>The server rejected the request</li>
+                        <li>Network connectivity issues</li>
+                    </ul>
+                    <p>Check the browser console for more details.</p>
+                `;
+                console.error('CORS test error:', error);
+            }
+        }
+
+        // Test custom endpoint
+        async function testEndpoint() {
+            const endpointInput = document.getElementById('endpoint');
+            const endpoint = endpointInput.value || '/api/ping';
+            const resultsDiv = document.getElementById('endpoint-results');
+            
+            resultsDiv.innerHTML = `<p class="info">Testing endpoint: ${endpoint}...</p>`;
+            
+            try {
+                // Use GET method for simplicity
+                const response = await fetch(endpoint);
+                const contentType = response.headers.get("content-type");
+                let responseData;
+                
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    responseData = await response.json();
+                } else {
+                    responseData = await response.text();
+                }
+                
+                resultsDiv.innerHTML = `
+                    <h3 class="success">✅ Endpoint test successful</h3>
+                    <h4>Request Details:</h4>
+                    <table>
+                        <tr><th>Endpoint</th><td>${endpoint}</td></tr>
+                        <tr><th>Method</th><td>GET</td></tr>
+                        <tr><th>URL</th><td>${window.location.origin}${endpoint}</td></tr>
+                    </table>
+                    <h4>Response Status:</h4>
+                    <p>Status: ${response.status} ${response.statusText}</p>
+                    <h4>Response Headers:</h4>
+                    <pre>${formatHeaders(response.headers)}</pre>
+                    <h4>Response Data:</h4>
+                    <pre>${typeof responseData === 'object' ? JSON.stringify(responseData, null, 2) : responseData}</pre>
+                `;
+                
+                updateCurlCommand(endpoint);
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <h3 class="error">❌ Endpoint test failed</h3>
+                    <p>Error message: ${error.message}</p>
+                    <p>Error type: ${error.name}</p>
+                    <h4>Request Details:</h4>
+                    <table>
+                        <tr><th>Endpoint</th><td>${endpoint}</td></tr>
+                        <tr><th>Method</th><td>GET</td></tr>
+                        <tr><th>URL</th><td>${window.location.origin}${endpoint}</td></tr>
+                    </table>
+                    <p>This typically indicates:</p>
+                    <ul>
+                        <li>The endpoint doesn't exist</li>
+                        <li>The server rejected the request</li>
+                        <li>CORS issues are preventing the connection</li>
+                    </ul>
+                    <p>Check the browser console for more details.</p>
+                `;
+                console.error(`Endpoint test error for ${endpoint}:`, error);
+            }
+        }
+
+        // Update curl command for manual testing
+        function updateCurlCommand(endpoint) {
+            const curlDiv = document.getElementById('curl-command');
+            const fullUrl = window.location.origin + endpoint;
+            
+            curlDiv.innerHTML = `
+                <p>Use this curl command to test the endpoint directly:</p>
+                <pre>curl -v "${fullUrl}"</pre>
+            `;
+        }
+
+        // Helper function to format headers for display
+        function formatHeaders(headers) {
+            const headersObj = {};
+            headers.forEach((value, name) => {
+                headersObj[name] = value;
+            });
+            return JSON.stringify(headersObj, null, 2);
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            showBrowserInfo();
+            updateCurlCommand('/api/ping');
+        });
+    </script>
+</body>
+</html>

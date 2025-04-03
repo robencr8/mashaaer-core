@@ -192,6 +192,27 @@ def feedback_test_page():
     
     return response
 
+@app.route('/feedback-tool-test')
+def feedback_tool_test():
+    """Ultra minimal text response specifically for the web application feedback tool"""
+    # Create simplest possible response to maximize compatibility
+    response = make_response("Server is running and accessible. OK.")
+    
+    # Set content type to plain text
+    response.headers['Content-Type'] = 'text/plain'
+    
+    # Add explicit CORS headers for maximum permissiveness
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    response.headers['Access-Control-Expose-Headers'] = '*'
+    
+    # Log the request for debugging
+    logger.info("feedback-tool-test endpoint accessed")
+    logger.info(f"Request headers: {dict(request.headers)}")
+    
+    return response
+
 # Voice API test pages
 @app.route('/test-voice-api')
 def test_voice_api():
@@ -462,6 +483,117 @@ def debug_request():
 def cors_diagnostic():
     """Redirects to the new debug-request endpoint"""
     return debug_request()
+
+@app.route('/diagnostic-tool')
+def diagnostic_tool():
+    """Serve a detailed diagnostic HTML page for CORS and connection troubleshooting"""
+    # This is a direct HTML response with inline JavaScript and CSS
+    html = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        pre { background: #f4f4f4; border: 1px solid #ddd; padding: 10px; overflow-x: auto; }
+        .success { color: green; }
+        .error { color: red; }
+        .endpoint { margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Mashaaer Diagnostic Tool</h1>
+    <p>This page tests connectivity to various endpoints and displays detailed information.</p>
+    
+    <h2>Browser Information</h2>
+    <pre id="browser-info"></pre>
+    
+    <h2>Endpoint Tests</h2>
+    <div id="results"></div>
+    
+    <script>
+        // Display browser info
+        function showBrowserInfo() {
+            const infoDiv = document.getElementById('browser-info');
+            const info = {
+                'User Agent': navigator.userAgent,
+                'URL': window.location.href,
+                'Origin': window.location.origin,
+                'Protocol': window.location.protocol,
+                'Host': window.location.host
+            };
+            infoDiv.textContent = JSON.stringify(info, null, 2);
+        }
+        
+        // Test endpoints
+        async function testEndpoints() {
+            const resultsDiv = document.getElementById('results');
+            const endpoints = [
+                '/api/ping',
+                '/api/status',
+                '/test',
+                '/api/test-cors',
+                '/feedback-tool-test',
+                '/api/minimal'
+            ];
+            
+            for (const endpoint of endpoints) {
+                const endpointDiv = document.createElement('div');
+                endpointDiv.className = 'endpoint';
+                endpointDiv.innerHTML = `<h3>Testing: ${endpoint}</h3>`;
+                resultsDiv.appendChild(endpointDiv);
+                
+                try {
+                    const response = await fetch(endpoint);
+                    const contentType = response.headers.get('content-type');
+                    let data;
+                    
+                    if (contentType && contentType.includes('application/json')) {
+                        data = await response.json();
+                        data = JSON.stringify(data, null, 2);
+                    } else {
+                        data = await response.text();
+                    }
+                    
+                    const headers = {};
+                    response.headers.forEach((value, name) => {
+                        headers[name] = value;
+                    });
+                    
+                    endpointDiv.innerHTML += `
+                        <p class="success">✅ Status: ${response.status} ${response.statusText}</p>
+                        <h4>Response Headers:</h4>
+                        <pre>${JSON.stringify(headers, null, 2)}</pre>
+                        <h4>Response Data:</h4>
+                        <pre>${data}</pre>
+                    `;
+                } catch (error) {
+                    endpointDiv.innerHTML += `
+                        <p class="error">❌ Error: ${error.message}</p>
+                    `;
+                    console.error(`Error testing ${endpoint}:`, error);
+                }
+            }
+        }
+        
+        // Run tests when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            showBrowserInfo();
+            testEndpoints();
+        });
+    </script>
+</body>
+</html>"""
+    
+    response = make_response(html)
+    response.headers['Content-Type'] = 'text/html'
+    # Explicit CORS headers for maximum compatibility
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    
+    return response
 
 @app.route('/tts_cache/<path:filename>')
 def serve_tts_cache(filename):

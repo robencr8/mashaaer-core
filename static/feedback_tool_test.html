@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra Minimal Test Page for Feedback Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        pre {
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Ultra Minimal Test Page for Feedback Tool</h1>
+    <p>This page is specifically designed to test connectivity with the web application feedback tool.</p>
+    
+    <div id="results">Loading...</div>
+    
+    <script>
+        // Test function to make a simple GET request to the server
+        async function testConnection() {
+            const resultsDiv = document.getElementById('results');
+            
+            try {
+                // Simple test to check if the server is reachable
+                const response = await fetch('/api/ping');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultsDiv.innerHTML = `
+                        <h2 class="success">✅ Server is reachable!</h2>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <p>Status: ${response.status} ${response.statusText}</p>
+                        <p>Response headers:</p>
+                        <pre>${formatHeaders(response.headers)}</pre>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <h2 class="error">❌ Server responded with status: ${response.status} ${response.statusText}</h2>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <h2 class="error">❌ Connection error</h2>
+                    <p>Error message: ${error.message}</p>
+                    <p>This typically indicates:</p>
+                    <ul>
+                        <li>The server is not running</li>
+                        <li>CORS issues are preventing the connection</li>
+                        <li>Network connectivity problems</li>
+                    </ul>
+                `;
+                console.error('Connection test error:', error);
+            }
+        }
+        
+        // Helper function to format headers for display
+        function formatHeaders(headers) {
+            const headersObj = {};
+            headers.forEach((value, name) => {
+                headersObj[name] = value;
+            });
+            return JSON.stringify(headersObj, null, 2);
+        }
+        
+        // Run the test when the page loads
+        window.addEventListener('DOMContentLoaded', testConnection);
+    </script>
+</body>
+</html>
