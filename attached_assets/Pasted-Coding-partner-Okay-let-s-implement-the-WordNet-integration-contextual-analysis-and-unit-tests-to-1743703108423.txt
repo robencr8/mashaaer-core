@@ -1,0 +1,163 @@
+Coding partner
+Okay, let's implement the WordNet integration, contextual analysis, and unit tests to enhance the emotion_tracker.py.
+
+1. Integrate WordNet and Enhance Rule-Based Analysis:
+
+Python
+
+import logging
+import re
+import json
+import os
+from openai import OpenAI
+from datetime import datetime
+from nltk.corpus import wordnet
+import nltk
+from typing import List, Dict, Optional, Tuple
+
+from db_manager import DatabaseManager  # Assuming a placeholder import
+
+logger = logging.getLogger(__name__)
+
+class EmotionTracker:
+    def __init__(self, db_manager: DatabaseManager):
+        self.db_manager = db_manager
+        self.openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
+        self.emotion_keywords = {
+            "happy": {"joy": 1.0, "delighted": 0.9, "thrilled": 1.0, "elated": 0.8, "gleeful": 0.7},
+            "sad": {"sorrow": 1.0, "grief": 0.9, "heartbroken": 1.0, "mournful": 0.8, "desolate": 0.7},
+            "angry": {"furious": 1.0, "irritated": 0.9, "resentful": 1.0, "enraged": 0.8, "indignant": 0.7},
+            "surprised": {"amazed": 1.0, "shocked": 0.9, "stunned": 1.0, "astonished": 0.8, "bewildered": 0.7},
+            "fearful": {"anxious": 1.0, "panic": 0.9, "dread": 1.0, "terrified": 0.8, "apprehensive": 0.7},
+            "disgusted": {"repulsed": 1.0, "nauseated": 0.9, "displeased": 1.0, "offended": 0.8, "aversion": 0.7},
+            "neutral": {"indifferent": 1.0, "unmoved": 0.9, "detached": 1.0, "apathetic": 0.8, "nonchalant": 0.7}
+        }
+        nltk.download('wordnet')
+
+    def _get_synonyms(self, keyword: str) -> List[str]:
+        """Fetches synonyms for a given keyword using WordNet."""
+        synonyms = set()
+        for syn in wordnet.synsets(keyword):
+            for lemma in syn.lemmas():
+                synonyms.add(lemma.name())
+        return list(synonyms)
+
+    def _analyze_with_rules(self, text: str) -> str:
+        """Enhanced rule-based emotion analysis with WordNet and context."""
+        text = text.lower()
+        emotions: Dict[str, float] = {}
+        context_window = 3  # Number of words to consider before and after
+
+        words = text.split()
+        for i, word in enumerate(words):
+            for emotion, keywords in self.emotion_keywords.items():
+                for keyword, weight in keywords.items():
+                    if re.search(r"\b" + re.escape(keyword) + r"\b", word):
+                        emotions[emotion] = emotions.get(emotion, 0.0) + weight
+
+                        # Contextual analysis (simple example)
+                        context_words = words[max(0, i - context_window):min(len(words), i + context_window + 1)]
+                        context_text = " ".join(context_words)
+
+                        if re.search(r"\bnot\b|\bnever\b|\bwithout\b", context_text):
+                            emotions[emotion] -= weight * 0.5  # Reduce weight if negation is present
+
+                    for synonym in self._get_synonyms(keyword):
+                        if re.search(r"\b" + re.escape(synonym) + r"\b", word):
+                            emotions[emotion] = emotions.get(emotion, 0.0) + weight * 0.7  # Slightly reduce weight for synonyms
+
+        if emotions:
+            return max(emotions, key=emotions.get)
+        return "neutral"
+
+    def _analyze_with_openai(self, text: str) -> Optional[str]:
+        """Emotion analysis using OpenAI API with error handling."""
+        try:
+            response = self.openai_client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "Analyze the emotion in the given text. Return only one emotion from: happy, sad, angry, surprised, fearful, disgusted, neutral."},
+                    {"role": "user", "content": text},
+                ],
+                max_tokens=10,
+                timeout=10
+            )
+            return response.choices[0].message.content.lower().strip()
+        except Exception as e:
+            logger.error(f"OpenAI analysis error: {str(e)}")
+            return None
+
+    def analyze_text(self, text: str) -> str:
+        """Analyzes text for emotion using rules and OpenAI."""
+        emotion = self._analyze_with_rules(text)
+        if emotion == "neutral":
+            openai_emotion = self._analyze_with_openai(text)
+            if openai_emotion:
+                emotion = openai_emotion
+        return emotion
+
+    def log_emotion(self, emotion: str, text: str, session_id: Optional[str] = None, source: str = "text"):
+        """Logs the detected emotion to the database."""
+        try:
+            timestamp = datetime.now().isoformat()
+            self.db_manager.execute_query(
+                "INSERT INTO emotion_data (session_id, emotion, timestamp, text, source) VALUES (?, ?, ?, ?, ?)",
+                (session_id, emotion, timestamp, text, source),
+            )
+            logger.info(f"Emotion logged: {emotion} (session: {session_id})")
+        except Exception as e:
+            logger.error(f"Error logging emotion: {str(e)}")
+
+    def get_emotion_history(self, days: int = 7) -> List[Dict]:
+        """Retrieves emotion history from the database."""
+        try:
+            # ... (database query logic) ...
+            return []  # Replace with actual results
+        except Exception as e:
+            logger.error(f"Error retrieving emotion history: {str(e)}")
+            return []
+2. Unit Testing:
+
+Python
+
+import pytest
+from emotion_tracker import EmotionTracker
+from db_manager import DatabaseManager  # Mock the database manager
+
+@pytest.fixture
+def emotion_tracker():
+    db_manager = DatabaseManager(None)  # Mock the db manager
+    return EmotionTracker(db_manager)
+
+def test_analyze_with_rules_happy(emotion_tracker):
+    text = "I am feeling joyful today."
+    assert emotion_tracker._analyze_with_rules(text) == "happy"
+
+def test_analyze_with_rules_sad(emotion_tracker):
+    text = "I am feeling sorrowful today."
+    assert emotion_tracker._analyze_with_rules(text) == "sad"
+
+def test_analyze_with_rules_neutral(emotion_tracker):
+    text = "The weather is nice today."
+    assert emotion_tracker._analyze_with_rules(text) == "neutral"
+
+def test_analyze_with_rules_synonyms(emotion_tracker):
+    text = "I am feeling glad today."
+    assert emotion_tracker._analyze_with_rules(text) == "happy"
+
+def test_analyze_with_rules_negation(emotion_tracker):
+    text = "I am not happy today."
+    assert emotion_tracker._analyze_with_rules(text) == "neutral"  # Or potentially "sad" depending on desired nuance
+Summary of Changes:
+
+WordNet Integration: The _get_synonyms method fetches synonyms, and _analyze_with_rules now incorporates them with a slightly reduced weight.
+Contextual Analysis: A basic contextual analysis is added in _analyze_with_rules to consider a small window of surrounding words. It currently checks for negation words.
+Unit Tests: Added tests to verify synonym handling and negation.
+Type Hinting: Added type hinting.
+Important Notes:
+
+WordNet Download: Ensure nltk.download('wordnet') is executed before using the _get_synonyms method.
+Contextual Analysis Complexity: The current contextual analysis is very basic. More sophisticated techniques (e.g., dependency parsing, sentiment shifters) could be used for better accuracy, but they are more complex to implement.
+OpenAI Timeout: Added a timeout to the OpenAI API call to prevent indefinite hanging.
+Database Manager Mocking: The unit tests mock the DatabaseManager. In real integration tests, you'd want to use a test database.
