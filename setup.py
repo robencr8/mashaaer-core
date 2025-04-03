@@ -1,0 +1,50 @@
+from setuptools import setup, find_packages
+
+setup(
+    name="mashaaer-feelings",
+    version="1.0.0",
+    packages=find_packages(),
+    include_package_data=True,
+    python_requires=">=3.11",
+    install_requires=[
+        "apscheduler>=3.11.0",
+        "email-validator>=2.2.0",
+        "flask-migrate>=4.1.0",
+        "flask>=3.1.0",
+        "flask-sqlalchemy>=3.1.1",
+        "gtts>=2.5.4",
+        "gunicorn>=23.0.0",
+        "numpy>=2.2.4",
+        "opencv-python>=4.11.0.86",
+        "psycopg2-binary>=2.9.10",
+        "pyaudio>=0.2.14",
+        "python-dotenv>=1.1.0",
+        "requests>=2.32.3",
+        "vosk>=0.3.45",
+        "sqlalchemy>=2.0.40",
+        "twilio>=9.5.1",
+        "alembic>=1.15.2",
+        "flask-cors>=5.0.1",
+        "openai>=1.70.0",
+        "psutil>=7.0.0",
+        "kivy>=2.3.1",
+    ],
+    extras_require={
+        "dev": [
+            "black",
+            "flake8",
+            "isort",
+            "pytest",
+            "pytest-cov",
+            "vulture",
+        ],
+        "test": [
+            "pytest",
+            "pytest-cov",
+        ],
+        "docs": [
+            "sphinx",
+            "sphinx-rtd-theme",
+        ],
+    },
+)

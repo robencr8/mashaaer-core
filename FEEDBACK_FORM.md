@@ -1,96 +1,203 @@
-# Mashaaer Feelings App - Feedback Form
+# مشاعر | Mashaaer Feedback Form
 
-Thank you for testing Mashaaer Feelings! Your feedback is essential to help us improve the application. Please take a few minutes to complete this form.
+## User Feedback Form
 
-## Tester Information
+Thank you for using مشاعر | Mashaaer! Your feedback is invaluable in helping us improve the application. Please take a few minutes to share your thoughts and experiences.
 
-**Name:** _________________________
+### Basic Information
 
-**Device Model:** _________________________
+**Name (Optional):** ____________________________
 
-**Android Version:** _________________________
+**Email (Optional):** ____________________________
 
-**Testing Date:** _________________________
+**Date:** ____________________________
 
-## Functionality Testing
+**Version Used:** ____________________________
 
-Please rate each feature on a scale of 1-5 (1 = Poor, 5 = Excellent):
+**Device/Platform:** ____________________________
 
-| Feature | Rating (1-5) | Comments |
-|---------|--------------|----------|
-| App Installation | | |
-| App Launch | | |
-| UI Appearance | | |
-| Text Input | | |
-| Voice Recording | | |
-| English Language | | |
-| Arabic Language | | |
-| Emotion Analysis | | |
-| Language Toggle | | |
-| Settings Menu | | |
-| Overall Performance | | |
+### Overall Experience
 
-## Emotion Analysis Accuracy
+**How would you rate your overall experience with Mashaaer?**
 
-Rate the accuracy of emotion analysis for the following inputs:
+- [ ] Excellent
+- [ ] Very Good
+- [ ] Good
+- [ ] Fair
+- [ ] Poor
 
-| Input Type | Rating (1-5) | Comments |
-|------------|--------------|----------|
-| Happy/Positive Text | | |
-| Sad/Negative Text | | |
-| Angry Text | | |
-| Mixed Emotions | | |
-| Arabic Text | | |
-| Voice Input | | |
+**What aspects of Mashaaer do you find most valuable?**
+_________________________________________________________________
+_________________________________________________________________
+_________________________________________________________________
 
-## User Experience
+**What aspects of Mashaaer do you find least valuable or most frustrating?**
+_________________________________________________________________
+_________________________________________________________________
+_________________________________________________________________
 
-1. **What was your first impression of the app?**
-   _________________________________________________________________
-   _________________________________________________________________
+### Feature Feedback
 
-2. **Was the app intuitive to use? If not, what was confusing?**
-   _________________________________________________________________
-   _________________________________________________________________
+**Voice Interaction**
 
-3. **Did you encounter any crashes or errors? Please describe:**
-   _________________________________________________________________
-   _________________________________________________________________
+How would you rate the voice interaction capabilities?
+- [ ] Excellent
+- [ ] Very Good
+- [ ] Good
+- [ ] Fair
+- [ ] Poor
 
-4. **How was the app's response time for:**
-   - Text analysis: □ Fast □ Acceptable □ Slow □ Very slow
-   - Voice recording: □ Fast □ Acceptable □ Slow □ Very slow
-   - UI transitions: □ Fast □ Acceptable □ Slow □ Very slow
+Comments: ___________________________________________________
+_________________________________________________________________
 
-5. **Did the offline mode work well when server connection was unavailable?**
-   □ Yes □ No □ Didn't test
-   Comments: _______________________________________________________
+**Emotion Analysis**
 
-## Suggestions and Feature Requests
+How accurately does Mashaaer identify emotions?
+- [ ] Extremely accurate
+- [ ] Very accurate
+- [ ] Moderately accurate
+- [ ] Slightly accurate
+- [ ] Not accurate at all
 
-1. **What features would you like to see added in future versions?**
-   _________________________________________________________________
-   _________________________________________________________________
+Comments: ___________________________________________________
+_________________________________________________________________
 
-2. **What aspects of the app need the most improvement?**
-   _________________________________________________________________
-   _________________________________________________________________
+**User Interface**
 
-3. **Would you recommend this app to others? Why or why not?**
-   _________________________________________________________________
-   _________________________________________________________________
+How would you rate the cosmic-themed user interface?
+- [ ] Excellent
+- [ ] Very Good
+- [ ] Good
+- [ ] Fair
+- [ ] Poor
 
-4. **Any other comments or suggestions?**
-   _________________________________________________________________
-   _________________________________________________________________
-   _________________________________________________________________
+Comments: ___________________________________________________
+_________________________________________________________________
 
-## Overall Rating
+**Language Support**
 
-Please give your overall rating of the app (circle one):
+How well does Mashaaer handle your preferred language?
+- [ ] Extremely well
+- [ ] Very well
+- [ ] Moderately well
+- [ ] Slightly well
+- [ ] Not well at all
 
-Poor | Below Average | Average | Good | Excellent
+Comments: ___________________________________________________
+_________________________________________________________________
+
+**SMS Notifications**
+
+If you've used the SMS notification features, how would you rate them?
+- [ ] Excellent
+- [ ] Very Good
+- [ ] Good
+- [ ] Fair
+- [ ] Poor
+- [ ] Haven't used
+
+Comments: ___________________________________________________
+_________________________________________________________________
+
+### User Experience
+
+**How easy was it to get started with Mashaaer?**
+- [ ] Extremely easy
+- [ ] Very easy
+- [ ] Moderately easy
+- [ ] Slightly difficult
+- [ ] Very difficult
+
+Comments: ___________________________________________________
+_________________________________________________________________
+
+**How intuitive is the application to use?**
+- [ ] Extremely intuitive
+- [ ] Very intuitive
+- [ ] Moderately intuitive
+- [ ] Slightly confusing
+- [ ] Very confusing
+
+Comments: ___________________________________________________
+_________________________________________________________________
+
+**How would you rate the performance of the application?**
+- [ ] Excellent
+- [ ] Very Good
+- [ ] Good
+- [ ] Fair
+- [ ] Poor
+
+Comments: ___________________________________________________
+_________________________________________________________________
+
+**Did you encounter any errors or issues?**
+- [ ] No issues
+- [ ] Minor issues that didn't affect usage
+- [ ] Moderate issues that slightly affected usage
+- [ ] Significant issues that affected usage
+- [ ] Critical issues that prevented usage
+
+Please describe any issues: ____________________________________
+_________________________________________________________________
+_________________________________________________________________
+
+### Suggestions and Improvements
+
+**What features would you like to see added or improved?**
+_________________________________________________________________
+_________________________________________________________________
+_________________________________________________________________
+
+**How could we make Mashaaer more useful for you?**
+_________________________________________________________________
+_________________________________________________________________
+_________________________________________________________________
+
+**Would you recommend Mashaaer to others?**
+- [ ] Definitely would recommend
+- [ ] Probably would recommend
+- [ ] Might or might not recommend
+- [ ] Probably would not recommend
+- [ ] Definitely would not recommend
+
+### Additional Comments
+
+Please share any other thoughts, suggestions, or feedback:
+_________________________________________________________________
+_________________________________________________________________
+_________________________________________________________________
+_________________________________________________________________
+_________________________________________________________________
+
+### Thank You!
+
+Thank you for taking the time to provide your feedback. Your insights help us make Mashaaer better for everyone!
+
+Please submit this form via:
+
+- Email: feedback@mashaaer.app
+- Within the app: Settings → Feedback
+- Website: www.mashaaer.app/feedback
 
 ---
 
-Thank you for your valuable feedback! Please return this form to: feedback@mashaaer.com
+## For Internal Use Only
+
+Received by: _____________________ Date: _____________________
+
+Feedback ID: _____________________
+
+Action taken:
+- [ ] Added to feature request database
+- [ ] Forwarded to development team
+- [ ] Forwarded to UX team
+- [ ] Bug report created
+- [ ] Responded to user
+- [ ] Other: _____________________
+
+Follow-up required: Yes [ ] No [ ]
+
+Follow-up notes:
+_________________________________________________________________
+_________________________________________________________________

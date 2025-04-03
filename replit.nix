@@ -1,5 +1,6 @@
 {pkgs}: {
   deps = [
+    pkgs.geckodriver
     pkgs.pkg-config
     pkgs.mtdev
     pkgs.libcxx

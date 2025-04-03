@@ -266,61 +266,6 @@
       text-align: left;
     }
     
-    /* Voice Input Styles */
-    .input-group {
-      display: flex;
-      align-items: center;
-      position: relative;
-      width: 100%;
-    }
-    
-    .voice-input-btn {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: rgba(33, 150, 243, 0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-    }
-    
-    [dir="rtl"] .voice-input-btn {
-      right: auto;
-      left: 10px;
-    }
-    
-    .voice-input-btn:hover {
-      background: rgba(33, 150, 243, 0.4);
-    }
-    
-    .voice-input-btn i {
-      color: #42a5f5;
-      font-size: 14px;
-    }
-    
-    .voice-input-btn:active {
-      background: rgba(33, 150, 243, 0.6);
-      transform: translateY(-50%) scale(0.95);
-    }
-    
-    .terms-agreement {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .terms-agreement .voice-input-btn {
-      position: relative;
-      transform: none;
-      top: 0;
-    }
-
     /* Tooltip Styles */
     .tooltip {
       position: absolute;
@@ -569,12 +514,7 @@
       <h2>أخبرني عن نفسك | Tell me about yourself</h2>
       <div class="form-group">
         <label>الاسم الكامل | Full Name</label>
-        <div class="input-group">
-          <input type="text" id="full-name" class="form-control" placeholder="محمد أحمد | John Doe">
-          <div class="voice-input-btn" onclick="startVoiceInput('full-name')">
-            <i class="fas fa-microphone"></i>
-          </div>
-        </div>
+        <input type="text" id="full-name" class="form-control" placeholder="محمد أحمد | John Doe">
       </div>
       <div class="btn-container">
         <div></div> <!-- Placeholder for alignment -->
@@ -593,12 +533,7 @@
       <h2>كيف تفضل أن أناديك؟ | What should I call you?</h2>
       <div class="form-group">
         <label>الاسم المستعار | Nickname</label>
-        <div class="input-group">
-          <input type="text" id="nickname" class="form-control" placeholder="محمد | John">
-          <div class="voice-input-btn" onclick="startVoiceInput('nickname')">
-            <i class="fas fa-microphone"></i>
-          </div>
-        </div>
+        <input type="text" id="nickname" class="form-control" placeholder="محمد | John">
       </div>
       <div class="btn-container">
         <button class="prev-btn" onclick="prevStep('nickname')">العودة | Back</button>
@@ -653,12 +588,7 @@
         </div>
       </div>
       <div class="form-group">
-        <div class="terms-agreement">
-          <label><input type="checkbox" id="terms-agree"> أوافق على الشروط والأحكام | I agree to the terms and conditions</label>
-          <div class="voice-input-btn" onclick="startVoiceInput('terms-agree')">
-            <i class="fas fa-microphone"></i>
-          </div>
-        </div>
+        <label><input type="checkbox" id="terms-agree"> أوافق على الشروط والأحكام | I agree to the terms and conditions</label>
       </div>
       <div class="btn-container">
         <button class="prev-btn" onclick="prevStep('terms')">العودة | Back</button>
@@ -901,25 +831,10 @@
     
     // Start voice input for a field
     function startVoiceInput(fieldId) {
-      const stepId = fieldId === 'full-name' ? 'name' : 
-                    fieldId === 'nickname' ? 'nickname' :
-                    fieldId === 'terms-agree' ? 'terms-agree' : 
-                    currentStep;
-                    
-      // Show listening indicator
-      const listeningIndicator = document.getElementById(`listening-${stepId}`);
-      if (listeningIndicator) {
-        listeningIndicator.style.display = 'flex';
-      }
-      
-      // Create form data with step parameter
-      const formData = new FormData();
-      formData.append('step', stepId);
-      
       // Call the server's listen API
       fetch('/api/listen', {
         method: 'POST',
-        body: formData
+        body: new FormData() // This would normally contain audio data
       })
       .then(response => response.json())
       .then(data => {
@@ -931,15 +846,11 @@
         }
         
         // Hide listening indicator
-        if (listeningIndicator) {
-          listeningIndicator.style.display = 'none';
-        }
+        document.getElementById(`listening-${currentStep}`).style.display = 'none';
       })
       .catch(error => {
         console.error('API error:', error);
-        if (listeningIndicator) {
-          listeningIndicator.style.display = 'none';
-        }
+        document.getElementById(`listening-${currentStep}`).style.display = 'none';
       });
     }
     

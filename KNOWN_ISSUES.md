@@ -1,84 +1,142 @@
-# Known Issues and Limitations - Mashaaer Feelings Android App
+# مشاعر | Mashaaer Known Issues
 
-This document outlines the known issues, limitations, and workarounds for the current version of the Mashaaer Feelings Android application.
+## Overview
+This document catalogs known issues, limitations, and workarounds for the Mashaaer Feelings application. These issues are tracked and prioritized for future releases.
 
-## Network Connectivity
+## Critical Issues
 
-### Issues
-- **Server Connection Timeout**: When the app cannot reach the server, there might be a delay of up to 5 seconds before falling back to local mode.
-- **Intermittent Connection**: On unstable networks, the app may switch between online and offline modes unexpectedly.
+### Voice Recognition Limitations
+- **Issue**: Voice recognition may not perform optimally in noisy environments.
+- **Affected Versions**: All current versions
+- **Workaround**: Use the application in a quiet environment or use text input as an alternative.
+- **Planned Fix**: Implementing noise cancellation algorithms in a future release.
 
-### Workarounds
-- Ensure stable internet connection when using the app
-- For consistently poor connections, the app will default to local analysis mode
+### SMS Functionality
+- **Issue**: SMS sending may fail if Twilio credentials are not properly configured.
+- **Affected Versions**: All current versions
+- **Workaround**: Ensure that all Twilio environment variables are correctly set.
+- **Planned Fix**: Adding a more robust fallback mechanism and clearer error messages.
 
-## Language Support
+## Major Issues
 
-### Issues
-- **Voice Recognition Accuracy**: Voice recognition is more accurate in English than in Arabic. This is a limitation of the underlying voice recognition technology.
-- **Arabic Text Analysis**: Local emotion analysis for Arabic text uses a simplified ruleset compared to server-based analysis.
+### Language Support
+- **Issue**: Some UI elements may not be properly translated when switching languages.
+- **Affected Versions**: All current versions
+- **Workaround**: Restart the application after changing the language.
+- **Planned Fix**: Implementing a more comprehensive localization system.
 
-### Workarounds
-- For most accurate Arabic language analysis, ensure server connectivity
-- Speak clearly and in a quiet environment for optimal voice recognition
+### Database Performance
+- **Issue**: Database operations may slow down with large amounts of historical data.
+- **Affected Versions**: All current versions
+- **Workaround**: Periodically clear old data that is no longer needed.
+- **Planned Fix**: Implementing database optimization and archiving features.
 
-## Emotion Analysis
+### Memory Usage
+- **Issue**: The application may use excessive memory during extended sessions.
+- **Affected Versions**: All current versions
+- **Workaround**: Restart the application periodically during long usage sessions.
+- **Planned Fix**: Optimizing memory management and implementing cleanup routines.
 
-### Issues
-- **Local Analysis Limitations**: The offline analysis mode uses a simplified emotion model with fewer emotion categories and potentially less accuracy.
-- **Context Awareness**: The current version analyzes each input independently without maintaining conversation context.
+## Minor Issues
 
-### Workarounds
-- Use server connection when possible for more sophisticated analysis
-- Provide more detailed input text for better emotion detection in offline mode
+### UI Rendering
+- **Issue**: Some UI elements may not render correctly on certain screen sizes.
+- **Affected Versions**: All current versions
+- **Workaround**: Use the application on a standard-sized device.
+- **Planned Fix**: Improving responsive design to handle more screen sizes.
 
-## Performance
+### Animation Performance
+- **Issue**: Cosmic animations may lag on lower-end devices.
+- **Affected Versions**: All current versions
+- **Workaround**: Disable animations in settings if available.
+- **Planned Fix**: Optimizing animations and adding adaptive performance settings.
 
-### Issues
-- **Initial Startup Time**: First launch may take 3-5 seconds on older devices
-- **Recording Memory Usage**: Continuous voice recording for over 1 minute may increase memory usage
+### Error Messages
+- **Issue**: Some error messages may not be descriptive or helpful.
+- **Affected Versions**: All current versions
+- **Workaround**: Refer to documentation for troubleshooting.
+- **Planned Fix**: Implementing more user-friendly error messages with suggested actions.
 
-### Workarounds
-- Allow app to fully initialize on first launch before interaction
-- Keep voice recordings to under 1 minute for optimal performance
+## Platform-Specific Issues
 
-## User Interface
+### Android
 
-### Issues
-- **Text Field Scrolling**: In some cases, the text input field may not automatically scroll when text exceeds visible area
-- **Animation Smoothness**: The cosmic sphere animation may appear less smooth on lower-end devices
+#### Permission Handling
+- **Issue**: The application may not clearly communicate why certain permissions are needed.
+- **Affected Versions**: All Android versions
+- **Workaround**: Grant permissions when requested or manually enable them in Android settings.
+- **Planned Fix**: Adding better permission explanation dialogs.
 
-### Workarounds
-- Manually scroll in text field if needed
-- No workaround needed for animations as they don't affect core functionality
+#### Background Operation
+- **Issue**: Voice recognition may stop working when the app is in the background.
+- **Affected Versions**: All Android versions
+- **Workaround**: Keep the application in the foreground during voice interactions.
+- **Planned Fix**: Implementing proper background service for voice recognition.
 
-## Device Compatibility
+### Web Application
 
-### Issues
-- **Android 8.0 Requirement**: The app requires Android 8.0 (API level 24) or higher
-- **Screen Size Variations**: On extremely small or large screens, some UI elements may appear disproportionate
+#### Browser Compatibility
+- **Issue**: Some features may not work correctly in all browsers.
+- **Affected Versions**: All web versions
+- **Workaround**: Use Chrome or Firefox for best compatibility.
+- **Planned Fix**: Improving cross-browser compatibility.
 
-### Workarounds
-- No workaround for minimum Android version - this is a hard requirement
-- The app is optimized for smartphone screens between 5-7 inches
+#### Authentication Sessions
+- **Issue**: Users may be logged out unexpectedly after prolonged inactivity.
+- **Affected Versions**: All web versions
+- **Workaround**: Save work frequently and refresh the page if needed.
+- **Planned Fix**: Implementing better session management.
 
-## Permissions
+## External Service Dependencies
 
-### Issues
-- **Permission Explanations**: Some Android versions may not clearly explain why certain permissions are needed
-- **Microphone Access**: If microphone permission is denied, voice input functionality won't work
+### OpenAI API
+- **Issue**: Response generation may fail if OpenAI API is unavailable or rate-limited.
+- **Affected Versions**: All current versions
+- **Workaround**: Wait a few minutes and try again.
+- **Planned Fix**: Implementing more robust fallback options and queuing system.
 
-### Workarounds
-- Manually grant permissions through device settings if initially declined
-- The app will provide instructions on how to enable needed permissions
+### ElevenLabs TTS
+- **Issue**: High-quality voice synthesis may fail back to basic TTS if API limits are reached.
+- **Affected Versions**: All current versions
+- **Workaround**: Be mindful of usage limits or upgrade API plan.
+- **Planned Fix**: Adding better quota management and user notification.
 
-## Future Improvements
+### Google Drive Sync
+- **Issue**: Synchronization may fail if Google Drive API changes or quota is exceeded.
+- **Affected Versions**: All current versions
+- **Workaround**: Manually export important data as backup.
+- **Planned Fix**: Implementing more robust synchronization with multiple backup options.
 
-The following limitations are known and planned for improvement in future releases:
+## Environment and Configuration Issues
 
-1. **Extended Emotion Set**: Expanding the emotion detection categories
-2. **Improved Arabic Support**: Enhanced Arabic language processing
-3. **Conversation Context**: Maintaining context across multiple interactions
-4. **UI Refinements**: More responsive and adaptive interface
-5. **Battery Optimization**: Reduced power consumption during extended use
-6. **Offline Voice Recognition**: Better offline voice processing
+### Environment Variables
+- **Issue**: Missing or incorrect environment variables can cause various features to fail.
+- **Affected Versions**: All current versions
+- **Workaround**: Verify all required environment variables are correctly set according to documentation.
+- **Planned Fix**: Adding a configuration verification tool on startup.
+
+### Database Configuration
+- **Issue**: Database connection issues may occur with certain configurations.
+- **Affected Versions**: All current versions
+- **Workaround**: Follow the exact configuration instructions in documentation.
+- **Planned Fix**: Implementing more robust database connection handling.
+
+## Reporting New Issues
+
+If you encounter an issue not listed here, please report it with the following information:
+
+1. Detailed description of the issue
+2. Steps to reproduce
+3. Expected behavior
+4. Actual behavior
+5. Application version
+6. Operating system and version
+7. Screenshots or logs if applicable
+
+Send reports to: [support@mashaaer.app](mailto:support@mashaaer.app)
+
+## Issue Tracking and Updates
+
+This document is updated regularly as issues are resolved and new ones are discovered. For the most current information, check for updates to this document or view the project's issue tracking system.
+
+Last Updated: April 2025

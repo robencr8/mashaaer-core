@@ -1,0 +1,52 @@
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | android/.buildozer
+  | android/bin
+  | logs
+  | temp
+  | tts_cache
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip_glob = [
+  "android/.buildozer/**",
+  "android/bin/**",
+  "venv/**",
+  ".venv/**",
+  "logs/**",
+  "temp/**",
+  "tts_cache/**"
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+python_classes = ["Test*"]
+filterwarnings = [
+  "ignore::DeprecationWarning",
+  "ignore::PendingDeprecationWarning"
+]
+addopts = [
+  "--verbose",
+  "--tb=short"
+]
+log_cli = true
+log_cli_level = "INFO"

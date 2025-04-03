@@ -1,135 +1,224 @@
-# مشاعر | Mashaaer - User Guide
+# مشاعر | Mashaaer User Guide
 
-## Installation Guide
+## Welcome to Mashaaer Feelings!
 
-### Download and Install
-
-1. **Scan QR Code**
-   - Use your phone's camera or QR scanner app to scan the provided QR code
-   - This will take you to the Google Drive download link
-
-2. **Download APK**
-   - Tap "Download" on the Google Drive page
-   - Wait for the APK file to download completely
-
-3. **Enable Unknown Sources**
-   - Before installation, you'll need to allow installation from unknown sources
-   - Go to **Settings → Security → Unknown Sources** (or **Settings → Apps → Special access → Install unknown apps** on newer Android versions)
-   - Enable this option for your file manager or browser
-
-4. **Install the App**
-   - Open the downloaded APK file
-   - Tap "Install" when prompted
-   - Wait for the installation to complete
-   - Tap "Open" to launch the app
+مشاعر | Mashaaer is your personal emotional AI companion, designed to understand, respond to, and help you navigate your emotional experiences through a beautiful cosmic interface. This guide will help you get started and make the most of Mashaaer's features.
 
 ## Getting Started
 
-### First Launch
+### Installation
 
-1. **Welcome Screen**
-   - Upon first launch, you'll see the welcome screen with the cosmic sphere animation
-   - The welcome message "Create the future, I'm listening" in English or "اصنع المستقبل، أنا أسمعك" in Arabic
-   - The app will attempt to connect to the Mashaaer server
-   - If connection is successful, you'll see "Connected to Mashaaer Server"
-   - If connection fails, you'll see "Server Offline - Using Local Mode"
+#### Android:
+1. Download the Mashaaer APK file from the provided link
+2. Enable installation from unknown sources in your device settings if needed
+3. Open the APK file and follow the installation prompts
+4. Once installed, look for the Mashaaer icon on your home screen or app drawer
 
-2. **Grant Permissions**
-   - The app will request permissions for:
-     - **Microphone**: Required for voice input
-     - **Internet**: Required for server connection
-     - **Storage**: Required for temporary files
-   - Tap "Allow" for each permission request
-   - If you deny a permission, the related functionality will be limited
+#### Web Application:
+1. Visit the Mashaaer website at [www.mashaaer.app](https://www.mashaaer.app)
+2. Create an account or sign in
+3. Grant necessary permissions when prompted (microphone, notifications)
 
-### Language Selection
+### First Launch Experience
 
-- The app supports both English and Arabic
-- Tap the "English/عربي" button at the bottom of the screen to toggle between languages
-- The interface text will update immediately to the selected language
+When you first open Mashaaer, you'll be guided through a cosmic onboarding experience:
 
-## Using the App
+1. **Welcome**: You'll be greeted with "اصنع المستقبل، أنا أسمعك" (Create the future, I hear you)
+2. **Profile Creation**: Share your name and how you'd like to be addressed
+3. **Language Selection**: Choose your preferred language (Arabic or English)
+4. **Voice Style**: Select your preferred voice interaction style
+5. **Terms Agreement**: Review and accept the terms of service
+6. **Cosmic Journey**: Experience a brief cosmic animation to introduce you to the Mashaaer universe
 
-### Text Input
+## Core Features
 
-1. **Enter Your Feelings**
-   - Type your thoughts or feelings in the text box
-   - You can write in either English or Arabic
-   - The more detailed your input, the better the emotion analysis
+### Voice Interaction
 
-2. **Analyze Emotions**
-   - Tap the "Analyze" button to process your text
-   - Wait for the analysis to complete
-   - A popup will show your emotion results
+Mashaaer is designed for seamless voice interaction:
 
-3. **View Results**
-   - The results will show:
-     - **Primary Emotion**: Your dominant emotion
-     - **Emotions Detected**: Percentages of all detected emotions
-   - Tap "Close" to dismiss the results and try again
+- **Speak Naturally**: Simply speak to Mashaaer in Arabic or English
+- **Voice Commands**: Use commands like "How am I feeling today?" or "Tell me about my emotions"
+- **Activation**: Tap the cosmic orb to activate voice listening mode
+- **Voice Settings**: Adjust voice settings in the profile section
 
-### Voice Input
+#### Voice Tips:
+- Speak clearly and at a normal pace
+- Use a quiet environment for better recognition
+- If voice recognition fails, you can always type your message
 
-1. **Start Recording**
-   - Tap the "Start Voice Input" button
-   - The button will turn red and change to "Stop Recording"
-   - Speak clearly into your device's microphone
+### Emotion Analysis
 
-2. **Stop and Analyze**
-   - Tap "Stop Recording" when finished speaking
-   - Your speech will be converted to text and appear in the text box
-   - Tap "Analyze" to process the text
+Mashaaer can analyze and track your emotions:
 
-3. **Automatic Timeout**
-   - Voice recording will automatically stop after 10 seconds if you don't stop it manually
+- **Text Analysis**: Mashaaer analyzes what you say to understand your emotional state
+- **Emotion Tracking**: Your emotional patterns are tracked over time
+- **Emotional Insights**: Receive insights about your emotional wellbeing
+- **Visual Representations**: View your emotions represented through cosmic visualizations
 
-### Settings
+#### Emotion Analysis Features:
+- Primary emotion detection (joy, sadness, anger, fear, surprise, etc.)
+- Emotional intensity measurement
+- Contextual understanding of emotions
+- Emotional wellbeing scores
 
-Access the settings by tapping the "Settings" button at the bottom of the screen. Here you can view:
-- Server connection information
-- Current server URL
-- Any additional configuration options in future updates
+### Cosmic Interface
+
+Navigate the cosmic-themed interface:
+
+- **Cosmic Orb**: The central interaction point for voice commands
+- **Emotion Cosmos**: Visual representation of your emotional universe
+- **Constellation Menu**: Access different features through the star constellation menu
+- **Cosmic Journey**: Experience emotional transitions through cosmic animations
+
+#### Interface Tips:
+- Tap stars to navigate to different sections
+- Swipe through the cosmos to view historical data
+- Pinch and zoom to explore your emotional universe in detail
+- Long-press on cosmic elements for additional information
+
+### SMS Notifications
+
+Stay connected through SMS notifications:
+
+- **Emotional Alerts**: Receive important emotional insights via SMS
+- **Reminders**: Get reminders for emotional check-ins
+- **Alerts**: Receive alerts when significant emotional patterns are detected
+- **Custom Messages**: Configure custom SMS messages
+
+#### Setting Up SMS:
+1. Go to Settings > Notifications
+2. Enter your phone number in international format
+3. Verify your number with the confirmation code
+4. Select which notifications you'd like to receive
+
+## Advanced Features
+
+### Face Recognition
+
+Mashaaer can recognize you and adapt to your presence:
+
+- **Profile Recognition**: The app recognizes you and loads your profile
+- **Emotional Response**: Adjusts responses based on detected facial expressions
+- **Privacy Controls**: All face data is processed locally for privacy
+
+#### Face Recognition Setup:
+1. Go to Settings > Profile > Face Recognition
+2. Follow the prompts to capture your face from different angles
+3. Set your privacy preferences for face data
+
+### Contextual Conversations
+
+Engage in meaningful conversations with context awareness:
+
+- **Memory**: Mashaaer remembers previous conversations
+- **Context-Awareness**: Responses take into account the conversation history
+- **Personality Adaptation**: The AI adapts to your communication style
+
+#### Conversation Tips:
+- Reference previous topics naturally
+- Ask follow-up questions
+- Share more about yourself for better personalization
+
+### Data Visualization
+
+Explore your emotional data through visualizations:
+
+- **Emotion Trends**: View trends in your emotional states over time
+- **Wellbeing Metrics**: Track emotional wellbeing metrics
+- **Interactive Charts**: Interact with data visualizations
+- **Comparison Views**: Compare emotional patterns across different time periods
+
+#### Visualization Access:
+1. Go to Insights > Visualizations
+2. Select the time period you want to explore
+3. Choose the type of visualization (chart, cosmos, timeline)
+
+## Settings and Customization
+
+### Profile Management
+
+Manage your personal profile:
+
+- **Personal Details**: Update your name, nickname, and preferences
+- **Language**: Change language settings
+- **Voice Settings**: Adjust voice interaction preferences
+- **Theme Settings**: Customize the visual theme
+
+### Privacy Controls
+
+Control your privacy settings:
+
+- **Data Storage**: Choose what data is stored and for how long
+- **Cloud Sync**: Enable or disable cloud synchronization
+- **Data Export**: Export your data at any time
+- **Account Deletion**: Option to delete your account and data
+
+### Notification Settings
+
+Customize your notification preferences:
+
+- **SMS Settings**: Configure SMS notification preferences
+- **Alert Thresholds**: Set thresholds for emotional alerts
+- **Frequency**: Control how often you receive notifications
+- **Quiet Hours**: Set times when notifications won't be sent
 
 ## Troubleshooting
 
-### Connection Issues
+### Common Issues
 
-- If the app shows "Server Offline", check your internet connection
-- The app will still work in offline mode, but with simplified analysis
+#### Voice Recognition Problems
+- Ensure your microphone is working and has necessary permissions
+- Try speaking more clearly or in a quieter environment
+- Restart the application if voice recognition becomes unresponsive
 
-### Voice Recognition Problems
+#### Connection Issues
+- Check your internet connection
+- Verify that Mashaaer has permission to access the internet
+- Try switching between Wi-Fi and mobile data
 
-- Ensure you're in a quiet environment
-- Speak clearly and at a moderate pace
-- Check that microphone permission is granted
-- If issues persist, use text input instead
+#### Application Crashes
+- Ensure your device meets the minimum requirements
+- Update to the latest version of Mashaaer
+- Clear the app cache in Android settings
 
-### App Not Responding
-
-- Close the app completely and restart it
-- If problems continue, restart your device
-- Make sure your device meets the minimum requirements (Android 8.0+)
-
-### Permission Issues
-
-If you denied permissions initially but want to enable them later:
-1. Go to **Settings → Apps → Mashaaer Feelings → Permissions**
-2. Enable the required permissions
-3. Restart the app
-
-## Contact Support
+### Getting Help
 
 If you encounter issues not covered in this guide:
-- Email: support@mashaaer.com
-- Include detailed information about the problem
-- Mention your device model and Android version
 
-## Privacy Information
+- **In-App Help**: Access the help section within the app
+- **Email Support**: Contact support@mashaaer.app
+- **Feedback**: Submit feedback through the feedback form
+- **FAQ**: Check the frequently asked questions section
 
-The Mashaaer Feelings app:
-- Only analyzes the text you explicitly submit
-- Does not record or store your voice permanently
-- Uses internet connection only for server-based analysis
-- Does not share your data with third parties
+## Privacy and Data
 
-Thank you for using مشاعر | Mashaaer!
+### Data Usage
+
+Mashaaer respects your privacy:
+
+- All emotional data is used solely to provide you with insights
+- Your conversations remain private and secure
+- Face recognition data never leaves your device
+- You maintain full control over your data
+
+### Data Protection
+
+Your data is protected through:
+
+- End-to-end encryption for communications
+- Local processing of sensitive information
+- Secure cloud storage with encryption
+- Regular security audits
+
+## Updates and Versions
+
+- Check for updates regularly in the app settings
+- New features are added through regular updates
+- View the version history in Settings > About > Version History
+- Major updates may include new cosmic themes or interface elements
+
+---
+
+Thank you for choosing مشاعر | Mashaaer as your emotional AI companion. We hope this guide helps you navigate the cosmos of your emotions with greater insight and understanding.
+
+For additional help or to provide feedback, contact us at support@mashaaer.app

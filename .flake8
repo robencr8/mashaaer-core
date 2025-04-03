@@ -1,0 +1,44 @@
+[flake8]
+max-line-length = 100
+exclude =
+    .git,
+    __pycache__,
+    build,
+    dist,
+    android/.buildozer,
+    android/bin,
+    venv,
+    .venv,
+    logs,
+    temp,
+    tts_cache
+
+ignore =
+    # E203: whitespace before ':' (black formatting conflicts)
+    E203,
+    # W503: line break before binary operator (black formatting conflicts)
+    W503,
+    # E402: module level import not at top of file (sometimes needed)
+    E402,
+    # E501: line too long (handled by black)
+    E501,
+    # F401: imported but unused (handled by IDE/editor)
+    F401
+
+per-file-ignores =
+    # Allow __init__ files to import but not use
+    __init__.py: F401
+    # Allow tests to have assert statements and unused variables
+    tests/*.py: F811, F841, E731
+
+[isort]
+profile = black
+line_length = 100
+skip_glob = 
+    android/.buildozer/**
+    android/bin/**
+    venv/**
+    .venv/**
+    logs/**
+    temp/**
+    tts_cache/**

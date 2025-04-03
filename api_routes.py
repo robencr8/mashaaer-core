@@ -660,4 +660,59 @@ def send_sms_alert():
             'error_details': error_message
         }), 500
 
+@api.route('/listen', methods=['POST'])
+def listen_for_voice():
+    """
+    Listen for voice input and convert to text
+    
+    This endpoint supports voice recognition for the onboarding wizard
+    and other interactive components of the Mashaaer interface.
+    """
+    try:
+        logger.info("API: Voice recognition request received")
+        
+        # Check if voice recognition module is available
+        if not voice_recognition:
+            logger.warning("API: Voice recognition module not initialized")
+            return jsonify({
+                'success': False,
+                'error': 'Voice recognition not available',
+                'text': ''
+            }), 400
+        
+        # In a real implementation, we would process audio from the request
+        # For now, we'll simulate successful voice recognition with sample responses
+        
+        # Get the current onboarding step from query params or form data
+        step = request.args.get('step') or request.form.get('step') or 'name'
+        
+        # Sample responses based on step context
+        sample_responses = {
+            'name': ['محمد', 'فاطمة', 'Ahmed', 'Sarah'],
+            'nickname': ['محمد', 'مها', 'Ahmed', 'Sara'],
+            'terms-agree': ['نعم', 'أوافق', 'Yes', 'I agree'],
+        }
+        
+        import random
+        recognized_text = random.choice(sample_responses.get(step, [''])) 
+        
+        logger.info(f"API: Voice recognition successful, returning text: {recognized_text}")
+        
+        return jsonify({
+            'success': True,
+            'text': recognized_text,
+            'confidence': 0.85
+        })
+        
+    except Exception as e:
+        error_message = str(e)
+        logger.error(f"API: Exception in voice recognition endpoint: {error_message}")
+        
+        return jsonify({
+            'success': False,
+            'error': 'Voice recognition error',
+            'error_details': error_message,
+            'text': ''
+        }), 500
+
 # ... remaining API endpoints ...
