@@ -1,0 +1,179 @@
+import os
+import logging
+import json
+import numpy as np
+from datetime import datetime, timedelta
+import sqlite3
+from collections import Counter, defaultdict
+import re
+from typing import Dict, List, Tuple, Optional, Union, Any
+
+import nltk
+from nltk.corpus import wordnet
+
+# Import for OpenAI integration
+try:
+    from openai import OpenAI
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+
+nltk.download('wordnet')  # Ensure WordNet is downloaded
+
+_synonym_cache: Dict[str, List[str]] = {}  # Cache synonyms
+
+def _get_synonyms(keyword: str, depth: int = 1) -> List[str]:
+    """
+    Fetches synonyms for a given keyword using WordNet, with optional depth control.
+
+    Args:
+        keyword: The word to find synonyms for.
+        depth: The level of synonym retrieval (1: direct synonyms, 2: synonyms of synonyms, etc.).
+
+    Returns:
+        A list of synonyms for the keyword.
+    """
+    if (keyword, depth) in _synonym_cache:
+        return _synonym_cache[(keyword, depth)]
+
+    synonyms = set()
+    queue = [(keyword, 0)]  # (word, current_depth)
+
+    while queue:
+        word, current_depth = queue.pop(0)
+        if current_depth > depth:
+            break
+
+        for syn in wordnet.synsets(word):
+            for lemma in syn.lemmas():
+                synonyms.add(lemma.name())
+
+            if current_depth < depth:
+                queue.extend([(lemma.name(), current_depth + 1) for lemma in syn.lemmas()])
+
+    _synonym_cache[(keyword, depth)] = list(synonyms)
+    return list(synonyms)
+
+
+class EmotionTracker:
+    """Advanced emotion tracking system with enhanced analysis algorithms"""
+
+    def __init__(self, db_manager, config, logger=None):  # Add config and logger to constructor
+        self.logger = logger or logging.getLogger(__name__)  # Use provided logger or create a default
+        self.db_manager = db_manager
+        self.config = config
+        self.openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY")) if OPENAI_AVAILABLE else None
+
+        self.emotion_keywords = {
+            "happy": {"joy": 1.0, "delighted": 0.9, "thrilled": 1.0},
+            "sad": {"sorrow": 1.0, "grief": 0.9, "heartbroken": 1.0},
+            # ... more keywords ...
+        }
+
+        self.context_window = 3  # Words to consider for context
+
+
+    def analyze_text(self, text: str) -> str:
+        """
+        Analyzes the given text to determine the dominant emotion.
+
+        Args:
+            text: The text to analyze.
+
+        Returns:
+            The dominant emotion detected (e.g., "happy", "sad", "angry", "neutral").
+        """
+        emotion = self._analyze_with_rules(text)
+        if emotion == "neutral" and self.openai_client:
+            emotion = self._analyze_with_openai(text) or emotion  # Fallback to rules if OpenAI fails
+        return emotion
+
+    def _analyze_with_rules(self, text: str) -> str:
+        """
+        Rule-based emotion analysis using keywords, synonyms, and contextual information.
+        """
+        text = text.lower()
+        emotions: Dict[str, float] = defaultdict(float)  # Use defaultdict for easier counting
+        words = text.split()
+
+        for i, word in enumerate(words):
+            for emotion, keywords in self.emotion_keywords.items():
+                for keyword, weight in keywords.items():
+                    if re.search(r"\b" + re.escape(keyword) + r"\b", word):
+                        emotions[emotion] += weight
+
+                        # Contextual analysis (example: negation)
+                        context_words = words[max(0, i - self.context_window):min(len(words), i + self.context_window + 1)]
+                        context_text = " ".join(context_words)
+                        if re.search(r"\bnot\b|\bnever\b|\bno\b", context_text):
+                            emotions[emotion] -= weight * 0.5  # Reduce weight if negation is present
+
+                    for synonym in _get_synonyms(keyword):
+                        if re.search(r"\b" + re.escape(synonym) + r"\b", word):
+                            emotions[emotion] += weight * 0.7  # Slightly reduce weight for synonyms
+
+        if emotions:
+            return max(emotions, key=emotions.get)
+        return "neutral"
+
+    def _analyze_with_openai(self, text: str) -> Optional[str]:
+        """
+        Emotion analysis using OpenAI API.
+        """
+        if not self.openai_client:
+            self.logger.warning("OpenAI client not available. Skipping OpenAI analysis.")
+            return None
+
+        try:
+            response = self.openai_client.chat.completions.create(
+                model=self.config.OPENAI_MODEL,  # Use config for model selection
+                messages=[
+                    {"role": "system", "content": self.config.OPENAI_PROMPT},  # Use config for prompt
+                    {"role": "user", "content": text},
+                ],
+                max_tokens=10,
+                timeout=10
+            )
+            return response.choices[0].message.content.lower().strip()
+        except Exception as e:
+            self.logger.error(f"OpenAI analysis error: {str(e)}")
+            return None
+
+    def log_emotion(self, emotion: str, text: str, session_id: Optional[str] = None, source: str = "text") -> None:
+        """
+        Logs the detected emotion to the database.
+        """
+        try:
+            timestamp = datetime.now().isoformat()
+            query = "INSERT INTO emotion_data (session_id, emotion, timestamp, text, source) VALUES (?, ?, ?, ?, ?)"
+            self.db_manager.execute_query(query, (session_id, emotion, timestamp, text, source))
+            self.logger.info(f"Emotion logged: {emotion} (session: {session_id}, source: {source})")
+        except sqlite3.Error as e:
+            self.logger.error(f"Database error logging emotion: {str(e)}")
+        except Exception as e:
+            self.logger.error(f"Error logging emotion: {str(e)}")
+
+    def get_emotion_history(self, session_id: Optional[str] = None, days: int = 7) -> List[Dict[str, Any]]:
+        """
+        Retrieves emotion history from the database.
+        """
+        try:
+            query = """
+                SELECT emotion, timestamp, text, source
+                FROM emotion_data
+                WHERE timestamp >= ?
+            """
+            params = [(datetime.now() - timedelta(days=days)).isoformat()]
+            if session_id:
+                query += " AND session_id = ?"
+                params.append(session_id)
+            query += " ORDER BY timestamp ASC"
+
+            results = self.db_manager.execute_query(query, tuple(params))
+            return [{"emotion": row[0], "timestamp": row[1], "text": row[2], "source": row[3]} for row in results]
+        except sqlite3.Error as e:
+            self.logger.error(f"Database error retrieving emotion history: {str(e)}")
+            return []
+        except Exception as e:
+            self.logger.error(f"Error retrieving emotion history: {str(e)}")
+            return []

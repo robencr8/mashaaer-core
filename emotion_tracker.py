@@ -24,13 +24,47 @@ except ImportError:
 
 nltk.download('wordnet')  # Ensure WordNet is downloaded
 
-def _get_synonyms(keyword: str) -> List[str]:
-    """ Fetches synonyms for a given keyword using WordNet. """
+# Cache for storing previously fetched synonyms
+_synonym_cache: Dict[Tuple[str, int], List[str]] = {}
+
+def _get_synonyms(keyword: str, depth: int = 1) -> List[str]:
+    """
+    Fetches synonyms for a given keyword using WordNet, with optional depth control.
+
+    Args:
+        keyword: The word to find synonyms for.
+        depth: The level of synonym retrieval (1: direct synonyms, 2: synonyms of synonyms, etc.).
+
+    Returns:
+        A list of synonyms for the keyword.
+    """
+    # Check if synonyms are already in cache
+    cache_key = (keyword, depth)
+    if cache_key in _synonym_cache:
+        return _synonym_cache[cache_key]
+
     synonyms = set()
-    for syn in wordnet.synsets(keyword):
-        for lemma in syn.lemmas():
-            synonyms.add(lemma.name())
-    return list(synonyms)
+    queue = [(keyword, 0)]  # (word, current_depth)
+
+    while queue:
+        word, current_depth = queue.pop(0)
+        if current_depth > depth:
+            break
+
+        for syn in wordnet.synsets(word):
+            for lemma in syn.lemmas():
+                synonyms.add(lemma.name())
+
+            if current_depth < depth:
+                # Add next level synonyms to the queue
+                for lemma in syn.lemmas():
+                    if lemma.name() != word:  # Avoid cycles
+                        queue.append((lemma.name(), current_depth + 1))
+
+    # Cache the results
+    result = list(synonyms)
+    _synonym_cache[cache_key] = result
+    return result
 
 def _analyze_with_rules(self, text: str, context: Optional[List[str]] = None) -> Dict[str, Any]:
     """
@@ -45,10 +79,14 @@ def _analyze_with_rules(self, text: str, context: Optional[List[str]] = None) ->
         for keyword, weight in keywords.items():
             if re.search(r"\b" + re.escape(keyword) + r"\b", text):
                 emotions[emotion] += weight
-            # Include synonyms in the search
-            for synonym in _get_synonyms(keyword):
+            # Include synonyms in the search with depth control
+            # Use depth=1 for common emotions, depth=2 for more nuanced emotions
+            depth = 2 if emotion in ["contemplative", "inspired", "satisfied", "frustrated", "amused"] else 1
+            for synonym in _get_synonyms(keyword, depth=depth):
                 if re.search(r"\b" + re.escape(synonym) + r"\b", text):
-                    emotions[emotion] += weight * 0.7  # Using lesser weight for synonyms
+                    # Adjust weight based on depth - deeper synonyms get lower weights
+                    synonym_weight = weight * (0.7 if depth == 1 else 0.5)
+                    emotions[emotion] += synonym_weight
 
      # Normalize to ensure no negatives and reasonable values
     for emotion in emotions:
@@ -539,6 +577,31 @@ class EmotionTracker:
                                 emotions["happy"] += 0.3 * score
                         else:
                             emotions[emotion] += score
+                            
+                    # Check if any synonyms of the keywords match
+                    for keyword, weight in keywords.items():
+                        # Skip if this is exactly the word we already checked
+                        if keyword == word:
+                            continue
+                            
+                        # Use different synonym depth based on emotion complexity
+                        depth = 2 if emotion in ["contemplative", "inspired", "satisfied", "frustrated", "amused"] else 1
+                        
+                        # Check all synonyms for this keyword
+                        for synonym in _get_synonyms(keyword, depth=depth):
+                            if word == synonym:
+                                # Adjust weight based on depth - deeper synonyms get lower weights
+                                synonym_weight = weight * (0.7 if depth == 1 else 0.5) * intensifier_value
+                                
+                                if negation_active:
+                                    emotions[emotion] -= synonym_weight
+                                    # Add small boost to opposite emotions for synonyms too
+                                    if emotion == "happy":
+                                        emotions["sad"] += 0.3 * synonym_weight
+                                    elif emotion == "sad":
+                                        emotions["happy"] += 0.3 * synonym_weight
+                                else:
+                                    emotions[emotion] += synonym_weight
                 else:
                     # Simple list format (legacy support)
                     if word in keywords:
@@ -631,10 +694,21 @@ class EmotionTracker:
         for emotion, keywords in self.emotion_keywords.items():
             if isinstance(keywords, dict):
                 for word, weight in keywords.items():
+                    # Check for exact keyword matches
                     pattern = r'\b' + re.escape(word) + r'\b'
                     matches = re.findall(pattern, combined_text.lower())
                     emotions[emotion] += len(matches) * weight
+                    
+                    # Get and check for synonyms with depth control
+                    depth = 2 if emotion in ["contemplative", "inspired", "satisfied", "frustrated", "amused"] else 1
+                    for synonym in _get_synonyms(word, depth=depth):
+                        syn_pattern = r'\b' + re.escape(synonym) + r'\b'
+                        syn_matches = re.findall(syn_pattern, combined_text.lower())
+                        # Apply reduced weight for synonyms
+                        synonym_weight = weight * (0.7 if depth == 1 else 0.5)
+                        emotions[emotion] += len(syn_matches) * synonym_weight
             else:
+                # Legacy support for list format
                 for keyword in keywords:
                     pattern = r'\b' + re.escape(keyword) + r'\b'
                     matches = re.findall(pattern, combined_text.lower())

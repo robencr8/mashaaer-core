@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-04-03T18:13:00.173818",
+  "timestamp": "2025-04-03T18:21:25.030767",
   "basic_emotions": {
     "happy": {
       "sentence": "I am feeling so happy and excited today!",
       "detected": "happy",
-      "intensity": 0.75,
-      "confidence": 0.5,
+      "intensity": 0.7638036809815951,
+      "confidence": 0.5092024539877301,
       "match": true
     },
     "sad": {
@@ -67,8 +67,8 @@
     "anxious": {
       "sentence": "I feel very anxious about the test results.",
       "detected": "anxious",
-      "intensity": 0.8156498673740052,
-      "confidence": 0.5437665782493368,
+      "intensity": 0.8165999592971982,
+      "confidence": 0.5443999728647988,
       "match": true
     },
     "calm": {
@@ -117,7 +117,7 @@
       "sentence": "I accomplished my goal and I'm really proud of myself.",
       "detected": "proud",
       "intensity": 1.0,
-      "confidence": 0.7404395224087212,
+      "confidence": 0.734637181909101,
       "match": true
     },
     "embarrassed": {
@@ -223,87 +223,87 @@
     {
       "text": "I'm excited about the new job but also anxious about the challenges ahead.",
       "primary": "anxious",
-      "intensity": 0.5314009661835749,
+      "intensity": 0.5306122448979592,
       "top_emotions": [
         [
           "anxious",
-          0.35426731078904994
+          0.35374149659863946
         ],
         [
           "excited",
-          0.35214848715992886
+          0.35136845435848757
         ],
         [
           "fearful",
-          0.2935842020510213
+          0.29489004904287297
         ]
       ]
     },
     {
       "text": "The movie made me laugh but the ending left me feeling sad and reflective.",
       "primary": "sad",
-      "intensity": 0.791154210028382,
+      "intensity": 0.7959518599562363,
       "top_emotions": [
         [
           "sad",
-          0.5274361400189214
+          0.5306345733041575
         ],
         [
           "contemplative",
-          0.4725638599810786
+          0.46936542669584247
         ]
       ]
     },
     {
       "text": "I'm proud of my work but frustrated it took so long to complete.",
       "primary": "proud",
-      "intensity": 0.539456513395256,
+      "intensity": 0.5424216322638201,
       "top_emotions": [
         [
           "proud",
-          0.35963767559683735
+          0.3616144215092134
         ],
         [
           "frustrated",
-          0.35695094803101257
+          0.35376995723997906
         ],
         [
           "angry",
-          0.2834113763721502
+          0.2846156212508075
         ]
       ]
     },
     {
       "text": "I'm disappointed about the cancellation but hopeful we can reschedule soon.",
       "primary": "sad",
-      "intensity": 0.8650059468745871,
+      "intensity": 0.8650692767255624,
       "top_emotions": [
         [
           "sad",
-          0.5766706312497247
+          0.576712851150375
         ],
         [
           "hopeful",
-          0.42332936875027527
+          0.423287148849625
         ]
       ]
     },
     {
       "text": "While I'm grateful for the opportunity, I'm tired from all the preparation.",
       "primary": "tired",
-      "intensity": 0.598950233281493,
+      "intensity": 0.5986690765691751,
       "top_emotions": [
         [
           "tired",
-          0.39930015552099535
+          0.39911271771278345
         ],
         [
           "grateful",
-          0.39696734059097977
+          0.3961551100887282
         ],
         [
           "happy",
-          0.20373250388802489
+          0.20473217219848835
         ]
       ]
     }

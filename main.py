@@ -23,12 +23,7 @@ else:
         handlers=[logging.StreamHandler()]
     )
 
-# Enable CORS for specific origins
-CORS(app, origins=["http://your-mobile-app.com", "http://localhost:8080"],
-     supports_credentials=True,
-     allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "X-Custom-Header"],
-     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-     expose_headers=["Content-Type", "Content-Length", "Date"])
+# CORS will be configured after app initialization
 logger = logging.getLogger(__name__)
 logger.info("========== Server Starting ==========")
 logger.info(f"Python version: {os.sys.version}")

@@ -533,6 +533,7 @@ def analyze_emotion():
         
         text = data.get('text', '')
         language = data.get('language', 'en')
+        return_details = data.get('return_details', False)
         
         if not text:
             return jsonify({
@@ -551,9 +552,9 @@ def analyze_emotion():
         text_preview = text[:20] + '...' if len(text) > 20 else text
         logger.info(f"API: Emotion analysis request: '{text_preview}' in {language}")
         
-        # Analyze emotion
+        # Analyze emotion with proper return_details parameter
         try:
-            emotion_result = emotion_tracker.analyze_text(text)
+            emotion_result = emotion_tracker.analyze_text(text, context=None, return_details=return_details)
             
             # Handle string or dict result types
             if isinstance(emotion_result, str):
@@ -567,24 +568,63 @@ def analyze_emotion():
             
             # Map complex emotions to simpler ones for the cosmic UI
             simple_emotion_map = {
+                # Happy group
+                'happy': 'happy',
                 'joy': 'happy',
                 'happiness': 'happy',
                 'excitement': 'happy',
                 'optimism': 'happy',
+                'grateful': 'happy',
+                'hopeful': 'happy',
+                'proud': 'happy',
+                'amused': 'happy',
+                'satisfied': 'happy',
+                
+                # Sad group
+                'sad': 'sad',
                 'sadness': 'sad',
                 'grief': 'sad',
                 'disappointment': 'sad',
+                'lonely': 'sad',
+                'tired': 'sad',
+                
+                # Angry group
+                'angry': 'angry',
                 'anger': 'angry',
                 'annoyance': 'angry',
                 'frustration': 'angry',
-                'neutral': 'neutral'
+                'disgusted': 'angry',
+                
+                # Neutral group
+                'neutral': 'neutral',
+                'calm': 'neutral',
+                'contemplative': 'neutral',
+                
+                # Surprised group (maps to neutral in cosmic UI)
+                'surprised': 'neutral',
+                
+                # Interested/confused group (maps to neutral in cosmic UI)
+                'interested': 'neutral',
+                'confused': 'neutral',
+                'inspired': 'neutral',
+                
+                # Fear group (maps to sad in cosmic UI)
+                'fearful': 'sad',
+                'anxious': 'sad',
+                'embarrassed': 'sad',
+                
+                # Boredom (maps to neutral in cosmic UI)
+                'bored': 'neutral'
             }
             
             # Convert to simple emotion for UI
             if isinstance(dominant_emotion, str):
+                logger.debug(f"API: Looking up simple emotion for {dominant_emotion.lower()}")
                 simple_emotion = simple_emotion_map.get(dominant_emotion.lower(), 'neutral')
+                logger.debug(f"API: Mapped '{dominant_emotion.lower()}' to '{simple_emotion}'")
             else:
                 simple_emotion = 'neutral'
+                logger.debug(f"API: Dominant emotion is not a string: {type(dominant_emotion)}")
             
             return jsonify({
                 'success': True,

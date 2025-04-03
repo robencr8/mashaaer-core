@@ -31,6 +31,8 @@
 - Resolved audio playback inconsistencies
 - Corrected Arabic RTL layout problems
 - Fixed touch interaction events on mobile devices
+- Fixed emotion mapping inconsistencies where primary emotions like "happy" were incorrectly mapped to "neutral"
+- Improved direct emotion term detection and mapping accuracy
 
 ## Future Plans
 - Speech-to-Speech translation capabilities

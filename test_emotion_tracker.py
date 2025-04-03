@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 """
 Test script for enhanced emotion tracker functionality
+
+Update (2025-04-03):
+- All emotion mappings now correctly work with specific emotion terms being
+  properly mapped to their primary categories ("happy" -> "happy", etc.)
+- Fixed the inconsistency where "happy" was being mapped to "neutral" instead of "happy"
+- Added direct mappings for "sad", "angry" and other primary emotions
+- All tests now pass with the expected emotional mapping
 """
 import json
 import os

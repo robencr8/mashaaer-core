@@ -1,7 +1,6 @@
 modules = ["python-3.11"]
 
 [workflows]
-runButton = "Project"
 
 [[workflows.workflow]]
 name = "Run"
