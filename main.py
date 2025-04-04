@@ -107,12 +107,24 @@ def log_request_details():
     logger.debug(f"⚡ All Headers: {dict(request.headers)}")
 
 
-CORS(app,
-     origins=allowed_origins,
+# Get the full list of possible origins for CORS
+FEEDBACK_TOOL_ORIGIN = "https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev"
+REPLIT_DOMAIN = f"https://{os.environ.get('REPL_SLUG', 'workspace')}.{os.environ.get('REPL_OWNER', 'robenedwan')}.repl.co"
+WORF_DOMAIN = f"https://{os.environ.get('REPL_SLUG', 'workspace')}--{os.environ.get('REPL_OWNER', 'robenedwan')}.repl.co"
+
+# Log the domains we're supporting
+logger.info(f"CORS Configuration - Allowing origins:")
+logger.info(f"Feedback Tool: {FEEDBACK_TOOL_ORIGIN}")
+logger.info(f"Replit Domain: {REPLIT_DOMAIN}")
+logger.info(f"Worf Domain: {WORF_DOMAIN}")
+
+# Use the simplest CORS configuration with wildcard origin
+CORS(app, 
+     origins="*",  # Allow all origins for maximum compatibility
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
      allow_headers=[
          "Content-Type", "Authorization", "X-Requested-With", "Accept",
-         "Origin"
+         "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"
      ],
      supports_credentials=False,
      expose_headers=["Content-Type", "Content-Length", "Date"],
@@ -939,11 +951,51 @@ def test_simple_html_page():
         return f"Error: {error_msg}", 500
 
 
-@app.route('/')
-def index():
+# Root route is now handled by routes_feedback_tool.py to avoid conflicts
+# @app.route('/')
+# def index():
+#     pass
+
+@app.route('/simple-test')
+def simple_test():
+    """Serve a simple test page for connectivity diagnostics"""
+    try:
+        logger.info("Simple test page accessed")
+        return app.send_static_file('simple_test.html')
+    except Exception as e:
+        logger.error(f"Error serving simple test page: {str(e)}")
+        return f"Error: {str(e)}", 500
+        
+@app.route('/minimal-test-enhanced')
+def minimal_test_page_enhanced():
+    """Serve the enhanced minimal test page for diagnosing web application accessibility"""
+    try:
+        logger.info("Enhanced minimal test page accessed")
+        # Add CORS headers for maximum compatibility
+        response = make_response(app.send_static_file('minimal_test.html'))
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+    except Exception as e:
+        logger.error(f"Error serving enhanced minimal test page: {str(e)}")
+        # Ultra-simple fallback response with CORS headers
+        response = make_response("Minimal test page is available. Server is running.")
+        response.headers['Content-Type'] = 'text/plain'
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+        
+@app.route('/ultra-minimal-enhanced')
+def ultra_minimal_page_enhanced():
+    """Ultra minimal endpoint returning text with no dependencies (enhanced version)"""
+    response = make_response("Mashaaer Feelings server is running. This is a plain text response.")
+    response.headers['Content-Type'] = 'text/plain'
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
+
+@app.route('/index')
+def app_index():
     try:
         # Log additional details about the request for diagnostics
-        logger.info("🔍 Request: GET /")
+        logger.info("🔍 Request: GET /index")
         logger.info(
             f"🔍 Origin: {request.headers.get('Origin', 'No Origin header')}")
         logger.info(f"🔍 Host: {request.headers.get('Host', 'No Host header')}")
@@ -952,7 +1004,7 @@ def index():
         )
 
         # Detailed logging for diagnostic purposes
-        logger.info("Root route accessed - detailed diagnostics:")
+        logger.info("Index route accessed - detailed diagnostics:")
         logger.info(f"Request method: {request.method}")
         logger.info(f"Request headers: {dict(request.headers)}")
         logger.info(f"Request remote address: {request.remote_addr}")
@@ -992,7 +1044,7 @@ def index():
         return app.send_static_file('index.html')
 
     except Exception as e:
-        error_msg = f"Error in root route: {str(e)}"
+        error_msg = f"Error in index route: {str(e)}"
         logger.error(error_msg)
         try:
             # Ultra-simple fallback response with explicit CORS headers
@@ -2590,67 +2642,20 @@ def feedback_test_comprehensive():
     return app.send_static_file('feedback_tool_test.html')
 
 
-@app.route('/feedback-tool-endpoint', methods=['POST', 'OPTIONS'])
-def feedback_tool_endpoint():
-    """Endpoint optimized for the feedback tool with all CORS headers"""
-    origin = request.headers.get('Origin', FEEDBACK_TOOL_ORIGIN or '*')
-    logger.info(f"⭐ Feedback tool endpoint accessed from origin: {origin}")
-
-    # For OPTIONS requests
-    if request.method == 'OPTIONS':
-        response = make_response()
-        response.headers['Access-Control-Allow-Origin'] = origin
-        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = '*'
-        response.headers['Access-Control-Max-Age'] = '3600'
-        return response
-
-    # Process POST request
-    try:
-        data = request.get_json()
-        logger.info(f"Received feedback tool test data: {data}")
-        response_data = {
-            "status": "success",
-            "message": "Feedback tool endpoint working correctly",
-            "received_data": data
-        }
-        response = jsonify(response_data)
-        response.headers['Access-Control-Allow-Origin'] = origin
-        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = '*'
-        return response
-    except Exception as e:
-        logger.error(f"Error in feedback tool endpoint: {str(e)}")
-        response = jsonify({"status": "error", "message": str(e)})
-        response.headers['Access-Control-Allow-Origin'] = origin
-        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = '*'
-        return response, 500
+# This route has been moved to routes_feedback_tool.py
+# @app.route('/feedback-tool-endpoint', methods=['POST', 'OPTIONS'])
+# def feedback_tool_endpoint():
+#     """Endpoint optimized for the feedback tool with all CORS headers"""
+#     # Implementation moved to routes_feedback_tool.py to avoid route conflicts
+#     pass
 
 
 # Root-level health check specifically for the feedback tool
-@app.route('/health', methods=['GET', 'OPTIONS'])
-def health_check():
-    """Ultra minimal health check endpoint at root level with maximum CORS headers"""
-    origin = request.headers.get('Origin', FEEDBACK_TOOL_ORIGIN or '*')
-    logger.info(f"⭐ Health check endpoint accessed from origin: {origin}")
-
-    # For OPTIONS requests
-    if request.method == 'OPTIONS':
-        response = make_response()
-        response.headers['Access-Control-Allow-Origin'] = origin
-        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = '*'
-        response.headers['Access-Control-Max-Age'] = '3600'
-        return response
-
-    # For GET requests - absolute minimal plain text response
-    response = make_response("OK")
-    response.headers['Content-Type'] = 'text/plain'
-    response.headers['Access-Control-Allow-Origin'] = origin
-    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = '*'
-    return response
+# This route has been moved to routes_feedback_tool.py to avoid conflicts
+# @app.route('/health', methods=['GET', 'OPTIONS'])
+# def health_check():
+#     """Ultra minimal health check endpoint at root level with maximum CORS headers"""
+#     pass
 
 
 @app.route('/static/markdown/<path:filename>')
@@ -2691,31 +2696,11 @@ def ultra_minimal_test_page():
     return render_template('ultra_minimal.html')
 
 
-@app.route('/health', methods=['GET', 'OPTIONS'])
-def health_check_root():
-    """Ultra minimal health check endpoint at root level for maximum accessibility"""
-    # Handle OPTIONS requests for preflight
-    if request.method == 'OPTIONS':
-        response = make_response()
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = '*'
-        response.headers['Access-Control-Max-Age'] = '86400'  # 24 hours
-        return response
-        
-    # Regular GET request
-    response = make_response("OK")
-    response.headers['Content-Type'] = 'text/plain'
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = '*'
-    response.headers['Access-Control-Expose-Headers'] = 'Content-Length, Content-Type, Date'
-    
-    # Log the request origin for debugging
-    origin = request.headers.get('Origin', 'No origin')
-    logger.info(f"⭐ Health check endpoint accessed from origin: {origin}")
-    
-    return response
+# This route conflicts with the one in routes_feedback_tool.py and has been disabled
+# @app.route('/health', methods=['GET', 'OPTIONS'])
+# def health_check_root():
+#     """Ultra minimal health check endpoint at root level for maximum accessibility"""
+#     pass
 
 
 @app.route('/feedback-whitelist')

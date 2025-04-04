@@ -155,12 +155,14 @@ class ProfileManager:
             voice_style = answers.get('voice_style', '').lower()
             language = answers.get('language', 'en')
             
-            lang = language or 'en'  # Make sure language is not None
+            # Make sure language is not None
+            if language is None:
+                language = 'en'
             
             # Default results
             results = {
                 'preferred_tone': 'neutral',
-                'tts_voice': 'default' if lang == 'en' else 'arabic',
+                'tts_voice': 'default' if language == 'en' else 'arabic',
                 'mood_type': 'balanced'
             }
             
@@ -180,10 +182,10 @@ class ProfileManager:
             
         except Exception as e:
             logger.error(f"Error inferring personality: {str(e)}")
-            lang = language or 'en'  # Make sure language is not None
+            # Default fallback values in case of error
             return {
                 'preferred_tone': 'neutral',
-                'tts_voice': 'default' if lang == 'en' else 'arabic',
+                'tts_voice': 'default',
                 'mood_type': 'balanced'
             }
     
@@ -257,7 +259,15 @@ class ProfileManager:
             
             # Insert into database
             columns = ', '.join(profile_data.keys())
-            placeholders = ', '.join(['%s' for _ in range(len(profile_data.keys()))])
+            
+            # Check if using PostgreSQL and adjust placeholders accordingly
+            if hasattr(self.db_manager, 'use_postgres') and self.db_manager.use_postgres:
+                # For PostgreSQL use $1, $2, etc.
+                placeholders = ', '.join([f'${i+1}' for i in range(len(profile_data.keys()))])
+            else:
+                # For SQLite use ? placeholders
+                placeholders = ', '.join(['?' for _ in range(len(profile_data.keys()))])
+                
             values = tuple(profile_data.values())
             
             query = f"INSERT INTO user_profile ({columns}) VALUES ({placeholders})"
@@ -299,15 +309,30 @@ class ProfileManager:
             update_parts = []
             values = []
             
-            for key, value in current_profile.items():
-                if key != 'id':  # Skip ID field
-                    update_parts.append(f"{key} = %s")
-                    values.append(value)
+            # Check for PostgreSQL vs SQLite
+            if hasattr(self.db_manager, 'use_postgres') and self.db_manager.use_postgres:
+                # For PostgreSQL use indexed placeholders
+                index = 1
+                for key, value in current_profile.items():
+                    if key != 'id':  # Skip ID field
+                        update_parts.append(f"{key} = ${index}")
+                        values.append(value)
+                        index += 1
+                
+                # Add ID for WHERE clause
+                values.append(profile_id)
+                query = f"UPDATE user_profile SET {', '.join(update_parts)} WHERE id = ${index}"
+            else:
+                # For SQLite use ? placeholders
+                for key, value in current_profile.items():
+                    if key != 'id':  # Skip ID field
+                        update_parts.append(f"{key} = ?")
+                        values.append(value)
+                
+                # Add ID for WHERE clause
+                values.append(profile_id)
+                query = f"UPDATE user_profile SET {', '.join(update_parts)} WHERE id = ?"
             
-            # Add ID for WHERE clause
-            values.append(profile_id)
-            
-            query = f"UPDATE user_profile SET {', '.join(update_parts)} WHERE id = %s"
             self.db_manager.execute_query(query, tuple(values))
             
             # Update current profile

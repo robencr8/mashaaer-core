@@ -1,95 +1,134 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Mashaaer Simple Test</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Connectivity Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-        .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-        }
-        h1 {
-            font-size: 2.5rem;
-            color: #8a2be2;
-            margin-bottom: 20px;
-        }
-        p {
-            font-size: 1.2rem;
             line-height: 1.6;
-            margin-bottom: 30px;
         }
-        .status {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #1e1e1e;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        .success {
+            color: green;
+            font-weight: bold;
         }
-        .status.online {
-            border-left: 4px solid #4CAF50;
+        .error {
+            color: red;
+            font-weight: bold;
         }
-        .status.offline {
-            border-left: 4px solid #F44336;
-        }
-        .action-btn {
-            display: inline-block;
-            background-color: #8a2be2;
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
             color: white;
-            padding: 12px 24px;
             border: none;
-            border-radius: 30px;
-            font-size: 1rem;
+            border-radius: 4px;
             cursor: pointer;
-            margin: 10px;
-            text-decoration: none;
-            transition: all 0.3s ease;
+            font-size: 16px;
+            margin: 5px;
         }
-        .action-btn:hover {
-            background-color: #6a1cb7;
-            transform: translateY(-2px);
+        button:hover {
+            background-color: #45a049;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>مشاعر | Mashaaer</h1>
-        <div class="status online">Server Status: Online</div>
-        <p>Welcome to the simplified test page for Mashaaer Feelings. This page confirms that the web server is operational.</p>
-        
-        <div>
-            <a href="/test" class="action-btn">Test Endpoint</a>
-            <a href="/api/status" class="action-btn">API Status</a>
-            <a href="/cors-test-enhanced" class="action-btn">CORS Test</a>
-        </div>
-        
-        <p style="margin-top: 50px; font-size: 0.9rem; opacity: 0.7;">Version: 1.0.0 | Server Time: <span id="server-time">Loading...</span></p>
+    <h1>Mashaaer Feelings - Simple Connectivity Test</h1>
+    <p>This page tests basic API connectivity to verify the web application is functioning correctly.</p>
+    
+    <div>
+        <button id="testRoot">Test Root Endpoint</button>
+        <button id="testHealth">Test Health Endpoint</button>
+        <button id="testAPI">Test API Status</button>
+    </div>
+    
+    <div id="results">
+        <p>Click any button above to test connectivity...</p>
     </div>
     
     <script>
-        // Update server time
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('server-time').textContent = now.toISOString();
-        }
-        
-        // Update time every second
-        updateTime();
-        setInterval(updateTime, 1000);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Log page load
+            console.log('Simple test page loaded at:', new Date().toISOString());
+            
+            // Display browser info
+            const results = document.getElementById('results');
+            results.innerHTML += `<p>Browser: ${navigator.userAgent}</p>`;
+            results.innerHTML += `<p>Page URL: ${window.location.href}</p>`;
+            
+            // Function to add result to the results div
+            function addResult(message, isSuccess = true) {
+                const p = document.createElement('p');
+                p.className = isSuccess ? 'success' : 'error';
+                p.textContent = message;
+                results.appendChild(p);
+                console.log(isSuccess ? '[SUCCESS]' : '[ERROR]', message);
+            }
+            
+            // Test the root endpoint (/)
+            document.getElementById('testRoot').addEventListener('click', function() {
+                results.innerHTML = '<h3>Testing Root Endpoint...</h3>';
+                addResult(`Request initiated at ${new Date().toISOString()}`);
+                
+                fetch('/')
+                    .then(response => {
+                        addResult(`Status: ${response.status} ${response.statusText}`);
+                        return response.text();
+                    })
+                    .then(data => {
+                        addResult(`Response: ${data.substring(0, 100)}${data.length > 100 ? '...' : ''}`);
+                    })
+                    .catch(error => {
+                        addResult(`Error: ${error.message}`, false);
+                    });
+            });
+            
+            // Test the health endpoint (/api/health)
+            document.getElementById('testHealth').addEventListener('click', function() {
+                results.innerHTML = '<h3>Testing Health Endpoint...</h3>';
+                addResult(`Request initiated at ${new Date().toISOString()}`);
+                
+                fetch('/api/health')
+                    .then(response => {
+                        addResult(`Status: ${response.status} ${response.statusText}`);
+                        return response.text();
+                    })
+                    .then(data => {
+                        addResult(`Response: ${data}`);
+                    })
+                    .catch(error => {
+                        addResult(`Error: ${error.message}`, false);
+                    });
+            });
+            
+            // Test the API status endpoint (/api/status)
+            document.getElementById('testAPI').addEventListener('click', function() {
+                results.innerHTML = '<h3>Testing API Status Endpoint...</h3>';
+                addResult(`Request initiated at ${new Date().toISOString()}`);
+                
+                fetch('/api/status')
+                    .then(response => {
+                        addResult(`Status: ${response.status} ${response.statusText}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        addResult(`Response: ${JSON.stringify(data, null, 2)}`);
+                    })
+                    .catch(error => {
+                        addResult(`Error: ${error.message}`, false);
+                    });
+            });
+        });
     </script>
 </body>
 </html>

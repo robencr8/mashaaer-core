@@ -1,95 +1,274 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Enhanced CORS Test Page</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced CORS Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
-            text-align: center;
             margin: 0;
             padding: 20px;
+            background-color: #f0f0f0;
         }
         .container {
             max-width: 800px;
             margin: 0 auto;
+            background-color: white;
             padding: 20px;
-            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-card {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
             border-radius: 8px;
         }
-        h1 {
-            color: #8a2be2;
+        h1, h2 {
+            color: #333;
         }
         button {
-            background-color: #8a2be2;
+            background-color: #4CAF50;
             color: white;
-            padding: 12px 24px;
             border: none;
-            border-radius: 30px;
+            padding: 8px 15px;
+            margin: 5px 0;
+            border-radius: 4px;
             cursor: pointer;
-            margin: 10px;
         }
-        #result {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #2a2a2a;
-            border-radius: 8px;
-            text-align: left;
-            width: 100%;
-            min-height: 50px;
+        button:hover {
+            background-color: #45a049;
         }
-        .success { color: #4CAF50; }
-        .error { color: #F44336; }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .origin-info {
+            background-color: #e6f7ff;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>مشاعر | Mashaaer</h1>
-        <h2>CORS Test Page</h2>
+        <h1>Enhanced CORS Test</h1>
         
-        <div>
-            <button onclick="testEndpoint('/api/status')">Test API Status</button>
-            <button onclick="testEndpoint('/api/ping')">Test API Ping</button>
-            <button onclick="testEndpoint('/test')">Test Simple Endpoint</button>
+        <div class="origin-info">
+            <strong>Page Origin:</strong> <span id="page-origin">Loading...</span><br>
+            <strong>Current URL:</strong> <span id="current-url">Loading...</span><br>
+            <strong>Headers to Match:</strong> <div id="headers-to-match">Loading...</div>
         </div>
         
-        <div id="result">Results will appear here...</div>
+        <div class="test-card">
+            <h2>1. Basic API Check</h2>
+            <button onclick="testEndpoint('/api/status')">Test API Status</button>
+            <button onclick="testEndpoint('/api/ping')">Test API Ping</button>
+            <button onclick="testEndpoint('/api/minimal')">Test Minimal API</button>
+            <div id="basic-result" class="result">Results will appear here...</div>
+        </div>
         
-        <p>Origin: <span id="origin"></span></p>
-        <p>Server Time: <span id="server-time"></span></p>
+        <div class="test-card">
+            <h2>2. CORS Specific Tests</h2>
+            <button onclick="testEndpoint('/api/test-cors')">Test CORS Endpoint</button>
+            <button onclick="testEndpoint('/api/test-cors-minimal')">Test CORS Minimal</button>
+            <button onclick="testEndpoint('/feedback-tool-test')">Test Feedback Tool Text</button>
+            <div id="cors-result" class="result">Results will appear here...</div>
+        </div>
+        
+        <div class="test-card">
+            <h2>3. OPTIONS Preflight Test</h2>
+            <button onclick="testOptions('/api/status')">Test OPTIONS /api/status</button>
+            <button onclick="testOptions('/api/test-cors')">Test OPTIONS /api/test-cors</button>
+            <div id="options-result" class="result">Results will appear here...</div>
+        </div>
+        
+        <div class="test-card">
+            <h2>4. Post Request Test</h2>
+            <button onclick="testPost('/api/test-cors', {test: 'data'})">Test POST to /api/test-cors</button>
+            <div id="post-result" class="result">Results will appear here...</div>
+        </div>
     </div>
-    
+
     <script>
-        // Display origin
-        document.getElementById('origin').textContent = window.location.origin;
+        // Show page origin and URL info
+        document.getElementById('page-origin').textContent = window.location.origin;
+        document.getElementById('current-url').textContent = window.location.href;
         
-        // Update time
-        document.getElementById('server-time').textContent = new Date().toISOString();
+        // Show headers to match
+        const headersToMatch = {
+            "Origin": window.location.origin,
+            "Referer": window.location.href
+        };
+        document.getElementById('headers-to-match').textContent = JSON.stringify(headersToMatch, null, 2);
         
-        // Test an endpoint
-        function testEndpoint(endpoint) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = `<p>Testing endpoint: ${endpoint}</p>`;
-            resultDiv.className = '';
+        async function testEndpoint(endpoint) {
+            const resultId = endpoint.includes('cors') ? 'cors-result' : 'basic-result';
+            const resultElement = document.getElementById(resultId);
             
-            fetch(endpoint)
-                .then(response => {
-                    resultDiv.innerHTML += `<p>Status: ${response.status} ${response.statusText}</p>`;
-                    return response.json();
-                })
-                .then(data => {
-                    resultDiv.innerHTML += `<p class="success">Success! Response data:</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
-                    resultDiv.className = 'success';
-                })
-                .catch(error => {
-                    resultDiv.innerHTML += `<p class="error">Error: ${error.message}</p>`;
-                    resultDiv.className = 'error';
-                    console.error('Fetch error:', error);
+            resultElement.innerHTML = `Fetching ${endpoint}...`;
+            resultElement.className = 'result';
+            
+            try {
+                const url = new URL(endpoint, window.location.origin);
+                console.log(`Fetching: ${url}`);
+                
+                const startTime = performance.now();
+                const response = await fetch(url);
+                const endTime = performance.now();
+                const duration = Math.round(endTime - startTime);
+                
+                console.log(`Response status: ${response.status}`);
+                console.log(`Response headers:`, response.headers);
+                
+                // Get response headers
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
                 });
+                
+                // Check CORS headers
+                const corsHeaders = {
+                    'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
+                    'access-control-allow-methods': response.headers.get('access-control-allow-methods'),
+                    'access-control-allow-headers': response.headers.get('access-control-allow-headers')
+                };
+                
+                // Check content type and parse response
+                const contentType = response.headers.get('content-type');
+                let responseData;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    responseData = await response.json();
+                    console.log(`JSON Response:`, responseData);
+                } else {
+                    responseData = await response.text();
+                    console.log(`Text Response: ${responseData}`);
+                }
+                
+                const result = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    duration: `${duration}ms`,
+                    corsHeaders: corsHeaders,
+                    contentType: contentType,
+                    data: responseData
+                };
+                
+                resultElement.textContent = JSON.stringify(result, null, 2);
+                resultElement.classList.add('success');
+            } catch (error) {
+                console.error(`Error fetching ${endpoint}:`, error);
+                resultElement.textContent = `Error: ${error.message}`;
+                resultElement.classList.add('error');
+            }
         }
+        
+        async function testOptions(endpoint) {
+            const resultElement = document.getElementById('options-result');
+            
+            resultElement.innerHTML = `Sending OPTIONS to ${endpoint}...`;
+            resultElement.className = 'result';
+            
+            try {
+                const url = new URL(endpoint, window.location.origin);
+                console.log(`OPTIONS: ${url}`);
+                
+                const response = await fetch(url, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                console.log(`Response status: ${response.status}`);
+                
+                // Get all response headers
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                
+                const result = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: headers
+                };
+                
+                resultElement.textContent = JSON.stringify(result, null, 2);
+                resultElement.classList.add('success');
+            } catch (error) {
+                console.error(`Error sending OPTIONS to ${endpoint}:`, error);
+                resultElement.textContent = `Error: ${error.message}`;
+                resultElement.classList.add('error');
+            }
+        }
+        
+        async function testPost(endpoint, data) {
+            const resultElement = document.getElementById('post-result');
+            
+            resultElement.innerHTML = `Posting to ${endpoint}...`;
+            resultElement.className = 'result';
+            
+            try {
+                const url = new URL(endpoint, window.location.origin);
+                console.log(`POST: ${url} with data:`, data);
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                console.log(`Response status: ${response.status}`);
+                
+                // Get all response headers
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+                
+                // Get response body
+                let responseData;
+                const contentType = response.headers.get('content-type');
+                
+                if (contentType && contentType.includes('application/json')) {
+                    responseData = await response.json();
+                } else {
+                    responseData = await response.text();
+                }
+                
+                const result = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: headers,
+                    data: responseData
+                };
+                
+                resultElement.textContent = JSON.stringify(result, null, 2);
+                resultElement.classList.add('success');
+            } catch (error) {
+                console.error(`Error posting to ${endpoint}:`, error);
+                resultElement.textContent = `Error: ${error.message}`;
+                resultElement.classList.add('error');
+            }
+        }
+        
+        // Automatically run the first test on page load
+        window.onload = function() {
+            testEndpoint('/api/status');
+        };
     </script>
 </body>
 </html>
