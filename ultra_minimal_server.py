@@ -1,32 +1,17 @@
+#!/usr/bin/env python3
 """
-Ultra Minimal Server for testing the web application feedback tool
-
-This is a self-contained Flask application with minimal dependencies that can be used
-to test if the web application feedback tool can successfully connect to a server.
-It includes properly configured CORS headers and a simple health check endpoint.
+Ultra Minimal Flask Server for Diagnostics
+No dependencies other than Flask, designed for maximum reliability
 """
 
-import os
-import logging
-from datetime import datetime
+from flask import Flask, jsonify, request, make_response
 
-from flask import Flask, jsonify, make_response, request
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-# Initialize Flask app
 app = Flask(__name__)
 
-# CORS headers helper function
+@app.after_request
 def add_cors_headers(response):
-    """Add CORS headers to the response"""
-    origin = request.headers.get('Origin', '*')
-    response.headers['Access-Control-Allow-Origin'] = origin
+    """Add CORS headers to all responses"""
+    response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = '*'
     response.headers['Access-Control-Max-Age'] = '3600'
@@ -34,74 +19,50 @@ def add_cors_headers(response):
 
 @app.route('/')
 def index():
-    """Root endpoint - returns a simple HTML page"""
-    html = """<!DOCTYPE html>
-<html>
-<head>
-    <title>Ultra Minimal Server</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .success { color: green; }
-    </style>
-</head>
-<body>
-    <h1>Ultra Minimal Server</h1>
-    <p class="success">✅ Server is running!</p>
-    <p>Server time: {time}</p>
-    <p><a href="/api/test">Test API Endpoint</a></p>
-</body>
-</html>""".format(time=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-    
-    response = make_response(html)
-    response.headers['Content-Type'] = 'text/html'
-    return add_cors_headers(response)
+    """Ultra minimal root endpoint"""
+    return "Ultra minimal server is running"
 
-@app.route('/api/test')
+@app.route('/test')
 def test_api():
-    """Test API endpoint - returns a simple JSON response"""
-    data = {
-        "status": "success",
-        "message": "API is working",
-        "timestamp": datetime.now().isoformat()
-    }
-    response = jsonify(data)
-    return add_cors_headers(response)
+    """Ultra minimal test API endpoint"""
+    return jsonify({
+        "status": "ok",
+        "message": "Ultra minimal test API is working",
+        "origin": request.headers.get('Origin', 'No origin')
+    })
 
-@app.route('/health')
-def health():
-    """Simple health check endpoint - returns text 'OK'"""
-    response = make_response("OK")
-    response.headers['Content-Type'] = 'text/plain'
-    return add_cors_headers(response)
-
-@app.route('/echo', methods=['GET', 'POST', 'OPTIONS'])
-def echo():
-    """Echo endpoint - returns information about the request"""
-    if request.method == 'OPTIONS':
-        response = make_response()
-        return add_cors_headers(response)
-    
-    data = {
-        "method": request.method,
-        "headers": dict(request.headers),
-        "args": dict(request.args),
-        "form": dict(request.form) if request.form else None,
-        "json": request.json if request.is_json else None,
-        "timestamp": datetime.now().isoformat()
-    }
-    
-    # Clean up sensitive data before logging
-    log_data = data.copy()
-    if 'headers' in log_data and log_data['headers']:
-        for sensitive in ['Authorization', 'Cookie']:
-            if sensitive in log_data['headers']:
-                log_data['headers'][sensitive] = '[REDACTED]'
-    
-    logger.info(f"Echo request: {log_data}")
-    response = jsonify(data)
-    return add_cors_headers(response)
+@app.route('/info')
+def info():
+    """Show server information"""
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Ultra Minimal Server</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+        <h1>Ultra Minimal Server</h1>
+        <p>This is an ultra minimal Flask server designed for maximum reliability.</p>
+        <p>If you can see this page, the web server is accessible.</p>
+    </body>
+    </html>
+    """
+    return html
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8080))  # Use port 8080 instead
-    logger.info(f"Starting ultra minimal server on port {port}")
+    import sys
+    import os
+    
+    # Get port from command line argument, environment variable, or default (8080)
+    if len(sys.argv) > 1:
+        try:
+            port = int(sys.argv[1])
+        except ValueError:
+            port = int(os.environ.get('PORT', 8080))
+    else:
+        port = int(os.environ.get('PORT', 8080))
+        
+    print(f"Starting ultra minimal server on port {port}")
     app.run(host='0.0.0.0', port=port, debug=True)

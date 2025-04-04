@@ -2488,6 +2488,71 @@ def user_logout():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+@app.route('/health-check-test', methods=['GET'])
+def health_check_test():
+    """Ultra simple health check endpoint that returns plain text"""
+    response = make_response("OK", 200)
+    # Add explicit CORS headers
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    return response
+
+
+@app.route('/feedback-test', methods=['GET'])
+def feedback_tool_direct_test():
+    """Direct endpoint specifically designed for the feedback tool"""
+    try:
+        html = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Feedback Tool Direct Test</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    max-width: 800px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    line-height: 1.6;
+                }
+                .success {
+                    color: green;
+                    font-weight: bold;
+                }
+                .box {
+                    border: 1px solid #ddd;
+                    padding: 15px;
+                    margin: 15px 0;
+                    border-radius: 5px;
+                    background-color: #f9f9f9;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Feedback Tool Direct Test</h1>
+            
+            <div class="box">
+                <p class="success">If you can see this page, the web server is responding correctly!</p>
+                <p>This HTML is directly returned from the endpoint, not from a template.</p>
+            </div>
+        </body>
+        </html>
+        """
+        response = make_response(html)
+        # Add explicit CORS headers
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Content-Type'] = 'text/html'
+        return response
+    except Exception as e:
+        logger.error(f"Error serving feedback test page: {str(e)}")
+        return "Error serving feedback test page", 500
+
+
 @app.route('/api/set-theme', methods=['POST'])
 def set_theme():
     """Set the user's theme preference"""
@@ -2723,9 +2788,9 @@ def cors_diagnostic_page():
     return send_from_directory('static', 'cors_diagnostic.html')
 
 
-@app.route('/ultra-minimal-test')
-def ultra_minimal_test_page():
-    """Serve the ultra minimal test page for diagnosing web application accessibility"""
+@app.route('/ultra-minimal-test-alt')
+def ultra_minimal_test_page_alt():
+    """Serve the ultra minimal test page (alternative route) for diagnosing web application accessibility"""
     return render_template('ultra_minimal.html')
 
 
@@ -2786,10 +2851,41 @@ def feedback_tool_access():
         response.headers['Content-Type'] = 'text/plain'
         logger.info(f"⭐⭐⭐ FEEDBACK TOOL HEAD: Responding with 200 OK")
     else:
-        # For GET requests, return a simple text response
-        response = make_response("OK - Feedback tool access successful")
-        response.headers['Content-Type'] = 'text/plain'
-        logger.info(f"⭐⭐⭐ FEEDBACK TOOL GET: Responding with 200 OK and text message")
+        # For GET requests, return a simple HTML page instead of plain text
+        # This helps diagnose browser rendering issues
+        html_content = """<!DOCTYPE html>
+<html>
+<head>
+    <title>Feedback Tool Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+    <h1>Feedback Tool Access Successful</h1>
+    <p>This page confirms that the feedback tool can successfully reach the server.</p>
+    <p>If you're seeing this page, it means:</p>
+    <ul>
+        <li>The server is running correctly</li>
+        <li>CORS headers are properly configured</li>
+        <li>The feedback tool can access the content</li>
+    </ul>
+    <div style="margin-top: 30px; padding: 15px; background-color: #f0f0f0; border-radius: 5px;">
+        <p><strong>Server Information:</strong></p>
+        <p>Request made from: {origin}</p>
+        <p>User agent: {user_agent}</p>
+        <p>Host: {host}</p>
+        <p>Current time: {time}</p>
+    </div>
+</body>
+</html>""".format(
+            origin=origin,
+            user_agent=user_agent,
+            host=host,
+            time=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
+        response = make_response(html_content)
+        response.headers['Content-Type'] = 'text/html'
+        logger.info(f"⭐⭐⭐ FEEDBACK TOOL GET: Responding with 200 OK and HTML content")
     
     # Add CORS headers to all responses
     response.headers['Access-Control-Allow-Origin'] = '*'
@@ -2797,4 +2893,14 @@ def feedback_tool_access():
     response.headers['Access-Control-Allow-Headers'] = '*'
     response.headers['Access-Control-Expose-Headers'] = 'Content-Length, Content-Type, Date'
     
+    return response
+
+
+# Simple health check endpoint that returns plain text with no dependencies
+@app.route('/health-check-direct')
+def health_check_direct():
+    """Ultra simple health check endpoint that returns plain text"""
+    response = make_response("OK - Server is healthy")
+    response.headers['Content-Type'] = 'text/plain'
+    response.headers['Access-Control-Allow-Origin'] = '*'
     return response

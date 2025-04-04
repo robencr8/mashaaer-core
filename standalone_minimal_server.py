@@ -2,17 +2,14 @@
 """
 Standalone minimal Flask server for testing the web application feedback tool
 
-This is a completely standalone minimal server that runs on port 3000 and doesn't
+This is a completely standalone minimal server that runs on port 5000 and doesn't
 require any of the dependencies of the main project. It can be used to isolate whether
 the issue is with the main application or with the web application feedback tool.
 """
 
-import os
 import logging
 from datetime import datetime
-import json
-
-from flask import Flask, make_response, request, jsonify
+from flask import Flask, make_response, request, jsonify, render_template_string
 
 # Set up logging
 logging.basicConfig(
@@ -24,6 +21,58 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
+# Simple HTML template for the home page
+HOME_TEMPLATE = '''
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Standalone Server</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .info-box {
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Standalone Minimal Server</h1>
+    <p>This is a standalone Flask server designed specifically for testing the web application feedback tool.</p>
+    
+    <div class="info-box">
+        <h2>Server Information</h2>
+        <p><strong>Server Time:</strong> {{ current_time }}</p>
+        <p><strong>Request Origin:</strong> {{ origin }}</p>
+        <p><strong>User Agent:</strong> {{ user_agent }}</p>
+    </div>
+    
+    <div class="info-box">
+        <h2>Available Endpoints</h2>
+        <ul>
+            <li><a href="/">/</a> - This page</li>
+            <li><a href="/api/status">/api/status</a> - API status (JSON)</li>
+            <li><a href="/health">/health</a> - Health check endpoint</li>
+            <li><a href="/health-check">/health-check</a> - Alternative health check</li>
+            <li><a href="/test">/test</a> - Test page</li>
+        </ul>
+    </div>
+</body>
+</html>
+'''
+
 @app.after_request
 def add_cors_headers(response):
     """Add CORS headers to all responses"""
@@ -32,94 +81,85 @@ def add_cors_headers(response):
     # Log the origin for debugging
     logger.info(f"Request from origin: {origin}")
     
-    response.headers['Access-Control-Allow-Origin'] = origin
+    # Enable CORS for all origins
+    response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+    response.headers['Access-Control-Max-Age'] = '3600'  # Cache preflight for 1 hour
     
     return response
 
 @app.route('/')
 def index():
-    """Root endpoint - returns a simple text response"""
+    """Root endpoint - renders a simple HTML page"""
     logger.info("Root endpoint accessed")
-    response = make_response("Standalone Minimal Server is running!")
-    response.headers['Content-Type'] = 'text/plain'
-    return response
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    origin = request.headers.get('Origin', 'No origin')
+    user_agent = request.headers.get('User-Agent', 'Unknown')
+    
+    return render_template_string(
+        HOME_TEMPLATE, 
+        current_time=current_time,
+        origin=origin,
+        user_agent=user_agent
+    )
+
+@app.route('/api/status')
+def api_status():
+    """API status endpoint returning JSON data"""
+    logger.info("API status endpoint accessed")
+    return jsonify({
+        'status': 'online',
+        'server': 'standalone_minimal_server',
+        'timestamp': datetime.now().isoformat(),
+        'message': 'This is a standalone server for testing'
+    })
 
 @app.route('/health')
 def health():
-    """Health check endpoint"""
+    """Simple health check endpoint"""
     logger.info("Health check endpoint accessed")
-    response = make_response("OK")
-    response.headers['Content-Type'] = 'text/plain'
-    return response
+    return "OK - Server is healthy"
 
-@app.route('/api/test')
+@app.route('/health-check')
+def health_check():
+    """Alternative health check endpoint"""
+    logger.info("Alternative health check endpoint accessed")
+    return "OK - Health check passed"
+
+@app.route('/test')
 def test():
-    """Test API endpoint - returns a simple JSON response"""
-    logger.info("Test API endpoint accessed")
-    data = {
-        "message": "API is working",
-        "status": "OK",
-        "timestamp": datetime.now().isoformat()
-    }
-    return jsonify(data)
-
-@app.route('/api/echo', methods=['GET', 'POST'])
-def echo():
-    """Echo endpoint - returns information about the request"""
-    logger.info(f"Echo endpoint accessed - method: {request.method}")
-    
-    data = {
-        "method": request.method,
-        "headers": dict(request.headers),
-        "remote_addr": request.remote_addr,
-        "timestamp": datetime.now().isoformat()
-    }
-    
-    if request.method == 'POST':
-        if request.is_json:
-            data["json"] = request.json
-        else:
-            data["data"] = request.get_data(as_text=True)
-    
-    return jsonify(data)
-
-@app.route('/api/debug-request')
-def debug_request():
-    """Debug endpoint for detailed request information"""
-    logger.info("Debug request endpoint accessed")
-    
-    origin = request.headers.get('Origin', 'No Origin header')
-    host = request.headers.get('Host', 'No Host header')
-    referer = request.headers.get('Referer', 'No Referer header')
-    user_agent = request.headers.get('User-Agent', 'No User-Agent header')
-    x_forwarded_host = request.headers.get('X-Forwarded-Host', 'No X-Forwarded-Host header')
-    x_forwarded_for = request.headers.get('X-Forwarded-For', 'No X-Forwarded-For header')
-    x_forwarded_proto = request.headers.get('X-Forwarded-Proto', 'No X-Forwarded-Proto header')
-    
-    debug_info = {
-        "method": request.method,
-        "url": request.url,
-        "path": request.path,
-        "origin": origin,
-        "host": host,
-        "referer": referer,
-        "user_agent": user_agent,
-        "x_forwarded_host": x_forwarded_host,
-        "x_forwarded_for": x_forwarded_for,
-        "x_forwarded_proto": x_forwarded_proto,
-        "remote_addr": request.remote_addr,
-        "full_headers": dict(request.headers),
-        "cookies": request.cookies,
-        "args": request.args,
-        "timestamp": datetime.now().isoformat()
-    }
-    
-    logger.info(f"Debug information: {json.dumps(debug_info, indent=2)}")
-    return jsonify(debug_info)
+    """Test page with minimal content"""
+    logger.info("Test page accessed")
+    html = '''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Test Page</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+        <h1>Test Page</h1>
+        <p>This is a simple test page from the standalone server.</p>
+        <p>If you can see this, the server is working correctly!</p>
+    </body>
+    </html>
+    '''
+    return html
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 3000))
+    import sys
+    
+    # Get port from command line argument or use default (3000)
+    if len(sys.argv) > 1:
+        try:
+            port = int(sys.argv[1])
+        except ValueError:
+            port = 3000
+            logger.warning(f"Invalid port specified: {sys.argv[1]}. Using default port 3000.")
+    else:
+        port = 3000
+        
     logger.info(f"Starting standalone minimal server on port {port}")
     app.run(host='0.0.0.0', port=port, debug=True)
