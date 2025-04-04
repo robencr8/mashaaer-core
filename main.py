@@ -294,6 +294,14 @@ def ultra_simple_test_page():
     """Serve an ultra simple test page for direct connectivity testing"""
     return app.send_static_file('ultra_simple_test.html')
 
+
+# TTS testing page
+@app.route('/tts-test')
+def tts_test_page():
+    """Serve the TTS testing page for verifying TTS functionality"""
+    logger.info("TTS test page requested")
+    return app.send_static_file('tts_test.html')
+
 # Ultra minimal test page specifically for the web application feedback tool
 @app.route('/ultra-minimal-test')
 def ultra_minimal_test_page():

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TTS Playback Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        button { padding: 10px 20px; cursor: pointer; margin-right: 10px; }
+        #result { margin-top: 20px; padding: 10px; background: #f5f5f5; border-radius: 5px; }
+        .status { font-weight: bold; }
+        .success { color: green; }
+        .error { color: red; }
+        .section { margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <h1>TTS Playback Test</h1>
+    
+    <div class="section">
+        <h2>Web API Test</h2>
+        <button onclick="generateAndPlayTTS('/api/speak')">Generate and Play TTS (Web API)</button>
+        <audio id="webAudioPlayer" controls></audio>
+        <div id="webResult" class="result"></div>
+    </div>
+    
+    <div class="section">
+        <h2>Mobile API Test</h2>
+        <button onclick="generateAndPlayTTS('/mobile-api/speak')">Generate and Play TTS (Mobile API)</button>
+        <audio id="mobileAudioPlayer" controls></audio>
+        <div id="mobileResult" class="result"></div>
+    </div>
+    
+    <script>
+        function generateAndPlayTTS(endpoint) {
+            const isWebApi = endpoint === '/api/speak';
+            const audioPlayer = document.getElementById(isWebApi ? 'webAudioPlayer' : 'mobileAudioPlayer');
+            const resultDiv = document.getElementById(isWebApi ? 'webResult' : 'mobileResult');
+            
+            resultDiv.innerHTML = '<span class="status">Generating TTS...</span>';
+            
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: 'This is a test message for TTS playback verification.', language: 'en' })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <span class="status success">Success!</span><br>
+                        <strong>Audio path:</strong> ${data.audio_path}<br>
+                        <strong>Voice:</strong> ${data.voice}<br>
+                        <strong>Language:</strong> ${data.language}<br>
+                        <strong>Full response:</strong> <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                    
+                    // Set audio source and play
+                    audioPlayer.src = data.audio_path;
+                    audioPlayer.play()
+                        .then(() => {
+                            console.log('Audio playback started successfully');
+                        })
+                        .catch(error => {
+                            console.error('Audio playback error:', error);
+                            resultDiv.innerHTML += `<br><span class="status error">Audio playback error: ${error.message}</span>`;
+                        });
+                } else {
+                    resultDiv.innerHTML = `<span class="status error">TTS generation failed: ${data.error || 'Unknown error'}</span>`;
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `<span class="status error">Fetch error: ${error.message}</span>`;
+                console.error('Fetch error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

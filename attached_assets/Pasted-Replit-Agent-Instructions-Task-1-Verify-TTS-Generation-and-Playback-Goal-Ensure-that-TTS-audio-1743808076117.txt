@@ -1,0 +1,79 @@
+Replit Agent Instructions:
+Task 1: Verify TTS Generation and Playback
+ * Goal: Ensure that TTS audio is generated correctly and plays back without errors.
+ * Steps:
+   * Inspect tts_manager.py:
+     * Open the tts/tts_manager.py file.
+     * Identify the speak() function.
+     * Note the TTS providers being used (ElevenLabs, gTTS).
+     * Check for any error handling or fallback mechanisms.
+   * Test TTS Generation (API Endpoint):
+     * Use curl commands to make requests to the /api/speak endpoint with various text and language parameters.
+     * Example:
+       curl -X POST -H "Content-Type: application/json" -d '{"text": "This is a test", "language": "en"}' http://localhost:5000/api/speak
+
+     * Verify:
+       * The server returns a 200 OK status code.
+       * The response includes a valid audio_path.
+       * There are no errors in the server logs.
+   * Test TTS Playback (HTML):
+     * If there's an existing test page for TTS, use that. Otherwise, create a simple HTML page:
+       <!DOCTYPE html>
+<html>
+<head>
+    <title>TTS Test</title>
+</head>
+<body>
+    <button onclick="playTTS()">Play TTS</button>
+    <audio id="audioPlayer" controls></audio>
+    <script>
+        function playTTS() {
+            fetch('/api/speak', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: 'Hello, world!', language: 'en' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('audioPlayer').src = data.audio_path;
+                    document.getElementById('audioPlayer').play();
+                } else {
+                    console.error('TTS error:', data.error);
+                }
+            })
+            .catch(error => console.error('Fetch error:', error));
+        }
+    </script>
+</body>
+</html>
+
+     * Load this HTML page in a browser.
+     * Click the button to trigger TTS generation and playback.
+     * Verify:
+       * The audio plays correctly.
+       * There are no errors in the browser console.
+       * The correct audio file is loaded (check the Network tab in developer tools).
+   * Error Handling Scenarios:
+     * Simulate errors (e.g., invalid input, TTS service unavailable) and verify that the application handles them gracefully.
+     * Check for appropriate error messages and fallback behavior.
+Replit Agent Commands:
+# 1. Inspect tts_manager.py
+OPEN tts/tts_manager.py
+
+# 2. Test TTS generation via API
+EXECUTE curl -X POST -H "Content-Type: application/json" -d '{"text": "This is a test", "language": "en"}' http://localhost:5000/api/speak
+
+# 3. Create a simple TTS test page (if needed)
+CREATE static/tts_test.html
+
+# (Paste the HTML from above)
+
+# 4. Test TTS playback in the browser
+
+# 5. Simulate TTS errors (if possible - depends on your implementation)
+# 6. Verify error handling and fallback behavior
+
+Next Steps:
+I'll await the results of these commands and your observations. Please provide any error messages, unexpected behavior, or areas of concern you identify during this process.
+Let's work together to ensure that the TTS functionality is solid and ready for launch!
