@@ -395,6 +395,27 @@ def ultra_simple():
     response.headers['Access-Control-Allow-Origin'] = '*'
     return response
 
+@app.route('/health-check-detailed')
+def health_check_detailed():
+    """Ultra minimal direct health check endpoint with detailed logging"""
+    # Log detailed request information for debugging
+    origin = request.headers.get('Origin', 'No Origin header')
+    user_agent = request.headers.get('User-Agent', 'No User-Agent header')
+    host = request.headers.get('Host', 'No Host header')
+    
+    logger.info(f"🔍 Request: {request.method} {request.path}")
+    logger.info(f"🔍 Origin: {origin}")
+    logger.info(f"🔍 Host: {host}")
+    logger.info(f"🔍 User-Agent: {user_agent}")
+    
+    response = make_response("OK - Server is healthy (Detailed Logging)")
+    response.headers['Content-Type'] = 'text/plain'
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    
+    return response
+
 
 # Voice API test pages
 @app.route('/test-voice-api')
@@ -514,6 +535,20 @@ def cors_test_route_minimal():
 #     # This function has been replaced by the implementation below
 #     pass
 
+# Dedicated test page for the feedback tool
+@app.route('/feedback-tool-test-page')
+def feedback_tool_test_page():
+    """Serve the feedback tool test page"""
+    logger.info("Feedback tool test page accessed")
+    return app.send_static_file('feedback_tool_test.html')
+
+# Ultra minimal test page specifically for the feedback tool
+@app.route('/feedback-tool-direct-test')
+def feedback_tool_direct_test():
+    """Serve an ultra minimal test page specifically for the feedback tool"""
+    logger.info("Feedback tool direct test page accessed")
+    return app.send_static_file('feedback_tool_direct_test.html')
+
 
 # Diagnostic panel for connectivity troubleshooting
 @app.route('/diagnostic-panel')
@@ -555,6 +590,39 @@ def api_ping():
     response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
     response.headers[
         'Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+
+    return response
+
+
+# Ultra simple API endpoint for the web application feedback tool
+@app.route('/api/simple-status', methods=['GET', 'OPTIONS'])
+def simple_status_api():
+    """Ultra simple API endpoint that returns minimal JSON with permissive CORS headers"""
+    # Get the origin from the request headers or use wildcard as fallback
+    origin = request.headers.get('Origin', '*')
+    logger.info(f"Received {request.method} request to /api/simple-status from {origin}")
+    
+    # For OPTIONS requests (preflight)
+    if request.method == 'OPTIONS':
+        logger.info(f"Handling OPTIONS preflight request from {origin}")
+        response = make_response()
+        # Use wildcard for maximum compatibility
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Max-Age'] = '3600'
+        return response
+
+    # Return minimal JSON response
+    response = jsonify({
+        'status': 'ok',
+        'timestamp': datetime.now().isoformat()
+    })
+
+    # Add permissive CORS headers for maximum compatibility
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
 
     return response
 
@@ -2500,7 +2568,7 @@ def health_check_test():
 
 
 @app.route('/feedback-test', methods=['GET'])
-def feedback_tool_direct_test():
+def feedback_tool_test_direct():
     """Direct endpoint specifically designed for the feedback tool"""
     try:
         html = """
@@ -2755,6 +2823,29 @@ def feedback_test_comprehensive():
 #     """Ultra minimal health check endpoint at root level with maximum CORS headers"""
 #     pass
 
+# Special root-level endpoint for feedback tool testing
+@app.route('/test-text')
+def test_text():
+    """Ultra-minimal plain text response with maximum compatibility for feedback tool"""
+    # Log detailed request information
+    origin = request.headers.get('Origin', 'No Origin header')
+    user_agent = request.headers.get('User-Agent', 'No User-Agent header')
+    host = request.headers.get('Host', 'No Host header')
+    referer = request.headers.get('Referer', 'No Referer header')
+    
+    logger.info(f"⭐⭐⭐ TEST-TEXT: Method={request.method}, Path={request.path}")
+    logger.info(f"⭐⭐⭐ TEST-TEXT: Origin={origin}, Host={host}")
+    logger.info(f"⭐⭐⭐ TEST-TEXT: UserAgent={user_agent}, Referer={referer}")
+    
+    # Create a minimal response with the most permissive headers possible
+    response = make_response("OK - Server is running properly.")
+    response.headers['Content-Type'] = 'text/plain'
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, HEAD, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    response.headers['Access-Control-Expose-Headers'] = 'Content-Length, Content-Type, Date'
+    return response
+
 
 @app.route('/static/markdown/<path:filename>')
 def serve_markdown(filename):
@@ -2897,10 +2988,23 @@ def feedback_tool_access():
 
 
 # Simple health check endpoint that returns plain text with no dependencies
-@app.route('/health-check-direct')
-def health_check_direct():
-    """Ultra simple health check endpoint that returns plain text"""
-    response = make_response("OK - Server is healthy")
+@app.route('/health-check-enhanced')
+def health_check_enhanced():
+    """Ultra simple health check endpoint that returns plain text with enhanced diagnostics"""
+    # Log detailed request information for debugging
+    origin = request.headers.get('Origin', 'No Origin header')
+    user_agent = request.headers.get('User-Agent', 'No User-Agent header')
+    host = request.headers.get('Host', 'No Host header')
+    
+    logger.info(f"🔍 Request: {request.method} {request.path}")
+    logger.info(f"🔍 Origin: {origin}")
+    logger.info(f"🔍 Host: {host}")
+    logger.info(f"🔍 User-Agent: {user_agent}")
+    
+    response = make_response("OK - Server is healthy (Enhanced Version)")
     response.headers['Content-Type'] = 'text/plain'
     response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    
     return response

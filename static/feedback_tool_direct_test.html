@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultra Simple Test</title>
+    <title>Ultra Simple Test Page</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
             padding: 20px;
             text-align: center;
@@ -20,18 +20,11 @@
 </head>
 <body>
     <h1>Ultra Simple Test Page</h1>
-    
     <p class="success">If you can see this page, the web server is responding correctly!</p>
-    <p>This is an ultra-minimal test page with no JavaScript, optimized for maximum compatibility.</p>
+    <p>Current time: <span id="time"></span></p>
     
-    <div>
-        <p>Application is running on port 5000.</p>
-        <p>Current time: <span id="current-time"></span></p>
-    </div>
-
-    <!-- Simple inline script to show current time -->
     <script>
-        document.getElementById('current-time').textContent = new Date().toISOString();
+        document.getElementById('time').textContent = new Date().toISOString();
     </script>
 </body>
 </html>
