@@ -64,25 +64,30 @@ import mobile_api_routes  # Mobile-optimized API routes
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "robin_ai_default_secret")
 # Enhanced CORS configuration with diagnostics for the web application feedback tool
-# Determine the exact origin of the feedback tool
-FEEDBACK_TOOL_ORIGIN = os.environ.get('FEEDBACK_TOOL_ORIGIN', None)
-if not FEEDBACK_TOOL_ORIGIN:
-    logger.warning(
-        "FEEDBACK_TOOL_ORIGIN environment variable not set! Using wildcard CORS configuration."
-    )
-    allowed_origins = ["*"]  # Allow all origins as fallback
-else:
-    logger.info(f"Using specific origin for CORS: {FEEDBACK_TOOL_ORIGIN}")
-    allowed_origins = [FEEDBACK_TOOL_ORIGIN]
+# Use the known feedback tool origin from troubleshooting
+KNOWN_FEEDBACK_TOOL_ORIGIN = "https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev"
+FEEDBACK_TOOL_ORIGIN = os.environ.get('FEEDBACK_TOOL_ORIGIN', KNOWN_FEEDBACK_TOOL_ORIGIN)
+
+# Set up a complete list of origins to allow
+allowed_origins = [
+    FEEDBACK_TOOL_ORIGIN,  # Primary feedback tool origin (from env or known value)
+    KNOWN_FEEDBACK_TOOL_ORIGIN,  # Known working feedback tool origin from logs
+    "*"  # Fallback to allow all origins for maximum compatibility
+]
 
 # Additional possible origins based on Replit URL patterns
 REPLIT_DOMAIN = f"https://{os.environ.get('REPL_SLUG', 'workspace')}.{os.environ.get('REPL_OWNER', 'unknown')}.repl.co"
-WORF_DOMAIN = os.environ.get('REPL_SLUG', 'workspace') + "--" + os.environ.get(
-    'REPL_OWNER', 'unknown') + ".repl.co"
+WORF_DOMAIN = f"https://{os.environ.get('REPL_SLUG', 'workspace')}--{os.environ.get('REPL_OWNER', 'unknown')}.repl.co"
 
-logger.info(f"Configuring CORS with origins: {allowed_origins}")
-logger.info(f"Current Replit domain (for reference): {REPLIT_DOMAIN}")
-logger.info(f"Possible Worf domain (for reference): {WORF_DOMAIN}")
+# Add these to allowed origins as well
+allowed_origins.append(REPLIT_DOMAIN)
+allowed_origins.append(WORF_DOMAIN)
+
+logger.info(f"🌐 Enhanced CORS Configuration for Web Application Feedback Tool")
+logger.info(f"🌐 Primary feedback tool origin: {FEEDBACK_TOOL_ORIGIN}")
+logger.info(f"🌐 Configuring CORS with origins: {allowed_origins}")
+logger.info(f"🌐 Current Replit domain: {REPLIT_DOMAIN}")
+logger.info(f"🌐 Possible Worf domain: {WORF_DOMAIN}")
 
 
 # Enhanced logging function for all requests to help diagnose CORS issues
@@ -237,6 +242,20 @@ def diagnostic_static_page():
     return app.send_static_file('diagnostic_static.html')
 
 
+# Enhanced diagnostic tool with comprehensive testing capabilities
+@app.route('/enhanced-diagnostic')
+def enhanced_diagnostic_page():
+    """Serve the enhanced diagnostic tool with improved visualization and testing capabilities"""
+    return app.send_static_file('enhanced_diagnostic.html')
+
+
+# Minimal diagnostic tool with only essential features
+@app.route('/minimal-diagnostic')
+def minimal_diagnostic_page():
+    """Serve a minimal diagnostic tool for basic connectivity testing"""
+    return app.send_static_file('minimal_diagnostic.html')
+
+
 # Minimal static HTML page with no JavaScript
 @app.route('/minimal')
 def minimal_page():
@@ -249,6 +268,13 @@ def minimal_page():
 def ultra_minimal_page():
     # Direct file serving of ultra-minimal HTML file
     return app.send_static_file('ultra_minimal.html')
+
+
+# Ultra simple test page for direct connectivity testing
+@app.route('/ultra-simple-test')
+def ultra_simple_test_page():
+    """Serve an ultra simple test page for direct connectivity testing"""
+    return app.send_static_file('ultra_simple_test.html')
 
 
 @app.route('/minimal-test')
@@ -271,6 +297,26 @@ def feedback_test_page():
     response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = '*'
 
+    return response
+
+
+@app.route('/feedback-tool-enhanced')
+def feedback_tool_enhanced_page():
+    """Serve an enhanced test page specifically for the web application feedback tool"""
+    # Direct file serving with explicit CORS headers
+    response = make_response(open('static/feedback_tool_test.html', 'r').read())
+    
+    # Set content type to HTML
+    response.headers['Content-Type'] = 'text/html'
+    
+    # Add explicit CORS headers for maximum compatibility
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    
+    # Log the access for debugging
+    logger.info("feedback-tool-enhanced endpoint accessed")
+    
     return response
 
 
@@ -2621,8 +2667,8 @@ def feedback_tool_guide():
     return send_from_directory('static', 'feedback_tool_guide.html')
 
 
-@app.route('/feedback-tool-test')
-def feedback_tool_test_page():
+@app.route('/feedback-tool-test-minimal')
+def feedback_tool_test_minimal_page():
     """Serve the minimal feedback tool test page"""
     return send_from_directory('static', 'feedback_tool_test.html')
 
@@ -2645,12 +2691,92 @@ def ultra_minimal_test_page():
     return render_template('ultra_minimal.html')
 
 
-@app.route('/health')
+@app.route('/health', methods=['GET', 'OPTIONS'])
 def health_check_root():
     """Ultra minimal health check endpoint at root level for maximum accessibility"""
+    # Handle OPTIONS requests for preflight
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Max-Age'] = '86400'  # 24 hours
+        return response
+        
+    # Regular GET request
     response = make_response("OK")
     response.headers['Content-Type'] = 'text/plain'
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = '*'
+    response.headers['Access-Control-Expose-Headers'] = 'Content-Length, Content-Type, Date'
+    
+    # Log the request origin for debugging
+    origin = request.headers.get('Origin', 'No origin')
+    logger.info(f"⭐ Health check endpoint accessed from origin: {origin}")
+    
+    return response
+
+
+@app.route('/feedback-whitelist')
+def feedback_whitelist_page():
+    """Serve a special whitelist test page for CORS and feedback tool diagnostics"""
+    return send_from_directory('static', 'feedback_whitelist.html')
+
+
+@app.route('/feedback-tool-origin-test')
+def feedback_tool_origin_test_page():
+    """Serve a dedicated test page targeting the specific feedback tool origin"""
+    return send_from_directory('static', 'feedback_tool_origin_test.html')
+
+
+@app.route('/feedback-tool-minimal')
+def feedback_tool_minimal_page():
+    """Serve an ultra-minimal test page for the feedback tool testing"""
+    return send_from_directory('static', 'feedback_tool_minimal.html')
+
+
+# Special endpoint for the web application feedback tool
+@app.route('/feedback-tool-access', methods=['GET', 'OPTIONS', 'HEAD'])
+def feedback_tool_access():
+    """Special endpoint optimized for the web application feedback tool with maximum logging"""
+    # Get all request details for debugging
+    method = request.method
+    origin = request.headers.get('Origin', 'No origin')
+    user_agent = request.headers.get('User-Agent', 'No user agent')
+    referer = request.headers.get('Referer', 'No referer')
+    host = request.headers.get('Host', 'No host')
+    
+    # Log detailed information about the request
+    logger.info(f"⭐⭐⭐ FEEDBACK TOOL ACCESS: Method={method}, Origin={origin}")
+    logger.info(f"⭐⭐⭐ FEEDBACK TOOL DETAILS: UserAgent={user_agent}, Referer={referer}, Host={host}")
+    logger.info(f"⭐⭐⭐ FEEDBACK TOOL HEADERS: {dict(request.headers)}")
+    
+    # Handle OPTIONS preflight requests
+    if method == 'OPTIONS':
+        response = make_response()
+        response.headers['Access-Control-Allow-Origin'] = '*'  # Allow all origins for maximum compatibility
+        response.headers['Access-Control-Allow-Methods'] = 'GET, HEAD, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'  # Allow all headers
+        response.headers['Access-Control-Max-Age'] = '86400'  # 24 hours
+        logger.info(f"⭐⭐⭐ FEEDBACK TOOL OPTIONS: Responding with CORS headers")
+        return response
+    
+    # Handle HEAD requests (often used for testing connectivity)
+    if method == 'HEAD':
+        response = make_response()
+        response.headers['Content-Type'] = 'text/plain'
+        logger.info(f"⭐⭐⭐ FEEDBACK TOOL HEAD: Responding with 200 OK")
+    else:
+        # For GET requests, return a simple text response
+        response = make_response("OK - Feedback tool access successful")
+        response.headers['Content-Type'] = 'text/plain'
+        logger.info(f"⭐⭐⭐ FEEDBACK TOOL GET: Responding with 200 OK and text message")
+    
+    # Add CORS headers to all responses
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, HEAD, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    response.headers['Access-Control-Expose-Headers'] = 'Content-Length, Content-Type, Date'
+    
     return response

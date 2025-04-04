@@ -1,0 +1,105 @@
+{
+  "happy": [
+    "feeling good about",
+    "couldn't be happier",
+    "on cloud nine",
+    "brightens my day",
+    "in high spirits",
+    "makes me smile",
+    "over the moon",
+    "feeling happy",
+    "having a great time"
+  ],
+  "sad": [
+    "lost interest in",
+    "don't feel like",
+    "feeling down",
+    "miss them so much",
+    "hard to deal with",
+    "can't stop crying",
+    "heart is heavy",
+    "brings tears to my eyes"
+  ],
+  "angry": [
+    "makes my blood boil",
+    "fed up with",
+    "had it with",
+    "drives me crazy",
+    "lost my temper",
+    "getting on my nerves",
+    "sick and tired of",
+    "crossed the line"
+  ],
+  "fearful": [
+    "scared to death",
+    "worried sick",
+    "feared the worst",
+    "sends chills down my spine",
+    "afraid of what might happen",
+    "keeps me up at night",
+    "feel threatened by"
+  ],
+  "amused": [
+    "cracking up",
+    "can't stop laughing",
+    "in stitches",
+    "rolling on the floor",
+    "that's hilarious",
+    "made my day",
+    "funniest thing ever",
+    "laughing so hard"
+  ],
+  "inspired": [
+    "changed my perspective",
+    "opened my mind",
+    "sparked my creativity",
+    "got me thinking",
+    "new way of seeing",
+    "burst of ideas",
+    "made me want to create",
+    "motivated me to start"
+  ],
+  "satisfied": [
+    "checks all the boxes",
+    "just what I needed",
+    "exactly right",
+    "mission accomplished",
+    "hit the mark",
+    "exceeded expectations",
+    "finally achieved",
+    "wrapped up perfectly"
+  ],
+  "frustrated": [
+    "hitting a wall",
+    "going nowhere",
+    "running in circles",
+    "can't figure it out",
+    "getting nowhere",
+    "wasting my time",
+    "no matter what I try",
+    "obstacles at every turn"
+  ],
+  "contemplative": [
+    "lost in thought",
+    "deep in reflection",
+    "made me wonder",
+    "thinking deeply about",
+    "pondering the meaning",
+    "gave me pause",
+    "led me to question",
+    "reflecting on my life"
+  ],
+  "neutral": [
+    "speech recognition",
+    "\u0623\u0646\u0627 \u0633\u0639\u064a\u062f",
+    "recognition system",
+    "speech recognition system",
+    "\u0633\u0639\u064a\u062f \u062c\u062f\u0627"
+  ],
+  "excited": [
+    "excited about",
+    "emotion analysis",
+    "analysis system",
+    "emotion analysis system"
+  ]
+}

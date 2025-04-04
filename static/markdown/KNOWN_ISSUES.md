@@ -31,8 +31,11 @@ The web application feedback tool persistently reports that the web server is un
 3. **Use the Standalone Minimal Server:**  
    The `standalone_minimal_server.py` script provides an ultra-minimal Flask server with no dependencies that can be used to isolate and test basic connectivity.
 
-4. **Diagnostic Endpoints:**  
-   Use `/health`, `/api/ping`, and other minimal endpoints to verify basic connectivity.
+4. **Diagnostic Endpoints and Tools:**  
+   - Use `/health`, `/api/ping`, and other minimal endpoints to verify basic connectivity
+   - Access `/enhanced-diagnostic` for a comprehensive testing tool with connectivity tests, CORS diagnostics, and API testing capabilities
+   - Use `/diagnostic` or `/diagnostic-static` for basic diagnostics
+   - Access `/api/debug-request` for detailed request information with headers and environment data
 
 ## CORS Configuration
 

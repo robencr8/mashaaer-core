@@ -1,194 +1,97 @@
-# Feedback Tool Integration Documentation
+# Feedback Tool Integration Guide
 
 ## Overview
 
-This document provides technical documentation for integrating the web application feedback tool with the Mashaaer Feelings application. It covers API endpoints, CORS configuration, troubleshooting procedures, and known limitations.
-
-## Health Check Endpoints
-
-### 1. Root Level Health Check
-
-```
-GET /health
-```
-
-- **Purpose**: Ultra-minimal health check endpoint at root level
-- **Response**: Plain text "OK"
-- **Content-Type**: text/plain
-- **CORS**: Fully enabled with all necessary headers
-- **Example**: `curl -v http://localhost:5000/health`
-
-### 2. API Status
-
-```
-GET /api/status
-```
-
-- **Purpose**: Get comprehensive system status information
-- **Response**: JSON object with system status details
-- **Content-Type**: application/json
-- **CORS**: Fully enabled with all necessary headers
-- **Example**: `curl -v http://localhost:5000/api/status`
-
-### 3. API Ping
-
-```
-GET /api/ping
-```
-
-- **Purpose**: Simple ping endpoint for connectivity testing
-- **Response**: JSON with success message
-- **Content-Type**: application/json
-- **CORS**: Fully enabled with all necessary headers
-- **Example**: `curl -v http://localhost:5000/api/ping`
-
-## Minimal Endpoints
-
-### 1. Minimal API
-
-```
-GET /api/minimal
-```
-
-- **Purpose**: Minimal API endpoint returning plain text
-- **Response**: Plain text message
-- **Content-Type**: text/plain
-- **CORS**: Fully enabled with all necessary headers
-- **Example**: `curl -v http://localhost:5000/api/minimal`
-
-### 2. Minimal Page
-
-```
-GET /minimal-page
-```
-
-- **Purpose**: Serve minimal HTML page with no dependencies
-- **Response**: HTML document
-- **Content-Type**: text/html
-- **Example**: Open in browser: http://localhost:5000/minimal-page
-
-### 3. Ultra Minimal Page
-
-```
-GET /ultra-minimal
-```
-
-- **Purpose**: Serve ultra-minimal HTML with zero dependencies
-- **Response**: HTML document
-- **Content-Type**: text/html
-- **Example**: Open in browser: http://localhost:5000/ultra-minimal
-
-## Dedicated Feedback Tool Endpoints
-
-### 1. Feedback Tool Endpoint
-
-```
-POST /feedback-tool-endpoint
-OPTIONS /feedback-tool-endpoint
-```
-
-- **Purpose**: Optimized endpoint for the feedback tool
-- **Response**: JSON with success status
-- **Content-Type**: application/json
-- **CORS**: Fully enabled with explicit preflight support
-- **Example**:
-  ```
-  curl -X POST -H "Content-Type: application/json" -H "Origin: http://example.com" \
-    -d '{"test":"data"}' http://localhost:5000/feedback-tool-endpoint
-  ```
-
-### 2. Feedback Tool Status
-
-```
-GET /api/feedback-tool-status
-```
-
-- **Purpose**: Enhanced diagnostic endpoint with detailed information
-- **Response**: JSON with detailed request and server information
-- **Content-Type**: application/json
-- **CORS**: Fully enabled with all necessary headers
-- **Example**: `curl -v http://localhost:5000/api/feedback-tool-status`
+This document provides information about integrating the web application feedback tool with your Mashaaer application. It includes troubleshooting steps, diagnostic tools, and best practices for resolving connectivity issues.
 
 ## Diagnostic Tools
 
-### 1. Debug Request
+### Enhanced Diagnostic Tool
 
-```
-GET /api/debug-request
-```
+The enhanced diagnostic tool provides comprehensive testing capabilities specifically designed for troubleshooting web application feedback tool integration issues. Access it at `/enhanced-diagnostic`.
 
-- **Purpose**: Detailed request information for debugging
-- **Response**: JSON with comprehensive request details
-- **Content-Type**: application/json
-- **CORS**: Fully enabled with all necessary headers
-- **Example**: `curl -v http://localhost:5000/api/debug-request`
+**Features:**
+- **Connectivity Tests:** Verify server accessibility through multiple endpoints
+- **CORS Diagnostics:** Test and analyze CORS configuration with detailed header inspection
+- **API Tests:** Test specific API endpoints with custom parameters
+- **Environment Information:** View browser and network information
+- **Troubleshooting Resources:** Access guidance for common issues
 
-### 2. CORS Diagnostic
+### Additional Diagnostic Endpoints
 
-```
-GET /cors-diagnostic
-```
+The application provides several specialized diagnostic endpoints to help isolate connectivity issues:
 
-- **Purpose**: Interactive CORS testing and debugging tool
-- **Response**: HTML page with diagnostic tools
-- **Content-Type**: text/html
-- **Example**: Open in browser: http://localhost:5000/cors-diagnostic
+| Endpoint | Description | Response Type |
+|----------|-------------|---------------|
+| `/health` | Basic health check at root level | Text |
+| `/api/ping` | JSON response with timestamp | JSON |
+| `/api/minimal` | Minimal text response with CORS headers | Text |
+| `/api/test-cors` | Test CORS configuration with detailed response | JSON |
+| `/api/debug-request` | Detailed request inspection with headers and environment | JSON |
+| `/ultra-simple` | Ultra-minimal response with no dependencies | Text |
+| `/feedback-tool-test` | Specialized endpoint for feedback tool testing | Text |
+| `/diagnostic` | Interactive diagnostic page (template-based) | HTML |
+| `/diagnostic-static` | Static diagnostic page (direct file serving) | HTML |
 
-### 3. Feedback Tool Diagnostic
+## Common Issues and Solutions
 
-```
-GET /feedback-tool-diagnostic
-```
+### CORS Misconfiguration
 
-- **Purpose**: Specialized diagnostic page for the feedback tool
-- **Response**: HTML page with feedback tool diagnostics
-- **Content-Type**: text/html
-- **Example**: Open in browser: http://localhost:5000/feedback-tool-diagnostic
+**Symptoms:**
+- Web application feedback tool reports server is unreachable
+- Browser console shows CORS errors
+- Preflight OPTIONS requests fail
 
-## CORS Configuration
+**Solutions:**
+1. Ensure `FEEDBACK_TOOL_ORIGIN` environment variable is set correctly
+2. Verify that CORS headers include the correct origin
+3. Check that OPTIONS requests are properly handled
+4. For credentials-based requests, ensure Access-Control-Allow-Credentials is 'true'
 
-All API endpoints are configured with the following CORS headers:
+### Network Connectivity Issues
 
-```
-Access-Control-Allow-Origin: <dynamic based on request origin or '*'>
-Access-Control-Allow-Methods: GET, POST, OPTIONS
-Access-Control-Allow-Headers: *
-Access-Control-Max-Age: 3600
-```
+**Symptoms:**
+- Timeout errors
+- Connection refused errors
+- Intermittent connectivity
 
-The application dynamically sets the `Access-Control-Allow-Origin` header based on the incoming request's `Origin` header, with fallback to `*` for maximum compatibility.
+**Solutions:**
+1. Verify the server is running using the `/health` endpoint
+2. Check if the server port (5000) is accessible
+3. Ensure no firewall rules are blocking traffic
+4. Test with cURL commands to isolate browser-specific issues
 
-## Testing and Verification
+### API-Specific Issues
 
-### Curl Commands
+**Symptoms:**
+- 404 errors on specific API endpoints
+- Unexpected response formats
+- Authentication failures
+
+**Solutions:**
+1. Use the `/api/debug-request` endpoint to inspect the exact request details
+2. Verify API route definitions in `api_routes.py`
+3. Check request and response formats using the Enhanced Diagnostic Tool
+
+## Standalone Testing Server
+
+For isolated testing, you can use the standalone minimal server:
 
 ```bash
-# Test basic health check
-curl -v http://localhost:5000/health
-
-# Test with custom origin
-curl -H "Origin: https://example.com" -v http://localhost:5000/api/status
-
-# Test OPTIONS preflight
-curl -X OPTIONS -H "Origin: https://example.com" \
-  -H "Access-Control-Request-Method: POST" \
-  -H "Access-Control-Request-Headers: content-type" \
-  -v http://localhost:5000/api/status
-
-# Test feedback tool endpoint
-curl -X POST -H "Content-Type: application/json" \
-  -H "Origin: https://example.com" \
-  -d '{"test":"data"}' http://localhost:5000/feedback-tool-endpoint
+python standalone_minimal_server.py
 ```
 
-### Browser Testing
+This runs a minimal Flask server with no dependencies, providing basic endpoints that can be used to verify connectivity from the feedback tool.
 
-Open the following URLs in your browser:
+## Best Practices
 
-- http://localhost:5000/cors-diagnostic
-- http://localhost:5000/feedback-tool-diagnostic
-- http://localhost:5000/feedback-comprehensive-test
+1. **Use Explicit CORS Headers:** Always include explicit CORS headers rather than relying on the Flask-CORS extension defaults
+2. **Test with Multiple Request Types:** Verify both GET and POST requests work correctly
+3. **Monitor Server Logs:** Check server logs for detailed information about incoming requests
+4. **Use the Enhanced Diagnostic Tool:** Make use of the comprehensive testing capabilities in the Enhanced Diagnostic Tool
 
-## Known Issues and Troubleshooting
+## Additional Resources
 
-See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for detailed information on known issues, workarounds, and troubleshooting procedures.
+For further assistance, refer to:
+- [KNOWN_ISSUES.md](/static/markdown/KNOWN_ISSUES.md): Documentation of known issues and workarounds
+- [README.md](/readme): Main project documentation

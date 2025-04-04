@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra Minimal Feedback Tool Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            text-align: center;
+        }
+        .status { 
+            font-size: 18px; 
+            margin: 20px 0; 
+            padding: 10px; 
+            border-radius: 4px; 
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .pending { background-color: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>Ultra Minimal Feedback Tool Test</h1>
+    
+    <div id="status" class="status pending">Testing connectivity...</div>
+    
+    <div id="details"></div>
+    
+    <script>
+        // Simple function to make a fetch request to the server
+        async function testServerConnection() {
+            const endpoints = [
+                '/health',
+                '/feedback-tool-access',
+                '/api/minimal'
+            ];
+            
+            let allResults = '';
+            let anySuccess = false;
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const startTime = performance.now();
+                    const response = await fetch(endpoint);
+                    const endTime = performance.now();
+                    const text = await response.text();
+                    
+                    allResults += `<p>✅ ${endpoint}: ${response.status} OK (${(endTime-startTime).toFixed(2)}ms)</p>`;
+                    allResults += `<p>Response: ${text}</p>`;
+                    anySuccess = true;
+                } catch (error) {
+                    allResults += `<p>❌ ${endpoint}: Error - ${error.message}</p>`;
+                }
+            }
+            
+            // Update the status and details
+            const statusEl = document.getElementById('status');
+            const detailsEl = document.getElementById('details');
+            
+            if (anySuccess) {
+                statusEl.textContent = "SERVER IS REACHABLE! At least one endpoint responded successfully.";
+                statusEl.className = "status success";
+            } else {
+                statusEl.textContent = "SERVER UNREACHABLE! None of the endpoints responded.";
+                statusEl.className = "status error";
+            }
+            
+            detailsEl.innerHTML = allResults;
+        }
+        
+        // Run the test when the page loads
+        window.onload = testServerConnection;
+    </script>
+</body>
+</html>

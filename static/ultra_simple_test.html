@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra Simple Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #7743DB;
+        }
+        div {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .result {
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #e6ffe6;
+            border-color: #4CAF50;
+        }
+        .error {
+            background-color: #ffe6e6;
+            border-color: #F44336;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ultra Simple Test</h1>
+    <p>Testing basic connectivity to server endpoints</p>
+    
+    <div id="test-results" class="result">Loading...</div>
+    
+    <script>
+        window.onload = async function() {
+            const resultsDiv = document.getElementById('test-results');
+            let results = '';
+            
+            // Test endpoints
+            const endpoints = [
+                '/ultra-simple',
+                '/health',
+                '/api/minimal'
+            ];
+            
+            // Start time for overall test
+            const startTime = performance.now();
+            
+            for (const endpoint of endpoints) {
+                const endpointStartTime = performance.now();
+                try {
+                    const response = await fetch(endpoint);
+                    const text = await response.text();
+                    const endpointTime = (performance.now() - endpointStartTime).toFixed(2);
+                    
+                    results += `✅ ${endpoint}: ${response.status} ${response.statusText}\n`;
+                    results += `   Time: ${endpointTime}ms\n`;
+                    results += `   Response: ${text.substring(0, 50)}${text.length > 50 ? '...' : ''}\n\n`;
+                } catch (error) {
+                    results += `❌ ${endpoint}: ERROR\n`;
+                    results += `   Error: ${error.message}\n\n`;
+                }
+            }
+            
+            // End time for overall test
+            const totalTime = (performance.now() - startTime).toFixed(2);
+            results += `Total time: ${totalTime}ms\n`;
+            
+            // Connection info
+            results += '\nConnection Information:\n';
+            results += `URL: ${window.location.href}\n`;
+            results += `Origin: ${window.location.origin}\n`;
+            results += `Protocol: ${window.location.protocol}\n`;
+            results += `Host: ${window.location.host}\n`;
+            
+            // Display results
+            resultsDiv.textContent = results;
+            resultsDiv.className = results.includes('ERROR') ? 'result error' : 'result success';
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Diagnostic Tool for Mashaaer Web Application</title>
+    <style>
+        :root {
+            --primary-color: #7743DB;
+            --secondary-color: #2E3858;
+            --success-color: #4CAF50;
+            --warning-color: #FFC107;
+            --danger-color: #F44336;
+            --background-color: #f5f7fa;
+            --card-background: #fff;
+            --text-color: #333;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--secondary-color);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .header h1 {
+            color: white;
+        }
+
+        .section {
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--box-shadow);
+        }
+
+        .results {
+            background-color: #f5f5f5;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        .success {
+            border-left-color: var(--success-color);
+        }
+
+        .warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .error {
+            border-left-color: var(--danger-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #5E35B1;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-success {
+            background-color: var(--success-color);
+        }
+
+        .status-warning {
+            background-color: var(--warning-color);
+        }
+
+        .status-error {
+            background-color: var(--danger-color);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            margin-left: 5px;
+        }
+
+        .badge-success {
+            background-color: var(--success-color);
+        }
+
+        .badge-warning {
+            background-color: var(--warning-color);
+        }
+
+        .badge-error {
+            background-color: var(--danger-color);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            margin-right: 5px;
+        }
+
+        .tab.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .log-entry {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .collapsible {
+            cursor: pointer;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 16px;
+            background-color: #eee;
+            margin-bottom: 1px;
+        }
+
+        .active-collapsible, .collapsible:hover {
+            background-color: #ddd;
+        }
+
+        .content {
+            padding: 0 18px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Enhanced Diagnostic Tool for Mashaaer Web Application</h1>
+            <p>Use this tool to diagnose and resolve connectivity and CORS issues</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('connectivity-tab')">Connection Tests</div>
+            <div class="tab" onclick="showTab('cors-tab')">CORS Diagnostics</div>
+            <div class="tab" onclick="showTab('api-tab')">API Tests</div>
+            <div class="tab" onclick="showTab('environment-tab')">Environment</div>
+            <div class="tab" onclick="showTab('resources-tab')">Resources</div>
+        </div>
+
+        <div id="connectivity-tab" class="tab-content active">
+            <div class="section">
+                <h2>Basic Connectivity Tests</h2>
+                <p>These tests check if the server is reachable through various endpoints.</p>
+                <button onclick="testBasicConnectivity()">Run Basic Connectivity Tests</button>
+                <div id="basic-connectivity-results" class="results">Results will appear here...</div>
+            </div>
+
+            <div class="section">
+                <h2>Endpoint Health Check</h2>
+                <table id="endpoint-table">
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>Method</th>
+                        <th>Status</th>
+                        <th>Response Time</th>
+                        <th>Actions</th>
+                    </tr>
+                    <tr>
+                        <td>/</td>
+                        <td>GET</td>
+                        <td><span id="root-status">Unknown</span></td>
+                        <td><span id="root-time">-</span></td>
+                        <td><button onclick="testEndpoint('/')">Test</button></td>
+                    </tr>
+                    <tr>
+                        <td>/api/ping</td>
+                        <td>GET</td>
+                        <td><span id="ping-status">Unknown</span></td>
+                        <td><span id="ping-time">-</span></td>
+                        <td><button onclick="testEndpoint('/api/ping')">Test</button></td>
+                    </tr>
+                    <tr>
+                        <td>/api/minimal</td>
+                        <td>GET</td>
+                        <td><span id="minimal-status">Unknown</span></td>
+                        <td><span id="minimal-time">-</span></td>
+                        <td><button onclick="testEndpoint('/api/minimal')">Test</button></td>
+                    </tr>
+                    <tr>
+                        <td>/api/test-cors</td>
+                        <td>GET</td>
+                        <td><span id="test-cors-status">Unknown</span></td>
+                        <td><span id="test-cors-time">-</span></td>
+                        <td><button onclick="testEndpoint('/api/test-cors')">Test</button></td>
+                    </tr>
+                    <tr>
+                        <td>/api/debug-request</td>
+                        <td>GET</td>
+                        <td><span id="debug-request-status">Unknown</span></td>
+                        <td><span id="debug-request-time">-</span></td>
+                        <td><button onclick="testEndpoint('/api/debug-request')">Test</button></td>
+                    </tr>
+                    <tr>
+                        <td>/feedback-tool-test</td>
+                        <td>GET</td>
+                        <td><span id="feedback-tool-test-status">Unknown</span></td>
+                        <td><span id="feedback-tool-test-time">-</span></td>
+                        <td><button onclick="testEndpoint('/feedback-tool-test')">Test</button></td>
+                    </tr>
+                    <tr>
+                        <td>/ultra-simple</td>
+                        <td>GET</td>
+                        <td><span id="ultra-simple-status">Unknown</span></td>
+                        <td><span id="ultra-simple-time">-</span></td>
+                        <td><button onclick="testEndpoint('/ultra-simple')">Test</button></td>
+                    </tr>
+                </table>
+                <button onclick="testAllEndpoints()">Test All Endpoints</button>
+            </div>
+        </div>
+
+        <div id="cors-tab" class="tab-content">
+            <div class="section">
+                <h2>CORS Configuration Test</h2>
+                <p>Tests if CORS headers are properly configured for cross-origin requests.</p>
+                <div class="form-group">
+                    <label for="cors-url">Endpoint URL:</label>
+                    <input type="text" id="cors-url" value="/api/test-cors" placeholder="Enter endpoint URL (e.g., /api/test-cors)">
+                </div>
+                <div class="form-group">
+                    <label for="cors-method">HTTP Method:</label>
+                    <select id="cors-method">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="OPTIONS">OPTIONS (Preflight)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cors-custom-headers">Custom Headers (optional):</label>
+                    <input type="text" id="cors-custom-headers" placeholder="e.g., Content-Type: application/json">
+                </div>
+                <button onclick="testCORS()">Test CORS Configuration</button>
+                <div id="cors-results" class="results">Results will appear here...</div>
+            </div>
+
+            <div class="section">
+                <h2>CORS Header Analysis</h2>
+                <div id="cors-analysis" class="results">
+                    Run a CORS test to see the analysis here.
+                </div>
+            </div>
+        </div>
+
+        <div id="api-tab" class="tab-content">
+            <div class="section">
+                <h2>API Endpoint Test</h2>
+                <p>Test specific API endpoints to verify functionality.</p>
+                <div class="form-group">
+                    <label for="api-url">API Endpoint:</label>
+                    <input type="text" id="api-url" value="/api/status" placeholder="Enter API endpoint URL">
+                </div>
+                <div class="form-group">
+                    <label for="api-method">HTTP Method:</label>
+                    <select id="api-method">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="api-payload">Request Payload (JSON):</label>
+                    <textarea id="api-payload" rows="4" placeholder='{"key": "value"}'></textarea>
+                </div>
+                <button onclick="testAPIEndpoint()">Test API Endpoint</button>
+                <div id="api-results" class="results">Results will appear here...</div>
+            </div>
+
+            <div class="section">
+                <h2>Common API Endpoints</h2>
+                <table>
+                    <tr>
+                        <th>Endpoint</th>
+                        <th>Description</th>
+                        <th>Action</th>
+                    </tr>
+                    <tr>
+                        <td>/api/status</td>
+                        <td>Get server status information</td>
+                        <td><button onclick="quickTestAPI('/api/status', 'GET')">Test</button></td>
+                    </tr>
+                    <tr>
+                        <td>/api/play-cosmic-sound</td>
+                        <td>Get cosmic sound effect</td>
+                        <td><button onclick="quickTestAPI('/api/play-cosmic-sound?type=welcome&language=en', 'GET')">Test</button></td>
+                    </tr>
+                    <tr>
+                        <td>/api/analyze-emotion</td>
+                        <td>Analyze text for emotions</td>
+                        <td><button onclick="quickTestAPI('/api/analyze-emotion', 'POST', {text: 'I am feeling happy today'})">Test</button></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div id="environment-tab" class="tab-content">
+            <div class="section">
+                <h2>Browser Information</h2>
+                <div id="browser-info" class="results">Loading browser information...</div>
+            </div>
+
+            <div class="section">
+                <h2>Network Information</h2>
+                <div id="network-info" class="results">Loading network information...</div>
+            </div>
+        </div>
+
+        <div id="resources-tab" class="tab-content">
+            <div class="section">
+                <h2>Troubleshooting Resources</h2>
+                <h3>Common Issues</h3>
+                <button class="collapsible">CORS Errors</button>
+                <div class="content">
+                    <p>CORS (Cross-Origin Resource Sharing) errors occur when a web page tries to request resources from a different origin than the one that served the page. To fix:</p>
+                    <ul>
+                        <li>Check that your server is sending the correct <code>Access-Control-Allow-Origin</code> header</li>
+                        <li>For requests with credentials, make sure <code>Access-Control-Allow-Credentials</code> is set to <code>true</code></li>
+                        <li>For preflight requests, ensure your server correctly handles OPTIONS requests</li>
+                        <li>Check if the origin in the request matches what your server expects</li>
+                    </ul>
+                </div>
+
+                <button class="collapsible">Connection Timeouts</button>
+                <div class="content">
+                    <p>Connection timeouts can occur due to:</p>
+                    <ul>
+                        <li>Server is down or unreachable</li>
+                        <li>Network connectivity issues</li>
+                        <li>Firewall or security rules blocking access</li>
+                        <li>Server process taking too long to respond</li>
+                    </ul>
+                    <p>Try accessing the minimal test endpoints like <code>/ultra-simple</code> or <code>/api/minimal</code> to check basic connectivity.</p>
+                </div>
+
+                <button class="collapsible">Feedback Tool Issues</button>
+                <div class="content">
+                    <p>If the web application feedback tool is not connecting properly:</p>
+                    <ul>
+                        <li>Check if the <code>FEEDBACK_TOOL_ORIGIN</code> environment variable is set correctly</li>
+                        <li>Ensure the server's CORS configuration allows the feedback tool's origin</li>
+                        <li>Verify the server is accessible at the root endpoint <code>/</code></li>
+                        <li>Check if there are any network restrictions between the feedback tool and your application</li>
+                        <li>Test with the dedicated endpoint <code>/feedback-tool-test</code></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Documentation Links</h2>
+                <ul>
+                    <li><a href="/readme" target="_blank">Project README</a></li>
+                    <li><a href="/static/markdown/KNOWN_ISSUES.md" target="_blank">Known Issues</a></li>
+                    <li><a href="/static/markdown/FEEDBACK_TOOL_DOCUMENTATION.md" target="_blank">Feedback Tool Documentation</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab navigation
+        function showTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Deactivate all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabId).classList.add('active');
+            
+            // Activate the clicked tab
+            event.currentTarget.classList.add('active');
+        }
+
+        // Basic connectivity test
+        async function testBasicConnectivity() {
+            const resultsDiv = document.getElementById('basic-connectivity-results');
+            resultsDiv.innerHTML = '<div class="loader"></div> Running basic connectivity tests...';
+            
+            try {
+                // Test 1: Root path
+                const startTime1 = performance.now();
+                const response1 = await fetch('/', { method: 'GET' });
+                const endTime1 = performance.now();
+                const time1 = (endTime1 - startTime1).toFixed(2);
+                
+                // Test 2: Minimal API endpoint
+                const startTime2 = performance.now();
+                const response2 = await fetch('/api/minimal', { method: 'GET' });
+                const endTime2 = performance.now();
+                const time2 = (endTime2 - startTime2).toFixed(2);
+                
+                // Test 3: Ultra simple endpoint
+                const startTime3 = performance.now();
+                const response3 = await fetch('/ultra-simple', { method: 'GET' });
+                const endTime3 = performance.now();
+                const time3 = (endTime3 - startTime3).toFixed(2);
+                
+                let results = '';
+                
+                results += `Test 1: Root path (/) - ${response1.ok ? 'SUCCESS' : 'FAILED'}\n`;
+                results += `Status: ${response1.status} ${response1.statusText}\n`;
+                results += `Time: ${time1}ms\n\n`;
+                
+                results += `Test 2: Minimal API (/api/minimal) - ${response2.ok ? 'SUCCESS' : 'FAILED'}\n`;
+                results += `Status: ${response2.status} ${response2.statusText}\n`;
+                results += `Time: ${time2}ms\n\n`;
+                
+                results += `Test 3: Ultra simple (/ultra-simple) - ${response3.ok ? 'SUCCESS' : 'FAILED'}\n`;
+                results += `Status: ${response3.status} ${response3.statusText}\n`;
+                results += `Time: ${time3}ms\n\n`;
+                
+                const allSuccess = response1.ok && response2.ok && response3.ok;
+                results += `Overall Result: ${allSuccess ? 'SUCCESS - Server is accessible' : 'FAILED - Some endpoints are not accessible'}\n`;
+                
+                resultsDiv.textContent = results;
+                resultsDiv.className = `results ${allSuccess ? 'success' : 'error'}`;
+            } catch (error) {
+                resultsDiv.textContent = `Error running connectivity tests: ${error.message}`;
+                resultsDiv.className = 'results error';
+            }
+        }
+
+        // Test specific endpoint
+        async function testEndpoint(endpoint) {
+            const idPrefix = endpoint.replace(/\//g, '').replace(/\-/g, '-');
+            const statusElement = document.getElementById(`${idPrefix}-status`);
+            const timeElement = document.getElementById(`${idPrefix}-time`);
+            
+            statusElement.innerHTML = '<div class="loader"></div>';
+            timeElement.textContent = '...';
+            
+            try {
+                const startTime = performance.now();
+                const response = await fetch(endpoint, { method: 'GET' });
+                const endTime = performance.now();
+                const time = (endTime - startTime).toFixed(2);
+                
+                if (response.ok) {
+                    statusElement.innerHTML = '<span class="status-indicator status-success"></span> OK';
+                } else {
+                    statusElement.innerHTML = `<span class="status-indicator status-error"></span> ${response.status}`;
+                }
+                
+                timeElement.textContent = `${time}ms`;
+            } catch (error) {
+                statusElement.innerHTML = '<span class="status-indicator status-error"></span> Failed';
+                timeElement.textContent = 'N/A';
+            }
+        }
+
+        // Test all endpoints
+        async function testAllEndpoints() {
+            const endpoints = ['/', '/api/ping', '/api/minimal', '/api/test-cors', '/api/debug-request', '/feedback-tool-test', '/ultra-simple'];
+            
+            for (const endpoint of endpoints) {
+                await testEndpoint(endpoint);
+            }
+        }
+
+        // Test CORS configuration
+        async function testCORS() {
+            const resultsDiv = document.getElementById('cors-results');
+            const analysisDiv = document.getElementById('cors-analysis');
+            const url = document.getElementById('cors-url').value;
+            const method = document.getElementById('cors-method').value;
+            const customHeadersInput = document.getElementById('cors-custom-headers').value;
+            
+            resultsDiv.innerHTML = '<div class="loader"></div> Testing CORS configuration...';
+            
+            try {
+                // Parse custom headers
+                const headers = new Headers();
+                if (customHeadersInput) {
+                    customHeadersInput.split(',').forEach(header => {
+                        const [key, value] = header.split(':').map(part => part.trim());
+                        if (key && value) {
+                            headers.append(key, value);
+                        }
+                    });
+                }
+                
+                // Make the request
+                const options = {
+                    method: method,
+                    headers: headers,
+                    mode: 'cors',
+                    cache: 'no-cache',
+                };
+                
+                if (method === 'POST' && !headers.has('Content-Type')) {
+                    headers.append('Content-Type', 'application/json');
+                    options.body = JSON.stringify({test: 'cors test'});
+                }
+                
+                const response = await fetch(url, options);
+                
+                // Collect response headers
+                const responseHeaders = {};
+                response.headers.forEach((value, key) => {
+                    responseHeaders[key] = value;
+                });
+                
+                // Display the results
+                let results = '';
+                results += `URL: ${url}\n`;
+                results += `Method: ${method}\n`;
+                results += `Status: ${response.status} ${response.statusText}\n\n`;
+                results += 'Request Headers:\n';
+                headers.forEach((value, key) => {
+                    results += `${key}: ${value}\n`;
+                });
+                
+                results += '\nResponse Headers:\n';
+                Object.keys(responseHeaders).forEach(key => {
+                    results += `${key}: ${responseHeaders[key]}\n`;
+                });
+                
+                if (response.headers.get('content-type')?.includes('application/json')) {
+                    const data = await response.json();
+                    results += '\nResponse Body:\n';
+                    results += JSON.stringify(data, null, 2);
+                } else {
+                    const text = await response.text();
+                    results += '\nResponse Body:\n';
+                    results += text;
+                }
+                
+                resultsDiv.textContent = results;
+                resultsDiv.className = `results ${response.ok ? 'success' : 'error'}`;
+                
+                // Analyze CORS headers
+                analyzeCORSHeaders(responseHeaders, analysisDiv);
+            } catch (error) {
+                resultsDiv.textContent = `Error testing CORS: ${error.message}`;
+                resultsDiv.className = 'results error';
+                
+                analysisDiv.innerHTML = `
+                <h3>CORS Error Analysis</h3>
+                <p>A error occurred: ${error.message}</p>
+                <p>This could indicate a CORS issue if the error is "Failed to fetch" or similar. Check:</p>
+                <ul>
+                    <li>Is the server running and accessible?</li>
+                    <li>Does the server allow CORS requests from this origin?</li>
+                    <li>If using credentials, is Access-Control-Allow-Credentials set to true?</li>
+                    <li>Is the server configured to handle OPTIONS preflight requests?</li>
+                </ul>
+                `;
+                analysisDiv.className = 'results error';
+            }
+        }
+
+        // Analyze CORS headers
+        function analyzeCORSHeaders(headers, analysisDiv) {
+            const allowOrigin = headers['access-control-allow-origin'];
+            const allowMethods = headers['access-control-allow-methods'];
+            const allowHeaders = headers['access-control-allow-headers'];
+            const allowCredentials = headers['access-control-allow-credentials'];
+            const maxAge = headers['access-control-max-age'];
+            
+            let analysis = '<h3>CORS Headers Analysis</h3>';
+            
+            // Check Access-Control-Allow-Origin
+            if (allowOrigin) {
+                if (allowOrigin === '*') {
+                    analysis += `<p><span class="badge badge-warning">Warning</span> Access-Control-Allow-Origin is set to wildcard (*). This will not work with credentials.</p>`;
+                } else {
+                    analysis += `<p><span class="badge badge-success">OK</span> Access-Control-Allow-Origin is set to: ${allowOrigin}</p>`;
+                }
+            } else {
+                analysis += `<p><span class="badge badge-error">Error</span> Access-Control-Allow-Origin header is missing.</p>`;
+            }
+            
+            // Check Access-Control-Allow-Methods
+            if (allowMethods) {
+                analysis += `<p><span class="badge badge-success">OK</span> Access-Control-Allow-Methods is set to: ${allowMethods}</p>`;
+            } else {
+                analysis += `<p><span class="badge badge-warning">Warning</span> Access-Control-Allow-Methods header is missing. This may cause issues with non-GET requests.</p>`;
+            }
+            
+            // Check Access-Control-Allow-Headers
+            if (allowHeaders) {
+                analysis += `<p><span class="badge badge-success">OK</span> Access-Control-Allow-Headers is set to: ${allowHeaders}</p>`;
+            } else {
+                analysis += `<p><span class="badge badge-warning">Warning</span> Access-Control-Allow-Headers header is missing. This may cause issues with custom headers.</p>`;
+            }
+            
+            // Check Access-Control-Allow-Credentials
+            if (allowCredentials) {
+                if (allowCredentials === 'true' && allowOrigin === '*') {
+                    analysis += `<p><span class="badge badge-error">Error</span> Access-Control-Allow-Credentials is set to true, but Access-Control-Allow-Origin is set to wildcard (*). This is not allowed and will fail.</p>`;
+                } else if (allowCredentials === 'true') {
+                    analysis += `<p><span class="badge badge-success">OK</span> Access-Control-Allow-Credentials is set to true.</p>`;
+                } else {
+                    analysis += `<p><span class="badge badge-warning">Warning</span> Access-Control-Allow-Credentials is set to: ${allowCredentials} (expected 'true')</p>`;
+                }
+            } else {
+                analysis += `<p><span class="badge badge-info">Info</span> Access-Control-Allow-Credentials header is missing. This will prevent requests with credentials.</p>`;
+            }
+            
+            // Check Access-Control-Max-Age
+            if (maxAge) {
+                analysis += `<p><span class="badge badge-success">OK</span> Access-Control-Max-Age is set to: ${maxAge} seconds.</p>`;
+            } else {
+                analysis += `<p><span class="badge badge-info">Info</span> Access-Control-Max-Age header is missing. Preflight results won't be cached.</p>`;
+            }
+            
+            // Overall assessment
+            const hasError = analysis.includes('badge-error');
+            const hasWarning = analysis.includes('badge-warning');
+            
+            if (hasError) {
+                analysis += `<p><span class="badge badge-error">Result</span> CORS configuration has errors that need to be fixed.</p>`;
+            } else if (hasWarning) {
+                analysis += `<p><span class="badge badge-warning">Result</span> CORS configuration has warnings but may work depending on the client requirements.</p>`;
+            } else {
+                analysis += `<p><span class="badge badge-success">Result</span> CORS configuration appears to be correct!</p>`;
+            }
+            
+            analysisDiv.innerHTML = analysis;
+            analysisDiv.className = hasError ? 'results error' : (hasWarning ? 'results warning' : 'results success');
+        }
+
+        // Test API endpoint
+        async function testAPIEndpoint() {
+            const resultsDiv = document.getElementById('api-results');
+            const url = document.getElementById('api-url').value;
+            const method = document.getElementById('api-method').value;
+            const payloadInput = document.getElementById('api-payload').value;
+            
+            resultsDiv.innerHTML = '<div class="loader"></div> Testing API endpoint...';
+            
+            try {
+                // Setup request options
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    mode: 'cors',
+                    cache: 'no-cache',
+                };
+                
+                // Add payload for POST, PUT methods
+                if (['POST', 'PUT'].includes(method) && payloadInput) {
+                    try {
+                        options.body = JSON.stringify(JSON.parse(payloadInput));
+                    } catch (e) {
+                        resultsDiv.textContent = `Invalid JSON payload: ${e.message}`;
+                        resultsDiv.className = 'results error';
+                        return;
+                    }
+                }
+                
+                const startTime = performance.now();
+                const response = await fetch(url, options);
+                const endTime = performance.now();
+                const time = (endTime - startTime).toFixed(2);
+                
+                // Collect response headers
+                const responseHeaders = {};
+                response.headers.forEach((value, key) => {
+                    responseHeaders[key] = value;
+                });
+                
+                // Display the results
+                let results = '';
+                results += `URL: ${url}\n`;
+                results += `Method: ${method}\n`;
+                results += `Status: ${response.status} ${response.statusText}\n`;
+                results += `Time: ${time}ms\n\n`;
+                
+                results += 'Request Headers:\n';
+                for (const [key, value] of Object.entries(options.headers)) {
+                    results += `${key}: ${value}\n`;
+                }
+                
+                if (options.body) {
+                    results += '\nRequest Body:\n';
+                    results += JSON.stringify(JSON.parse(options.body), null, 2);
+                }
+                
+                results += '\nResponse Headers:\n';
+                for (const [key, value] of Object.entries(responseHeaders)) {
+                    results += `${key}: ${value}\n`;
+                }
+                
+                // Display response body
+                if (response.headers.get('content-type')?.includes('application/json')) {
+                    try {
+                        const data = await response.json();
+                        results += '\nResponse Body (JSON):\n';
+                        results += JSON.stringify(data, null, 2);
+                    } catch (e) {
+                        const text = await response.text();
+                        results += '\nResponse Body (Text - Failed to parse as JSON):\n';
+                        results += text;
+                    }
+                } else {
+                    const text = await response.text();
+                    results += '\nResponse Body (Text):\n';
+                    results += text;
+                }
+                
+                resultsDiv.textContent = results;
+                resultsDiv.className = `results ${response.ok ? 'success' : 'error'}`;
+            } catch (error) {
+                resultsDiv.textContent = `Error testing API endpoint: ${error.message}`;
+                resultsDiv.className = 'results error';
+            }
+        }
+
+        // Quick test API endpoint with predefined parameters
+        function quickTestAPI(url, method, payload = null) {
+            document.getElementById('api-url').value = url;
+            document.getElementById('api-method').value = method;
+            
+            if (payload) {
+                document.getElementById('api-payload').value = JSON.stringify(payload, null, 2);
+            } else {
+                document.getElementById('api-payload').value = '';
+            }
+            
+            // Switch to API tab
+            showTab('api-tab');
+            
+            // Run the test
+            testAPIEndpoint();
+        }
+
+        // Display browser information
+        function displayBrowserInfo() {
+            const infoDiv = document.getElementById('browser-info');
+            
+            const browserInfo = {
+                'User Agent': navigator.userAgent,
+                'Browser': getBrowserName(),
+                'Platform': navigator.platform,
+                'Cookies Enabled': navigator.cookieEnabled,
+                'Language': navigator.language,
+                'Online': navigator.onLine,
+                'Screen Resolution': `${window.screen.width}x${window.screen.height}`,
+                'Window Size': `${window.innerWidth}x${window.innerHeight}`,
+                'Color Depth': window.screen.colorDepth,
+                'Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
+                'Do Not Track': navigator.doNotTrack,
+            };
+            
+            let infoText = '';
+            for (const [key, value] of Object.entries(browserInfo)) {
+                infoText += `${key}: ${value}\n`;
+            }
+            
+            infoDiv.textContent = infoText;
+        }
+
+        // Get browser name from user agent
+        function getBrowserName() {
+            const userAgent = navigator.userAgent;
+            
+            if (userAgent.indexOf('Firefox') > -1) {
+                return 'Mozilla Firefox';
+            } else if (userAgent.indexOf('SamsungBrowser') > -1) {
+                return 'Samsung Internet';
+            } else if (userAgent.indexOf('Opera') > -1 || userAgent.indexOf('OPR') > -1) {
+                return 'Opera';
+            } else if (userAgent.indexOf('Trident') > -1) {
+                return 'Internet Explorer';
+            } else if (userAgent.indexOf('Edge') > -1) {
+                return 'Microsoft Edge (Legacy)';
+            } else if (userAgent.indexOf('Edg') > -1) {
+                return 'Microsoft Edge (Chromium)';
+            } else if (userAgent.indexOf('Chrome') > -1) {
+                return 'Google Chrome';
+            } else if (userAgent.indexOf('Safari') > -1) {
+                return 'Apple Safari';
+            } else {
+                return 'Unknown';
+            }
+        }
+
+        // Display network information
+        function displayNetworkInfo() {
+            const infoDiv = document.getElementById('network-info');
+            
+            let networkInfo = {
+                'Online': navigator.onLine ? 'Yes' : 'No',
+                'Current URL': window.location.href,
+                'Current Origin': window.location.origin,
+                'Protocol': window.location.protocol,
+                'Host': window.location.host,
+                'Hostname': window.location.hostname,
+                'Port': window.location.port || '(default)',
+                'Pathname': window.location.pathname,
+                'Search': window.location.search || '(none)',
+                'Hash': window.location.hash || '(none)',
+            };
+            
+            // Add Network Information API data if available
+            if ('connection' in navigator) {
+                const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                
+                if (connection) {
+                    networkInfo = {
+                        ...networkInfo,
+                        'Connection Type': connection.type || 'unknown',
+                        'Effective Type': connection.effectiveType || 'unknown',
+                        'Downlink': connection.downlink ? `${connection.downlink} Mbps` : 'unknown',
+                        'RTT': connection.rtt ? `${connection.rtt} ms` : 'unknown',
+                        'Save Data': connection.saveData ? 'Yes' : 'No',
+                    };
+                }
+            }
+            
+            let infoText = '';
+            for (const [key, value] of Object.entries(networkInfo)) {
+                infoText += `${key}: ${value}\n`;
+            }
+            
+            infoDiv.textContent = infoText;
+        }
+
+        // Initialize collapsible elements
+        function initCollapsibles() {
+            const collapsibles = document.getElementsByClassName('collapsible');
+            
+            for (const collapsible of collapsibles) {
+                collapsible.addEventListener('click', function() {
+                    this.classList.toggle('active-collapsible');
+                    const content = this.nextElementSibling;
+                    
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                    }
+                });
+            }
+        }
+
+        // Initialize the page
+        window.onload = function() {
+            // Display browser and network info
+            displayBrowserInfo();
+            displayNetworkInfo();
+            
+            // Initialize collapsible elements
+            initCollapsibles();
+            
+            // Run basic connectivity test automatically
+            testBasicConnectivity();
+        };
+    </script>
+</body>
+</html>
