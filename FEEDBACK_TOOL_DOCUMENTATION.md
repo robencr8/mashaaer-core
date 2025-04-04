@@ -1,297 +1,142 @@
-# Feedback Tool Integration Guide
+# Web Application Feedback Tool Documentation
 
-This documentation provides comprehensive guidance for diagnosing and resolving connectivity issues with the web application feedback tool in the Mashaaer Feelings application.
+## Overview
 
-## Table of Contents
+This document provides comprehensive documentation for troubleshooting and working with the web application feedback tool in the context of the Mashaaer Feelings application.
 
-1. [Introduction](#introduction)
-2. [CORS Configuration](#cors-configuration)
-3. [Diagnostic Endpoints](#diagnostic-endpoints)
-4. [Testing Tools](#testing-tools)
-5. [Troubleshooting](#troubleshooting)
-6. [Implementation Details](#implementation-details)
+## Current Status
 
-## Introduction
+Despite extensive troubleshooting, the web application feedback tool consistently reports that the server is unreachable. All other methods of accessing the server (browsers, curl, etc.) work correctly. This appears to be a specific incompatibility between the feedback tool and our server configuration.
 
-The Mashaaer Feelings application includes specialized endpoints and configuration to ensure compatibility with the Replit web application feedback tool. This document describes the approaches taken to diagnose and resolve connectivity issues.
+## Diagnostic Tools
 
-## CORS Configuration
+### Testing Scripts
 
-Cross-Origin Resource Sharing (CORS) is a crucial aspect of ensuring the feedback tool can communicate with our application. The application implements several CORS-related features:
+1. **run_diagnostics.py**
+   - Comprehensive diagnostic tool that runs all tests and generates a report
+   - Usage: `python run_diagnostics.py`
 
-### Key CORS Headers
+2. **test_server_connectivity.py**
+   - Tests basic server connectivity and CORS configuration
+   - Usage: `python test_server_connectivity.py [base_url]`
 
-```
-Access-Control-Allow-Origin: <origin> 
-Access-Control-Allow-Methods: GET, POST, OPTIONS, HEAD
-Access-Control-Allow-Headers: *
-Access-Control-Max-Age: 86400
-Access-Control-Allow-Credentials: true (when needed)
-```
+3. **test_feedback_tool_connectivity.py**
+   - Specifically tests endpoints for compatibility with the feedback tool
+   - Usage: `python test_feedback_tool_connectivity.py [base_url]`
 
-### Environment Variables
+### Standalone Servers
 
-- `FEEDBACK_TOOL_ORIGIN`: Contains the exact origin of the feedback tool to enable precise CORS control
+1. **standalone_minimal_server.py**
+   - Complete standalone server with minimal dependencies
+   - Runs on port 3000 to avoid conflicts with the main application
+   - Usage: `python standalone_minimal_server.py`
 
-### Implementation
+2. **ultra_minimal_server.py**
+   - Ultra-minimal server implementation with basic endpoints
+   - Usage: `python ultra_minimal_server.py`
 
-CORS is implemented at multiple levels:
+3. **truly_minimal_server.py**
+   - The most minimal possible server implementation
+   - Usage: `python truly_minimal_server.py`
 
-1. **Global CORS**: Applied using Flask-CORS for application-wide protection
-2. **Endpoint-specific CORS**: Custom headers applied to specific endpoints
-3. **Feedback Tool Endpoints**: Specialized endpoints with maximum CORS compatibility
+### Diagnostic Endpoints
 
-## Diagnostic Endpoints
+The main application includes various diagnostic endpoints:
 
-The following endpoints are specifically designed for diagnosing feedback tool connectivity:
+1. `/health`
+   - Basic health check endpoint returning "OK"
+   - Includes CORS headers for maximum compatibility
 
-### `/feedback-tool-endpoint` (GET, OPTIONS)
+2. `/api/ping`
+   - Returns JSON response confirming server status
+   - Includes timestamp and server status information
 
-Ultra-minimal endpoint returning plain text for maximum compatibility.
+3. `/api/status`
+   - Returns detailed server status information
+   - Includes environment details, configuration and component status
 
-**Sample Response**:
-```
-OK - Mashaaer Feelings server is running and accessible.
-```
+4. `/api/debug-request`
+   - Returns detailed information about the incoming request
+   - Includes all headers, origin, and request parameters
 
-### `/api/feedback-tool-status` (GET, OPTIONS)
+5. `/api/minimal`
+   - Ultra-minimal endpoint returning plain text
+   - Explicitly configured with all necessary CORS headers
 
-Detailed diagnostic endpoint returning comprehensive information about the server and request.
+### Diagnostic Pages
 
-**Sample Response**:
-```json
-{
-  "status": "online",
-  "message": "Server is accessible by the feedback tool",
-  "timestamp": "2025-04-03T23:32:36.177Z",
-  "replit_info": {
-    "domain": "b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev",
-    "full_domain": "https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev/",
-    "worf_domain": "workspace--robenedwan.repl.co",
-    "slug": "workspace",
-    "owner": "robenedwan",
-    "repl_id": "b846eda6-3902-424b-86a3-00b49b2e7d19",
-    "feedback_tool_origin": "https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev"
-  },
-  "request": {
-    "method": "GET",
-    "path": "/api/feedback-tool-status",
-    "url": "https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev/api/feedback-tool-status",
-    "origin": "https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev",
-    "remote_addr": "172.31.128.40",
-    "headers": {
-      "Host": "b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev",
-      "User-Agent": "Mozilla/5.0 (compatible)",
-      "Accept": "*/*",
-      "Origin": "https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev"
-    },
-    "args": {},
-    "data": null
-  },
-  "env_vars": {
-    "REPL_SLUG": "workspace",
-    "REPL_OWNER": "robenedwan",
-    "REPL_ID": "b846eda6-3902-424b-86a3-00b49b2e7d19",
-    "PORT": "5000",
-    "REPLIT_DEPLOYMENT_ID": "Not set"
-  }
-}
-```
+1. `/diagnostic`
+   - Comprehensive diagnostic page with interactive tests
+   - Tests various endpoints, CORS configurations, and request types
 
-### `/api/minimal` (GET, OPTIONS)
+2. `/minimal-test`
+   - Minimal test page with basic connectivity checks
+   - Uses simple fetch requests to test server accessibility
 
-Minimal endpoint returning plain text with basic CORS headers.
+3. `/cors-test-enhanced`
+   - Advanced CORS testing page with detailed diagnostics
+   - Tests various origin configurations and preflight requests
 
-**Sample Response**:
-```
-Server is running. Status: OK. Timestamp: 2025-04-03T23:32:36.177Z
-```
+4. `/feedback-tool-test`
+   - Specialized page for testing the feedback tool connectivity
+   - Minimal HTML with just enough code to verify connectivity
 
-### `/api/test-cors-minimal` (GET, POST, OPTIONS)
+## Troubleshooting Guide
 
-Test endpoint with detailed CORS configuration and response information.
+If you're experiencing issues with the web application feedback tool, follow these steps:
 
-**Sample Response**:
-```json
-{
-  "message": "CORS test successful",
-  "method": "GET",
-  "request_origin": "https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev",
-  "timestamp": "2025-04-03T23:32:36.177Z"
-}
-```
+1. Verify server is running:
+   ```
+   curl -v http://localhost:5000/health
+   ```
 
-### `/api/debug-request` (GET, POST, OPTIONS)
+2. Verify API accessibility:
+   ```
+   curl -v http://localhost:5000/api/status
+   ```
 
-Advanced diagnostic endpoint that returns complete details about the request, including all headers, environment variables, and request properties.
+3. Check diagnostic information:
+   ```
+   curl -v http://localhost:5000/api/debug-request
+   ```
 
-## Testing Tools
+4. Run comprehensive diagnostics:
+   ```
+   python run_diagnostics.py
+   ```
 
-Several testing tools are available to diagnose connectivity issues:
+5. Test standalone server:
+   ```
+   python standalone_minimal_server.py
+   ```
 
-### `/feedback-comprehensive-test`
+6. Visit diagnostic pages in your browser:
+   - http://localhost:5000/diagnostic
+   - http://localhost:5000/minimal-test
+   - http://localhost:5000/cors-test-enhanced
 
-Advanced test page with:
-- Multiple endpoint tests
-- Custom request construction
-- Header and body configuration
-- Detailed request/response analysis
-- Browser and network diagnostics
+## Workarounds
 
-### `test_server_connectivity.py`
+Since the web application feedback tool consistently reports connectivity issues, you can use the following alternatives for testing:
 
-Standalone Python script to test connectivity from outside the browser context.
+1. **Direct Browser Testing**
+   - Use your browser to directly interact with the application
+   - Use browser developer tools to inspect network activity and console logs
 
-**Usage**:
-```bash
-python test_server_connectivity.py [base_url]
-```
+2. **API Testing with curl**
+   - Test API endpoints using curl commands
+   - Example: `curl -v http://localhost:5000/api/analyze-emotion -H "Content-Type: application/json" -d '{"text":"I am feeling happy today"}'`
 
-### `standalone_minimal_server.py`
+3. **Diagnostic Pages**
+   - Use the diagnostic pages included in the application
+   - These pages provide detailed information and interactive testing
 
-Isolated minimal server for testing if CORS issues are related to the main application configuration.
+4. **Server Logs**
+   - Monitor server logs to track requests and responses
+   - Look for specific CORS-related information or errors
 
-**Usage**:
-```bash
-python standalone_minimal_server.py [port]
-```
+## Additional Notes
 
-## Troubleshooting
+The feedback tool connectivity issue appears to be related to specific requirements or configurations in the Replit environment. All standard accessibility and CORS tests pass, suggesting this is not a conventional web server configuration issue.
 
-Common issues and their solutions:
-
-### CORS Errors
-
-1. **Missing Origin Header**: Ensure the `Origin` header is correctly echoed in the `Access-Control-Allow-Origin` response header
-2. **Invalid CORS Configuration**: Use the diagnostic tools to verify all required CORS headers are present
-3. **Preflight Failures**: Test OPTIONS requests to ensure they return proper CORS headers
-
-### Network Connectivity
-
-1. **Blocked Requests**: Check for network firewalls or proxy issues
-2. **HTTPS Mixed Content**: Ensure all resources use HTTPS when the main page is served over HTTPS
-3. **Replit-Specific Issues**: Verify the application is accessible from the Replit domain
-
-### Environment Configuration
-
-1. **Port Configuration**: Verify the server is listening on the correct port (typically 5000)
-2. **Host Binding**: Ensure the server is bound to `0.0.0.0` to accept external connections
-3. **Environment Variables**: Verify `FEEDBACK_TOOL_ORIGIN` is correctly set
-
-## Implementation Details
-
-### Core Files
-
-1. **main.py**: Contains the primary feedback tool endpoint implementation
-2. **routes_feedback_tool.py**: Contains specialized feedback tool route implementations
-3. **static/feedback_tool_test.html**: Advanced testing interface
-
-### Key Code Implementations
-
-#### Feedback Tool Endpoint
-
-```python
-@app.route('/feedback-tool-endpoint', methods=['GET', 'OPTIONS'])
-def feedback_tool_endpoint():
-    """Endpoint optimized for the web application feedback tool with all CORS headers"""
-    # Log all request details to help diagnose issues
-    origin = request.headers.get('Origin', FEEDBACK_TOOL_ORIGIN or '*')
-    logger.info(f"⭐ Feedback tool endpoint accessed from origin: {origin}")
-    logger.info(f"⭐ Request headers: {dict(request.headers)}")
-    
-    # For OPTIONS preflight requests
-    if request.method == 'OPTIONS':
-        logger.info(f"⭐ Handling OPTIONS preflight for feedback tool endpoint from {origin}")
-        response = make_response()
-        
-        # Maximum permissiveness for CORS headers
-        response.headers['Access-Control-Allow-Origin'] = origin
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, HEAD'
-        response.headers['Access-Control-Allow-Headers'] = '*'
-        response.headers['Access-Control-Max-Age'] = '86400'
-        
-        return response
-    
-    # For GET requests - Ultra simple text response for maximum compatibility
-    response = make_response("OK - Mashaaer Feelings server is running and accessible.")
-    
-    # Set Content-Type to plain text for maximum compatibility
-    response.headers['Content-Type'] = 'text/plain; charset=utf-8'
-    
-    # Maximum permissiveness for CORS headers in the response
-    response.headers['Access-Control-Allow-Origin'] = origin
-    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS, HEAD'
-    response.headers['Access-Control-Allow-Headers'] = '*'
-    response.headers['Access-Control-Max-Age'] = '86400'
-    
-    logger.info(f"⭐ Response headers: {dict(response.headers)}")
-    return response
-```
-
-#### Feedback Tool Status Endpoint
-
-```python
-@feedback_tool_bp.route('/api/feedback-tool-status', methods=['GET', 'OPTIONS'])
-def feedback_tool_status():
-    """Status endpoint optimized for feedback tool with explicit CORS headers and request details."""
-    origin = request.headers.get('Origin', '*')  # Echo the Origin or allow all
-    logger.info(f"Feedback tool status endpoint accessed from origin: {origin}")
-    logger.debug(f"Request Headers: {dict(request.headers)}")  # Log all request headers
-
-    # For OPTIONS preflight requests
-    if request.method == 'OPTIONS':
-        logger.info(f"Handling OPTIONS preflight for feedback tool status endpoint from {origin}")
-        response = make_response()
-        
-        # Maximum permissiveness for CORS headers
-        response.headers['Access-Control-Allow-Origin'] = origin
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, HEAD'
-        response.headers['Access-Control-Allow-Headers'] = '*'
-        response.headers['Access-Control-Max-Age'] = '86400'
-        
-        return response
-    
-    response_data = {
-        'status': 'online',
-        'message': 'Server is accessible by the feedback tool',
-        'timestamp': datetime.now().isoformat(),
-        'replit_info': {
-            'domain': request.host,  # The host the server is running on
-            'full_domain': request.host_url,
-            'worf_domain': f"{os.environ.get('REPL_SLUG', 'unknown')}--{os.environ.get('REPL_OWNER', 'unknown')}.repl.co",
-            'slug': os.environ.get('REPL_SLUG', 'unknown'),
-            'owner': os.environ.get('REPL_OWNER', 'unknown'),
-            'repl_id': os.environ.get('REPL_ID', 'unknown'),
-            'feedback_tool_origin': os.environ.get('FEEDBACK_TOOL_ORIGIN', 'Not set')
-        },
-        'request': {
-            'method': request.method,
-            'path': request.path,
-            'url': request.url,
-            'origin': origin,
-            'remote_addr': request.remote_addr,
-            'headers': {k: v for k, v in request.headers.items()},
-            'args': {k: v for k, v in request.args.items()},
-            'data': request.get_data(as_text=True) if request.data else None
-        },
-        'env_vars': {
-            'REPL_SLUG': os.environ.get('REPL_SLUG', 'Not set'),
-            'REPL_OWNER': os.environ.get('REPL_OWNER', 'Not set'),
-            'REPL_ID': os.environ.get('REPL_ID', 'Not set'),
-            'PORT': os.environ.get('PORT', '5000'),
-            'REPLIT_DEPLOYMENT_ID': os.environ.get('REPLIT_DEPLOYMENT_ID', 'Not set'),
-        }
-    }
-
-    response = jsonify(response_data)
-    
-    # Maximum permissiveness for CORS headers in the response
-    response.headers['Access-Control-Allow-Origin'] = origin
-    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS, HEAD'
-    response.headers['Access-Control-Allow-Headers'] = '*'
-    response.headers['Access-Control-Expose-Headers'] = 'Content-Type, Content-Length, Authorization'
-    response.headers['Access-Control-Max-Age'] = '86400'
-    
-    logger.debug(f"Response Headers: {dict(response.headers)}")
-    return response
-```
+Refer to KNOWN_ISSUES.md for an up-to-date summary of the current status and workarounds.

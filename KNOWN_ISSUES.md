@@ -1,75 +1,96 @@
-# Known Issues
+# Known Issues and Limitations
 
 ## Web Application Feedback Tool Connectivity
 
-### Description
-The web application feedback tool consistently reports that the web server is unreachable, despite extensive efforts to implement compatible endpoints and CORS configurations. Multiple test cases have confirmed that the server is running and accessible from web browsers, but the feedback tool itself cannot establish a connection.
+### Issue Description
+The web application feedback tool reports that the server is unreachable despite successful access via browser and curl tests. This appears to be a specific incompatibility between the feedback tool and our application server.
 
-### Measures Taken
+### Impact
+- The feedback tool cannot be used for direct interaction with our application
+- All manual testing through browsers and API testing via curl works correctly
+- This is strictly a testing tool issue, not an end-user facing problem
 
-We have implemented numerous measures to address this issue:
+### Extensive Troubleshooting Performed
 
-1. **Specialized Endpoints**
-   - `/feedback-tool-endpoint`: Ultra-minimal plain text endpoint with maximum CORS compatibility
-   - `/health`: Root-level health check endpoint with minimal response
-   - `/api/feedback-tool-status`: Enhanced diagnostic endpoint with detailed server information
-   - `/api/minimal`: Minimalistic API endpoint with plain text response
-   - `/api/test-cors-minimal`: Test endpoint specifically for CORS verification
+We've taken the following troubleshooting steps to isolate and attempt to resolve the issue:
 
-2. **CORS Configuration**
-   - Implemented maximally permissive CORS headers in multiple ways
-   - Correctly echoing the Origin header in Access-Control-Allow-Origin
-   - Added support for all request methods (GET, POST, OPTIONS, HEAD)
-   - Configured Access-Control-Allow-Headers to accept any headers with wildcard
-   - Set long cache times with Access-Control-Max-Age
-   - Added Access-Control-Expose-Headers for necessary headers
+1. **CORS Configuration**
+   - Added explicit CORS headers to all endpoints
+   - Tested with wildcard origin (`*`) and specific origins
+   - Created endpoints with various CORS configurations
+   - Verified CORS preflight requests work correctly
 
-3. **Request/Response Headers**
-   - Ensured Content-Type headers are correctly set (text/plain, application/json)
-   - Minimized response complexity to reduce potential issues
-   - Added detailed logging of all request and response headers
+2. **Minimal Endpoints**
+   - Created ultra-minimal endpoints with no dependencies
+   - Added simple health check endpoint at root level (`/health`)
+   - Developed multiple test endpoints with different response types
+   - Created standalone minimal server implementations
 
-4. **Testing Tools**
-   - Created dedicated test pages to verify connectivity
-   - Implemented standalone test servers to isolate the issue
-   - Developed comprehensive testing scripts to verify all endpoints
-   - Added detailed documentation of the testing process
+3. **Network Verification**
+   - Confirmed server is accessible via curl and browser
+   - Verified local connectivity to all endpoints
+   - Created diagnostic endpoints with detailed request/response information
+   - Added extensive logging for all incoming requests (including dedicated `/readme` route)
 
-### Verification Steps
+4. **Custom Testing**
+   - Developed separate test scripts to verify connectivity
+   - Created specialized diagnostic HTML pages
+   - Added comprehensive debug logging
+   - Tested with various content types and response formats
 
-Manual testing has confirmed:
+### Workarounds
 
-1. **Browser Accessibility**: The server is accessible from web browsers directly
-2. **CORS Compliance**: The server correctly implements CORS headers for cross-origin requests
-3. **Response Format**: All endpoints return valid responses in expected formats
-4. **Headers**: All necessary CORS and content headers are present in responses
+Use the following alternatives for testing:
 
-### Possible Causes
+1. **Browser Testing**
+   - Access the application directly through your browser
+   - Use the browser's developer tools to inspect network requests and responses
 
-Based on our extensive testing, we believe the issue may be related to one of the following:
+2. **API Testing**
+   - Use curl commands for API endpoint testing
+   - Example: `curl -v http://localhost:5000/api/status`
 
-1. **Network Configuration**: The feedback tool may be trying to access the server through a network path that's blocked or inaccessible.
-2. **Port Configuration**: The feedback tool might be trying to connect on a different port than 5000.
-3. **URL Formation**: The feedback tool might be constructing URLs differently than expected.
-4. **Replit-Specific Behavior**: There may be specific requirements or behaviors in the Replit environment affecting connectivity.
-5. **Undocumented Requirements**: The feedback tool may require specific endpoints or configurations that are not documented.
+3. **Diagnostic Pages**
+   - Access `/api/status` for a detailed server status report
+   - Visit `/diagnostic` for comprehensive connection testing
+   - Check `/cors-test-enhanced` for CORS configuration verification
 
-### Workaround
+4. **Health Verification**
+   - Check the `/health` endpoint for a simple status check
+   - Use `/api/ping` for a JSON response confirming server status
 
-While we continue to investigate a permanent solution, users can verify application functionality by:
+### Diagnostic Tools
 
-1. Accessing the application directly in the browser
-2. Using the created diagnostic endpoints to verify server status
-3. Testing API connectivity with the provided test scripts
-4. Using the comprehensive test page at `/feedback-comprehensive-test` for detailed diagnostics
+The following specialized diagnostic tools are available:
 
-### Next Steps
+1. **Test Scripts**
+   - `test_server_connectivity.py` - Tests various endpoints and CORS configurations
+   - `test_feedback_tool_connectivity.py` - Specifically tests compatibility with the feedback tool
 
-1. Contact Replit support for additional guidance on feedback tool requirements
-2. Test with a different port configuration if possible
-3. Implement a completely separate server just for the feedback tool
-4. Continue monitoring logs for any clues about the connectivity issue
+2. **Diagnostic Pages**
+   - `/diagnostic` - Comprehensive diagnostic page
+   - `/minimal-test` - Ultra-minimal test page
+   - `/cors-test-enhanced` - Advanced CORS testing page
+   - `/feedback-tool-test` - Specialized page for feedback tool testing
+   - `/readme` - Project documentation and overview page
 
-## Other Known Issues
+3. **Standalone Servers**
+   - `standalone_minimal_server.py` - Independent minimal server on port 3000
+   - `ultra_minimal_server.py` - Ultra-minimal server implementation
+   - `truly_minimal_server.py` - The most minimal possible server configuration
 
-No other critical issues identified at this time.
+### Future Investigation
+
+Potential avenues for future investigation when time permits:
+
+1. Contact Replit support regarding potential networking incompatibilities
+2. Explore detailed network packet capture to analyze the exact communication differences
+3. Investigate if the feedback tool has specific requirements not documented
+
+### Documentation
+
+Additional documentation related to this issue:
+
+- `FEEDBACK_TOOL_DOCUMENTATION.md` - Detailed documentation on the feedback tool integration
+- `FEEDBACK_TOOL_SUMMARY.md` - Summary of findings related to the feedback tool
+- `static/feedback_tool_guide.html` - Guide for using the feedback tool with workarounds
