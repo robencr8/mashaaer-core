@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ultra Minimal Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ultra Minimal Test Page</h1>
+    <p>This page is designed to test basic accessibility with the web application feedback tool.</p>
+    
+    <div id="status">Testing connection...</div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusDiv = document.getElementById('status');
+            
+            // Display page info
+            statusDiv.innerHTML = `
+                <p>Page loaded successfully at: ${new Date().toISOString()}</p>
+                <p>Origin: ${window.location.origin}</p>
+                <p>Page URL: ${window.location.href}</p>
+                <p class="success">If you can see this, the HTML page is loading correctly!</p>
+            `;
+            
+            // Make a simple test request to the API
+            fetch('/api/health')
+                .then(response => {
+                    statusDiv.innerHTML += `
+                        <p class="success">API connection successful!</p>
+                        <p>Response status: ${response.status}</p>
+                        <p>Access-Control-Allow-Origin: ${response.headers.get('Access-Control-Allow-Origin') || 'not set'}</p>
+                    `;
+                    return response.text();
+                })
+                .then(data => {
+                    statusDiv.innerHTML += `
+                        <p>Response data: ${data}</p>
+                    `;
+                })
+                .catch(error => {
+                    statusDiv.innerHTML += `
+                        <p class="error">API connection failed: ${error.message}</p>
+                    `;
+                });
+        });
+    </script>
+</body>
+</html>

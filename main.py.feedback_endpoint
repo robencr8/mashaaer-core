@@ -1,0 +1,36 @@
+@app.route('/feedback-tool-access', methods=['GET', 'OPTIONS'])
+def feedback_tool_access():
+    """Special endpoint optimized for the web application feedback tool with maximum logging"""
+    origin = request.headers.get('Origin', '*')
+    
+    logger.info(f"💡 Feedback tool access endpoint accessed from origin: {origin}")
+    logger.info(f"💡 Full request headers: {dict(request.headers)}")
+    
+    # Handle OPTIONS preflight request
+    if request.method == 'OPTIONS':
+        response = make_response()
+        response.headers['Access-Control-Allow-Origin'] = '*'  # Allow all origins for maximum compatibility
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Max-Age'] = '3600'
+        
+        logger.info("💡 Sending OPTIONS response with permissive CORS headers")
+        logger.info(f"💡 Response headers: {dict(response.headers)}")
+        
+        return response
+    
+    # For GET requests
+    if request.method == 'GET':
+        # Create a plain text response for maximum compatibility
+        response = make_response("Feedback tool access endpoint is active. Server is running.")
+        
+        # Set headers for maximum compatibility
+        response.headers['Content-Type'] = 'text/plain'
+        response.headers['Access-Control-Allow-Origin'] = '*'  # Allow all origins
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        
+        logger.info("💡 Sending GET response with permissive CORS headers")
+        logger.info(f"💡 Response headers: {dict(response.headers)}")
+        
+        return response

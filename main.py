@@ -118,9 +118,15 @@ logger.info(f"Feedback Tool: {FEEDBACK_TOOL_ORIGIN}")
 logger.info(f"Replit Domain: {REPLIT_DOMAIN}")
 logger.info(f"Worf Domain: {WORF_DOMAIN}")
 
-# Use the simplest CORS configuration with wildcard origin
+# Use specific CORS configuration with all known origins
 CORS(app, 
-     origins="*",  # Allow all origins for maximum compatibility
+     origins=[
+         FEEDBACK_TOOL_ORIGIN,
+         KNOWN_FEEDBACK_TOOL_ORIGIN,
+         REPLIT_DOMAIN,
+         WORF_DOMAIN,
+         "*"  # Fallback for maximum compatibility
+     ],
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"],
      allow_headers=[
          "Content-Type", "Authorization", "X-Requested-With", "Accept",
@@ -287,6 +293,33 @@ def ultra_minimal_page():
 def ultra_simple_test_page():
     """Serve an ultra simple test page for direct connectivity testing"""
     return app.send_static_file('ultra_simple_test.html')
+
+# Ultra minimal test page specifically for the web application feedback tool
+@app.route('/ultra-minimal-test')
+def ultra_minimal_test_page():
+    """Serve the ultra minimal test page for diagnosing web application accessibility"""
+    try:
+        with open('static/ultra_minimal_test.html', 'r') as f:
+            content = f.read()
+        
+        # Create response with the file content
+        response = make_response(content)
+        response.headers['Content-Type'] = 'text/html'
+        
+        # Add explicit CORS headers to ensure compatibility with feedback tool
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        
+        logger.info("Ultra minimal test page served with explicit CORS headers")
+        return response
+    except Exception as e:
+        logger.error(f"Error serving ultra minimal test page: {str(e)}")
+        # Return a plain text response as fallback
+        response = make_response("Ultra minimal page - Server is running")
+        response.headers['Content-Type'] = 'text/plain'
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
 
 
 @app.route('/minimal-test')
