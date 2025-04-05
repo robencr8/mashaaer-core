@@ -628,7 +628,7 @@
 
   <!-- Audio element for background sound -->
   <audio id="background-audio" loop>
-    <source src="/static/audio/cosmic_ambient.mp3" type="audio/mp3">
+    <source src="/static/sounds/cosmic.mp3" type="audio/mp3">
   </audio>
 
   <script>
@@ -1106,9 +1106,13 @@
       // For non-voice sounds, we can just play them directly and cache them
       if (soundType !== 'welcome') {
         // Create a temporary audio element for the interaction sound
-        const sound = new Audio(`/static/audio/${soundType}.mp3`);
+        const sound = new Audio(`/static/sounds/${soundType}.mp3`);
         sound.volume = soundType === 'hover' ? 0.3 : 0.5;
-        sound.play();
+        
+        // Play with error handling for auto-play restrictions
+        sound.play().catch(err => {
+          console.warn('Audio play error (likely autoplay restriction):', err);
+        });
         
         // Cache for future use
         soundCache[soundType] = sound;
@@ -1116,15 +1120,8 @@
       }
       
       // For welcome sounds, use the API to get voice feedback
-      fetch('/api/play-cosmic-sound', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sound_type: soundType,
-          language: language
-        }),
+      fetch(`/api/play-cosmic-sound?sound_type=${soundType}&language=${language}`, {
+        method: 'GET'
       })
       .then(response => response.json())
       .then(data => {
@@ -1132,7 +1129,11 @@
           // Play the returned sound
           const sound = new Audio(data.sound_path);
           sound.volume = 0.6;
-          sound.play();
+          
+          // Play with error handling for auto-play restrictions
+          sound.play().catch(err => {
+            console.warn('Welcome audio play error (likely autoplay restriction):', err);
+          });
         }
       })
       .catch(error => {

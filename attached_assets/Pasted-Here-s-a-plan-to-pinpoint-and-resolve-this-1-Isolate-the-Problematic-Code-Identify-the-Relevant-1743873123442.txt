@@ -1,0 +1,62 @@
+Here's a plan to pinpoint and resolve this:
+
+1. Isolate the Problematic Code:
+
+Identify the Relevant HTML:
+Open the HTML file where these buttons are located (likely templates/homepage.html or a similar main page).
+Use your editor's search function to find the button elements.
+Note the button IDs, classes, or any other unique attributes.
+Find the Event Listeners:
+In the same HTML file, search for JavaScript code that adds event listeners to these buttons.
+Look for:
+addEventListener('mouseover', ...)
+onmouseover = function() { ... }
+Inline event handlers (e.g., onmouseover="someFunction())
+Identify the functions that are executed when the buttons are hovered.
+2. Analyze the Code:
+
+Examine the Functions:
+Carefully review the code of the functions that are triggered on hover.
+Look for:
+Where the text output is being generated.
+How the text is being constructed (e.g., string concatenation, template literals).
+Any variables that might be holding incorrect values.
+Logical errors in the code.
+Check for Redundant Calls:
+Is the function being called multiple times unnecessarily?
+Are there multiple event listeners attached to the same button?
+Consider Variables and Scope:
+Are variables being used correctly within the function's scope?
+Are there any global variables that might be getting overwritten?
+3. Debugging Techniques:
+
+Browser Developer Tools (Essential):
+Open your browser's developer tools (Console tab).
+Set breakpoints in the event listener functions.
+Step through the code line by line to observe the values of variables.
+Use console.log() statements to print intermediate values and track the execution flow.
+Simplified Example:
+If the code is complex, try to create a simplified example that reproduces the issue. This will help isolate the problem.
+Example Debugging Workflow:
+
+Replit Agent Instruction:
+
+OPEN templates/homepage.html
+Replit Agent Output:
+
+(Code of homepage.html)
+Replit Agent Instruction:
+
+GREP -n "myButton.addEventListener('mouseover'" templates/homepage.html
+Replit Agent Output:
+
+123:  myButton.addEventListener('mouseover', displayText);
+Replit Agent Instruction:
+
+EXPLAIN Line 123 in homepage.html
+Replit Agent Output:
+
+Line 123 attaches an event listener to the element with the ID 'myButton' to execute the function 'displayText' when the mouse pointer is moved onto the element.
+... and so on.
+
+By following this plan and using the suggested debugging techniques, you can effectively pinpoint the source of the unexpected text output and implement the necessary fix.

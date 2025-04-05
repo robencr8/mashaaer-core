@@ -617,11 +617,18 @@
         });
       }
       
-      // Add hover effect to interactive elements
+      // Add hover effect to interactive elements - with debounce to prevent multiple sounds
+      let lastHoverTime = 0;
+      const HOVER_DEBOUNCE_TIME = 300; // milliseconds
+      
       [sphere, enterButton, voicePromptButton, audioToggle].forEach(element => {
         element.addEventListener('mouseenter', function() {
           if (audioEnabled) {
-            playCosmicSound('hover');
+            const now = Date.now();
+            if (now - lastHoverTime > HOVER_DEBOUNCE_TIME) {
+              playCosmicSound('hover');
+              lastHoverTime = now;
+            }
           }
         });
       });

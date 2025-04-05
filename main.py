@@ -2,7 +2,7 @@
 Main Flask Application for Mashaaer Feelings
 This is the entry point for the Replit Gunicorn server.
 """
-from flask import Flask, jsonify, send_from_directory, render_template_string, request
+from flask import Flask, jsonify, send_from_directory, render_template_string, render_template, request
 from flask_cors import CORS
 import os
 import logging
@@ -26,6 +26,49 @@ db_manager = DatabaseManager(config)
 db_manager.initialize_db()
 emotion_tracker = EmotionTracker(db_manager)
 
+# Initialize face detection if enabled
+face_detector = None
+try:
+    if config.get('FACE_DETECTION_ENABLED', True):
+        from vision.face_detector import FaceDetector
+        face_detector = FaceDetector(config)
+except ImportError:
+    logger.warning("Face detection module could not be imported")
+except Exception as e:
+    logger.warning(f"Error initializing face detection: {str(e)}")
+
+# Initialize TTS manager
+tts_manager = None
+try:
+    from tts.tts_manager import TTSManager
+    tts_manager = TTSManager(config)
+    tts_manager.initialize()
+except ImportError:
+    logger.warning("TTS module could not be imported")
+except Exception as e:
+    logger.warning(f"Error initializing TTS: {str(e)}")
+
+# Initialize voice recognition
+voice_recognition = None
+try:
+    from voice.recognition import VoiceRecognition
+    voice_recognition = VoiceRecognition(config)
+    voice_recognition.initialize()
+except ImportError:
+    logger.warning("Voice recognition module could not be imported")
+except Exception as e:
+    logger.warning(f"Error initializing voice recognition: {str(e)}")
+
+# Initialize intent classifier
+intent_classifier = None
+try:
+    from intent_classifier import IntentClassifier
+    intent_classifier = IntentClassifier(config)
+except ImportError:
+    logger.warning("Intent classifier module could not be imported")
+except Exception as e:
+    logger.warning(f"Error initializing intent classifier: {str(e)}")
+
 # Create the Flask application instance
 app = Flask(__name__, 
             static_folder='static',
@@ -36,6 +79,17 @@ CORS(app, origins="*", supports_credentials=False)
 
 # Set a secret key for session management
 app.secret_key = os.environ.get("SESSION_SECRET", "mashaaer_development_key")
+
+# Import and register API routes
+try:
+    from api_routes import init_api
+    api_blueprint = init_api(app, db_manager, emotion_tracker, face_detector, 
+                          tts_manager, voice_recognition, intent_classifier, config)
+    logger.info(f"API routes registered successfully")
+except ImportError as e:
+    logger.error(f"Could not import API routes: {str(e)}")
+except Exception as e:
+    logger.error(f"Error registering API routes: {str(e)}")
 
 @app.route('/')
 def index():
@@ -156,6 +210,11 @@ def simple_test():
     </html>
     """
     return html
+
+@app.route('/cosmic')
+def cosmic_splash():
+    logger.debug("Serving interactive cosmic splash page")
+    return render_template('interactive_cosmic_splash.html')
 
 @app.route('/ultra-simple')
 def ultra_simple():
