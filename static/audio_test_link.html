@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Test Page with Links</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f8f8;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            text-decoration: none;
+        }
+        .button:hover {
+            background-color: #2980b9;
+        }
+        .audio-container {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        #status-message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .link-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Audio Test Page with Links</h1>
+        <p>This page tests audio playback and provides links to other test pages.</p>
+        
+        <h2>Available Pages</h2>
+        <div class="link-list">
+            <a href="/micro-test" class="button">Micro-Interactions Test</a>
+            <a href="/emotion-test" class="button">Emotion Test</a>
+            <a href="/cosmic" class="button">Cosmic Experience</a>
+            <a href="/health" class="button">Health Check</a>
+            <a href="/ultra-simple" class="button">Ultra Simple Test</a>
+        </div>
+        
+        <h2>Audio Test</h2>
+        <div class="audio-container">
+            <p>Click the buttons below to test audio playback:</p>
+            <button id="playClick" class="button">Play Click Sound</button>
+            <button id="playHover" class="button">Play Hover Sound</button>
+            <button id="playNotification" class="button">Play Notification</button>
+            <button id="playWelcome" class="button">Play Welcome Sound</button>
+            
+            <div id="status-message"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/micro_interactions.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize variables
+            const statusMessage = document.getElementById('status-message');
+            const Interactions = window.MashaaerInteractions;
+            
+            if (!Interactions) {
+                showStatus('Micro-Interactions module not loaded!', 'error');
+                return;
+            }
+            
+            // Add click event handlers
+            document.getElementById('playClick').addEventListener('click', function() {
+                playSound('click');
+            });
+            
+            document.getElementById('playHover').addEventListener('click', function() {
+                playSound('hover');
+            });
+            
+            document.getElementById('playNotification').addEventListener('click', function() {
+                playSound('notification');
+            });
+            
+            document.getElementById('playWelcome').addEventListener('click', function() {
+                playSound('welcome');
+            });
+            
+            // Function to play sound and show status
+            function playSound(soundType) {
+                try {
+                    Interactions.playSound(soundType)
+                        .then(() => {
+                            showStatus(`Playing ${soundType} sound...`, 'success');
+                        })
+                        .catch(error => {
+                            showStatus(`Error playing sound: ${error.message}`, 'error');
+                        });
+                } catch (error) {
+                    showStatus(`Error playing sound: ${error.message}`, 'error');
+                }
+            }
+            
+            // Function to show status message
+            function showStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = type;
+                
+                // Clear message after 3 seconds
+                setTimeout(() => {
+                    statusMessage.textContent = '';
+                    statusMessage.className = '';
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>

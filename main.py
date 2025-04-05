@@ -503,3 +503,21 @@ def server_error(e):
 if __name__ == "__main__":
     logger.info("Starting Mashaaer Feelings application")
     app.run(host="0.0.0.0", port=5000, debug=True)
+
+@app.route('/micro-test')
+def micro_test():
+    """Test page for micro-interactions"""
+    logger.debug("Serving micro-interactions test page")
+    return send_from_directory('static', 'micro_test.html')
+
+@app.route('/audio-test-link')
+def audio_test_link():
+    """Audio test page with links to other test pages"""
+    logger.debug("Serving audio test link page")
+    return send_from_directory('static', 'audio_test_link.html')
+
+@app.route('/minimal-test')
+def minimal_test():
+    """Minimal test page for debugging"""
+    logger.debug("Serving minimal test page")
+    return send_from_directory('static', 'ultra_simple.html')

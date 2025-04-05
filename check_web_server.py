@@ -1,124 +1,104 @@
 """
-Script to check web server accessibility from different contexts.
+Simple utility to check if the web server is running.
 """
-import os
-import sys
 import requests
 import time
-import json
-import socket
-import subprocess
+import sys
 
-def check_url(url, max_retries=3, retry_delay=1):
-    """Check if a URL is accessible and return details."""
-    print(f"Checking URL: {url}")
-    results = {"url": url, "accessible": False, "status_code": None, "content_length": None, "error": None}
+def check_server(url="http://localhost:5000", max_attempts=3, delay=2):
+    """
+    Check if the server is running by making a request to the specified URL.
     
-    for i in range(max_retries):
+    Args:
+        url: The URL to check
+        max_attempts: Maximum number of attempts
+        delay: Delay between attempts in seconds
+        
+    Returns:
+        True if server is running, False otherwise
+    """
+    print(f"Checking if web server is running at {url}...")
+    
+    for attempt in range(1, max_attempts + 1):
         try:
             response = requests.get(url, timeout=5)
-            results["accessible"] = True
-            results["status_code"] = response.status_code
-            results["content_length"] = len(response.content)
-            results["content_type"] = response.headers.get('Content-Type')
-            results["content_preview"] = response.content[:100].decode('utf-8', errors='replace') if response.content else ""
-            return results
-        except requests.exceptions.RequestException as e:
-            results["error"] = str(e)
-            if i < max_retries - 1:
-                time.sleep(retry_delay)
+            if response.status_code == 200:
+                print(f"Success! Server is running (status code: {response.status_code})")
+                return True
+            else:
+                print(f"Attempt {attempt}/{max_attempts}: Server responded with status code {response.status_code}")
+        except requests.exceptions.ConnectionError:
+            print(f"Attempt {attempt}/{max_attempts}: Connection error - server may not be running")
+        except requests.exceptions.Timeout:
+            print(f"Attempt {attempt}/{max_attempts}: Request timed out")
+        except Exception as e:
+            print(f"Attempt {attempt}/{max_attempts}: Unexpected error: {str(e)}")
+        
+        if attempt < max_attempts:
+            print(f"Retrying in {delay} seconds...")
+            time.sleep(delay)
     
-    return results
+    print("Failed to connect to the server after multiple attempts.")
+    return False
 
-def check_port(host, port):
-    """Check if a port is open on a host."""
-    print(f"Checking if port {port} is open on {host}")
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(2)
-    result = sock.connect_ex((host, port))
-    sock.close()
-    return {"host": host, "port": port, "open": result == 0}
-
-def get_process_info(port):
-    """Get information about processes listening on the specified port."""
-    print(f"Getting process info for port {port}")
-    try:
-        output = subprocess.check_output(f"lsof -i :{port}", shell=True, text=True)
-        return {"port": port, "process_info": output.strip()}
-    except subprocess.CalledProcessError:
-        return {"port": port, "process_info": "No process found listening on this port"}
-
-def check_dns_resolution(domain):
-    """Check DNS resolution for a domain."""
-    print(f"Checking DNS resolution for {domain}")
-    try:
-        ip = socket.gethostbyname(domain)
-        return {"domain": domain, "resolved": True, "ip": ip}
-    except socket.gaierror:
-        return {"domain": domain, "resolved": False, "error": "DNS resolution failed"}
-
-def get_environment_info():
-    """Get information about the environment."""
-    print("Getting environment info")
-    info = {
-        "python_version": sys.version,
-        "platform": sys.platform,
-        "cwd": os.getcwd(),
-        "env_vars": {k: v for k, v in os.environ.items() if k.startswith("REPL") or k in ["PORT", "HOST", "FLASK_ENV", "FLASK_DEBUG"]}
-    }
-    return info
-
-def main():
-    """Run all checks and print results."""
-    results = {}
+def check_endpoint(url="http://localhost:5000/micro-test", max_attempts=3, delay=2):
+    """
+    Check if a specific endpoint is accessible.
     
-    # Check local URLs
-    results["local_url_checks"] = [
-        check_url("http://localhost:5000/"),
-        check_url("http://127.0.0.1:5000/"),
-        check_url("http://0.0.0.0:5000/"),
-        check_url("http://localhost:5000/health"),
-        check_url("http://localhost:5000/replit-test"),
-        check_url("http://localhost:5000/static/replit_test.html")
-    ]
+    Args:
+        url: The endpoint URL to check
+        max_attempts: Maximum number of attempts
+        delay: Delay between attempts in seconds
+        
+    Returns:
+        True if endpoint is accessible, False otherwise
+    """
+    print(f"Checking if endpoint is accessible at {url}...")
     
-    # Check ports
-    results["port_checks"] = [
-        check_port("localhost", 5000),
-        check_port("127.0.0.1", 5000),
-        check_port("0.0.0.0", 5000)
-    ]
+    for attempt in range(1, max_attempts + 1):
+        try:
+            response = requests.get(url, timeout=5)
+            if response.status_code == 200:
+                print(f"Success! Endpoint is accessible (status code: {response.status_code})")
+                content_preview = response.text[:100] + "..." if len(response.text) > 100 else response.text
+                print(f"Content preview: {content_preview}")
+                return True
+            else:
+                print(f"Attempt {attempt}/{max_attempts}: Endpoint responded with status code {response.status_code}")
+        except requests.exceptions.ConnectionError:
+            print(f"Attempt {attempt}/{max_attempts}: Connection error - server may not be running")
+        except requests.exceptions.Timeout:
+            print(f"Attempt {attempt}/{max_attempts}: Request timed out")
+        except Exception as e:
+            print(f"Attempt {attempt}/{max_attempts}: Unexpected error: {str(e)}")
+        
+        if attempt < max_attempts:
+            print(f"Retrying in {delay} seconds...")
+            time.sleep(delay)
     
-    # Get process info
-    results["process_info"] = get_process_info(5000)
-    
-    # Check DNS resolution
-    hostname = socket.gethostname()
-    results["dns_checks"] = [
-        check_dns_resolution("localhost"),
-        check_dns_resolution(hostname)
-    ]
-    
-    # Get environment info
-    results["environment_info"] = get_environment_info()
-    
-    # Print results
-    print("\n=== Web Server Accessibility Check Results ===")
-    print(json.dumps(results, indent=2))
-    
-    # Summary
-    print("\n=== Summary ===")
-    accessible_urls = [result["url"] for result in results["local_url_checks"] if result["accessible"]]
-    print(f"Accessible URLs: {len(accessible_urls)}/{len(results['local_url_checks'])}")
-    if accessible_urls:
-        print("URLs that are accessible:")
-        for url in accessible_urls:
-            print(f"  - {url}")
-    
-    open_ports = [result["port"] for result in results["port_checks"] if result["open"]]
-    print(f"Open ports: {len(open_ports)}/{len(results['port_checks'])}")
-    
-    print("\nDetailed results have been printed above.")
+    print("Failed to access the endpoint after multiple attempts.")
+    return False
 
 if __name__ == "__main__":
-    main()
+    # Check server and specific endpoint
+    server_url = "http://localhost:5000"
+    endpoint_url = "http://localhost:5000/micro-test"
+    
+    # Override URLs if provided as command line arguments
+    if len(sys.argv) > 1:
+        server_url = sys.argv[1]
+    if len(sys.argv) > 2:
+        endpoint_url = sys.argv[2]
+    
+    server_running = check_server(server_url)
+    if server_running:
+        endpoint_accessible = check_endpoint(endpoint_url)
+        if endpoint_accessible:
+            print("All checks passed. The server and endpoint are working correctly.")
+            sys.exit(0)
+        else:
+            print("Server is running but the specific endpoint is not accessible.")
+            sys.exit(1)
+    else:
+        print("Server check failed. Please ensure the server is running.")
+        sys.exit(1)
