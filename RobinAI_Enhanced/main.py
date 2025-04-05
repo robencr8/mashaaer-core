@@ -1,15 +1,14 @@
 """
-Compatibility Layer for Replit Deployment
-This module imports and reexports the Flask app from the root main.py file
-to ensure compatibility with the Replit deployment configuration.
+Ultra-Minimal Flask App for the RobinAI_Enhanced package
+This file is designed to match the expected Replit deployment entry point.
 """
-import sys
-import os
+from flask import Flask
 
-# Add the parent directory to sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+app = Flask(__name__)
 
-# Import the app from the root main.py
-from main import app
+@app.route('/')
+def hello_replit():
+    return "Hello from Replit RobinAI_Enhanced!"
 
-# This file exists solely to provide the correct import path for the .replit file
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)

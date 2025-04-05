@@ -1,14 +1,11 @@
 """
-Ultra-Minimal Flask App for Replit Feedback Tool
-This file is designed to be the most basic Flask application possible.
+Replit Entry Point - Ultra Minimal Version
+This file is designed to match the workflow configuration.
 """
-from flask import Flask
+# Import the Flask app instance from the main.py file
+from main import app
 
-app = Flask(__name__)
-
-@app.route('/')
-def hello():
-    return "Welcome to Mashaaer Feelings"
+# That's it! No need for anything else.
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
