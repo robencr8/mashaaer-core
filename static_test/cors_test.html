@@ -1,55 +1,123 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CORS Test</title>
+    <title>CORS Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f5f5f5;
+            white-space: pre-wrap;
+        }
+        button {
+            padding: 10px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-    <h1>Testing CORS with Mashaaer Feelings API</h1>
+    <h1>CORS Test Page</h1>
+    <p>This page tests CORS configuration for the Mashaaer API.</p>
     
-    <div id="results">Testing...</div>
+    <div>
+        <h2>Test Endpoints</h2>
+        <button id="testHealth">Test /health</button>
+        <button id="testApiStatus">Test /api/status</button>
+        <button id="testAll">Test All Endpoints</button>
+    </div>
+    
+    <div>
+        <h3>Results:</h3>
+        <div id="results" class="result">Results will appear here...</div>
+    </div>
     
     <script>
-        document.addEventListener('DOMContentLoaded', async function() {
-            const resultsElement = document.getElementById('results');
-            
+        const resultDiv = document.getElementById('results');
+        const baseUrl = window.location.origin; // Get the current origin
+        
+        function addResult(message) {
+            resultDiv.innerHTML += message + '\n';
+        }
+        
+        function clearResults() {
+            resultDiv.innerHTML = '';
+        }
+        
+        async function testEndpoint(url, name) {
             try {
-                // First test - API status
-                const apiStatusResponse = await fetch('http://localhost:5000/api/status');
-                const apiStatusData = await apiStatusResponse.json();
+                addResult(`Testing ${name} (${url})...`);
+                console.log(`Fetching ${url}`);
                 
-                resultsElement.innerHTML = `
-                    <h2>API Status Test: SUCCESS</h2>
-                    <pre>${JSON.stringify(apiStatusData, null, 2)}</pre>
-                `;
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                    credentials: 'include'
+                });
                 
-                // Second test - Root endpoint
-                const rootResponse = await fetch('http://localhost:5000/');
-                const rootText = await rootResponse.text();
+                addResult(`Status: ${response.status} ${response.statusText}`);
                 
-                resultsElement.innerHTML += `
-                    <h2>Root Endpoint Test: SUCCESS</h2>
-                    <p>${rootText}</p>
-                `;
+                // Log all headers
+                addResult('Response headers:');
+                response.headers.forEach((value, key) => {
+                    addResult(`  ${key}: ${value}`);
+                });
                 
-                // Third test - Cosmic Onboarding endpoint
-                const cosmicResponse = await fetch('http://localhost:5000/cosmic-onboarding');
-                const cosmicStatus = cosmicResponse.status;
+                if (response.headers.get('content-type')?.includes('application/json')) {
+                    const data = await response.json();
+                    addResult(`Response data: ${JSON.stringify(data, null, 2)}`);
+                } else {
+                    const text = await response.text();
+                    addResult(`Response text: ${text.substring(0, 150)}...`);
+                }
                 
-                resultsElement.innerHTML += `
-                    <h2>Cosmic Onboarding Test: SUCCESS</h2>
-                    <p>Status code: ${cosmicStatus}</p>
-                `;
-                
+                addResult('Test completed successfully');
+                return true;
             } catch (error) {
-                resultsElement.innerHTML = `
-                    <h2>CORS Test: FAILED</h2>
-                    <p>Error: ${error.message}</p>
-                `;
-                console.error('CORS Test Error:', error);
+                addResult(`Error testing ${name}: ${error.message}`);
+                console.error('Error:', error);
+                return false;
             }
+        }
+        
+        document.getElementById('testHealth').addEventListener('click', async () => {
+            clearResults();
+            await testEndpoint(`${baseUrl}/health`, 'Health Endpoint');
         });
+        
+        document.getElementById('testApiStatus').addEventListener('click', async () => {
+            clearResults();
+            await testEndpoint(`${baseUrl}/api/status`, 'API Status Endpoint');
+        });
+        
+        document.getElementById('testAll').addEventListener('click', async () => {
+            clearResults();
+            addResult('=== Testing All Endpoints ===');
+            await testEndpoint(`${baseUrl}/health`, 'Health Endpoint');
+            addResult('---');
+            await testEndpoint(`${baseUrl}/api/status`, 'API Status Endpoint');
+            addResult('=== All Tests Completed ===');
+        });
+        
+        // Log browser details for debugging
+        addResult(`Browser: ${navigator.userAgent}`);
+        addResult(`Current origin: ${baseUrl}`);
     </script>
 </body>
 </html>

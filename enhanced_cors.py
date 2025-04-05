@@ -8,12 +8,13 @@ to work with the Replit web application feedback tool.
 from flask import Flask, request, Response
 from flask_cors import CORS
 
-def configure_cors(app):
+def configure_cors(app, dev_mode=False):
     """
     Configure enhanced CORS settings for the Replit feedback tool
     
     Args:
         app: Flask application instance
+        dev_mode: Enable development mode with additional origins
     """
     # Initialize CORS with very permissive settings
     CORS(app, 

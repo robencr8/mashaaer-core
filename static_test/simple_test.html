@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f5f5f5;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple Test Page</h1>
+    <p>This page tests basic functionality of the Mashaaer API.</p>
+    
+    <button id="testHealth">Test Health Endpoint</button>
+    <div id="healthResult" class="result">Results will appear here...</div>
+    
+    <script>
+        document.getElementById('testHealth').addEventListener('click', function() {
+            const resultDiv = document.getElementById('healthResult');
+            resultDiv.textContent = 'Testing health endpoint...';
+            
+            fetch('/health')
+                .then(response => {
+                    resultDiv.textContent = 'Response status: ' + response.status;
+                    return response.json();
+                })
+                .then(data => {
+                    resultDiv.textContent += '\nResponse data: ' + JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    resultDiv.textContent = 'Error: ' + error.message;
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+</body>
+</html>

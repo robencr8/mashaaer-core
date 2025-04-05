@@ -22,6 +22,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Import enhanced CORS if available, fallback to standard CORS if not
+try:
+    from enhanced_cors import configure_cors
+    logger.info("Enhanced CORS module loaded")
+    ENHANCED_CORS_AVAILABLE = True
+except ImportError:
+    logger.warning("Enhanced CORS module not available, using standard CORS")
+    ENHANCED_CORS_AVAILABLE = False
+
 # Import local modules
 import api_routes
 from config import Config
@@ -60,11 +69,24 @@ app = Flask(__name__, static_folder='static')
 # Set a secret key for session management
 app.secret_key = os.environ.get('SESSION_SECRET', os.urandom(24).hex())
 
-# Enable CORS for all routes
-CORS(app, origins="*", supports_credentials=True)
-
 # Load configuration
 config = Config()
+
+# Enable CORS for all routes with enhanced configuration
+if ENHANCED_CORS_AVAILABLE:
+    logger.info("Using enhanced CORS configuration")
+    cors = configure_cors(app, dev_mode=config.DEBUG)
+else:
+    logger.warning("Using fallback CORS configuration - may have limited compatibility")
+    # We can't use "*" with credentials, so fallback to explicit origins
+    origins = [
+        'https://mashaaer.replit.app',
+        'http://localhost:5000', 
+        'http://127.0.0.1:5000',
+        'https://*.replit.app'
+    ]
+    logger.info(f"CORS fallback origins: {origins}")
+    CORS(app, origins=origins, supports_credentials=True)
 
 # Initialize components
 db_manager = DatabaseManager(config)
@@ -171,6 +193,13 @@ def simple_test():
     """Simple test page to verify web server is working"""
     return render_template('simple_test.html')
 
+# Route for the static test page
+@app.route('/static-test')
+def static_test():
+    """Static test page to verify web server connectivity"""
+    logger.info(f"Static test page request received from {request.remote_addr}")
+    return send_from_directory('static_test', 'simple_test.html')
+
 # Route for serving TTS cache files
 @app.route('/tts_cache/<path:filename>')
 def serve_tts_cache(filename):
@@ -193,3 +222,10 @@ def serve_static(filename):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
+
+# Route for the CORS test page
+@app.route('/cors-test')
+def cors_test():
+    """CORS test page to verify cross-origin configuration"""
+    logger.info(f"CORS test page request received from {request.remote_addr}")
+    return send_from_directory('static_test', 'cors_test.html')

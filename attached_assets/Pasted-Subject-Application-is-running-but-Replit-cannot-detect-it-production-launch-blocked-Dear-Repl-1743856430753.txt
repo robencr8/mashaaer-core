@@ -1,0 +1,44 @@
+Subject: Application is running but Replit cannot detect it – production launch blocked
+
+Dear Replit Support,
+
+We are experiencing a critical issue with our application hosted on Replit. The app runs perfectly when tested locally via `curl` and the logs confirm that Gunicorn is binding correctly to 0.0.0.0:5000. However, Replit’s comment agent and deployment system are failing to detect that the server is up and running.
+
+Here’s a breakdown of the situation:
+
+✅ What works:
+- The Flask app launches via Gunicorn
+- `curl http://localhost:5000/` returns 200 OK
+- `/health` and `/api/status` endpoints return valid JSON
+- Sound and TTS APIs are functional
+- Logs confirm incoming traffic and requests
+
+❌ What’s broken:
+- Replit’s UI and testing agent report that the app is not responding
+- HTML and JS assets (like interactive_cosmic_splash.html) are not rendering in Replit's web preview
+- It seems like Replit is not recognizing a valid HTTP 200 response from our root `/` route
+
+🎯 Suspected causes:
+- CORS config (`origins="*" and supports_credentials=True`) might be causing Replit's internal iframe check to fail
+- Replit may be looking for a specific HTTP header or misconfigured health check logic
+- Replit may not properly respect `main:app` when `.workflow` is being used instead of `.replit`
+
+🔍 Reproduction:
+1. Run the Flask app using Gunicorn as per the `.workflow`
+2. Access via `curl` or browser: everything works
+3. Replit's preview and comment system still fail
+
+This is blocking a **live production demo** of an emotional AI assistant called **"Mashaaer | مشاعر"**. The experience involves:
+- Voice and emotion recognition
+- Real-time audio playback
+- Interactive cosmic-themed UI
+All systems are working except Replit's frontend routing or health check logic.
+
+Please investigate and advise urgently. This is not a staging app — it’s the official launch interface, and this issue is causing a public delay.
+
+Thank you for your support.
+
+Best regards,  
+Roben Edwan  
+General Manager – Eco Technology  
+🇦🇪 Ajman, UAE  

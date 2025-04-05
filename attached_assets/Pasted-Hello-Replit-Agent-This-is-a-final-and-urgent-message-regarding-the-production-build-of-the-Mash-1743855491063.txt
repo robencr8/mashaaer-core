@@ -1,0 +1,75 @@
+Hello Replit Agent,
+
+This is a final and urgent message regarding the production build of the Mashaaer emotional intelligence assistant.
+
+After weeks of collaborative development, the current live version is not aligned with the experience we’ve agreed on, neither visually nor functionally. Below is a consolidated list of issues, required fixes, and features that must be fully implemented before public demonstration.
+
+---
+
+✅ 1. Interface Activation:
+- The central cosmic sphere is the **only** trigger for interaction.
+- Remove any external “Start” or “Say Hello” buttons.
+- On click:
+   - Play `/static/sounds/welcome.mp3`
+   - Start voice recognition (via `VoiceRecognition`)
+   - Fallback to text input if mic access fails
+
+---
+
+✅ 2. Real-Time Sphere Feedback:
+- While listening, the sphere should:
+   - Pulse softly
+   - Emit animated ripple rings
+- After receiving input, sphere color must update to reflect emotion.
+- Emotion-to-color mapping is **suggested only** (you have freedom to fine-tune for style):
+
+| Emotion    | Suggested Color |
+|------------|------------------|
+| happy      | `#fcd34d` (soft yellow)  
+| calm       | `#60a5fa` (sky blue)  
+| angry      | `#ef4444` (deep red)  
+| anxious    | `#fb923c` (warm orange)  
+| sad        | `#a78bfa` (muted purple)  
+| neutral    | `#9333ea` (default violet)
+
+Smooth transitions and light glows are expected — no harsh visual jumps.
+
+---
+
+✅ 3. Emotional Response:
+- After emotion is processed, the app should reply using TTS:
+   - Use endpoint `/api/tts?text=...`
+   - Play audio reply back to the user (via `speakText()`)
+
+---
+
+✅ 4. Critical Regression: Cosmic Background Removed ❌
+- The moving star field / meteor background was removed — this is unacceptable.
+- You must **restore the full animated cosmic background** behind the sphere:
+   - Animated stars, particle effects, or meteor shower
+   - Possibly referenced via `meteor-shower.css`, `stars.js`, or `canvas` layers
+- This background is part of the **branding** and the immersive user experience.
+
+---
+
+✅ 5. File Consistency:
+- Ensure these files are present and accessible:
+   - HTML: `interactive_cosmic_splash.html` or `startup_standalone.html`
+   - Sounds in: `static/sounds/` or `static/audio/` with files like:
+     - `welcome.mp3`, `cosmic.mp3`, `click.mp3`, `listen_start.mp3`
+
+---
+
+✅ 6. Clean UI:
+- Keep the layout minimal:
+   - Language toggle (AR/EN)
+   - Cosmic sphere with glow & animation
+   - Optional subtitle or message bubble
+- Remove: test pages, developer placeholders, or redundant text
+
+---
+
+🎯 Final Goal:
+Mashaaer is an emotional intelligence assistant, not a standard app. The UI, audio, and behavior must feel polished, alive, and emotionally responsive.
+
+Please deploy the corrected version and confirm when live.
