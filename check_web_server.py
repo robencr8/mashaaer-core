@@ -1,83 +1,89 @@
-#!/usr/bin/env python3
 """
-Simple script to check if the web server is accessible
+Check the web server status and connectivity
 """
 import requests
-import sys
-import time
 import json
+import os
+import logging
+import socket
+import time
+from pprint import pprint
 
-def check_endpoints():
-    """Check multiple endpoints for accessibility"""
-    base_url = "http://localhost:5000"
-    endpoints = {
-        "/": "Main page",
-        "/health": "Health check endpoint",
-        "/api/status": "API status endpoint",
-        "/simple-test": "Test page"
-    }
-    
-    results = {}
-    all_successful = True
-    
-    print(f"Checking web server at {base_url}...")
-    print("=" * 50)
-    
-    for endpoint, description in endpoints.items():
-        url = f"{base_url}{endpoint}"
-        try:
-            print(f"Testing {description} ({url})...")
-            response = requests.get(url, timeout=5)
-            response.raise_for_status()
-            status = "SUCCESS"
-            content = response.text[:100] + "..." if len(response.text) > 100 else response.text
-            if response.headers.get('content-type', '').startswith('application/json'):
-                content = json.dumps(response.json(), indent=2)
-            
-            results[endpoint] = {
-                "status": status,
-                "status_code": response.status_code,
-                "content_type": response.headers.get('content-type'),
-                "content_preview": content
-            }
-            print(f"  ✓ Status code: {response.status_code}")
-            print(f"  ✓ Content type: {response.headers.get('content-type')}")
-            print(f"  ✓ Content preview: {content[:100]}...")
-        except requests.exceptions.RequestException as e:
-            status = "FAILED"
-            all_successful = False
-            results[endpoint] = {
-                "status": status,
-                "error": str(e)
-            }
-            print(f"  ✗ Error: {e}")
-        
-        print("-" * 50)
-    
-    return all_successful, results
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+def check_port(port):
+    """Check if a port is open on localhost"""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(1)
+    result = sock.connect_ex(('127.0.0.1', port))
+    sock.close()
+    return result == 0
+
+def check_server_health(url):
+    """Check if the server is healthy"""
+    try:
+        logger.info(f"Checking server health at {url}")
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()  # Raise an exception for 4XX/5XX responses
+        logger.info(f"Server health check successful: {response.status_code}")
+        logger.info(f"Response: {response.text[:500]}")
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error checking server health: {e}")
+        return None
+
+def check_api_status(url):
+    """Check API status"""
+    try:
+        logger.info(f"Checking API status at {url}")
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        logger.info(f"API status check successful: {response.status_code}")
+        logger.info(f"Response: {response.text[:500]}")
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error checking API status: {e}")
+        return None
 
 def main():
-    """Main function"""
-    # Wait a moment to ensure server is up
-    time.sleep(1)
-    
-    # Check the endpoints
-    success, results = check_endpoints()
-    
-    # Output summary
-    print("\nSummary:")
-    print("=" * 50)
-    for endpoint, result in results.items():
-        status_symbol = "✓" if result["status"] == "SUCCESS" else "✗"
-        print(f"{status_symbol} {endpoint}: {result['status']}")
-    
-    # Exit with appropriate code
-    if success:
-        print("\nAll endpoints accessible!")
-        return 0
+    """Main function to check web server status"""
+    # Check if port 5000 is open
+    logger.info("Checking if port 5000 is open...")
+    if check_port(5000):
+        logger.info("Port 5000 is open")
     else:
-        print("\nSome endpoints failed!")
-        return 1
+        logger.error("Port 5000 is closed!")
+        return
+
+    # Base URL
+    base_url = "http://localhost:5000"
+    
+    # Check server health
+    health_data = check_server_health(f"{base_url}/health")
+    if health_data:
+        logger.info("Server health check passed")
+        logger.info("Health data:")
+        pprint(health_data)
+    
+    # Check API status
+    api_status = check_api_status(f"{base_url}/api/status")
+    if api_status:
+        logger.info("API status check passed")
+        logger.info("API status data:")
+        pprint(api_status)
+    
+    # Try to get the main page
+    try:
+        logger.info("Trying to get the main page...")
+        response = requests.get(base_url, timeout=5)
+        logger.info(f"Main page status code: {response.status_code}")
+        logger.info(f"Main page content type: {response.headers.get('Content-Type')}")
+        logger.info(f"Main page content length: {len(response.text)} bytes")
+        logger.info(f"Main page content preview: {response.text[:200]}...")
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error getting main page: {e}")
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

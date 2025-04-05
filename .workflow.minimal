@@ -1,2 +1,2 @@
-name = "Minimal test"
-command = "gunicorn --bind 0.0.0.0:5000 --reuse-port --reload --access-logfile - --error-logfile - minimal_app:app"
+name = "Minimal application"
+command = "gunicorn --bind 0.0.0.0:5001 --reuse-port --reload minimal_app:app"

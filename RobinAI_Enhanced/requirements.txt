@@ -1,2 +1,13 @@
 flask==2.3.3
 gunicorn==23.0.0
+flask-cors
+kivy
+marshmallow
+nltk
+numpy
+psutil
+psycopg2-binary
+python-dotenv
+requests
+sqlalchemy
+werkzeug

@@ -1166,31 +1166,50 @@
       }, 1000);
     }
     
-    // Play cosmic sound using API
+    // Play cosmic sound using API with enhanced error handling
     function playCosmicSound(soundType, language = currentLanguage) {
-      if (!audioEnabled) return;
+      // Exit early if audio is disabled
+      if (!audioEnabled) {
+        console.log('Audio is disabled. Enable audio by clicking anywhere on the screen.');
+        return;
+      }
       
       // Check cache first
       if (soundType !== 'welcome' && soundCache[soundType]) {
         soundCache[soundType].currentTime = 0;
-        soundCache[soundType].play();
+        soundCache[soundType].play().catch(err => {
+          console.warn('Cached audio play error:', err);
+          // Try to recover by recreating the audio element
+          delete soundCache[soundType]; 
+          // Call playCosmicSound again to recreate the sound
+          setTimeout(() => playCosmicSound(soundType, language), 100);
+        });
         return;
       }
       
-      // For non-voice sounds, we can just play them directly and cache them
+      // For non-voice sounds (UI interactions), load and play from static files
       if (soundType !== 'welcome') {
         try {
           // Create a temporary audio element for the interaction sound
           const sound = new Audio(`/static/sounds/${soundType}.mp3`);
           sound.volume = soundType === 'hover' ? 0.3 : 0.5;
+          
+          // Add proper load error handling
+          sound.addEventListener('error', (e) => {
+            console.warn(`Sound file error for ${soundType}.mp3:`, e);
+          });
+          
+          // Play with catch for autoplay restrictions
           sound.play().catch(err => {
-            console.error('Audio play error (likely autoplay restriction):', err);
+            console.warn('Audio play error (likely autoplay restriction):', err);
+            // Still cache the sound for future use when user interacts
+            soundCache[soundType] = sound;
           });
           
           // Cache for future use
           soundCache[soundType] = sound;
         } catch (err) {
-          console.error('Error creating audio element:', err);
+          console.warn('Error creating audio element:', err);
         }
         return;
       }
@@ -1199,25 +1218,56 @@
       fetch(`/api/play-cosmic-sound?sound_type=${soundType}&language=${language}`, {
         method: 'GET'
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+      })
       .then(data => {
         if (data.success && data.sound_path) {
-
-          // Play the returned sound
+          // Play the returned sound with enhanced error handling
           try {
             const sound = new Audio(data.sound_path);
             sound.volume = 0.6;
+            
+            // Add load error handler
+            sound.addEventListener('error', (e) => {
+              console.warn(`Welcome sound load error for ${data.sound_path}:`, e);
+              // Try to play a fallback sound from static files if available
+              const fallbackSound = new Audio('/static/sounds/welcome.mp3');
+              fallbackSound.volume = 0.6;
+              fallbackSound.play().catch(err => {
+                console.warn('Fallback welcome sound play error:', err);
+              });
+            });
+            
+            // Play with detailed error handling
             sound.play().catch(err => {
-              console.error('Welcome sound play error (likely autoplay restriction):', err);
+              console.warn('Welcome sound play error (likely autoplay restriction):', err);
+              // Cache for future use when user interacts
+              soundCache['welcome'] = sound;
             });
           } catch (err) {
-            console.error('Error creating welcome audio element:', err);
+            console.warn('Error creating welcome audio element:', err);
           }
-
+        } else {
+          console.warn('Invalid response data from server for welcome sound:', data);
         }
       })
       .catch(error => {
-        console.error('Error playing cosmic sound:', error);
+        console.warn('Error playing cosmic sound:', error);
+        
+        // Try to play a static fallback welcome sound
+        try {
+          const fallbackSound = new Audio('/static/sounds/welcome.mp3');
+          fallbackSound.volume = 0.6;
+          fallbackSound.play().catch(err => {
+            console.warn('Fallback welcome sound play error:', err);
+          });
+        } catch (err) {
+          console.warn('Error creating fallback welcome audio:', err);
+        }
       });
     }
     

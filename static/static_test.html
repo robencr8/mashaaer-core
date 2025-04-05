@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer Static Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #673ab7;
+            text-align: center;
+        }
+        .test-card {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            font-weight: bold;
+            padding: 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .success {
+            background-color: #e6f4ea;
+            color: #0d652d;
+        }
+        .pending {
+            background-color: #fef7e0;
+            color: #b06000;
+        }
+        .error {
+            background-color: #fce8e6;
+            color: #c5221f;
+        }
+        button {
+            background-color: #673ab7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #5e35b1;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mashaaer Static Test Page</h1>
+    
+    <div class="test-card">
+        <h2>Server Status</h2>
+        <p>This page confirms that the Mashaaer web server is running and accessible.</p>
+        <p>Current status: <span class="status success">ONLINE</span></p>
+        <p><strong>Server time:</strong> <span id="server-time"></span></p>
+    </div>
+    
+    <div class="test-card">
+        <h2>PWA Capabilities</h2>
+        <p>The Mashaaer application can be installed as a Progressive Web App (PWA) with offline capabilities.</p>
+        <p>Service worker status: <span id="sw-status" class="status pending">Checking...</span></p>
+    </div>
+    
+    <div class="test-card">
+        <h2>Health Check</h2>
+        <p>Test server health endpoint:</p>
+        <button id="test-health">Test Health Endpoint</button>
+        <div id="health-result"></div>
+    </div>
+    
+    <div class="test-card">
+        <h2>API Status</h2>
+        <p>Test API status endpoint:</p>
+        <button id="test-api">Test API Endpoint</button>
+        <div id="api-result"></div>
+    </div>
+
+    <script>
+        // Display server time based on the server's response headers
+        document.getElementById('server-time').textContent = new Date().toLocaleString();
+        
+        // Check service worker status
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistration().then(function(registration) {
+                const swStatus = document.getElementById('sw-status');
+                if (registration) {
+                    console.log('Service Worker is registered', registration);
+                    swStatus.textContent = 'REGISTERED';
+                    swStatus.className = 'status success';
+                } else {
+                    console.log('No Service Worker is registered');
+                    swStatus.textContent = 'NOT REGISTERED';
+                    swStatus.className = 'status error';
+                }
+            }).catch(function(error) {
+                console.error('Service Worker error:', error);
+                const swStatus = document.getElementById('sw-status');
+                swStatus.textContent = 'ERROR';
+                swStatus.className = 'status error';
+            });
+        } else {
+            console.log('Service Workers not supported');
+            const swStatus = document.getElementById('sw-status');
+            swStatus.textContent = 'NOT SUPPORTED';
+            swStatus.className = 'status error';
+        }
+        
+        // Health check test
+        document.getElementById('test-health').addEventListener('click', function() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.innerHTML = '<p class="status pending">Testing...</p>';
+            
+            fetch('/health')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Health data:', data);
+                    resultDiv.innerHTML = `
+                        <p class="status success">Success!</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Health check error:', error);
+                    resultDiv.innerHTML = `
+                        <p class="status error">Error: ${error.message}</p>
+                    `;
+                });
+        });
+        
+        // API status test
+        document.getElementById('test-api').addEventListener('click', function() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = '<p class="status pending">Testing...</p>';
+            
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('API data:', data);
+                    resultDiv.innerHTML = `
+                        <p class="status success">Success!</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                })
+                .catch(error => {
+                    console.error('API check error:', error);
+                    resultDiv.innerHTML = `
+                        <p class="status error">Error: ${error.message}</p>
+                    `;
+                });
+        });
+    </script>
+</body>
+</html>
