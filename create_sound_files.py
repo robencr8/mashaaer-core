@@ -1,69 +1,112 @@
-#!/usr/bin/env python3
+"""
+Create Sound Files for Mashaaer
+
+This script creates required sound files for the Mashaaer application
+using text-to-speech technology and copies them to the appropriate location.
+"""
 
 import os
+import sys
+import json
+import shutil
 import requests
-import time
+from pathlib import Path
 
-# Ensure the sounds directory exists
-os.makedirs('static/sounds', exist_ok=True)
+# Set up paths
+CURRENT_DIR = Path(__file__).parent
+STATIC_SOUNDS_DIR = CURRENT_DIR / "static" / "sounds"
+TEMP_DIR = CURRENT_DIR / "temp_sounds"
+TTS_CACHE_DIR = CURRENT_DIR / "tts_cache"
 
-# List of sound files we need to create
-sound_files = [
-    'welcome.mp3',
-    'cosmic.mp3',
-    'click.mp3',
-    'hover.mp3',
-    'listen_start.mp3',
-    'listen_stop.mp3',
-    'greeting.mp3'
-]
+# Make sure necessary directories exist
+STATIC_SOUNDS_DIR.mkdir(parents=True, exist_ok=True)
+TEMP_DIR.mkdir(parents=True, exist_ok=True)
 
-# Sample audio URLs (short audio files)
-sample_urls = [
-    "https://github.com/duncantl/SampleAudio/raw/master/audio/file1.mp3",
-    "https://github.com/duncantl/SampleAudio/raw/master/audio/file2.mp3",
-    "https://github.com/duncantl/SampleAudio/raw/master/audio/file3.mp3"
-]
+# Sound definitions - mapping sound types to text prompts
+SOUND_DEFINITIONS = {
+    # For interaction sounds
+    "click": {"en": "click", "ar": "نقرة"},
+    "hover": {"en": "hover", "ar": "تحويم"},
+    "listen_start": {"en": "start listening", "ar": "بدء الاستماع"},
+    "listen_stop": {"en": "stop listening", "ar": "إيقاف الاستماع"},
+    # For voice notifications
+    "welcome": {"en": "Welcome to Mashaaer, Create the future, I hear you", 
+                "ar": "مرحبا بك في مشاعر، اصنع المستقبل، أنا أسمعك"},
+    "greeting": {"en": "I'm listening to you", "ar": "أنا أستمع إليك"}
+}
 
-# Download or create each file
-for i, sound_file in enumerate(sound_files):
-    file_path = os.path.join('static', 'sounds', sound_file)
+# Background music file (we'll use a TTS-generated ambient sound for now)
+BACKGROUND_MUSIC = {"en": "cosmic ambient music", "ar": "موسيقى كونية"}
+
+def generate_sound_with_tts(text, language, filename):
+    """Generate a sound file using the application's TTS API"""
+    print(f"Generating sound for: {text} ({language}) -> {filename}")
     
-    # Check if the file already exists and has content
-    if os.path.exists(file_path) and os.path.getsize(file_path) > 100:
-        print(f"Skipping {sound_file} - already exists with content")
-        continue
+    # Call the TTS API endpoint
+    api_url = "http://localhost:5000/api/speak"
+    headers = {'Content-Type': 'application/json'}
+    data = {
+        'text': text,
+        'language': language,
+        'cache': True  # Use cache if available
+    }
     
     try:
-        # Use a different sample URL for each file (cycling through the available ones)
-        url = sample_urls[i % len(sample_urls)]
-        print(f"Downloading audio for {sound_file} from {url}")
-        
-        response = requests.get(url, timeout=10)
+        response = requests.post(api_url, headers=headers, json=data)
         if response.status_code == 200:
-            with open(file_path, 'wb') as audio_file:
-                audio_file.write(response.content)
-            print(f"Created {sound_file}, size: {os.path.getsize(file_path)} bytes")
+            result = response.json()
+            if result.get('success') and 'audio_url' in result:
+                # Parse the relative URL path
+                audio_path = result['audio_url'].split('/')[-1]
+                audio_source = TTS_CACHE_DIR / audio_path
+                
+                if audio_source.exists():
+                    # Copy the generated file to our destination
+                    shutil.copy(audio_source, filename)
+                    print(f"  ✓ Created sound file: {filename}")
+                    return True
+                else:
+                    print(f"  ✗ TTS generated audio file not found at: {audio_source}")
+            else:
+                print(f"  ✗ TTS API error: {result.get('error', 'Unknown error')}")
         else:
-            print(f"Failed to download audio for {sound_file}, status: {response.status_code}")
-            # Create a minimal valid MP3 file if download fails
-            with open(file_path, 'wb') as audio_file:
-                audio_file.write(b'\xFF\xFB\x90\x44\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
-            print(f"Created minimal MP3 for {sound_file}")
-    except Exception as e:
-        print(f"Error creating {sound_file}: {str(e)}")
-        # Create a minimal valid MP3 file in case of any error
-        with open(file_path, 'wb') as audio_file:
-            audio_file.write(b'\xFF\xFB\x90\x44\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
-        print(f"Created minimal MP3 for {sound_file} after error")
+            print(f"  ✗ TTS API returned error status: {response.status_code}")
+            print(f"  Response: {response.text}")
     
-    # Delay to avoid rate limiting
-    time.sleep(0.5)
+    except Exception as e:
+        print(f"  ✗ Error calling TTS API: {str(e)}")
+    
+    return False
 
-print("\nSummary of sound files:")
-for sound_file in sound_files:
-    file_path = os.path.join('static', 'sounds', sound_file)
-    if os.path.exists(file_path):
-        print(f"{sound_file}: {os.path.getsize(file_path)} bytes")
+def create_sound(sound_type, language="en"):
+    """Create a sound file for the specified type and language"""
+    if sound_type == "cosmic":
+        text = BACKGROUND_MUSIC[language]
+        out_filename = STATIC_SOUNDS_DIR / f"cosmic.mp3"
     else:
-        print(f"{sound_file}: MISSING")
+        text = SOUND_DEFINITIONS.get(sound_type, {}).get(language, sound_type)
+        out_filename = STATIC_SOUNDS_DIR / f"{sound_type}.mp3"
+    
+    return generate_sound_with_tts(text, language, out_filename)
+
+def main():
+    """Main function to create all required sound files"""
+    print("Creating sound files for Mashaaer...")
+    
+    # Create all the basic interaction sounds (using English for simplicity)
+    for sound_type in ["click", "hover", "listen_start", "listen_stop"]:
+        create_sound(sound_type, "en")
+    
+    # Create welcome and greeting sounds in both languages
+    for sound_type in ["welcome", "greeting"]:
+        # Arabic version for primary use
+        create_sound(sound_type, "ar")
+    
+    # Create the cosmic background audio
+    create_sound("cosmic", "en")
+    
+    print("\nSound file creation complete!")
+    print(f"Sound files location: {STATIC_SOUNDS_DIR}")
+
+if __name__ == "__main__":
+    main()
