@@ -1,5 +1,5 @@
 """
-Ultra-Minimal Flask App for Replit Feedback Tool
+Ultra-Minimal Flask App for Replit Feedback Tool Testing
 This file is designed to be the most basic Flask application possible.
 """
 from flask import Flask
@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello():
-    return "Welcome to Mashaaer Feelings"
+    return "Welcome to Mashaaer Feelings - Ultra Minimal Version"
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host="0.0.0.0", port=5000)

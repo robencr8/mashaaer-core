@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connection Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <h1>Replit Connection Test</h1>
+    <div id="results">Testing connections...</div>
+    <script>
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = 'Connection test successful: ' + new Date().toISOString();
+        
+        fetch('/api/status')
+            .then(response => response.json())
+            .then(data => {
+                const p = document.createElement('p');
+                p.textContent = 'API Status: ' + JSON.stringify(data);
+                document.body.appendChild(p);
+            })
+            .catch(error => {
+                const p = document.createElement('p');
+                p.textContent = 'API Error: ' + error;
+                p.style.color = 'red';
+                document.body.appendChild(p);
+            });
+    </script>
+</body>
+</html>

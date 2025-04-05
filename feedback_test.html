@@ -3,200 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Replit Feedback Tool Test</title>
+    <title>Replit Connection Tester</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            line-height: 1.6;
         }
-        .test-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
+        .result {
+            padding: 10px;
+            margin: 10px 0;
             border-radius: 5px;
         }
         .success {
-            color: green;
-            font-weight: bold;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
         }
         .error {
-            color: red;
-            font-weight: bold;
-        }
-        button {
-            padding: 8px 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
         }
         pre {
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
             padding: 10px;
             border-radius: 5px;
             overflow-x: auto;
         }
+        button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0069d9;
+        }
     </style>
 </head>
 <body>
-    <h1>Replit Feedback Tool Test</h1>
-    <p>This page tests connectivity with the server to diagnose any issues with the Replit web application feedback tool.</p>
+    <h1>Replit Connection Tester</h1>
     
-    <div class="test-section">
-        <h2>1. Simple GET Request Test</h2>
-        <p>Tests a basic GET request to the root URL:</p>
-        <button onclick="testRootEndpoint()">Test Root Endpoint</button>
-        <div id="root-result"></div>
+    <div>
+        <button id="testFetch">Test Fetch API</button>
+        <button id="testXHR">Test XMLHttpRequest</button>
+        <button id="testImage">Test Image Load</button>
+        <button id="testIframe">Test Iframe Load</button>
+        <button id="clearResults">Clear Results</button>
     </div>
     
-    <div class="test-section">
-        <h2>2. Health Endpoint Test</h2>
-        <p>Tests the health check endpoint:</p>
-        <button onclick="testHealthEndpoint()">Test Health Endpoint</button>
-        <div id="health-result"></div>
-    </div>
+    <h2>Results:</h2>
+    <div id="results"></div>
     
-    <div class="test-section">
-        <h2>3. CORS Preflight Test</h2>
-        <p>Tests CORS preflight (OPTIONS) request:</p>
-        <button onclick="testCORSPreflight()">Test CORS Preflight</button>
-        <div id="cors-result"></div>
-    </div>
-    
-    <div class="test-section">
-        <h2>4. Network Information</h2>
-        <button onclick="showNetworkInfo()">Show Network Info</button>
-        <div id="network-info"></div>
-    </div>
-
     <script>
-        const ROOT_URL = window.location.origin;
-
-        // Helper function to display results
-        function showResult(elementId, success, message, details = null) {
-            const element = document.getElementById(elementId);
-            element.innerHTML = `
-                <p class="${success ? 'success' : 'error'}">${message}</p>
-                ${details ? `<pre>${JSON.stringify(details, null, 2)}</pre>` : ''}
-            `;
-        }
-
-        // Test 1: Root endpoint
-        async function testRootEndpoint() {
-            try {
-                const response = await fetch(ROOT_URL + '/');
-                if (response.ok) {
-                    showResult('root-result', true, 'SUCCESS: Root endpoint is accessible!', {
-                        status: response.status,
-                        statusText: response.statusText,
-                        headers: Object.fromEntries([...response.headers]),
-                        url: response.url
-                    });
-                } else {
-                    showResult('root-result', false, `ERROR: Root endpoint returned status ${response.status}`, {
-                        status: response.status,
-                        statusText: response.statusText,
-                        headers: Object.fromEntries([...response.headers]),
-                        url: response.url
-                    });
-                }
-            } catch (error) {
-                showResult('root-result', false, `ERROR: Failed to access root endpoint: ${error.message}`);
-                console.error('Root endpoint error:', error);
-            }
-        }
-
-        // Test 2: Health endpoint
-        async function testHealthEndpoint() {
-            try {
-                const response = await fetch(ROOT_URL + '/health');
-                if (response.ok) {
-                    const data = await response.json();
-                    showResult('health-result', true, 'SUCCESS: Health endpoint is accessible!', {
-                        status: response.status,
-                        data: data,
-                        headers: Object.fromEntries([...response.headers]),
-                        url: response.url
-                    });
-                } else {
-                    showResult('health-result', false, `ERROR: Health endpoint returned status ${response.status}`, {
-                        status: response.status,
-                        statusText: response.statusText,
-                        headers: Object.fromEntries([...response.headers]),
-                        url: response.url
-                    });
-                }
-            } catch (error) {
-                showResult('health-result', false, `ERROR: Failed to access health endpoint: ${error.message}`);
-                console.error('Health endpoint error:', error);
-            }
-        }
-
-        // Test 3: CORS Preflight
-        async function testCORSPreflight() {
-            try {
-                // Create a request with custom headers to trigger preflight
-                const response = await fetch(ROOT_URL + '/health', {
-                    method: 'OPTIONS',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get DOM elements
+            const resultsDiv = document.getElementById('results');
+            const testFetchBtn = document.getElementById('testFetch');
+            const testXHRBtn = document.getElementById('testXHR');
+            const testImageBtn = document.getElementById('testImage');
+            const testIframeBtn = document.getElementById('testIframe');
+            const clearResultsBtn = document.getElementById('clearResults');
+            
+            // Function to add a result
+            function addResult(message, isSuccess = true, data = null) {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = `result ${isSuccess ? 'success' : 'error'}`;
                 
-                if (response.ok) {
-                    showResult('cors-result', true, 'SUCCESS: CORS preflight is properly configured!', {
-                        status: response.status,
-                        statusText: response.statusText,
-                        headers: Object.fromEntries([...response.headers]),
-                        url: response.url
-                    });
-                } else {
-                    showResult('cors-result', false, `ERROR: CORS preflight returned status ${response.status}`, {
-                        status: response.status,
-                        statusText: response.statusText,
-                        headers: Object.fromEntries([...response.headers]),
-                        url: response.url
-                    });
+                const timestamp = new Date().toISOString();
+                resultDiv.innerHTML = `<strong>${timestamp}</strong>: ${message}`;
+                
+                if (data) {
+                    const preElem = document.createElement('pre');
+                    preElem.textContent = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+                    resultDiv.appendChild(preElem);
                 }
-            } catch (error) {
-                showResult('cors-result', false, `ERROR: CORS preflight failed: ${error.message}`);
-                console.error('CORS preflight error:', error);
+                
+                resultsDiv.prepend(resultDiv);
             }
-        }
-        
-        // Test 4: Network Information
-        function showNetworkInfo() {
-            const info = {
+            
+            // Test using Fetch API
+            testFetchBtn.addEventListener('click', function() {
+                addResult('Testing connection with Fetch API...');
+                
+                fetch('/')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        addResult('Fetch API connection successful', true, data.substring(0, 200) + '...');
+                    })
+                    .catch(error => {
+                        addResult(`Fetch API connection failed: ${error.message}`, false);
+                    });
+            });
+            
+            // Test using XMLHttpRequest
+            testXHRBtn.addEventListener('click', function() {
+                addResult('Testing connection with XMLHttpRequest...');
+                
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', '/');
+                
+                xhr.onload = function() {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        addResult('XMLHttpRequest connection successful', true, xhr.responseText.substring(0, 200) + '...');
+                    } else {
+                        addResult(`XMLHttpRequest connection failed: ${xhr.status} ${xhr.statusText}`, false);
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    addResult('XMLHttpRequest connection failed: Network error', false);
+                };
+                
+                xhr.send();
+            });
+            
+            // Test Image Loading
+            testImageBtn.addEventListener('click', function() {
+                addResult('Testing image loading...');
+                
+                const img = new Image();
+                const timestamp = new Date().getTime(); // Cache-busting
+                img.src = `/favicon.ico?t=${timestamp}`;
+                
+                img.onload = function() {
+                    addResult('Image loading successful', true);
+                };
+                
+                img.onerror = function() {
+                    addResult('Image loading failed', false);
+                };
+            });
+            
+            // Test Iframe Loading
+            testIframeBtn.addEventListener('click', function() {
+                addResult('Testing iframe loading...');
+                
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                iframe.onload = function() {
+                    addResult('Iframe loading successful', true);
+                    setTimeout(() => document.body.removeChild(iframe), 1000);
+                };
+                
+                iframe.onerror = function() {
+                    addResult('Iframe loading failed', false);
+                    setTimeout(() => document.body.removeChild(iframe), 1000);
+                };
+                
+                iframe.src = '/';
+            });
+            
+            // Clear Results
+            clearResultsBtn.addEventListener('click', function() {
+                resultsDiv.innerHTML = '';
+            });
+            
+            // Initial Diagnostics
+            addResult('Connection tester initialized.', true);
+            
+            // Browser Information
+            const browserInfo = {
                 userAgent: navigator.userAgent,
-                platform: navigator.platform,
                 vendor: navigator.vendor,
                 language: navigator.language,
-                online: navigator.onLine,
-                origin: window.location.origin,
-                pathname: window.location.pathname,
-                protocol: window.location.protocol,
-                href: window.location.href
+                platform: navigator.platform,
+                cookieEnabled: navigator.cookieEnabled
             };
             
+            addResult('Browser Information', true, browserInfo);
+            
+            // Network Information if available
             if (navigator.connection) {
-                info.connection = {
+                const networkInfo = {
                     effectiveType: navigator.connection.effectiveType,
                     downlink: navigator.connection.downlink,
                     rtt: navigator.connection.rtt,
                     saveData: navigator.connection.saveData
                 };
+                
+                addResult('Network Information', true, networkInfo);
             }
-            
-            document.getElementById('network-info').innerHTML = `
-                <pre>${JSON.stringify(info, null, 2)}</pre>
-            `;
-        }
+        });
     </script>
 </body>
 </html>

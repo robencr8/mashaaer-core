@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connection Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Replit Connection Test</h1>
+    <div id="results">Testing connections...</div>
+
+    <script>
+        const resultsDiv = document.getElementById('results');
+        
+        function addResult(message, isSuccess, details) {
+            const resultElem = document.createElement('div');
+            resultElem.className = isSuccess ? 'success' : 'error';
+            resultElem.textContent = message;
+            
+            if (details) {
+                const pre = document.createElement('pre');
+                pre.textContent = typeof details === 'object' ? JSON.stringify(details, null, 2) : details;
+                resultElem.appendChild(pre);
+            }
+            
+            resultsDiv.appendChild(resultElem);
+        }
+
+        // Test direct fetch
+        fetch('/')
+            .then(response => {
+                addResult('Direct fetch succeeded', true, 
+                    { status: response.status, statusText: response.statusText });
+                return response.text();
+            })
+            .then(text => {
+                addResult('Content received', true, text.substring(0, 100) + '...');
+            })
+            .catch(error => {
+                addResult('Direct fetch failed', false, error.toString());
+            });
+
+        // Test API endpoint
+        fetch('/api/status')
+            .then(response => response.json())
+            .then(data => {
+                addResult('API fetch succeeded', true, data);
+            })
+            .catch(error => {
+                addResult('API fetch failed', false, error.toString());
+            });
+            
+        // Display browser info
+        const browserInfo = {
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            language: navigator.language,
+            windowInnerWidth: window.innerWidth,
+            windowInnerHeight: window.innerHeight
+        };
+        
+        addResult('Browser information', true, browserInfo);
+    </script>
+</body>
+</html>
