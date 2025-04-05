@@ -68,15 +68,25 @@ def configure_enhanced_cors(app, config=None):
     
     # Configure CORS with the expanded origins list and additional settings
     # Use a simplified CORS configuration to maximize compatibility with Replit tools
+    
+    # Register a simple CORS-enabling after_request handler
+    @app.after_request
+    def add_cors_headers(response):
+        """Add CORS headers to every response to ensure maximum compatibility"""
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT, DELETE'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Max-Age'] = '86400'  # 24 hours
+        return response
+        
+    # Now use the Flask-CORS extension with simpler settings
     CORS(
         app,
-        resources={r"/*": {
-            "origins": "*",  # Most permissive setting for Replit compatibility
-            "supports_credentials": False,  # Disable credentials support to avoid browser issues
-            "allow_headers": "*",  # Allow all headers
-            "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
-            "expose_headers": ["Content-Length", "Content-Type"]
-        }}
+        origins="*",  # Most permissive setting for Replit compatibility
+        supports_credentials=False,  # Disable credentials support to avoid browser issues
+        allow_headers="*",  # Allow all headers
+        methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+        expose_headers=["Content-Length", "Content-Type"]
     )
     
     logger.info("Enhanced CORS configuration applied successfully")

@@ -3,26 +3,9 @@
 <head>
   <title>Direct Replit Test</title>
   <meta charset="UTF-8">
-  <style>
-    body { background: #111; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
-    div { margin-bottom: 10px; }
-    span.success { color: #4CAF50; }
-    span.error { color: #F44336; }
-  </style>
 </head>
 <body>
-  <h1>Direct Replit Test</h1>
-  <div>Application is running! You should see this message.</div>
-  <div id="status">Checking API status...</div>
-
-  <script>
-    fetch('/api/health')
-      .then(response => {
-        document.getElementById('status').innerHTML = '<span class="success">API Health Check: SUCCESS</span>';
-      })
-      .catch(error => {
-        document.getElementById('status').innerHTML = '<span class="error">API Health Check: FAILED - ' + error.message + '</span>';
-      });
-  </script>
+  <h1>Direct Test Page</h1>
+  <p>Ultra-minimal page with no CSS or JavaScript dependencies.</p>
 </body>
 </html>

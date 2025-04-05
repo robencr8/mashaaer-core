@@ -1,55 +1,80 @@
 """
-Simple test server for verifying Replit web application feedback tool compatibility.
-This is a standalone server that doesn't depend on other components.
+Simplified Test Server for Replit Feedback Tool
+
+This is an extremely minimal Flask application designed to test
+compatibility with the Replit web application feedback tool.
 """
 
-from flask import Flask, jsonify, make_response
-import os
+from flask import Flask, jsonify, Response, request
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/', methods=['GET', 'OPTIONS'])
 def index():
-    """Root route returning a simple text response"""
-    response = make_response("Test Server is Running - Replit Compatibility Test")
-    # Add CORS headers
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = '*'
-    return response
-
-@app.route('/test')
-def test():
-    """Test endpoint with CORS headers"""
-    response = make_response("Test endpoint is working")
-    # Add CORS headers
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = '*'
-    return response
-
-@app.route('/api/health')
-def health():
-    """Health check endpoint"""
-    response = make_response(jsonify({'status': 'ok', 'message': 'Test server is running'}))
-    # Add CORS headers
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = '*'
-    return response
-
-# Allow cross-domain OPTIONS requests
-@app.route('/', methods=['OPTIONS'])
-@app.route('/test', methods=['OPTIONS'])
-@app.route('/api/health', methods=['OPTIONS'])
-def options_handler():
-    """Handle OPTIONS requests for CORS preflight"""
-    response = make_response()
+    """Root route with extensive debugging information"""
+    if request.method == 'OPTIONS':
+        # Handle preflight request
+        response = Response('')
+    else:
+        # Regular GET request
+        html = """<!DOCTYPE html>
+<html>
+<head>
+    <title>Replit Test Server</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Welcome to the Test Server</h1>
+    <p>This is a minimal test server for the Replit feedback tool.</p>
+</body>
+</html>"""
+        response = Response(html, mimetype='text/html')
+    
+    # Add all possible CORS headers
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = '*'
+    response.headers['Access-Control-Max-Age'] = '86400'  # 24 hours
+    
+    # Debug information in console
+    print(f"Received {request.method} request at {request.path}")
+    print(f"Request headers: {dict(request.headers)}")
+    
+    return response
+
+@app.route('/api/status', methods=['GET', 'OPTIONS'])
+def status():
+    """Status endpoint for health checks"""
+    if request.method == 'OPTIONS':
+        # Handle preflight request
+        response = Response('')
+    else:
+        # Regular GET request
+        response = jsonify({
+            "status": "ok",
+            "message": "Server is running",
+            "version": "1.0.0"
+        })
+    
+    # Add all possible CORS headers
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    response.headers['Access-Control-Max-Age'] = '86400'  # 24 hours
+    
+    # Debug information in console
+    print(f"Received {request.method} request at {request.path}")
+    print(f"Request headers: {dict(request.headers)}")
+    
+    return response
+
+@app.after_request
+def after_request(response):
+    """Add additional headers to all responses"""
+    response.headers.add('X-Content-Type-Options', 'nosniff')
+    response.headers.add('X-Frame-Options', 'SAMEORIGIN')
     return response
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    print("Starting simplified test server on port 5000...")
+    app.run(host='0.0.0.0', port=5000, debug=True)
