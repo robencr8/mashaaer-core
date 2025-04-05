@@ -1,0 +1,195 @@
+Replit Agent Directive: Phase 3 — Intelligent Evolution
+Project: مشاعر | Mashaaer Feelings Application
+Phase: 3
+Type: Live Deployment
+Mode: Augment existing Phase 2
+Goal: Emotion-aware, multilingual, proactive, installable AI experience
+
+🧠 1. Update /api/chat with Auto Sentiment Detection
+✅ Required:
+In api_routes.py, enhance the /chat route:
+
+python
+Copy
+Edit
+from textblob import TextBlob
+
+def detect_emotion_from_text(text):
+    polarity = TextBlob(text).sentiment.polarity
+    if polarity > 0.3:
+        return "happy"
+    elif polarity < -0.3:
+        return "sad"
+    return "neutral"
+
+@api_bp.route('/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    user_input = data.get("message", "")
+    detected_emotion = detect_emotion_from_text(user_input)
+    emotion = data.get("emotion", detected_emotion)
+
+    result = decision_engine.decide(user_input, emotion)
+    action = result["action"]
+    params = result.get("params", {})
+
+    log_interaction(user_input, emotion, action, params)
+
+    return jsonify({
+        "action": action,
+        "reply": f"Action: {action}",
+        "params": params
+    })
+🌍 2. Arabic + English Language Routing (Multilingual Rules)
+Update rules_config.json to include language metadata:
+
+json
+Copy
+Edit
+{
+  "id": "rule004",
+  "lang": "ar",
+  "emotion": "sad",
+  "keyword": "وحيد",
+  "action": "offer_companionship",
+  "weight": 1.0
+}
+Update decision engine logic to accept a language filter (optional per user session).
+
+🔔 3. Create /api/set_reminder + APScheduler Job
+reminder_scheduler.py (new file)
+python
+Copy
+Edit
+from apscheduler.schedulers.background import BackgroundScheduler
+import datetime, logging
+
+scheduler = BackgroundScheduler()
+reminders = []
+
+def check_reminders():
+    now = datetime.datetime.now()
+    for r in reminders[:]:
+        if now >= r['time']:
+            logging.info(f"Reminder Triggered: {r['text']}")
+            reminders.remove(r)
+
+def schedule_reminder(text, minutes_from_now):
+    time = datetime.datetime.now() + datetime.timedelta(minutes=minutes_from_now)
+    reminders.append({"text": text, "time": time})
+
+scheduler.add_job(check_reminders, "interval", seconds=30)
+scheduler.start()
+In api_routes.py, add:
+python
+Copy
+Edit
+from reminder_scheduler import schedule_reminder
+
+@api_bp.route('/set_reminder', methods=['POST'])
+def set_reminder():
+    data = request.get_json()
+    text = data["text"]
+    minutes = int(data.get("minutes", 1))
+    schedule_reminder(text, minutes)
+    return jsonify(success=True, message=f"Reminder set for {minutes} min")
+📱 4. PWA Setup
+Create static/manifest.json
+json
+Copy
+Edit
+{
+  "name": "Mashaaer | مشاعر",
+  "short_name": "Mashaaer",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#212121",
+  "icons": [
+    {
+      "src": "/static/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
+Create static/service-worker.js
+js
+Copy
+Edit
+self.addEventListener("install", e => {
+  e.waitUntil(caches.open("v1").then(cache => {
+    return cache.addAll(["/offline.html"]);
+  }));
+});
+
+self.addEventListener("fetch", e => {
+  e.respondWith(
+    fetch(e.request).catch(() => caches.match("/offline.html"))
+  );
+});
+In HTML Head:
+html
+Copy
+Edit
+<link rel="manifest" href="/static/manifest.json">
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/static/service-worker.js");
+  }
+</script>
+🎧 5. Add Text-to-Speech
+In JS (frontend):
+js
+Copy
+Edit
+function speak(text, lang = "en-US") {
+  const msg = new SpeechSynthesisUtterance(text);
+  msg.lang = lang;
+  window.speechSynthesis.speak(msg);
+}
+Call speak(replyText) after rendering reply.
+
+🎨 6. Emotion-Aware UI Skins
+Update <body> tag dynamically:
+
+html
+Copy
+Edit
+<body class="emotion-neutral"> <!-- or emotion-happy/sad -->
+Use CSS classes like:
+
+css
+Copy
+Edit
+.emotion-happy { background-color: #fffbe6; }
+.emotion-sad { background-color: #e0f7fa; }
+.emotion-neutral { background-color: #f5f5f5; }
+📊 7. Admin Stats Page
+admin_routes.py
+python
+Copy
+Edit
+@admin_bp.route('/admin/stats')
+def admin_stats():
+    # Analyze logs to extract stats
+    # Display rule usage counts, top feedback, moods
+    return render_template("admin_stats.html", stats=...)
+✅ Final Checklist for Agent
+Task	Required
+Auto-emotion in /chat	✅
+Arabic rule support	✅
+Scheduler setup	✅
+Reminder route	✅
+PWA files and install flow	✅
+Text-to-speech	✅
+Emotion UI classes	✅
+Admin stats page	✅
+Please integrate each module in-place in the active Replit Mashaaer environment, ensuring:
+
+No interruption of voice UI
+
+Backward compatibility with Phase 1–2
+
+Logs and reminders persist while app is live
+

@@ -1,0 +1,36 @@
+ Mashaaer Feature Testing Sheet (Phase 3)
+Feature	Test Prompt	What to Check	Code File(s)
+🎤 Voice Input	Speak: “I feel alone”	Transcription + routed reply	voice.recognition.py, voice.vosk_handler.py
+🧠 Decision Engine	Type: “music” + emotion: happy	play_music triggered	api_routes.py, decision_engine.py, rules_config.json
+😔 Emotion Auto-Detect	Type: “I’m feeling down”	Emotion = sad, triggers rule	emotion_tracker.py, TextBlob logic in api_routes.py
+🌍 Arabic Flow	Type: “موسيقى”, set emotion: happy	Arabic rule is triggered	rules_config.json, decision_engine.py, voice.vosk_handler.py
+🕰 Smart Reminders	POST /set_reminder JSON	Reminder logs/schedules	api_routes.py, reminder_scheduler.py
+📋 Admin Dashboard	Visit /admin	View rules and logs	admin_routes.py, templates/admin.html, logs/
+📊 Analytics	Visit /admin/stats	View usage charts & logs	admin_routes.py, templates/admin_stats.html (if built)
+📱 PWA Install	Open on phone browser	"Add to Home Screen" prompt	static/manifest.json, static/service-worker.js, <link rel="manifest"> in HTML
+🔊 Text-to-Speech	After any reply	Voice speaks back	static/js/speak.js, tts.tts_manager.py (optional server-side)
+🎨 Emotion UI Skins	Reply triggers emotion (e.g. sad)	Background updates to theme	static/css/emotion_styles.css, dynamic <body class="emotion-X">
+🔌 Sample Endpoint Test
+✅ /api/chat with curl
+bash
+Copy
+Edit
+curl -X POST https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/chat \
+-H "Content-Type: application/json" \
+-d '{"message": "I feel alone"}'
+✅ /set_reminder (POST)
+bash
+Copy
+Edit
+curl -X POST https://.../api/set_reminder \
+-H "Content-Type: application/json" \
+-d '{"text": "check on user", "minutes": 1}'
+✅ Best Practices for Dev Deployment
+Always clear logs/interaction_log.csv before QA round
+
+rules_config.json: keep Arabic + English versions separate or tagged
+
+Use localhost:5000 or Replit URL from desktop and phone to test PWA
+
+Use dev tools > Application tab > Manifest to verify installability
+

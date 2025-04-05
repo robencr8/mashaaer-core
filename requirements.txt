@@ -21,3 +21,5 @@ scipy
 openai
 rule-engine
 beautifulsoup4
+textblob
+apscheduler

@@ -99,6 +99,23 @@ CORS(app, origins="*", supports_credentials=False)
 # Set a secret key for session management
 app.secret_key = os.environ.get("SESSION_SECRET", "mashaaer_development_key")
 
+# Initialize memory store and logs
+try:
+    from memory_store import init_db
+    from log_manager import init_logs
+    
+    # Initialize SQLite database for memory store
+    init_db()
+    
+    # Initialize logging system
+    init_logs()
+    
+    logger.info("Memory store and logging system initialized successfully")
+except ImportError as e:
+    logger.error(f"Could not import memory store or logging modules: {str(e)}")
+except Exception as e:
+    logger.error(f"Error initializing memory store or logs: {str(e)}")
+
 # Import and register API routes
 try:
     from api_routes import init_api
@@ -138,6 +155,19 @@ try:
 except Exception as e:
     logger.error(f"Error enhancing CORS: {str(e)}")
 
+# Register admin routes
+try:
+    from admin_routes import admin_bp
+    
+    # Register the admin blueprint
+    app.register_blueprint(admin_bp)
+    
+    logger.info("Admin routes registered successfully")
+except ImportError as e:
+    logger.error(f"Could not import admin routes: {str(e)}")
+except Exception as e:
+    logger.error(f"Error registering admin routes: {str(e)}")
+
 # Add root route for the homepage
 @app.route("/", methods=["GET"])
 def index():
@@ -146,11 +176,7 @@ def index():
     return render_template("index.html")
 
 # Add recommendations page route
-@app.route("/recommendations", methods=["GET"])
-def recommendations_page():
-    """Show the AI-powered recommendations page"""
-    logger.debug("Serving recommendations page")
-    return render_template("recommendations.html")
+# This is now handled by recommendation_routes.py
 
 # Add emotion analysis API endpoint
 @app.route("/api/analyze-emotion", methods=["POST"])

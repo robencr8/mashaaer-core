@@ -1,24 +1,26 @@
 [
-  {
-    "emotion": "sad",
-    "keyword": "alone",
-    "action": "offer_companionship",
-    "description": "Respond with emotional support",
-    "weight": 1.0
-  },
-  {
-    "emotion": "happy",
-    "keyword": "music",
-    "action": "play_music",
-    "params": { "genre": "uplifting" },
-    "description": "Play music to enhance mood",
-    "weight": 2.0
-  },
-  {
-    "emotion": "neutral",
-    "keyword": "weather",
-    "action": "fetch_weather",
-    "description": "Provide weather update",
-    "weight": 1.5
-  }
+    {
+        "id": "rule001",
+        "emotion": "sad",
+        "keyword": "alone",
+        "action": "offer_companionship",
+        "weight": 1.0
+    },
+    {
+        "id": "rule002",
+        "emotion": "happy",
+        "keyword": "music",
+        "action": "play_music",
+        "params": {
+            "genre": "uplifting"
+        },
+        "weight": 1.5
+    },
+    {
+        "id": "rule003",
+        "emotion": "neutral",
+        "keyword": "weather",
+        "action": "fetch_weather",
+        "weight": 1.2
+    }
 ]

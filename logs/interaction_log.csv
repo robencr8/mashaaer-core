@@ -1,0 +1,7 @@
+timestamp,user_input,emotion,action,params
+2025-04-05T21:06:15.591432,I feel so alone today,sad,offer_companionship,{}
+2025-04-05T21:16:02.920941,I feel alone today,sad,offer_companionship,{},en
+2025-04-05T21:16:11.269420,أشعر بالوحدة اليوم,sad,default_response,{},ar
+2025-04-05T21:16:15.866532,أشعر وحيد اليوم,sad,offer_companionship,{},ar
+2025-04-05T21:16:21.047796,أحب الموسيقى,happy,play_music,"{""genre"": ""\u0645\u0628\u0647\u062c""}",ar
+2025-04-05T21:16:25.309982,كيف الطقس اليوم,neutral,fetch_weather,{},ar

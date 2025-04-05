@@ -1,0 +1,56 @@
+[
+  {
+    "id": "rule002",
+    "emotion": "happy",
+    "keyword": "music",
+    "action": "play_music",
+    "params": {
+      "genre": "uplifting"
+    },
+    "weight": 1.5,
+    "lang": "en"
+  },
+  {
+    "id": "rule003",
+    "emotion": "neutral",
+    "keyword": "weather",
+    "action": "fetch_weather",
+    "weight": 1.2,
+    "lang": "en"
+  },
+  {
+    "id": "rule001",
+    "emotion": "sad",
+    "keyword": "alone",
+    "action": "offer_companionship",
+    "weight": 1.1,
+    "lang": "en"
+  },
+  {
+    "id": "rule004",
+    "emotion": "sad",
+    "keyword": "وحيد",
+    "action": "offer_companionship",
+    "weight": 1.0,
+    "lang": "ar"
+  },
+  {
+    "id": "rule005",
+    "emotion": "happy",
+    "keyword": "موسيقى",
+    "action": "play_music",
+    "params": {
+      "genre": "مبهج"
+    },
+    "weight": 1.5,
+    "lang": "ar"
+  },
+  {
+    "id": "rule006",
+    "emotion": "neutral",
+    "keyword": "طقس",
+    "action": "fetch_weather",
+    "weight": 1.2,
+    "lang": "ar"
+  }
+]

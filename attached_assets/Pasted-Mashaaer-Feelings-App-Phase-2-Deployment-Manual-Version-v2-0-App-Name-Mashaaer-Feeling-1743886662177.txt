@@ -1,0 +1,126 @@
+Mashaaer Feelings App — Phase 2 Deployment Manual
+Version: v2.0 | App Name: مشاعر | Mashaaer Feelings Application
+Maintainer: Roben Edwan | Environment: Replit (Flask + HTML/JS)
+
+📂 Directory Structure
+bash
+Copy
+Edit
+/main.py
+/api_routes.py
+/admin_routes.py
+/memory_store.py
+/log_manager.py
+/rules_config_loader.py
+/rules_config.json
+/templates/
+    admin.html
+/logs/
+    interaction_log.csv
+/tests/
+    test_rule_engine.py
+✅ What This Phase Adds:
+Feature	Description
+🎯 Rule Weight Learning	/api/feedback adjusts rule weights dynamically
+🧠 SQLite Memory	Persists user-specific preferences
+📊 Admin Dashboard	View + manage rules and logs at /admin
+📈 Logging Engine	Stores interaction data in CSV
+✅ Unit Testing	Validates decision logic using unittest
+🛠 Setup Instructions (Step-by-Step)
+1. Install Required Packages
+bash
+Copy
+Edit
+pip install flask
+SQLite is included in Python by default.
+
+2. Integrate Blueprints in main.py
+python
+Copy
+Edit
+from flask import Flask
+from api_routes import api_bp
+from admin_routes import admin_bp
+from memory_store import init_db
+
+app = Flask(__name__)
+app.register_blueprint(api_bp)
+app.register_blueprint(admin_bp)
+
+init_db()  # Ensures SQLite table is ready
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
+3. Test Your Endpoints
+/api/chat
+
+bash
+Copy
+Edit
+POST /api/chat
+{
+  "message": "I feel alone",
+  "emotion": "sad"
+}
+/api/feedback
+
+bash
+Copy
+Edit
+POST /api/feedback
+{
+  "rule_id": "rule001",
+  "feedback": "positive"
+}
+/admin
+
+View dashboard: rules + logs
+
+4. Run Unit Tests
+bash
+Copy
+Edit
+python -m unittest discover tests
+5. Expected Rule Format (rules_config.json)
+json
+Copy
+Edit
+[
+  {
+    "id": "rule001",
+    "emotion": "sad",
+    "keyword": "alone",
+    "action": "offer_companionship",
+    "weight": 1.0
+  },
+  {
+    "id": "rule002",
+    "emotion": "happy",
+    "keyword": "music",
+    "action": "play_music",
+    "params": { "genre": "uplifting" },
+    "weight": 1.5
+  }
+]
+🔁 Feedback Loop Example
+User says: "I'm alone" → matched rule001 → offer_companionship
+
+If user clicks 👍 → /api/feedback with "positive" on "rule001"
+
+Rule weight increases from 1.0 → 1.1
+
+Rules are auto-sorted by weight → Smart learning
+
+✅ Checkpoints for Replit Agent:
+Task	Status
+Ensure /chat still works	✅
+Confirm /admin page loads	✅
+Initialize SQLite db	✅ init_db()
+Log file is created	✅ /logs/interaction_log.csv
+Rule config updates via feedback	✅ /api/feedback
+Tests pass	✅ python -m unittest discover
+🤝 Support
+Contact: Roben Edwan
+Role: General Manager, Eco Technology Environmental Protection Services
+Location: Ajman, UAE
+Project: Mashaaer (مشاعر) AI Companion
