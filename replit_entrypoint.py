@@ -1,11 +1,12 @@
 """
-Replit Entry Point - Ultra Minimal Version
-This file is designed to match the workflow configuration.
+Replit entry point for the Mashaaer Feelings application.
+This file is specifically designed to work with Replit's deployment system.
 """
-# Import the Flask app instance from the main.py file
+# Import the app from main.py
 from main import app
 
-# That's it! No need for anything else.
+# Replit uses this variable for deployment
+application = app
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
