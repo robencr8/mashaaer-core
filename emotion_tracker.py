@@ -526,21 +526,35 @@ class EmotionTracker:
             # Prepare system message
             system_message = {
                 "role": "system", 
-                "content": f"""You are an expert emotion analyzer. Analyze the emotional content of the text.
+                "content": f"""You are an expert emotion analyzer specialized in identifying complex and mixed emotions. Analyze the emotional content of the text with careful attention to subtle and conflicting emotional signals.
+                
                 Return a JSON object with the following structure:
                 {{
-                    "primary_emotion": "The single most prominent emotion in the text",
+                    "primary_emotion": "The single most prominent emotion in the text. Use 'mixed' if multiple emotions are equally strong or if the text clearly expresses conflicting emotions.",
                     "emotions": {{
                         "emotion1": score (0.0-1.0),
                         "emotion2": score (0.0-1.0),
                         ...
                     }},
                     "intensity": "Overall emotional intensity (0.0-1.0)",
-                    "explanation": "Brief explanation of the analysis"
+                    "is_mixed": true/false,
+                    "emotion_pairs": [["emotion1", "emotion2"], ...], 
+                    "explanation": "Brief explanation of the analysis, with particular attention to any mixed or conflicting emotions detected"
                 }}
 
                 Valid emotion categories: {', '.join(self.emotion_labels)}
-                Only include emotions that are present in the text.
+                Include all emotions that are present in the text, even at low levels.
+                
+                For determining whether emotions are mixed, consider:
+                1. Presence of contrasting emotions (e.g., happy and sad, fearful and excited)
+                2. Contextual cues indicating transitions between emotions (e.g., "but", "however", "although")
+                3. Emotional ambivalence where someone expresses uncertainty about their feelings
+                4. Bittersweet expressions that combine positive and negative emotions
+                
+                Pay special attention to sentences containing emotional shifts like:
+                - "I'm excited about the new project but nervous about the deadline"
+                - "Happy to achieve this milestone, yet sad that the journey is ending"
+                - "Proud of my accomplishments but sad to leave my friends behind"
                 """
             }
 
@@ -570,21 +584,71 @@ class EmotionTracker:
                 return None
 
             # Ensure primary emotion is in our supported list
-            if result["primary_emotion"] not in self.emotion_labels:
+            if result["primary_emotion"] not in self.emotion_labels and result["primary_emotion"] != "mixed":
                 result["primary_emotion"] = "neutral"
 
             # Filter emotions to our supported list
             result["emotions"] = {k: v for k, v in result["emotions"].items() if k in self.emotion_labels}
+            
+            # Process mixed emotion information
+            has_mixed_emotions = False
+            
+            # Check if OpenAI explicitly flagged mixed emotions
+            if "is_mixed" in result and result["is_mixed"]:
+                has_mixed_emotions = True
+                # Ensure "mixed" is in emotions dict
+                if "mixed" not in result["emotions"]:
+                    result["emotions"]["mixed"] = 0.8  # High confidence when explicitly flagged
+
+            # Process emotion pairs if available
+            emotion_pairs = []
+            if "emotion_pairs" in result and isinstance(result["emotion_pairs"], list):
+                # Filter to valid emotion pairs only
+                valid_pairs = []
+                for pair in result["emotion_pairs"]:
+                    if isinstance(pair, list) and len(pair) == 2:
+                        if pair[0] in self.emotion_labels and pair[1] in self.emotion_labels:
+                            valid_pairs.append(pair)
+                            has_mixed_emotions = True
+                
+                if valid_pairs:
+                    emotion_pairs = valid_pairs
+                    # Update result with cleaned pairs
+                    result["emotion_pairs"] = valid_pairs
+                    
+                    # If mixed emotions detected through pairs but not primary, update primary
+                    if has_mixed_emotions and result["primary_emotion"] != "mixed":
+                        # Look at the scores to see if this should be primary 
+                        top_emotions = sorted(result["emotions"].items(), key=lambda x: x[1], reverse=True)
+                        if len(top_emotions) >= 2:
+                            top1, top2 = top_emotions[0], top_emotions[1]
+                            # If top two emotions are very close in score, mark as mixed
+                            if top2[1] / top1[1] > 0.7:  # Within 70% of top score
+                                result["primary_emotion"] = "mixed"
+                                result["emotions"]["mixed"] = 0.9  # High confidence
 
             # Ensure intensity is present and in bounds
             if "intensity" not in result:
                 result["intensity"] = 0.5
             result["intensity"] = max(0.0, min(1.0, float(result["intensity"])))
 
+            # Add mixed emotion metadata
+            if "metadata" not in result:
+                result["metadata"] = {}
+            result["metadata"]["has_mixed_emotions"] = has_mixed_emotions
+            if emotion_pairs:
+                result["metadata"]["emotion_pairs"] = emotion_pairs
+
             # Add timestamp
             result["timestamp"] = datetime.now().isoformat()
 
-            self.logger.debug(f"OpenAI emotion analysis: {result['primary_emotion']} ({result['intensity']})")
+            # Enhanced logging
+            mixed_info = ""
+            if has_mixed_emotions:
+                pairs_str = ', '.join([f"{p[0]}+{p[1]}" for p in emotion_pairs]) if emotion_pairs else "unspecified"
+                mixed_info = f" (mixed emotions: {pairs_str})"
+            
+            self.logger.debug(f"OpenAI emotion analysis: {result['primary_emotion']} ({result['intensity']}){mixed_info}")
             return result
 
         except Exception as e:
@@ -675,55 +739,126 @@ class EmotionTracker:
         if "ideas to explore" in text.lower():
             emotions["inspired"] += 4.5
             
-        # Define mixed emotion patterns with more structured approach
+        # Define mixed emotion patterns with more structured and comprehensive approach
         MIXED_EMOTION_PATTERNS = [
+            # Excitement/Anxiety Pattern
             {
                 "emotions": ["happy", "fearful"],
-                "keywords1": ["excited", "enthusiasm", "looking forward", "thrilled"],
-                "keywords2": ["nervous", "worried", "anxiety", "anxious", "concerned", "deadline"],
-                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "mixed", "both"],
+                "keywords1": ["excited", "enthusiasm", "looking forward", "thrilled", "eager", "anticipation", "can't wait", "thrilling"],
+                "keywords2": ["nervous", "worried", "anxiety", "anxious", "concerned", "deadline", "stress", "pressure", "apprehensive", "trepidation"],
+                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "mixed", "both", "at the same time", "simultaneously", "meanwhile", "despite", "nevertheless"],
                 "mixed_weight": 8.0,
-                "individual_weight": 3.0
+                "individual_weight": 3.0,
+                "proximity_boost": 1.5,  # Extra boost if keywords are close to each other
+                "name": "excitement-anxiety"
             },
+            
+            # Bittersweet Pattern
             {
                 "emotions": ["happy", "sad"],
-                "keywords1": ["happy", "glad", "joy", "proud", "accomplishments", "achievement"],
-                "keywords2": ["sad", "melancholy", "bittersweet", "miss", "leave", "behind"],
-                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "bittersweet", "mixed", "both"],
+                "keywords1": ["happy", "glad", "joy", "proud", "accomplishments", "achievement", "success", "victory", "milestone", "graduation", "earned", "reward"],
+                "keywords2": ["sad", "melancholy", "bittersweet", "miss", "leave", "behind", "farewell", "goodbye", "end", "nostalgia", "reminisce", "chapter"],
+                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "bittersweet", "mixed", "both", "at the same time", "simultaneously", "meanwhile", "despite", "nevertheless"],
                 "mixed_weight": 8.0,
-                "individual_weight": 3.0
+                "individual_weight": 3.0,
+                "proximity_boost": 1.5,
+                "name": "bittersweet"
             },
+            
+            # Frustrated Joy Pattern
             {
                 "emotions": ["happy", "angry"],
-                "keywords1": ["happy", "pleased", "satisfied", "glad"],
-                "keywords2": ["angry", "annoyed", "upset", "irritated", "frustrated"],
-                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "mixed", "both"],
+                "keywords1": ["happy", "pleased", "satisfied", "glad", "thrilled", "celebrate", "achievement", "finally", "at last", "succeeded"],
+                "keywords2": ["angry", "annoyed", "upset", "irritated", "frustrated", "difficulty", "struggle", "problem", "challenge", "obstacle", "hurdle", "roadblock"],
+                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "mixed", "both", "at the same time", "simultaneously", "nevertheless", "in spite of", "despite"],
                 "mixed_weight": 8.0,
-                "individual_weight": 3.0
+                "individual_weight": 3.0,
+                "proximity_boost": 1.5,
+                "name": "frustrated-joy"
             },
+            
+            # Angry Disappointment Pattern
             {
                 "emotions": ["sad", "angry"],
-                "keywords1": ["sad", "disappointed", "upset", "heartbroken"],
-                "keywords2": ["angry", "frustrated", "mad", "furious", "outraged"],
-                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "mixed", "both"],
+                "keywords1": ["sad", "disappointed", "upset", "heartbroken", "let down", "discouraged", "disheartened", "down", "blue", "disappointed"],
+                "keywords2": ["angry", "frustrated", "mad", "furious", "outraged", "resentful", "bitter", "indignant", "resentment", "betrayed", "unfair"],
+                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "mixed", "both", "at the same time", "simultaneously", "meanwhile", "as well as", "together with"],
                 "mixed_weight": 8.0,
-                "individual_weight": 3.0
+                "individual_weight": 3.0,
+                "proximity_boost": 1.5,
+                "name": "angry-disappointment"
             },
+            
+            # Anxious Anger Pattern
             {
                 "emotions": ["fearful", "angry"],
-                "keywords1": ["afraid", "scared", "fearful", "worried"],
-                "keywords2": ["angry", "frustrated", "mad", "annoyed"],
-                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "mixed", "both"],
+                "keywords1": ["afraid", "scared", "fearful", "worried", "concerned", "anxious", "uncertain", "dread", "fright", "terror", "horror"],
+                "keywords2": ["angry", "frustrated", "mad", "annoyed", "irritated", "fury", "rage", "hostility", "aggravated", "incensed", "livid"],
+                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "mixed", "both", "at the same time", "simultaneously", "meanwhile", "alongside"],
                 "mixed_weight": 8.0,
-                "individual_weight": 3.0
+                "individual_weight": 3.0,
+                "proximity_boost": 1.5,
+                "name": "anxious-anger"
             },
+            
+            # Fearful Surprise Pattern
             {
                 "emotions": ["surprised", "fearful"],
-                "keywords1": ["surprised", "shocked", "amazed", "astonished"],
-                "keywords2": ["scared", "worried", "concerned", "afraid"],
-                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "mixed", "both"],
+                "keywords1": ["surprised", "shocked", "amazed", "astonished", "startled", "astounded", "stunned", "taken aback", "unexpected", "sudden"],
+                "keywords2": ["scared", "worried", "concerned", "afraid", "anxious", "frightened", "terrified", "alarmed", "uneasy", "nervous", "on edge"],
+                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "mixed", "both", "at the same time", "simultaneously", "immediately", "instantly"],
                 "mixed_weight": 8.0,
-                "individual_weight": 3.0
+                "individual_weight": 3.0,
+                "proximity_boost": 1.5,
+                "name": "fearful-surprise"
+            },
+            
+            # Conflicted Decision Pattern 
+            {
+                "emotions": ["confused", "anxious"],
+                "keywords1": ["confused", "uncertain", "unsure", "indecisive", "torn", "ambivalent", "conflicted", "dilemma", "crossroads", "choice", "decide", "decision"],
+                "keywords2": ["nervous", "worried", "stress", "pressure", "deadline", "consequences", "impact", "result", "outcome", "repercussions"],
+                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "mixed", "both", "on one hand", "on the other hand", "either", "or", "versus", "vs"],
+                "mixed_weight": 8.0,
+                "individual_weight": 3.0,
+                "proximity_boost": 1.5,
+                "name": "conflicted-decision"
+            },
+            
+            # Hopeful Sadness Pattern
+            {
+                "emotions": ["inspired", "sad"],
+                "keywords1": ["hope", "hopeful", "inspired", "motivated", "determined", "optimistic", "looking forward", "future", "potential", "opportunity"],
+                "keywords2": ["sad", "difficult", "challenging", "hard", "struggle", "tough", "pain", "suffering", "grief", "loss"],
+                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "mixed", "both", "in spite of", "despite", "through", "beyond", "after"],
+                "mixed_weight": 8.0,
+                "individual_weight": 3.0,
+                "proximity_boost": 1.5,
+                "name": "hopeful-sadness"
+            },
+            
+            # Grateful Melancholy Pattern
+            {
+                "emotions": ["grateful", "sad"],
+                "keywords1": ["grateful", "thankful", "appreciate", "blessed", "fortunate", "luck", "lucky", "gratitude", "appreciation"],
+                "keywords2": ["miss", "memories", "remember", "past", "used to", "gone", "never again", "no longer", "changed", "different now", "nostalgia"],
+                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "mixed", "both", "at the same time", "still", "nevertheless"],
+                "mixed_weight": 8.0,
+                "individual_weight": 3.0,
+                "proximity_boost": 1.5,
+                "name": "grateful-melancholy"
+            },
+            
+            # Amused Embarrassment Pattern
+            {
+                "emotions": ["amused", "embarrassed"],
+                "keywords1": ["funny", "laugh", "amusing", "hilarious", "humor", "comedy", "joke", "giggle", "chuckle"],
+                "keywords2": ["embarrassed", "embarrassing", "awkward", "cringe", "mortify", "humiliated", "shame", "blush", "facepalm", "fool"],
+                "context_cues": ["but", "yet", "however", "although", "though", "while", "and", "also", "mixed", "both", "at the same time", "simultaneously", "nevertheless"],
+                "mixed_weight": 8.0,
+                "individual_weight": 3.0,
+                "proximity_boost": 1.5,
+                "name": "amused-embarrassment"
             }
         ]
         
@@ -757,23 +892,60 @@ class EmotionTracker:
                     emotions[emotion] += 3.0
         
         # Then check for mixed emotion patterns (second priority)
+        # Store detected pattern information for metadata
+        detected_patterns = []
+        
         for pattern in MIXED_EMOTION_PATTERNS:
-            # Check if any keywords from both emotion categories are present
-            keywords1_present = any(keyword.lower() in text.lower() for keyword in pattern["keywords1"])
-            keywords2_present = any(keyword.lower() in text.lower() for keyword in pattern["keywords2"])
+            # Find actual matching keywords instead of just checking presence
+            matching_keywords1 = [kw for kw in pattern["keywords1"] if kw.lower() in text.lower()]
+            matching_keywords2 = [kw for kw in pattern["keywords2"] if kw.lower() in text.lower()]
+            matching_cues = [cue for cue in pattern["context_cues"] if cue.lower() in text.lower()]
             
-            # Check for context cues
-            context_cue_present = any(cue.lower() in text.lower() for cue in pattern["context_cues"])
-            
-            # If both types of keywords and a context cue are present, consider it mixed
-            if keywords1_present and keywords2_present and context_cue_present:
-                # Set mixed emotion with high weight
-                emotions["mixed"] = pattern["mixed_weight"]
-                
-                # Also boost the individual emotions
-                em1, em2 = pattern["emotions"]
-                emotions[em1] += pattern["individual_weight"]
-                emotions[em2] += pattern["individual_weight"]
+            # Only proceed if we have matches from both keyword sets
+            if matching_keywords1 and matching_keywords2:
+                # Check for context cues
+                if matching_cues:
+                    # Calculate base weight for this pattern
+                    base_weight = pattern["mixed_weight"]
+                    
+                    # Check for proximity boost (if keywords are close to each other)
+                    # We'll do a simple proximity check by looking for pairs within certain distance
+                    proximity_boost = 0
+                    
+                    # For each pair of emotion keywords, check if they're near each other
+                    for kw1 in matching_keywords1:
+                        for kw2 in matching_keywords2:
+                            # Simple algorithm: if both keywords are in the same sentence, boost
+                            sentences = re.split(r'[.!?]+', text.lower())
+                            for sentence in sentences:
+                                if kw1.lower() in sentence and kw2.lower() in sentence:
+                                    # Keywords in same sentence get maximum proximity boost
+                                    proximity_boost = pattern.get("proximity_boost", 1.0)
+                                    break
+                    
+                    # Calculate final weight with any proximity boost
+                    final_weight = base_weight + proximity_boost
+                    
+                    # Apply stronger weight if there's an explicit context cue
+                    if any(cue in ["but", "yet", "however", "although", "though"] for cue in matching_cues):
+                        final_weight *= 1.2  # 20% boost for contrast cues
+                    
+                    # Set mixed emotion with calculated weight
+                    emotions["mixed"] = max(emotions.get("mixed", 0), final_weight)
+                    
+                    # Also boost the individual emotions
+                    em1, em2 = pattern["emotions"]
+                    emotions[em1] += pattern["individual_weight"]
+                    emotions[em2] += pattern["individual_weight"]
+                    
+                    # Store pattern information for metadata
+                    detected_patterns.append({
+                        "pattern": pattern.get("name", f"{em1}-{em2}"),
+                        "keywords1": matching_keywords1,
+                        "keywords2": matching_keywords2,
+                        "context_cues": matching_cues,
+                        "weight": final_weight
+                    })
         
         # Special case pattern matching for specific phrases
         if ("excited" in text.lower() and "nervous" in text.lower()) or ("excitement" in text.lower() and "nervousness" in text.lower()):
@@ -785,17 +957,77 @@ class EmotionTracker:
             # This is a direct match for one of our test cases
             emotions["mixed"] = 12.0  # Give extremely high weight for exact test case
             
-        # Check for explicit mixed emotion phrases
+        # Check for explicit mixed emotion phrases - comprehensive list
         mixed_explicit_phrases = [
-            "mixed emotions", "mixed feelings", "conflicted feelings", 
-            "torn between", "feel both", "simultaneously feel", 
-            "part of me feels", "on one hand", "on the other hand",
-            "caught between", "emotional rollercoaster", "bittersweet",
-            "happy and sad", "excited but nervous", "proud but sad"
+            # Direct mixed emotion mentions
+            "mixed emotions", "mixed feelings", "conflicted feelings", "conflicting emotions",
+            "emotional conflict", "ambivalent", "ambivalence", "emotional ambivalence",
+            
+            # Phrases indicating internal conflict
+            "torn between", "feel both", "simultaneously feel", "feel simultaneously",
+            "part of me feels", "another part of me", "on one hand", "on the other hand",
+            "caught between", "in two minds", "of two minds", "paradoxical feelings",
+            
+            # Emotional state descriptions
+            "emotional rollercoaster", "bittersweet", "sweet sorrow", "pleasant sadness",
+            "joyful melancholy", "melancholic joy", "happy sorrow", "smiling through tears",
+            
+            # Common mixed emotion pairings
+            "happy and sad", "excited but nervous", "proud but sad", 
+            "grateful yet sad", "relieved but disappointed", "angry but concerned",
+            "frustrated yet hopeful", "happy but worried", "excited and scared",
+            "glad but regretful", "hopeful yet anxious", "calm but tense",
+            
+            # Temporal transition phrases
+            "started happy but ended sad", "began with excitement but now worried",
+            "initially nervous now excited", "went from happy to confused",
+            "shifted from anger to concern", "transitioned from joy to anxiety",
+            
+            # Complex emotional responses
+            "love-hate relationship", "complicated feelings", "it's complicated",
+            "not sure how to feel", "don't know whether to laugh or cry",
+            "laughing and crying", "tears of joy", "tears of happiness", 
+            "nervous excitement", "anxious anticipation", "excited fear",
+            
+            # Cultural/idiomatic expressions
+            "bitter sweet", "bitter-sweet", "mixed blessing", "double-edged",
+            "two sides of the same coin", "blessing in disguise",
+            "sweet and sour feelings", "laughing on the outside crying on the inside"
         ]
         
-        if any(phrase in text.lower() for phrase in mixed_explicit_phrases):
-            emotions["mixed"] = 10.0  # Set mixed emotion with very high confidence
+        # Enhanced detection: full phrases or meaningful segments
+        matched_phrases = []
+        for phrase in mixed_explicit_phrases:
+            if phrase in text.lower():
+                matched_phrases.append(phrase)
+                emotions["mixed"] = 10.0  # Set mixed emotion with very high confidence
+                break
+                
+        # If no exact matches, check for related constructions that suggest mixed emotions
+        if not matched_phrases:
+            # Look for "emotion X and emotion Y" pattern (e.g., "I feel happy and anxious")
+            positive_emotions = ["happy", "excited", "joy", "joyful", "glad", "pleased", "satisfied", "proud"]
+            negative_emotions = ["sad", "angry", "anxious", "nervous", "worried", "frustrated", "scared", "fearful"]
+            
+            for pos in positive_emotions:
+                for neg in negative_emotions:
+                    patterns = [
+                        f"{pos} and {neg}", f"{pos} but {neg}", 
+                        f"{pos} yet {neg}", f"{neg} and {pos}", 
+                        f"{neg} but {pos}", f"{neg} yet {pos}"
+                    ]
+                    
+                    for pattern in patterns:
+                        if pattern in text.lower():
+                            emotions["mixed"] = 9.5  # High but slightly lower than explicit phrases
+                            matched_phrases.append(pattern)
+                            break
+                    
+                    if matched_phrases:
+                        break
+                
+                if matched_phrases:
+                    break
             
         # 1. Check for emotional phrases first (highest priority)
         for emotion, phrases in self.emotional_phrases.items():
@@ -912,14 +1144,43 @@ class EmotionTracker:
                 "metadata": {"source": "rule-based", "confidence": 0.3}
             }
 
-        # Find primary emotion (highest score)
-        primary_emotion = max(normalized_emotions.items(), key=lambda x: x[1])[0]
+        # Determine if "mixed" should be the primary emotion
+        is_mixed_primary = False
+        
+        # Get top two emotions by score
+        sorted_emotions = sorted(normalized_emotions.items(), key=lambda x: x[1], reverse=True)
+        
+        # If "mixed" is among the top emotions with a meaningful score, prioritize it
+        if "mixed" in normalized_emotions and normalized_emotions["mixed"] > 0.20:
+            is_mixed_primary = True
+        
+        # Check if top two emotions are very close in score (another indicator of mixed emotions)
+        if len(sorted_emotions) >= 2:
+            top1, top2 = sorted_emotions[0], sorted_emotions[1]
+            if top2[1] / top1[1] > 0.75 and top1[0] != "mixed" and top2[0] != "mixed":
+                # If top emotions are different categories and close in score, consider it mixed
+                if top1[0] in ["happy", "excited", "inspired", "grateful", "proud", "amused", "satisfied"] and \
+                   top2[0] in ["sad", "fearful", "anxious", "angry", "frustrated", "confused", "embarrassed"]:
+                    is_mixed_primary = True
+                    # Ensure mixed has a high score
+                    normalized_emotions["mixed"] = max(normalized_emotions.get("mixed", 0), 
+                                                   (top1[1] + top2[1]) / 2)  # Average of top two scores
+        
+        # Determine primary emotion based on analysis
+        if is_mixed_primary:
+            primary_emotion = "mixed"
+        else:
+            primary_emotion = sorted_emotions[0][0]  # Highest scoring emotion
 
         # Calculate overall intensity
         max_score = max(normalized_emotions.values())
         scaled_intensity = min(1.0, max_score * 1.5)  # Scale up for better display
+        
+        # For mixed emotions, increase the intensity slightly to reflect complexity
+        if primary_emotion == "mixed":
+            scaled_intensity = min(1.0, scaled_intensity * 1.2)
 
-        # Return complete analysis
+        # Return complete analysis with enhanced metadata including detected patterns
         return {
             "primary_emotion": primary_emotion,
             "emotions": normalized_emotions,
@@ -928,7 +1189,12 @@ class EmotionTracker:
                 "source": "rule-based",
                 "confidence": max_score,
                 "context_length": len(context) if context else 0,
-                "pattern_strength": sum(pattern_influence.values()) / len(pattern_influence) if pattern_influence else 0
+                "pattern_strength": sum(pattern_influence.values()) / len(pattern_influence) if pattern_influence else 0,
+                "mixed_emotion_info": {
+                    "is_mixed": is_mixed_primary,
+                    "detected_patterns": detected_patterns if detected_patterns else [],
+                    "top_emotions": [{"emotion": e, "score": s} for e, s in sorted_emotions[:3]]
+                }
             }
         }
 

@@ -10,7 +10,7 @@
 - She asks the user for their **name**, **age**, **gender**, and **general emotional state**.
 - Each question is asked out loud first. Only after speaking, a gentle input field appears.
 - The user may speak or type, but voice is always prioritized.
-- If the user doesn't respond clearly, Mashaaer repeats gently or invites them to type.
+- If the user doesn’t respond clearly, Mashaaer repeats gently or invites them to type.
 
 ---
 

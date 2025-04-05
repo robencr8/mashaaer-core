@@ -1,39 +1,45 @@
 """
-Ultra-Minimal Flask Application for RobinAI_Enhanced
-This file defines a minimal Flask app that can be used by Replit for deployment.
+Flask Application Entry Point for RobinAI_Enhanced Package
+This file imports the app from the root main.py file to maintain compatibility with Replit.
 """
-from flask import Flask, Response
+import os
+import sys
 
-# Create a minimal Flask application that Replit expects
-app = Flask(__name__)
+# Add the root directory to the path so we can import the app from main.py
+root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, root_dir)
 
-@app.route('/')
-def hello_replit():
-    """Root route that returns a simple HTML response"""
-    return Response("""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Mashaaer Feelings</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <h1>Welcome to Mashaaer Feelings</h1>
-        <p>The application is running correctly from RobinAI_Enhanced/main.py</p>
-    </body>
-    </html>
-    """, mimetype='text/html')
+# Import the app from the main file
+try:
+    from main import app
+    print(f"Successfully imported app from {root_dir}/main.py")
+except ImportError as e:
+    print(f"Error importing app from main.py: {e}")
+    
+    # As a fallback, create a minimal app that can at least start
+    from flask import Flask, jsonify
+    app = Flask(__name__)
+    
+    @app.route('/')
+    def index():
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Mashaaer Feelings</title>
+        </head>
+        <body>
+            <h1>Mashaaer Feelings</h1>
+            <p>Warning: Running in fallback mode. The main application couldn't be loaded.</p>
+        </body>
+        </html>
+        """
+    
+    @app.route('/health')
+    def health():
+        return jsonify({"status": "warning", "message": "Running in fallback mode"})
 
-@app.route('/health')
-def health():
-    """Health check endpoint"""
-    return '{"status":"ok"}'
-
-@app.route('/api/status')
-def api_status():
-    """API status endpoint"""
-    return '{"message":"Mashaaer Feelings API is running","version":"1.0.0"}'
-
+# This is just for local testing - when running through gunicorn, 
+# the app variable above will be used directly
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
