@@ -1,10 +1,11 @@
 """
 Production-ready Flask application for Mashaaer Feelings
 """
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
+import os
 
 # Create a Flask app instance named 'app' for Replit compatibility
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 
 @app.route('/')
 def index():
@@ -61,6 +62,11 @@ def api_status():
         "version": "1.0.0",
         "environment": "production"
     })
+
+@app.route('/test')
+def test_page():
+    """Test page for API access"""
+    return send_from_directory('static', 'test_access.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

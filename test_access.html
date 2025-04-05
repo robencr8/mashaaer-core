@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mashaaer API Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .endpoint {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mashaaer API Test Page</h1>
+    
+    <div class="endpoint">
+        <h2>Root Endpoint (/) - Welcome Page</h2>
+        <button onclick="testRoot()">Test Root Endpoint</button>
+        <div class="result" id="rootResult">Results will appear here...</div>
+    </div>
+    
+    <div class="endpoint">
+        <h2>Health Check (/health)</h2>
+        <button onclick="testHealth()">Test Health Endpoint</button>
+        <div class="result" id="healthResult">Results will appear here...</div>
+    </div>
+    
+    <div class="endpoint">
+        <h2>API Status (/api/status)</h2>
+        <button onclick="testApiStatus()">Test API Status Endpoint</button>
+        <div class="result" id="apiStatusResult">Results will appear here...</div>
+    </div>
+
+    <script>
+        // Function to fetch the root endpoint
+        async function testRoot() {
+            const resultElement = document.getElementById('rootResult');
+            resultElement.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('/');
+                const text = await response.text();
+                
+                resultElement.textContent = `Status: ${response.status} ${response.statusText}\n\nResponse (first 100 chars):\n${text.substring(0, 100)}...`;
+            } catch (error) {
+                resultElement.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        // Function to fetch the health endpoint
+        async function testHealth() {
+            const resultElement = document.getElementById('healthResult');
+            resultElement.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                
+                resultElement.textContent = `Status: ${response.status} ${response.statusText}\n\nResponse:\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultElement.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        // Function to fetch the API status endpoint
+        async function testApiStatus() {
+            const resultElement = document.getElementById('apiStatusResult');
+            resultElement.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                resultElement.textContent = `Status: ${response.status} ${response.statusText}\n\nResponse:\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultElement.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
