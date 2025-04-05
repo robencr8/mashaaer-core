@@ -1,14 +1,12 @@
 """
-Replit-Compatible Flask App for Mashaaer Feelings
+Ultra-Compatible Flask App for Mashaaer Feelings
+Designed to work with Replit's deployment and web application feedback tool
 """
 
 from flask import Flask, Response, jsonify, request, render_template, send_from_directory
 import os
 import json
 import logging
-
-# Import our health check routes
-from replit_health import init_health_routes
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -17,8 +15,16 @@ logger = logging.getLogger(__name__)
 # Create Flask app
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
-# Initialize health check routes
-init_health_routes(app)
+# Add direct health check routes
+@app.route('/health')
+def health():
+    """Main health check endpoint for Replit"""
+    return Response('{"status":"ok"}', mimetype='application/json')
+
+@app.route('/replit-health')
+def replit_health():
+    """Additional health check endpoint"""
+    return Response('{"status":"ok"}', mimetype='application/json')
 
 # Enable CORS for all routes
 @app.after_request
@@ -36,9 +42,9 @@ def options_handler(path):
 
 @app.route('/')
 def index():
-    """Root route with template HTML"""
+    """Root route with simplified HTML"""
     logger.info("Root route accessed")
-    return render_template('index.html') if os.path.exists('templates/index.html') else Response("""<!DOCTYPE html>
+    return Response("""<!DOCTYPE html>
 <html>
 <head>
   <title>Mashaaer Feelings</title>
@@ -73,13 +79,6 @@ def index():
       border-left: 4px solid #4caf50;
       margin-bottom: 20px;
     }
-    .api-links {
-      margin-top: 30px;
-    }
-    .api-link {
-      display: block;
-      margin-bottom: 8px;
-    }
   </style>
 </head>
 <body>
@@ -88,13 +87,7 @@ def index():
     <div class="status">
       <p>✅ The application is running correctly.</p>
     </div>
-    <p>This is a bilingual (Arabic/English) responsive web application with AI-driven personalization and adaptive interfaces.</p>
-    <div class="api-links">
-      <h3>API Endpoints:</h3>
-      <a class="api-link" href="/health">Health Check</a>
-      <a class="api-link" href="/api/status">API Status</a>
-      <a class="api-link" href="/replit-health">Replit Health Check</a>
-    </div>
+    <p>This is a bilingual (Arabic/English) responsive web application with AI-driven personalization.</p>
   </div>
 </body>
 </html>""", mimetype='text/html')
@@ -109,11 +102,6 @@ def api_status():
         "version": "1.0.0",
         "name": "Mashaaer Feelings API"
     })
-
-@app.route('/static/<path:filename>')
-def serve_static(filename):
-    """Serve static files"""
-    return app.send_static_file(filename)
 
 # Create app context
 if __name__ == '__main__':

@@ -1,6 +1,5 @@
 """
-Ultra Minimal Flask App for Replit Web Application Feedback Tool
-(Final Working Version)
+Minimal Flask Application for Replit
 """
 
 from flask import Flask, Response
@@ -11,24 +10,23 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     """Root route with minimal HTML"""
-    html = """<!DOCTYPE html>
-<html>
-<head>
-  <title>Mashaaer Feelings - Minimal Version</title>
-  <meta charset="UTF-8">
-</head>
-<body>
-  <h1>Welcome to Mashaaer Feelings</h1>
-  <p>The application is running correctly in minimal mode.</p>
-</body>
-</html>"""
-    
-    return Response(html, mimetype='text/html')
+    return Response("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Mashaaer Feelings</title>
+    </head>
+    <body>
+        <h1>Welcome to Mashaaer Feelings</h1>
+        <p>The application is running correctly.</p>
+    </body>
+    </html>
+    """, mimetype='text/html')
 
 @app.route('/health')
 def health():
-    """Health check endpoint for Replit web application feedback tool"""
-    return Response('{"status":"ok"}', mimetype='application/json')
+    """Health check endpoint"""
+    return '{"status":"ok"}'
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
