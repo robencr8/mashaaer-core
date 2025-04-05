@@ -76,7 +76,12 @@ def register_routes(app):
         logger.debug("Serving audio example page with links")
         return send_from_directory("static", "audio_test_link.html")
     
-    # Removing the cosmic route as it's already defined in main.py
+    # Cosmic sound system test page
+    @app.route("/cosmic-sound-test")
+    def cosmic_sound_test():
+        """Cosmic sound system test page with interactive controls"""
+        logger.debug("Serving cosmic sound system test page")
+        return send_from_directory("static", "cosmic_sound_test.html")
     
     # Return the app to allow chaining
     return app

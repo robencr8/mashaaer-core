@@ -115,13 +115,21 @@ def chat():
         # Generate response based on action
         response_text = generate_response(action, params, emotion, user_id, language)
         
+        # Add cosmic soundscape information
+        cosmic_soundscape = {
+            'emotion': emotion,
+            'play': True,  # Enable auto-play of cosmic soundscape
+            'track': f"{emotion}_cosmic.mp3"
+        }
+        
         response = {
             'success': True,
             'action': action,
             'response': response_text,
             'rule_matched': rule_id,
             'detected_emotion': emotion,
-            'params': params
+            'params': params,
+            'cosmic_soundscape': cosmic_soundscape
         }
         
         # Log the interaction
@@ -587,6 +595,88 @@ def get_user_memory(user_id, key):
         return jsonify({
             'success': False,
             'error': 'Failed to get memory',
+            'message': str(e)
+        }), 500
+        
+@api_bp.route('/cosmic-sound', methods=['POST'])
+def cosmic_sound():
+    """
+    Retrieve or play cosmic ambient sound for a specific emotion
+    
+    Request body:
+    {
+        "emotion": "happy",  # sad, angry, calm, neutral
+        "action": "play",    # play, stop, info
+        "volume": 0.5        # optional volume level (0.0 to 1.0)
+    }
+    
+    Returns:
+    {
+        "success": true,
+        "message": "Playing cosmic ambient for emotion: happy",
+        "cosmic_soundscape": {
+            "emotion": "happy",
+            "track": "happy_cosmic.mp3",
+            "duration": 120,
+            "volume": 0.5
+        }
+    }
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': 'No data provided'}), 400
+        
+        # Extract required fields
+        emotion = data.get('emotion')
+        action = data.get('action')
+        volume = data.get('volume', 0.5)  # Default volume: 50%
+        
+        if not emotion or not action:
+            return jsonify({
+                'success': False, 
+                'error': 'Missing required fields: emotion and action'
+            }), 400
+        
+        # Map emotions to valid track names
+        valid_emotions = ['happy', 'sad', 'angry', 'calm', 'neutral']
+        
+        # Validate emotion
+        if emotion not in valid_emotions:
+            emotion = 'neutral'  # Default to neutral if invalid
+        
+        # Cosmic soundscape information
+        cosmic_soundscape = {
+            'emotion': emotion,
+            'track': f"{emotion}_cosmic.mp3" if emotion != 'neutral' else "cosmicmusic.mp3",
+            'duration': 120,  # 2 minutes approximation
+            'volume': volume
+        }
+        
+        # Log the request
+        logger.info(f"Cosmic sound request - Emotion: {emotion}, Action: {action}, Volume: {volume}")
+        
+        # Prepare response based on action
+        if action == 'play':
+            message = f"Playing cosmic ambient for emotion: {emotion}"
+        elif action == 'stop':
+            message = "Stopping cosmic ambient sounds"
+        elif action == 'info':
+            message = f"Cosmic ambient information for emotion: {emotion}"
+        else:
+            message = "Invalid action for cosmic sounds"
+        
+        return jsonify({
+            'success': True,
+            'message': message,
+            'cosmic_soundscape': cosmic_soundscape
+        })
+    
+    except Exception as e:
+        logger.error(f"Error processing cosmic sound request: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to process cosmic sound request',
             'message': str(e)
         }), 500
 
