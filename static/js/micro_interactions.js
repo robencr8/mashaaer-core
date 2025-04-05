@@ -1,386 +1,671 @@
 /**
- * Micro-interactions and Audio-Visual Cues for Mashaaer
+ * Mashaaer Micro-Interactions
+ * Provides delightful visual and audio feedback for user interactions.
  * 
- * This module provides delightful micro-interactions for various user actions
- * across the Mashaaer application, enhancing the overall user experience with
- * subtle visual feedback and audio cues.
+ * This module enhances the user experience by adding:
+ * - Sound effects for UI interactions
+ * - Visual feedback animations
+ * - Particle effects
+ * - Notifications with sound
+ * - Emotion-based visual cues
  */
 
-class MashaaerInteractions {
-  constructor(options = {}) {
-    // Default configuration
-    this.config = {
-      audioEnabled: false,               // Start with audio disabled due to browser policies
-      hoverSoundEnabled: true,           // Enable hover sounds
-      clickSoundEnabled: true,           // Enable click sounds
-      successSoundEnabled: true,         // Enable success feedback
-      errorSoundEnabled: true,           // Enable error feedback
-      notificationSoundEnabled: true,    // Enable notification sounds
-      visualFeedbackEnabled: true,       // Enable visual feedback effects
-      hoverDebounceTime: 300,            // Debounce time for hover sounds (ms)
-      particleEffectsEnabled: true,      // Enable particle effects
-      rippleEffectsEnabled: true,        // Enable ripple effects
-      buttonFeedbackEnabled: true,       // Enable button press feedback
-      emotionVisualsEnabled: true,       // Enable emotion-based visual changes
-      vibrationEnabled: true,            // Enable vibration on mobile devices (if supported)
-      soundVolume: 0.5,                  // Default volume for sounds (0.0 to 1.0)
-      hoverSoundVolume: 0.3,             // Lower volume for hover sounds
-      ...options                         // Override with any provided options
-    };
+(function() {
+  // Configuration
+  const config = {
+    soundEnabled: true,
+    particlesEnabled: true,
+    notificationsEnabled: true,
+    soundPath: '/static/sounds/',
+    emotionColors: {
+      'happy': {
+        primary: '#FFD700',    // Gold
+        secondary: '#FFA500'   // Orange
+      },
+      'sad': {
+        primary: '#4169E1',    // Royal Blue
+        secondary: '#1E90FF'   // Dodger Blue
+      },
+      'angry': {
+        primary: '#FF4500',    // Orange Red
+        secondary: '#FF6347'   // Tomato
+      },
+      'surprised': {
+        primary: '#8A2BE2',    // Blue Violet
+        secondary: '#9370DB'   // Medium Purple
+      },
+      'fearful': {
+        primary: '#800080',    // Purple
+        secondary: '#483D8B'   // Dark Slate Blue
+      },
+      'disgusted': {
+        primary: '#006400',    // Dark Green
+        secondary: '#228B22'   // Forest Green
+      },
+      'neutral': {
+        primary: '#9370DB',    // Medium Purple (default cosmic color)
+        secondary: '#7B68EE'   // Medium Slate Blue
+      },
+      'mixed': {
+        primary: '#DA70D6',    // Orchid
+        secondary: '#BA55D3'   // Medium Orchid
+      }
+    },
+    sounds: {
+      'hover': 'hover.mp3',
+      'click': 'click.mp3',
+      'success': 'success.mp3',
+      'error': 'error.mp3',
+      'notification': 'notification.mp3',
+      'welcome': 'welcome.mp3',
+      'cosmic': 'cosmic.mp3',
+      'listen_start': 'listen_start.mp3',
+      'listen_stop': 'listen_stop.mp3'
+    },
+    // Store last sound played times to prevent sound flooding
+    lastSoundTimes: {},
+    // Debounce time in milliseconds for sounds
+    soundDebounceTime: 300
+  };
 
-    // State tracking
-    this.state = {
-      lastHoverTime: 0,                  // For hover sound debouncing
-      currentEmotion: 'neutral',         // Current emotion being displayed
-      audioInitialized: false,           // Whether audio has been initialized
-      soundCache: {},                    // Cache for sound objects
-      currentLanguage: localStorage.getItem('user_language') || 'ar'
-    };
-
-    // Initialize event listeners
-    this._attachGlobalListeners();
-  }
-
-  /**
-   * Initialize the interaction system
-   * @public
-   */
-  init() {
-    // Try to preload common sounds
-    this._preloadCommonSounds();
+  // Current emotional state
+  let currentEmotion = 'neutral';
+  
+  // Initialization
+  function init() {
+    // Set CSS variables for current emotion
+    setEmotion(currentEmotion);
     
-    // Add global document listener for first-interaction audio unlock
-    document.addEventListener('click', () => this._handleFirstInteraction(), { once: true });
-    
-    console.log('Mashaaer Interactions initialized');
-    return this;
-  }
-
-  /**
-   * Enable or disable audio feedback
-   * @param {boolean} enabled - Whether audio should be enabled
-   * @public
-   */
-  setAudioEnabled(enabled) {
-    this.config.audioEnabled = enabled;
-    return this;
-  }
-
-  /**
-   * Apply interactive behaviors to elements
-   * @param {string} selector - CSS selector for target elements
-   * @param {Object} options - Options for the interaction
-   * @public
-   */
-  applyTo(selector, options = {}) {
-    const elements = document.querySelectorAll(selector);
-    
-    if (!elements.length) {
-      console.warn(`No elements found matching selector: ${selector}`);
-      return this;
+    // Pre-load sounds
+    if (config.soundEnabled) {
+      preloadSounds();
     }
     
-    // Default interaction options
-    const interactionOptions = {
-      hover: true,           // Enable hover effects
-      click: true,           // Enable click effects
-      ripple: true,          // Add ripple effect on click
-      sound: true,           // Play sound on interaction
-      hoverSound: 'hover',   // Sound to play on hover
-      clickSound: 'click',   // Sound to play on click
-      activeClass: 'active', // Class to add when active
-      hoverClass: 'hover',   // Class to add on hover
-      ...options             // Override with provided options
-    };
+    console.log('Mashaaer Micro-Interactions initialized');
+  }
+  
+  /**
+   * Preload sound files to prevent delay on first play
+   */
+  function preloadSounds() {
+    Object.values(config.sounds).forEach(soundFile => {
+      const audio = new Audio(`${config.soundPath}${soundFile}`);
+      audio.preload = 'auto';
+      // Just load, don't play
+      audio.load();
+    });
+  }
+  
+  /**
+   * Play a sound effect if sound is enabled
+   * 
+   * @param {string} soundType - Type of sound to play (hover, click, etc.)
+   * @returns {Promise} - Promise that resolves when sound plays or fails
+   */
+  function playSound(soundType) {
+    if (!config.soundEnabled) return Promise.resolve();
     
-    elements.forEach(element => {
-      // Store options on element for reference
-      element.interactionOptions = interactionOptions;
+    // Debounce sounds to prevent flooding
+    const now = Date.now();
+    if (config.lastSoundTimes[soundType] && 
+        now - config.lastSoundTimes[soundType] < config.soundDebounceTime) {
+      return Promise.resolve();
+    }
+    
+    config.lastSoundTimes[soundType] = now;
+    
+    const soundFile = config.sounds[soundType];
+    if (!soundFile) {
+      console.warn(`Sound type "${soundType}" not found`);
+      return Promise.resolve();
+    }
+    
+    const audio = new Audio(`${config.soundPath}${soundFile}`);
+    return audio.play().catch(err => {
+      console.warn(`Sound playback error for ${soundType}: ${err.message}`);
+    });
+  }
+  
+  /**
+   * Apply micro-interactions to a DOM element
+   * 
+   * @param {string|Element} selector - CSS selector or DOM element
+   * @param {Object} options - Configuration options
+   * @returns {Element|null} - The element or null if not found
+   */
+  function applyTo(selector, options = {}) {
+    const element = typeof selector === 'string' 
+      ? document.querySelector(selector) 
+      : selector;
       
-      // Add hover interactions
-      if (interactionOptions.hover) {
-        element.addEventListener('mouseenter', (e) => this._handleHover(e, element));
-        element.addEventListener('touchstart', (e) => this._handleTouch(e, element, 'start'));
+    if (!element) {
+      console.warn(`Element not found: ${selector}`);
+      return null;
+    }
+    
+    // Default options
+    const settings = Object.assign({
+      ripple: false,
+      hoverSound: null,
+      clickSound: 'click',
+      hoverClass: null,
+      activeClass: null,
+      particleEffect: false
+    }, options);
+    
+    // Add marker class
+    element.classList.add('has-interactions');
+    
+    // Apply ripple effect
+    if (settings.ripple) {
+      applyRippleEffect(element);
+    }
+    
+    // Mouse enter event
+    element.addEventListener('mouseenter', function() {
+      // Play hover sound if specified
+      if (settings.hoverSound) {
+        playSound(settings.hoverSound);
       }
       
-      // Add click interactions
-      if (interactionOptions.click) {
-        element.addEventListener('click', (e) => this._handleClick(e, element));
-        element.addEventListener('touchend', (e) => this._handleTouch(e, element, 'end'));
+      // Add hover class if specified
+      if (settings.hoverClass) {
+        element.classList.add(settings.hoverClass);
       }
-      
-      // Add accessibility attributes
-      if (!element.hasAttribute('role')) {
-        if (element.tagName === 'BUTTON' || element.tagName === 'A') {
-          // Role is implicit for these elements
-        } else {
-          element.setAttribute('role', 'button');
-        }
-        
-        if (!element.hasAttribute('tabindex')) {
-          element.setAttribute('tabindex', '0');
-        }
-      }
-      
-      // Mark the element as having interactions applied
-      element.classList.add('has-interactions');
     });
     
-    return this;
-  }
-
-  /**
-   * Play a sound with specified parameters
-   * @param {string} soundType - Type of sound to play (hover, click, etc.)
-   * @param {Object} options - Options for playback
-   * @public
-   */
-  playSound(soundType, options = {}) {
-    if (!this.config.audioEnabled) {
-      // console.log('Audio is disabled, skipping sound: ' + soundType);
-      return false;
-    }
-    
-    const defaultOptions = {
-      volume: soundType === 'hover' ? this.config.hoverSoundVolume : this.config.soundVolume,
-      loop: false,
-      language: this.state.currentLanguage
-    };
-    
-    const playOptions = { ...defaultOptions, ...options };
-    
-    // Check cache first for non-greeting sounds
-    if (soundType !== 'welcome' && soundType !== 'greeting' && this.state.soundCache[soundType]) {
-      const cachedSound = this.state.soundCache[soundType];
-      cachedSound.volume = playOptions.volume;
-      cachedSound.loop = playOptions.loop;
-      cachedSound.currentTime = 0;
-      
-      cachedSound.play().catch(err => {
-        // If playing fails, try re-creating the sound
-        console.warn(`Error playing cached sound ${soundType}:`, err);
-        delete this.state.soundCache[soundType];
-        setTimeout(() => this.playSound(soundType, options), 50);
-      });
-      
-      return true;
-    }
-    
-    // For voice-based sounds like welcome or greeting, use the API
-    if (soundType === 'welcome' || soundType === 'greeting') {
-      fetch(`/api/play-cosmic-sound?sound_type=${soundType}&language=${playOptions.language}`, {
-        method: 'GET'
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success && data.sound_path) {
-          const sound = new Audio(data.sound_path);
-          sound.volume = playOptions.volume;
-          sound.loop = playOptions.loop;
-          
-          sound.addEventListener('error', (e) => {
-            console.warn(`Error loading sound from ${data.sound_path}:`, e);
-            // Try fallback
-            const fallback = new Audio(`/static/sounds/${soundType}.mp3`);
-            fallback.volume = playOptions.volume;
-            fallback.play().catch(err => console.warn('Fallback sound error:', err));
-          });
-          
-          sound.play().catch(err => {
-            console.warn(`Error playing ${soundType} sound:`, err);
-          });
-          
-          // Cache for future use (for welcome/greeting we don't cache to ensure fresh generation)
-        }
-      })
-      .catch(error => {
-        console.error('Error fetching sound from API:', error);
-        // Try local fallback
-        const fallback = new Audio(`/static/sounds/${soundType}.mp3`);
-        fallback.volume = playOptions.volume;
-        fallback.play().catch(err => console.warn('API fallback sound error:', err));
-      });
-      
-      return true;
-    }
-    
-    // For standard UI sounds, use static files
-    try {
-      const sound = new Audio(`/static/sounds/${soundType}.mp3`);
-      sound.volume = playOptions.volume;
-      sound.loop = playOptions.loop;
-      
-      sound.addEventListener('error', (e) => {
-        console.warn(`Sound file error for ${soundType}.mp3:`, e);
-      });
-      
-      sound.play().catch(err => {
-        console.warn(`Error playing ${soundType} sound:`, err);
-      });
-      
-      // Cache for future use
-      this.state.soundCache[soundType] = sound;
-      return true;
-    } catch (err) {
-      console.error('Error creating audio element:', err);
-      return false;
-    }
-  }
-
-  /**
-   * Create a ripple effect on an element
-   * @param {HTMLElement} element - Element to apply the ripple to
-   * @param {Event} event - The event that triggered the ripple
-   * @public
-   */
-  createRipple(element, event = null) {
-    if (!this.config.rippleEffectsEnabled) return;
-    
-    const ripple = document.createElement('div');
-    ripple.className = 'interaction-ripple';
-    
-    // Position the ripple
-    const rect = element.getBoundingClientRect();
-    
-    if (event && (event.clientX || event.touches)) {
-      // If we have a mouse/touch event, center the ripple at that point
-      const clientX = event.clientX || (event.touches[0] ? event.touches[0].clientX : rect.width / 2);
-      const clientY = event.clientY || (event.touches[0] ? event.touches[0].clientY : rect.height / 2);
-      
-      const offsetX = clientX - rect.left;
-      const offsetY = clientY - rect.top;
-      
-      ripple.style.left = `${offsetX}px`;
-      ripple.style.top = `${offsetY}px`;
-    } else {
-      // Otherwise center in the element
-      ripple.style.left = `${rect.width / 2}px`;
-      ripple.style.top = `${rect.height / 2}px`;
-    }
-    
-    // Calculate the maximum size for the ripple effect
-    const rippleSize = Math.max(rect.width, rect.height) * 2;
-    ripple.style.width = `${rippleSize}px`;
-    ripple.style.height = `${rippleSize}px`;
-    
-    // Add ripple to the element
-    element.style.position = element.style.position || 'relative';
-    element.style.overflow = element.style.overflow || 'hidden';
-    element.appendChild(ripple);
-    
-    // Trigger the animation
-    ripple.classList.add('animate');
-    
-    // Clean up after animation
-    setTimeout(() => {
-      if (element.contains(ripple)) {
-        element.removeChild(ripple);
+    // Mouse leave event
+    element.addEventListener('mouseleave', function() {
+      // Remove hover class if specified
+      if (settings.hoverClass) {
+        element.classList.remove(settings.hoverClass);
       }
-    }, 600); // Animation duration is 500ms, wait a bit longer to ensure it completes
+    });
+    
+    // Click event
+    element.addEventListener('click', function(e) {
+      // Play click sound
+      if (settings.clickSound) {
+        playSound(settings.clickSound);
+      }
+      
+      // Add temporary active class
+      if (settings.activeClass) {
+        element.classList.add(settings.activeClass);
+        setTimeout(() => {
+          element.classList.remove(settings.activeClass);
+        }, 300);
+      }
+      
+      // Create particle effect if enabled
+      if (settings.particleEffect) {
+        createParticleBurst(element);
+      }
+    });
+    
+    return element;
   }
-
+  
   /**
-   * Create particle burst effect at an element
-   * @param {HTMLElement} element - Element to center the burst around
-   * @param {Object} options - Options for the particle burst
-   * @public
+   * Apply ripple effect to an element
+   * 
+   * @param {Element} element - DOM element to enhance
    */
-  createParticleBurst(element, options = {}) {
-    if (!this.config.particleEffectsEnabled) return;
-    
-    const defaultOptions = {
-      count: 12,                         // Number of particles
-      colors: ['#9370DB', '#8A2BE2'],    // Default colors
-      size: { min: 3, max: 8 },          // Size range in pixels
-      duration: { min: 600, max: 1200 }, // Animation duration range in ms
-      speed: { min: 50, max: 150 },      // Speed range in pixels/second
-      spread: { min: 20, max: 100 },     // Spread distance from center
-      fadeDelay: 200,                    // Delay before starting to fade
-      emotion: this.state.currentEmotion // Optional emotion to use for colors
-    };
-    
-    const burstOptions = { ...defaultOptions, ...options };
-    
-    // If an emotion is provided, use emotion-based colors
-    if (burstOptions.emotion && this.config.emotionVisualsEnabled) {
-      burstOptions.colors = this._getEmotionColors(burstOptions.emotion);
+  function applyRippleEffect(element) {
+    // Make element relative position if it's not already set
+    if (getComputedStyle(element).position === 'static') {
+      element.style.position = 'relative';
     }
     
-    // Get the element's position for centering the burst
+    // Add overflow hidden if needed
+    if (getComputedStyle(element).overflow !== 'hidden') {
+      element.style.overflow = 'hidden';
+    }
+    
+    // Add click listener for ripple effect
+    element.addEventListener('click', function(e) {
+      // Create ripple element
+      const ripple = document.createElement('span');
+      ripple.className = 'interaction-ripple';
+      
+      // Position ripple
+      const rect = element.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      
+      // Set ripple style
+      ripple.style.width = ripple.style.height = `${size}px`;
+      ripple.style.left = `${e.clientX - rect.left - size / 2}px`;
+      ripple.style.top = `${e.clientY - rect.top - size / 2}px`;
+      ripple.style.position = 'absolute';
+      ripple.style.borderRadius = '50%';
+      ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+      ripple.style.transform = 'scale(0)';
+      ripple.style.animation = 'ripple-effect 0.6s linear';
+      
+      // Add ripple to element
+      element.appendChild(ripple);
+      
+      // Remove ripple after animation
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    });
+    
+    // Add ripple animation if needed
+    if (!document.querySelector('#ripple-effect-style')) {
+      const style = document.createElement('style');
+      style.id = 'ripple-effect-style';
+      style.textContent = `
+        @keyframes ripple-effect {
+          to {
+            transform: scale(4);
+            opacity: 0;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+  
+  /**
+   * Create a particle burst effect
+   * 
+   * @param {Element} element - Source element for the burst
+   * @param {Object} options - Configuration options
+   */
+  function createParticleBurst(element, options = {}) {
+    if (!config.particlesEnabled) return;
+    
+    // Default options
+    const settings = Object.assign({
+      particleCount: 12,
+      emotion: currentEmotion,
+      duration: 1000
+    }, options);
+    
     const rect = element.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
     
+    // Get emotion colors
+    const colors = config.emotionColors[settings.emotion] || config.emotionColors.neutral;
+    
+    // Create temporary container for particles
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.pointerEvents = 'none';
+    container.style.zIndex = '99999';
+    document.body.appendChild(container);
+    
     // Create particles
-    for (let i = 0; i < burstOptions.count; i++) {
+    for (let i = 0; i < settings.particleCount; i++) {
+      // Create particle
       const particle = document.createElement('div');
-      particle.className = 'interaction-particle';
       
-      // Random properties
-      const size = burstOptions.size.min + Math.random() * (burstOptions.size.max - burstOptions.size.min);
-      const angle = Math.random() * Math.PI * 2;
-      const distance = burstOptions.spread.min + Math.random() * (burstOptions.spread.max - burstOptions.spread.min);
-      const duration = burstOptions.duration.min + Math.random() * (burstOptions.duration.max - burstOptions.duration.min);
-      const colorIndex = Math.floor(Math.random() * burstOptions.colors.length);
+      // Calculate angle and distance
+      const angle = (i / settings.particleCount) * 360;
+      const distance = 30 + Math.random() * 40;
       
-      // Style the particle
-      particle.style.width = `${size}px`;
-      particle.style.height = `${size}px`;
-      particle.style.backgroundColor = burstOptions.colors[colorIndex];
-      particle.style.boxShadow = `0 0 ${size/2}px ${burstOptions.colors[colorIndex]}`;
-      particle.style.position = 'fixed';
+      // Calculate end position
+      const endX = centerX + distance * Math.cos(angle * Math.PI / 180);
+      const endY = centerY + distance * Math.sin(angle * Math.PI / 180);
+      
+      // Set particle style
+      particle.style.position = 'absolute';
+      particle.style.width = '8px';
+      particle.style.height = '8px';
       particle.style.borderRadius = '50%';
-      particle.style.zIndex = '9999';
-      particle.style.pointerEvents = 'none';
-      particle.style.opacity = '1';
-      particle.style.transition = `transform ${duration}ms ease-out, opacity ${duration - burstOptions.fadeDelay}ms ease-in ${burstOptions.fadeDelay}ms`;
+      particle.style.backgroundColor = i % 2 === 0 ? colors.primary : colors.secondary;
+      particle.style.boxShadow = `0 0 6px ${i % 2 === 0 ? colors.primary : colors.secondary}`;
       
       // Set initial position
-      particle.style.left = `${centerX}px`;
       particle.style.top = `${centerY}px`;
-      particle.style.transform = 'translate(-50%, -50%)';
+      particle.style.left = `${centerX}px`;
       
-      // Add to DOM
-      document.body.appendChild(particle);
+      // Add particle to container
+      container.appendChild(particle);
       
-      // Trigger animation after a small delay
+      // Animate particle
       setTimeout(() => {
-        particle.style.transform = `translate(calc(-50% + ${Math.cos(angle) * distance}px), calc(-50% + ${Math.sin(angle) * distance}px))`;
+        // Set transition for animation
+        particle.style.transition = `all ${settings.duration}ms cubic-bezier(0.165, 0.84, 0.44, 1)`;
+        
+        // Move particle
+        particle.style.top = `${endY}px`;
+        particle.style.left = `${endX}px`;
+        
+        // Fade out particle
         particle.style.opacity = '0';
+        
+        // Reduce size
+        particle.style.width = '2px';
+        particle.style.height = '2px';
       }, 10);
-      
-      // Remove after animation
-      setTimeout(() => {
-        if (document.body.contains(particle)) {
-          document.body.removeChild(particle);
-        }
-      }, duration + 50);
     }
-  }
-
-  /**
-   * Get colors associated with an emotion
-   * @param {string} emotion - The emotion name
-   * @returns {Array} - Array of color values
-   * @private
-   */
-  _getEmotionColors(emotion) {
-    const colorSets = {
-      happy: ['#FFDB58', '#FFD700', '#FFA500'],       // Gold, Yellow, Orange
-      sad: ['#4169E1', '#1E90FF', '#87CEEB'],         // Royal Blue, Dodger Blue, Sky Blue
-      angry: ['#FF4500', '#FF6347', '#FF7F50'],       // Red Orange, Tomato, Coral
-      afraid: ['#9932CC', '#8B008B', '#800080'],      // Dark Orchid, Dark Magenta, Purple
-      surprised: ['#00BFFF', '#00CED1', '#40E0D0'],   // Deep Sky Blue, Dark Turquoise, Turquoise
-      neutral: ['#9370DB', '#8A2BE2', '#9400D3'],     // Medium Purple, Blue Violet, Dark Violet
-      mixed: ['#DDA0DD', '#EE82EE', '#DA70D6'],       // Plum, Violet, Orchid
-      default: ['#9370DB', '#8A2BE2', '#9400D3']      // Default cosmic colors
-    };
     
-    return colorSets[emotion] || colorSets.default;
+    // Remove container after animation
+    setTimeout(() => {
+      document.body.removeChild(container);
+    }, settings.duration + 100);
   }
-
-  // Other methods and code omitted for length...
-}
-
-// Create and export a singleton instance
-window.MashaaerInteractions = new MashaaerInteractions().init();
+  
+  /**
+   * Set the current emotion, updating CSS variables
+   * 
+   * @param {string} emotion - The emotional state
+   */
+  function setEmotion(emotion) {
+    if (!config.emotionColors[emotion]) {
+      console.warn(`Unknown emotion: ${emotion}, defaulting to neutral`);
+      emotion = 'neutral';
+    }
+    
+    currentEmotion = emotion;
+    
+    // Update CSS variables for colors
+    const colors = config.emotionColors[emotion];
+    document.documentElement.style.setProperty('--emotion-primary', colors.primary);
+    document.documentElement.style.setProperty('--emotion-secondary', colors.secondary);
+    
+    // Update body class for emotion-specific styling
+    document.body.classList.remove(
+      ...Object.keys(config.emotionColors).map(e => `emotion-${e}`)
+    );
+    document.body.classList.add(`emotion-${emotion}`);
+    
+    return currentEmotion;
+  }
+  
+  /**
+   * Create a notification toast
+   * 
+   * @param {string} message - Notification message
+   * @param {Object} options - Configuration options
+   */
+  function notify(message, options = {}) {
+    if (!config.notificationsEnabled) return;
+    
+    // Default options
+    const settings = Object.assign({
+      type: 'info', // info, success, error, warning
+      duration: 3000,
+      position: 'top-center',
+      sound: true,
+      emotion: currentEmotion
+    }, options);
+    
+    // Create notification container if it doesn't exist
+    let container = document.querySelector('.mashaaer-notifications');
+    if (!container) {
+      container = document.createElement('div');
+      container.className = 'mashaaer-notifications';
+      
+      // Style container
+      container.style.position = 'fixed';
+      container.style.zIndex = '9999';
+      
+      // Set position
+      switch (settings.position) {
+        case 'top-left':
+          container.style.top = '20px';
+          container.style.left = '20px';
+          break;
+        case 'top-right':
+          container.style.top = '20px';
+          container.style.right = '20px';
+          break;
+        case 'bottom-left':
+          container.style.bottom = '20px';
+          container.style.left = '20px';
+          break;
+        case 'bottom-right':
+          container.style.bottom = '20px';
+          container.style.right = '20px';
+          break;
+        case 'bottom-center':
+          container.style.bottom = '20px';
+          container.style.left = '50%';
+          container.style.transform = 'translateX(-50%)';
+          break;
+        case 'top-center':
+        default:
+          container.style.top = '20px';
+          container.style.left = '50%';
+          container.style.transform = 'translateX(-50%)';
+      }
+      
+      document.body.appendChild(container);
+    }
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `mashaaer-notification notification-${settings.type}`;
+    
+    // Style notification
+    notification.style.padding = '15px 20px';
+    notification.style.marginBottom = '10px';
+    notification.style.borderRadius = '8px';
+    notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+    notification.style.color = '#fff';
+    notification.style.fontWeight = '500';
+    notification.style.minWidth = '200px';
+    notification.style.maxWidth = '400px';
+    notification.style.opacity = '0';
+    notification.style.transform = 'translateY(-20px)';
+    notification.style.transition = 'all 0.3s ease';
+    
+    // Set background color based on type
+    switch (settings.type) {
+      case 'success':
+        notification.style.backgroundColor = '#28a745';
+        break;
+      case 'error':
+        notification.style.backgroundColor = '#dc3545';
+        break;
+      case 'warning':
+        notification.style.backgroundColor = '#ffc107';
+        notification.style.color = '#212529';
+        break;
+      case 'info':
+      default:
+        notification.style.backgroundColor = config.emotionColors[settings.emotion].primary;
+    }
+    
+    // Set content
+    notification.textContent = message;
+    
+    // Add notification to container
+    container.appendChild(notification);
+    
+    // Show notification with animation
+    setTimeout(() => {
+      notification.style.opacity = '1';
+      notification.style.transform = 'translateY(0)';
+    }, 10);
+    
+    // Play sound if enabled
+    if (settings.sound) {
+      const soundType = settings.type === 'success' ? 'success' : 
+                       settings.type === 'error' ? 'error' : 'notification';
+      playSound(soundType);
+    }
+    
+    // Set timeout to remove notification
+    setTimeout(() => {
+      // Hide notification with animation
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateY(-20px)';
+      
+      // Remove notification after animation
+      setTimeout(() => {
+        if (container.contains(notification)) {
+          container.removeChild(notification);
+        }
+        
+        // Remove container if empty
+        if (container.childNodes.length === 0) {
+          document.body.removeChild(container);
+        }
+      }, 300);
+    }, settings.duration);
+  }
+  
+  /**
+   * Enable or disable sound effects
+   * 
+   * @param {boolean} enabled - Whether sound should be enabled
+   */
+  function setAudioEnabled(enabled) {
+    config.soundEnabled = enabled;
+    
+    if (enabled) {
+      // Trigger welcome sound
+      playSound('welcome');
+    }
+    
+    return config.soundEnabled;
+  }
+  
+  /**
+   * Enable or disable particle effects
+   * 
+   * @param {boolean} enabled - Whether particles should be enabled
+   */
+  function setParticlesEnabled(enabled) {
+    config.particlesEnabled = enabled;
+    return config.particlesEnabled;
+  }
+  
+  /**
+   * Create a floating message that animates up and fades
+   * 
+   * @param {string|Element} target - Target element or selector
+   * @param {string} message - Message to display
+   * @param {Object} options - Configuration options
+   */
+  function floatingMessage(target, message, options = {}) {
+    // Default options
+    const settings = Object.assign({
+      duration: 1000,
+      color: config.emotionColors[currentEmotion].primary,
+      offset: { x: 0, y: -20 }
+    }, options);
+    
+    // Get target element
+    const element = typeof target === 'string' 
+      ? document.querySelector(target) 
+      : target;
+      
+    if (!element) {
+      console.warn(`Target element not found for floating message: ${target}`);
+      return;
+    }
+    
+    // Get element position
+    const rect = element.getBoundingClientRect();
+    const startX = rect.left + rect.width / 2 + settings.offset.x;
+    const startY = rect.top + settings.offset.y;
+    
+    // Create message element
+    const messageEl = document.createElement('div');
+    messageEl.textContent = message;
+    messageEl.style.position = 'fixed';
+    messageEl.style.left = `${startX}px`;
+    messageEl.style.top = `${startY}px`;
+    messageEl.style.transform = 'translate(-50%, -50%)';
+    messageEl.style.color = settings.color;
+    messageEl.style.fontWeight = '600';
+    messageEl.style.fontSize = '18px';
+    messageEl.style.textShadow = '0 0 5px rgba(0, 0, 0, 0.3)';
+    messageEl.style.zIndex = '9999';
+    messageEl.style.pointerEvents = 'none';
+    messageEl.style.opacity = '0';
+    messageEl.style.transition = `opacity 0.5s ease, transform ${settings.duration}ms ease`;
+    
+    // Add to document
+    document.body.appendChild(messageEl);
+    
+    // Start animation
+    setTimeout(() => {
+      messageEl.style.opacity = '1';
+      messageEl.style.transform = `translate(-50%, calc(-50% - 40px))`;
+    }, 10);
+    
+    // Remove after animation
+    setTimeout(() => {
+      messageEl.style.opacity = '0';
+      setTimeout(() => {
+        if (document.body.contains(messageEl)) {
+          document.body.removeChild(messageEl);
+        }
+      }, 500);
+    }, settings.duration);
+  }
+  
+  // Add global style for animations
+  function addGlobalStyles() {
+    if (document.getElementById('mashaaer-interactions-styles')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'mashaaer-interactions-styles';
+    style.textContent = `
+      /* Common interaction styles */
+      .has-interactions {
+        transition: all 0.2s ease;
+      }
+      
+      /* Cosmic visual effects */
+      @keyframes cosmic-pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(147, 112, 219, 0.7);
+        }
+        70% {
+          box-shadow: 0 0 0 15px rgba(147, 112, 219, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(147, 112, 219, 0);
+        }
+      }
+      
+      /* Notification animations */
+      @keyframes notification-slide-in {
+        0% {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      addGlobalStyles();
+      init();
+    });
+  } else {
+    addGlobalStyles();
+    init();
+  }
+  
+  // Export API
+  window.MashaaerInteractions = {
+    applyTo,
+    playSound,
+    createParticleBurst,
+    setEmotion,
+    notify,
+    setAudioEnabled,
+    setParticlesEnabled,
+    floatingMessage
+  };
+})();

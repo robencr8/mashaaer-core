@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Mashaaer">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  <script>
+  <link rel="stylesheet" href="/static/css/micro_interactions.css">
     // Register the service worker for PWA functionality
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
@@ -31,6 +31,7 @@
 </head>
 <body>
   <!-- محتوى HTML السابق بلا تغيير -->
+  <script src="/static/js/micro_interactions.js"></script>
 </body>
 </html>
           console.log('Service Worker تم تسجيله بنجاح:', registration.scope);
@@ -203,6 +204,16 @@
         }
         
         // Sound feedback (with autoplay restrictions handling)
+        // Show welcome notification when user enables audio
+        if (window.MashaaerInteractions) {
+          setTimeout(() => {
+            window.MashaaerInteractions.notify(
+              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
+              { type: "success", sound: true, duration: 5000 }
+            );
+          }, 1000);
+        }
+
         if (audioEnabled) {
           playCosmicSound('click');
         }
@@ -211,6 +222,16 @@
       // Enter button
       enterButton.addEventListener('click', function() {
         // Sound feedback (with autoplay restrictions handling)
+        // Show welcome notification when user enables audio
+        if (window.MashaaerInteractions) {
+          setTimeout(() => {
+            window.MashaaerInteractions.notify(
+              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
+              { type: "success", sound: true, duration: 5000 }
+            );
+          }, 1000);
+        }
+
         if (audioEnabled) {
           playCosmicSound('click');
         }
@@ -224,6 +245,16 @@
         toggleAudio();
         
         // Play sound feedback if enabling audio
+        // Show welcome notification when user enables audio
+        if (window.MashaaerInteractions) {
+          setTimeout(() => {
+            window.MashaaerInteractions.notify(
+              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
+              { type: "success", sound: true, duration: 5000 }
+            );
+          }, 1000);
+        }
+
         if (audioEnabled) {
           playCosmicSound('click');
         }
@@ -233,6 +264,16 @@
       function toggleAudio() {
         audioEnabled = !audioEnabled;
         
+        // Show welcome notification when user enables audio
+        if (window.MashaaerInteractions) {
+          setTimeout(() => {
+            window.MashaaerInteractions.notify(
+              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
+              { type: "success", sound: true, duration: 5000 }
+            );
+          }, 1000);
+        }
+
         if (audioEnabled) {
           audioIcon.className = 'fas fa-volume-up';
           
@@ -266,6 +307,16 @@
         voiceStatusText.innerText = currentLanguage === 'ar' ? 'جارٍ الاستماع...' : 'Listening...';
         
         // Audio feedback
+        // Show welcome notification when user enables audio
+        if (window.MashaaerInteractions) {
+          setTimeout(() => {
+            window.MashaaerInteractions.notify(
+              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
+              { type: "success", sound: true, duration: 5000 }
+            );
+          }, 1000);
+        }
+
         if (audioEnabled) {
           playCosmicSound('listen_start');
         }
@@ -288,6 +339,16 @@
         voiceStatus.style.display = 'none';
         
         // Audio feedback
+        // Show welcome notification when user enables audio
+        if (window.MashaaerInteractions) {
+          setTimeout(() => {
+            window.MashaaerInteractions.notify(
+              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
+              { type: "success", sound: true, duration: 5000 }
+            );
+          }, 1000);
+        }
+
         if (audioEnabled) {
           playCosmicSound('listen_stop');
         }
@@ -323,6 +384,10 @@
       
       // Apply emotion to sphere
       function applyEmotionToSphere(emotion) {
+        // Update the micro-interactions system emotion
+        if (window.MashaaerInteractions) {
+          window.MashaaerInteractions.setEmotion(emotion);
+        }
         // Remove all emotion classes
         sphereGlow.classList.remove('sphere-happy', 'sphere-sad', 'sphere-angry');
         
@@ -339,6 +404,21 @@
       }
       
       // Create particle burst animation
+      // Enhanced particle burst function using micro-interactions system
+      function createEnhancedParticleBurst(element, options = {}) {
+        // Use our micro-interactions system if available
+        if (window.MashaaerInteractions) {
+          window.MashaaerInteractions.createParticleBurst(element, {
+            emotion: recognizedEmotion,
+            ...options
+          });
+          return;
+        }
+        
+        // Fallback to original implementation
+        createParticleBurst();
+      }
+
       function createParticleBurst() {
         const burstCount = 20; // Number of particles in the burst
         
@@ -387,6 +467,16 @@
       
       // Add interactive events to sphere
       sphere.addEventListener('click', function(e) {
+        // Show welcome notification when user enables audio
+        if (window.MashaaerInteractions) {
+          setTimeout(() => {
+            window.MashaaerInteractions.notify(
+              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
+              { type: "success", sound: true, duration: 5000 }
+            );
+          }, 1000);
+        }
+
         if (audioEnabled) {
           playCosmicSound('click');
         }
@@ -421,6 +511,16 @@
           
           // Play welcome sound in new language
           // Do NOT play sounds automatically to avoid browser autoplay restrictions
+        // Show welcome notification when user enables audio
+        if (window.MashaaerInteractions) {
+          setTimeout(() => {
+            window.MashaaerInteractions.notify(
+              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
+              { type: "success", sound: true, duration: 5000 }
+            );
+          }, 1000);
+        }
+
           if (audioEnabled) {
             playCosmicSound('welcome', lang);
           }
@@ -617,19 +717,6 @@
         });
       }
       
-      // Add hover effect to interactive elements - with debounce to prevent multiple sounds
-      let lastHoverTime = 0;
-      const HOVER_DEBOUNCE_TIME = 300; // milliseconds
-      
-      [sphere, enterButton, voicePromptButton, audioToggle].forEach(element => {
-        element.addEventListener('mouseenter', function() {
-          if (audioEnabled) {
-            const now = Date.now();
-            if (now - lastHoverTime > HOVER_DEBOUNCE_TIME) {
-              playCosmicSound('hover');
-              lastHoverTime = now;
-            }
-          }
         });
       });
       
@@ -640,6 +727,10 @@
         
         // Enable audio and update UI
         audioEnabled = true;
+        // Update MashaaerInteractions audio state if available
+        if (window.MashaaerInteractions) {
+          window.MashaaerInteractions.setAudioEnabled(true);
+        }
         document.getElementById('audio-icon').className = 'fas fa-volume-up';
         
         // Play welcome sound now that audio is enabled
@@ -668,6 +759,16 @@
           e.preventDefault();
           this.classList.remove('touched');
           
+        // Show welcome notification when user enables audio
+        if (window.MashaaerInteractions) {
+          setTimeout(() => {
+            window.MashaaerInteractions.notify(
+              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
+              { type: "success", sound: true, duration: 5000 }
+            );
+          }, 1000);
+        }
+
           if (audioEnabled) {
             playCosmicSound('click');
           }
@@ -725,4 +826,3 @@
     });
   </script>
 </body>
-</html>

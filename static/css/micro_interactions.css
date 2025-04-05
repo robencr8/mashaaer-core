@@ -1,412 +1,315 @@
-/* 
- * Micro-Interactions and Audio-Visual Cues for Mashaaer
- * CSS styling for delightful UI feedback
- */
+/* Mashaaer Micro-Interactions CSS */
 
-/* Define CSS variables for theming and emotion colors */
+/* CSS Variables for Emotion-based Theming */
 :root {
-  --primary: #9370DB;               /* Default primary color - Medium Purple */
-  --secondary: #8A2BE2;             /* Default secondary color - Blue Violet */
-  --tertiary: #9400D3;              /* Default tertiary color - Dark Violet */
-  --success: #28a745;               /* Success color */
-  --error: #dc3545;                 /* Error color */
-  --warning: #ffc107;               /* Warning color */
-  --info: #17a2b8;                  /* Info color */
-  
-  /* Emotion-based colors (set dynamically by JS) */
-  --emotion-primary: var(--primary);
-  --emotion-secondary: var(--secondary);
-  --emotion-tertiary: var(--tertiary);
-  
-  /* Animation timing variables */
-  --transition-quick: 150ms;
-  --transition-medium: 300ms;
-  --transition-slow: 500ms;
-  
-  /* Interaction feedback sizes */
-  --ripple-size: 100px;
-  --notification-width: 300px;
-  
-  /* Z-index layers */
-  --z-notifications: 9000;
-  --z-particles: 8000;
-  --z-interactions: 7000;
+  --emotion-primary: #9370DB;
+  --emotion-secondary: #7B68EE;
+  --cosmic-background: #180538;
+  --cosmic-accent: #9678D3;
+  --cosmic-text: #ffffff;
 }
 
-/* ======= Ripple Effects ======= */
-.interaction-ripple {
-  position: absolute;
-  background-color: rgba(255, 255, 255, 0.4);
-  border-radius: 50%;
-  transform: scale(0);
-  pointer-events: none;
-  z-index: var(--z-interactions);
-}
-
-.interaction-ripple.animate {
-  animation: ripple-effect 500ms ease-out forwards;
-}
-
-@keyframes ripple-effect {
-  0% {
-    transform: scale(0);
-    opacity: 0.5;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-
-/* ======= Particle Effects ======= */
-.interaction-particle {
-  will-change: transform, opacity;
-  pointer-events: none;
-  z-index: var(--z-particles);
-}
-
-/* ======= Pulse Animation ======= */
-.pulse-animation {
+/* Cosmic Button Styles */
+.cosmic-button {
   position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, var(--emotion-primary) 0%, var(--emotion-secondary) 100%);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
 }
 
-.pulse-animation::after {
+.cosmic-button::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: inherit;
-  box-shadow: 0 0 0 0 var(--pulse-color, var(--emotion-primary));
-  animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
-  opacity: 0.6;
-}
-
-@keyframes pulse-ring {
-  0% {
-    box-shadow: 0 0 0 0 rgba(147, 112, 219, 0.7);
-    transform: scale(0.95);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(147, 112, 219, 0);
-    transform: scale(1);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(147, 112, 219, 0);
-    transform: scale(0.95);
-  }
-}
-
-/* ======= Button Feedback ======= */
-.button-pressed {
-  transition: transform var(--transition-quick) ease, 
-              box-shadow var(--transition-quick) ease;
-}
-
-/* Hover effects for interactive elements */
-.has-interactions.hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
-  transition: all var(--transition-quick) ease;
-}
-
-/* Active effects for interactive elements */
-.has-interactions.active {
-  filter: brightness(0.95);
-  transform: translateY(1px);
-  transition: all var(--transition-quick) ease;
-}
-
-/* ======= Notifications ======= */
-.mashaaer-notifications-container {
-  position: fixed;
-  z-index: var(--z-notifications);
-  display: flex;
-  flex-direction: column;
-  width: var(--notification-width);
-  max-width: 90vw;
-  pointer-events: none;
-}
-
-.mashaaer-notifications-container.top-right {
-  top: 20px;
-  right: 20px;
-  align-items: flex-end;
-}
-
-.mashaaer-notifications-container.top-left {
-  top: 20px;
-  left: 20px;
-  align-items: flex-start;
-}
-
-.mashaaer-notifications-container.top-center {
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  align-items: center;
-}
-
-.mashaaer-notification {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #fff;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-  border-radius: 6px;
-  padding: 10px 15px;
-  margin-bottom: 10px;
+  left: -100%;
   width: 100%;
-  pointer-events: auto;
-  position: relative;
-  z-index: 1;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.7s ease;
 }
 
-.mashaaer-notification .notification-content {
-  display: flex;
-  align-items: center;
-  flex: 1;
+.cosmic-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3);
 }
 
-.mashaaer-notification i {
-  margin-right: 12px;
-  font-size: 18px;
+.cosmic-button:hover::before {
+  left: 100%;
 }
 
-.mashaaer-notification .close-notification {
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  font-size: 14px;
-  margin-left: 10px;
-  padding: 0;
+.cosmic-button.pulse {
+  animation: cosmic-pulse 1.5s infinite;
 }
 
-.mashaaer-notification.success {
-  border-left: 4px solid var(--success);
-}
-
-.mashaaer-notification.success i {
-  color: var(--success);
-}
-
-.mashaaer-notification.error {
-  border-left: 4px solid var(--error);
-}
-
-.mashaaer-notification.error i {
-  color: var(--error);
-}
-
-.mashaaer-notification.warning {
-  border-left: 4px solid var(--warning);
-}
-
-.mashaaer-notification.warning i {
-  color: var(--warning);
-}
-
-.mashaaer-notification.info {
-  border-left: 4px solid var(--info);
-}
-
-.mashaaer-notification.info i {
-  color: var(--info);
-}
-
-/* Notification animations */
-.mashaaer-notification.slide-in-right {
-  animation: slide-in-right 0.3s forwards;
-}
-
-.mashaaer-notification.slide-in-left {
-  animation: slide-in-left 0.3s forwards;
-}
-
-.mashaaer-notification.slide-in-top {
-  animation: slide-in-top 0.3s forwards;
-}
-
-.mashaaer-notification.fade-in {
-  animation: fade-in 0.3s forwards;
-}
-
-.mashaaer-notification.fade-out {
-  animation: fade-out 0.3s forwards;
-}
-
-@keyframes slide-in-right {
-  0% {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slide-in-left {
-  0% {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slide-in-top {
-  0% {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes fade-in {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes fade-out {
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-/* ======= Action Cues ======= */
-.mashaaer-action-cue {
-  position: absolute;
-  z-index: 1;
-}
-
-.mashaaer-action-cue.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.mashaaer-action-cue.pulse {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  animation: cue-pulse 1.5s infinite;
-}
-
-.mashaaer-action-cue.badge {
-  min-width: 18px;
-  height: 18px;
-  border-radius: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-size: 11px;
-  padding: 0 5px;
-}
-
-.mashaaer-action-cue.top-right {
-  top: -4px;
-  right: -4px;
-}
-
-.mashaaer-action-cue.top-left {
-  top: -4px;
-  left: -4px;
-}
-
-.mashaaer-action-cue.bottom-right {
-  bottom: -4px;
-  right: -4px;
-}
-
-.mashaaer-action-cue.bottom-left {
-  bottom: -4px;
-  left: -4px;
-}
-
-@keyframes cue-pulse {
+@keyframes cosmic-pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(147, 112, 219, 0.7);
   }
   70% {
-    box-shadow: 0 0 0 6px rgba(147, 112, 219, 0);
+    box-shadow: 0 0 0 15px rgba(147, 112, 219, 0);
   }
   100% {
     box-shadow: 0 0 0 0 rgba(147, 112, 219, 0);
   }
 }
 
-/* ======= Emotion-Specific Effects ======= */
-.emotion-happy {
-  --emotion-primary: #FFDB58;
-  --emotion-secondary: #FFD700;
-  --emotion-tertiary: #FFA500;
+/* Cosmic Animation Effects */
+.cosmic-animation {
+  animation: cosmic-fade-in 1s ease forwards;
 }
 
-.emotion-sad {
-  --emotion-primary: #4169E1;
-  --emotion-secondary: #1E90FF;
-  --emotion-tertiary: #87CEEB;
-}
-
-.emotion-angry {
-  --emotion-primary: #FF4500;
-  --emotion-secondary: #FF6347;
-  --emotion-tertiary: #FF7F50;
-}
-
-.emotion-afraid {
-  --emotion-primary: #9932CC;
-  --emotion-secondary: #8B008B;
-  --emotion-tertiary: #800080;
-}
-
-.emotion-surprised {
-  --emotion-primary: #00BFFF;
-  --emotion-secondary: #00CED1;
-  --emotion-tertiary: #40E0D0;
-}
-
-.emotion-neutral {
-  --emotion-primary: #9370DB;
-  --emotion-secondary: #8A2BE2;
-  --emotion-tertiary: #9400D3;
-}
-
-.emotion-mixed {
-  --emotion-primary: #DDA0DD;
-  --emotion-secondary: #EE82EE;
-  --emotion-tertiary: #DA70D6;
-}
-
-/* ======= Responsive Adjustments ======= */
-@media screen and (max-width: 600px) {
-  .mashaaer-notifications-container {
-    width: calc(100% - 40px);
-    max-width: 100%;
+@keyframes cosmic-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  
-  .mashaaer-notifications-container.top-center,
-  .mashaaer-notifications-container.top-right,
-  .mashaaer-notifications-container.top-left {
-    right: 20px;
-    left: 20px;
-    transform: none;
-    align-items: stretch;
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Cosmic Sparkle Effect */
+.cosmic-sparkle {
+  position: relative;
+}
+
+.cosmic-sparkle::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  border-radius: inherit;
+  background: radial-gradient(circle at center, 
+    var(--emotion-primary) 0%, 
+    transparent 70%);
+  opacity: 0;
+  z-index: -1;
+  animation: sparkle-effect 3s infinite;
+}
+
+@keyframes sparkle-effect {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.1);
+  }
+}
+
+/* Voice Button Animation */
+.voice-prompt-button.voice-hover {
+  background-color: rgba(147, 112, 219, 0.8);
+  transform: scale(1.05);
+}
+
+.voice-prompt-button.voice-active {
+  background-color: rgba(147, 112, 219, 1);
+  transform: scale(0.95);
+}
+
+/* Enter Button Animation */
+.enter-button.button-hover {
+  filter: brightness(1.2);
+  transform: translateY(-2px);
+  box-shadow: 0 7px 15px rgba(0, 0, 0, 0.3);
+}
+
+.enter-button.button-active {
+  filter: brightness(0.9);
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Audio Toggle Animation */
+.audio-toggle.audio-hover {
+  transform: rotate(15deg) scale(1.1);
+}
+
+/* Language Option Animation */
+.lang-option.lang-hover {
+  opacity: 0.9;
+  transform: scale(1.1);
+}
+
+/* Cosmic Floating Animation for particles */
+.cosmic-floating {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background-color: var(--emotion-primary);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.7;
+  filter: blur(1px);
+  box-shadow: 0 0 5px var(--emotion-primary);
+  animation: cosmic-float 10s infinite linear;
+}
+
+@keyframes cosmic-float {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.7;
+  }
+  90% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(var(--float-x, 20px));
+    opacity: 0;
+  }
+}
+
+/* Page transition effect */
+.page-transition {
+  animation: page-fade-in 0.5s ease-out;
+}
+
+@keyframes page-fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Apply cosmic button style to our enter button */
+.enter-button {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Enhanced focus states for accessibility */
+.has-interactions:focus {
+  outline: 2px solid var(--emotion-primary);
+  outline-offset: 2px;
+}
+
+/* Enhanced emotional feedback in orbit particles */
+.orbital-particle {
+  transition: background-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+.emotion-happy .orbital-particle {
+  background-color: #FFDB58 !important;
+  box-shadow: 0 0 15px #FFD700 !important;
+}
+
+.emotion-sad .orbital-particle {
+  background-color: #4169E1 !important;
+  box-shadow: 0 0 15px #1E90FF !important;
+}
+
+.emotion-angry .orbital-particle {
+  background-color: #FF4500 !important;
+  box-shadow: 0 0 15px #FF6347 !important;
+}
+
+/* Add ripple effect for interactive elements */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.4);
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Notification styles */
+.mashaaer-notification {
+  background: linear-gradient(135deg, var(--emotion-primary) 0%, var(--emotion-secondary) 100%);
+  color: white;
+  padding: 15px 20px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: notification-slide-in 0.3s ease-out forwards;
+}
+
+@keyframes notification-slide-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Breathing effect for elements */
+.breathing {
+  animation: breathing 5s ease-in-out infinite;
+}
+
+@keyframes breathing {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+/* Floating animation for text or icons */
+.floating {
+  animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Pulsing dot animation for indicating activity */
+.pulsing-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--emotion-primary);
+  display: inline-block;
+  margin-right: 5px;
+  animation: pulsing-dot 1.5s infinite;
+}
+
+@keyframes pulsing-dot {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
   }
 }

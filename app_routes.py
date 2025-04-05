@@ -1,15 +1,29 @@
-# Add to app.py to support audio testing
+# Additional application routes for Mashaaer Feelings
 
 from flask import render_template
+import logging
 
-@app.route("/audio-test")
-def audio_test():
-    """Audio test page for debugging autoplay issues"""
-    return render_template("render_static", path="/audio_test.html")
+logger = logging.getLogger(__name__)
 
-@app.route("/audio-fix")
-def audio_fix_guide():
-    """Display the audio fix documentation"""
-    with open("AUDIO_FIX.md", "r") as f:
-        content = f.read()
-    return render_template("markdown.html", content=content, title="Audio Fix Guide")
+# These routes are registered in main.py when importing this module
+def register_routes(app):
+    """Register routes with the Flask app"""
+    
+    @app.route("/audio-test")
+    def audio_test():
+        """Audio test page for debugging autoplay issues"""
+        logger.debug("Serving audio test page")
+        return render_template("render_static", path="/audio_test.html")
+    
+    @app.route("/audio-fix")
+    def audio_fix_guide():
+        """Display the audio fix documentation"""
+        logger.debug("Serving audio fix guide")
+        with open("AUDIO_FIX.md", "r") as f:
+            content = f.read()
+        return render_template("markdown.html", content=content, title="Audio Fix Guide")
+    
+    # Removing the cosmic route as it's already defined in main.py
+    
+    # Return the app to allow chaining
+    return app

@@ -83,8 +83,15 @@ app.secret_key = os.environ.get("SESSION_SECRET", "mashaaer_development_key")
 # Import and register API routes
 try:
     from api_routes import init_api
+    from app_routes import register_routes  # Import function to register additional routes
+    
+    # Initialize API routes
     api_blueprint = init_api(app, db_manager, emotion_tracker, face_detector, 
                           tts_manager, voice_recognition, intent_classifier, config)
+    
+    # Register additional routes from app_routes.py
+    register_routes(app)
+    
     logger.info(f"API routes registered successfully")
 except ImportError as e:
     logger.error(f"Could not import API routes: {str(e)}")
