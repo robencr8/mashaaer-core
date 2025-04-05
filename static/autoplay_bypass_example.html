@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مثال تجاوز حظر التشغيل التلقائي | مشاعر</title>
+    <style>
+        body { 
+            font-family: Arial; 
+            background-color: #1a1a2e;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            direction: rtl;
+        }
+        h1 { color: #8a2be2; }
+        button { 
+            background-color: #8a2be2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        #log { 
+            margin-top: 20px; 
+            background-color: rgba(0,0,0,0.3);
+            padding: 10px;
+            text-align: right;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+        }
+        .success { color: #4caf50; }
+        .error { color: #f44336; }
+        .warning { color: #ff9800; }
+        #audio-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            z-index: 1000;
+            border-radius: 5px;
+            margin: 0 auto;
+            width: fit-content;
+            max-width: 80%;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>مثال تجاوز حظر التشغيل التلقائي | مشاعر</h1>
+
+    <!-- Silent audio for bypassing autoplay restrictions -->
+    <audio id="starter" src="/static/sounds/silence.mp3" preload="auto"></audio>
+    
+    <!-- Audio activation notification -->
+    <div id="audio-notification">
+        انقر لتفعيل التجربة الصوتية
+    </div>
+
+    <div>
+        <button id="testButton" disabled>اختبار المؤثرات الصوتية</button>
+    </div>
+
+    <div id="log"></div>
+
+    <script>
+        const log = document.getElementById('log');
+        const testButton = document.getElementById('testButton');
+        const starter = document.getElementById('starter');
+        let audioActivated = false;
+
+        function logMessage(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.textContent = message;
+            entry.className = type;
+            log.insertBefore(entry, log.firstChild);
+            console.log(`[${type}] ${message}`);
+        }
+
+        // Add click listener for audio activation
+        document.addEventListener("click", () => {
+            if (!audioActivated) {
+                audioActivated = true;
+                
+                // Play silent audio to enable browser audio
+                starter.play().then(() => {
+                    logMessage("✅ تم تفعيل الصوت بنجاح", "success");
+                    document.getElementById("audio-notification").style.display = "none";
+                    
+                    // Now we can start the visual/voice effects
+                    startVisualVoiceEffect();
+                    
+                    // Enable the test button
+                    testButton.disabled = false;
+                    
+                }).catch(err => {
+                    logMessage(`⚠️ فشل تفعيل الصوت: ${err}`, "warning");
+                });
+            }
+        });
+        
+        // Function to start visual voice effects after audio activation
+        function startVisualVoiceEffect() {
+            logMessage("✅ بدء تأثيرات الصوت والمرئيات", "success");
+            
+            // Optionally use speech synthesis for welcome message
+            if ('speechSynthesis' in window) {
+                const msg = new SpeechSynthesisUtterance("أهلاً بك في مشاعر...");
+                msg.lang = 'ar-SA';
+                window.speechSynthesis.speak(msg);
+                logMessage("✅ تم نطق رسالة الترحيب", "success");
+            } else {
+                logMessage("⚠️ نظام نطق النص غير متوفر في هذا المتصفح", "warning");
+            }
+        }
+        
+        // Test button handler
+        testButton.addEventListener('click', () => {
+            logMessage("📢 تم النقر على زر الاختبار", "info");
+            
+            if ('speechSynthesis' in window) {
+                const msg = new SpeechSynthesisUtterance("المؤثرات الصوتية تعمل بشكل جيد");
+                msg.lang = 'ar-SA';
+                window.speechSynthesis.speak(msg);
+                logMessage("✅ تم نطق رسالة الاختبار", "success");
+            }
+        });
+
+        // رسالة ترحيبية
+        logMessage('👋 مرحبًا! هذه الصفحة توضح كيفية تجاوز حظر التشغيل التلقائي للصوت.');
+        logMessage('💡 نصيحة: انقر في أي مكان لتفعيل الصوت.');
+    </script>
+</body>
+</html>

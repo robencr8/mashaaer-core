@@ -207,3 +207,44 @@ class RulesConfigLoader:
         # Remove rule and save
         self.rules = [r for r in self.rules if r.get('id') != rule_id]
         return self._save_rules(self.rules)
+
+
+def load_rules_from_config(config_path: str = 'rules_config.json'):
+    """
+    Helper function to load rules from config file into a RobinDecisionEngine
+    
+    Args:
+        config_path: Path to the rules configuration file
+        
+    Returns:
+        Initialized RobinDecisionEngine with rules loaded from config
+    """
+    from rule_engine import RobinDecisionEngine, Rule
+    
+    # Create a new decision engine
+    engine = RobinDecisionEngine()
+    
+    try:
+        # Load rules from config file
+        with open(config_path, 'r', encoding='utf-8') as f:
+            rules_data = json.load(f)
+            
+        # Add each rule to the engine
+        for rule_data in rules_data:
+            rule = Rule(
+                emotion=rule_data.get('emotion', 'neutral'),
+                keyword=rule_data.get('keyword', ''),
+                action=rule_data.get('action', 'respond_normally'),
+                params=rule_data.get('params', {}),
+                weight=rule_data.get('weight', 1.0),
+                description=rule_data.get('description', ''),
+                rule_id=rule_data.get('id'),
+                lang=rule_data.get('lang', 'en')
+            )
+            engine.add_rule(rule)
+            
+        logger.info(f"Loaded {len(rules_data)} rules from {config_path}")
+    except Exception as e:
+        logger.error(f"Error loading rules from {config_path}: {str(e)}")
+    
+    return engine

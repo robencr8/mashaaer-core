@@ -5,3 +5,11 @@ timestamp,user_input,emotion,action,params
 2025-04-05T21:16:15.866532,أشعر وحيد اليوم,sad,offer_companionship,{},ar
 2025-04-05T21:16:21.047796,أحب الموسيقى,happy,play_music,"{""genre"": ""\u0645\u0628\u0647\u062c""}",ar
 2025-04-05T21:16:25.309982,كيف الطقس اليوم,neutral,fetch_weather,{},ar
+2025-04-05T22:00:44.134074,I feel alone today,sad,offer_companionship,{},en
+2025-04-05T22:01:09.526296,I am so excited about the new features,happy,share_excitement,"{""intensity"": ""high""}",en
+2025-04-05T22:01:40.599470,What is the weather like today?,neutral,fetch_weather,{},en
+2025-04-05T22:01:45.568954,أشعر بالوحدة اليوم,sad,respond_normally,{},ar
+2025-04-05T22:01:52.600914,أشعر وحيد اليوم,sad,offer_companionship,{},ar
+2025-04-05T22:23:22.207716,I feel alone today,sad,offer_companionship,{},en
+2025-04-05T22:23:27.023183,أشعر بأنني وحيد اليوم,sad,offer_companionship,{},ar
+2025-04-05T22:24:08.480300,I had an amazing day at work,excited,share_excitement,"{""intensity"": ""high""}",en

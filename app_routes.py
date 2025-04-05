@@ -1,7 +1,8 @@
 # Additional application routes for Mashaaer Feelings
 
-from flask import render_template
+from flask import render_template, send_from_directory
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,14 @@ def register_routes(app):
         with open("AUDIO_FIX.md", "r") as f:
             content = f.read()
         return render_template("markdown.html", content=content, title="Audio Fix Guide")
+        
+    @app.route("/audio-bypass")
+    def audio_bypass_guide():
+        """Display the audio autoplay bypass documentation"""
+        logger.debug("Serving audio autoplay bypass guide")
+        with open("AUDIO_AUTOPLAY_BYPASS.md", "r") as f:
+            content = f.read()
+        return render_template("markdown.html", content=content, title="Audio Autoplay Bypass Guide")
     
     @app.route("/cosmic-loader-demo")
     def cosmic_loader_demo():
@@ -42,6 +51,30 @@ def register_routes(app):
         """Show the AI-powered recommendations page"""
         logger.debug("Serving recommendations page")
         return render_template("recommendations.html")
+    
+    @app.route("/audio-activation")
+    def audio_activation():
+        """Audio activation bypass example page"""
+        logger.debug("Serving audio activation example page")
+        return send_from_directory("static", "audio_activation_integration.html")
+    
+    @app.route("/audio-bypass-ar")
+    def audio_bypass_ar():
+        """Audio activation bypass example page (Arabic)"""
+        logger.debug("Serving Arabic audio bypass example page")
+        return send_from_directory("static", "autoplay_bypass_example.html")
+    
+    @app.route("/audio-integration")
+    def audio_integration():
+        """Audio integration example with full implementation"""
+        logger.debug("Serving audio integration example page")
+        return send_from_directory("static", "audio_integration_example.html")
+    
+    @app.route("/audio-example")
+    def audio_example():
+        """Audio example page with link to other tests"""
+        logger.debug("Serving audio example page with links")
+        return send_from_directory("static", "audio_test_link.html")
     
     # Removing the cosmic route as it's already defined in main.py
     

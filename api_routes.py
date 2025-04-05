@@ -10,7 +10,8 @@ from typing import Dict, Any, List, Optional
 from textblob import TextBlob
 
 # Import decision engine components
-from rules_config_loader import RulesConfigLoader
+from rules_config_loader import RulesConfigLoader, load_rules_from_config
+from rule_engine import RobinDecisionEngine, Rule
 from memory_store import save_memory, get_memory
 from log_manager import log_interaction
 
@@ -41,8 +42,9 @@ def init_api(app, db_manager=None, emotion_tracker=None, face_detector=None,
     logger.info("API routes registered successfully")
     return api_bp
 
-# Initialize rules config loader
+# Initialize rules config loader and Robin Decision Engine
 rules_loader = RulesConfigLoader()
+robin_engine = load_rules_from_config('rules_config.json')
 
 @api_bp.route('/chat', methods=['POST'])
 def chat():
@@ -89,38 +91,38 @@ def chat():
             emotion = detect_emotion_from_text(message)
             logger.info(f"Auto-detected emotion '{emotion}' for message: '{message}'")
         
-        # Match rules based on emotion, language and message
-        matched_rules = rules_loader.match_rules(emotion, message, language)
+        # Store any user-specific data in the engine memory
+        if user_id != 'anonymous':
+            # Save user_id and language preference in memory for future interactions
+            robin_engine.store_memory(user_id, 'language', language)
+            
+            # Get user's name from memory if available
+            user_name = get_memory(user_id, 'name')
+            if user_name:
+                robin_engine.store_memory(user_id, 'name', user_name)
         
-        if not matched_rules:
-            # No rules matched, return default response
-            response = {
-                'success': True,
-                'action': 'default_response',
-                'response': 'I understand. Tell me more about how you feel.',
-                'rule_matched': None,
-                'detected_emotion': emotion
-            }
-        else:
-            # Use the highest weighted matching rule
-            best_match = matched_rules[0]
-            
-            # Get action and parameters
-            action = best_match.get('action')
-            params = best_match.get('params', {})
-            rule_id = best_match.get('id')
-            
-            # Generate response based on action
-            response_text = generate_response(action, params, emotion, user_id, language)
-            
-            response = {
-                'success': True,
-                'action': action,
-                'response': response_text,
-                'rule_matched': rule_id,
-                'detected_emotion': emotion,
-                'params': params
-            }
+        # Use RobinDecisionEngine to decide the appropriate action
+        decision = robin_engine.decide(message, emotion)
+        
+        action = decision.get('action', 'respond_normally')
+        params = decision.get('params', {})
+        
+        # For compatibility with the existing system, also check rules_loader
+        # to get the rule_id that matched
+        matched_rules = rules_loader.match_rules(emotion, message, language)
+        rule_id = matched_rules[0].get('id') if matched_rules else None
+        
+        # Generate response based on action
+        response_text = generate_response(action, params, emotion, user_id, language)
+        
+        response = {
+            'success': True,
+            'action': action,
+            'response': response_text,
+            'rule_matched': rule_id,
+            'detected_emotion': emotion,
+            'params': params
+        }
         
         # Log the interaction
         log_interaction(message, emotion, response.get('action'), response.get('params', {}), language)
@@ -175,13 +177,17 @@ def process_feedback():
                 'error': 'Invalid feedback value. Must be "positive" or "negative"'
             }), 400
         
-        # Adjust rule weight based on feedback
-        success = rules_loader.adjust_rule_weight(rule_id, feedback)
+        # Calculate delta for rule weight adjustment
+        delta = 0.1 if feedback.lower() == 'positive' else -0.1
         
-        if not success:
+        # Adjust rule weight in both systems
+        rules_success = rules_loader.adjust_rule_weight(rule_id, feedback)
+        engine_success = robin_engine.update_rule_weight(rule_id, delta)
+        
+        if not rules_success and not engine_success:
             return jsonify({
                 'success': False, 
-                'error': f'Failed to process feedback for rule ID: {rule_id}'
+                'error': f'Failed to process feedback for rule ID: {rule_id}. Rule not found in any system.'
             }), 404
         
         # Get updated rule for response
@@ -323,10 +329,32 @@ def add_rule():
                     'error': f'Missing required field: {field}'
                 }), 400
         
-        # Add rule
-        success = rules_loader.add_rule(data)
+        # Add rule to rules_loader
+        config_success = rules_loader.add_rule(data)
         
-        if not success:
+        # Also add rule to robin_engine
+        engine_success = False
+        try:
+            # Create a Rule object from the data
+            rule = Rule(
+                emotion=data.get('emotion', 'neutral'),
+                keyword=data.get('keyword', ''),
+                action=data.get('action', 'respond_normally'),
+                params=data.get('params', {}),
+                weight=data.get('weight', 1.0),
+                description=data.get('description', ''),
+                rule_id=data.get('id'),
+                lang=data.get('lang', 'en')
+            )
+            
+            # Add the rule to the engine
+            robin_engine.add_rule(rule)
+            engine_success = True
+            
+        except Exception as e:
+            logger.error(f"Error adding rule to RobinDecisionEngine: {str(e)}")
+            
+        if not config_success and not engine_success:
             return jsonify({
                 'success': False, 
                 'error': 'Failed to add rule. Rule ID may already exist.'
@@ -383,10 +411,35 @@ def update_rule(rule_id):
         if not data:
             return jsonify({'success': False, 'error': 'No data provided'}), 400
         
-        # Update rule
-        success = rules_loader.update_rule(rule_id, data)
+        # Update rule in rules_loader
+        config_success = rules_loader.update_rule(rule_id, data)
         
-        if not success:
+        # Also update rule in robin_engine
+        engine_success = False
+        try:
+            # First, remove the old rule
+            robin_engine.remove_rule(rule_id)
+            
+            # Then create and add the new rule with updated data
+            rule = Rule(
+                emotion=data.get('emotion', 'neutral'),
+                keyword=data.get('keyword', ''),
+                action=data.get('action', 'respond_normally'),
+                params=data.get('params', {}),
+                weight=data.get('weight', 1.0),
+                description=data.get('description', ''),
+                rule_id=rule_id,  # Use the original rule_id
+                lang=data.get('lang', 'en')
+            )
+            
+            # Add the updated rule to the engine
+            robin_engine.add_rule(rule)
+            engine_success = True
+            
+        except Exception as e:
+            logger.error(f"Error updating rule in RobinDecisionEngine: {str(e)}")
+        
+        if not config_success and not engine_success:
             return jsonify({
                 'success': False, 
                 'error': f'Failed to update rule. Rule ID {rule_id} may not exist.'
@@ -421,10 +474,18 @@ def delete_rule(rule_id):
     }
     """
     try:
-        # Delete rule
-        success = rules_loader.delete_rule(rule_id)
+        # Delete rule from both systems
+        config_success = rules_loader.delete_rule(rule_id)
         
-        if not success:
+        # Also remove from robin_engine if present
+        engine_success = False
+        try:
+            robin_engine.remove_rule(rule_id)
+            engine_success = True
+        except Exception as e:
+            logger.error(f"Error removing rule from RobinDecisionEngine: {str(e)}")
+            
+        if not config_success and not engine_success:
             return jsonify({
                 'success': False, 
                 'error': f'Failed to delete rule. Rule ID {rule_id} may not exist.'

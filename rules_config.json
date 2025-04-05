@@ -1,38 +1,29 @@
 [
   {
+    "id": "rule012",
+    "emotion": "happy",
+    "keyword": "celebrate",
+    "action": "celebrate_success",
+    "params": {
+      "intensity": "high",
+      "include_animation": true
+    },
+    "weight": 1.6,
+    "lang": "en",
+    "description": "Celebrates with the user when they express happiness about an achievement"
+  },
+  {
     "id": "rule002",
     "emotion": "happy",
     "keyword": "music",
     "action": "play_music",
     "params": {
-      "genre": "uplifting"
+      "genre": "uplifting",
+      "tempo": "medium"
     },
     "weight": 1.5,
-    "lang": "en"
-  },
-  {
-    "id": "rule003",
-    "emotion": "neutral",
-    "keyword": "weather",
-    "action": "fetch_weather",
-    "weight": 1.2,
-    "lang": "en"
-  },
-  {
-    "id": "rule001",
-    "emotion": "sad",
-    "keyword": "alone",
-    "action": "offer_companionship",
-    "weight": 1.1,
-    "lang": "en"
-  },
-  {
-    "id": "rule004",
-    "emotion": "sad",
-    "keyword": "وحيد",
-    "action": "offer_companionship",
-    "weight": 1.0,
-    "lang": "ar"
+    "lang": "en",
+    "description": "Plays uplifting music when user is in a good mood and mentions music"
   },
   {
     "id": "rule005",
@@ -40,10 +31,85 @@
     "keyword": "موسيقى",
     "action": "play_music",
     "params": {
-      "genre": "مبهج"
+      "genre": "مبهج",
+      "tempo": "متوسط"
     },
     "weight": 1.5,
-    "lang": "ar"
+    "lang": "ar",
+    "description": "Arabic version of the music rule for happy moods"
+  },
+  {
+    "id": "rule008",
+    "emotion": "anxious",
+    "keyword": "worried",
+    "action": "offer_reassurance",
+    "params": {
+      "type": "gentle",
+      "include_affirmation": true
+    },
+    "weight": 1.4,
+    "lang": "en",
+    "description": "Offers gentle reassurance when user expresses worry or anxiety"
+  },
+  {
+    "id": "rule010",
+    "emotion": "anxious",
+    "keyword": "قلق",
+    "action": "offer_reassurance",
+    "params": {
+      "type": "gentle",
+      "include_affirmation": true
+    },
+    "weight": 1.4,
+    "lang": "ar",
+    "description": "Arabic version of the reassurance rule for anxiety"
+  },
+  {
+    "id": "rule013",
+    "emotion": "excited",
+    "keyword": "amazing",
+    "action": "share_excitement",
+    "params": {
+      "intensity": "high"
+    },
+    "weight": 1.4,
+    "lang": "en",
+    "description": "Shares in user excitement when something amazing happens"
+  },
+  {
+    "id": "rule007",
+    "emotion": "angry",
+    "keyword": "frustrated",
+    "action": "suggest_calming",
+    "params": {
+      "technique": "breathing",
+      "duration": 60
+    },
+    "weight": 1.3,
+    "lang": "en",
+    "description": "Suggests calming breathing exercises when user expresses frustration or anger"
+  },
+  {
+    "id": "rule011",
+    "emotion": "angry",
+    "keyword": "غاضب",
+    "action": "suggest_calming",
+    "params": {
+      "technique": "تنفس",
+      "duration": 60
+    },
+    "weight": 1.3,
+    "lang": "ar",
+    "description": "Arabic version of the calming exercises rule for anger"
+  },
+  {
+    "id": "rule003",
+    "emotion": "neutral",
+    "keyword": "weather",
+    "action": "fetch_weather",
+    "weight": 1.2,
+    "lang": "en",
+    "description": "Provides weather information when user asks about the weather"
   },
   {
     "id": "rule006",
@@ -51,6 +117,38 @@
     "keyword": "طقس",
     "action": "fetch_weather",
     "weight": 1.2,
-    "lang": "ar"
+    "lang": "ar",
+    "description": "Arabic version of the weather information rule"
+  },
+  {
+    "id": "rule009",
+    "emotion": "neutral",
+    "keyword": "recommend",
+    "action": "recommendation",
+    "params": {
+      "category": "general",
+      "personalized": true
+    },
+    "weight": 1.2,
+    "lang": "en",
+    "description": "Provides personalized recommendations when specifically requested"
+  },
+  {
+    "id": "rule001",
+    "emotion": "sad",
+    "keyword": "alone",
+    "action": "offer_companionship",
+    "weight": 1.1,
+    "lang": "en",
+    "description": "Offers companionship and emotional support when user expresses loneliness"
+  },
+  {
+    "id": "rule004",
+    "emotion": "sad",
+    "keyword": "وحيد",
+    "action": "offer_companionship",
+    "weight": 1.1,
+    "lang": "ar",
+    "description": "Arabic version of the companionship rule for loneliness"
   }
 ]

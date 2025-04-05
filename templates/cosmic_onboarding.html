@@ -583,6 +583,14 @@
 </head>
 
 <body>
+  <!-- Silent audio for bypassing autoplay restrictions -->
+  <audio id="starter" src="/static/sounds/silence.mp3" preload="auto"></audio>
+  
+  <!-- Audio activation notification -->
+  <div id="audio-notification" style="position: fixed; bottom: 20px; left: 0; right: 0; text-align: center; padding: 10px; background-color: rgba(0, 0, 0, 0.7); color: white; z-index: 1000; border-radius: 5px; margin: 0 auto; width: fit-content; max-width: 80%; font-size: 14px;">
+    انقر لتفعيل التجربة الصوتية
+  </div>
+  
   <!-- Stars Background -->
   <div class="stars" id="stars-container"></div>
   

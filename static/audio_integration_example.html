@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Integration Example | Mashaaer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #1a1a2e;
+            color: #e1e1e1;
+        }
+        h1, h2, h3 {
+            color: #9370DB;
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        button {
+            background-color: #9370DB;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #8A2BE2;
+        }
+        button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+        pre {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            color: #f8f8f8;
+        }
+        code {
+            font-family: monospace;
+        }
+        #log {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .log-entry {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 5px 0;
+        }
+        .success { color: #4caf50; }
+        .warning { color: #ff9800; }
+        .error { color: #f44336; }
+        .cosmic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+        }
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0.5; transform: scale(1); }
+        }
+        
+        .glow-effect {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(147, 112, 219, 0.2);
+            filter: blur(10px);
+            animation: pulse 3s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmic-bg">
+        <div class="stars" id="stars"></div>
+    </div>
+    
+    <h1>Audio Integration Example</h1>
+    <p>This example demonstrates how to integrate the audio activation system into your application.</p>
+    
+    <div class="card">
+        <h2>Implementation Steps</h2>
+        <ol>
+            <li>Include audio_activation.js script in your HTML</li>
+            <li>Initialize the activation system</li>
+            <li>Listen for activation events</li>
+            <li>Start your audio features after activation</li>
+        </ol>
+    </div>
+    
+    <div class="card">
+        <h2>Code Example</h2>
+        <pre><code>&lt;!-- Include audio activation script -->
+&lt;script src="/static/js/audio_activation.js">&lt;/script>
+
+&lt;script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialize audio activation system
+        const audioSystem = MashaaerAudioActivation.init({
+            debugMode: true
+        });
+        
+        // Listen for activation event
+        document.addEventListener('audioActivated', function(event) {
+            console.log('Audio activated successfully!');
+            startVisualAndAudioExperience();
+        });
+        
+        // Listen for activation failure
+        document.addEventListener('audioActivationFailed', function(event) {
+            console.warn('Audio activation failed:', event.detail.error);
+            // Provide alternative experience or retry prompt
+        });
+        
+        function startVisualAndAudioExperience() {
+            // Start your audio features here
+            // Now safe to call audio functions
+            playWelcomeSound();
+            animateTextWithSpeech();
+        }
+    });
+&lt;/script></code></pre>
+    </div>
+    
+    <div class="card">
+        <h2>Test Console</h2>
+        <button id="checkStatus">Check Audio Status</button>
+        <button id="playSound" disabled>Play Test Sound</button>
+        <button id="triggerSpeech" disabled>Trigger Speech</button>
+        <div id="log"></div>
+    </div>
+    
+    <!-- Include the scripts -->
+    <script src="/static/js/audio_activation.js"></script>
+    <script src="/static/js/micro_interactions.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const logElement = document.getElementById('log');
+            const playButton = document.getElementById('playSound');
+            const speechButton = document.getElementById('triggerSpeech');
+            
+            function logMessage(message, type = 'info') {
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${type}`;
+                entry.textContent = message;
+                logElement.insertBefore(entry, logElement.firstChild);
+                console.log(`[${type}] ${message}`);
+            }
+            
+            // Create cosmic background effect
+            createStars();
+            
+            // Initialize audio activation system
+            logMessage('Initializing audio activation system...');
+            const audioSystem = MashaaerAudioActivation.init({
+                debugMode: true
+            });
+            
+            // Listen for activation event
+            document.addEventListener('audioActivated', function(event) {
+                logMessage('✅ Audio activated successfully!', 'success');
+                
+                // Enable buttons
+                playButton.disabled = false;
+                speechButton.disabled = false;
+                
+                // Start visual effect
+                createGlowEffect();
+            });
+            
+            // Listen for activation failure
+            document.addEventListener('audioActivationFailed', function(event) {
+                logMessage(`⚠️ Audio activation failed: ${event.detail.error}`, 'warning');
+                logMessage('Try clicking anywhere on the page to retry.', 'info');
+            });
+            
+            // Check status button
+            document.getElementById('checkStatus').addEventListener('click', function() {
+                const isActivated = MashaaerAudioActivation.isActivated();
+                logMessage(`Audio status: ${isActivated ? 'Activated' : 'Not activated'}`, isActivated ? 'success' : 'warning');
+                
+                if (!isActivated) {
+                    logMessage('Click anywhere on the page to activate audio.', 'info');
+                }
+            });
+            
+            // Play sound button
+            playButton.addEventListener('click', function() {
+                if (window.MashaaerInteractions) {
+                    try {
+                        window.MashaaerInteractions.playSound('welcome')
+                            .then(() => {
+                                logMessage('Playing welcome sound', 'success');
+                            })
+                            .catch(err => {
+                                logMessage(`Sound error: ${err.message}`, 'error');
+                            });
+                    } catch (err) {
+                        logMessage(`Sound error: ${err.message}`, 'error');
+                    }
+                } else {
+                    logMessage('Micro-Interactions module not loaded!', 'error');
+                }
+            });
+            
+            // Speech synthesis button
+            speechButton.addEventListener('click', function() {
+                if ('speechSynthesis' in window) {
+                    const msg = new SpeechSynthesisUtterance("Welcome to Mashaaer Feelings application. Your cosmic emotional companion.");
+                    msg.lang = 'en-US';
+                    window.speechSynthesis.speak(msg);
+                    logMessage('Speaking welcome message', 'success');
+                } else {
+                    logMessage('Speech synthesis not available in this browser', 'error');
+                }
+            });
+            
+            // Create stars
+            function createStars() {
+                const starsContainer = document.getElementById('stars');
+                const numberOfStars = 50;
+                
+                for (let i = 0; i < numberOfStars; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    star.style.width = Math.random() * 3 + 1 + 'px';
+                    star.style.height = star.style.width;
+                    star.style.borderRadius = '50%';
+                    star.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+                    star.style.position = 'absolute';
+                    star.style.top = Math.random() * 100 + '%';
+                    star.style.left = Math.random() * 100 + '%';
+                    star.style.opacity = Math.random() * 0.5 + 0.5;
+                    star.style.boxShadow = '0 0 3px rgba(255, 255, 255, 0.3)';
+                    starsContainer.appendChild(star);
+                }
+            }
+            
+            // Create glow effect
+            function createGlowEffect() {
+                const glowContainer = document.createElement('div');
+                glowContainer.className = 'glow-container';
+                glowContainer.style.position = 'fixed';
+                glowContainer.style.top = '0';
+                glowContainer.style.left = '0';
+                glowContainer.style.width = '100%';
+                glowContainer.style.height = '100%';
+                glowContainer.style.pointerEvents = 'none';
+                glowContainer.style.zIndex = '-1';
+                document.body.appendChild(glowContainer);
+                
+                for (let i = 0; i < 3; i++) {
+                    const glow = document.createElement('div');
+                    glow.className = 'glow-effect';
+                    glow.style.left = 20 + Math.random() * 60 + '%';
+                    glow.style.top = 20 + Math.random() * 60 + '%';
+                    glow.style.width = 100 + Math.random() * 100 + 'px';
+                    glow.style.height = glow.style.width;
+                    glow.style.animationDelay = i * 0.7 + 's';
+                    glowContainer.appendChild(glow);
+                }
+            }
+            
+            // Initial log message
+            logMessage('👋 Welcome to the Audio Integration Example', 'info');
+            logMessage('Click anywhere on the page to activate audio', 'info');
+        });
+    </script>
+</body>
+</html>
