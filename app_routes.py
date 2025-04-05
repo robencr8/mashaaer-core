@@ -1,6 +1,6 @@
 # Additional application routes for Mashaaer Feelings
 
-from flask import render_template, send_from_directory
+from flask import render_template, send_from_directory, redirect, url_for
 import logging
 import os
 
@@ -9,6 +9,19 @@ logger = logging.getLogger(__name__)
 # These routes are registered in main.py when importing this module
 def register_routes(app):
     """Register routes with the Flask app"""
+    
+    @app.route("/start")
+    def start_journey():
+        """Start the Mashaaer journey - main app entry point from cosmic homepage"""
+        logger.debug("Starting Mashaaer journey from cosmic homepage")
+        # Redirect to the main application interface
+        return render_template("mobile/index_app.html")
+    
+    @app.route("/mobile")
+    def mobile_index():
+        """Mobile index route - redirects to root for new cosmic interface"""
+        logger.debug("Mobile index redirecting to root")
+        return redirect(url_for("index"))
     
     @app.route("/audio-test")
     def audio_test():
