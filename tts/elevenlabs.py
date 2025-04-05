@@ -46,6 +46,9 @@ class ElevenLabsTTS:
         self.cache_dir = "tts_cache"
         os.makedirs(self.cache_dir, exist_ok=True)
         
+        # Cache control flag
+        self.use_cache = True
+        
         # Track API usage
         self.request_count = 0
         self.last_request_time = None
@@ -120,8 +123,12 @@ class ElevenLabsTTS:
                 self.logger.error("Failed to retrieve ElevenLabs API key from environment")
                 raise ValueError("ElevenLabs API key not set and not found in environment")
         
+        # Handle None, default, or empty voice value first
+        if voice is None or voice == "default" or voice == "":
+            voice_id = self.voices["default"]
+            self.logger.info(f"Using default voice: {voice_id}")
         # Special handling for known ElevenLabs voice IDs
-        if voice == "ErXwobaYiN019PkySvjV":
+        elif voice == "ErXwobaYiN019PkySvjV":
             # This is the Rachel (English) voice
             voice_id = "ErXwobaYiN019PkySvjV"
             self.logger.info(f"Using English voice Rachel: {voice_id}")
@@ -136,13 +143,17 @@ class ElevenLabsTTS:
         # Fallback to dictionary for other voices
         else:
             # Get voice ID - try to check if it's a direct ElevenLabs ID (usually 21-24 chars)
-            if len(voice) >= 21 and all(c in '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' for c in voice):
+            if isinstance(voice, str) and len(voice) >= 21 and all(c in '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ' for c in voice):
                 voice_id = voice  # Use the ID directly
                 self.logger.info(f"Using voice ID directly: {voice_id}")
-            else:
+            elif isinstance(voice, str):
                 # Otherwise, look up in our voice dictionary
                 voice_id = self.voices.get(voice.lower(), self.voices["default"])
                 self.logger.info(f"Mapped voice '{voice}' to ElevenLabs voice ID: {voice_id}")
+            else:
+                # Fallback for any other case
+                voice_id = self.voices["default"]
+                self.logger.info(f"Invalid voice type, using default: {voice_id}")
         
         # Create a cache filename based on text and voice
         import hashlib
@@ -150,14 +161,16 @@ class ElevenLabsTTS:
         cache_filename = f"{voice_id}_{text_hash}.mp3"
         cache_path = os.path.join(self.cache_dir, cache_filename)
         
-        # Check if we already have this audio cached
-        if os.path.exists(cache_path):
+        # Check if we should use cache
+        if self.use_cache and os.path.exists(cache_path):
             file_size = os.path.getsize(cache_path)
             if file_size > 0:
                 self.logger.info(f"Using cached audio for: {text[:30]}... (size: {file_size} bytes)")
                 return cache_path
             else:
                 self.logger.warning(f"Found zero-byte cached file, will regenerate: {cache_path}")
+        elif not self.use_cache:
+            self.logger.info(f"Cache disabled for this request, generating fresh audio")
         
         try:
             # Verify directories exist
@@ -265,6 +278,16 @@ class ElevenLabsTTS:
             # Create a more detailed error message
             raise Exception(f"ElevenLabs TTS failed: {str(e)} (voice: {voice}, voice_id: {voice_id})")
     
+    def enable_cache(self):
+        """Enable caching for TTS generation"""
+        self.use_cache = True
+        self.logger.info("ElevenLabs TTS cache enabled")
+        
+    def disable_cache(self):
+        """Disable caching for TTS generation"""
+        self.use_cache = False
+        self.logger.info("ElevenLabs TTS cache disabled")
+        
     def get_available_voices(self):
         """Get list of available voices from the API"""
         if not self.api_key:

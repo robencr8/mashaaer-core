@@ -1176,4 +1176,105 @@ def listen_for_voice():
             'debug': f"General exception: {error_message}"
         }), 500, response_headers
 
+@api.route('/speak', methods=['POST'])
+def speak():
+    """
+    Convert text to speech and return audio data or URL to cached audio
+    
+    This endpoint should be accessed via POST since it processes text data
+    and generates audio content.
+    
+    Request parameters:
+    - text: The text to convert to speech (required)
+    - language: The language code (e.g., 'en', 'ar') (optional, default: session language or 'ar')
+    - voice: The voice to use (optional, default: configured default voice)
+    - cache: Whether to use cache (optional, default: True)
+    
+    Returns:
+    - success: Boolean indicating if the operation was successful
+    - audio_url: URL to the audio file
+    - cache_hit: Boolean indicating if the result was served from cache
+    - error: Error message if unsuccessful
+    """
+    # Initialize response headers with default CORS
+    response_headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+    }
+    
+    # Use config if available for better CORS settings
+    if config:
+        try:
+            response_headers = config.get_cors_headers(request)
+        except Exception as e:
+            logger.warning(f"Could not get CORS headers from config: {str(e)}, using defaults")
+    
+    try:
+        # Get parameters from request
+        data = request.get_json() if request.is_json else request.form
+        
+        if not data:
+            logger.error("API - TTS error: No data in request")
+            return jsonify({
+                'success': False,
+                'error': 'No data provided',
+                'audio_url': None,
+                'cache_hit': False
+            }), 400, response_headers
+        
+        text = data.get('text')
+        if not text:
+            logger.error("API - TTS error: No text in request")
+            return jsonify({
+                'success': False,
+                'error': 'No text provided',
+                'audio_url': None,
+                'cache_hit': False
+            }), 400, response_headers
+            
+        language = data.get('language') or session.get('language', 'ar')
+        voice = data.get('voice')
+        use_cache_str = data.get('cache', 'true')
+        use_cache = use_cache_str.lower() == 'true' if isinstance(use_cache_str, str) else bool(use_cache_str)
+        
+        # Log the TTS request
+        session_id = _get_or_create_session_id()
+        logger.info(f"API: TTS request - session: {session_id}, language: {language}, text: {text[:50]}...")
+        
+        # Use the TTS manager that was set in init_api as a global variable
+        if tts_manager is None:
+            logger.error("TTS manager is not initialized")
+            return jsonify({
+                'success': False,
+                'error': 'TTS system not initialized',
+                'audio_url': '/tts_cache/error.mp3',
+                'cache_hit': False
+            }), 500, response_headers
+            
+        result = tts_manager.generate_tts(text, language, voice, use_cache)
+        
+        return jsonify({
+            'success': True,
+            'audio_url': result['audio_url'],
+            'cache_hit': result.get('cache_hit', False),
+            'text': text,
+            'language': language
+        }), 200, response_headers
+        
+    except Exception as e:
+        error_message = str(e)
+        logger.error(f"API: Exception in TTS endpoint: {error_message}")
+        import traceback
+        logger.error(traceback.format_exc())
+        
+        return jsonify({
+            'success': False,
+            'error': 'TTS generation error',
+            'error_details': error_message,
+            'text': text if 'text' in locals() else '',
+            'audio_url': None,
+            'cache_hit': False
+        }), 500, response_headers
+
 # ... remaining API endpoints ...

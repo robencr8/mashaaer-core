@@ -72,7 +72,8 @@ config = Config()
 db_manager = DatabaseManager(config)
 emotion_tracker = EmotionTracker(db_manager)
 intent_classifier = IntentClassifier()
-tts_manager = TTSManager(db_manager)
+tts_manager = TTSManager(config)  # Fixed: passing config instead of db_manager
+tts_manager.initialize()  # Initialize TTS system
 voice_recognition = VoiceRecognition(config)
 
 # Initialize optional components
@@ -106,8 +107,8 @@ except ImportError:
 @app.route('/')
 def index():
     """Main entry point for Mashaaer Feelings web application"""
-    # Serve the official production UI with a clean, professional design
-    return render_template('startup_standalone.html')
+    # Serve the official production UI with cosmic design elements
+    return render_template('interactive_cosmic_splash.html')
 
 @app.route('/health')
 def health():
@@ -122,12 +123,12 @@ def health():
         }
     })
 
-# Serve static files for cosmic onboarding experience
+# Cosmic onboarding experience
 @app.route('/cosmic-onboarding')
 def cosmic_onboarding():
     """Cosmic onboarding experience entry point"""
     try:
-        return send_from_directory('static', 'cosmic_onboarding.html')
+        return render_template('cosmic_onboarding.html')
     except Exception as e:
         logger.error(f"Error serving cosmic onboarding: {e}")
         return render_template('error.html', message="Cosmic onboarding experience not available")
@@ -142,7 +143,7 @@ def cosmic_theme():
 @app.route('/homepage')
 def homepage_direct():
     """Direct access to the production homepage UI"""
-    return render_template('startup_standalone.html')
+    return render_template('interactive_cosmic_splash.html')
 
 # Route for consent page
 @app.route('/consent')

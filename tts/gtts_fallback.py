@@ -38,6 +38,9 @@ class GTTSFallback:
         self.cache_dir = "tts_cache"
         os.makedirs(self.cache_dir, exist_ok=True)
         
+        # Cache control flag
+        self.use_cache = True
+        
         # Initialize simple response cache for offline TTS
         self._init_offline_cache()
     
@@ -112,9 +115,14 @@ class GTTSFallback:
                 lang = language[:2]  # Use first two chars as language code
             self.logger.debug(f"Using explicit language override: {lang} from {language}")
         else:
-            # Otherwise use voice mapping
-            lang = self.languages.get(voice.lower(), "en")
-            self.logger.debug(f"Mapped voice '{voice}' to language: {lang}")
+            # Handle None or invalid voice values
+            if voice is None or not isinstance(voice, str):
+                lang = "en"  # Default to English
+                self.logger.debug(f"Using default language 'en' for None or invalid voice: {voice}")
+            else:
+                # Otherwise use voice mapping
+                lang = self.languages.get(voice.lower(), "en")
+                self.logger.debug(f"Mapped voice '{voice}' to language: {lang}")
         
         # Handling Arabic text specially (right-to-left language)
         is_arabic = lang == 'ar'
@@ -135,10 +143,12 @@ class GTTSFallback:
         cache_filename = f"gtts_{lang}_{text_hash}.mp3"
         cache_path = os.path.join(self.cache_dir, cache_filename)
         
-        # Check if we already have this audio cached
-        if os.path.exists(cache_path) and os.path.getsize(cache_path) > 0:
+        # Check if we should use cache
+        if self.use_cache and os.path.exists(cache_path) and os.path.getsize(cache_path) > 0:
             self.logger.debug(f"Using cached audio for: {text[:20]}...")
             return cache_path
+        elif not self.use_cache:
+            self.logger.info(f"Cache disabled for this request, generating fresh audio")
         
         # Try to generate speech with gTTS if available
         if gTTS:
@@ -210,6 +220,16 @@ class GTTSFallback:
         except Exception as e:
             self.logger.error(f"Failed to create static error file: {str(e)}")
     
+    def enable_cache(self):
+        """Enable caching for TTS generation"""
+        self.use_cache = True
+        self.logger.info("Google TTS cache enabled")
+        
+    def disable_cache(self):
+        """Disable caching for TTS generation"""
+        self.use_cache = False
+        self.logger.info("Google TTS cache disabled")
+        
     def get_available_voices(self):
         """Get list of available voices/languages"""
         return [

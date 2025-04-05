@@ -254,19 +254,25 @@ class TTSManager:
         
         return voices
         
-    def generate_tts(self, text, voice="default", language=None):
+    def generate_tts(self, text, language=None, voice="default", use_cache=True):
         """
-        Generate TTS audio and return the path - This is a wrapper for the speak method
-        for API compatibility with the cosmic interface
+        Generate TTS audio and return a dictionary with audio information
+        This is a wrapper for the speak method with enhanced API compatibility
         
         Args:
             text (str): The text to convert to speech
-            voice (str): Voice ID or name 
             language (str): Language code (e.g., 'en', 'ar')
+            voice (str): Voice ID or name 
+            use_cache (bool): Whether to use cached audio if available
             
         Returns:
-            str: Path to the generated audio file
+            dict: Dictionary containing:
+                - audio_url: URL to the generated audio file
+                - cache_hit: Whether the result was served from cache
         """
+        # Track if we get a cache hit
+        self.last_was_cache_hit = False
+        
         # If language is specified but voice is default, use the appropriate voice
         if language and voice == "default":
             # Use the language code as the voice identifier if possible
@@ -282,5 +288,31 @@ class TTSManager:
             
             self.logger.info(f"Mapped language '{language}' to voice '{voice}'")
         
+        # Handle cache control
+        if not use_cache:
+            self.logger.info(f"Cache disabled for TTS request: '{text[:30]}...'")
+            if hasattr(self.elevenlabs, 'disable_cache'):
+                self.elevenlabs.disable_cache()
+            if hasattr(self.gtts, 'disable_cache'):
+                self.gtts.disable_cache()
+        
         # Call the speak method to handle the actual TTS generation
-        return self.speak(text, voice, language)
+        audio_path = self.speak(text, voice, language)
+        
+        # Convert file path to URL
+        base_url = self.config.APP_URL or ""
+        audio_url = f"{base_url}/{audio_path}"
+        
+        # Re-enable cache for future requests if it was disabled
+        if not use_cache:
+            if hasattr(self.elevenlabs, 'enable_cache'):
+                self.elevenlabs.enable_cache()
+            if hasattr(self.gtts, 'enable_cache'):
+                self.gtts.enable_cache()
+        
+        # Return dictionary with results
+        return {
+            'audio_url': audio_url,
+            'cache_hit': getattr(self, 'last_was_cache_hit', False),
+            'path': audio_path
+        }
