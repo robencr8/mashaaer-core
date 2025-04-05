@@ -14,6 +14,7 @@
   <meta name="apple-mobile-web-app-title" content="Mashaaer">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <link rel="stylesheet" href="/static/css/micro_interactions.css">
+  <script>
     // Register the service worker for PWA functionality
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
@@ -26,23 +27,422 @@
     }
   </script>
   <style>
-    /* CSS styles are here - not changed */
-  </style>
-</head>
-<body>
-  <!-- محتوى HTML السابق بلا تغيير -->
-  <script src="/static/js/micro_interactions.js"></script>
-</body>
-</html>
-          console.log('Service Worker تم تسجيله بنجاح:', registration.scope);
-        }, function(err) {
-          console.log('Service Worker فشل التسجيل:', err);
-        });
-      });
+    /* CSS reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-  </script>
-  <style>
-    /* CSS styles are here - not changed */
+    
+    /* Base styles */
+    body, html {
+      height: 100%;
+      overflow: hidden;
+      background-color: #000;
+      color: #fff;
+    }
+    
+    /* Stars background */
+    .stars-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      overflow: hidden;
+    }
+    
+    .stars {
+      background: #000 url('/static/images/stars.png') repeat top center;
+      z-index: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    
+    .twinkling {
+      background: transparent url('/static/images/twinkling.png') repeat top center;
+      z-index: 1;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      animation: move-twink-back 200s linear infinite;
+    }
+    
+    /* Falling stars */
+    .falling-stars {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
+    
+    .falling-star {
+      position: absolute;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(255,255,255,0));
+      border-radius: 2px;
+      transform: rotate(45deg);
+      animation: fall 5s linear forwards;
+    }
+    
+    @keyframes fall {
+      to {
+        transform: translateY(120vh) translateX(100px) rotate(45deg);
+        opacity: 0;
+      }
+    }
+    
+    /* Main content */
+    .splash-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      z-index: 10;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    /* Main sphere */
+    .main-sphere {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      margin-bottom: 40px;
+    }
+    
+    .sphere {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #9370DB, #4B0082);
+      box-shadow: 0 0 30px rgba(147, 112, 219, 0.8);
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .sphere-glow {
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      width: calc(100% + 40px);
+      height: calc(100% + 40px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(147, 112, 219, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
+      z-index: -1;
+    }
+    
+    .sphere:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 40px rgba(147, 112, 219, 0.8);
+    }
+    
+    /* Orbits */
+    .orbit {
+      position: absolute;
+      top: -30px;
+      left: -30px;
+      width: calc(100% + 60px);
+      height: calc(100% + 60px);
+      border: 1px solid rgba(147, 112, 219, 0.3);
+      border-radius: 50%;
+      animation: rotate 15s linear infinite;
+    }
+    
+    .orbit:nth-child(2) {
+      top: -50px;
+      left: -50px;
+      width: calc(100% + 100px);
+      height: calc(100% + 100px);
+      animation-duration: 25s;
+      animation-direction: reverse;
+    }
+    
+    .orbit:nth-child(3) {
+      top: -70px;
+      left: -70px;
+      width: calc(100% + 140px);
+      height: calc(100% + 140px);
+      animation-duration: 35s;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Orbit particles */
+    .orbital-particle {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--particle-color, #9370DB);
+      box-shadow: 0 0 5px var(--particle-color, #9370DB);
+      transform: translateX(-50%);
+    }
+    
+    /* Breathing animation */
+    .breathe {
+      animation: breathe 6s ease-in-out infinite;
+    }
+    
+    .gentle-glow {
+      animation: glow 6s ease-in-out infinite;
+    }
+    
+    .orbit-breathe {
+      animation-name: orbit-breathe;
+    }
+    
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.07); }
+    }
+    
+    @keyframes glow {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    
+    @keyframes orbit-breathe {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      25% { transform: rotate(90deg) scale(1.02); }
+      50% { transform: rotate(180deg) scale(1.04); }
+      75% { transform: rotate(270deg) scale(1.02); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+    
+    /* Typography */
+    .title {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: #fff;
+      text-shadow: 0 0 15px rgba(147, 112, 219, 0.8);
+    }
+    
+    .subtitle, .subtitle-en {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      color: #ccc;
+    }
+    
+    .subtitle-en {
+      display: none;
+    }
+    
+    /* Buttons */
+    .voice-prompt-button, .enter-button {
+      background-color: rgba(147, 112, 219, 0.2);
+      border: 1px solid rgba(147, 112, 219, 0.5);
+      border-radius: 30px;
+      padding: 12px 25px;
+      margin-bottom: 15px;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+    
+    .voice-prompt-button:hover, .enter-button:hover {
+      background-color: rgba(147, 112, 219, 0.4);
+      box-shadow: 0 0 15px rgba(147, 112, 219, 0.8);
+    }
+    
+    .voice-prompt-button i {
+      margin-right: 8px;
+    }
+    
+    /* Voice status */
+    .voice-status {
+      display: none;
+      align-items: center;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 20px;
+      border: 1px solid rgba(147, 112, 219, 0.3);
+    }
+    
+    .voice-indicator {
+      display: flex;
+      align-items: center;
+      margin-right: 10px;
+    }
+    
+    .voice-waves {
+      width: 3px;
+      height: 10px;
+      margin: 0 2px;
+      border-radius: 2px;
+      background-color: #9370DB;
+    }
+    
+    .voice-waves:nth-child(1) { animation: wave 1s linear infinite; }
+    .voice-waves:nth-child(2) { animation: wave 1s linear infinite 0.2s; }
+    .voice-waves:nth-child(3) { animation: wave 1s linear infinite 0.4s; }
+    .voice-waves:nth-child(4) { animation: wave 1s linear infinite 0.6s; }
+    
+    @keyframes wave {
+      0%, 100% { height: 5px; }
+      50% { height: 20px; }
+    }
+    
+    /* Audio toggle */
+    .audio-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: rgba(147, 112, 219, 0.2);
+      border: 1px solid rgba(147, 112, 219, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 100;
+      transition: all 0.3s ease;
+    }
+    
+    .audio-toggle:hover {
+      background-color: rgba(147, 112, 219, 0.4);
+      box-shadow: 0 0 15px rgba(147, 112, 219, 0.8);
+    }
+    
+    /* Language toggle */
+    .language-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 100;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+    
+    .lang-switch {
+      display: flex;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 20px;
+      border: 1px solid rgba(147, 112, 219, 0.3);
+      overflow: hidden;
+      margin-top: 5px;
+    }
+    
+    .lang-option {
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .lang-option.active {
+      background-color: rgba(147, 112, 219, 0.5);
+    }
+    
+    /* Audio notification */
+    .audio-notification {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      cursor: pointer;
+    }
+    
+    .audio-notification-content {
+      background-color: rgba(147, 112, 219, 0.2);
+      border: 1px solid rgba(147, 112, 219, 0.5);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      max-width: 80%;
+    }
+    
+    .audio-notification-content i {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      color: #9370DB;
+    }
+    
+    .audio-notification-content span {
+      display: block;
+      font-size: 1.2rem;
+      margin: 5px 0;
+    }
+    
+    /* Language specific display */
+    html[dir="rtl"] .en { display: none; }
+    html[dir="rtl"] .ar { display: inline-block; }
+    html[dir="ltr"] .ar { display: none; }
+    html[dir="ltr"] .en { display: inline-block; }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .title { font-size: 2rem; }
+      .subtitle, .subtitle-en { font-size: 1rem; }
+      .main-sphere { width: 120px; height: 120px; }
+    }
+    
+    @media (max-width: 480px) {
+      .title { font-size: 1.8rem; }
+      .subtitle, .subtitle-en { font-size: 0.9rem; }
+      .main-sphere { width: 100px; height: 100px; }
+      .voice-prompt-button, .enter-button { padding: 10px 20px; font-size: 0.9rem; }
+    }
+
+    /* Cosmic player link */
+    .cosmic-player-link {
+      margin: 10px 0 20px;
+    }
+    
+    .cosmic-link {
+      display: inline-block;
+      background-color: rgba(147, 112, 219, 0.2);
+      border: 1px solid rgba(147, 112, 219, 0.5);
+      border-radius: 30px;
+      padding: 8px 20px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .cosmic-link:hover {
+      background-color: rgba(147, 112, 219, 0.4);
+      box-shadow: 0 0 15px rgba(147, 112, 219, 0.8);
+    }
+    
+    .cosmic-link i {
+      margin-right: 8px;
+    }
   </style>
 </head>
 <body>
@@ -108,6 +508,14 @@
     
     <button class="enter-button" id="enter-button">البدء | Start</button>
     
+    <div class="cosmic-player-link">
+      <a href="/cosmic-player" class="cosmic-link">
+        <i class="fas fa-music"></i>
+        <span class="ar">موسيقى كونية</span>
+        <span class="en">Cosmic Music</span>
+      </a>
+    </div>
+    
     <div class="voice-status" id="voice-status">
       <div class="voice-indicator">
         <div class="voice-waves"></div>
@@ -118,711 +526,5 @@
       <p id="voice-status-text"></p>
     </div>
   </div>
-
-  <script>
-    // Main JavaScript functionality
-    document.addEventListener('DOMContentLoaded', function() {
-      // Configuration
-      const config = {
-        particlesEnabled: true,
-        starsEnabled: true,
-        fallingStarsEnabled: true,
-        touchFeedbackEnabled: true,
-        emotionColorsEnabled: true,
-        defaultEmotion: 'neutral',
-        audioEnabled: false,
-        breathingEffectsEnabled: true
-      };
-      
-      // Initialize elements
-      const sphere = document.getElementById('interactive-sphere');
-      const sphereGlow = document.getElementById('sphere-glow');
-      const title = document.getElementById('title');
-      const subtitle = document.getElementById('subtitle');
-      const subtitleEn = document.getElementById('subtitle-en');
-      const voicePromptButton = document.getElementById('voice-prompt-button');
-      const enterButton = document.getElementById('enter-button');
-      const voiceStatus = document.getElementById('voice-status');
-      const voiceStatusText = document.getElementById('voice-status-text');
-      const audioToggle = document.getElementById('audio-toggle');
-      const audioIcon = document.getElementById('audio-icon');
-      const audioNotification = document.getElementById('audio-notification');
-      
-      // State variables
-      let recognizedEmotion = config.defaultEmotion;
-      let isListening = false;
-      let audioEnabled = false;
-      let currentLanguage = localStorage.getItem('user_language') || 'ar';
-      
-      // Sound cache for improved performance
-      const soundCache = {};
-      
-      // Start disabled to respect browser autoplay policies
-      audioIcon.className = 'fas fa-volume-mute';
-      
-      // Initialize breathing effect if enabled
-      if (config.breathingEffectsEnabled) {
-        sphere.classList.add('breathe');
-        sphereGlow.classList.add('gentle-glow');
-        document.querySelectorAll('.orbit').forEach(orbit => {
-          orbit.classList.add('orbit-breathe');
-        });
-      }
-      
-      // Helper function to get a color based on emotion
-      function getEmotionColor(emotion = recognizedEmotion) {
-        const colors = {
-          happy: '#FFD700', // Gold
-          sad: '#4169E1',   // Royal blue
-          angry: '#FF4500', // Red/orange
-          neutral: '#9370DB', // Medium purple
-          default: '#9370DB'  // Default cosmic purple
-        };
-        
-        return colors[emotion] || colors.default;
-      }
-      
-      // Update particle colors based on emotion
-      function updateParticleColors(emotion) {
-        const color = getEmotionColor(emotion);
-        document.documentElement.style.setProperty('--particle-color', color);
-        document.documentElement.style.setProperty('--glow-color', color);
-      }
-      
-      // Initialize with default emotion
-      updateParticleColors(recognizedEmotion);
-      
-      // Voice prompt button
-      voicePromptButton.addEventListener('click', function() {
-        voicePromptButton.classList.add('active');
-        
-        // Start the voice recognition
-        if (!isListening) {
-          startListening();
-        } else {
-          stopListening();
-        }
-        
-        // Sound feedback (with autoplay restrictions handling)
-        // Show welcome notification when user enables audio
-        if (window.MashaaerInteractions) {
-          setTimeout(() => {
-            window.MashaaerInteractions.notify(
-              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
-              { type: "success", sound: true, duration: 5000 }
-            );
-          }, 1000);
-        }
-
-        if (audioEnabled) {
-          playCosmicSound('click');
-        }
-      });
-      
-      // Enter button
-      enterButton.addEventListener('click', function() {
-        // Sound feedback (with autoplay restrictions handling)
-        // Show welcome notification when user enables audio
-        if (window.MashaaerInteractions) {
-          setTimeout(() => {
-            window.MashaaerInteractions.notify(
-              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
-              { type: "success", sound: true, duration: 5000 }
-            );
-          }, 1000);
-        }
-
-        if (audioEnabled) {
-          playCosmicSound('click');
-        }
-        
-        // Navigate to main application
-        window.location.href = "/cosmic";
-      });
-      
-      // Audio toggle functionality
-      audioToggle.addEventListener('click', function() {
-        toggleAudio();
-        
-        // Play sound feedback if enabling audio
-        // Show welcome notification when user enables audio
-        if (window.MashaaerInteractions) {
-          setTimeout(() => {
-            window.MashaaerInteractions.notify(
-              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
-              { type: "success", sound: true, duration: 5000 }
-            );
-          }, 1000);
-        }
-
-        if (audioEnabled) {
-          playCosmicSound('click');
-        }
-      });
-      
-      // Function to toggle audio state
-      function toggleAudio() {
-        audioEnabled = !audioEnabled;
-        
-        // Show welcome notification when user enables audio
-        if (window.MashaaerInteractions) {
-          setTimeout(() => {
-            window.MashaaerInteractions.notify(
-              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
-              { type: "success", sound: true, duration: 5000 }
-            );
-          }, 1000);
-        }
-
-        if (audioEnabled) {
-          audioIcon.className = 'fas fa-volume-up';
-          
-          // Try to play background audio if audio is now enabled
-          try {
-            document.getElementById('background-audio').play().catch(err => {
-              console.warn('Background audio autoplay error:', err);
-            });
-          } catch (err) {
-            console.error('Error playing background audio:', err);
-          }
-        } else {
-          audioIcon.className = 'fas fa-volume-mute';
-          
-          // Pause background audio if disabling
-          try {
-            document.getElementById('background-audio').pause();
-          } catch (err) {
-            console.error('Error pausing background audio:', err);
-          }
-        }
-      }
-      
-      // Voice recognition simulation (for demonstration)
-      function startListening() {
-        if (isListening) return;
-        
-        isListening = true;
-        voicePromptButton.classList.add('listening');
-        voiceStatus.style.display = 'flex';
-        voiceStatusText.innerText = currentLanguage === 'ar' ? 'جارٍ الاستماع...' : 'Listening...';
-        
-        // Audio feedback
-        // Show welcome notification when user enables audio
-        if (window.MashaaerInteractions) {
-          setTimeout(() => {
-            window.MashaaerInteractions.notify(
-              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
-              { type: "success", sound: true, duration: 5000 }
-            );
-          }, 1000);
-        }
-
-        if (audioEnabled) {
-          playCosmicSound('listen_start');
-        }
-        
-        // Simulate voice recognition (demo)
-        setTimeout(() => {
-          const emotions = ['happy', 'sad', 'neutral', 'angry'];
-          const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
-          
-          // Update UI based on recognized emotion
-          analyzeEmotion('hello', randomEmotion);
-          
-          stopListening();
-        }, 3000);
-      }
-      
-      function stopListening() {
-        isListening = false;
-        voicePromptButton.classList.remove('listening');
-        voiceStatus.style.display = 'none';
-        
-        // Audio feedback
-        // Show welcome notification when user enables audio
-        if (window.MashaaerInteractions) {
-          setTimeout(() => {
-            window.MashaaerInteractions.notify(
-              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
-              { type: "success", sound: true, duration: 5000 }
-            );
-          }, 1000);
-        }
-
-        if (audioEnabled) {
-          playCosmicSound('listen_stop');
-        }
-      }
-      
-      // Analyze text for emotion
-      function analyzeEmotion(text, presetEmotion = null) {
-        // If we have a preset emotion (for demo), use it directly
-        if (presetEmotion) {
-          applyEmotionToSphere(presetEmotion);
-          return;
-        }
-        
-        // Otherwise use the API
-        fetch('/api/analyze-emotion', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ text: text })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success && data.emotion) {
-            // If server responds with emotion, use it
-            applyEmotionToSphere(data.emotion);
-          }
-        })
-        .catch(error => {
-          console.error('Error analyzing emotion:', error);
-        });
-      }
-      
-      // Apply emotion to sphere
-      function applyEmotionToSphere(emotion) {
-        // Update the micro-interactions system emotion
-        if (window.MashaaerInteractions) {
-          window.MashaaerInteractions.setEmotion(emotion);
-        }
-        // Remove all emotion classes
-        sphereGlow.classList.remove('sphere-happy', 'sphere-sad', 'sphere-angry');
-        
-        // Add the new emotion class
-        if (emotion !== 'neutral') {
-          sphereGlow.classList.add(`sphere-${emotion}`);
-        }
-        
-        // Update global emotion state
-        recognizedEmotion = emotion;
-        
-        // Change particle colors based on emotion
-        updateParticleColors(emotion);
-      }
-      
-      // Create particle burst animation
-      // Enhanced particle burst function using micro-interactions system
-      function createEnhancedParticleBurst(element, options = {}) {
-        // Use our micro-interactions system if available
-        if (window.MashaaerInteractions) {
-          window.MashaaerInteractions.createParticleBurst(element, {
-            emotion: recognizedEmotion,
-            ...options
-          });
-          return;
-        }
-        
-        // Fallback to original implementation
-        createParticleBurst();
-      }
-
-      function createParticleBurst() {
-        const burstCount = 20; // Number of particles in the burst
-        
-        for (let i = 0; i < burstCount; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const distance = 50 + Math.random() * 100;
-          const speed = 1 + Math.random() * 2;
-          
-          const particle = document.createElement('div');
-          particle.className = 'particle-burst';
-          
-          // Get position relative to sphere center
-          const sphereRect = sphere.getBoundingClientRect();
-          const centerX = sphereRect.left + sphereRect.width / 2;
-          const centerY = sphereRect.top + sphereRect.height / 2;
-          
-          // Style the particle
-          particle.style.width = `${3 + Math.random() * 5}px`;
-          particle.style.height = particle.style.width;
-          particle.style.background = getEmotionColor();
-          particle.style.position = 'fixed';
-          particle.style.borderRadius = '50%';
-          particle.style.boxShadow = `0 0 10px ${getEmotionColor()}`;
-          particle.style.zIndex = '100';
-          
-          // Calculate start position (center of sphere)
-          particle.style.left = `${centerX}px`;
-          particle.style.top = `${centerY}px`;
-          
-          // Add to DOM
-          document.body.appendChild(particle);
-          
-          // Animate particle
-          setTimeout(() => {
-            // Set end position
-            particle.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px)`;
-            particle.style.opacity = '0';
-            
-            // Remove after animation
-            setTimeout(() => {
-              document.body.removeChild(particle);
-            }, 1000);
-          }, 10);
-        }
-      }
-      
-      // Add interactive events to sphere
-      sphere.addEventListener('click', function(e) {
-        // Show welcome notification when user enables audio
-        if (window.MashaaerInteractions) {
-          setTimeout(() => {
-            window.MashaaerInteractions.notify(
-              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
-              { type: "success", sound: true, duration: 5000 }
-            );
-          }, 1000);
-        }
-
-        if (audioEnabled) {
-          playCosmicSound('click');
-        }
-        
-        // Create ripple and particle effect
-        createRipple(sphere);
-        if (config.particlesEnabled) {
-          createParticleBurst();
-        }
-        
-        // Animate title
-        title.classList.add('pulse');
-        setTimeout(() => {
-          title.classList.remove('pulse');
-        }, 1000);
-      });
-      
-      // Language switch functionality
-      document.querySelectorAll('.lang-option').forEach(option => {
-        option.addEventListener('click', function() {
-          // Get language code
-          const lang = this.getAttribute('data-lang');
-          
-          // Set language
-          setLanguage(lang);
-          
-          // Update active state
-          document.querySelectorAll('.lang-option').forEach(opt => {
-            opt.classList.remove('active');
-          });
-          this.classList.add('active');
-          
-          // Play welcome sound in new language
-          // Do NOT play sounds automatically to avoid browser autoplay restrictions
-        // Show welcome notification when user enables audio
-        if (window.MashaaerInteractions) {
-          setTimeout(() => {
-            window.MashaaerInteractions.notify(
-              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
-              { type: "success", sound: true, duration: 5000 }
-            );
-          }, 1000);
-        }
-
-          if (audioEnabled) {
-            playCosmicSound('welcome', lang);
-          }
-        });
-      });
-      
-      // Set initial language
-      function setLanguage(lang) {
-        currentLanguage = lang;
-        localStorage.setItem('user_language', lang);
-        
-        if (lang === 'ar') {
-          document.documentElement.dir = 'rtl';
-          subtitle.style.display = 'block';
-          subtitleEn.style.display = 'none';
-          enterButton.textContent = 'البدء | Start';
-        } else {
-          document.documentElement.dir = 'ltr';
-          subtitle.style.display = 'none';
-          subtitleEn.style.display = 'block';
-          enterButton.textContent = 'Start | البدء';
-        }
-      }
-      
-      // Initialize the correct language
-      setLanguage(currentLanguage);
-      
-      // Create ripple effect when sphere is clicked
-      function createRipple(element) {
-        const ripple = document.createElement('div');
-        ripple.style.position = 'absolute';
-        ripple.style.width = '100%';
-        ripple.style.height = '100%';
-        ripple.style.top = '0';
-        ripple.style.left = '0';
-        ripple.style.borderRadius = '50%';
-        ripple.style.background = 'radial-gradient(circle, rgba(138, 43, 226, 0.8) 0%, rgba(138, 43, 226, 0) 70%)';
-        ripple.style.transform = 'scale(0)';
-        ripple.style.animation = 'ripple 1s linear';
-        
-        // Add keyframes for the ripple animation
-        const style = document.createElement('style');
-        style.textContent = `
-          @keyframes ripple {
-            to {
-              transform: scale(2);
-              opacity: 0;
-            }
-          }
-        `;
-        document.head.appendChild(style);
-        
-        // Add ripple element
-        element.appendChild(ripple);
-        
-        // Remove after animation completes
-        setTimeout(() => {
-          element.removeChild(ripple);
-          document.head.removeChild(style);
-        }, 1000);
-      }
-      
-      // Function to play cosmic sounds with enhanced error handling
-      function playCosmicSound(soundType, language = currentLanguage) {
-        // Exit early if audio is disabled
-        if (!audioEnabled) {
-          console.log('Audio is disabled. Enable audio by clicking anywhere on the screen.');
-          return;
-        }
-        
-        // Check cache first
-        if (soundType !== 'welcome' && soundCache[soundType]) {
-          soundCache[soundType].currentTime = 0;
-          soundCache[soundType].play().catch(err => {
-            console.warn('Cached audio play error:', err);
-            // Try to recover by recreating the audio element
-            delete soundCache[soundType]; 
-            // Call playCosmicSound again to recreate the sound
-            setTimeout(() => playCosmicSound(soundType, language), 100);
-          });
-          return;
-        }
-        
-        // For non-voice sounds (UI interactions), load and play from static files
-        if (soundType !== 'welcome') {
-          try {
-            // Create a temporary audio element for the interaction sound
-            const sound = new Audio(`/static/sounds/${soundType}.mp3`);
-            sound.volume = soundType === 'hover' ? 0.3 : 0.5;
-            
-            // Add proper load error handling
-            sound.addEventListener('error', (e) => {
-              console.warn(`Sound file error for ${soundType}.mp3:`, e);
-            });
-            
-            // Play with catch for autoplay restrictions
-            sound.play().catch(err => {
-              console.warn('Audio play error (likely autoplay restriction):', err);
-              // Still cache the sound for future use when user interacts
-              soundCache[soundType] = sound;
-            });
-            
-            // Cache for future use
-            soundCache[soundType] = sound;
-          } catch (err) {
-            console.warn('Error creating audio element:', err);
-          }
-          return;
-        }
-        
-        // For welcome sounds, use the API to get voice feedback
-        fetch(`/api/play-cosmic-sound?sound_type=${soundType}&language=${language}`, {
-          method: 'GET'
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data.success && data.sound_path) {
-            // Play the returned sound with enhanced error handling
-            try {
-              const sound = new Audio(data.sound_path);
-              sound.volume = 0.6;
-              
-              // Add load error handler with improved fallback
-              sound.addEventListener('error', (e) => {
-                console.warn(`Welcome sound load error for ${data.sound_path}:`, e);
-                
-                // First try to use the local copy we created in tts_cache
-                let fallbackSound = new Audio('/tts_cache/fallback.mp3');
-                fallbackSound.volume = 0.6;
-                
-                fallbackSound.addEventListener('error', (fallbackErr) => {
-                  console.warn('First fallback error, trying static welcome sound:', fallbackErr);
-                  // If that fails, try the static welcome sound
-                  const staticFallback = new Audio('/static/sounds/welcome.mp3');
-                  staticFallback.volume = 0.6;
-                  staticFallback.play().catch(staticErr => {
-                    console.warn('Static fallback welcome sound play error:', staticErr);
-                  });
-                });
-                
-                fallbackSound.play().catch(err => {
-                  console.warn('Fallback welcome sound play error:', err);
-                  // Immediately try the static file on error
-                  const staticFallback = new Audio('/static/sounds/welcome.mp3');
-                  staticFallback.volume = 0.6;
-                  staticFallback.play().catch(staticErr => {
-                    console.warn('Static fallback welcome sound play error after catch:', staticErr);
-                  });
-                });
-              });
-              
-              // Play with detailed error handling and double fallback
-              sound.play().catch(err => {
-                console.warn("Audio play error (likely autoplay restriction):", err);
-                // Cache for future use when user interacts
-                soundCache['welcome'] = sound;
-                
-                // Show audio notification to ensure user knows they need to interact
-                document.getElementById("audio-notification").style.display = "flex";
-              });
-              
-              // Cache for future use
-              soundCache['welcome'] = sound;
-            } catch (err) {
-              console.warn('Error creating welcome audio element:', err);
-              // Try fallback if we can't create the audio element
-              try {
-                const fallbackSound = new Audio('/static/sounds/welcome.mp3');
-                fallbackSound.play().catch(err => {
-                  console.warn('Fallback sound play error:', err);
-                });
-              } catch (innerErr) {
-                console.error('Critical audio error, could not create audio elements:', innerErr);
-              }
-            }
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching cosmic sound:', error);
-          // Fallback to static welcome sound on API error
-          try {
-            const fallbackSound = new Audio('/static/sounds/welcome.mp3');
-            fallbackSound.play().catch(err => {
-              console.warn('Static fallback play error:', err);
-            });
-          } catch (err) {
-            console.error('Critical fallback error:', err);
-          }
-        });
-      }
-      
-        });
-      });
-      
-      // Play background audio on page interaction
-      document.addEventListener('click', function() {
-        // Hide the audio notification
-        document.getElementById("audio-notification").style.display = "none";
-        
-        // Enable audio and update UI
-        audioEnabled = true;
-        // Update MashaaerInteractions audio state if available
-        if (window.MashaaerInteractions) {
-          window.MashaaerInteractions.setAudioEnabled(true);
-        }
-        document.getElementById('audio-icon').className = 'fas fa-volume-up';
-        
-        // Play welcome sound now that audio is enabled
-        playCosmicSound("welcome", currentLanguage);
-
-        // Try to play background audio with error handling
-        try {
-          const bgAudio = document.getElementById('background-audio');
-          bgAudio.play().catch(err => {
-            console.error('Background audio play error:', err);
-          });
-        } catch (err) {
-          console.error('Error playing background audio:', err);
-        }
-      });
-      
-      // Add touch interaction events for mobile
-      if (config.touchFeedbackEnabled) {
-        // Touch event for sphere
-        sphere.addEventListener('touchstart', function(e) {
-          e.preventDefault();
-          this.classList.add('touched');
-        });
-        
-        sphere.addEventListener('touchend', function(e) {
-          e.preventDefault();
-          this.classList.remove('touched');
-          
-        // Show welcome notification when user enables audio
-        if (window.MashaaerInteractions) {
-          setTimeout(() => {
-            window.MashaaerInteractions.notify(
-              currentLanguage === "ar" ? "مرحبًا بك في مشاعر" : "Welcome to Mashaaer",
-              { type: "success", sound: true, duration: 5000 }
-            );
-          }, 1000);
-        }
-
-          if (audioEnabled) {
-            playCosmicSound('click');
-          }
-          
-          // Create visual effects
-          createRipple(sphere);
-          if (config.particlesEnabled) {
-            createParticleBurst();
-          }
-        });
-      }
-      
-      // Create falling stars animation if enabled
-      if (config.fallingStarsEnabled) {
-        function createFallingStar() {
-          const star = document.createElement('div');
-          star.className = 'falling-star';
-          
-          // Random position and properties
-          const startX = Math.random() * window.innerWidth;
-          const startY = -50; // Start above the viewport
-          const size = 1 + Math.random() * 3;
-          const duration = 2 + Math.random() * 6;
-          const delay = Math.random() * 5;
-          
-          // Apply styles
-          star.style.left = `${startX}px`;
-          star.style.top = `${startY}px`;
-          star.style.width = `${size}px`;
-          star.style.height = `${size * 15}px`;
-          star.style.animationDuration = `${duration}s`;
-          star.style.animationDelay = `${delay}s`;
-          
-          // Add to container
-          document.getElementById('falling-stars').appendChild(star);
-          
-          // Remove after animation completes
-          setTimeout(() => {
-            try {
-              document.getElementById('falling-stars').removeChild(star);
-            } catch (err) {
-              // Element might already be removed, just ignore
-            }
-          }, (duration + delay) * 1000);
-        }
-        
-        // Create falling stars periodically
-        setInterval(createFallingStar, 1000);
-        
-        // Create initial stars
-        for (let i = 0; i < 5; i++) {
-          createFallingStar();
-        }
-      }
-    });
-  </script>
 </body>
+</html>

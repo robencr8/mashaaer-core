@@ -10,6 +10,9 @@ import sys
 import json
 import datetime
 import platform
+import time
+import numpy as np
+from typing import Dict, List, Any, Optional, Tuple
 from enhanced_cors import enhance_cors
 from routes_feedback_tool import register_feedback_routes
 
@@ -536,3 +539,111 @@ def conn_test():
     """Connection test page"""
     logger.debug("Serving connection test page")
     return send_file('conn_test.html')
+
+@app.route('/cosmic-player')
+def cosmic_player():
+    """Cosmic Ambient Music Player"""
+    logger.debug("Serving cosmic music player")
+    return send_from_directory('static', 'cosmic_player.html')
+
+# Cosmic Sounds API Routes
+@app.route('/api/cosmic-sounds')
+def get_cosmic_sounds():
+    """Get list of available cosmic sounds"""
+    try:
+        # Import and initialize cosmic sounds generator if not already done
+        from cosmic_sounds import CosmicSoundsGenerator
+        cosmic_sounds_generator = CosmicSoundsGenerator()
+        
+        category = request.args.get('category', 'all')
+        
+        logger.debug(f"API: Cosmic sounds request for category: {category}")
+        
+        if category == 'all':
+            sounds = cosmic_sounds_generator.list_available_sounds()
+            return jsonify({
+                "success": True,
+                "sounds": sounds
+            })
+        else:
+            available_sounds = cosmic_sounds_generator.list_available_sounds()
+            sounds = available_sounds.get(category, [])
+            return jsonify({
+                "success": True,
+                "category": category,
+                "sounds": sounds
+            })
+    except Exception as e:
+        logger.error(f"Error getting cosmic sounds: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": f"Failed to get cosmic sounds: {str(e)}"
+        }), 500
+
+@app.route('/api/cosmic-sounds/<category>/<filename>')
+def get_cosmic_sound(category, filename):
+    """Get a specific cosmic sound file"""
+    try:
+        # Import and initialize cosmic sounds generator if not already done
+        from cosmic_sounds import CosmicSoundsGenerator
+        cosmic_sounds_generator = CosmicSoundsGenerator()
+        
+        logger.debug(f"API: Cosmic sound file request: {category}/{filename}")
+        
+        # Get sound info
+        sound_info = cosmic_sounds_generator.get_sound_info(category, filename)
+        
+        if not sound_info or 'path' not in sound_info:
+            return jsonify({
+                "success": False,
+                "error": f"Sound {filename} not found in category {category}"
+            }), 404
+        
+        # Return the file
+        return send_file(sound_info['path'], mimetype='audio/mpeg')
+    except Exception as e:
+        logger.error(f"Error getting cosmic sound file: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": f"Failed to get cosmic sound file: {str(e)}"
+        }), 500
+
+@app.route('/api/generate-cosmic-soundscape', methods=['POST'])
+def generate_cosmic_soundscape():
+    """Generate a cosmic soundscape"""
+    try:
+        # Import and initialize cosmic soundscape generator if not already done
+        from cosmic_soundscape import CosmicSoundscapeGenerator
+        cosmic_soundscape_generator = CosmicSoundscapeGenerator()
+        
+        # Get parameters from request
+        data = request.get_json() or {}
+        duration = data.get('duration', 30)
+        layers = data.get('layers', 3)
+        mood = data.get('mood', 'peaceful')
+        
+        logger.debug(f"API: Generate cosmic soundscape: duration={duration}s, layers={layers}, mood={mood}")
+        
+        # Generate the soundscape
+        audio_data, output_path = cosmic_soundscape_generator.generate_cosmic_soundscape(
+            duration=duration,
+            mood=mood,
+            layers=layers
+        )
+        
+        # Return the soundscape info
+        return jsonify({
+            "success": True,
+            "soundscape": {
+                "url": f"/static/cosmic_sounds/{os.path.basename(output_path)}",
+                "duration": duration,
+                "mood": mood,
+                "layers": layers
+            }
+        })
+    except Exception as e:
+        logger.error(f"Error generating cosmic soundscape: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": f"Failed to generate cosmic soundscape: {str(e)}"
+        }), 500

@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#180538">
+  <meta name="description" content="Cosmic Music Player | Mashaaer Feelings">
+  <title>Cosmic Music Player | Mashaaer</title>
+  <link rel="icon" href="/static/favicon.ico">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/micro_interactions.css">
+  <style>
+    /* CSS reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* Base styles */
+    body, html {
+      height: 100%;
+      overflow: hidden;
+      background-color: #000;
+      color: #fff;
+    }
+    
+    /* Stars background */
+    .stars-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      overflow: hidden;
+    }
+    
+    .stars {
+      background: #000 url('/static/images/stars.png') repeat top center;
+      z-index: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    
+    .twinkling {
+      background: transparent url('/static/images/twinkling.png') repeat top center;
+      z-index: 1;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      animation: move-twink-back 200s linear infinite;
+    }
+    
+    @keyframes move-twink-back {
+      from { background-position: 0 0; }
+      to { background-position: -10000px 5000px; }
+    }
+    
+    /* Main content */
+    .player-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100%;
+      z-index: 10;
+      padding: 20px;
+      text-align: center;
+      overflow-y: auto;
+    }
+    
+    /* Header */
+    .player-header {
+      margin-bottom: 30px;
+      width: 100%;
+      max-width: 800px;
+    }
+    
+    .player-title {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      color: #fff;
+      text-shadow: 0 0 15px rgba(147, 112, 219, 0.8);
+    }
+    
+    .player-subtitle {
+      font-size: 1.1rem;
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+    
+    /* Player controls */
+    .player-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 30px;
+      width: 100%;
+      max-width: 800px;
+    }
+    
+    .control-button {
+      background-color: rgba(147, 112, 219, 0.2);
+      border: 1px solid rgba(147, 112, 219, 0.5);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      margin: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.5rem;
+    }
+    
+    .control-button:hover, .control-button.active {
+      background-color: rgba(147, 112, 219, 0.4);
+      box-shadow: 0 0 15px rgba(147, 112, 219, 0.8);
+    }
+    
+    .play-button {
+      width: 70px;
+      height: 70px;
+      font-size: 1.8rem;
+    }
+    
+    /* Visualization */
+    .visualization {
+      width: 100%;
+      max-width: 800px;
+      height: 150px;
+      background-color: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(147, 112, 219, 0.3);
+      border-radius: 10px;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .visualization-bars {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      height: 100%;
+      padding: 0 10px;
+    }
+    
+    .viz-bar {
+      width: 8px;
+      background-color: rgba(147, 112, 219, 0.7);
+      border-radius: 4px 4px 0 0;
+      transition: height 0.1s ease;
+    }
+    
+    /* Sound categories */
+    .sound-categories {
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 20px;
+    }
+    
+    .category-title {
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(147, 112, 219, 0.6);
+      text-align: left;
+      padding-left: 10px;
+      border-left: 3px solid rgba(147, 112, 219, 0.8);
+    }
+    
+    .sound-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .sound-card {
+      background-color: rgba(147, 112, 219, 0.1);
+      border: 1px solid rgba(147, 112, 219, 0.3);
+      border-radius: 10px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: left;
+    }
+    
+    .sound-card:hover, .sound-card.active {
+      background-color: rgba(147, 112, 219, 0.2);
+      box-shadow: 0 0 15px rgba(147, 112, 219, 0.5);
+      transform: translateY(-3px);
+    }
+    
+    .sound-name {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+    
+    .sound-info {
+      font-size: 0.8rem;
+      color: #ccc;
+    }
+    
+    .sound-card .play-indicator {
+      float: right;
+      color: rgba(147, 112, 219, 0.8);
+      display: none;
+    }
+    
+    .sound-card.active .play-indicator {
+      display: inline-block;
+    }
+    
+    /* Progress bar */
+    .progress-container {
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 30px;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background-color: rgba(147, 112, 219, 0.2);
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background-color: rgba(147, 112, 219, 0.8);
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.1s ease;
+    }
+    
+    .progress-handle {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 12px;
+      height: 12px;
+      background-color: #fff;
+      border-radius: 50%;
+      border: 2px solid rgba(147, 112, 219, 0.8);
+      left: 0%;
+    }
+    
+    .time-display {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: #ccc;
+    }
+    
+    /* Volume control */
+    .volume-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 30px;
+      width: 100%;
+      max-width: 800px;
+    }
+    
+    .volume-icon {
+      margin-right: 15px;
+      font-size: 1.2rem;
+      color: #ccc;
+    }
+    
+    .volume-slider {
+      flex-grow: 1;
+      height: 4px;
+      background-color: rgba(147, 112, 219, 0.2);
+      border-radius: 2px;
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .volume-fill {
+      height: 100%;
+      background-color: rgba(147, 112, 219, 0.8);
+      border-radius: 2px;
+      width: 70%;
+    }
+    
+    .volume-handle {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 10px;
+      height: 10px;
+      background-color: #fff;
+      border-radius: 50%;
+      border: 2px solid rgba(147, 112, 219, 0.8);
+      left: 70%;
+    }
+    
+    /* Generate custom soundscape section */
+    .generate-section {
+      width: 100%;
+      max-width: 800px;
+      background-color: rgba(147, 112, 219, 0.1);
+      border: 1px solid rgba(147, 112, 219, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .generate-title {
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(147, 112, 219, 0.6);
+    }
+    
+    .generate-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      text-align: left;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+    
+    .form-select, .form-range {
+      width: 100%;
+      padding: 8px 10px;
+      background-color: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(147, 112, 219, 0.5);
+      border-radius: 5px;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+    
+    .form-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%239370DB%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 12px;
+      padding-right: 30px;
+    }
+    
+    .form-range {
+      appearance: none;
+      height: 8px;
+      outline: none;
+      border: none;
+      background-color: rgba(147, 112, 219, 0.2);
+      border-radius: 4px;
+    }
+    
+    .form-range::-webkit-slider-thumb {
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      background-color: rgba(147, 112, 219, 0.8);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    
+    .generate-button {
+      background-color: rgba(147, 112, 219, 0.3);
+      border: 1px solid rgba(147, 112, 219, 0.6);
+      border-radius: 5px;
+      padding: 10px 20px;
+      color: #fff;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      max-width: 200px;
+      margin: 0 auto;
+    }
+    
+    .generate-button:hover {
+      background-color: rgba(147, 112, 219, 0.5);
+      box-shadow: 0 0 15px rgba(147, 112, 219, 0.6);
+    }
+    
+    /* Back link */
+    .back-link {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.9rem;
+      padding: 8px 15px;
+      background-color: rgba(147, 112, 219, 0.2);
+      border: 1px solid rgba(147, 112, 219, 0.5);
+      border-radius: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    .back-link:hover {
+      background-color: rgba(147, 112, 219, 0.4);
+      box-shadow: 0 0 15px rgba(147, 112, 219, 0.6);
+    }
+    
+    .back-link i {
+      margin-right: 5px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .player-title { font-size: 1.8rem; }
+      .player-subtitle { font-size: 1rem; }
+      .control-button { width: 50px; height: 50px; font-size: 1.2rem; }
+      .play-button { width: 60px; height: 60px; font-size: 1.5rem; }
+      .visualization { height: 120px; }
+      .category-title { font-size: 1.1rem; }
+    }
+    
+    @media (max-width: 480px) {
+      .player-title { font-size: 1.5rem; }
+      .player-subtitle { font-size: 0.9rem; }
+      .control-button { width: 40px; height: 40px; font-size: 1rem; margin: 0 5px; }
+      .play-button { width: 50px; height: 50px; font-size: 1.3rem; }
+      .visualization { height: 100px; }
+      .category-title { font-size: 1rem; }
+      .sound-list { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background elements -->
+  <div class="stars-container">
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+  </div>
+  
+  <!-- Back link -->
+  <a href="/" class="back-link">
+    <i class="fas fa-arrow-left"></i>
+    Return to Home
+  </a>
+  
+  <!-- Main content -->
+  <div class="player-container">
+    <div class="player-header">
+      <h1 class="player-title">Cosmic Music Player</h1>
+      <p class="player-subtitle">Immerse yourself in ambient cosmic sounds</p>
+    </div>
+    
+    <!-- Player controls -->
+    <div class="player-controls">
+      <div class="control-button" id="prev-button">
+        <i class="fas fa-step-backward"></i>
+      </div>
+      <div class="control-button play-button" id="play-button">
+        <i class="fas fa-play" id="play-icon"></i>
+      </div>
+      <div class="control-button" id="next-button">
+        <i class="fas fa-step-forward"></i>
+      </div>
+      <div class="control-button" id="shuffle-button">
+        <i class="fas fa-random"></i>
+      </div>
+      <div class="control-button" id="repeat-button">
+        <i class="fas fa-redo"></i>
+      </div>
+    </div>
+    
+    <!-- Audio visualization -->
+    <div class="visualization">
+      <div class="visualization-bars" id="visualization-bars"></div>
+    </div>
+    
+    <!-- Progress bar -->
+    <div class="progress-container">
+      <div class="progress-bar" id="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+        <div class="progress-handle" id="progress-handle"></div>
+      </div>
+      <div class="time-display">
+        <span id="current-time">0:00</span>
+        <span id="total-time">0:00</span>
+      </div>
+    </div>
+    
+    <!-- Volume control -->
+    <div class="volume-container">
+      <div class="volume-icon">
+        <i class="fas fa-volume-up" id="volume-icon"></i>
+      </div>
+      <div class="volume-slider" id="volume-slider">
+        <div class="volume-fill" id="volume-fill"></div>
+        <div class="volume-handle" id="volume-handle"></div>
+      </div>
+    </div>
+    
+    <!-- Ambient sounds -->
+    <div class="sound-categories">
+      <h2 class="category-title">Ambient Sounds</h2>
+      <div class="sound-list" id="ambient-sounds"></div>
+    </div>
+    
+    <!-- Transition sounds -->
+    <div class="sound-categories">
+      <h2 class="category-title">Transition Sounds</h2>
+      <div class="sound-list" id="transition-sounds"></div>
+    </div>
+    
+    <!-- Interaction sounds -->
+    <div class="sound-categories">
+      <h2 class="category-title">Interaction Sounds</h2>
+      <div class="sound-list" id="interaction-sounds"></div>
+    </div>
+    
+    <!-- Generate custom soundscape -->
+    <div class="generate-section">
+      <h2 class="generate-title">Generate Custom Soundscape</h2>
+      <div class="generate-form">
+        <div class="form-group">
+          <label class="form-label">Duration (seconds)</label>
+          <select class="form-select" id="duration-select">
+            <option value="30">30 seconds</option>
+            <option value="60" selected>1 minute</option>
+            <option value="180">3 minutes</option>
+            <option value="300">5 minutes</option>
+            <option value="600">10 minutes</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Layers</label>
+          <select class="form-select" id="layers-select">
+            <option value="2">2 layers</option>
+            <option value="3" selected>3 layers</option>
+            <option value="4">4 layers</option>
+            <option value="5">5 layers</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mood</label>
+          <select class="form-select" id="mood-select">
+            <option value="peaceful" selected>Peaceful</option>
+            <option value="mysterious">Mysterious</option>
+            <option value="energetic">Energetic</option>
+          </select>
+        </div>
+      </div>
+      <button class="generate-button" id="generate-button">Generate Soundscape</button>
+    </div>
+  </div>
+  
+  <!-- Audio elements -->
+  <audio id="main-audio" preload="auto"></audio>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM Elements
+      const playButton = document.getElementById('play-button');
+      const playIcon = document.getElementById('play-icon');
+      const prevButton = document.getElementById('prev-button');
+      const nextButton = document.getElementById('next-button');
+      const shuffleButton = document.getElementById('shuffle-button');
+      const repeatButton = document.getElementById('repeat-button');
+      const progressBar = document.getElementById('progress-bar');
+      const progressFill = document.getElementById('progress-fill');
+      const progressHandle = document.getElementById('progress-handle');
+      const currentTimeDisplay = document.getElementById('current-time');
+      const totalTimeDisplay = document.getElementById('total-time');
+      const volumeSlider = document.getElementById('volume-slider');
+      const volumeFill = document.getElementById('volume-fill');
+      const volumeHandle = document.getElementById('volume-handle');
+      const volumeIcon = document.getElementById('volume-icon');
+      const ambientSoundsContainer = document.getElementById('ambient-sounds');
+      const transitionSoundsContainer = document.getElementById('transition-sounds');
+      const interactionSoundsContainer = document.getElementById('interaction-sounds');
+      const generateButton = document.getElementById('generate-button');
+      const audio = document.getElementById('main-audio');
+      const visualizationBars = document.getElementById('visualization-bars');
+      
+      // State
+      let isPlaying = false;
+      let isShuffle = false;
+      let isRepeat = false;
+      let volume = 0.7;
+      let currentSoundIndex = -1;
+      let currentPlaylist = [];
+      let allSounds = [];
+      let audioContext = null;
+      let analyzer = null;
+      let dataArray = null;
+      let vizBars = [];
+      
+      // Create visualization bars
+      function createVisualizationBars() {
+        const numBars = 64;
+        for (let i = 0; i < numBars; i++) {
+          const bar = document.createElement('div');
+          bar.className = 'viz-bar';
+          bar.style.height = '2px';
+          visualizationBars.appendChild(bar);
+          vizBars.push(bar);
+        }
+      }
+      
+      // Initialize audio context for visualization
+      function initAudioContext() {
+        try {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const source = audioContext.createMediaElementSource(audio);
+          analyzer = audioContext.createAnalyser();
+          analyzer.fftSize = 256;
+          source.connect(analyzer);
+          analyzer.connect(audioContext.destination);
+          
+          const bufferLength = analyzer.frequencyBinCount;
+          dataArray = new Uint8Array(bufferLength);
+          
+          updateVisualization();
+        } catch (e) {
+          console.error('Web Audio API not supported:', e);
+        }
+      }
+      
+      // Update audio visualization
+      function updateVisualization() {
+        if (!analyzer) return;
+        
+        requestAnimationFrame(updateVisualization);
+        
+        analyzer.getByteFrequencyData(dataArray);
+        
+        // Only update viz when audio is playing
+        if (isPlaying) {
+          const numBars = vizBars.length;
+          const step = Math.floor(dataArray.length / numBars);
+          
+          for (let i = 0; i < numBars; i++) {
+            const barHeight = dataArray[i * step] / 255 * 100;
+            vizBars[i].style.height = barHeight + 'px';
+          }
+        }
+      }
+      
+      // Format time (seconds to MM:SS)
+      function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+      }
+      
+      // Play/Pause toggle
+      function togglePlay() {
+        if (currentSoundIndex < 0 && allSounds.length > 0) {
+          // If nothing is selected, play first sound
+          playSoundByIndex(0);
+          return;
+        }
+        
+        if (isPlaying) {
+          audio.pause();
+          playIcon.className = 'fas fa-play';
+        } else {
+          audio.play()
+            .then(() => {
+              // Successfully started playback
+              if (!audioContext) {
+                initAudioContext();
+              } else if (audioContext.state === 'suspended') {
+                audioContext.resume();
+              }
+            })
+            .catch(error => {
+              console.error('Playback failed:', error);
+            });
+          playIcon.className = 'fas fa-pause';
+        }
+        
+        isPlaying = !isPlaying;
+      }
+      
+      // Play sound by index
+      function playSoundByIndex(index) {
+        if (index < 0 || index >= currentPlaylist.length) return;
+        
+        // Update current index
+        currentSoundIndex = index;
+        const sound = currentPlaylist[index];
+        
+        // Update active sound card
+        document.querySelectorAll('.sound-card').forEach(card => {
+          card.classList.remove('active');
+        });
+        
+        const soundCard = document.getElementById(`sound-card-${sound.id}`);
+        if (soundCard) {
+          soundCard.classList.add('active');
+        }
+        
+        // Set audio source and play
+        audio.src = sound.url;
+        audio.load();
+        audio.play()
+          .then(() => {
+            if (!audioContext) {
+              initAudioContext();
+            } else if (audioContext.state === 'suspended') {
+              audioContext.resume();
+            }
+            isPlaying = true;
+            playIcon.className = 'fas fa-pause';
+          })
+          .catch(error => {
+            console.error('Playback failed:', error);
+          });
+      }
+      
+      // Play next sound
+      function playNext() {
+        if (currentPlaylist.length === 0) return;
+        
+        let nextIndex;
+        
+        if (isShuffle) {
+          // Play random sound
+          do {
+            nextIndex = Math.floor(Math.random() * currentPlaylist.length);
+          } while (nextIndex === currentSoundIndex && currentPlaylist.length > 1);
+        } else {
+          // Play next in sequence
+          nextIndex = (currentSoundIndex + 1) % currentPlaylist.length;
+        }
+        
+        playSoundByIndex(nextIndex);
+      }
+      
+      // Play previous sound
+      function playPrevious() {
+        if (currentPlaylist.length === 0) return;
+        
+        let prevIndex;
+        
+        if (isShuffle) {
+          // Play random sound
+          do {
+            prevIndex = Math.floor(Math.random() * currentPlaylist.length);
+          } while (prevIndex === currentSoundIndex && currentPlaylist.length > 1);
+        } else {
+          // Play previous in sequence
+          prevIndex = (currentSoundIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
+        }
+        
+        playSoundByIndex(prevIndex);
+      }
+      
+      // Toggle shuffle
+      function toggleShuffle() {
+        isShuffle = !isShuffle;
+        shuffleButton.classList.toggle('active', isShuffle);
+      }
+      
+      // Toggle repeat
+      function toggleRepeat() {
+        isRepeat = !isRepeat;
+        repeatButton.classList.toggle('active', isRepeat);
+      }
+      
+      // Set volume
+      function setVolume(value) {
+        volume = Math.max(0, Math.min(1, value));
+        audio.volume = volume;
+        
+        // Update volume slider UI
+        volumeFill.style.width = `${volume * 100}%`;
+        volumeHandle.style.left = `${volume * 100}%`;
+        
+        // Update volume icon
+        if (volume === 0) {
+          volumeIcon.className = 'fas fa-volume-mute';
+        } else if (volume < 0.5) {
+          volumeIcon.className = 'fas fa-volume-down';
+        } else {
+          volumeIcon.className = 'fas fa-volume-up';
+        }
+      }
+      
+      // Create sound card
+      function createSoundCard(sound) {
+        const card = document.createElement('div');
+        card.className = 'sound-card';
+        card.id = `sound-card-${sound.id}`;
+        
+        card.innerHTML = `
+          <div class="sound-name">${sound.name}</div>
+          <div class="sound-info">${sound.duration}s</div>
+          <div class="play-indicator"><i class="fas fa-volume-up"></i></div>
+        `;
+        
+        card.addEventListener('click', () => {
+          // Set current playlist and play this sound
+          const soundCategory = sound.category;
+          
+          // Filter sounds by category
+          currentPlaylist = allSounds.filter(s => s.category === soundCategory);
+          
+          // Find index of this sound in the playlist
+          const soundIndex = currentPlaylist.findIndex(s => s.id === sound.id);
+          
+          // Play the sound
+          playSoundByIndex(soundIndex);
+        });
+        
+        return card;
+      }
+      
+      // Fetch cosmic sounds
+      function fetchCosmicSounds() {
+        fetch('/api/cosmic-sounds')
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && data.sounds) {
+              allSounds = [];
+              
+              // Process each category
+              for (const category in data.sounds) {
+                const sounds = data.sounds[category];
+                const soundsContainer = document.getElementById(`${category}-sounds`);
+                
+                if (soundsContainer) {
+                  // Clear container
+                  soundsContainer.innerHTML = '';
+                  
+                  // Add sounds
+                  sounds.forEach(sound => {
+                    // Add to all sounds list
+                    allSounds.push({
+                      id: `${category}-${sound.filename}`,
+                      name: sound.name || sound.filename,
+                      category: category,
+                      url: sound.url,
+                      duration: sound.duration || 0
+                    });
+                    
+                    // Create and append sound card
+                    const card = createSoundCard({
+                      id: `${category}-${sound.filename}`,
+                      name: sound.name || sound.filename,
+                      category: category,
+                      url: sound.url,
+                      duration: sound.duration || 0
+                    });
+                    
+                    soundsContainer.appendChild(card);
+                  });
+                }
+              }
+              
+              // Set initial playlist to ambient sounds
+              currentPlaylist = allSounds.filter(sound => sound.category === 'ambient');
+            } else {
+              console.error('Failed to fetch cosmic sounds:', data.error || 'Unknown error');
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching cosmic sounds:', error);
+          });
+      }
+      
+      // Generate custom soundscape
+      function generateSoundscape() {
+        const duration = document.getElementById('duration-select').value;
+        const layers = document.getElementById('layers-select').value;
+        const mood = document.getElementById('mood-select').value;
+        
+        // Disable button during generation
+        generateButton.disabled = true;
+        generateButton.textContent = 'Generating...';
+        
+        fetch('/api/generate-cosmic-soundscape', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            duration: parseInt(duration),
+            layers: parseInt(layers),
+            mood: mood
+          })
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && data.soundscape) {
+              // Play generated soundscape
+              audio.src = data.soundscape.url;
+              audio.load();
+              audio.play()
+                .then(() => {
+                  if (!audioContext) {
+                    initAudioContext();
+                  } else if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                  }
+                  isPlaying = true;
+                  playIcon.className = 'fas fa-pause';
+                  
+                  // Reset current playlist and index
+                  currentPlaylist = [{
+                    id: 'generated-soundscape',
+                    name: `Custom ${mood} Soundscape`,
+                    url: data.soundscape.url,
+                    duration: parseInt(duration)
+                  }];
+                  currentSoundIndex = 0;
+                  
+                  // Reset sound cards active state
+                  document.querySelectorAll('.sound-card').forEach(card => {
+                    card.classList.remove('active');
+                  });
+                })
+                .catch(error => {
+                  console.error('Playback of generated soundscape failed:', error);
+                });
+            } else {
+              console.error('Failed to generate soundscape:', data.error || 'Unknown error');
+              window.MashaaerInteractions?.notify('Failed to generate soundscape', { type: 'error' });
+            }
+            
+            // Re-enable button
+            generateButton.disabled = false;
+            generateButton.textContent = 'Generate Soundscape';
+          })
+          .catch(error => {
+            console.error('Error generating soundscape:', error);
+            
+            // Re-enable button
+            generateButton.disabled = false;
+            generateButton.textContent = 'Generate Soundscape';
+          });
+      }
+      
+      // Update progress bar
+      function updateProgressBar() {
+        if (audio.duration) {
+          const progress = (audio.currentTime / audio.duration) * 100;
+          progressFill.style.width = `${progress}%`;
+          progressHandle.style.left = `${progress}%`;
+          
+          // Update time displays
+          currentTimeDisplay.textContent = formatTime(audio.currentTime);
+          totalTimeDisplay.textContent = formatTime(audio.duration);
+        }
+      }
+      
+      // Set progress position
+      function setProgress(percent) {
+        if (audio.duration) {
+          const seekTime = (percent / 100) * audio.duration;
+          audio.currentTime = seekTime;
+        }
+      }
+      
+      // Event listeners
+      playButton.addEventListener('click', togglePlay);
+      
+      prevButton.addEventListener('click', playPrevious);
+      
+      nextButton.addEventListener('click', playNext);
+      
+      shuffleButton.addEventListener('click', toggleShuffle);
+      
+      repeatButton.addEventListener('click', toggleRepeat);
+      
+      generateButton.addEventListener('click', generateSoundscape);
+      
+      // Progress bar interaction
+      progressBar.addEventListener('click', function(e) {
+        const rect = this.getBoundingClientRect();
+        const percent = ((e.clientX - rect.left) / rect.width) * 100;
+        setProgress(percent);
+      });
+      
+      // Volume slider interaction
+      volumeSlider.addEventListener('click', function(e) {
+        const rect = this.getBoundingClientRect();
+        const value = (e.clientX - rect.left) / rect.width;
+        setVolume(value);
+      });
+      
+      // Audio events
+      audio.addEventListener('timeupdate', updateProgressBar);
+      
+      audio.addEventListener('ended', function() {
+        if (isRepeat) {
+          // Repeat current sound
+          audio.currentTime = 0;
+          audio.play().catch(error => {
+            console.error('Repeat playback failed:', error);
+          });
+        } else {
+          // Play next sound
+          playNext();
+        }
+      });
+      
+      audio.addEventListener('play', function() {
+        isPlaying = true;
+        playIcon.className = 'fas fa-pause';
+      });
+      
+      audio.addEventListener('pause', function() {
+        isPlaying = false;
+        playIcon.className = 'fas fa-play';
+      });
+      
+      // Initialize
+      setVolume(volume);
+      createVisualizationBars();
+      fetchCosmicSounds();
+      
+      // Create fake initial visualization
+      for (let i = 0; i < vizBars.length; i++) {
+        const height = Math.random() * 20 + 2;
+        vizBars[i].style.height = height + 'px';
+      }
+    });
+  </script>
+</body>
+</html>

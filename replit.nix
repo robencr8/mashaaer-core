@@ -1,5 +1,8 @@
 {pkgs}: {
   deps = [
+    pkgs.ffmpeg-full
+    pkgs.xsimd
+    pkgs.libxcrypt
     pkgs.imagemagick
     pkgs.tree
     pkgs.libyaml
