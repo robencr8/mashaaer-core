@@ -163,6 +163,16 @@ def goodbye():
     """Goodbye page for users who do not consent"""
     return render_template('goodbye.html')
 
+# Route for serving TTS cache files
+@app.route('/tts_cache/<path:filename>')
+def serve_tts_cache(filename):
+    """Serve TTS cache files"""
+    try:
+        return send_from_directory('tts_cache', filename)
+    except Exception as e:
+        logger.error(f"Error serving TTS cache file {filename}: {e}")
+        return jsonify({"error": "Audio file not found"}), 404
+
 # Catch-all route for serving static files
 @app.route('/<path:filename>')
 def serve_static(filename):
