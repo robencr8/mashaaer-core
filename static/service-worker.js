@@ -1,120 +1,129 @@
-// مشاعر | Mashaaer PWA Service Worker
-const CACHE_NAME = 'mashaaer-cache-v1';
+// Mashaaer Service Worker v1.0
 
-// المصادر التي سيتم تخزينها محلياً
-const urlsToCache = [
+const CACHE_NAME = 'mashaaer-cache-v1';
+const OFFLINE_URL = '/offline';
+
+// Assets to cache on install
+const CORE_ASSETS = [
   '/',
+  '/static/sounds/welcome.mp3',
   '/static/sounds/click.mp3',
   '/static/sounds/hover.mp3',
-  '/static/sounds/listen_start.mp3',
-  "/static/offline.html",
-  '/static/sounds/listen_stop.mp3',
-  '/static/sounds/welcome.mp3',
-  '/static/sounds/greeting.mp3',
   '/static/sounds/cosmic.mp3',
-  '/static/icons/icon-192x192.png',
-  '/static/icons/icon-512x512.png',
-  '/static/manifest.json',
-  '/health',
-  '/cosmic-onboarding',
-  '/cosmic-theme'
+  '/static/sounds/greeting.mp3',
+  '/static/sounds/listen_start.mp3',
+  '/static/sounds/listen_stop.mp3',
+  '/tts_cache/fallback.mp3',
+  '/offline',
+  '/static/manifest.json'
 ];
 
-// تثبيت Service Worker وتخزين الموارد
-self.addEventListener('install', event => {
-  console.log('[ServiceWorker] Install');
+// Install event - cache core assets
+self.addEventListener('install', (event) => {
+  console.log('Service Worker installing...');
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[ServiceWorker] Caching app shell');
-        return cache.addAll(urlsToCache);
+      .then((cache) => {
+        console.log('Service Worker: Caching core app shell and content');
+        return cache.addAll(CORE_ASSETS);
+      })
+      .then(() => {
+        console.log('Service Worker installed successfully');
+        return self.skipWaiting();
+      })
+      .catch((error) => {
+        console.error('Service Worker installation failed:', error);
       })
   );
 });
 
-// تنشيط Service Worker وحذف التخزين المؤقت القديم
-self.addEventListener('activate', event => {
-  console.log('[ServiceWorker] Activate');
+// Activate event - cleanup old caches
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker activating...');
+  
   event.waitUntil(
-    caches.keys().then(keyList => {
-      return Promise.all(keyList.map(key => {
-        if (key !== CACHE_NAME) {
-          console.log('[ServiceWorker] Removing old cache', key);
-          return caches.delete(key);
-        }
-      }));
-    })
+    caches.keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames.filter((cacheName) => {
+            return cacheName !== CACHE_NAME;
+          }).map((cacheName) => {
+            console.log('Service Worker: Deleting old cache', cacheName);
+            return caches.delete(cacheName);
+          })
+        );
+      })
+      .then(() => {
+        console.log('Service Worker activated successfully, claiming clients');
+        return self.clients.claim();
+      })
   );
-  // تأكد من أن Service Worker يبدأ في التحكم في الصفحات فوراً
-  return self.clients.claim();
 });
 
-// استراتيجية "الشبكة أولاً ثم التخزين المؤقت" للأنماط الديناميكية مثل API
-const networkThenCache = async (event) => {
-  try {
-    // محاولة جلب من الشبكة
-    const networkResponse = await fetch(event.request);
-    
-    // إذا كان الرد ناجحًا، احفظه في التخزين المؤقت ثم أعده
-    if (networkResponse.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(event.request, networkResponse.clone());
-    }
-    
-    return networkResponse;
-  } catch (error) {
-    // إذا فشل الاتصال بالشبكة، استخدم التخزين المؤقت
-    const cachedResponse = await caches.match(event.request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    throw error;
-  }
-};
-
-// استراتيجية "التخزين المؤقت أولاً ثم الشبكة" للمصادر الثابتة
-const cacheFirstThenNetwork = async (event) => {
-  const cachedResponse = await caches.match(event.request);
-  if (cachedResponse) {
-    return cachedResponse;
+// Fetch event - serve from cache or network
+self.addEventListener('fetch', (event) => {
+  // Skip cross-origin requests
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
   }
   
-  // إذا لم يكن في التخزين المؤقت، حاول من الشبكة
-  try {
-    const networkResponse = await fetch(event.request);
-    
-    // خزن الاستجابة الجديدة
-    if (networkResponse.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(event.request, networkResponse.clone());
-    }
-    
-    return networkResponse;
-  } catch (error) {
-    // فشل الاتصال تماماً
-    console.error('[ServiceWorker] Fetch failed; returning offline page instead.', error);
-    throw error;
+  // Handle API requests differently (network-first)
+  if (event.request.url.includes('/api/')) {
+    event.respondWith(
+      fetch(event.request)
+        .catch((error) => {
+          console.log('Service Worker: API request failed, serving offline content', error);
+          return caches.match('/offline');
+        })
+    );
+    return;
   }
-};
-
-// معالجة طلبات الشبكة
-self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
   
-  // إذا كان الطلب يبدأ بـ /api/ استخدم استراتيجية الشبكة أولاً
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(networkThenCache(event));
-  } 
-  // للمصادر الثابتة مثل الصور والأصوات استخدم التخزين المؤقت أولاً
-  else if (
-    url.pathname.includes('/static/') || 
-    url.pathname.includes('/icons/') || 
-    url.pathname.includes('/sounds/')
-  ) {
-    event.respondWith(cacheFirstThenNetwork(event));
-  }
-  // لجميع الطلبات الأخرى، حاول الشبكة أولاً ثم التخزين المؤقت
-  else {
-    event.respondWith(networkThenCache(event));
+  // For other requests, try cache first, then network
+  event.respondWith(
+    caches.match(event.request)
+      .then((cachedResponse) => {
+        if (cachedResponse) {
+          console.log('Service Worker: Serving from cache:', event.request.url);
+          return cachedResponse;
+        }
+        
+        // Not in cache, get from network
+        return fetch(event.request)
+          .then((networkResponse) => {
+            // Cache valid responses for future use
+            if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+              const clonedResponse = networkResponse.clone();
+              caches.open(CACHE_NAME)
+                .then((cache) => {
+                  console.log('Service Worker: Caching new resource:', event.request.url);
+                  cache.put(event.request, clonedResponse);
+                });
+            }
+            return networkResponse;
+          })
+          .catch((error) => {
+            console.log('Service Worker: Network request failed, serving offline page', error);
+            
+            // If the request is for a page, show the offline page
+            if (event.request.mode === 'navigate') {
+              return caches.match('/offline');
+            }
+            
+            // For other resources, return a simple error response
+            return new Response('Network error happened', {
+              status: 408,
+              headers: { 'Content-Type': 'text/plain' }
+            });
+          });
+      })
+  );
+});
+
+// Listen for messages from the client
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.action === 'skipWaiting') {
+    self.skipWaiting();
   }
 });

@@ -5,193 +5,163 @@ This is the main entry point for the full Mashaaer Feelings application,
 with all APIs and components enabled.
 """
 import os
+import json
 import logging
-import sys
 from datetime import datetime
-from flask import Flask, jsonify, render_template, send_from_directory, send_file, request
-from flask_cors import CORS
+from flask import Flask, render_template, send_from_directory, jsonify, request, redirect, url_for
+from enhanced_cors import configure_cors
+import api_routes
+import api_routes_dev
 
-# Set up logging
+# إعداد السجلات
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler('app.log')
+        logging.FileHandler("app.log"),
+        logging.StreamHandler()
     ]
 )
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('main')
 
-# Import enhanced CORS if available, fallback to standard CORS if not
+# إنشاء تطبيق Flask
+app = Flask(__name__)
+
+# تكوين CORS المحسن
+logger.info("Enhanced CORS module loaded")
+configure_cors(app)
+
+# تهيئة الوحدات بترتيب صحيح لتجنب التبعيات الدائرية
+logger.info("Initializing core modules...")
+
+# استيراد المكونات الضرورية
+# 1. أولاً: تهيئة قاعدة البيانات
 try:
-    from enhanced_cors import configure_cors
-    logger.info("Enhanced CORS module loaded")
-    ENHANCED_CORS_AVAILABLE = True
-except ImportError:
-    logger.warning("Enhanced CORS module not available, using standard CORS")
-    ENHANCED_CORS_AVAILABLE = False
+    from database.db_manager import DatabaseManager
+    db_manager = DatabaseManager()
+except ImportError as e:
+    logger.warning(f"DatabaseManager import error: {e}")
+    db_manager = None
 
-# Import local modules
-import api_routes
-from config import Config
-from database.db_manager import DatabaseManager
-from emotion_tracker import EmotionTracker
-from intent_classifier import IntentClassifier
-from context_assistant import ContextAssistant
-from tts.tts_manager import TTSManager
-from voice.recognition import VoiceRecognition
-
-# Optional imports - will be None if not available
+# 2. ثانياً: تهيئة التكوين
 try:
-    from face_recognition_module import FaceDetector
-    logger.info("FaceDetector module loaded successfully")
-except ImportError:
-    logger.warning("FaceDetector module not available")
-    FaceDetector = None
+    from config import Config
+    config = Config()
+except ImportError as e:
+    logger.warning(f"Config import error: {e}")
+    config = None
+
+# 3. باقي المكونات التي تعتمد على قاعدة البيانات والتكوين
+components = {}
+
+try:
+    from emotion_tracker import EmotionTracker
+    components['emotion_tracker'] = EmotionTracker(db_manager)
+except ImportError as e:
+    logger.warning(f"EmotionTracker import error: {e}")
+    components['emotion_tracker'] = None
+except TypeError as e:
+    logger.warning(f"EmotionTracker initialization error: {e}")
+    components['emotion_tracker'] = None
+
+try:
+    from intent_classifier import IntentClassifier
+    components['intent_classifier'] = IntentClassifier()
+except ImportError as e:
+    logger.warning(f"IntentClassifier import error: {e}")
+    components['intent_classifier'] = None
+
+try:
+    from vision.face_detector import FaceDetector
+    components['face_detector'] = FaceDetector(config, db_manager)
+except ImportError as e:
+    logger.warning(f"FaceDetector module not available: {e}")
+    components['face_detector'] = None
+except TypeError as e:
+    logger.warning(f"FaceDetector initialization error: {e}")
+    components['face_detector'] = None
+
+try:
+    from tts.tts_manager import TTSManager
+    components['tts_manager'] = TTSManager(config)
+except ImportError as e:
+    logger.warning(f"TTSManager import error: {e}")
+    components['tts_manager'] = None
+
+try:
+    from voice.voice_recognition import VoiceRecognition
+    components['voice_recognition'] = VoiceRecognition()
+except ImportError as e:
+    logger.warning(f"VoiceRecognition import error: {e}")
+    components['voice_recognition'] = None
+
+try:
+    from context_assistant import ContextAssistant
+    components['context_assistant'] = ContextAssistant()
+except ImportError as e:
+    logger.warning(f"ContextAssistant import error: {e}")
+    components['context_assistant'] = None
 
 try:
     from ai_model_router import AIModelRouter
+    components['model_router'] = AIModelRouter()
     logger.info("AIModelRouter module loaded successfully")
-except ImportError:
-    logger.warning("AIModelRouter module not available")
-    AIModelRouter = None
+except ImportError as e:
+    logger.warning(f"AIModelRouter import error: {e}")
+    components['model_router'] = None
 
 try:
     from profile_manager import ProfileManager
+    components['profile_manager'] = ProfileManager()
     logger.info("ProfileManager module loaded successfully")
-except ImportError:
-    logger.warning("ProfileManager module not available")
-    ProfileManager = None
+except ImportError as e:
+    logger.warning(f"ProfileManager import error: {e}")
+    components['profile_manager'] = None
 
-# Create a Flask app instance named 'app' for Replit compatibility
-app = Flask(__name__, static_folder='static')
-
-# Set a secret key for session management
-app.secret_key = os.environ.get('SESSION_SECRET', os.urandom(24).hex())
-
-# Load configuration
-config = Config()
-
-# Enable CORS for all routes with enhanced configuration
-if ENHANCED_CORS_AVAILABLE:
-    logger.info("Using enhanced CORS configuration")
-    cors = configure_cors(app, dev_mode=config.DEBUG)
-else:
-    logger.warning("Using fallback CORS configuration - may have limited compatibility")
-    # We can't use "*" with credentials, so fallback to explicit origins
-    origins = [
-        'https://mashaaer.replit.app',
-        'http://localhost:5000', 
-        'http://127.0.0.1:5000',
-        'https://*.replit.app'
-    ]
-    logger.info(f"CORS fallback origins: {origins}")
-    CORS(app, origins=origins, supports_credentials=True)
-
-# Initialize components
-db_manager = DatabaseManager(config)
-emotion_tracker = EmotionTracker(db_manager)
-intent_classifier = IntentClassifier()
-tts_manager = TTSManager(config)  # Fixed: passing config instead of db_manager
-tts_manager.initialize()  # Initialize TTS system
-voice_recognition = VoiceRecognition(config)
-
-# Initialize optional components
-face_detector = FaceDetector() if FaceDetector else None
-model_router = AIModelRouter() if AIModelRouter else None
-profile_manager = ProfileManager(db_manager) if ProfileManager else None
-
-# Initialize context assistant last since it depends on other components
-context_assistant = ContextAssistant(
-    db_manager=db_manager,
-    profile_manager=profile_manager,
-    emotion_tracker=emotion_tracker,
-    intent_classifier=intent_classifier
+# تسجيل مسارات API
+logger.info("Initializing API routes...")
+# لتجنب الأخطاء، نتحقق من وجود جميع المكونات المطلوبة أولاً
+api_routes.init_api(
+    app, 
+    db_manager, 
+    components.get('emotion_tracker'), 
+    components.get('face_detector'), 
+    components.get('tts_manager'), 
+    components.get('voice_recognition'), 
+    components.get('intent_classifier'), 
+    config,
+    components.get('context_assistant'), 
+    components.get('model_router'), 
+    components.get('profile_manager')
 )
 
-# Initialize API routes
-api = api_routes.init_api(
-    app, db_manager, emotion_tracker, face_detector, 
-    tts_manager, voice_recognition, intent_classifier, config,
-    context_assistant, model_router, profile_manager
-)
-
-# Developer/diagnostic API routes (if available)
+# تسجيل مسارات API للمطورين
 try:
-    import api_routes_dev
-    api_dev = api_routes_dev.init_developer_api(app, emotion_tracker, db_manager)
+    api_routes_dev.init_developer_api(app, components.get('emotion_tracker'), db_manager)
     logger.info("Developer API routes loaded")
-except ImportError:
-    logger.info("Developer API routes not available")
+except Exception as e:
+    logger.error(f"Failed to load developer API routes: {e}")
 
 @app.route('/')
 def index():
     """Main entry point for Mashaaer Feelings web application"""
     logger.info(f"Index page request received from {request.remote_addr}")
-    # Serve the official production UI with cosmic design elements
     return render_template('interactive_cosmic_splash.html')
 
 @app.route('/health')
 def health():
     """Health check endpoint for monitoring"""
-    logger.info(f"Health check request received from {request.remote_addr}")
-    response = {
+    return jsonify({
         "status": "ok",
-        "timestamp": datetime.now().isoformat(),
-        "services": {
-            "app": True,
-            "database": db_manager is not None,
-            "emotion_tracker": emotion_tracker is not None
+        "time": datetime.now().isoformat(),
+        "components": {
+            "db": db_manager is not None,
+            "emotion_tracker": components.get('emotion_tracker') is not None,
+            "voice_recognition": components.get('voice_recognition') is not None,
+            "face_detector": components.get('face_detector') is not None,
+            "tts": components.get('tts_manager') is not None
         }
-    }
-    logger.info(f"Health check response: {response}")
-    return jsonify(response)
-
-# Cosmic onboarding experience
-@app.route('/cosmic-onboarding')
-def cosmic_onboarding():
-    """Cosmic onboarding experience entry point"""
-    try:
-        return render_template('interactive_cosmic_splash.html')
-    except Exception as e:
-        logger.error(f"Error serving cosmic onboarding: {e}")
-        return render_template('error.html', message="Cosmic onboarding experience not available")
-
-# Provide alternative access to the cosmic theme UI
-@app.route('/cosmic-theme')
-def cosmic_theme():
-    """Alternative cosmic theme interface"""
-    return render_template('interactive_cosmic_splash.html')
-
-# Direct access to the homepage UI
-@app.route('/homepage')
-def homepage_direct():
-    """Direct access to the production homepage UI"""
-    return render_template('interactive_cosmic_splash.html')
-
-# Route for consent page
-@app.route('/consent')
-def consent():
-    """User consent page"""
-    return render_template('consent.html')
-
-# Route for voice registration
-@app.route('/voice-register')
-def voice_register():
-    """Voice registration page"""
-    return render_template('voice_register.html')
-
-# Route for goodbye page
-@app.route('/goodbye')
-def goodbye():
-    """Goodbye page for users who do not consent"""
-    return render_template('goodbye.html')
-
-# Simple test route
-@app.route('/simple-test')
-def simple_test():
-    """Simple test page to verify web server is working"""
-    return render_template('simple_test.html')
+    })
 
 @app.route('/hello')
 def hello():
@@ -199,50 +169,120 @@ def hello():
     logger.info(f"Hello endpoint accessed from {request.remote_addr}")
     return jsonify({
         "message": "Hello from Mashaaer API!",
-        "time": datetime.now().isoformat(),
-        "status": "ok"
+        "status": "ok",
+        "time": datetime.now().isoformat()
     })
 
-# Route for the static test page
+@app.route('/replit-health')
+def replit_health():
+    """Special health endpoint for Replit verification"""
+    return "OK", 200
+
+@app.route('/cosmic-onboarding')
+def cosmic_onboarding():
+    """Cosmic onboarding experience entry point"""
+    return render_template('cosmic_onboarding.html')
+
+@app.route('/cosmic-theme')
+def cosmic_theme():
+    """Alternative cosmic theme interface"""
+    return render_template('cosmic_theme.html')
+
+@app.route('/direct')
+def homepage_direct():
+    """Direct access to the production homepage UI"""
+    return render_template('interactive_cosmic_splash.html')
+
+@app.route('/consent')
+def consent():
+    """User consent page"""
+    return render_template('consent.html')
+
+@app.route('/voice-register')
+def voice_register():
+    """Voice registration page"""
+    return render_template('voice_register.html')
+
+@app.route('/goodbye')
+def goodbye():
+    """Goodbye page for users who do not consent"""
+    return render_template('goodbye.html')
+
+@app.route('/simple-test')
+def simple_test():
+    """Simple test page to verify web server is working"""
+    return '''
+    <!DOCTYPE html>
+    <html>
+    <head><title>Mashaaer Simple Test</title></head>
+    <body>
+        <h1>الخادم يعمل بنجاح!</h1>
+        <p>هذه صفحة اختبار بسيطة للتأكد من أن خادم الويب يعمل بشكل صحيح.</p>
+        <p>Server is working correctly! This is a simple test page.</p>
+    </body>
+    </html>
+    '''
+
 @app.route('/static-test')
 def static_test():
     """Static test page to verify web server connectivity"""
-    logger.info(f"Static test page request received from {request.remote_addr}")
-    return send_from_directory('static_test', 'simple_test.html')
+    return send_from_directory('static_test', 'index.html')
 
-# Route for serving TTS cache files
 @app.route('/tts_cache/<path:filename>')
 def serve_tts_cache(filename):
     """Serve TTS cache files"""
-    try:
-        return send_from_directory('tts_cache', filename)
-    except Exception as e:
-        logger.error(f"Error serving TTS cache file {filename}: {e}")
-        return jsonify({"error": "Audio file not found"}), 404
+    return send_from_directory('tts_cache', filename)
 
-# Catch-all route for serving static files
-@app.route('/<path:filename>')
+@app.route('/static/<path:filename>')
 def serve_static(filename):
     """Serve static files"""
-    try:
-        return send_from_directory('static', filename)
-    except Exception as e:
-        logger.error(f"Error serving static file {filename}: {e}")
-        return jsonify({"error": "File not found"}), 404
+    return send_from_directory('static', filename)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
-
-# Route for the CORS test page
 @app.route('/cors-test')
 def cors_test():
     """CORS test page to verify cross-origin configuration"""
-    logger.info(f"CORS test page request received from {request.remote_addr}")
-    return send_from_directory('static_test', 'cors_test.html')
+    return send_from_directory('static', 'cors_test.html')
 
-# Route for the offline page (for PWA)
 @app.route('/offline')
 def offline():
     """Offline page for PWA"""
     logger.info(f"Offline page request received from {request.remote_addr}")
     return send_from_directory('static', 'offline.html')
+
+@app.route('/manifest.json')
+def manifest():
+    """Serve the PWA manifest file"""
+    logger.info(f"Manifest request received from {request.remote_addr}")
+    return send_from_directory('static', 'manifest.json')
+
+@app.route('/favicon.ico')
+def favicon():
+    """Serve the favicon file"""
+    return send_from_directory('static', 'favicon.ico')
+
+@app.route('/icon-test')
+def icon_test():
+    """Test page for PWA icons"""
+    logger.info(f"Icon test page request received from {request.remote_addr}")
+    return render_template('icon_test.html')
+
+@app.route('/service-worker.js')
+def service_worker():
+    """Serve the service worker JavaScript file"""
+    logger.info(f"Service worker request received from {request.remote_addr}")
+    return send_from_directory('static', 'service-worker.js')
+
+@app.route('/pwa-test')
+def pwa_test_page():
+    """Test page for PWA features"""
+    logger.info(f"PWA test page request received from {request.remote_addr}")
+    return send_from_directory('static', 'pwa_test.html')
+
+@app.route("/test-pwa")
+def test_pwa_page():
+    """Alternative test page for PWA features"""
+    logger.info(f"Alternative PWA test page request received from {request.remote_addr}")
+    return send_from_directory('static', 'pwa_test.html')
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)

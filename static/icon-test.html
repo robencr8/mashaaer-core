@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+        }
+        
+        .icon-test {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .icon-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+            width: 200px;
+        }
+        
+        .icon-container img, .icon-container object {
+            max-width: 100%;
+        }
+        
+        .info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Icon Test Page</h1>
+    <p>This page displays all the icons used for PWA installation.</p>
+    
+    <div class="icon-test">
+        <div class="icon-container">
+            <object data="/static/icons/icon-192x192.svg" type="image/svg+xml" width="192" height="192"></object>
+            <div class="info">icon-192x192.svg</div>
+        </div>
+        
+        <div class="icon-container">
+            <object data="/static/icons/icon-512x512.svg" type="image/svg+xml" width="192" height="192"></object>
+            <div class="info">icon-512x512.svg</div>
+        </div>
+        
+        <div class="icon-container">
+            <img src="/static/favicon.ico" alt="Favicon">
+            <div class="info">favicon.ico</div>
+        </div>
+    </div>
+    
+    <h2>Manifest Information</h2>
+    <pre id="manifest-info">Loading manifest information...</pre>
+    
+    <script>
+        // Fetch and display manifest information
+        fetch('/manifest.json')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('manifest-info').textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('manifest-info').textContent = 'Error loading manifest: ' + error.message;
+            });
+    </script>
+</body>
+</html>

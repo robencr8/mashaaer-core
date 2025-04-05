@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#180538">
+    <title>اختبار PWA - مشاعر</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/static/favicon.ico">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mashaaer">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #180538;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #9370DB;
+        }
+        .test-section {
+            background-color: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #9370DB;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #8a2be2;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: rgba(0,128,0,0.3);
+            border: 1px solid green;
+        }
+        .error {
+            background-color: rgba(255,0,0,0.3);
+            border: 1px solid red;
+        }
+        pre {
+            background-color: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .cosmic-sphere {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #6a0dad 0%, #4b0082 100%);
+            border-radius: 50%;
+            margin: 20px auto;
+            box-shadow: 0 0 30px #9370DB;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.9em;
+            opacity: 0.7;
+        }
+    </style>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
+                    console.log('Service Worker تم تسجيله بنجاح:', registration.scope);
+                    document.getElementById('sw-status').textContent = 'تم تسجيل Service Worker بنجاح!';
+                    document.getElementById('sw-status').className = 'status success';
+                }, function(err) {
+                    console.log('Service Worker فشل التسجيل:', err);
+                    document.getElementById('sw-status').textContent = 'فشل تسجيل Service Worker: ' + err;
+                    document.getElementById('sw-status').className = 'status error';
+                });
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="cosmic-sphere"></div>
+            <h1>اختبار مشاعر PWA</h1>
+            <p>أداة لاختبار واستكشاف ميزات تطبيق الويب التقدمي</p>
+        </header>
+
+        <div class="test-section">
+            <h2>حالة Service Worker</h2>
+            <div id="sw-status" class="status">جاري التحقق...</div>
+            <button onclick="checkServiceWorker()">إعادة التحقق</button>
+            <button onclick="unregisterServiceWorker()">إلغاء تسجيل Service Worker</button>
+        </div>
+
+        <div class="test-section">
+            <h2>معلومات ملف التجانب (Manifest)</h2>
+            <pre id="manifest-info">جاري التحميل...</pre>
+            <button onclick="loadManifestInfo()">تحميل معلومات التجانب</button>
+        </div>
+
+        <div class="test-section">
+            <h2>اختبار التخزين المؤقت</h2>
+            <div id="cache-status" class="status">اضغط على الزر لاختبار التخزين المؤقت</div>
+            <button onclick="testCaching()">اختبار التخزين المؤقت</button>
+            <button onclick="clearCache()">مسح التخزين المؤقت</button>
+        </div>
+
+        <div class="test-section">
+            <h2>محاكاة وضع عدم الاتصال</h2>
+            <p>يمكنك اختبار وضع عدم الاتصال من خلال:</p>
+            <ol>
+                <li>فتح أدوات المطور في المتصفح (F12)</li>
+                <li>الانتقال إلى تبويب "Network" أو "الشبكة"</li>
+                <li>تفعيل خيار "Offline" أو "بدون اتصال"</li>
+                <li>محاولة تحميل الصفحة مرة أخرى</li>
+            </ol>
+            <p>أو يمكنك استخدام الزر أدناه لمحاكاة عدم الاتصال:</p>
+            <button onclick="simulateOffline()">محاكاة وضع عدم الاتصال</button>
+        </div>
+
+        <div class="test-section">
+            <h2>إنشاء بيانات وصفية للتثبيت</h2>
+            <p>في بعض المتصفحات، قد تحتاج إلى زيارة الموقع عدة مرات قبل ظهور خيار التثبيت.</p>
+            <button onclick="triggerInstallPrompt()">تجربة ظهور مطالبة التثبيت</button>
+            <div id="install-status" class="status">جاري التحضير...</div>
+        </div>
+
+        <footer>
+            <p>تطبيق مشاعر &copy; 2025 | <a href="/" style="color: #9370DB;">العودة للصفحة الرئيسية</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // تحقق من حالة Service Worker
+        function checkServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    const statusEl = document.getElementById('sw-status');
+                    if (registrations.length > 0) {
+                        statusEl.textContent = `تم العثور على ${registrations.length} تسجيل لـ Service Worker. النطاق: ${registrations[0].scope}`;
+                        statusEl.className = 'status success';
+                    } else {
+                        statusEl.textContent = 'لم يتم العثور على أي تسجيل لـ Service Worker';
+                        statusEl.className = 'status error';
+                    }
+                });
+            } else {
+                document.getElementById('sw-status').textContent = 'Service Worker غير مدعوم في هذا المتصفح';
+                document.getElementById('sw-status').className = 'status error';
+            }
+        }
+
+        // إلغاء تسجيل Service Worker
+        function unregisterServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    const statusEl = document.getElementById('sw-status');
+                    if (registrations.length > 0) {
+                        for(let registration of registrations) {
+                            registration.unregister();
+                        }
+                        statusEl.textContent = 'تم إلغاء تسجيل Service Worker بنجاح';
+                        statusEl.className = 'status success';
+                    } else {
+                        statusEl.textContent = 'لم يتم العثور على أي تسجيل لـ Service Worker';
+                        statusEl.className = 'status error';
+                    }
+                });
+            }
+        }
+
+        // تحميل معلومات ملف التجانب
+        function loadManifestInfo() {
+            fetch('/manifest.json')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('manifest-info').textContent = JSON.stringify(data, null, 2);
+                })
+                .catch(error => {
+                    document.getElementById('manifest-info').textContent = 'حدث خطأ أثناء تحميل ملف التجانب: ' + error.message;
+                });
+        }
+
+        // اختبار التخزين المؤقت
+        function testCaching() {
+            const statusEl = document.getElementById('cache-status');
+            
+            if ('caches' in window) {
+                caches.open('mashaaer-cache-v1').then(cache => {
+                    cache.add('/static/sounds/welcome.mp3').then(() => {
+                        statusEl.textContent = 'تم تخزين ملف الصوت بنجاح في التخزين المؤقت';
+                        statusEl.className = 'status success';
+                        
+                        // تحقق من التخزين
+                        setTimeout(() => {
+                            caches.match('/static/sounds/welcome.mp3').then(response => {
+                                if (response) {
+                                    statusEl.textContent = 'تم التحقق: الملف متوفر في التخزين المؤقت';
+                                } else {
+                                    statusEl.textContent = 'تحذير: لم يتم العثور على الملف في التخزين المؤقت';
+                                    statusEl.className = 'status error';
+                                }
+                            });
+                        }, 1000);
+                    }).catch(err => {
+                        statusEl.textContent = 'خطأ أثناء تخزين الملف: ' + err.message;
+                        statusEl.className = 'status error';
+                    });
+                });
+            } else {
+                statusEl.textContent = 'API التخزين المؤقت غير متوفر في هذا المتصفح';
+                statusEl.className = 'status error';
+            }
+        }
+
+        // مسح التخزين المؤقت
+        function clearCache() {
+            const statusEl = document.getElementById('cache-status');
+            
+            if ('caches' in window) {
+                caches.delete('mashaaer-cache-v1').then(successful => {
+                    if (successful) {
+                        statusEl.textContent = 'تم مسح التخزين المؤقت بنجاح';
+                        statusEl.className = 'status success';
+                    } else {
+                        statusEl.textContent = 'لم يتم العثور على التخزين المؤقت لمسحه';
+                        statusEl.className = 'status error';
+                    }
+                });
+            } else {
+                statusEl.textContent = 'API التخزين المؤقت غير متوفر في هذا المتصفح';
+                statusEl.className = 'status error';
+            }
+        }
+
+        // محاكاة وضع عدم الاتصال
+        function simulateOffline() {
+            window.location.href = '/offline';
+        }
+
+        // تجربة ظهور مطالبة التثبيت
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // منع ظهور المطالبة تلقائيًا
+            e.preventDefault();
+            // تخزين الحدث للاستخدام لاحقًا
+            deferredPrompt = e;
+            // تحديث واجهة المستخدم
+            document.getElementById('install-status').textContent = 'التطبيق جاهز للتثبيت! انقر على الزر للتثبيت.';
+            document.getElementById('install-status').className = 'status success';
+        });
+
+        function triggerInstallPrompt() {
+            const statusEl = document.getElementById('install-status');
+            
+            if (deferredPrompt) {
+                // إظهار مطالبة التثبيت
+                deferredPrompt.prompt();
+                
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        statusEl.textContent = 'تم قبول تثبيت التطبيق!';
+                        statusEl.className = 'status success';
+                    } else {
+                        statusEl.textContent = 'تم رفض تثبيت التطبيق';
+                        statusEl.className = 'status error';
+                    }
+                    // لا يمكن استخدام المطالبة مرة أخرى
+                    deferredPrompt = null;
+                });
+            } else {
+                statusEl.textContent = 'التطبيق غير مؤهل للتثبيت أو تم تثبيته بالفعل';
+                statusEl.className = 'status error';
+            }
+        }
+
+        // تحميل معلومات التجانب تلقائيًا
+        loadManifestInfo();
+        // تحقق من حالة Service Worker عند التحميل
+        setTimeout(checkServiceWorker, 1000);
+    </script>
+</body>
+</html>

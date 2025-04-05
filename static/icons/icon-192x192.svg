@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <radialGradient id="sphereGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" style="stop-color:#9370DB; stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4B0082; stop-opacity:1" />
+    </radialGradient>
+  </defs>
+  <rect width="192" height="192" fill="#180538" />
+  <circle cx="96" cy="96" r="60" fill="url(#sphereGradient)" />
+  <circle cx="96" cy="96" r="60" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.3" />
+  <ellipse cx="96" cy="96" rx="75" ry="30" fill="none" stroke="#9370DB" stroke-width="1" opacity="0.5" transform="rotate(30, 96, 96)" />
+  <ellipse cx="96" cy="96" rx="82" ry="34" fill="none" stroke="#9370DB" stroke-width="1" opacity="0.3" transform="rotate(60, 96, 96)" />
+  <ellipse cx="96" cy="96" rx="90" ry="38" fill="none" stroke="#9370DB" stroke-width="0.5" opacity="0.2" transform="rotate(90, 96, 96)" />
+  <text x="96" y="160" font-family="Arial" font-size="16" fill="#FFFFFF" text-anchor="middle">مشاعر</text>
+</svg>
