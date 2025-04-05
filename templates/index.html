@@ -110,10 +110,10 @@
       const langToggle = document.getElementById('langToggle');
       const enContent = document.querySelectorAll('[lang="en"]');
       const arContent = document.querySelectorAll('[lang="ar"]');
-      
+
       langToggle.addEventListener('click', function() {
         const isShowingEn = langToggle.getAttribute('data-showing') === 'en';
-        
+
         if (isShowingEn) {
           // Switch to Arabic
           enContent.forEach(el => el.style.display = 'none');
@@ -136,14 +136,14 @@
     <div class="language-toggle">
       <button id="langToggle" data-showing="en">العربية</button>
     </div>
-    
+
     <div lang="en">
       <h1>Welcome to Mashaaer Feelings Application | مشاعر</h1>
       <div class="status">
         <p>✅ The application is running correctly.</p>
       </div>
       <p>This is a bilingual (Arabic/English) responsive web application with AI-driven personalization and adaptive interfaces.</p>
-      
+
       <div class="features">
         <h3>Features:</h3>
         <div class="feature">AI-driven personalization</div>
@@ -152,28 +152,28 @@
         <div class="feature">Multi-modal input support</div>
         <div class="feature">Culturally aware UI/UX design</div>
       </div>
-      
+
       <div class="api-links">
         <h3>API Endpoints:</h3>
         <a class="api-link" href="/health">Health Check</a>
         <a class="api-link" href="/api/status">API Status</a>
         <a class="api-link" href="/api/docs">API Documentation</a>
       </div>
-      
+
       <div class="ui-section">
         <h3>User Interfaces:</h3>
         <a class="ui-link" href="/">📱 Main Application UI</a>
         <a class="ui-link cosmic-link" href="/cosmic-theme">✨ Cosmic Theme Experience</a>
       </div>
     </div>
-    
+
     <div lang="ar">
       <h1>مرحبا بكم في مشاعر</h1>
       <div class="status">
         <p>✅ التطبيق يعمل بشكل صحيح.</p>
       </div>
       <p>هذا تطبيق ويب ثنائي اللغة (العربية/الإنجليزية) يستجيب مع تخصيص مدعوم بالذكاء الاصطناعي وواجهات تكيفية.</p>
-      
+
       <div class="features">
         <h3>المميزات:</h3>
         <div class="feature">تخصيص مدعوم بالذكاء الاصطناعي</div>
@@ -182,14 +182,14 @@
         <div class="feature">دعم إدخال متعدد الوسائط</div>
         <div class="feature">تصميم واجهة مستخدم/تجربة مستخدم مراعٍ للثقافة</div>
       </div>
-      
+
       <div class="api-links">
         <h3>نقاط النهاية API:</h3>
         <a class="api-link" href="/health">فحص الصحة</a>
         <a class="api-link" href="/api/status">حالة API</a>
         <a class="api-link" href="/api/docs">وثائق API</a>
       </div>
-      
+
       <div class="ui-section">
         <h3>واجهات المستخدم:</h3>
         <a class="ui-link" href="/">📱 واجهة التطبيق الرئيسية</a>

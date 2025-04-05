@@ -21,14 +21,14 @@
     <header>
       <h1>Emotional Cosmos</h1>
       <h2>Mapping Your Emotional Journey</h2>
-      
+
       <div class="cosmic-orb">
         <div class="orbit"></div>
         <div class="orbit"></div>
         <div class="orbit"></div>
         <div class="orb"></div>
       </div>
-      
+
       <div class="user-status" id="userStatus">
         <span class="status-dot"></span>
         <span class="status-text">Analyzing emotional patterns...</span>
@@ -107,23 +107,23 @@
   <footer>
     Robin AI - Mapping the universe of human emotions.
   </footer>
-  
+
   <script src="{{ versioned_url('mobile/js/api-service.js') }}"></script>
   <script src="{{ versioned_url('mobile/js/emotions.js') }}"></script>
-  
+
   <script>
     // Initialize the toast notification system
     function showToast(message, type = 'info') {
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
       toast.textContent = message;
-      
+
       document.body.appendChild(toast);
-      
+
       setTimeout(() => {
         toast.classList.add('show');
       }, 100);
-      
+
       setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => {
@@ -131,34 +131,34 @@
         }, 300);
       }, 3000);
     }
-    
+
     // Check for Safari browser and SpeechRecognition support
     document.addEventListener('DOMContentLoaded', function() {
       // Detect Safari browser
       const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-      
+
       // Check if SpeechRecognition is supported
       const hasSpeechRecognition = 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
-      
+
       // Show warning if Safari and no SpeechRecognition support
       if (isSafari && !hasSpeechRecognition) {
         document.getElementById('speechRecognitionWarning').style.display = 'block';
       }
-      
+
       // Close button for warning banner
       document.getElementById('closeSpeechWarning').addEventListener('click', function() {
         document.getElementById('speechRecognitionWarning').style.display = 'none';
-        
+
         // Set a flag in localStorage to remember the user's choice
         localStorage.setItem('speechWarningDismissed', 'true');
       });
-      
+
       // Only show the warning if it hasn't been dismissed before
       if (localStorage.getItem('speechWarningDismissed') === 'true') {
         document.getElementById('speechRecognitionWarning').style.display = 'none';
       }
     });
-    
+
     // Tab navigation
     document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', function() {
