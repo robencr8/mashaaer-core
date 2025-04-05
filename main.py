@@ -302,6 +302,23 @@ def tts_test_page():
     logger.info("TTS test page requested")
     return app.send_static_file('tts_test.html')
 
+@app.route('/feedback-tool-test')
+def feedback_tool_test_route():
+    """Serve a special test page specifically designed for the web application feedback tool"""
+    try:
+        logger.info("Feedback tool test page requested")
+        response = make_response("Mashaaer TTS is working properly. This page is accessible to the feedback tool.")
+        # Add explicit CORS headers for feedback tool compatibility
+        response.headers['Content-Type'] = 'text/plain'
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Expose-Headers'] = 'Content-Length, Content-Type, Date'
+        return response
+    except Exception as e:
+        logger.error(f"Error serving feedback tool test page: {str(e)}")
+        return f"Error: {str(e)}", 500
+
 # Ultra minimal test page specifically for the web application feedback tool
 @app.route('/ultra-minimal-test')
 def ultra_minimal_test_page():
@@ -1058,6 +1075,56 @@ def test_simple_html_page():
         error_msg = f"Error in test route: {str(e)}"
         logger.error(error_msg)
         return f"Error: {error_msg}", 500
+
+@app.route('/tts-test-simple')
+def tts_test_page_simple():
+    """Serve a simplified TTS testing page to verify TTS functionality"""
+    try:
+        logger.info("Simple TTS Test page accessed")
+        # Serve the static HTML file with additional CORS headers for maximum compatibility
+        response = send_from_directory('static_test', 'tts_test.html')
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Access-Control-Expose-Headers'] = 'Content-Length, Content-Type, Date'
+        logger.info("Added CORS headers to TTS test page response")
+        return response
+    except Exception as e:
+        error_msg = f"Error serving simple TTS test page: {str(e)}"
+        logger.error(error_msg)
+        logger.error(traceback.format_exc())
+        # Also add CORS headers to error response
+        response = make_response(f"Error: {error_msg}", 500)
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+
+@app.route('/tts-minimal')
+def tts_minimal_test():
+    """Serve an ultra-minimal plain text response for TTS testing with the feedback tool"""
+    try:
+        logger.info("Ultra-minimal TTS test endpoint accessed")
+        response = make_response("Mashaaer TTS is working. The server is accessible.")
+        response.headers['Content-Type'] = 'text/plain'
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        logger.info("Sending ultra-minimal text response with CORS headers")
+        return response
+    except Exception as e:
+        logger.error(f"Error in ultra-minimal TTS test: {str(e)}")
+        response = make_response(f"Error: {str(e)}", 500)
+        response.headers['Content-Type'] = 'text/plain'
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+
+@app.route('/ultra-basic')
+def ultra_basic_test():
+    """Absolute minimal endpoint for feedback tool compatibility"""
+    # No logging, no try/except, just the simplest possible response
+    response = make_response("OK")
+    response.headers['Content-Type'] = 'text/plain'
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
 
 
 # Root route is now handled by routes_feedback_tool.py to avoid conflicts

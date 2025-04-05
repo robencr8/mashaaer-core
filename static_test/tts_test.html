@@ -1,28 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>TTS Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer TTS Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f5f5f5;
         }
-        .container {
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .test-section {
-            margin-bottom: 30px;
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
         }
         button {
             background-color: #4CAF50;
-            border: none;
             color: white;
-            padding: 10px 15px;
+            border: none;
+            padding: 10px 20px;
             text-align: center;
             text-decoration: none;
             display: inline-block;
@@ -31,199 +54,248 @@
             cursor: pointer;
             border-radius: 4px;
         }
-        textarea {
+        button:hover {
+            background-color: #45a049;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+        }
+        #resultCard {
+            display: none;
+        }
+        audio {
             width: 100%;
-            height: 100px;
-            margin-bottom: 10px;
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-        select {
-            padding: 8px;
-            border-radius: 4px;
-            margin-right: 10px;
-        }
-        .log {
-            background-color: #f8f8f8;
-            border: 1px solid #ddd;
-            padding: 10px;
             margin-top: 10px;
-            border-radius: 4px;
-            height: 150px;
-            overflow-y: auto;
         }
-        #audioSourceInfo {
-            margin-top: 5px;
-            font-size: 14px;
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status {
             color: #666;
+            font-style: italic;
+            margin-top: 8px;
+        }
+        #logArea {
+            background-color: #333;
+            color: #fff;
+            font-family: monospace;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
-    <h1>TTS Testing Interface</h1>
+    <h1>Mashaaer TTS Testing Tool</h1>
     
-    <div class="container">
+    <div class="card">
         <h2>Web API Test</h2>
-        <div class="test-section">
-            <textarea id="webApiText">Hello, this is a test of the text-to-speech system using the web API.</textarea>
-            <div>
-                <select id="webApiLanguage">
-                    <option value="en">English</option>
-                    <option value="ar">Arabic</option>
-                </select>
-                <button onclick="playWebTTS()">Play TTS (Web API)</button>
+        <div>
+            <label for="text">Text to convert to speech:</label>
+            <textarea id="text" placeholder="Enter text to convert to speech...">Welcome to Mashaaer Feelings. Create the future, I'm listening.</textarea>
+            
+            <label for="language">Language:</label>
+            <select id="language">
+                <option value="en-US">English (US)</option>
+                <option value="ar">Arabic</option>
+            </select>
+            
+            <label for="voice">Voice:</label>
+            <select id="voice">
+                <option value="default">Default</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="formal">Formal</option>
+                <option value="casual">Casual</option>
+                <option value="british">British</option>
+                <option value="arabic">Arabic</option>
+                <option value="english">English</option>
+            </select>
+            
+            <div class="button-group">
+                <button id="generateWebApi">Generate Speech (Web API)</button>
+                <button id="generateMobileApi">Generate Speech (Mobile API)</button>
             </div>
-            <audio id="webAudioPlayer" controls></audio>
-            <div id="webAudioSourceInfo"></div>
-            <div class="log" id="webApiLog">Web API logs will appear here...</div>
         </div>
     </div>
     
-    <div class="container">
-        <h2>Mobile API Test</h2>
-        <div class="test-section">
-            <textarea id="mobileApiText">Hello, this is a test of the text-to-speech system using the mobile API.</textarea>
-            <div>
-                <select id="mobileApiLanguage">
-                    <option value="en">English</option>
-                    <option value="ar">Arabic</option>
-                </select>
-                <select id="mobileApiVoice">
-                    <option value="default">Default</option>
-                    <option value="rachel">Rachel (Female)</option>
-                    <option value="josh">Josh (Male)</option>
-                    <option value="arabic">Arabic</option>
-                </select>
-                <button onclick="playMobileTTS()">Play TTS (Mobile API)</button>
-            </div>
-            <audio id="mobileAudioPlayer" controls></audio>
-            <div id="mobileAudioSourceInfo"></div>
-            <div class="log" id="mobileApiLog">Mobile API logs will appear here...</div>
-        </div>
+    <div id="resultCard" class="card">
+        <h2>Result</h2>
+        <audio id="audioPlayer" controls></audio>
+        <div class="status" id="status"></div>
     </div>
-
+    
+    <div class="card">
+        <h2>Console</h2>
+        <div id="logArea"></div>
+        <button id="clearLogs" style="margin-top: 10px;">Clear Logs</button>
+    </div>
+    
+    <div class="loader" id="loader"></div>
+    
     <script>
-        function logToElement(elementId, message, isError = false) {
-            const logElement = document.getElementById(elementId);
-            const timestamp = new Date().toLocaleTimeString();
-            const entry = document.createElement('div');
-            entry.textContent = `[${timestamp}] ${message}`;
+        document.addEventListener('DOMContentLoaded', function() {
+            const textInput = document.getElementById('text');
+            const languageSelect = document.getElementById('language');
+            const voiceSelect = document.getElementById('voice');
+            const generateWebApiButton = document.getElementById('generateWebApi');
+            const generateMobileApiButton = document.getElementById('generateMobileApi');
+            const resultCard = document.getElementById('resultCard');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const statusElement = document.getElementById('status');
+            const logArea = document.getElementById('logArea');
+            const loader = document.getElementById('loader');
+            const clearLogsButton = document.getElementById('clearLogs');
             
-            if (isError) {
-                entry.style.color = 'red';
-            }
-            
-            logElement.appendChild(entry);
-            logElement.scrollTop = logElement.scrollHeight;
-        }
-
-        function updateAudioSourceInfo(infoElementId, path, details) {
-            const infoElement = document.getElementById(infoElementId);
-            infoElement.innerHTML = `
-                <strong>Audio Source:</strong> ${path}<br>
-                <strong>Details:</strong> ${details}
-            `;
-        }
-
-        function playWebTTS() {
-            const text = document.getElementById('webApiText').value;
-            const language = document.getElementById('webApiLanguage').value;
-            const logElementId = 'webApiLog';
-            
-            if (!text) {
-                logToElement(logElementId, 'Error: Text is empty', true);
-                return;
-            }
-            
-            logToElement(logElementId, `Sending request to /api/speak: "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}" (${language})`);
-            
-            fetch('/api/speak', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text, language })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+            // Try to populate Arabic field with Arabic text if user selects Arabic
+            languageSelect.addEventListener('change', function() {
+                if (this.value === 'ar' && textInput.value.trim() === '') {
+                    textInput.value = 'مرحبًا بك في مشاعر. اصنع المستقبل، أنا أسمعك.';
+                } else if (this.value === 'en-US' && textInput.value.trim() === '') {
+                    textInput.value = 'Welcome to Mashaaer Feelings. Create the future, I\'m listening.';
                 }
-                logToElement(logElementId, `Response received (HTTP ${response.status})`);
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    logToElement(logElementId, `Success! Audio path: ${data.audio_path}`);
-                    
-                    const audioPlayer = document.getElementById('webAudioPlayer');
-                    audioPlayer.src = data.audio_path;
-                    audioPlayer.play();
-                    
-                    updateAudioSourceInfo('webAudioSourceInfo', data.audio_path, 
-                                        `Voice: ${data.voice}, Language: ${data.language}`);
-                } else {
-                    logToElement(logElementId, `Error: ${data.error || 'Unknown error'}`, true);
+            });
+            
+            // Log messages to the console card
+            function log(message, isError = false) {
+                const logEntry = document.createElement('div');
+                logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                if (isError) {
+                    logEntry.style.color = '#ff6b6b';
+                }
+                logArea.appendChild(logEntry);
+                logArea.scrollTop = logArea.scrollHeight;
+            }
+            
+            // Clear logs
+            clearLogsButton.addEventListener('click', function() {
+                logArea.innerHTML = '';
+            });
+            
+            // Handle Web API request
+            generateWebApiButton.addEventListener('click', function() {
+                const text = textInput.value.trim();
+                const language = languageSelect.value;
+                const voice = voiceSelect.value;
+                
+                if (!text) {
+                    log('Error: No text provided', true);
+                    return;
                 }
                 
-                // Log all response data for debugging
-                logToElement(logElementId, `Full response: ${JSON.stringify(data, null, 2)}`);
-            })
-            .catch(error => {
-                logToElement(logElementId, `Fetch error: ${error.message}`, true);
-                console.error('Fetch error:', error);
-            });
-        }
-
-        function playMobileTTS() {
-            const text = document.getElementById('mobileApiText').value;
-            const language = document.getElementById('mobileApiLanguage').value;
-            const voice = document.getElementById('mobileApiVoice').value;
-            const logElementId = 'mobileApiLog';
-            
-            if (!text) {
-                logToElement(logElementId, 'Error: Text is empty', true);
-                return;
-            }
-            
-            logToElement(logElementId, `Sending request to /mobile-api/speak: "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}" (${language}, ${voice})`);
-            
-            fetch('/mobile-api/speak', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text, language, voice })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                logToElement(logElementId, `Response received (HTTP ${response.status})`);
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    logToElement(logElementId, `Success! Audio path: ${data.audio_path}`);
-                    
-                    const audioPlayer = document.getElementById('mobileAudioPlayer');
-                    audioPlayer.src = data.audio_path;
-                    audioPlayer.play();
-                    
-                    let details = `Voice: ${data.voice}, Language: ${data.language}`;
-                    if (data.cache_status) {
-                        details += `, Cache: ${data.cache_status}`;
+                // Show loader
+                loader.style.display = 'block';
+                resultCard.style.display = 'none';
+                log(`Sending request to Web API: text="${text}", language=${language}, voice=${voice}`);
+                
+                // Make API request
+                fetch('/api/speak', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        language: language,
+                        voice: voice
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
                     }
+                    return response.json();
+                })
+                .then(data => {
+                    log(`Success! Audio file: ${data.audio_file}`);
                     
-                    updateAudioSourceInfo('mobileAudioSourceInfo', data.audio_path, details);
-                } else {
-                    logToElement(logElementId, `Error: ${data.error || 'Unknown error'}`, true);
+                    // Update UI with audio
+                    audioPlayer.src = data.audio_file;
+                    resultCard.style.display = 'block';
+                    statusElement.textContent = `Generated using provider: ${data.provider || 'unknown'}, voice: ${data.voice || voice}`;
+                    
+                    // Try to play the audio
+                    audioPlayer.load();
+                    audioPlayer.play().catch(e => log(`Audio playback error: ${e.message}`, true));
+                })
+                .catch(error => {
+                    log(`Error: ${error.message}`, true);
+                })
+                .finally(() => {
+                    loader.style.display = 'none';
+                });
+            });
+            
+            // Handle Mobile API request
+            generateMobileApiButton.addEventListener('click', function() {
+                const text = textInput.value.trim();
+                const language = languageSelect.value;
+                const voice = voiceSelect.value;
+                
+                if (!text) {
+                    log('Error: No text provided', true);
+                    return;
                 }
                 
-                // Log all response data for debugging
-                logToElement(logElementId, `Full response: ${JSON.stringify(data, null, 2)}`);
-            })
-            .catch(error => {
-                logToElement(logElementId, `Fetch error: ${error.message}`, true);
-                console.error('Fetch error:', error);
+                // Show loader
+                loader.style.display = 'block';
+                resultCard.style.display = 'none';
+                log(`Sending request to Mobile API: text="${text}", language=${language}, voice=${voice}`);
+                
+                // Make API request
+                fetch('/mobile-api/speak', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        language: language,
+                        voice: voice
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    log(`Success! Audio file: ${data.audio_file}`);
+                    
+                    // Update UI with audio
+                    audioPlayer.src = data.audio_file;
+                    resultCard.style.display = 'block';
+                    statusElement.textContent = `Generated using provider: ${data.provider || 'unknown'}, voice: ${data.voice || voice}`;
+                    
+                    // Try to play the audio
+                    audioPlayer.load();
+                    audioPlayer.play().catch(e => log(`Audio playback error: ${e.message}`, true));
+                })
+                .catch(error => {
+                    log(`Error: ${error.message}`, true);
+                })
+                .finally(() => {
+                    loader.style.display = 'none';
+                });
             });
-        }
+            
+            // Log initial page load
+            log('TTS Test page loaded successfully');
+        });
     </script>
 </body>
 </html>

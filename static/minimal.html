@@ -1,10 +1,67 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Minimal Test</title>
+    <title>Minimal Test Page</title>
 </head>
 <body>
-    <h1>Minimal Test Page</h1>
-    <p>Server is reachable.</p>
+    <h1>Mashaaer Feelings TTS Test</h1>
+    <p>This is a minimal test page to verify that the server is accessible.</p>
+    <p>Status: <span id="status" style="color: green; font-weight: bold;">ONLINE</span></p>
+    
+    <div>
+        <h2>Test Text-to-Speech</h2>
+        <input type="text" id="text-input" value="Hello, welcome to Mashaaer Feelings" />
+        <select id="voice-type">
+            <option value="default">Default</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="arabic">Arabic</option>
+        </select>
+        <select id="language">
+            <option value="en-US">English</option>
+            <option value="ar">Arabic</option>
+        </select>
+        <button onclick="testTTS()">Generate Speech</button>
+        <div id="result"></div>
+        <audio id="audio-player" controls style="display: none;"></audio>
+    </div>
+
+    <script>
+        function testTTS() {
+            const text = document.getElementById('text-input').value;
+            const voiceType = document.getElementById('voice-type').value;
+            const language = document.getElementById('language').value;
+            const result = document.getElementById('result');
+            const player = document.getElementById('audio-player');
+            
+            result.innerHTML = "Generating speech...";
+            
+            fetch('/api/speak', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: text,
+                    voice_style: voiceType,
+                    language: language
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.audio_url) {
+                    result.innerHTML = `<p style="color: green">Speech generated successfully!</p>`;
+                    player.src = data.audio_url;
+                    player.style.display = 'block';
+                    player.play();
+                } else {
+                    result.innerHTML = `<p style="color: red">Error: ${data.error || 'No audio URL returned'}</p>`;
+                }
+            })
+            .catch(error => {
+                result.innerHTML = `<p style="color: red">Error: ${error.message}</p>`;
+            });
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer TTS Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-left: 4px solid #4CAF50;
+        }
+        .error {
+            color: red;
+            background-color: #ffeeee;
+            padding: 10px;
+            border-left: 4px solid red;
+            margin-top: 10px;
+        }
+        .success {
+            color: green;
+            background-color: #eeffee;
+            padding: 10px;
+            border-left: 4px solid green;
+            margin-top: 10px;
+        }
+        .console {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+            border-radius: 5px;
+            font-family: monospace;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .output {
+            margin-top: 5px;
+            white-space: pre-wrap;
+        }
+        .info {
+            color: #2196F3;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        .status-success {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .status-failed {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mashaaer TTS Test <span class="status-badge status-success">Feedback Tool Accessible</span></h1>
+    
+    <div class="content">
+        <div class="test-section">
+            <h2>Test TTS Functionality</h2>
+            <p>This page allows you to test the Text-to-Speech (TTS) functionality of the Mashaaer application using both the web API and mobile API endpoints.</p>
+            
+            <div class="form-group">
+                <label for="text">Enter text to convert to speech:</label>
+                <input type="text" id="text" value="Welcome to Mashaaer Feelings. Create the future, I'm listening.">
+            </div>
+            
+            <div class="form-group">
+                <label for="voice-type">Select voice type:</label>
+                <select id="voice-type">
+                    <option value="default">Default</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="british">British</option>
+                    <option value="arabic">Arabic</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="language">Select language:</label>
+                <select id="language">
+                    <option value="en-US">English</option>
+                    <option value="ar">Arabic</option>
+                </select>
+            </div>
+            
+            <button onclick="generateSpeech('web')">Generate Speech (Web API)</button>
+            <button onclick="generateSpeech('mobile')">Generate Speech (Mobile API)</button>
+            
+            <div class="result" id="result">
+                <audio id="audio-player" controls style="width: 100%; display: none;"></audio>
+            </div>
+        </div>
+        
+        <div class="console">
+            <h3>Console Output</h3>
+            <div id="console-output" class="output"></div>
+        </div>
+    </div>
+
+    <script>
+        // Log to console function
+        function logToConsole(message, type = 'info') {
+            const consoleOutput = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            let className = '';
+            
+            if (type === 'error') className = 'error';
+            else if (type === 'success') className = 'success';
+            else className = 'info';
+            
+            consoleOutput.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        // Function to generate speech
+        function generateSpeech(apiType) {
+            const text = document.getElementById('text').value;
+            const voiceType = document.getElementById('voice-type').value;
+            const language = document.getElementById('language').value;
+            const audioPlayer = document.getElementById('audio-player');
+            const result = document.getElementById('result');
+            
+            // Validate input
+            if (!text) {
+                logToConsole('Please enter text to convert to speech.', 'error');
+                return;
+            }
+            
+            logToConsole(`Generating speech via ${apiType} API...`);
+            
+            // Determine API endpoint based on type
+            const endpoint = apiType === 'web' ? '/api/speak' : '/mobile-api/speak';
+            
+            // Send request to the API
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text: text,
+                    voice_style: voiceType,
+                    language: language
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                logToConsole(`Response status: ${response.status}`, 'success');
+                return response.json();
+            })
+            .then(data => {
+                logToConsole(`API response: ${JSON.stringify(data)}`, 'success');
+                
+                if (data.audio_url) {
+                    // Display the audio player
+                    audioPlayer.src = data.audio_url;
+                    audioPlayer.style.display = 'block';
+                    audioPlayer.play().catch(e => logToConsole(`Audio playback error: ${e.message}`, 'error'));
+                    
+                    // Add success message
+                    logToConsole(`Generated audio available at: ${data.audio_url}`, 'success');
+                } else {
+                    logToConsole('No audio URL in the response.', 'error');
+                }
+            })
+            .catch(error => {
+                logToConsole(`Error: ${error.message}`, 'error');
+                result.innerHTML += `<div class="error">Failed to generate speech: ${error.message}</div>`;
+            });
+        }
+
+        // Log initial status
+        window.onload = function() {
+            logToConsole('TTS Test Page loaded successfully.');
+            logToConsole('Ready to test TTS functionality with Web and Mobile APIs.');
+            
+            // Test API status
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    logToConsole(`API Status: ${JSON.stringify(data)}`, 'success');
+                })
+                .catch(error => {
+                    logToConsole(`API Status check failed: ${error.message}`, 'error');
+                });
+        };
+    </script>
+</body>
+</html>
