@@ -144,3 +144,45 @@ def index():
     """Serve the main homepage"""
     logger.debug("Serving homepage")
     return render_template("index.html")
+
+# Add recommendations page route
+@app.route("/recommendations", methods=["GET"])
+def recommendations_page():
+    """Show the AI-powered recommendations page"""
+    logger.debug("Serving recommendations page")
+    return render_template("recommendations.html")
+
+# Add emotion analysis API endpoint
+@app.route("/api/analyze-emotion", methods=["POST"])
+def analyze_emotion():
+    """Analyze text for emotional content and return the detected emotion"""
+    logger.debug("Analyzing emotion via API endpoint")
+    try:
+        data = request.get_json()
+        if not data or 'text' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'Missing required parameter: text'
+            }), 400
+            
+        text = data['text']
+        return_details = data.get('return_details', True)
+        
+        # Analyze the text using the emotion tracker
+        result = emotion_tracker.analyze_text(text, return_details=return_details)
+        
+        # Format the response
+        response = {
+            'success': True,
+            'primary_emotion': result.get('primary_emotion', 'neutral'),
+            'emotion_data': result if return_details else None
+        }
+        
+        return jsonify(response)
+    except Exception as e:
+        logger.error(f"Error analyzing emotion: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to analyze emotion',
+            'message': str(e)
+        }), 500
