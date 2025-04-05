@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Analysis Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f7f9fc;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid #3498db;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: inherit;
+            margin-bottom: 15px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        #result {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .emotion-bar {
+            height: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .emotion-fill {
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            border-radius: 10px;
+            transition: width 0.5s ease-out;
+        }
+        
+        .emotion-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .primary-emotion {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        .loading:after {
+            content: "...";
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: "."; }
+            40% { content: ".."; }
+            60%, 100% { content: "..."; }
+        }
+        
+        #error-message {
+            color: #e74c3c;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-left: 10px;
+            font-size: 14px;
+        }
+        
+        .mic-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .mic-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #3498db;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .mic-button i {
+            font-size: 32px;
+        }
+        
+        .mic-button:hover {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+        
+        .mic-button.recording {
+            background-color: #e74c3c;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+            }
+            
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+            }
+            
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+            }
+        }
+        
+        .recognized-text {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            min-height: 60px;
+        }
+        
+        .language-selector {
+            margin-bottom: 15px;
+        }
+        
+        select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        
+        .mic-status {
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            color: #7f8c8d;
+        }
+        
+        .input-method {
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            background-color: #f0f4f8;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .chart-container {
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <h1>Emotion Analysis Test</h1>
+    
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" data-tab="text">نص مكتوب / Text Input</div>
+            <div class="tab" data-tab="voice">تسجيل صوتي / Voice Recording</div>
+        </div>
+        
+        <div class="tab-content active" id="text-tab">
+            <h2>Enter text to analyze</h2>
+            <textarea id="text-input" placeholder="Type or paste text here to analyze its emotional content..."></textarea>
+            <button id="analyze-text-btn">Analyze Emotions</button>
+        </div>
+        
+        <div class="tab-content" id="voice-tab">
+            <h2>Record your voice</h2>
+            <div class="language-selector">
+                <label for="voice-language">Language / اللغة:</label>
+                <select id="voice-language">
+                    <option value="ar">العربية</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+            
+            <div class="mic-container">
+                <button class="mic-button" id="record-btn">
+                    <i class="fas fa-microphone"></i>
+                </button>
+            </div>
+            
+            <div class="mic-status" id="mic-status">Click the microphone to start recording</div>
+            
+            <div class="recognized-text" id="recognized-text">
+                <i>Your recognized speech will appear here...</i>
+            </div>
+            
+            <button id="analyze-voice-btn" disabled>Analyze Voice Emotions</button>
+        </div>
+        
+        <div id="loading" class="loading">Analyzing</div>
+        <div id="error-message"></div>
+    </div>
+    
+    <div id="result" style="display: none;">
+        <h2>Analysis Results</h2>
+        <div class="input-method" id="input-method"></div>
+        
+        <div id="primary-emotion-container">
+            <h3>Primary Emotion: <span id="primary-emotion-label" class="primary-emotion"></span></h3>
+            <div>Intensity: <span id="intensity-value"></span></div>
+        </div>
+        
+        <h3>Emotion Breakdown</h3>
+        <div id="emotions-container">
+            <!-- Emotion bars will be added here dynamically -->
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="emotions-chart"></canvas>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Color mapping for emotions
+        const emotionColors = {
+            happy: '#27ae60',
+            excited: '#2ecc71',
+            sad: '#3498db',
+            angry: '#e74c3c',
+            fearful: '#9b59b6',
+            disgusted: '#8e44ad',
+            surprised: '#f1c40f',
+            confused: '#95a5a6',
+            interested: '#1abc9c',
+            anxious: '#d35400',
+            calm: '#3498db',
+            tired: '#7f8c8d',
+            bored: '#95a5a6',
+            grateful: '#16a085',
+            hopeful: '#2ecc71',
+            lonely: '#34495e',
+            proud: '#f39c12',
+            embarrassed: '#e67e22',
+            amused: '#f1c40f',
+            inspired: '#27ae60',
+            satisfied: '#16a085',
+            frustrated: '#c0392b',
+            contemplative: '#3498db',
+            neutral: '#7f8c8d',
+            mixed: '#9b59b6'
+        };
+        
+        // Default color for emotions not in the mapping
+        const defaultColor = '#7f8c8d';
+        
+        // Initialize variables for voice recording
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        let recordedBlob = null;
+        let recognizedText = '';
+        let chart = null;
+        
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Show the corresponding tab content
+                const tabName = this.getAttribute('data-tab');
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+            });
+        });
+        
+        // Text analysis
+        document.getElementById('analyze-text-btn').addEventListener('click', () => analyzeText());
+        
+        // Also trigger on Enter key in the textarea
+        document.getElementById('text-input').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && event.ctrlKey) {
+                analyzeText();
+                event.preventDefault();
+            }
+        });
+        
+        // Voice recording
+        document.getElementById('record-btn').addEventListener('click', toggleRecording);
+        document.getElementById('analyze-voice-btn').addEventListener('click', analyzeVoice);
+        
+        function toggleRecording() {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+        
+        function startRecording() {
+            // Reset previous recording
+            audioChunks = [];
+            recordedBlob = null;
+            recognizedText = '';
+            document.getElementById('recognized-text').innerHTML = '<i>Recording...</i>';
+            document.getElementById('analyze-voice-btn').disabled = true;
+            
+            // UI updates
+            isRecording = true;
+            document.getElementById('record-btn').classList.add('recording');
+            document.getElementById('mic-status').textContent = 'Recording... Click to stop';
+            
+            // Request microphone access
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    
+                    mediaRecorder.addEventListener('dataavailable', event => {
+                        audioChunks.push(event.data);
+                    });
+                    
+                    mediaRecorder.addEventListener('stop', processRecording);
+                    
+                    // Start recording
+                    mediaRecorder.start();
+                    
+                    // Auto-stop after 15 seconds
+                    setTimeout(() => {
+                        if (isRecording) {
+                            stopRecording();
+                        }
+                    }, 15000);
+                })
+                .catch(error => {
+                    console.error('Error accessing microphone:', error);
+                    showError('Could not access your microphone. Please check permissions and try again.');
+                    isRecording = false;
+                    document.getElementById('record-btn').classList.remove('recording');
+                    document.getElementById('mic-status').textContent = 'Could not access microphone';
+                });
+        }
+        
+        function stopRecording() {
+            if (!mediaRecorder) return;
+            
+            // Stop recording
+            mediaRecorder.stop();
+            
+            // Stop all tracks in the stream
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            
+            // UI updates
+            isRecording = false;
+            document.getElementById('record-btn').classList.remove('recording');
+            document.getElementById('mic-status').textContent = 'Processing your speech...';
+        }
+        
+        function processRecording() {
+            // Create audio blob from chunks
+            recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            
+            // Create form data for API request
+            const formData = new FormData();
+            formData.append('audio', recordedBlob);
+            
+            // Get language
+            const language = document.getElementById('voice-language').value;
+            formData.append('language', language);
+            
+            // Send to API for speech recognition
+            fetch('/api/listen-for-voice', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.text) {
+                    recognizedText = data.text;
+                    document.getElementById('recognized-text').textContent = recognizedText;
+                    document.getElementById('analyze-voice-btn').disabled = false;
+                    document.getElementById('mic-status').textContent = 'Speech recognized! Click Analyze to proceed.';
+                } else {
+                    document.getElementById('recognized-text').innerHTML = '<i>Could not recognize speech. Please try again.</i>';
+                    document.getElementById('mic-status').textContent = 'Speech recognition failed. Try again?';
+                    showError(data.error || 'Voice recognition failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error in voice recognition:', error);
+                document.getElementById('recognized-text').innerHTML = '<i>An error occurred. Please try again.</i>';
+                document.getElementById('mic-status').textContent = 'Error processing speech';
+                showError('Network error or server issue with voice recognition.');
+            });
+        }
+        
+        function analyzeVoice() {
+            if (!recognizedText) {
+                showError('No recognized text to analyze');
+                return;
+            }
+            
+            // Show loading indicator
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error-message').style.display = 'none';
+            
+            // Call the API
+            fetch('/api/analyze-emotion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: recognizedText,
+                    return_details: true,
+                    source: 'voice'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display results
+                document.getElementById('input-method').textContent = 'Voice Input';
+                displayResults(data);
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                showError('Network error or server issue. Please try again.');
+                console.error('Error:', error);
+            });
+        }
+        
+        function analyzeText() {
+            const text = document.getElementById('text-input').value.trim();
+            
+            if (!text) {
+                showError('Please enter some text to analyze');
+                return;
+            }
+            
+            // Show loading indicator
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('error-message').style.display = 'none';
+            
+            // Call the API
+            fetch('/api/analyze-emotion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: text,
+                    return_details: true,
+                    source: 'text'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display results
+                document.getElementById('input-method').textContent = 'Text Input';
+                displayResults(data);
+            })
+            .catch(error => {
+                document.getElementById('loading').style.display = 'none';
+                showError('Network error or server issue. Please try again.');
+                console.error('Error:', error);
+            });
+        }
+        
+        function displayResults(data) {
+            // Hide loading indicator
+            document.getElementById('loading').style.display = 'none';
+            
+            if (!data.success) {
+                showError(data.error || 'An error occurred during analysis');
+                return;
+            }
+            
+            // Show result container
+            document.getElementById('result').style.display = 'block';
+            
+            // Update primary emotion
+            const primaryEmotion = data.primary_emotion;
+            const primaryEmotionLabel = document.getElementById('primary-emotion-label');
+            primaryEmotionLabel.textContent = primaryEmotion.charAt(0).toUpperCase() + primaryEmotion.slice(1);
+            primaryEmotionLabel.style.backgroundColor = emotionColors[primaryEmotion] || defaultColor;
+            
+            // Update intensity
+            document.getElementById('intensity-value').textContent = 
+                `${Math.round(data.emotion_data.intensity * 100)}%`;
+            
+            // Clear previous emotion bars
+            const emotionsContainer = document.getElementById('emotions-container');
+            emotionsContainer.innerHTML = '';
+            
+            // Get emotions and sort by value
+            const emotions = data.emotion_data.emotions;
+            const sortedEmotions = Object.entries(emotions)
+                .sort((a, b) => b[1] - a[1]);
+            
+            // Create emotion bars for top emotions
+            sortedEmotions.forEach(([emotion, value]) => {
+                // Only show emotions with some significance
+                if (value < 0.01) return;
+                
+                const percentage = Math.round(value * 100);
+                const color = emotionColors[emotion] || defaultColor;
+                
+                const emotionLabelDiv = document.createElement('div');
+                emotionLabelDiv.className = 'emotion-label';
+                emotionLabelDiv.innerHTML = `
+                    <span>${emotion.charAt(0).toUpperCase() + emotion.slice(1)}</span>
+                    <span>${percentage}%</span>
+                `;
+                
+                const emotionBarDiv = document.createElement('div');
+                emotionBarDiv.className = 'emotion-bar';
+                
+                const emotionFillDiv = document.createElement('div');
+                emotionFillDiv.className = 'emotion-fill';
+                emotionFillDiv.style.backgroundColor = color;
+                emotionFillDiv.style.width = `${percentage}%`;
+                
+                emotionBarDiv.appendChild(emotionFillDiv);
+                
+                emotionsContainer.appendChild(emotionLabelDiv);
+                emotionsContainer.appendChild(emotionBarDiv);
+            });
+            
+            // Create or update chart
+            createEmotionChart(emotions);
+        }
+        
+        function createEmotionChart(emotions) {
+            const ctx = document.getElementById('emotions-chart').getContext('2d');
+            
+            // Destroy previous chart if it exists
+            if (chart) {
+                chart.destroy();
+            }
+            
+            // Prepare data for chart
+            const labels = [];
+            const data = [];
+            const backgroundColors = [];
+            
+            // Sort emotions by value
+            const sortedEmotions = Object.entries(emotions)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 7); // Take only top 7 emotions for clarity
+            
+            sortedEmotions.forEach(([emotion, value]) => {
+                if (value < 0.01) return;
+                
+                labels.push(emotion.charAt(0).toUpperCase() + emotion.slice(1));
+                data.push(Math.round(value * 100));
+                backgroundColors.push(emotionColors[emotion] || defaultColor);
+            });
+            
+            // Create chart
+            chart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Emotion Distribution'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function showError(message) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
