@@ -1,95 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mashaaer Simple Test</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1 {
-            font-size: 2.5rem;
-            color: #8a2be2;
-            margin-bottom: 20px;
-        }
-        p {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-        .status {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #1e1e1e;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .status.online {
-            border-left: 4px solid #4CAF50;
-        }
-        .status.offline {
-            border-left: 4px solid #F44336;
-        }
-        .action-btn {
-            display: inline-block;
-            background-color: #8a2be2;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 30px;
-            font-size: 1rem;
-            cursor: pointer;
-            margin: 10px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        .action-btn:hover {
-            background-color: #6a1cb7;
-            transform: translateY(-2px);
-        }
-    </style>
+    <title>Simple Test Page</title>
 </head>
 <body>
-    <div class="container">
-        <h1>مشاعر | Mashaaer</h1>
-        <div class="status online">Server Status: Online</div>
-        <p>Welcome to the simplified test page for Mashaaer Feelings. This page confirms that the web server is operational.</p>
-        
-        <div>
-            <a href="/test" class="action-btn">Test Endpoint</a>
-            <a href="/api/status" class="action-btn">API Status</a>
-            <a href="/connection-test" class="action-btn">Connection Test</a>
-        </div>
-        
-        <p style="margin-top: 50px; font-size: 0.9rem; opacity: 0.7;">Version: 1.0.0 | Server Time: <span id="server-time">Loading...</span></p>
-    </div>
-    
-    <script>
-        // Update server time
-        function updateTime() {
-            const now = new Date();
-            document.getElementById('server-time').textContent = now.toISOString();
-        }
-        
-        // Update time every second
-        updateTime();
-        setInterval(updateTime, 1000);
-    </script>
+    <h1>Mashaaer Test Page</h1>
+    <p>This is a simple test page to verify the web server is working properly.</p>
 </body>
 </html>

@@ -3,148 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشاعر | Mashaaer</title>
-    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <title>مشاعر | Mashaaer - Your Cosmic Companion</title>
     <style>
-        body {
-            background-color: #121212;
-            color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&family=Raleway:wght@300;400;700&display=swap');
+        
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Raleway', 'Tajawal', sans-serif;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            height: 100vh;
             overflow: hidden;
+            color: #fff;
             position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-
-        .cosmic-sphere {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle at 30% 30%, #8a2be2, #4b0082);
-            border-radius: 50%;
-            box-shadow: 
-                0 0 60px 30px rgba(138, 43, 226, 0.7),
-                0 0 100px 60px rgba(75, 0, 130, 0.5);
-            animation: float 6s ease-in-out infinite, glow 4s ease-in-out infinite alternate;
-            z-index: -1;
-        }
-
-        .cosmic-sphere::before {
+        
+        body::before {
             content: '';
             position: absolute;
-            top: 15%;
-            left: 15%;
-            width: 20%;
-            height: 20%;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 50%;
-            filter: blur(5px);
-        }
-
-        .content {
-            text-align: center;
-            padding: 2rem;
-            background-color: rgba(18, 18, 18, 0.8);
-            border-radius: 1rem;
-            backdrop-filter: blur(10px);
-            max-width: 600px;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 2px),
+                radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 3px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            background-position: 0 0, 40px 60px, 130px 270px;
             z-index: 1;
         }
-
+        
+        .content {
+            text-align: center;
+            z-index: 3;
+            max-width: 800px;
+            padding: 20px;
+        }
+        
         h1 {
             font-size: 3rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(45deg, #8a2be2, #4b0082);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+            margin-bottom: 0.5em;
+            text-shadow: 0 0 15px rgba(138, 43, 226, 0.7);
         }
         
-        h2 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: #f8f9fa;
-        }
-
         p {
+            margin-bottom: 1.5em;
             font-size: 1.2rem;
-            margin-bottom: 2rem;
             line-height: 1.6;
         }
-
+        
         .arabic-text {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1.5rem;
+            line-height: 1.6;
             direction: rtl;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #8a2be2, #4b0082);
-            border: none;
-            padding: 0.75rem 2rem;
-            font-size: 1.1rem;
-            border-radius: 2rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
-            margin: 0.5rem;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0 25px rgba(138, 43, 226, 0.7);
+            margin-bottom: 0.5em;
         }
         
-        .interaction-options {
-            margin-top: 2rem;
-        }
-        
-        .option-container {
-            display: flex;
-            justify-content: center;
-            margin-top: 1rem;
-        }
-        
-        .option-card {
-            background: rgba(25, 25, 25, 0.8);
-            border-radius: 1rem;
-            padding: 1.5rem;
-            margin: 0 1rem;
+        .cosmic-sphere {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 200px;
+            height: 200px;
+            background: radial-gradient(circle at 30% 30%, #9b59b6, #8e44ad 60%, #491d7f);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 80px 40px rgba(138, 43, 226, 0.7),
+                0 0 120px 80px rgba(75, 0, 130, 0.5);
+            z-index: 2;
+            animation: pulsate 4s ease-in-out infinite;
             cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
         }
         
-        .option-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 15px rgba(138, 43, 226, 0.7);
-            border-color: #8a2be2;
+        #interaction-prompt {
+            color: #9b59b6;
+            font-weight: bold;
+            animation: fadeInOut 2s ease-in-out infinite;
         }
         
-        .option-card.selected {
-            border-color: #8a2be2;
-            box-shadow: 0 0 20px rgba(138, 43, 226, 0.9);
+        @keyframes fadeInOut {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
         }
         
-        .option-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: #8a2be2;
+        /* Meteors/falling stars effect */
+        @keyframes meteor {
+            0% {
+                transform: translate(0, 0) rotate(240deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(calc(-100vw - 100%), calc(100vh + 100%)) rotate(240deg);
+                opacity: 0;
+            }
         }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0);
+        
+        .meteor {
+            position: absolute;
+            width: 1px;
+            height: 60px;
+            background: linear-gradient(to bottom, transparent, white);
+            animation: meteor linear infinite;
+            animation-duration: calc(40s / var(--speed));
+            top: calc(var(--top) * 1%);
+            left: calc(var(--left) * 1%);
+            opacity: var(--opacity);
+            z-index: 1;
+        }
+        
+        @keyframes pulsate {
+            0% {
+                box-shadow: 
+                    0 0 80px 40px rgba(138, 43, 226, 0.7),
+                    0 0 100px 60px rgba(75, 0, 130, 0.3);
             }
             50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        @keyframes glow {
-            0% {
                 box-shadow: 
                     0 0 60px 30px rgba(138, 43, 226, 0.5),
                     0 0 100px 60px rgba(75, 0, 130, 0.3);
@@ -158,29 +140,13 @@
     </style>
 </head>
 <body>
-    <div class="cosmic-sphere"></div>
+    <div class="cosmic-sphere" id="cosmic-sphere"></div>
     <div class="content">
         <h1>مشاعر | Mashaaer</h1>
         <p class="arabic-text">اصنع المستقبل، أنا أسمعك</p>
         <p>Create the future, I'm listening</p>
         <p>Your cosmic companion designed to understand your emotions and provide personalized assistance.</p>
-        
-        <div class="interaction-options">
-            <h2>Choose your interaction style:</h2>
-            <div class="option-container">
-                <div class="option-card" id="voice-option">
-                    <div class="option-icon">🎤</div>
-                    <h3>Voice Interaction</h3>
-                    <p>Talk with Mashaaer using your voice</p>
-                </div>
-                <div class="option-card" id="text-option">
-                    <div class="option-icon">💬</div>
-                    <h3>Text-only Chat</h3>
-                    <p>Interact through text messages only</p>
-                </div>
-            </div>
-            <button id="continue-btn" class="btn btn-primary" disabled>Continue</button>
-        </div>
+        <p id="interaction-prompt">Click the cosmic sphere to begin your journey</p>
     </div>
 
     <script>
@@ -192,33 +158,33 @@
             sphere.style.transform = `translate(${x}px, ${y}px)`;
         });
         
-        // Interaction option selection
-        let selectedOption = null;
-        const voiceOption = document.getElementById('voice-option');
-        const textOption = document.getElementById('text-option');
-        const continueBtn = document.getElementById('continue-btn');
-        
-        voiceOption.addEventListener('click', () => {
-            voiceOption.classList.add('selected');
-            textOption.classList.remove('selected');
-            selectedOption = 'voice';
-            continueBtn.disabled = false;
-        });
-        
-        textOption.addEventListener('click', () => {
-            textOption.classList.add('selected');
-            voiceOption.classList.remove('selected');
-            selectedOption = 'text';
-            continueBtn.disabled = false;
-        });
-        
-        continueBtn.addEventListener('click', () => {
-            // Store the user's choice in localStorage
-            localStorage.setItem('interaction_mode', selectedOption);
+        // Make the cosmic sphere interactive
+        const cosmicSphere = document.getElementById('cosmic-sphere');
+
+        // Add click event to the cosmic sphere
+        cosmicSphere.addEventListener('click', () => {
+            // Play welcome sound
+            playSound('welcome');
             
-            // Redirect to consent page
-            window.location.href = '/consent';
+            // Set voice as the default interaction mode
+            localStorage.setItem('interaction_mode', 'voice');
+            
+            // Redirect to consent page after playing sound
+            setTimeout(() => {
+                window.location.href = '/consent';
+            }, 2000);
         });
+
+        // Function to play sounds
+        function playSound(soundType) {
+            const audioURL = `/api/play-cosmic-sound?sound_type=${soundType}&language=en`;
+            const audio = new Audio(audioURL);
+            audio.play().catch(error => {
+                console.error('Error playing audio:', error);
+                // If audio fails, proceed with navigation
+                window.location.href = '/consent';
+            });
+        }
     </script>
 </body>
 </html>

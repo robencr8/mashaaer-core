@@ -8,7 +8,7 @@ import os
 import logging
 import sys
 from datetime import datetime
-from flask import Flask, jsonify, render_template, send_from_directory, send_file
+from flask import Flask, jsonify, render_template, send_from_directory, send_file, request
 from flask_cors import CORS
 
 # Set up logging
@@ -60,10 +60,8 @@ app = Flask(__name__, static_folder='static')
 # Set a secret key for session management
 app.secret_key = os.environ.get('SESSION_SECRET', os.urandom(24).hex())
 
-# Enable CORS
-CORS(app, resources={
-    r"/api/*": {"origins": "*", "supports_credentials": True}
-})
+# Enable CORS for all routes
+CORS(app, origins="*", supports_credentials=True)
 
 # Load configuration
 config = Config()
@@ -107,13 +105,15 @@ except ImportError:
 @app.route('/')
 def index():
     """Main entry point for Mashaaer Feelings web application"""
+    logger.info(f"Index page request received from {request.remote_addr}")
     # Serve the official production UI with cosmic design elements
     return render_template('startup_standalone.html')
 
 @app.route('/health')
 def health():
     """Health check endpoint for monitoring"""
-    return jsonify({
+    logger.info(f"Health check request received from {request.remote_addr}")
+    response = {
         "status": "ok",
         "timestamp": datetime.now().isoformat(),
         "services": {
@@ -121,7 +121,9 @@ def health():
             "database": db_manager is not None,
             "emotion_tracker": emotion_tracker is not None
         }
-    })
+    }
+    logger.info(f"Health check response: {response}")
+    return jsonify(response)
 
 # Cosmic onboarding experience
 @app.route('/cosmic-onboarding')
@@ -162,6 +164,12 @@ def voice_register():
 def goodbye():
     """Goodbye page for users who do not consent"""
     return render_template('goodbye.html')
+
+# Simple test route
+@app.route('/simple-test')
+def simple_test():
+    """Simple test page to verify web server is working"""
+    return render_template('simple_test.html')
 
 # Route for serving TTS cache files
 @app.route('/tts_cache/<path:filename>')
