@@ -7,7 +7,8 @@ api_bp = Blueprint('api', __name__, url_prefix='/api')
 logger = logging.getLogger(__name__)
 
 # Initialize engine with example rules
-decision_engine = RobinDecisionEngine()
+from rules_config_loader import load_rules_from_config
+decision_engine = load_rules_from_config()
 decision_engine.add_rule(Rule("sad", "alone", "offer_companionship"))
 decision_engine.add_rule(Rule("happy", "music", "play_music", {"genre": "uplifting"}))
 decision_engine.add_rule(Rule("neutral", "weather", "fetch_weather"))
