@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer Feelings - Recommendations</title>
+    <link rel="stylesheet" href="/static/css/recommendation_ui.css">
+    <link rel="stylesheet" href="/static/css/cosmic_loader.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #f8fafc;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #6366f1, #8b5cf6, #d946ef);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+        
+        .app-description {
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            text-align: center;
+            line-height: 1.6;
+            color: #cbd5e1;
+            padding: 0 1rem;
+        }
+        
+        .emotion-input {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-direction: column;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        textarea {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            background-color: rgba(15, 23, 42, 0.6);
+            color: #f8fafc;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: rgba(99, 102, 241, 0.6);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+        
+        .analyze-btn {
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .emotion-result {
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            text-align: center;
+            display: none;
+        }
+        
+        .emotion-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            background: linear-gradient(45deg, #6366f1, #8b5cf6);
+            color: white;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Mashaaer Feelings | مشاعر</h1>
+            <div class="subtitle">AI-Powered Emotional Intelligence</div>
+        </header>
+        
+        <div class="app-description">
+            <p>Discover personalized recommendations based on your emotional state. Our AI analyzes your feelings and provides tailored suggestions to improve your wellbeing and emotional balance.</p>
+        </div>
+        
+        <div class="emotion-input">
+            <textarea id="emotionText" placeholder="Express how you're feeling today..."></textarea>
+            <div class="input-group">
+                <button id="analyzeBtn" class="analyze-btn">Analyze My Feelings</button>
+                <button id="voiceBtn" class="analyze-btn" style="background: linear-gradient(45deg, #10b981, #3b82f6);">
+                    🎤 Use Voice
+                </button>
+            </div>
+        </div>
+        
+        <div class="emotion-result" id="emotionResult">
+            <div class="emotion-badge" id="emotionBadge">Joy</div>
+            <p>Based on your expression, our AI has detected this primary emotion.</p>
+        </div>
+        
+        <div id="recommendations-container" data-recommendation-auto-init data-load-on-init="false" data-theme="cosmic"></div>
+    </div>
+    
+    <div class="footer">
+        <p>© 2025 Mashaaer Feelings | مشاعر - Created with ❤️ and AI</p>
+    </div>
+    
+    <script src="/static/js/cosmic_loader.js"></script>
+    <script src="/static/js/recommendation_ui.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const emotionText = document.getElementById('emotionText');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const voiceBtn = document.getElementById('voiceBtn');
+            const emotionResult = document.getElementById('emotionResult');
+            const emotionBadge = document.getElementById('emotionBadge');
+            
+            // Initialize recommendation UI
+            let recommendationUI = null;
+            document.querySelectorAll('[data-recommendation-auto-init]').forEach(element => {
+                recommendationUI = new RecommendationUI({
+                    containerSelector: `#${element.id}`,
+                    theme: element.dataset.theme || 'cosmic',
+                    language: document.documentElement.lang || 'en'
+                });
+            });
+            
+            // Text analysis
+            analyzeBtn.addEventListener('click', function() {
+                if (!emotionText.value.trim()) {
+                    alert('Please enter some text about your feelings.');
+                    return;
+                }
+                
+                analyzeEmotion(emotionText.value);
+            });
+            
+            // Voice input
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'en-US';
+                recognition.continuous = false;
+                
+                voiceBtn.addEventListener('click', function() {
+                    CosmicLoader.show('orb', 'Listening...');
+                    recognition.start();
+                });
+                
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    emotionText.value = transcript;
+                    CosmicLoader.hide();
+                    
+                    // Auto-analyze after voice input
+                    setTimeout(() => analyzeEmotion(transcript), 500);
+                };
+                
+                recognition.onend = function() {
+                    CosmicLoader.hide();
+                };
+                
+                recognition.onerror = function(event) {
+                    CosmicLoader.hide();
+                    console.error('Speech recognition error', event.error);
+                    alert('Voice recognition error: ' + event.error);
+                };
+            } else {
+                voiceBtn.style.display = 'none';
+            }
+            
+            // Analyze emotion function
+            function analyzeEmotion(text) {
+                CosmicLoader.show('dust', 'Analyzing emotions...');
+                
+                fetch('/api/analyze-emotion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        return_details: true
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show emotion result
+                        emotionBadge.textContent = data.primary_emotion;
+                        emotionResult.style.display = 'block';
+                        
+                        // Load recommendations based on emotion data
+                        if (recommendationUI) {
+                            recommendationUI.updateWithEmotion({
+                                primary_emotion: data.primary_emotion,
+                                emotions: data.emotion_data?.emotions || {},
+                                intensity: data.emotion_data?.intensity || 0.5
+                            });
+                        }
+                    } else {
+                        alert('Error analyzing emotions: ' + (data.error || 'Unknown error'));
+                    }
+                    CosmicLoader.hide();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Network error while analyzing emotions');
+                    CosmicLoader.hide();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -37,6 +37,12 @@ def register_routes(app):
             content = f.read()
         return render_template("markdown.html", content=content, title="Cosmic Loader Animations")
     
+    @app.route("/recommendations")
+    def recommendations_page():
+        """Show the AI-powered recommendations page"""
+        logger.debug("Serving recommendations page")
+        return render_template("recommendations.html")
+    
     # Removing the cosmic route as it's already defined in main.py
     
     # Return the app to allow chaining
