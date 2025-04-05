@@ -10,6 +10,22 @@ The web application feedback tool reports that the server is unreachable despite
 - All manual testing through browsers and API testing via curl works correctly
 - This is strictly a testing tool issue, not an end-user facing problem
 
+### Latest Findings (April 4, 2025)
+Recent tests with the TTS functionality confirm that:
+- The server correctly processes requests to the `/tts-test` endpoint
+- API calls to `/api/speak` are successfully generating audio via ElevenLabs
+- Audio files are being correctly cached and served from the `/tts_cache/` directory
+- The feedback tool is attempting to access: `https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev/tts-test`
+- Server logs show successful processing of these requests, despite the tool reporting connectivity issues
+
+### Latest Findings (April 4, 2025)
+Recent tests with the TTS functionality confirm that:
+- The server correctly processes requests to the `/tts-test` endpoint
+- API calls to `/api/speak` are successfully generating audio via ElevenLabs
+- Audio files are being correctly cached and served from the `/tts_cache/` directory
+- The feedback tool is attempting to access: `https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev/tts-test`
+- Server logs show successful processing of these requests, despite the tool reporting connectivity issues
+
 ### Extensive Troubleshooting Performed
 
 We've taken the following troubleshooting steps to isolate and attempt to resolve the issue:
