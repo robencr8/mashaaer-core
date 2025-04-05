@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Tool Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .failure {
+            color: red;
+            font-weight: bold;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Feedback Tool Test</h1>
+    <p>This page tests if the Replit Feedback Tool can access our server correctly.</p>
+
+    <div class="test-section">
+        <h2>Server Status</h2>
+        <p>Testing connection to /health endpoint...</p>
+        <div id="health-result">Running test...</div>
+        <button onclick="testHealth()">Test Again</button>
+    </div>
+
+    <div class="test-section">
+        <h2>CORS Configuration</h2>
+        <p>Testing CORS headers...</p>
+        <div id="cors-result">Running test...</div>
+        <button onclick="testCORS()">Test Again</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Server Information</h2>
+        <p>The following information may help troubleshoot issues:</p>
+        <ul>
+            <li>Page URL: <span id="page-url"></span></li>
+            <li>Origin: <span id="origin"></span></li>
+            <li>User Agent: <span id="user-agent"></span></li>
+        </ul>
+    </div>
+
+    <script>
+        // Display page information
+        document.getElementById('page-url').textContent = window.location.href;
+        document.getElementById('origin').textContent = window.location.origin;
+        document.getElementById('user-agent').textContent = navigator.userAgent;
+
+        // Test health endpoint
+        function testHealth() {
+            const healthResult = document.getElementById('health-result');
+            healthResult.innerHTML = 'Testing...';
+            
+            fetch('/health')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Health response:', data);
+                    healthResult.innerHTML = `<span class="success">SUCCESS!</span> Server is healthy.<br>
+                        Response: ${JSON.stringify(data)}`;
+                })
+                .catch(error => {
+                    console.error('Health check error:', error);
+                    healthResult.innerHTML = `<span class="failure">FAILED!</span> Could not reach health endpoint.<br>
+                        Error: ${error.message}`;
+                });
+        }
+
+        // Test CORS
+        function testCORS() {
+            const corsResult = document.getElementById('cors-result');
+            corsResult.innerHTML = 'Testing...';
+            
+            // Check if we're running in the Replit environment
+            const isReplit = window.location.hostname.includes('replit') || 
+                            window.location.hostname.includes('repl.co');
+            
+            // Create a test request to check CORS
+            const testUrl = '/health';
+            
+            fetch(testUrl, {
+                method: 'OPTIONS',
+                headers: {
+                    'Origin': isReplit ? 'https://replit.com' : window.location.origin,
+                    'Access-Control-Request-Method': 'GET'
+                }
+            })
+            .then(response => {
+                console.log('CORS preflight response:', response);
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+                };
+                
+                let result = '';
+                if (corsHeaders['Access-Control-Allow-Origin'] === '*' || 
+                    corsHeaders['Access-Control-Allow-Origin'] === window.location.origin) {
+                    result = `<span class="success">SUCCESS!</span> CORS is properly configured.<br>`;
+                } else {
+                    result = `<span class="failure">POTENTIAL ISSUE!</span> CORS configuration might not be optimal.<br>`;
+                }
+                
+                result += 'CORS Headers:<br><pre>' + JSON.stringify(corsHeaders, null, 2) + '</pre>';
+                corsResult.innerHTML = result;
+            })
+            .catch(error => {
+                console.error('CORS test error:', error);
+                corsResult.innerHTML = `<span class="failure">FAILED!</span> Could not perform CORS test.<br>
+                    Error: ${error.message}`;
+            });
+        }
+
+        // Run tests when page loads
+        window.onload = function() {
+            testHealth();
+            testCORS();
+        };
+    </script>
+</body>
+</html>

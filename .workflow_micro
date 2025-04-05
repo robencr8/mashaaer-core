@@ -1,8 +1,6 @@
-<workflow>
 <name>
-Micro HTTP Server
+Micro server
 </name>
 <command>
 python micro_http_server.py
 </command>
-</workflow>

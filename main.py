@@ -2,12 +2,16 @@
 Main Flask Application for Mashaaer Feelings
 This is the entry point for the Replit Gunicorn server.
 """
-from flask import Flask, jsonify, send_from_directory, render_template_string, render_template, request
+from flask import Flask, jsonify, send_from_directory, render_template_string, render_template, request, send_file
 from flask_cors import CORS
 import os
 import logging
 import sys
 import json
+import datetime
+import platform
+from enhanced_cors import enhance_cors
+from routes_feedback_tool import register_feedback_routes
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, 
@@ -100,64 +104,9 @@ except Exception as e:
 
 @app.route('/')
 def index():
-    logger.debug("Serving index page")
-    return """
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <title>Mashaaer Feelings</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 20px;
-                line-height: 1.6;
-                color: #333;
-                background-color: #f8f8f8;
-            }
-            h1 {
-                color: #2c3e50;
-                border-bottom: 2px solid #3498db;
-                padding-bottom: 10px;
-            }
-            .card {
-                background: white;
-                border-radius: 8px;
-                padding: 20px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                margin-bottom: 20px;
-            }
-            .status {
-                display: inline-block;
-                background: #2ecc71;
-                color: white;
-                padding: 5px 10px;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            a {
-                color: #3498db;
-                text-decoration: none;
-            }
-            a:hover {
-                text-decoration: underline;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="card">
-            <h1>Mashaaer Feelings Application</h1>
-            <p>Status: <span class="status">Running</span></p>
-            <p>The server is up and responding to requests.</p>
-            <p>Check the <a href="/health">/health</a> endpoint for detailed status information.</p>
-            <p>Server time: <script>document.write(new Date().toLocaleString());</script></p>
-        </div>
-    </body>
-    </html>
-    """
+    logger.debug("Redirecting root route to cosmic experience")
+    # Instead of showing a status page, redirect users to the cosmic experience
+    return render_template('interactive_cosmic_splash.html')
 
 @app.route('/health')
 def health():
@@ -177,7 +126,7 @@ def favicon():
 @app.route('/replit-test')
 def replit_test():
     logger.debug("Serving replit test page")
-    return send_from_directory('static', 'replit_test.html')
+    return render_template('replit_test.html')
 
 @app.route('/simple-test')
 def simple_test():
@@ -521,3 +470,61 @@ def minimal_test():
     """Minimal test page for debugging"""
     logger.debug("Serving minimal test page")
     return send_from_directory('static', 'ultra_simple.html')
+
+@app.route('/feedback-test')
+def feedback_test():
+    """Test page for Replit feedback tool"""
+    logger.debug("Serving feedback test page")
+    return send_from_directory('static', 'feedback_test.html')
+
+@app.route('/replit-feedback-test')
+def replit_feedback_test():
+    """Minimal endpoint specifically for Replit feedback tool testing"""
+    logger.debug("Replit feedback test requested")
+    response = jsonify({
+        "status": "ok",
+        "message": "Replit feedback tool test successful",
+        "version": "1.0.0",
+        "timestamp": str(os.popen('date -u').read().strip())
+    })
+    
+    # Add explicit CORS headers
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    
+    return response
+
+@app.route('/replit-feedback-test', methods=['OPTIONS'])
+def replit_feedback_test_options():
+    """Handle OPTIONS requests for the Replit feedback test endpoint"""
+    logger.debug("Replit feedback test OPTIONS request")
+    response = jsonify({})
+    
+    # Add explicit CORS headers
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    
+    return response
+
+@app.route('/pwa-test')
+def pwa_test():
+    """Test page for PWA installation"""
+    logger.debug("Serving PWA test page")
+    return send_from_directory('static', 'pwa_test.html')
+
+# Apply enhanced CORS support to the application
+try:
+    logger.info("Applying enhanced CORS support to the application")
+    enhance_cors(app)
+    register_feedback_routes(app)
+    logger.info("Successfully registered enhanced CORS and feedback routes")
+except Exception as e:
+    logger.error(f"Failed to register enhanced CORS or feedback routes: {str(e)}")
+
+@app.route('/conn-test')
+def conn_test():
+    """Connection test page"""
+    logger.debug("Serving connection test page")
+    return send_file('conn_test.html')

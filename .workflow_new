@@ -1,8 +1,8 @@
 <workflow>
 <name>
-Start application
+All Servers
 </name>
 <command>
-python main.py
+python simple_server.py & python micro_http_server.py & cd . && echo "All servers started successfully!"
 </command>
 </workflow>

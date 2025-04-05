@@ -1,2 +1,8 @@
-name = "Start application"
-command = "gunicorn --bind 0.0.0.0:5000 --reuse-port --reload RobinAI_Enhanced.main:app"
+<workflow>
+<name>
+Simple server
+</name>
+<command>
+python simple_server.py
+</command>
+</workflow>

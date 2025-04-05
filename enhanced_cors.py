@@ -1,78 +1,73 @@
 """
-Enhanced CORS Configuration for Replit Web Application Feedback Tool
+Enhanced CORS Support Module for Flask Applications
 
-This module provides advanced CORS configuration specifically designed
-to work with the Replit web application feedback tool.
+This module provides utility functions to add comprehensive CORS headers
+to Flask applications, making them accessible for external services like
+the Replit web application feedback tool.
 """
 
-import logging
-import re
-from flask import Flask, request, Response
-from flask_cors import CORS
+from flask import Blueprint, jsonify, current_app
 
-logger = logging.getLogger(__name__)
-
-def configure_cors(app, dev_mode=False):
-    """
-    Configure enhanced CORS settings for the Replit feedback tool
+def create_cors_blueprint():
+    """Create a Flask blueprint with routes specifically designed for CORS testing"""
+    cors_blueprint = Blueprint('cors', __name__)
     
-    Args:
-        app: Flask application instance
-        dev_mode: Enable development mode with additional origins
-    """
-    # Create a list of allowed origins that includes all Replit domains
-    allowed_origins = [
-        # Original domains
-        'https://mashaaer.replit.app',
-        'http://localhost:5000',
-        'http://127.0.0.1:5000',
-        # Replit-specific domains
-        'https://*.replit.app',
-        'https://*.repl.co',
-        'https://replit.com',
-        # Wildcard for development
-        '*'
-    ]
-    
-    logger.info(f"Configuring enhanced CORS with origins: {allowed_origins}")
-    
-    # Initialize CORS with permissive settings - using wildcard origin
-    CORS(app, 
-         resources={r"/*": {"origins": "*"}},
-         supports_credentials=False,
-         methods=["GET", "POST", "OPTIONS", "PUT", "DELETE", "HEAD"],
-         allow_headers=["Content-Type", "Authorization", "X-Requested-With"])
-    
-    # Add custom CORS headers for all responses
-    @app.after_request
-    def add_cors_headers(response):
-        # Using wildcard for all - this is necessary for Replit feedback tools
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT, DELETE, HEAD'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
-        response.headers['Access-Control-Max-Age'] = '3600'  # Cache preflight request for 1 hour
+    @cors_blueprint.route('/cors-test')
+    def cors_test():
+        """Test endpoint for CORS configuration"""
+        response = jsonify({
+            "status": "ok",
+            "message": "CORS test endpoint is working",
+            "cors_enabled": True,
+            "timestamp": "2025-04-05T18:00:00Z"
+        })
         
-        # Log the response headers for debugging
-        logger.debug(f"Request from: {request.remote_addr}, Origin: {request.headers.get('Origin', 'None')}")
-        logger.debug(f"Response CORS headers: {response.headers.get('Access-Control-Allow-Origin')}")
+        # Add comprehensive CORS headers
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
         
         return response
     
-    # Handle OPTIONS requests explicitly
+    @cors_blueprint.route('/cors-test', methods=['OPTIONS'])
+    def cors_test_options():
+        """Handle OPTIONS requests for CORS preflight"""
+        response = jsonify({})
+        
+        # Add comprehensive CORS headers
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        
+        return response
+    
+    return cors_blueprint
+
+def add_cors_headers_after_request(response):
+    """Add CORS headers to all responses from this Flask application"""
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
+    return response
+
+def enhance_cors(app):
+    """Enhance a Flask application with comprehensive CORS support"""
+    # Register after_request handler to add CORS headers to all responses
+    app.after_request(add_cors_headers_after_request)
+    
+    # Handle OPTIONS requests globally
     @app.route('/', methods=['OPTIONS'])
     @app.route('/<path:path>', methods=['OPTIONS'])
-    def options_handler(path=''):
-        """Handle OPTIONS preflight requests"""
-        logger.debug(f"OPTIONS request from {request.remote_addr} for path: {path}")
-        
-        response = Response('')
-        # Using wildcard origin for maximum compatibility with Replit tools
+    def options_handler(path=None):
+        """Handle OPTIONS requests for CORS preflight"""
+        response = jsonify({})
         response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT, DELETE, HEAD'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
-        response.headers['Access-Control-Max-Age'] = '3600'
-        
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
         return response
     
-    # Return the CORS instance
-    return CORS
+    # Register the CORS blueprint
+    cors_blueprint = create_cors_blueprint()
+    app.register_blueprint(cors_blueprint)
+    
+    return app

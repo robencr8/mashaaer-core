@@ -1,8 +1,6 @@
-<workflow>
 <name>
-Start application
+Simple server
 </name>
 <command>
-python main.py
+python simple_server.py
 </command>
-</workflow>
