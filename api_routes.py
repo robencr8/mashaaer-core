@@ -545,23 +545,25 @@ def play_cosmic_sound():
                         tts_manager.initialize()
                     
                     # Generate the TTS audio
-                    audio_path = tts_manager.generate_tts(welcome_text, voice=voice, language=language)
-                    logger.debug(f"TTS generated audio path: {audio_path}")
+                    tts_result = tts_manager.generate_tts(welcome_text, voice=voice, language=language)
+                    logger.debug(f"TTS generated result: {tts_result}")
                 else:
                     logger.error("TTS Manager is not available")
                     return jsonify({'success': False, 'error': 'TTS service not available'}), 503
                 
-                if audio_path:
-                    # Check if the generated audio exists 
-                    if os.path.exists(audio_path):
+                if tts_result and isinstance(tts_result, dict) and 'audio_url' in tts_result:
+                    # Get the actual path if available
+                    audio_path = tts_result.get('path', '')
+                    if audio_path and os.path.exists(audio_path):
                         logger.debug(f"Audio file exists: {audio_path} - Size: {os.path.getsize(audio_path)} bytes")
                     else:
                         logger.warning(f"Audio file does not exist at path: {audio_path}")
                     
-                    # Return the audio file path
+                    # Return the audio file path from the URL
                     return jsonify({
                         'success': True,
-                        'sound_path': audio_path
+                        'sound_path': tts_result['audio_url'],
+                        'cache_hit': tts_result.get('cache_hit', False)
                     })
                 else:
                     logger.error("TTS returned None for audio path")
@@ -595,15 +597,17 @@ def play_cosmic_sound():
             try:
                 voice = "arabic" if language == "ar" else "default"
                 if tts_manager is not None:
-                    audio_path = tts_manager.generate_tts(greeting_text, voice=voice, language=language)
+                    tts_result = tts_manager.generate_tts(greeting_text, voice=voice, language=language)
+                    logger.debug(f"TTS generated result for greeting: {tts_result}")
                 else:
                     logger.error("TTS Manager is not available")
                     return jsonify({'success': False, 'error': 'TTS service not available'}), 503
                 
-                if audio_path:
+                if tts_result and isinstance(tts_result, dict) and 'audio_url' in tts_result:
                     return jsonify({
                         'success': True,
-                        'sound_path': audio_path
+                        'sound_path': tts_result['audio_url'],
+                        'cache_hit': tts_result.get('cache_hit', False)
                     })
                 else:
                     return jsonify({
