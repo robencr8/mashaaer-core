@@ -1,47 +1,90 @@
-from flask import Flask, jsonify
-from flask_cors import CORS
+"""
+Flask application for testing Replit
+"""
+from flask import Flask, jsonify, render_template_string
 
-app = Flask(__name__, static_url_path='')
-CORS(app, resources={r"/*": {"origins": "*"}})
+app = Flask(__name__)
+
+HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Replit Test App</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+                         Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 {
+            color: #0066cc;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 10px;
+        }
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .success {
+            color: #00cc66;
+            font-weight: bold;
+        }
+        .environment {
+            background: #f8f9fa;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>Replit Test App</h1>
+        <p class="success">✓ Flask application is running successfully!</p>
+        <p>This is a simple Flask application designed to test Replit's ability to run and access web applications.</p>
+        <p>Generated at: <span id="timestamp"></span></p>
+        
+        <div class="environment">
+            <h3>Environment Information:</h3>
+            <p>Host: {{ request.host }}</p>
+            <p>Path: {{ request.path }}</p>
+            <p>URL: {{ request.url }}</p>
+            <p>Method: {{ request.method }}</p>
+            <p>User Agent: {{ request.headers.get('User-Agent') }}</p>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+    </script>
+</body>
+</html>
+"""
 
 @app.route('/')
 def index():
-    return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Flask on Replit</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 20px;
-                line-height: 1.6;
-            }
-            h1 {
-                color: #2c3e50;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>Flask Application is Running!</h1>
-        <p>This is a simple Flask application running on Replit.</p>
-        <p>Server is operational and should be accessible by Replit's webview.</p>
-        <p>Try accessing the <a href="/health">/health</a> endpoint to check status.</p>
-    </body>
-    </html>
-    """
+    return render_template_string(HTML_TEMPLATE, request=request)
 
 @app.route('/health')
 def health():
     return jsonify({
         "status": "ok",
-        "server": "Flask Development Server",
-        "version": "1.0.0"
+        "message": "Flask app is healthy",
+        "timestamp": str(datetime.datetime.now())
     })
 
 if __name__ == '__main__':
+    import datetime
+    from flask import request
+    
+    print("Starting Flask app on port 8080...")
     app.run(host='0.0.0.0', port=8080, debug=True)

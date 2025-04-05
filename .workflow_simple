@@ -1,0 +1,22 @@
+entrypoint = "simple_server.py"
+
+[env]
+
+[packager]
+language = "python3"
+
+[packager.features]
+
+[languages]
+python = "3.11"
+
+[deployment]
+run = ["python3", "simple_server.py"]
+
+[[workflows.workflow]]
+name = "Simple server"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python simple_server.py"
+waitForPort = 5000

@@ -1,89 +1,124 @@
 """
-Check the web server status and connectivity
+Script to check web server accessibility from different contexts.
 """
-import requests
-import json
 import os
-import logging
-import socket
+import sys
+import requests
 import time
-from pprint import pprint
+import json
+import socket
+import subprocess
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+def check_url(url, max_retries=3, retry_delay=1):
+    """Check if a URL is accessible and return details."""
+    print(f"Checking URL: {url}")
+    results = {"url": url, "accessible": False, "status_code": None, "content_length": None, "error": None}
+    
+    for i in range(max_retries):
+        try:
+            response = requests.get(url, timeout=5)
+            results["accessible"] = True
+            results["status_code"] = response.status_code
+            results["content_length"] = len(response.content)
+            results["content_type"] = response.headers.get('Content-Type')
+            results["content_preview"] = response.content[:100].decode('utf-8', errors='replace') if response.content else ""
+            return results
+        except requests.exceptions.RequestException as e:
+            results["error"] = str(e)
+            if i < max_retries - 1:
+                time.sleep(retry_delay)
+    
+    return results
 
-def check_port(port):
-    """Check if a port is open on localhost"""
+def check_port(host, port):
+    """Check if a port is open on a host."""
+    print(f"Checking if port {port} is open on {host}")
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(1)
-    result = sock.connect_ex(('127.0.0.1', port))
+    sock.settimeout(2)
+    result = sock.connect_ex((host, port))
     sock.close()
-    return result == 0
+    return {"host": host, "port": port, "open": result == 0}
 
-def check_server_health(url):
-    """Check if the server is healthy"""
+def get_process_info(port):
+    """Get information about processes listening on the specified port."""
+    print(f"Getting process info for port {port}")
     try:
-        logger.info(f"Checking server health at {url}")
-        response = requests.get(url, timeout=5)
-        response.raise_for_status()  # Raise an exception for 4XX/5XX responses
-        logger.info(f"Server health check successful: {response.status_code}")
-        logger.info(f"Response: {response.text[:500]}")
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Error checking server health: {e}")
-        return None
+        output = subprocess.check_output(f"lsof -i :{port}", shell=True, text=True)
+        return {"port": port, "process_info": output.strip()}
+    except subprocess.CalledProcessError:
+        return {"port": port, "process_info": "No process found listening on this port"}
 
-def check_api_status(url):
-    """Check API status"""
+def check_dns_resolution(domain):
+    """Check DNS resolution for a domain."""
+    print(f"Checking DNS resolution for {domain}")
     try:
-        logger.info(f"Checking API status at {url}")
-        response = requests.get(url, timeout=5)
-        response.raise_for_status()
-        logger.info(f"API status check successful: {response.status_code}")
-        logger.info(f"Response: {response.text[:500]}")
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Error checking API status: {e}")
-        return None
+        ip = socket.gethostbyname(domain)
+        return {"domain": domain, "resolved": True, "ip": ip}
+    except socket.gaierror:
+        return {"domain": domain, "resolved": False, "error": "DNS resolution failed"}
+
+def get_environment_info():
+    """Get information about the environment."""
+    print("Getting environment info")
+    info = {
+        "python_version": sys.version,
+        "platform": sys.platform,
+        "cwd": os.getcwd(),
+        "env_vars": {k: v for k, v in os.environ.items() if k.startswith("REPL") or k in ["PORT", "HOST", "FLASK_ENV", "FLASK_DEBUG"]}
+    }
+    return info
 
 def main():
-    """Main function to check web server status"""
-    # Check if port 5000 is open
-    logger.info("Checking if port 5000 is open...")
-    if check_port(5000):
-        logger.info("Port 5000 is open")
-    else:
-        logger.error("Port 5000 is closed!")
-        return
-
-    # Base URL
-    base_url = "http://localhost:5000"
+    """Run all checks and print results."""
+    results = {}
     
-    # Check server health
-    health_data = check_server_health(f"{base_url}/health")
-    if health_data:
-        logger.info("Server health check passed")
-        logger.info("Health data:")
-        pprint(health_data)
+    # Check local URLs
+    results["local_url_checks"] = [
+        check_url("http://localhost:5000/"),
+        check_url("http://127.0.0.1:5000/"),
+        check_url("http://0.0.0.0:5000/"),
+        check_url("http://localhost:5000/health"),
+        check_url("http://localhost:5000/replit-test"),
+        check_url("http://localhost:5000/static/replit_test.html")
+    ]
     
-    # Check API status
-    api_status = check_api_status(f"{base_url}/api/status")
-    if api_status:
-        logger.info("API status check passed")
-        logger.info("API status data:")
-        pprint(api_status)
+    # Check ports
+    results["port_checks"] = [
+        check_port("localhost", 5000),
+        check_port("127.0.0.1", 5000),
+        check_port("0.0.0.0", 5000)
+    ]
     
-    # Try to get the main page
-    try:
-        logger.info("Trying to get the main page...")
-        response = requests.get(base_url, timeout=5)
-        logger.info(f"Main page status code: {response.status_code}")
-        logger.info(f"Main page content type: {response.headers.get('Content-Type')}")
-        logger.info(f"Main page content length: {len(response.text)} bytes")
-        logger.info(f"Main page content preview: {response.text[:200]}...")
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Error getting main page: {e}")
+    # Get process info
+    results["process_info"] = get_process_info(5000)
+    
+    # Check DNS resolution
+    hostname = socket.gethostname()
+    results["dns_checks"] = [
+        check_dns_resolution("localhost"),
+        check_dns_resolution(hostname)
+    ]
+    
+    # Get environment info
+    results["environment_info"] = get_environment_info()
+    
+    # Print results
+    print("\n=== Web Server Accessibility Check Results ===")
+    print(json.dumps(results, indent=2))
+    
+    # Summary
+    print("\n=== Summary ===")
+    accessible_urls = [result["url"] for result in results["local_url_checks"] if result["accessible"]]
+    print(f"Accessible URLs: {len(accessible_urls)}/{len(results['local_url_checks'])}")
+    if accessible_urls:
+        print("URLs that are accessible:")
+        for url in accessible_urls:
+            print(f"  - {url}")
+    
+    open_ports = [result["port"] for result in results["port_checks"] if result["open"]]
+    print(f"Open ports: {len(open_ports)}/{len(results['port_checks'])}")
+    
+    print("\nDetailed results have been printed above.")
 
 if __name__ == "__main__":
     main()

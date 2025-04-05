@@ -1,0 +1,60 @@
+Dear Replit Support,
+
+We are experiencing a critical issue with the Mashaaer Feelings application, hosted on Replit under our account. While the application is running correctly and accessible through direct access methods (browser, curl), the Replit web application feedback tool consistently reports “Web server is unreachable.” This is blocking our testing and deployment workflow.
+
+⸻
+
+Summary of the Situation:
+	•	The application is a Flask-based web platform designed for emotion recognition and voice interaction.
+	•	The server starts successfully and responds to HTTP requests on port 5000 or 80.
+	•	We can access the application via browser and curl commands without issue.
+	•	All API endpoints return valid responses (200 OK).
+	•	The correct HTML files are being served (e.g., /, /health, /static/audio_test.html).
+	•	There are no visible errors in the application logs.
+	•	We created minimal test apps (hello world) and the issue still persists.
+
+Despite all direct access tests succeeding, the Replit feedback system fails to connect, which is affecting deployment and public demo readiness.
+
+⸻
+
+Troubleshooting Steps We Have Taken:
+	•	Verified .replit and .workflow configurations (entrypoint = main:app)
+	•	Tested various gunicorn bindings on 0.0.0.0:5000 and 0.0.0.0:80
+	•	Created simplified Flask apps with a single / endpoint returning HTML
+	•	Set up /health, /replit-test, and /simple-test routes
+	•	Adjusted CORS using a dynamic enhanced_cors.py module
+	•	Ran all tests locally, and through Replit’s internal shell using curl, with successful HTTP/1.1 200 OK responses
+
+⸻
+
+Billing & Resource Usage Concern:
+
+We are also concerned about potential unnecessary charges accruing due to the repeated deployments, restarts, and test environments created during this debugging process.
+
+As the General Manager of Eco Technology Environmental Protection Services L.L.C – Ajman, we have invested significant time and resources into building and hosting the Mashaaer Feelings project.
+
+If the root cause of this issue is due to internal Replit constraints or undocumented requirements, we respectfully request that Replit:
+	•	Resolves the visibility issue immediately
+	•	Reviews any resource usage or charges tied to this diagnostic process
+	•	Clarifies configuration guidelines to prevent this in the future
+
+⸻
+
+Request:
+
+Could you please provide urgent guidance on:
+	•	Ensuring compatibility with Replit’s Web Application Feedback system?
+	•	Any internal conditions Replit requires for an app to be marked “reachable”?
+	•	Whether our app meets deployment requirements and whether resource usage during testing can be reviewed?
+
+⸻
+
+Project Link:
+https://replit.com/@robenedwan/Mashaaer
+
+Workspace:
+Mashaaer | مشاعر – Emotion PWA
+
+⸻
+
+Thank you for your prompt and thorough assistance. We look forward to your support in resolving this matter so we can continue advancing this public-facing AI experience.

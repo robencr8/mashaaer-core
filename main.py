@@ -1,4 +1,8 @@
-from flask import Flask, jsonify, send_from_directory
+"""
+Main Flask Application for Mashaaer Feelings
+This is the entry point for the Replit Gunicorn server.
+"""
+from flask import Flask, jsonify, send_from_directory, render_template_string
 from flask_cors import CORS
 import os
 import logging
@@ -14,7 +18,7 @@ app = Flask(__name__,
             template_folder='templates')
 
 # Configure CORS with all origins allowed
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, origins="*", supports_credentials=False)
 
 # Set a secret key for session management
 app.secret_key = os.environ.get("SESSION_SECRET", "mashaaer_development_key")
@@ -94,6 +98,55 @@ def health():
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+@app.route('/replit-test')
+def replit_test():
+    logger.debug("Serving replit test page")
+    return send_from_directory('static', 'replit_test.html')
+
+@app.route('/simple-test')
+def simple_test():
+    logger.debug("Serving simple test page (inline HTML)")
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Simple Test</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            body { 
+                font-family: Arial, sans-serif;
+                margin: 40px;
+                line-height: 1.6;
+            }
+            h1 { color: #0066cc; }
+            .box {
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 20px;
+                background-color: #f9f9f9;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="box">
+            <h1>Simple Test Page</h1>
+            <p>This is a simple test page with inline HTML.</p>
+            <p>Current time: <span id="time"></span></p>
+        </div>
+        <script>
+            document.getElementById('time').textContent = new Date().toLocaleString();
+        </script>
+    </body>
+    </html>
+    """
+    return html
+
+@app.route('/ultra-simple')
+def ultra_simple():
+    logger.debug("Serving ultra simple test page (static file)")
+    return send_from_directory('static', 'ultra_simple.html')
 
 # Error handlers
 @app.errorhandler(404)

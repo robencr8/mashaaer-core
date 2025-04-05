@@ -1,48 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Replit Connection Test</title>
-    <style>
-        body { 
-            font-family: Arial; 
-            background-color: #1a1a2e;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-        h1 { color: #8a2be2; }
-        .success { color: #4caf50; }
-        .error { color: #f44336; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Replit Test Page</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f8f8f8;
+    }
+    h1 {
+      color: #2c3e50;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+    }
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .success {
+      color: #2ecc71;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <h1>Replit Connection Test</h1>
-    <p>This page tests connectivity to the Mashaaer API server.</p>
-    
-    <div id="status">Testing connection...</div>
-    
-    <script>
-        const statusDiv = document.getElementById('status');
-        
-        // Test the health endpoint
-        fetch('/health')
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                }
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            })
-            .then(data => {
-                statusDiv.innerHTML = `<p class="success">Connection successful!</p>
-                                      <p>Server status: ${data.status}</p>
-                                      <p>Server time: ${data.time}</p>
-                                      <p>Components: ${JSON.stringify(data.components)}</p>`;
-            })
-            .catch(error => {
-                statusDiv.innerHTML = `<p class="error">Connection failed: ${error.message}</p>`;
-            });
-    </script>
+  <div class="card">
+    <h1>Replit Test Page</h1>
+    <p class="success">✓ Static file is being served correctly!</p>
+    <p>This is a simple static HTML file to verify that the Flask application is serving static files correctly and can be accessed through the Replit feedback tool.</p>
+    <p>Page generated: <span id="timestamp"></span></p>
+  </div>
+
+  <script>
+    document.getElementById('timestamp').textContent = new Date().toLocaleString();
+  </script>
 </body>
 </html>
