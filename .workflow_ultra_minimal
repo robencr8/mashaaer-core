@@ -1,0 +1,6 @@
+<name>
+Ultra Minimal CORS Server
+</name>
+<command>
+python ultra_minimal_server.py
+</command>

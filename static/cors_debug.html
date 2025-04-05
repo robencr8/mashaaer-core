@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Debug Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .panel {
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+        .log-panel {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .request-details {
+            margin-top: 10px;
+            font-size: 14px;
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .header-details {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CORS Debug Tool</h1>
+        
+        <div class="panel">
+            <h2>Browser Info</h2>
+            <div id="browser-info"></div>
+        </div>
+        
+        <div class="panel">
+            <h2>1. Simple GET Request</h2>
+            <div class="test-section">
+                <input type="text" id="get-url" value="/health" placeholder="Enter URL (e.g., /health)">
+                <button onclick="testGetRequest()">Test GET Request</button>
+                <div id="get-result" class="request-details"></div>
+            </div>
+
+            <h2>2. JSON API Test</h2>
+            <div class="test-section">
+                <input type="text" id="api-url" value="/api/status" placeholder="Enter API URL (e.g., /api/status)">
+                <button onclick="testJsonApi()">Test JSON API</button>
+                <div id="api-result" class="request-details"></div>
+            </div>
+
+            <h2>3. CORS Preflight Test</h2>
+            <div class="test-section">
+                <input type="text" id="cors-url" value="/api/analyze-emotion" placeholder="Enter URL to test CORS preflight">
+                <button onclick="testCorsRequest()">Test CORS Preflight</button>
+                <div id="cors-result" class="request-details"></div>
+            </div>
+
+            <h2>4. Custom Header Test</h2>
+            <div class="test-section">
+                <input type="text" id="header-url" value="/health" placeholder="Enter URL for custom header test">
+                <button onclick="testCustomHeaders()">Test Custom Headers</button>
+                <div id="header-result" class="request-details"></div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Console Log</h2>
+            <button onclick="clearLog()">Clear Log</button>
+            <div id="log-panel" class="log-panel"></div>
+        </div>
+    </div>
+
+    <script>
+        // Display browser information
+        function showBrowserInfo() {
+            const browserInfo = document.getElementById('browser-info');
+            browserInfo.innerHTML = `
+                <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+                <p><strong>Browser:</strong> ${getBrowserInfo()}</p>
+                <p><strong>Current Origin:</strong> ${window.location.origin}</p>
+                <p><strong>Protocol:</strong> ${window.location.protocol}</p>
+                <p><strong>Current Page:</strong> ${window.location.href}</p>
+            `;
+        }
+
+        function getBrowserInfo() {
+            const userAgent = navigator.userAgent;
+            let browserName;
+            
+            if (userAgent.match(/chrome|chromium|crios/i)) {
+                browserName = "Chrome";
+            } else if (userAgent.match(/firefox|fxios/i)) {
+                browserName = "Firefox";
+            } else if (userAgent.match(/safari/i)) {
+                browserName = "Safari";
+            } else if (userAgent.match(/opr\//i)) {
+                browserName = "Opera";
+            } else if (userAgent.match(/edg/i)) {
+                browserName = "Edge";
+            } else {
+                browserName = "Unknown";
+            }
+            
+            return browserName;
+        }
+
+        // Logging function
+        function addLog(message, type = 'info') {
+            const logPanel = document.getElementById('log-panel');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const log = document.createElement('div');
+            log.className = type;
+            log.textContent = `[${timestamp}] ${message}`;
+            
+            logPanel.appendChild(log);
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log-panel').innerHTML = '';
+            addLog('Log cleared');
+        }
+
+        // Request handling
+        async function testGetRequest() {
+            const resultDiv = document.getElementById('get-result');
+            resultDiv.innerHTML = '<p>Testing...</p>';
+            
+            const url = document.getElementById('get-url').value;
+            const fullUrl = url.startsWith('http') ? url : window.location.origin + url;
+            
+            addLog(`Making GET request to: ${fullUrl}`);
+            
+            try {
+                const startTime = performance.now();
+                const response = await fetch(fullUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*'
+                    }
+                });
+                const endTime = performance.now();
+                const responseTime = (endTime - startTime).toFixed(2);
+                
+                const contentType = response.headers.get('content-type');
+                let responseData;
+                
+                if (contentType && contentType.includes('application/json')) {
+                    responseData = await response.json();
+                    addLog(`Received JSON response with status ${response.status}`, 'success');
+                } else {
+                    responseData = await response.text();
+                    addLog(`Received Text response with status ${response.status}`, 'success');
+                }
+                
+                // Extract headers
+                const headers = {};
+                response.headers.forEach((value, name) => {
+                    headers[name] = value;
+                });
+                
+                resultDiv.innerHTML = `
+                    <p class="success">Request successful (${responseTime}ms)</p>
+                    <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                    <p><strong>Response Type:</strong> ${contentType || 'unknown'}</p>
+                    <div class="header-details">
+                        <p><strong>Response Headers:</strong></p>
+                        <pre>${JSON.stringify(headers, null, 2)}</pre>
+                    </div>
+                    <p><strong>Response Data:</strong></p>
+                    <pre>${typeof responseData === 'object' ? JSON.stringify(responseData, null, 2) : responseData.substring(0, 500) + (responseData.length > 500 ? '...' : '')}</pre>
+                `;
+            } catch (error) {
+                addLog(`Error making GET request: ${error.message}`, 'error');
+                resultDiv.innerHTML = `
+                    <p class="error">Request failed</p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p>Check browser console for more details.</p>
+                `;
+                console.error('GET Request Error:', error);
+            }
+        }
+
+        async function testJsonApi() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = '<p>Testing API...</p>';
+            
+            const url = document.getElementById('api-url').value;
+            const fullUrl = url.startsWith('http') ? url : window.location.origin + url;
+            
+            addLog(`Making API request to: ${fullUrl}`);
+            
+            try {
+                const startTime = performance.now();
+                const response = await fetch(fullUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const endTime = performance.now();
+                const responseTime = (endTime - startTime).toFixed(2);
+                
+                // Extract headers
+                const headers = {};
+                response.headers.forEach((value, name) => {
+                    headers[name] = value;
+                });
+                
+                let responseData;
+                try {
+                    responseData = await response.json();
+                    addLog(`Received JSON response with status ${response.status}`, 'success');
+                } catch (e) {
+                    responseData = await response.text();
+                    addLog(`Warning: Expected JSON but received text response`, 'error');
+                }
+                
+                resultDiv.innerHTML = `
+                    <p class="success">API Request successful (${responseTime}ms)</p>
+                    <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                    <div class="header-details">
+                        <p><strong>Response Headers:</strong></p>
+                        <pre>${JSON.stringify(headers, null, 2)}</pre>
+                    </div>
+                    <p><strong>Response Data:</strong></p>
+                    <pre>${typeof responseData === 'object' ? JSON.stringify(responseData, null, 2) : responseData}</pre>
+                `;
+            } catch (error) {
+                addLog(`Error making API request: ${error.message}`, 'error');
+                resultDiv.innerHTML = `
+                    <p class="error">API Request failed</p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p>Check browser console for more details.</p>
+                `;
+                console.error('API Request Error:', error);
+            }
+        }
+
+        async function testCorsRequest() {
+            const resultDiv = document.getElementById('cors-result');
+            resultDiv.innerHTML = '<p>Testing CORS...</p>';
+            
+            const url = document.getElementById('cors-url').value;
+            const fullUrl = url.startsWith('http') ? url : window.location.origin + url;
+            
+            addLog(`Testing CORS preflight for: ${fullUrl}`);
+            
+            // First make an OPTIONS request
+            try {
+                // Simulate preflight with manual OPTIONS request
+                const preflightInfo = await fetch(fullUrl, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'Content-Type, Authorization'
+                    }
+                });
+                
+                // Extract headers
+                const preflightHeaders = {};
+                preflightInfo.headers.forEach((value, name) => {
+                    preflightHeaders[name] = value;
+                });
+                
+                addLog(`Preflight completed with status ${preflightInfo.status}`, 'success');
+                
+                // Now make the actual request
+                const startTime = performance.now();
+                const response = await fetch(fullUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'test-auth'
+                    },
+                    body: JSON.stringify({
+                        text: "Test emotion analysis",
+                        return_details: true
+                    })
+                });
+                const endTime = performance.now();
+                const responseTime = (endTime - startTime).toFixed(2);
+                
+                // Extract headers
+                const headers = {};
+                response.headers.forEach((value, name) => {
+                    headers[name] = value;
+                });
+                
+                let responseData;
+                try {
+                    responseData = await response.json();
+                } catch (e) {
+                    responseData = await response.text();
+                }
+                
+                resultDiv.innerHTML = `
+                    <p class="success">CORS Test successful (${responseTime}ms)</p>
+                    <div class="header-details">
+                        <p><strong>Preflight Response Headers:</strong></p>
+                        <pre>${JSON.stringify(preflightHeaders, null, 2)}</pre>
+                    </div>
+                    <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                    <div class="header-details">
+                        <p><strong>Response Headers:</strong></p>
+                        <pre>${JSON.stringify(headers, null, 2)}</pre>
+                    </div>
+                    <p><strong>Response Data:</strong></p>
+                    <pre>${typeof responseData === 'object' ? JSON.stringify(responseData, null, 2) : responseData}</pre>
+                `;
+            } catch (error) {
+                addLog(`Error testing CORS: ${error.message}`, 'error');
+                resultDiv.innerHTML = `
+                    <p class="error">CORS Test failed</p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p>Check browser console for more details.</p>
+                `;
+                console.error('CORS Test Error:', error);
+            }
+        }
+
+        async function testCustomHeaders() {
+            const resultDiv = document.getElementById('header-result');
+            resultDiv.innerHTML = '<p>Testing custom headers...</p>';
+            
+            const url = document.getElementById('header-url').value;
+            const fullUrl = url.startsWith('http') ? url : window.location.origin + url;
+            
+            addLog(`Making request with custom headers to: ${fullUrl}`);
+            
+            try {
+                const startTime = performance.now();
+                const response = await fetch(fullUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Custom-Header': 'test-value',
+                        'X-Test-Origin': 'cors-debug-tool',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const endTime = performance.now();
+                const responseTime = (endTime - startTime).toFixed(2);
+                
+                // Extract headers
+                const headers = {};
+                response.headers.forEach((value, name) => {
+                    headers[name] = value;
+                });
+                
+                let responseData;
+                try {
+                    responseData = await response.json();
+                } catch (e) {
+                    responseData = await response.text();
+                }
+                
+                resultDiv.innerHTML = `
+                    <p class="success">Custom Headers Test successful (${responseTime}ms)</p>
+                    <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                    <div class="header-details">
+                        <p><strong>Request Headers Sent:</strong></p>
+                        <pre>${JSON.stringify({
+                            'Accept': 'application/json',
+                            'X-Custom-Header': 'test-value',
+                            'X-Test-Origin': 'cors-debug-tool',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }, null, 2)}</pre>
+                    </div>
+                    <div class="header-details">
+                        <p><strong>Response Headers:</strong></p>
+                        <pre>${JSON.stringify(headers, null, 2)}</pre>
+                    </div>
+                    <p><strong>Response Data:</strong></p>
+                    <pre>${typeof responseData === 'object' ? JSON.stringify(responseData, null, 2) : responseData}</pre>
+                `;
+            } catch (error) {
+                addLog(`Error in Custom Headers test: ${error.message}`, 'error');
+                resultDiv.innerHTML = `
+                    <p class="error">Custom Headers Test failed</p>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <p>Check browser console for more details.</p>
+                `;
+                console.error('Custom Headers Test Error:', error);
+            }
+        }
+
+        // Initialize
+        window.onload = function() {
+            showBrowserInfo();
+            addLog('CORS Debug Tool loaded');
+            
+            // Get current URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const autoRun = urlParams.get('autorun');
+            
+            if (autoRun === 'true') {
+                addLog('Auto-run enabled, running all tests...');
+                setTimeout(() => {
+                    testGetRequest();
+                    setTimeout(testJsonApi, 1000);
+                    setTimeout(testCorsRequest, 2000);
+                    setTimeout(testCustomHeaders, 3000);
+                }, 500);
+            }
+        };
+    </script>
+</body>
+</html>
