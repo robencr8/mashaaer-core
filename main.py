@@ -106,7 +106,8 @@ except ImportError:
 @app.route('/')
 def index():
     """Main entry point for Mashaaer Feelings web application"""
-    return render_template('cosmic_homepage.html')
+    # Serve the official production UI with a clean, professional design
+    return render_template('startup_standalone.html')
 
 @app.route('/health')
 def health():
@@ -130,6 +131,36 @@ def cosmic_onboarding():
     except Exception as e:
         logger.error(f"Error serving cosmic onboarding: {e}")
         return render_template('error.html', message="Cosmic onboarding experience not available")
+
+# Provide alternative access to the cosmic theme UI
+@app.route('/cosmic-theme')
+def cosmic_theme():
+    """Alternative cosmic theme interface"""
+    return render_template('cosmic_homepage.html')
+
+# Direct access to the homepage UI
+@app.route('/homepage')
+def homepage_direct():
+    """Direct access to the production homepage UI"""
+    return render_template('startup_standalone.html')
+
+# Route for consent page
+@app.route('/consent')
+def consent():
+    """User consent page"""
+    return render_template('consent.html')
+
+# Route for voice registration
+@app.route('/voice-register')
+def voice_register():
+    """Voice registration page"""
+    return render_template('voice_register.html')
+
+# Route for goodbye page
+@app.route('/goodbye')
+def goodbye():
+    """Goodbye page for users who do not consent"""
+    return render_template('goodbye.html')
 
 # Catch-all route for serving static files
 @app.route('/<path:filename>')
