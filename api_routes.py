@@ -624,18 +624,18 @@ def play_cosmic_sound():
         # For non-voice sounds, just return the path to the static sound file
         else:
             sound_file = f"{sound_type}.mp3"
-            sound_path = f"/static/audio/{sound_file}"
+            sound_path = f"/static/sounds/{sound_file}"
             
             # Check if the file exists
             import os
-            full_path = os.path.join('static', 'audio', sound_file)
+            full_path = os.path.join('static', 'sounds', sound_file)
             if not os.path.exists(full_path):
                 logger.warning(f"API: Cosmic sound file not found: {full_path}")
                 
                 # Return fallback sound if available
                 return jsonify({
                     'success': True,
-                    'sound_path': '/static/audio/click.mp3',
+                    'sound_path': '/static/sounds/click.mp3',
                     'warning': f'Requested sound {sound_file} not found, using fallback'
                 })
             
