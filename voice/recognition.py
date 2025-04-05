@@ -145,6 +145,46 @@ class VoiceRecognition:
             # Log the recognition
             self._log_recognition(text)
     
+    def recognize_speech_from_file(self, file_path, language="en-US"):
+        """
+        Recognize speech from an audio file
+        
+        Args:
+            file_path: Path to audio file
+            language: Language code for recognition (e.g. 'en-US', 'ar-EG')
+            
+        Returns:
+            Dict with recognized text and confidence
+        """
+        self.logger.info(f"Recognizing speech from file: {file_path}, language: {language}")
+        
+        try:
+            # Map language to language code
+            language_code = language
+            if language == "en":
+                language_code = "en-US"
+            elif language == "ar":
+                language_code = "ar-EG"
+                
+            # Process the file using Vosk handler
+            result = self.vosk_handler.recognize_from_file(file_path, language_code)
+            
+            # Log the recognition result
+            if result and 'text' in result:
+                self.logger.info(f"Successfully recognized: {result['text']}")
+            else:
+                self.logger.warning("Recognition returned no text")
+                
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Error recognizing speech from file: {str(e)}")
+            return {
+                "success": False,
+                "error": str(e),
+                "text": ""
+            }
+    
     def _log_recognition(self, text, audio_path=None, language=None):
         """Log speech recognition to file"""
         try:

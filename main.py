@@ -73,8 +73,8 @@ try:
     from voice.recognition import VoiceRecognition
     voice_recognition = VoiceRecognition(config)
     voice_recognition.initialize()
-except ImportError:
-    logger.warning("Voice recognition module could not be imported")
+except ImportError as e:
+    logger.warning(f"VoiceRecognition import error: {str(e)}")
 except Exception as e:
     logger.warning(f"Error initializing voice recognition: {str(e)}")
 

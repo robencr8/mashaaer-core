@@ -1,0 +1,64 @@
+Replit Agent Directive: Integrate RobinDecisionEngine into api_routes.py
+🔧 Step-by-Step Instruction Set
+python
+Copy
+Edit
+# STEP 1: Ensure the following imports are added to api_routes.py
+from flask import Blueprint, jsonify, request
+from rule_engine import RobinDecisionEngine
+from rules_config_loader import load_rules_from_config
+import logging
+
+api_bp = Blueprint('api', __name__, url_prefix='/api')
+logger = logging.getLogger(__name__)
+
+# STEP 2: Instantiate the engine once
+decision_engine = load_rules_from_config()  # Loads rules_config.json into RobinDecisionEngine
+
+# STEP 3: Modify /chat route to use the engine
+@api_bp.route('/chat', methods=['POST'])
+def chat():
+    data = request.get_json()
+    user_input = data.get('message', '')
+    emotion = data.get('emotion', 'neutral')
+
+    result = decision_engine.decide(user_input, emotion)
+    action = result["action"]
+    params = result.get("params", {})
+
+    logger.info(f"[Mashaaer Chat] Input: '{user_input}' | Emotion: {emotion} | Action: {action}")
+
+    # Map actions to logic
+    if action == "play_music":
+        return jsonify({"reply": "🎵 Playing music...", "action": action, "song": params.get("genre", "uplifting")})
+    elif action == "fetch_weather":
+        return jsonify({"reply": "🌤️ The weather is clear and calm.", "action": action})
+    elif action == "offer_companionship":
+        return jsonify({"reply": "🤝 I’m here for you, always 💙", "action": action})
+    else:
+        return jsonify({"reply": "🪐 Understood. I'm listening.", "action": action})
+🔍 Additional Agent Checks:
+✅ Confirm rules_config.json exists and is well-formed
+
+✅ rule_engine.py contains working RobinDecisionEngine and Rule classes
+
+✅ rules_config_loader.py returns a valid engine via load_rules_from_config()
+
+🧪 Test Case (for Debugging)
+Use this curl command or postman:
+
+bash
+Copy
+Edit
+curl -X POST https://your-replit-url/api/chat \
+-H "Content-Type: application/json" \
+-d '{"message": "I feel alone", "emotion": "sad"}'
+Expected result:
+
+json
+Copy
+Edit
+{
+  "reply": "🤝 I’m here for you, always 💙",
+  "action": "offer_companionship"
+}

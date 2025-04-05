@@ -326,6 +326,48 @@ class VoskHandler:
         
         self.logger.info("Voice recognition stopped")
     
+    def recognize_from_file(self, file_path, language):
+        """
+        Recognize speech from an audio file
+        
+        Args:
+            file_path: Path to audio file
+            language: Language code for recognition (e.g. 'en-US', 'ar')
+            
+        Returns:
+            Dict with recognized text and confidence
+        """
+        self.logger.info(f"Processing audio file: {file_path} with language: {language}")
+        
+        # Extract text using underlying recognize_file method
+        try:
+            text = self.recognize_file(file_path, language)
+            confidence = 0.8  # Default confidence score
+            
+            # More complex audio has lower confidence
+            if len(text.split()) > 5:
+                confidence = 0.7
+                
+            result = {
+                "success": True,
+                "text": text,
+                "confidence": confidence,
+                "language": language
+            }
+            
+            self.logger.info(f"Recognition result: {text}")
+            return result
+            
+        except Exception as e:
+            self.logger.error(f"Error in recognize_from_file: {str(e)}")
+            return {
+                "success": False,
+                "error": str(e),
+                "text": "",
+                "confidence": 0.0,
+                "language": language
+            }
+    
     def _mock_listening_thread(self, language):
         """Thread for continuous mock listening"""
         import time
