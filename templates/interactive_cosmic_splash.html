@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
@@ -642,7 +643,7 @@
     // Set audio to disabled initially to comply with browser autoplay policies
     let audioEnabled = false;
     // Display a message instructing the user to click anywhere to enable audio
-    document.getElementById('notification-area').innerHTML = '<div class="notification">انقر على أي مكان لتفعيل الصوت<br>Click anywhere to enable audio</div>';
+    document.getElementById('audio-notification').style.display = 'block';
     
     let soundCache = {}; // Cache for sound effects
     let isListening = false;
@@ -1153,21 +1154,19 @@
       
       // For non-voice sounds, we can just play them directly and cache them
       if (soundType !== 'welcome') {
-
-      try {
-        // Create a temporary audio element for the interaction sound
-        const sound = new Audio(`/static/sounds/${soundType}.mp3`);
-        sound.volume = soundType === 'hover' ? 0.3 : 0.5;
-        sound.play().catch(err => {
-          console.error('Audio play error (likely autoplay restriction):', err);
-        });
-        
-        // Cache for future use
-        soundCache[soundType] = sound;
-      } catch (err) {
-        console.error('Error creating audio element:', err);
-      }
-
+        try {
+          // Create a temporary audio element for the interaction sound
+          const sound = new Audio(`/static/sounds/${soundType}.mp3`);
+          sound.volume = soundType === 'hover' ? 0.3 : 0.5;
+          sound.play().catch(err => {
+            console.error('Audio play error (likely autoplay restriction):', err);
+          });
+          
+          // Cache for future use
+          soundCache[soundType] = sound;
+        } catch (err) {
+          console.error('Error creating audio element:', err);
+        }
         return;
       }
       
@@ -1486,14 +1485,8 @@
     try {
       bgAudio.volume = 0.4;
       // Removed automatic play to avoid browser autoplay restrictions
-      bgAudio.volume = 0.4;
       // Play only after user interaction. This happens in the click event listener above.
-        //
-        //;
-      });
     } catch(e) {
-      console.log("Audio error:", e);
-    }
-  </script>
+      // Play only after user interaction. This happens in the click event listener above.
 </body>
 </html>

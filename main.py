@@ -129,7 +129,7 @@ def index():
     """Main entry point for Mashaaer Feelings web application"""
     logger.info(f"Index page request received from {request.remote_addr}")
     # Serve the official production UI with cosmic design elements
-    return render_template('startup_standalone.html')
+    return render_template('interactive_cosmic_splash.html')
 
 @app.route('/health')
 def health():
@@ -152,7 +152,7 @@ def health():
 def cosmic_onboarding():
     """Cosmic onboarding experience entry point"""
     try:
-        return render_template('startup_standalone.html')
+        return render_template('interactive_cosmic_splash.html')
     except Exception as e:
         logger.error(f"Error serving cosmic onboarding: {e}")
         return render_template('error.html', message="Cosmic onboarding experience not available")
@@ -161,13 +161,13 @@ def cosmic_onboarding():
 @app.route('/cosmic-theme')
 def cosmic_theme():
     """Alternative cosmic theme interface"""
-    return render_template('startup_standalone.html')
+    return render_template('interactive_cosmic_splash.html')
 
 # Direct access to the homepage UI
 @app.route('/homepage')
 def homepage_direct():
     """Direct access to the production homepage UI"""
-    return render_template('startup_standalone.html')
+    return render_template('interactive_cosmic_splash.html')
 
 # Route for consent page
 @app.route('/consent')

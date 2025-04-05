@@ -624,17 +624,26 @@
       </div>
       <p id="voice-status-text"></p>
     </div>
+  <!-- Audio notification message -->
+  <div id="audio-notification" style="position: fixed; bottom: 20px; left: 0; right: 0; text-align: center; padding: 10px; background-color: rgba(0, 0, 0, 0.7); color: white; z-index: 1000; border-radius: 5px; margin: 0 auto; width: fit-content; max-width: 80%; font-size: 14px; display: none;">
+    <span class="ar">انقر في أي مكان لتفعيل الصوت</span>
+    <span class="en">Click anywhere to enable audio</span>
+  </div>
   </div>
 
   <!-- Audio element for background sound -->
   <audio id="background-audio" loop>
-    <source src="/static/audio/cosmic_ambient.mp3" type="audio/mp3">
+    <source src="/static/sounds/cosmic.mp3" type="audio/mp3">
   </audio>
 
   <script>
     // Initialize language from local storage or default to Arabic
     let currentLanguage = localStorage.getItem('user_language') || 'ar';
-    let audioEnabled = true;
+    // Set audio to disabled initially to comply with browser autoplay policies
+    let audioEnabled = false;
+    // Display a message instructing the user to click anywhere to enable audio
+    document.getElementById('notification-area').innerHTML = '<div class="notification">انقر على أي مكان لتفعيل الصوت<br>Click anywhere to enable audio</div>';
+    
     let soundCache = {}; // Cache for sound effects
     let isListening = false;
     let recognizedEmotion = null;
@@ -690,6 +699,13 @@
     // Initialize on page load
     window.addEventListener('DOMContentLoaded', function() {
       // We'll only initialize speech recognition, but NOT play sounds automatically
+    // Show audio notification
+    document.getElementById("audio-notification").style.display = "block";
+
+    // Hide notification after 5 seconds
+    setTimeout(() => {
+      document.getElementById("audio-notification").style.display = "none";
+    }, 5000);
       // This avoids browser autoplay restrictions
       initSpeechRecognition();
       
@@ -1034,9 +1050,16 @@
     audioToggle.addEventListener('click', function() {
       audioEnabled = !audioEnabled;
       
+      // Do NOT play sounds automatically to avoid browser autoplay restrictions
       if (audioEnabled) {
         audioIcon.className = 'fas fa-volume-up';
-        bgAudio.play();
+        try {
+          bgAudio.play().catch(err => {
+            console.error('Background audio play error:', err);
+          });
+        } catch (err) {
+          console.error('Error playing background audio:', err);
+        }
       } else {
         audioIcon.className = 'fas fa-volume-mute';
         bgAudio.pause();
@@ -1056,7 +1079,7 @@
         this.classList.add('active');
         
         // Play welcome sound in new language
-        if (audioEnabled) {
+        // Do NOT play sounds automatically to avoid browser autoplay restrictions
           playCosmicSound('welcome', lang);
         }
       });
@@ -1130,13 +1153,19 @@
       
       // For non-voice sounds, we can just play them directly and cache them
       if (soundType !== 'welcome') {
-        // Create a temporary audio element for the interaction sound
-        const sound = new Audio(`/static/audio/${soundType}.mp3`);
-        sound.volume = soundType === 'hover' ? 0.3 : 0.5;
-        sound.play();
-        
-        // Cache for future use
-        soundCache[soundType] = sound;
+        try {
+          // Create a temporary audio element for the interaction sound
+          const sound = new Audio(`/static/sounds/${soundType}.mp3`);
+          sound.volume = soundType === 'hover' ? 0.3 : 0.5;
+          sound.play().catch(err => {
+            console.error('Audio play error (likely autoplay restriction):', err);
+          });
+          
+          // Cache for future use
+          soundCache[soundType] = sound;
+        } catch (err) {
+          console.error('Error creating audio element:', err);
+        }
         return;
       }
       
@@ -1147,10 +1176,18 @@
       .then(response => response.json())
       .then(data => {
         if (data.success && data.sound_path) {
+
           // Play the returned sound
-          const sound = new Audio(data.sound_path);
-          sound.volume = 0.6;
-          sound.play();
+          try {
+            const sound = new Audio(data.sound_path);
+            sound.volume = 0.6;
+            sound.play().catch(err => {
+              console.error('Welcome sound play error (likely autoplay restriction):', err);
+            });
+          } catch (err) {
+            console.error('Error creating welcome audio element:', err);
+          }
+
         }
       })
       .catch(error => {
@@ -1160,8 +1197,22 @@
     
     // Play background audio on page interaction
     document.addEventListener('click', function() {
+      // Hide the audio notification
+      document.getElementById("audio-notification").style.display = "none";
+      
+      // Also play welcome sound when audio is first enabled
       if (audioEnabled) {
-        bgAudio.play();
+        playCosmicSound("welcome", currentLanguage);
+      }
+
+      // Try to play background audio with error handling
+      try {
+        const bgAudio = document.getElementById('background-audio');
+        bgAudio.play().catch(err => {
+          console.error('Background audio play error:', err);
+        });
+      } catch (err) {
+        console.error('Error playing background audio:', err);
       }
     }, { once: true });
     
@@ -1429,15 +1480,11 @@
     // Initialize canvas
     setupCanvas();
     
-    // Try to play audio if not blocked
+    // Setup audio but don't play automatically
     try {
       bgAudio.volume = 0.4;
-      bgAudio.play().then(() => {
-        // Audio started successfully
-      }).catch((e) => {
-        // Audio autoplay was prevented, we'll wait for user interaction
-        console.log("Audio autoplay prevented, waiting for user interaction");
-      });
+      // Removed automatic play to avoid browser autoplay restrictions
+      // Play only after user interaction. This happens in the click event listener above.
     } catch(e) {
       console.log("Audio error:", e);
     }
