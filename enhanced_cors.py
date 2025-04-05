@@ -67,20 +67,13 @@ def configure_enhanced_cors(app, config=None):
     logger.debug(f"Allowed origins: {origins}")
     
     # Configure CORS with the expanded origins list and additional settings
+    # Use a simplified CORS configuration to maximize compatibility with Replit tools
     CORS(
         app,
         resources={r"/*": {
-            "origins": ["*"],  # Allow all origins for maximum compatibility
+            "origins": "*",  # Most permissive setting for Replit compatibility
             "supports_credentials": False,  # Disable credentials support to avoid browser issues
-            "allow_headers": [
-                "Content-Type", 
-                "Authorization", 
-                "X-Requested-With",
-                "Accept", 
-                "Origin", 
-                "Cache-Control",
-                "*"  # Allow all headers for maximum compatibility
-            ],
+            "allow_headers": "*",  # Allow all headers
             "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
             "expose_headers": ["Content-Length", "Content-Type"]
         }}
