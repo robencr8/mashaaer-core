@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Audio Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #111;
+            color: #eef;
+        }
+        h1 {
+            color: #9cf;
+            text-align: center;
+        }
+        .audio-container {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #223;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(100, 150, 255, 0.2);
+        }
+        .audio-label {
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #acf;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        button {
+            padding: 12px 20px;
+            background-color: #334466;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #4466aa;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #223344;
+            color: #aaccff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mashaaer Cosmic Audio Test</h1>
+    
+    <div class="audio-container">
+        <div class="audio-label">Generated Cosmic Ambient Track:</div>
+        <audio id="cosmicAudio" controls loop>
+            <source src="audio/cosmicmusic.mp3" type="audio/mp3">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+    
+    <div class="controls">
+        <button id="playButton">Play Ambient Track</button>
+        <button id="loopToggle">Toggle Loop (Currently On)</button>
+        <button id="autoplayButton">Test Autoplay</button>
+        <div class="status" id="status">Status: Ready</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const audio = document.getElementById('cosmicAudio');
+            const playButton = document.getElementById('playButton');
+            const loopToggle = document.getElementById('loopToggle');
+            const autoplayButton = document.getElementById('autoplayButton');
+            const status = document.getElementById('status');
+            
+            // Play button
+            playButton.addEventListener('click', function() {
+                if (audio.paused) {
+                    audio.play()
+                    .then(() => {
+                        status.textContent = 'Status: Playing cosmic ambient track';
+                    })
+                    .catch(error => {
+                        status.textContent = `Status: Error playing audio: ${error.message}`;
+                    });
+                } else {
+                    audio.pause();
+                    status.textContent = 'Status: Paused cosmic ambient track';
+                }
+            });
+            
+            // Loop toggle
+            loopToggle.addEventListener('click', function() {
+                audio.loop = !audio.loop;
+                loopToggle.textContent = `Toggle Loop (Currently ${audio.loop ? 'On' : 'Off'})`;
+                status.textContent = `Status: Loop set to ${audio.loop ? 'on' : 'off'}`;
+            });
+            
+            // Autoplay test
+            autoplayButton.addEventListener('click', function() {
+                audio.pause();
+                audio.currentTime = 0;
+                
+                status.textContent = 'Status: Testing autoplay...';
+                
+                // Need user interaction to allow autoplay in most browsers
+                const playPromise = audio.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise
+                    .then(() => {
+                        status.textContent = 'Status: Autoplay successful!';
+                    })
+                    .catch(error => {
+                        status.textContent = `Status: Autoplay failed: ${error.message}`;
+                    });
+                }
+            });
+            
+            // Listen for audio events
+            audio.addEventListener('play', function() {
+                playButton.textContent = 'Pause Ambient Track';
+            });
+            
+            audio.addEventListener('pause', function() {
+                playButton.textContent = 'Play Ambient Track';
+            });
+            
+            audio.addEventListener('ended', function() {
+                if (!audio.loop) {
+                    playButton.textContent = 'Play Ambient Track';
+                    status.textContent = 'Status: Playback ended';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
