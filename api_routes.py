@@ -66,9 +66,44 @@ def _get_or_create_session_id():
 @api.route('/docs', methods=['GET'])
 def api_docs():
     """API documentation listing all available endpoints"""
-    # ... code omitted for brevity ...
+    docs = {
+        'api_version': '1.2.0',
+        'title': 'Mashaaer Feelings API',
+        'description': 'REST API for the Mashaaer Feelings application',
+        'endpoints': {
+            '/api/status': {
+                'methods': ['GET'],
+                'description': 'Get system status information'
+            },
+            '/api/analyze-emotion': {
+                'methods': ['POST'],
+                'description': 'Analyze text for emotional content',
+                'request_body': {'text': 'string', 'context': 'array (optional)'}
+            },
+            '/api/cosmic-onboarding/profile': {
+                'methods': ['POST'],
+                'description': 'Update user profile during cosmic onboarding'
+            },
+            '/api/cosmic-sound': {
+                'methods': ['GET'],
+                'description': 'Generate sound for cosmic interface'
+            },
+            '/api/send-sms': {
+                'methods': ['POST'],
+                'description': 'Send SMS notification via Twilio'
+            },
+            '/api/voice/listen': {
+                'methods': ['POST'],
+                'description': 'Listen for voice input'
+            },
+            '/api/log-voice-error': {
+                'methods': ['POST'],
+                'description': 'Log voice input errors'
+            }
+        }
+    }
     
-    return jsonify(api_docs)
+    return jsonify(docs)
 
 
 @api.route('/status', methods=['GET'])
