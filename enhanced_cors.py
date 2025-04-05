@@ -70,15 +70,16 @@ def configure_enhanced_cors(app, config=None):
     CORS(
         app,
         resources={r"/*": {
-            "origins": origins,
-            "supports_credentials": True,
+            "origins": ["*"],  # Allow all origins for maximum compatibility
+            "supports_credentials": False,  # Disable credentials support to avoid browser issues
             "allow_headers": [
                 "Content-Type", 
                 "Authorization", 
                 "X-Requested-With",
                 "Accept", 
                 "Origin", 
-                "Cache-Control"
+                "Cache-Control",
+                "*"  # Allow all headers for maximum compatibility
             ],
             "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
             "expose_headers": ["Content-Length", "Content-Type"]
