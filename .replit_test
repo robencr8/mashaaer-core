@@ -1,0 +1,12 @@
+# Updated Replit configuration for testing
+modules = ["python-3.11"]
+
+[[ports]]
+localPort = 5000
+externalPort = 5000
+
+[deployment]
+deploymentTarget = "static"
+
+[[deployment.files]]
+path = "/"

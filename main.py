@@ -96,11 +96,15 @@ except ImportError as e:
     components['voice_recognition'] = None
 
 try:
-    from context_assistant import ContextAssistant
-    components['context_assistant'] = ContextAssistant()
+    from profile_manager import ProfileManager
+    components['profile_manager'] = ProfileManager(db_manager)
+    logger.info("ProfileManager module loaded successfully")
 except ImportError as e:
-    logger.warning(f"ContextAssistant import error: {e}")
-    components['context_assistant'] = None
+    logger.warning(f"ProfileManager import error: {e}")
+    components['profile_manager'] = None
+except TypeError as e:
+    logger.warning(f"ProfileManager initialization error: {e}")
+    components['profile_manager'] = None
 
 try:
     from ai_model_router import AIModelRouter
@@ -111,12 +115,14 @@ except ImportError as e:
     components['model_router'] = None
 
 try:
-    from profile_manager import ProfileManager
-    components['profile_manager'] = ProfileManager()
-    logger.info("ProfileManager module loaded successfully")
+    from context_assistant import ContextAssistant
+    components['context_assistant'] = ContextAssistant(db_manager, components.get('profile_manager'))
 except ImportError as e:
-    logger.warning(f"ProfileManager import error: {e}")
-    components['profile_manager'] = None
+    logger.warning(f"ContextAssistant import error: {e}")
+    components['context_assistant'] = None
+except TypeError as e:
+    logger.warning(f"ContextAssistant initialization error: {e}")
+    components['context_assistant'] = None
 
 # تسجيل مسارات API
 logger.info("Initializing API routes...")
@@ -283,6 +289,38 @@ def test_pwa_page():
     """Alternative test page for PWA features"""
     logger.info(f"Alternative PWA test page request received from {request.remote_addr}")
     return send_from_directory('static', 'pwa_test.html')
+
+@app.route("/replit-test")
+def replit_test():
+    """Test page specifically for Replit's feedback tool"""
+    logger.info(f"Replit test page request received from {request.remote_addr}")
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Replit Connection Test</title>
+        <style>
+            body { 
+                font-family: Arial; 
+                background-color: #1a1a2e;
+                color: white;
+                text-align: center;
+                padding: 20px;
+            }
+            h1 { color: #8a2be2; }
+            .success { color: #4caf50; }
+            .error { color: #f44336; }
+        </style>
+    </head>
+    <body>
+        <h1>Replit Connection Test</h1>
+        <p>This page tests connectivity to the Mashaaer API server.</p>
+        <p class="success">If you can see this page, the server is working correctly!</p>
+    </body>
+    </html>
+    """
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

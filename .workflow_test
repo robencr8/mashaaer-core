@@ -1,0 +1,6 @@
+<name>
+Test Server
+</name>
+<command>
+python replit_test_app.py
+</command>
