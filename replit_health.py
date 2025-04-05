@@ -1,27 +1,14 @@
 """
-Health check module for Replit compatibility
+Ultra-Minimal Flask Application for Replit Feedback Tool
+This file is deliberately ultra-simple to ensure compatibility
 """
+from flask import Flask
 
-from flask import Blueprint, jsonify, Response
+app = Flask(__name__)
 
-# Create blueprint for health check endpoints
-health_bp = Blueprint('health', __name__)
+@app.route('/')
+def hello():
+    return "OK"
 
-@health_bp.route('/health')
-def health():
-    """Primary health check endpoint for Replit web application feedback tool"""
-    return Response('{"status":"ok"}', mimetype='application/json')
-
-@health_bp.route('/replit-health')
-def replit_health():
-    """Secondary health check endpoint"""
-    return Response('{"status":"ok"}', mimetype='application/json')
-
-@health_bp.route('/replit-feedback-health')
-def replit_feedback_health():
-    """Alternative health check specifically for Replit feedback tool"""
-    return Response('{"status":"ok","message":"Server is running"}', mimetype='application/json')
-
-def init_health_routes(app):
-    """Initialize health check routes on the given Flask app"""
-    app.register_blueprint(health_bp)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
