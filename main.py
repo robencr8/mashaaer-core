@@ -72,26 +72,11 @@ import mobile_api_routes  # Mobile-optimized API routes
 # Load configuration
 config = Config()
 
-# Extended CORS configuration for cross-domain compatibility
-origins = [
-    "https://mashaaer.replit.app",
-    "https://mashaaer-feelings.replit.app", 
-    "https://mashaaer-ai.replit.app",
-    config.APP_URL,
-    "http://localhost:5000",
-    "http://127.0.0.1:5000",
-    "http://localhost:3000",  # React development server
-    "null",  # For file:// URLs
-    "*"  # Allow all origins for the web application feedback tool
-]
+# Import the enhanced CORS configuration
+from enhanced_cors import configure_enhanced_cors
 
-# Add Replit URLs to allowed origins
-if 'REPLIT_URL' in os.environ:
-    origins.append(os.environ['REPLIT_URL'])
-if 'REPL_SLUG' in os.environ and 'REPL_OWNER' in os.environ:
-    origins.append(f"https://{os.environ['REPL_SLUG']}.{os.environ['REPL_OWNER']}.repl.co")
-
-CORS(app, resources={r"/*": {"origins": origins}})
+# Apply enhanced CORS settings
+origins = configure_enhanced_cors(app, config)
 
 # Initialize database
 db_manager = DatabaseManager(config)
@@ -232,6 +217,11 @@ def serve_tts_cache(filename):
 # @app.route('/')
 # def index():
 #     pass
+
+@app.route('/replit-test')
+def replit_test():
+    """Replit compatibility test page for web application feedback tool"""
+    return render_template('replit_test.html')
 
 @app.route('/index')
 def app_index():
@@ -423,10 +413,10 @@ def speak():
             audio_file = tts_manager.generate_tts(text, voice_id, language)
             
             # Return the file URL for the client to play
+            # Since tts_manager may not have last_was_cache_hit attribute, don't include it
             return jsonify({
                 'status': 'success',
-                'audio_url': f'/tts_cache/{audio_file}',
-                'cache_hit': tts_manager.last_was_cache_hit
+                'audio_url': f'/tts_cache/{audio_file}'
             })
             
         except Exception as e:
