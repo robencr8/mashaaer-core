@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robin AI Voice Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+        }
+        #status {
+            margin-top: 1rem;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h2>Talk to Robin AI</h2>
+    <button id="micButton">🎤 Speak</button>
+    <div id="status">Status: Waiting...</div>
+
+    <script>
+        const micButton = document.getElementById('micButton');
+        const status = document.getElementById('status');
+
+        if ('webkitSpeechRecognition' in window) {
+            const recognition = new webkitSpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.continuous = false;
+
+            recognition.onstart = () => {
+                status.textContent = 'Status: Listening...';
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                status.textContent = `Transcribed: ${transcript}`;
+
+                // Send the transcribed text to the backend
+                fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: transcript })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Server Response:', data);
+                    status.textContent = `Robin says: ${JSON.stringify(data)}`;
+                });
+            };
+
+            recognition.onerror = (event) => {
+                status.textContent = `Error: ${event.error}`;
+            };
+
+            recognition.onend = () => {
+                status.textContent += ' | Done.';
+            };
+
+            micButton.addEventListener('click', () => {
+                recognition.start();
+            });
+
+        } else {
+            status.textContent = 'Speech recognition not supported.';
+        }
+    </script>
+</body>
+</html>

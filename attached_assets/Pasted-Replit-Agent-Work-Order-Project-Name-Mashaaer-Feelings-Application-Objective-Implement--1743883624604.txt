@@ -1,0 +1,145 @@
+Replit Agent Work Order
+Project Name: Mashaaer Feelings Application | مشاعر
+
+✅ Objective:
+Implement and deploy the fully integrated, adaptive, and emotion-aware voice web assistant using all prepared components and files.
+
+📁 App Directory Structure (Final)
+csharp
+Copy
+Edit
+/Mashaaer
+├── api_routes.py
+├── admin_routes.py
+├── rule_engine.py
+├── rules_config_loader.py
+├── rules_config.json
+├── audio_utils.py
+├── scheduler_setup.py
+├── memory_store.py
+├── log_manager.py
+├── static/
+│   └── app.js  # (optional JS frontend logic)
+├── templates/
+│   ├── index.html          # Voice + Emotion UI
+│   └── admin.html          # Admin Dashboard
+├── tests/
+│   └── test_rule_engine.py
+├── logs/
+│   └── interaction_log.csv
+├── memory.db
+└── main.py  # App launcher, registers routes, initializes DB
+🔧 Agent Task List (Step-by-Step)
+1. Frontend Updates
+Update all HTML branding to:
+
+html
+Copy
+Edit
+<title>Mashaaer Feelings Application | مشاعر</title>
+<h1>Welcome to Mashaaer Feelings Application | مشاعر</h1>
+Files to update:
+
+templates/index.html
+
+templates/admin.html
+
+2. Sentiment Analysis (TextBlob)
+Add in api_routes.py:
+
+python
+Copy
+Edit
+from textblob import TextBlob
+
+# In the chat() route:
+blob = TextBlob(user_input)
+polarity = blob.sentiment.polarity
+if polarity > 0.2:
+    emotion = "happy"
+elif polarity < -0.2:
+    emotion = "sad"
+else:
+    emotion = "neutral"
+3. Admin Dashboard
+File: admin_routes.py
+
+Load and view rules_config.json
+
+Render in admin.html
+
+View CSV logs
+
+4. Persistent Memory
+File: memory_store.py
+
+SQLite DB: memory.db
+
+Table: memory(user_id, key, value, timestamp)
+
+Functions: init_db(), save_memory(), get_memory()
+
+Call init_db() in main.py on startup.
+
+5. Adaptive Feedback Endpoint
+Route: /api/feedback
+
+Method: POST
+
+Params: rule_id, feedback (positive/negative)
+
+Adjust matching rule’s weight in rules_config.json and persist
+
+6. Logging
+File: log_manager.py
+
+Write to: logs/interaction_log.csv
+
+Include: timestamp, user_input, emotion, action, params
+
+Call from chat() route after action execution.
+
+7. Unit Tests
+File: tests/test_rule_engine.py
+
+Ensure decision engine matches logic, weight priority, and fallback works
+
+Run via:
+
+bash
+Copy
+Edit
+python3 -m unittest discover tests/
+8. Final Touch
+Run app in main.py
+
+Register all blueprints:
+
+python
+Copy
+Edit
+app.register_blueprint(api_bp)
+app.register_blueprint(admin_bp)
+Serve static and template files
+
+Confirm /api/chat, /admin/, /api/feedback are working
+
+🔄 Summary for Replit Agent
+You already have all these modules:
+
+🎤 Voice recognition UI
+
+🤖 Emotion-driven decision engine
+
+🧠 Sentiment classifier
+
+📊 Rule management dashboard
+
+📁 SQLite-based memory
+
+♻️ Feedback-adaptive behavior
+
+🧪 Unit test coverage
+
+👉 Your job is to stitch them together, integrate the logic as directed, ensure branding is updated to “Mashaaer Feelings Application | مشاعر”, and confirm everything is functional and clean.
+
