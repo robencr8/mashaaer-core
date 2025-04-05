@@ -106,59 +106,7 @@ except ImportError:
 @app.route('/')
 def index():
     """Main entry point for Mashaaer Feelings web application"""
-    return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Mashaaer Feelings</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 20px;
-                text-align: center;
-                background-color: #f8f9fa;
-            }
-            h1 {
-                color: #2c3e50;
-                margin-top: 40px;
-            }
-            .container {
-                max-width: 800px;
-                margin: 0 auto;
-                background-color: white;
-                padding: 30px;
-                border-radius: 10px;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            }
-            .button {
-                display: inline-block;
-                padding: 10px 20px;
-                margin: 10px;
-                background-color: #9c27b0;
-                color: white;
-                text-decoration: none;
-                border-radius: 5px;
-                font-weight: bold;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>Welcome to Mashaaer Feelings</h1>
-            <p>Your emotional intelligence companion</p>
-            <p>The application is running correctly and ready to assist you.</p>
-            <div>
-                <a href="/health" class="button">Health Check</a>
-                <a href="/api/status" class="button">API Status</a>
-                <a href="/api/docs" class="button">API Documentation</a>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
+    return render_template('cosmic_homepage.html')
 
 @app.route('/health')
 def health():
