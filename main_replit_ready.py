@@ -7,18 +7,12 @@ import os
 import json
 import logging
 
-# Import our health check routes
-from replit_health import init_health_routes
-
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Create Flask app
 app = Flask(__name__, static_folder='static', template_folder='templates')
-
-# Initialize health check routes
-init_health_routes(app)
 
 # Enable CORS for all routes
 @app.after_request
@@ -36,8 +30,7 @@ def options_handler(path):
 
 @app.route('/')
 def index():
-    """Root route with template HTML"""
-    logger.info("Root route accessed")
+    """Root route with minimal HTML"""
     return render_template('index.html') if os.path.exists('templates/index.html') else Response("""<!DOCTYPE html>
 <html>
 <head>
@@ -93,11 +86,22 @@ def index():
       <h3>API Endpoints:</h3>
       <a class="api-link" href="/health">Health Check</a>
       <a class="api-link" href="/api/status">API Status</a>
-      <a class="api-link" href="/replit-health">Replit Health Check</a>
     </div>
   </div>
 </body>
 </html>""", mimetype='text/html')
+
+@app.route('/health')
+def health():
+    """Health check endpoint for Replit web application feedback tool"""
+    logger.info("Health check endpoint accessed")
+    return Response('{"status":"ok"}', mimetype='application/json')
+
+@app.route('/replit-feedback-health')
+def replit_feedback_health():
+    """Alternative health check specifically for Replit feedback tool"""
+    logger.info("Replit feedback health check endpoint accessed")
+    return Response('{"status":"ok","message":"Server is running"}', mimetype='application/json')
 
 @app.route('/api/status')
 def api_status():

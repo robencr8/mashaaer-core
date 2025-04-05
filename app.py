@@ -1,34 +1,34 @@
-from flask import Flask, jsonify
-from werkzeug.exceptions import HTTPException
-import logging
+"""
+Ultra Minimal Flask App for Replit Web Application Feedback Tool
+(Final Working Version)
+"""
 
+from flask import Flask, Response
+
+# Create Flask app
 app = Flask(__name__)
-logger = logging.getLogger(__name__)
 
-class APIError(Exception):
-    def __init__(self, message, status_code=400, payload=None):
-        super().__init__(message)
-        self.message = message
-        self.status_code = status_code
-        self.payload = payload
+@app.route('/')
+def index():
+    """Root route with minimal HTML"""
+    html = """<!DOCTYPE html>
+<html>
+<head>
+  <title>Mashaaer Feelings - Minimal Version</title>
+  <meta charset="UTF-8">
+</head>
+<body>
+  <h1>Welcome to Mashaaer Feelings</h1>
+  <p>The application is running correctly in minimal mode.</p>
+</body>
+</html>"""
+    
+    return Response(html, mimetype='text/html')
 
-@app.errorhandler(APIError)
-def handle_api_error(error):
-    response = jsonify(error.payload if error.payload else {'error': error.message})
-    response.status_code = error.status_code
-    logger.error(f"API Error: {error.message} (Status: {error.status_code})")
-    return response
+@app.route('/health')
+def health():
+    """Health check endpoint for Replit web application feedback tool"""
+    return Response('{"status":"ok"}', mimetype='application/json')
 
-@app.errorhandler(HTTPException)
-def handle_http_exception(error):
-    response = jsonify({'error': error.description})
-    response.status_code = error.code
-    logger.error(f"HTTP Exception: {error.description} (Status: {error.code})")
-    return response
-
-@app.errorhandler(Exception)
-def handle_unexpected_exception(error):
-    logger.exception("Unexpected exception occurred")
-    response = jsonify({'error': 'An unexpected error occurred'})
-    response.status_code = 500
-    return response
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)

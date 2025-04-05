@@ -1,67 +1,27 @@
 """
-Replit Health Check
-
-This is a very simple Flask application specifically designed to be accessible
-by the Replit web application feedback tool. It provides a minimal HTTP server
-with just the necessary routes for the feedback tool to function.
+Health check module for Replit compatibility
 """
 
-from flask import Flask, Response, request
+from flask import Blueprint, jsonify, Response
 
-app = Flask(__name__)
+# Create blueprint for health check endpoints
+health_bp = Blueprint('health', __name__)
 
-@app.route('/', methods=['GET', 'OPTIONS'])
-def index():
-    """Provide a simple HTML page that the feedback tool can access"""
-    # Handle OPTIONS request for CORS preflight
-    if request.method == 'OPTIONS':
-        response = Response('')
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-        return response
-    
-    # Simple HTML response
-    html = """<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Replit Health Check</title>
-</head>
-<body>
-    <h1>Replit Health Check</h1>
-    <p>This server is configured for the Replit web application feedback tool.</p>
-</body>
-</html>"""
-    
-    response = Response(html, mimetype='text/html')
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    return response
-
-@app.route('/health', methods=['GET', 'OPTIONS'])
+@health_bp.route('/health')
 def health():
-    """Simple health check endpoint"""
-    # Handle OPTIONS request for CORS preflight
-    if request.method == 'OPTIONS':
-        response = Response('')
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-        return response
-    
-    # Return simple JSON status
-    response = Response('{"status":"ok"}', mimetype='application/json')
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    return response
+    """Primary health check endpoint for Replit web application feedback tool"""
+    return Response('{"status":"ok"}', mimetype='application/json')
 
-@app.route('/<path:path>', methods=['OPTIONS'])
-def options(path):
-    """Handle OPTIONS requests"""
-    response = Response('')
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-    return response
+@health_bp.route('/replit-health')
+def replit_health():
+    """Secondary health check endpoint"""
+    return Response('{"status":"ok"}', mimetype='application/json')
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+@health_bp.route('/replit-feedback-health')
+def replit_feedback_health():
+    """Alternative health check specifically for Replit feedback tool"""
+    return Response('{"status":"ok","message":"Server is running"}', mimetype='application/json')
+
+def init_health_routes(app):
+    """Initialize health check routes on the given Flask app"""
+    app.register_blueprint(health_bp)
