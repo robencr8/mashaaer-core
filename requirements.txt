@@ -20,3 +20,4 @@ pydub
 scipy
 openai
 rule-engine
+beautifulsoup4
