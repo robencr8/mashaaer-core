@@ -1,0 +1,800 @@
+/**
+ * Recommendation UI Styles
+ * 
+ * Styling for the AI-powered recommendation engine interface
+ * with cosmic theme integration
+ */
+
+/* Container */
+.recommendations-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Theme: Cosmic (default) */
+.recommendations-container.theme-cosmic {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9));
+    color: #f8f9fa;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 0 80px rgba(99, 102, 241, 0.1);
+}
+
+.theme-cosmic .recommendations-header::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(129, 140, 248, 0.3) 0%, rgba(129, 140, 248, 0) 70%);
+    border-radius: 50%;
+    z-index: -1;
+    animation: pulse 8s infinite ease-in-out;
+}
+
+.theme-cosmic .recommendations-header::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    left: -50px;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(192, 132, 252, 0.2) 0%, rgba(192, 132, 252, 0) 70%);
+    border-radius: 50%;
+    z-index: -1;
+    animation: pulse 6s infinite ease-in-out 1s;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+/* Theme: Light */
+.recommendations-container.theme-light {
+    background-color: #ffffff;
+    color: #333333;
+    border: 1px solid #e1e4e8;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Theme: Dark */
+.recommendations-container.theme-dark {
+    background-color: #1e1e2e;
+    color: #e2e2e2;
+    border: 1px solid #313143;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* Header */
+.recommendations-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.recommendations-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+}
+
+.theme-cosmic .recommendations-title {
+    color: #f1f5f9;
+    text-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+}
+
+.recommendations-subtitle {
+    font-size: 1rem;
+    font-weight: 400;
+    margin: 0;
+    opacity: 0.8;
+}
+
+/* Loading state */
+.recommendations-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+}
+
+.recommendations-loading p {
+    margin-top: 1rem;
+    color: #a1a1aa;
+}
+
+.theme-cosmic .recommendations-loading .cosmic-orb-loader {
+    width: 60px;
+    height: 60px;
+    position: relative;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #6366f1, #8b5cf6, #d946ef);
+    animation: orb-spin 1.5s linear infinite;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+}
+
+.theme-cosmic .recommendations-loading .cosmic-orb-loader::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.theme-cosmic .recommendations-loading .cosmic-orb-loader::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 50%;
+    background: linear-gradient(45deg, #6366f1, #8b5cf6);
+    border-radius: 50% 50% 0 0;
+    transform-origin: 0% 100%;
+    animation: orb-spin 3s linear infinite reverse;
+}
+
+@keyframes orb-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Empty state */
+.recommendations-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+}
+
+.recommendations-empty-state p {
+    margin-bottom: 1.5rem;
+    color: #a1a1aa;
+}
+
+.theme-cosmic .refresh-button {
+    background-color: rgba(99, 102, 241, 0.2);
+    color: #f8fafc;
+    border: 1px solid rgba(99, 102, 241, 0.5);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.theme-cosmic .refresh-button:hover {
+    background-color: rgba(99, 102, 241, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* Error state */
+.recommendations-error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #ef4444;
+}
+
+.error-message {
+    margin-bottom: 1.5rem;
+    color: #ef4444;
+}
+
+/* Tabs */
+.recommendations-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    justify-content: center;
+}
+
+.recommendations-tab {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.theme-cosmic .recommendations-tab {
+    color: #cbd5e1;
+    background-color: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.theme-cosmic .recommendations-tab:hover {
+    background-color: rgba(99, 102, 241, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.theme-cosmic .recommendations-tab.active {
+    background-color: rgba(99, 102, 241, 0.3);
+    color: #f1f5f9;
+    border: 1px solid rgba(99, 102, 241, 0.6);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+}
+
+.recommendations-tab .icon {
+    font-size: 1.1rem;
+}
+
+/* Content */
+.recommendations-content {
+    position: relative;
+    min-height: 200px;
+}
+
+/* Affirmation */
+.recommendations-affirmation {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.recommendations-affirmation blockquote {
+    font-style: italic;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    position: relative;
+    max-width: 90%;
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+}
+
+.theme-cosmic .recommendations-affirmation blockquote {
+    background-color: rgba(99, 102, 241, 0.15);
+    border-left: 4px solid rgba(99, 102, 241, 0.6);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.theme-cosmic .recommendations-affirmation blockquote::before,
+.theme-cosmic .recommendations-affirmation blockquote::after {
+    content: '"';
+    font-size: 1.5rem;
+    font-family: Georgia, serif;
+    color: rgba(99, 102, 241, 0.6);
+    position: absolute;
+}
+
+.theme-cosmic .recommendations-affirmation blockquote::before {
+    top: 0;
+    left: 0.5rem;
+}
+
+.theme-cosmic .recommendations-affirmation blockquote::after {
+    bottom: -0.5rem;
+    right: 0.5rem;
+}
+
+/* Section */
+.recommendations-section {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+}
+
+.section-title .icon {
+    font-size: 1.3rem;
+}
+
+.theme-cosmic .section-title {
+    color: #f1f5f9;
+    text-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Recommendation items */
+.recommendations-items {
+    list-style-type: none;
+    padding: 0;
+    margin: 0 0 2rem;
+}
+
+.recommendation-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.8rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    animation: slideIn 0.3s ease-in-out;
+    animation-fill-mode: both;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.theme-cosmic .recommendation-item {
+    background-color: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.theme-cosmic .recommendation-item:hover {
+    background-color: rgba(99, 102, 241, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+}
+
+.recommendation-item:nth-child(1) { animation-delay: 0.05s; }
+.recommendation-item:nth-child(2) { animation-delay: 0.1s; }
+.recommendation-item:nth-child(3) { animation-delay: 0.15s; }
+.recommendation-item:nth-child(4) { animation-delay: 0.2s; }
+.recommendation-item:nth-child(5) { animation-delay: 0.25s; }
+
+.item-content {
+    flex: 1;
+    padding-right: 0.5rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.item-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.theme-cosmic .implement-button {
+    background-color: rgba(99, 102, 241, 0.1);
+    color: #cbd5e1;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.theme-cosmic .implement-button:hover {
+    background-color: rgba(99, 102, 241, 0.2);
+    transform: scale(1.1);
+}
+
+.theme-cosmic .recommendation-item.implemented {
+    background-color: rgba(99, 102, 241, 0.2);
+    border: 1px solid rgba(99, 102, 241, 0.4);
+}
+
+.theme-cosmic .recommendation-item.implemented .implement-button {
+    background-color: rgba(99, 102, 241, 0.4);
+    color: #f1f5f9;
+    border: 1px solid rgba(99, 102, 241, 0.6);
+}
+
+.theme-cosmic .recommendation-item.implemented .item-content {
+    color: #f1f5f9;
+}
+
+/* Footer */
+.recommendations-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+}
+
+.recommendations-refresh-button,
+.recommendations-feedback-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.theme-cosmic .recommendations-refresh-button {
+    background-color: rgba(99, 102, 241, 0.1);
+    color: #cbd5e1;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.theme-cosmic .recommendations-refresh-button:hover {
+    background-color: rgba(99, 102, 241, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.theme-cosmic .recommendations-feedback-button {
+    background-color: rgba(99, 102, 241, 0.3);
+    color: #f1f5f9;
+    border: 1px solid rgba(99, 102, 241, 0.5);
+}
+
+.theme-cosmic .recommendations-feedback-button:hover {
+    background-color: rgba(99, 102, 241, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+/* Metadata */
+.recommendations-metadata {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.theme-cosmic .recommendations-metadata {
+    border-top: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.emotion-badge,
+.generated-time {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.emotion-badge .label,
+.generated-time .label {
+    color: #a1a1aa;
+}
+
+.theme-cosmic .emotion-badge .value {
+    color: #f1f5f9;
+    font-weight: 500;
+}
+
+/* Modal */
+.recommendation-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.recommendation-modal.visible {
+    opacity: 1;
+}
+
+.modal-content {
+    max-width: 500px;
+    width: 90%;
+    border-radius: 16px;
+    overflow: hidden;
+    animation: modalIn 0.3s ease-in-out;
+}
+
+@keyframes modalIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.theme-cosmic .modal-content {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9));
+    color: #f8f9fa;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 0 80px rgba(99, 102, 241, 0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.close-button {
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.theme-cosmic .close-button:hover {
+    color: #f1f5f9;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.radio-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.rating-stars {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    color: #a1a1aa;
+    cursor: pointer;
+}
+
+.theme-cosmic .rating-stars .star:hover,
+.theme-cosmic .rating-stars .star.selected {
+    color: #eab308;
+    text-shadow: 0 0 10px rgba(234, 179, 8, 0.5);
+}
+
+.theme-cosmic textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    background-color: rgba(15, 23, 42, 0.5);
+    color: #f1f5f9;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.theme-cosmic textarea:focus {
+    outline: none;
+    border-color: rgba(99, 102, 241, 0.6);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.cancel-button,
+.submit-button {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.theme-cosmic .cancel-button {
+    background-color: rgba(99, 102, 241, 0.1);
+    color: #cbd5e1;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.theme-cosmic .cancel-button:hover {
+    background-color: rgba(99, 102, 241, 0.2);
+}
+
+.theme-cosmic .submit-button {
+    background-color: rgba(99, 102, 241, 0.5);
+    color: #f1f5f9;
+    border: 1px solid rgba(99, 102, 241, 0.7);
+}
+
+.theme-cosmic .submit-button:hover {
+    background-color: rgba(99, 102, 241, 0.65);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* Toast */
+#recommendation-toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1100;
+}
+
+.recommendation-toast {
+    background-color: #333;
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    min-width: 240px;
+    max-width: 400px;
+    opacity: 0;
+    transform: translateX(30px);
+    transition: all 0.3s ease;
+}
+
+.recommendation-toast.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.recommendation-toast.hiding {
+    opacity: 0;
+    transform: translateX(30px);
+}
+
+.toast-success {
+    background-color: #22c55e;
+}
+
+.toast-error {
+    background-color: #ef4444;
+}
+
+.toast-info {
+    background-color: #3b82f6;
+}
+
+.toast-content {
+    flex: 1;
+    padding-right: 10px;
+}
+
+.toast-close {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.toast-close:hover {
+    color: white;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .recommendations-container {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+    
+    .recommendations-title {
+        font-size: 1.5rem;
+    }
+    
+    .recommendations-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+        justify-content: flex-start;
+    }
+    
+    .recommendations-tab {
+        white-space: nowrap;
+    }
+    
+    .recommendations-metadata {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+/* Right-to-left support for Arabic */
+.recommendations-container[lang="ar"],
+.recommendations-container[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+}
+
+.recommendations-container[lang="ar"] .recommendations-tabs,
+.recommendations-container[dir="rtl"] .recommendations-tabs {
+    flex-direction: row-reverse;
+}
+
+.recommendations-container[lang="ar"] .item-content,
+.recommendations-container[dir="rtl"] .item-content {
+    padding-right: 0;
+    padding-left: 0.5rem;
+}
+
+.recommendations-container[lang="ar"] .recommendations-metadata,
+.recommendations-container[dir="rtl"] .recommendations-metadata {
+    flex-direction: row-reverse;
+}
+
+.recommendations-container[lang="ar"] .modal-header,
+.recommendations-container[dir="rtl"] .modal-header {
+    flex-direction: row-reverse;
+}
+
+.recommendations-container[lang="ar"] .modal-footer,
+.recommendations-container[dir="rtl"] .modal-footer {
+    flex-direction: row-reverse;
+}
+
+/* Animation for cosmic theme */
+.theme-cosmic.recommendations-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background-image: 
+        radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 25%),
+        radial-gradient(circle at 80% 70%, rgba(192, 132, 252, 0.1) 0%, transparent 20%);
+    z-index: -1;
+}

@@ -526,5 +526,409 @@
       <p id="voice-status-text"></p>
     </div>
   </div>
+
+  <!-- Add JavaScript for interactions -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM Elements
+      const backgroundAudio = document.getElementById('background-audio');
+      const audioIcon = document.getElementById('audio-icon');
+      const audioToggle = document.getElementById('audio-toggle');
+      const audioNotification = document.getElementById('audio-notification');
+      const interactiveSphere = document.getElementById('interactive-sphere');
+      const sphereGlow = document.getElementById('sphere-glow');
+      const fallingStars = document.getElementById('falling-stars');
+      const langOptions = document.querySelectorAll('.lang-option');
+      const voicePromptButton = document.getElementById('voice-prompt-button');
+      const enterButton = document.getElementById('enter-button');
+      const voiceStatus = document.getElementById('voice-status');
+      const voiceStatusText = document.getElementById('voice-status-text');
+      
+      // Initialize audio state
+      let audioEnabled = false;
+      
+      // Audio sounds
+      const sounds = {
+        hover: new Audio('/static/sounds/hover.mp3'),
+        click: new Audio('/static/sounds/click.mp3'),
+        welcome: new Audio('/static/sounds/welcome.mp3'),
+        listenStart: new Audio('/static/sounds/listen_start.mp3'),
+        listenStop: new Audio('/static/sounds/listen_stop.mp3')
+      };
+      
+      // Set volume for all sounds
+      Object.values(sounds).forEach(sound => {
+        sound.volume = 0.6;
+      });
+      
+      // Create falling stars function
+      function createFallingStar() {
+        const star = document.createElement('div');
+        star.classList.add('falling-star');
+        
+        // Random size
+        const size = Math.random() * 4 + 2;
+        star.style.width = `${size}px`;
+        star.style.height = `${size * 10}px`;
+        
+        // Random position
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = '-10%';
+        
+        // Random delay
+        star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+        
+        fallingStars.appendChild(star);
+        
+        // Remove the star after animation completes
+        setTimeout(() => {
+          star.remove();
+        }, 5000);
+      }
+      
+      // Initialize periodic falling stars
+      setInterval(createFallingStar, 2000);
+      
+      // Cosmic breathing effects
+      interactiveSphere.classList.add('breathe');
+      sphereGlow.classList.add('gentle-glow');
+      
+      // Handle audio notification click
+      audioNotification.addEventListener('click', function() {
+        enableAudio();
+        audioNotification.style.display = 'none';
+      });
+      
+      // Enable audio function
+      function enableAudio() {
+        audioEnabled = true;
+        backgroundAudio.play().catch(error => {
+          console.warn('Audio autoplay was prevented:', error);
+        });
+        
+        // Set volume
+        backgroundAudio.volume = 0.4;
+        
+        // Update audio button icon
+        audioIcon.className = 'fas fa-volume-up';
+      }
+      
+      // Toggle audio function
+      audioToggle.addEventListener('click', function() {
+        if (!audioEnabled) {
+          enableAudio();
+        } else if (backgroundAudio.paused) {
+          backgroundAudio.play();
+          audioIcon.className = 'fas fa-volume-up';
+        } else {
+          backgroundAudio.pause();
+          audioIcon.className = 'fas fa-volume-mute';
+        }
+        
+        // Add click sound
+        if (audioEnabled) {
+          sounds.click.play();
+        }
+      });
+      
+      // Language toggle
+      langOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          const lang = this.getAttribute('data-lang');
+          
+          // Update active state
+          langOptions.forEach(opt => opt.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Update HTML direction
+          document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+          
+          // Add click sound
+          if (audioEnabled) {
+            sounds.click.play();
+          }
+        });
+        
+        // Add hover sound
+        option.addEventListener('mouseenter', function() {
+          if (audioEnabled) {
+            sounds.hover.play();
+          }
+        });
+      });
+      
+      // Button hover sounds
+      [voicePromptButton, enterButton].forEach(button => {
+        button.addEventListener('mouseenter', function() {
+          if (audioEnabled) {
+            sounds.hover.play();
+          }
+        });
+      });
+      
+      // Voice prompt button
+      voicePromptButton.addEventListener('click', function() {
+        if (audioEnabled) {
+          sounds.click.play();
+          sounds.listenStart.play();
+        }
+        
+        // Show voice status
+        voiceStatus.style.display = 'flex';
+        const currentLang = document.documentElement.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+        voiceStatusText.textContent = currentLang === 'ar' ? 'جاري الاستماع...' : 'Listening...';
+        
+        // Simulate voice recording (in real app, this would trigger voice recognition)
+        setTimeout(() => {
+          if (audioEnabled) {
+            sounds.listenStop.play();
+          }
+          
+          voiceStatusText.textContent = currentLang === 'ar' ? 'تم الاستماع!' : 'Heard you!';
+          
+          // Hide voice status after a moment
+          setTimeout(() => {
+            voiceStatus.style.display = 'none';
+          }, 1500);
+        }, 3000);
+      });
+      
+      // Enter button
+      enterButton.addEventListener('click', function() {
+        if (audioEnabled) {
+          sounds.click.play();
+          sounds.welcome.play();
+        }
+        
+        // Redirect to main app or next screen
+        setTimeout(() => {
+          window.location.href = '/cosmic-player';
+        }, 1000);
+      });
+      
+      // Interactive sphere
+      interactiveSphere.addEventListener('click', function() {
+        if (audioEnabled) {
+          sounds.click.play();
+        }
+        
+        // Add a pulsing effect on click
+        this.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+          this.style.transform = '';
+        }, 300);
+        
+        // Show falling stars burst
+        for (let i = 0; i < 10; i++) {
+          setTimeout(() => {
+            createFallingStar();
+          }, i * 100);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+
+  <!-- Add JavaScript for interactions -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM Elements
+      const backgroundAudio = document.getElementById('background-audio');
+      const audioIcon = document.getElementById('audio-icon');
+      const audioToggle = document.getElementById('audio-toggle');
+      const audioNotification = document.getElementById('audio-notification');
+      const interactiveSphere = document.getElementById('interactive-sphere');
+      const sphereGlow = document.getElementById('sphere-glow');
+      const fallingStars = document.getElementById('falling-stars');
+      const langOptions = document.querySelectorAll('.lang-option');
+      const voicePromptButton = document.getElementById('voice-prompt-button');
+      const enterButton = document.getElementById('enter-button');
+      const voiceStatus = document.getElementById('voice-status');
+      const voiceStatusText = document.getElementById('voice-status-text');
+      
+      // Initialize audio state
+      let audioEnabled = false;
+      
+      // Audio sounds
+      const sounds = {
+        hover: new Audio('/static/sounds/hover.mp3'),
+        click: new Audio('/static/sounds/click.mp3'),
+        welcome: new Audio('/static/sounds/welcome.mp3'),
+        listenStart: new Audio('/static/sounds/listen_start.mp3'),
+        listenStop: new Audio('/static/sounds/listen_stop.mp3')
+      };
+      
+      // Set volume for all sounds
+      Object.values(sounds).forEach(sound => {
+        sound.volume = 0.6;
+      });
+      
+      // Create falling stars function
+      function createFallingStar() {
+        const star = document.createElement('div');
+        star.classList.add('falling-star');
+        
+        // Random size
+        const size = Math.random() * 4 + 2;
+        star.style.width = `${size}px`;
+        star.style.height = `${size * 10}px`;
+        
+        // Random position
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = '-10%';
+        
+        // Random delay
+        star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+        
+        fallingStars.appendChild(star);
+        
+        // Remove the star after animation completes
+        setTimeout(() => {
+          star.remove();
+        }, 5000);
+      }
+      
+      // Initialize periodic falling stars
+      setInterval(createFallingStar, 2000);
+      
+      // Cosmic breathing effects
+      interactiveSphere.classList.add('breathe');
+      sphereGlow.classList.add('gentle-glow');
+      
+      // Handle audio notification click
+      audioNotification.addEventListener('click', function() {
+        enableAudio();
+        audioNotification.style.display = 'none';
+      });
+      
+      // Enable audio function
+      function enableAudio() {
+        audioEnabled = true;
+        backgroundAudio.play().catch(error => {
+          console.warn('Audio autoplay was prevented:', error);
+        });
+        
+        // Set volume
+        backgroundAudio.volume = 0.4;
+        
+        // Update audio button icon
+        audioIcon.className = 'fas fa-volume-up';
+      }
+      
+      // Toggle audio function
+      audioToggle.addEventListener('click', function() {
+        if (!audioEnabled) {
+          enableAudio();
+        } else if (backgroundAudio.paused) {
+          backgroundAudio.play();
+          audioIcon.className = 'fas fa-volume-up';
+        } else {
+          backgroundAudio.pause();
+          audioIcon.className = 'fas fa-volume-mute';
+        }
+        
+        // Add click sound
+        if (audioEnabled) {
+          sounds.click.play();
+        }
+      });
+      
+      // Language toggle
+      langOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          const lang = this.getAttribute('data-lang');
+          
+          // Update active state
+          langOptions.forEach(opt => opt.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Update HTML direction
+          document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+          
+          // Add click sound
+          if (audioEnabled) {
+            sounds.click.play();
+          }
+        });
+        
+        // Add hover sound
+        option.addEventListener('mouseenter', function() {
+          if (audioEnabled) {
+            sounds.hover.play();
+          }
+        });
+      });
+      
+      // Button hover sounds
+      [voicePromptButton, enterButton].forEach(button => {
+        button.addEventListener('mouseenter', function() {
+          if (audioEnabled) {
+            sounds.hover.play();
+          }
+        });
+      });
+      
+      // Voice prompt button
+      voicePromptButton.addEventListener('click', function() {
+        if (audioEnabled) {
+          sounds.click.play();
+          sounds.listenStart.play();
+        }
+        
+        // Show voice status
+        voiceStatus.style.display = 'flex';
+        const currentLang = document.documentElement.getAttribute('dir') === 'rtl' ? 'ar' : 'en';
+        voiceStatusText.textContent = currentLang === 'ar' ? 'جاري الاستماع...' : 'Listening...';
+        
+        // Simulate voice recording (in real app, this would trigger voice recognition)
+        setTimeout(() => {
+          if (audioEnabled) {
+            sounds.listenStop.play();
+          }
+          
+          voiceStatusText.textContent = currentLang === 'ar' ? 'تم الاستماع!' : 'Heard you!';
+          
+          // Hide voice status after a moment
+          setTimeout(() => {
+            voiceStatus.style.display = 'none';
+          }, 1500);
+        }, 3000);
+      });
+      
+      // Enter button
+      enterButton.addEventListener('click', function() {
+        if (audioEnabled) {
+          sounds.click.play();
+          sounds.welcome.play();
+        }
+        
+        // Redirect to main app or next screen
+        setTimeout(() => {
+          window.location.href = '/cosmic-player';
+        }, 1000);
+      });
+      
+      // Interactive sphere
+      interactiveSphere.addEventListener('click', function() {
+        if (audioEnabled) {
+          sounds.click.play();
+        }
+        
+        // Add a pulsing effect on click
+        this.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+          this.style.transform = '';
+        }, 300);
+        
+        // Show falling stars burst
+        for (let i = 0; i < 10; i++) {
+          setTimeout(() => {
+            createFallingStar();
+          }, i * 100);
+        }
+      });
+    });
+  </script>
 </body>
 </html>

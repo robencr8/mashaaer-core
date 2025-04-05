@@ -18,3 +18,4 @@ flask-cors
 gunicorn
 pydub
 scipy
+openai

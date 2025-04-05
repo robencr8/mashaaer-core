@@ -23,6 +23,20 @@ def register_routes(app):
             content = f.read()
         return render_template("markdown.html", content=content, title="Audio Fix Guide")
     
+    @app.route("/cosmic-loader-demo")
+    def cosmic_loader_demo():
+        """Showcase page for cosmic loader animations"""
+        logger.debug("Serving cosmic loader demo page")
+        return render_template("cosmic_loader_demo.html")
+    
+    @app.route("/cosmic-loader-docs")
+    def cosmic_loader_docs():
+        """Documentation for cosmic loader animations"""
+        logger.debug("Serving cosmic loader documentation")
+        with open("COSMIC_LOADER_ANIMATIONS.md", "r") as f:
+            content = f.read()
+        return render_template("markdown.html", content=content, title="Cosmic Loader Animations")
+    
     # Removing the cosmic route as it's already defined in main.py
     
     # Return the app to allow chaining

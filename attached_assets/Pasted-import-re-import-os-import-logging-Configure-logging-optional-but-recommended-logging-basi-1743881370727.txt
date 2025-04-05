@@ -1,0 +1,87 @@
+import re
+import os
+import logging
+
+# Configure logging (optional but recommended)
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logger = logging.getLogger(__name__)
+
+def update_cosmic_onboarding_html(filepath: str) -> bool:
+    """
+    Updates interactive_cosmic_splash.html to address audio autoplay and related issues.
+
+    Args:
+        filepath: The path to the HTML file.
+
+    Returns:
+        bool: True if updates were successful, False otherwise.
+    """
+
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except FileNotFoundError:
+        logger.error(f"File not found: {filepath}")
+        return False
+    except Exception as e:
+        logger.error(f"Error reading file {filepath}: {str(e)}")
+        return False
+
+    # 1. Fix duplicate <script> tags and HTML comment issue
+    content = re.sub(
+        r'',
+        r'// تسجيل Service Worker لدعم PWA',
+        content
+    )
+    content = re.sub(r'<script>\s*// تسجيل Service Worker لدعم PWA', r'', content)
+
+    # 2. Fix issue with { once: true } parameter in document.addEventListener
+    content = re.sub(
+        r"document\.addEventListener\('click',\s*function\(\)\s*\{\s*//\s*Hide\s+the\s+audio\s+notification.*?\},\s*\{\s*once:\s*true\s*\}\s*\);",
+        r"document.addEventListener('click', function() { // Hide the audio notification",
+        content
+    )
+
+    # 3. Apply error handling to all sound.play() calls
+    content = re.sub(
+        r"sound\.play\(\)",
+        r"sound.play().catch(err => { console.warn('Audio play error (likely autoplay restriction):', err); })",
+        content
+    )
+    content = re.sub(
+        r"bgAudio\.play\(\)",
+        r"bgAudio.play().catch(err => { console.error('Background audio play error:', err); })",
+        content
+    )
+
+    # 4. Add audio notification for user interaction
+    audio_notification = """
+    <div id="audio-notification" style="position: fixed; bottom: 20px; left: 0; right: 0; text-align: center; padding: 10px; background-color: rgba(0, 0, 0, 0.7); color: white; z-index: 1000; border-radius: 5px; margin: 0 auto; width: fit-content; max-width: 80%; font-size: 14px; display: none;">
+        <span class="ar">انقر في أي مكان لتفعيل الصوت</span>
+        <span class="en">Click anywhere to enable audio</span>
+    </div>
+    """
+    content = re.sub(r'(<div class="cosmic-container">)', r'\1' + audio_notification, content)
+    
+    # 5. Add JavaScript to show the audio notification
+    content = content.replace(
+        'document.getElementById("audio-icon").className = \'fas fa-volume-up\';',
+        'document.getElementById("audio-icon").className = \'fas fa-volume-up\';\n        document.getElementById("audio-notification").style.display = "block";'
+    )
+
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(content)
+        logger.info(f"Successfully updated {filepath}")
+        return True
+    except Exception as e:
+        logger.error(f"Error writing to file {filepath}: {str(e)}")
+        return False
+
+
+if __name__ == "__main__":
+    filepath = "templates/interactive_cosmic_splash.html"
+    if update_cosmic_onboarding_html(filepath):
+        print(f"File '{filepath}' updated successfully.")
+    else:
+        print(f"Failed to update file '{filepath}'.")

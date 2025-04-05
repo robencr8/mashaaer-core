@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Loader Animations - Mashaaer</title>
+    <link rel="stylesheet" href="/static/css/cosmic_loader.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(to right, #4B0082, #9370DB);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(147, 112, 219, 0.5);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            background: linear-gradient(to right, #fff, #ddd);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        
+        .subtitle {
+            margin-top: 10px;
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        
+        .demo-section {
+            margin-bottom: 40px;
+            background-color: rgba(30, 30, 50, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        h2 {
+            margin-top: 0;
+            color: #9370DB;
+            border-bottom: 1px solid rgba(147, 112, 219, 0.3);
+            padding-bottom: 10px;
+        }
+        
+        .demo-box {
+            position: relative;
+            height: 300px;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .demo-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/static/images/stars.png') repeat top center;
+            opacity: 0.5;
+            z-index: 0;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: linear-gradient(to right, #4B0082, #9370DB);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: linear-gradient(to right, #5c1a9e, #a080db);
+            box-shadow: 0 0 10px rgba(147, 112, 219, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .code-sample {
+            background-color: rgba(20, 20, 30, 0.8);
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            overflow: auto;
+            font-family: monospace;
+            color: #ddd;
+        }
+        
+        .code-sample code {
+            white-space: pre;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .demo-box {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <header>
+            <h1>Cosmic Loader Animations</h1>
+            <div class="subtitle">Playful loading experiences with cosmic theme</div>
+        </header>
+        
+        <div class="demo-section">
+            <h2>Cosmic Orb Loader</h2>
+            <p>A mesmerizing orb surrounded by orbiting rings with particles, creating a cosmic centerpiece for your loading screen.</p>
+            <div class="demo-box" id="orb-demo-box"></div>
+            <div class="controls">
+                <button onclick="showOrbLoader()">Show Orb Loader</button>
+                <button onclick="hideLoader('orb-demo-box')">Hide Loader</button>
+            </div>
+            <div class="code-sample">
+                <code>// Show the cosmic orb loader
+CosmicLoader.show('orb', 'Loading your cosmic experience');</code>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>Galaxy Spinner Loader</h2>
+            <p>A spinning galaxy with multiple arms rotating at different speeds, representing the vastness of the cosmic realm.</p>
+            <div class="demo-box" id="galaxy-demo-box"></div>
+            <div class="controls">
+                <button onclick="showGalaxyLoader()">Show Galaxy Loader</button>
+                <button onclick="hideLoader('galaxy-demo-box')">Hide Loader</button>
+            </div>
+            <div class="code-sample">
+                <code>// Show the galaxy spinner loader
+CosmicLoader.show('galaxy', 'Exploring the cosmic realm');</code>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>Cosmic Dust Loader</h2>
+            <p>Particles of cosmic dust float upward creating a magical, mystical effect that captures the essence of cosmic energy.</p>
+            <div class="demo-box" id="dust-demo-box"></div>
+            <div class="controls">
+                <button onclick="showDustLoader()">Show Dust Loader</button>
+                <button onclick="hideLoader('dust-demo-box')">Hide Loader</button>
+            </div>
+            <div class="code-sample">
+                <code>// Show the cosmic dust loader
+CosmicLoader.show('dust', 'Gathering cosmic energy');</code>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>Progress Bar Loader</h2>
+            <p>A cosmic-themed progress bar for when you need to show loading progress in a sleek, minimalist way.</p>
+            <div class="demo-box" id="progress-demo-box"></div>
+            <div class="controls">
+                <button onclick="showProgressLoader()">Show Progress Loader</button>
+                <button onclick="updateProgress()">Update Progress</button>
+                <button onclick="hideLoader('progress-demo-box')">Hide Loader</button>
+            </div>
+            <div class="code-sample">
+                <code>// Show the progress bar loader
+const loader = CosmicLoader.show('progress', 'Loading your content');
+
+// Update progress (0-100)
+CosmicLoader.updateProgress(50);</code>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Part of the Mashaaer AI Emotional Intelligence Platform &copy; 2025</p>
+        </footer>
+    </div>
+    
+    <script src="/static/js/cosmic_loader.js"></script>
+    <script>
+        // Function to show Cosmic Orb loader
+        function showOrbLoader() {
+            const container = document.getElementById('orb-demo-box');
+            container.innerHTML = '';
+            
+            const loaderContainer = document.createElement('div');
+            loaderContainer.className = 'cosmic-loader-container';
+            loaderContainer.style.position = 'absolute';
+            
+            // Add stars background
+            const stars = document.createElement('div');
+            stars.className = 'loader-stars';
+            loaderContainer.appendChild(stars);
+            
+            const twinkling = document.createElement('div');
+            twinkling.className = 'loader-twinkling';
+            loaderContainer.appendChild(twinkling);
+            
+            // Create loader content
+            const loaderContent = document.createElement('div');
+            loaderContent.className = 'cosmic-loader-content';
+            
+            // Create orb loader
+            const orbLoader = document.createElement('div');
+            orbLoader.className = 'cosmic-orb-loader';
+            
+            const orb = document.createElement('div');
+            orb.className = 'cosmic-orb';
+            orbLoader.appendChild(orb);
+            
+            // Create three rings around the orb
+            for (let i = 0; i < 3; i++) {
+                const ring = document.createElement('div');
+                ring.className = 'cosmic-orb-ring';
+                
+                const particle = document.createElement('div');
+                particle.className = 'cosmic-orb-particle';
+                ring.appendChild(particle);
+                
+                orbLoader.appendChild(ring);
+            }
+            
+            loaderContent.appendChild(orbLoader);
+            
+            // Add loading text
+            const loadingText = document.createElement('div');
+            loadingText.className = 'cosmic-loading-text';
+            loadingText.innerHTML = 'Loading cosmic experience<div class="cosmic-loading-dots"><span></span><span></span><span></span></div>';
+            loaderContent.appendChild(loadingText);
+            
+            loaderContainer.appendChild(loaderContent);
+            container.appendChild(loaderContainer);
+        }
+        
+        // Function to show Galaxy loader
+        function showGalaxyLoader() {
+            const container = document.getElementById('galaxy-demo-box');
+            container.innerHTML = '';
+            
+            const loaderContainer = document.createElement('div');
+            loaderContainer.className = 'cosmic-loader-container';
+            loaderContainer.style.position = 'absolute';
+            
+            // Add stars background
+            const stars = document.createElement('div');
+            stars.className = 'loader-stars';
+            loaderContainer.appendChild(stars);
+            
+            const twinkling = document.createElement('div');
+            twinkling.className = 'loader-twinkling';
+            loaderContainer.appendChild(twinkling);
+            
+            // Create loader content
+            const loaderContent = document.createElement('div');
+            loaderContent.className = 'cosmic-loader-content';
+            
+            // Create galaxy spinner
+            const galaxySpinner = document.createElement('div');
+            galaxySpinner.className = 'galaxy-spinner';
+            
+            // Create the spinning arms
+            for (let i = 0; i < 3; i++) {
+                const arm = document.createElement('div');
+                arm.className = 'galaxy-arm';
+                galaxySpinner.appendChild(arm);
+            }
+            
+            // Add the center of the galaxy
+            const center = document.createElement('div');
+            center.className = 'galaxy-center';
+            galaxySpinner.appendChild(center);
+            
+            loaderContent.appendChild(galaxySpinner);
+            
+            // Add loading text
+            const loadingText = document.createElement('div');
+            loadingText.className = 'cosmic-loading-text';
+            loadingText.innerHTML = 'Exploring the cosmic realm<div class="cosmic-loading-dots"><span></span><span></span><span></span></div>';
+            loaderContent.appendChild(loadingText);
+            
+            loaderContainer.appendChild(loaderContent);
+            container.appendChild(loaderContainer);
+        }
+        
+        // Function to show Dust loader
+        function showDustLoader() {
+            const container = document.getElementById('dust-demo-box');
+            container.innerHTML = '';
+            
+            const loaderContainer = document.createElement('div');
+            loaderContainer.className = 'cosmic-loader-container';
+            loaderContainer.style.position = 'absolute';
+            
+            // Add stars background
+            const stars = document.createElement('div');
+            stars.className = 'loader-stars';
+            loaderContainer.appendChild(stars);
+            
+            const twinkling = document.createElement('div');
+            twinkling.className = 'loader-twinkling';
+            loaderContainer.appendChild(twinkling);
+            
+            // Create loader content
+            const loaderContent = document.createElement('div');
+            loaderContent.className = 'cosmic-loader-content';
+            
+            // Create dust loader
+            const dustLoader = document.createElement('div');
+            dustLoader.className = 'cosmic-dust-loader';
+            
+            // Create dust particles
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'dust-particle';
+                
+                // Set random positions and animations
+                const size = Math.random() * 4 + 2;
+                const delay = Math.random() * 3;
+                const tx = (Math.random() * 200 - 100) + 'px';
+                const ty = (Math.random() * -200) + 'px';
+                
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.top = (40 + Math.random() * 20) + 'px';
+                particle.style.left = (40 + Math.random() * 20) + 'px';
+                particle.style.setProperty('--tx', tx);
+                particle.style.setProperty('--ty', ty);
+                particle.style.animationDelay = delay + 's';
+                
+                dustLoader.appendChild(particle);
+            }
+            
+            loaderContent.appendChild(dustLoader);
+            
+            // Add loading text
+            const loadingText = document.createElement('div');
+            loadingText.className = 'cosmic-loading-text';
+            loadingText.innerHTML = 'Gathering cosmic energy<div class="cosmic-loading-dots"><span></span><span></span><span></span></div>';
+            loaderContent.appendChild(loadingText);
+            
+            loaderContainer.appendChild(loaderContent);
+            container.appendChild(loaderContainer);
+        }
+        
+        // Function to show Progress loader
+        function showProgressLoader() {
+            const container = document.getElementById('progress-demo-box');
+            container.innerHTML = '';
+            
+            const loaderContainer = document.createElement('div');
+            loaderContainer.className = 'cosmic-loader-container';
+            loaderContainer.style.position = 'absolute';
+            
+            // Add stars background
+            const stars = document.createElement('div');
+            stars.className = 'loader-stars';
+            loaderContainer.appendChild(stars);
+            
+            const twinkling = document.createElement('div');
+            twinkling.className = 'loader-twinkling';
+            loaderContainer.appendChild(twinkling);
+            
+            // Create loader content
+            const loaderContent = document.createElement('div');
+            loaderContent.className = 'cosmic-loader-content';
+            
+            // Create galaxy spinner (for visual interest)
+            const galaxySpinner = document.createElement('div');
+            galaxySpinner.className = 'galaxy-spinner';
+            galaxySpinner.style.transform = 'scale(0.7)';
+            
+            // Create the spinning arms
+            for (let i = 0; i < 3; i++) {
+                const arm = document.createElement('div');
+                arm.className = 'galaxy-arm';
+                galaxySpinner.appendChild(arm);
+            }
+            
+            // Add the center of the galaxy
+            const center = document.createElement('div');
+            center.className = 'galaxy-center';
+            galaxySpinner.appendChild(center);
+            
+            loaderContent.appendChild(galaxySpinner);
+            
+            // Create progress bar
+            const progressContainer = document.createElement('div');
+            progressContainer.className = 'cosmic-progress-container';
+            
+            const progressBar = document.createElement('div');
+            progressBar.className = 'cosmic-progress-bar';
+            progressBar.id = 'demo-progress-bar';
+            progressBar.style.width = '0%';
+            progressContainer.appendChild(progressBar);
+            
+            loaderContent.appendChild(progressContainer);
+            
+            // Add loading text
+            const loadingText = document.createElement('div');
+            loadingText.className = 'cosmic-loading-text';
+            loadingText.innerHTML = 'Loading content: <span id="progress-text">0%</span>';
+            loaderContent.appendChild(loadingText);
+            
+            loaderContainer.appendChild(loaderContent);
+            container.appendChild(loaderContainer);
+        }
+        
+        // Function to update progress bar
+        let currentProgress = 0;
+        function updateProgress() {
+            const progressBar = document.getElementById('demo-progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            if (progressBar && progressText) {
+                currentProgress += Math.floor(Math.random() * 20) + 5;
+                if (currentProgress > 100) currentProgress = 0;
+                
+                progressBar.style.width = `${currentProgress}%`;
+                progressBar.style.transition = 'width 0.5s ease-in-out';
+                progressText.textContent = `${currentProgress}%`;
+            }
+        }
+        
+        // Function to hide any loader
+        function hideLoader(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+        }
+        
+        // Show one loader by default when the page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            showOrbLoader();
+        });
+    </script>
+</body>
+</html>
