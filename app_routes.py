@@ -81,7 +81,7 @@ def register_routes(app):
     def cosmic_sound_test():
         """Cosmic sound system test page with interactive controls"""
         logger.debug("Serving cosmic sound system test page")
-        return send_from_directory("static", "cosmic_sound_test.html")
+        return render_template("cosmic-sound-test.html")
     
     # Return the app to allow chaining
     return app

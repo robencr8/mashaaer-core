@@ -23,3 +23,4 @@ rule-engine
 beautifulsoup4
 textblob
 apscheduler
+anthropic

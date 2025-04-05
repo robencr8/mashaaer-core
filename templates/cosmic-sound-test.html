@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer Cosmic Sound System - Test Page</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #111122;
+            color: #eef;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: background-color 1s ease;
+        }
+        
+        header {
+            background-color: rgba(0, 0, 20, 0.7);
+            padding: 1rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            background: linear-gradient(to right, #9cf, #f9c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .subtitle {
+            opacity: 0.8;
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+        
+        main {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+        
+        .control-panel {
+            background-color: rgba(30, 30, 50, 0.7);
+            backdrop-filter: blur(5px);
+            border-radius: 1rem;
+            padding: 2rem;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .emotion-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .emotion-btn {
+            background-color: #2a2a40;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.8rem 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .emotion-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom right, rgba(255,255,255,0.1), rgba(255,255,255,0));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .emotion-btn:hover::before {
+            opacity: 1;
+        }
+        
+        .emotion-btn.happy {
+            background-color: #774400;
+            border-bottom: 3px solid #ffdd66;
+        }
+        
+        .emotion-btn.sad {
+            background-color: #334466;
+            border-bottom: 3px solid #6688cc;
+        }
+        
+        .emotion-btn.angry {
+            background-color: #772222;
+            border-bottom: 3px solid #ff6655;
+        }
+        
+        .emotion-btn.calm {
+            background-color: #337766;
+            border-bottom: 3px solid #66ccbb;
+        }
+        
+        .emotion-btn.neutral {
+            background-color: #445566;
+            border-bottom: 3px solid #aaccee;
+        }
+        
+        .slider-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .slider-control label {
+            min-width: 100px;
+        }
+        
+        .slider-control input[type="range"] {
+            flex: 1;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #2a2a40;
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        .slider-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #8af;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .slider-control input[type="range"]::-webkit-slider-thumb:hover {
+            background: #adf;
+        }
+        
+        .toggle-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #2a2a40;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #8af;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+        
+        .cosmic-visualizer {
+            width: 100%;
+            height: 200px;
+            background-color: rgba(20, 20, 40, 0.7);
+            border-radius: 0.5rem;
+            margin-top: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cosmic-pulse {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #aaccee;
+            box-shadow: 0 0 10px 5px rgba(170, 204, 238, 0.5);
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        .cosmic-ripple {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #aaccee;
+            animation: ripple 4s infinite ease-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.7; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        
+        @keyframes ripple {
+            0% { width: 20px; height: 20px; opacity: 1; }
+            100% { width: 300px; height: 300px; opacity: 0; }
+        }
+        
+        .status-display {
+            background-color: rgba(30, 30, 50, 0.7);
+            backdrop-filter: blur(5px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .status-label {
+            font-weight: bold;
+            color: #aac;
+        }
+        
+        .status-value {
+            font-family: monospace;
+            padding: 0.25rem 0.5rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 0.25rem;
+        }
+        
+        .api-test {
+            background-color: rgba(30, 30, 50, 0.7);
+            backdrop-filter: blur(5px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .api-input {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .api-input input {
+            flex: 1;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 0.5rem;
+            background-color: rgba(40, 40, 60, 0.8);
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .api-input button {
+            background-color: #445588;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0 1.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .api-input button:hover {
+            background-color: #556699;
+        }
+        
+        .api-response {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: rgba(0, 0, 20, 0.7);
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        /* Emotion-specific body backgrounds */
+        body.happy {
+            background-color: #332211;
+        }
+        
+        body.sad {
+            background-color: #112233;
+        }
+        
+        body.angry {
+            background-color: #331111;
+        }
+        
+        body.calm {
+            background-color: #113322;
+        }
+        
+        body.neutral {
+            background-color: #111122;
+        }
+        
+        /* Emotion pulse animations */
+        .cosmic-pulse.happy {
+            background-color: #ffdd66;
+            box-shadow: 0 0 20px 10px rgba(255, 221, 102, 0.3);
+            animation: pulse 1.2s infinite ease-in-out;
+        }
+        
+        .cosmic-pulse.sad {
+            background-color: #6688cc;
+            box-shadow: 0 0 20px 10px rgba(102, 136, 204, 0.3);
+            animation: pulse 3.5s infinite ease-in-out;
+        }
+        
+        .cosmic-pulse.angry {
+            background-color: #ff6655;
+            box-shadow: 0 0 20px 10px rgba(255, 102, 85, 0.3);
+            animation: pulse 0.8s infinite ease-in-out;
+        }
+        
+        .cosmic-pulse.calm {
+            background-color: #66ccbb;
+            box-shadow: 0 0 20px 10px rgba(102, 204, 187, 0.3);
+            animation: pulse 4s infinite ease-in-out;
+        }
+        
+        .cosmic-ripple.happy {
+            border-color: #ffdd66;
+            animation: ripple 2.5s infinite ease-out;
+        }
+        
+        .cosmic-ripple.sad {
+            border-color: #6688cc;
+            animation: ripple 6s infinite ease-out;
+        }
+        
+        .cosmic-ripple.angry {
+            border-color: #ff6655;
+            animation: ripple 1.6s infinite ease-out;
+        }
+        
+        .cosmic-ripple.calm {
+            border-color: #66ccbb;
+            animation: ripple 8s infinite ease-out;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            main {
+                padding: 1rem;
+            }
+            
+            .emotion-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body class="neutral">
+    <header>
+        <h1>Mashaaer Cosmic Sound System</h1>
+        <div class="subtitle">Emotion-synchronized ambient sound test interface</div>
+    </header>
+    
+    <main>
+        <div class="control-panel">
+            <h2>Cosmic Sound Controls</h2>
+            
+            <div class="emotion-buttons">
+                <button class="emotion-btn happy" onclick="selectEmotion('happy')">Happy</button>
+                <button class="emotion-btn sad" onclick="selectEmotion('sad')">Sad</button>
+                <button class="emotion-btn angry" onclick="selectEmotion('angry')">Angry</button>
+                <button class="emotion-btn calm" onclick="selectEmotion('calm')">Calm</button>
+                <button class="emotion-btn neutral" onclick="selectEmotion('neutral')">Neutral</button>
+            </div>
+            
+            <div class="slider-control">
+                <label for="volume">Volume:</label>
+                <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5" oninput="updateVolume(this.value)">
+                <span id="volume-value">50%</span>
+            </div>
+            
+            <div class="toggle-control">
+                <label>Mute:</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="mute-toggle" onchange="toggleMute(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="toggle-control">
+                <label>Auto-transition:</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="auto-transition" checked onchange="toggleAutoTransition(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <button class="emotion-btn" style="width: 100%; margin-top: 1rem;" onclick="stopAllSounds()">Stop All Sounds</button>
+            
+            <div class="cosmic-visualizer">
+                <div class="cosmic-pulse neutral" id="emotion-pulse"></div>
+                <div class="cosmic-ripple neutral" id="emotion-ripple"></div>
+            </div>
+        </div>
+        
+        <div class="status-display">
+            <h2>Current Status</h2>
+            
+            <div class="status-item">
+                <span class="status-label">Current Emotion:</span>
+                <span class="status-value" id="current-emotion">neutral</span>
+            </div>
+            
+            <div class="status-item">
+                <span class="status-label">Track Playing:</span>
+                <span class="status-value" id="current-track">None</span>
+            </div>
+            
+            <div class="status-item">
+                <span class="status-label">Volume Level:</span>
+                <span class="status-value" id="volume-level">50%</span>
+            </div>
+            
+            <div class="status-item">
+                <span class="status-label">Audio Status:</span>
+                <span class="status-value" id="audio-status">Stopped</span>
+            </div>
+        </div>
+        
+        <div class="api-test">
+            <h2>API Test</h2>
+            
+            <div class="api-input">
+                <input type="text" id="test-message" placeholder="Enter a message..." value="I feel so happy today!">
+                <button onclick="testChatAPI()">Send</button>
+            </div>
+            
+            <h3>Response:</h3>
+            <div class="api-response" id="api-response">
+                No response yet.
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>Mashaaer Feelings Application &copy; 2025 - Cosmic Sound System Testing Interface</p>
+    </footer>
+    
+    <!-- Include the emotion audio integration library -->
+    <script src="/static/mobile/js/emotion_audio_integration.js"></script>
+    
+    <script>
+        // Global variables
+        let autoTransitionEnabled = true;
+        let autoTransitionTimer = null;
+        const emotions = ['happy', 'sad', 'angry', 'calm', 'neutral'];
+        const emotionDurations = {
+            'happy': 30000,   // 30 seconds
+            'sad': 45000,     // 45 seconds
+            'angry': 25000,   // 25 seconds
+            'calm': 50000,    // 50 seconds
+            'neutral': 35000  // 35 seconds
+        };
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial volume display
+            document.getElementById('volume-value').textContent = '50%';
+            
+            // Start auto-transition if enabled
+            if (autoTransitionEnabled) {
+                scheduleNextTransition();
+            }
+            
+            // Set up event listeners for the emotion changed event
+            document.addEventListener('emotionChanged', function(event) {
+                updateStatusDisplay(event.detail.emotion);
+                updateVisualizer(event.detail.emotion);
+            });
+        });
+        
+        // Select emotion and play corresponding track
+        function selectEmotion(emotion) {
+            playEmotionTrack(emotion);
+            updateStatusDisplay(emotion);
+            updateVisualizer(emotion);
+            document.body.className = emotion;
+            
+            // Reset auto-transition timer if enabled
+            if (autoTransitionEnabled) {
+                clearTimeout(autoTransitionTimer);
+                scheduleNextTransition();
+            }
+        }
+        
+        // Update volume
+        function updateVolume(value) {
+            const percentage = Math.round(value * 100) + '%';
+            document.getElementById('volume-value').textContent = percentage;
+            document.getElementById('volume-level').textContent = percentage;
+            setCosmicVolume(parseFloat(value));
+        }
+        
+        // Toggle mute
+        function toggleMute(muted) {
+            muteCosmicSounds(muted);
+            document.getElementById('audio-status').textContent = muted ? 'Muted' : 'Playing';
+        }
+        
+        // Toggle auto-transition
+        function toggleAutoTransition(enabled) {
+            autoTransitionEnabled = enabled;
+            
+            if (enabled) {
+                scheduleNextTransition();
+            } else {
+                clearTimeout(autoTransitionTimer);
+            }
+        }
+        
+        // Stop all sounds
+        function stopAllSounds() {
+            stopCosmicSounds();
+            document.getElementById('current-emotion').textContent = 'None';
+            document.getElementById('current-track').textContent = 'None';
+            document.getElementById('audio-status').textContent = 'Stopped';
+            document.body.className = 'neutral';
+            updateVisualizer('neutral');
+        }
+        
+        // Update status display
+        function updateStatusDisplay(emotion) {
+            document.getElementById('current-emotion').textContent = emotion;
+            document.getElementById('current-track').textContent = `${emotion}_cosmic.mp3`;
+            document.getElementById('audio-status').textContent = document.getElementById('mute-toggle').checked ? 'Muted' : 'Playing';
+        }
+        
+        // Update visualizer
+        function updateVisualizer(emotion) {
+            const pulse = document.getElementById('emotion-pulse');
+            const ripple = document.getElementById('emotion-ripple');
+            
+            // Remove all emotion classes
+            pulse.className = 'cosmic-pulse';
+            ripple.className = 'cosmic-ripple';
+            
+            // Add new emotion class
+            pulse.classList.add(emotion);
+            ripple.classList.add(emotion);
+        }
+        
+        // Schedule next automatic transition
+        function scheduleNextTransition() {
+            if (!autoTransitionEnabled) return;
+            
+            // Choose random emotion, different from current
+            const currentEmotion = document.getElementById('current-emotion').textContent;
+            let availableEmotions = emotions.filter(e => e !== currentEmotion);
+            
+            // If no current emotion, use all emotions
+            if (currentEmotion === 'None') {
+                availableEmotions = emotions;
+            }
+            
+            const nextEmotion = availableEmotions[Math.floor(Math.random() * availableEmotions.length)];
+            const nextDuration = emotionDurations[nextEmotion];
+            
+            autoTransitionTimer = setTimeout(() => {
+                selectEmotion(nextEmotion);
+            }, nextDuration);
+        }
+        
+        // Test the chat API
+        function testChatAPI() {
+            const message = document.getElementById('test-message').value;
+            const responseEl = document.getElementById('api-response');
+            
+            responseEl.textContent = 'Sending request...';
+            
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: message,
+                    user_id: 'test_user',
+                    lang: 'en'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                responseEl.textContent = JSON.stringify(data, null, 2);
+                
+                // Handle the emotion response
+                handleEmotionResponse(data);
+                
+                // Update UI based on detected emotion
+                if (data.detected_emotion) {
+                    document.body.className = data.detected_emotion;
+                    updateVisualizer(data.detected_emotion);
+                }
+            })
+            .catch(error => {
+                responseEl.textContent = 'Error: ' + error.message;
+            });
+        }
+    </script>
+</body>
+</html>
