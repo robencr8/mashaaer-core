@@ -1116,15 +1116,8 @@
       }
       
       // For welcome sounds, use the API to get voice feedback
-      fetch('/api/play-cosmic-sound', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sound_type: soundType,
-          language: language
-        }),
+      fetch(`/api/play-cosmic-sound?sound_type=${soundType}&language=${language}`, {
+        method: 'GET'
       })
       .then(response => response.json())
       .then(data => {
