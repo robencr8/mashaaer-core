@@ -3,6 +3,6 @@
 Start application
 </name>
 <command>
-gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app
+python main.py
 </command>
 </workflow>

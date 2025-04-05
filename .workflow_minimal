@@ -1,1 +1,8 @@
-gunicorn --bind 0.0.0.0:5000 --reuse-port --reload ultra_minimal:app
+<workflow>
+<name>
+Simple HTTP Server
+</name>
+<command>
+python simple_server.py
+</command>
+</workflow>

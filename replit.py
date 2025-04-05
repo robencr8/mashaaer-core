@@ -1,5 +1,5 @@
 """
-Minimal Replit-compatible Flask server 
+Special Replit-focused Flask application
 """
 from flask import Flask, jsonify
 from flask_cors import CORS
@@ -9,18 +9,18 @@ CORS(app)
 
 @app.route('/')
 def index():
-    """Main endpoint"""
+    """Main page that should be detected by Replit"""
     return """
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Replit Compatible Server</title>
+        <title>Hello Replit</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
     <body>
-        <h1>Replit Compatible Server</h1>
-        <p>This server should be compatible with Replit's detection system.</p>
+        <h1>Hello from Replit!</h1>
+        <p>This is a minimal app for Replit's webview detection.</p>
     </body>
     </html>
     """
@@ -34,10 +34,10 @@ def health():
 def status():
     """API status endpoint"""
     return jsonify({
-        "status": "online",
-        "version": "1.0.0",
-        "environment": "replit"
+        "status": "operational",
+        "server": "flask",
+        "version": "1.0.0"
     })
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)

@@ -11,3 +11,8 @@ python-dotenv
 requests
 sqlalchemy
 werkzeug
+flask
+flask-cors
+flask
+flask-cors
+gunicorn

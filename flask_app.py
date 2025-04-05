@@ -1,9 +1,8 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-import os
 
-app = Flask(__name__)
-CORS(app)
+app = Flask(__name__, static_url_path='')
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route('/')
 def index():
@@ -11,7 +10,7 @@ def index():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Flask App for Replit</title>
+        <title>Flask on Replit</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
@@ -28,10 +27,10 @@ def index():
         </style>
     </head>
     <body>
-        <h1>Flask Application for Replit</h1>
-        <p>This application follows Replit's recommended structure for Flask apps.</p>
-        <p>The server is running and should be accessible via webview.</p>
-        <p>Check the <a href="/health">/health</a> endpoint for status information.</p>
+        <h1>Flask Application is Running!</h1>
+        <p>This is a simple Flask application running on Replit.</p>
+        <p>Server is operational and should be accessible by Replit's webview.</p>
+        <p>Try accessing the <a href="/health">/health</a> endpoint to check status.</p>
     </body>
     </html>
     """
@@ -40,5 +39,9 @@ def index():
 def health():
     return jsonify({
         "status": "ok",
-        "message": "Server is healthy"
+        "server": "Flask Development Server",
+        "version": "1.0.0"
     })
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8080, debug=True)
