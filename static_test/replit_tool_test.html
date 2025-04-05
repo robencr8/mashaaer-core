@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Replit Feedback Tool Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0066cc;
+            margin-top: 0;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        button {
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #004c99;
+        }
+        .results {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: #0066cc; }
+        .logs { 
+            margin-top: 20px;
+            background-color: #1e1e1e;
+            color: #f1f1f1;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .configs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .config-option {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+        label {
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Replit Feedback Tool Test</h1>
+        <p>This page is specifically designed to test connectivity with the Replit feedback tool.</p>
+        
+        <div class="test-section">
+            <h2>Browser Information</h2>
+            <div id="browser-info" class="results">Loading browser information...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test Configuration</h2>
+            <div class="configs">
+                <div class="config-option">
+                    <input type="checkbox" id="use-credentials" checked>
+                    <label for="use-credentials">Use Credentials</label>
+                </div>
+                <div class="config-option">
+                    <input type="checkbox" id="include-custom-headers">
+                    <label for="include-custom-headers">Custom Headers</label>
+                </div>
+            </div>
+            <div>
+                <h3>Endpoint Selection</h3>
+                <select id="endpoint-select">
+                    <option value="/replit-feedback-test">Dedicated Replit Test</option>
+                    <option value="/api/test-cors-minimal">Minimal CORS Test</option>
+                    <option value="/health">Health Check</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test Basic Connection</h2>
+            <p>Tests a simple GET request to the selected endpoint.</p>
+            <button id="test-connection-btn">Test Connection</button>
+            <div id="connection-result" class="results">Results will appear here...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test CORS Headers</h2>
+            <p>This will make a CORS request and display the received headers.</p>
+            <button id="test-cors-headers-btn">Test CORS Headers</button>
+            <div id="cors-headers-result" class="results">Results will appear here...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Test Preflight Request</h2>
+            <p>This will trigger a preflight OPTIONS request.</p>
+            <button id="test-preflight-btn">Test Preflight</button>
+            <div id="preflight-result" class="results">Results will appear here...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Logs</h2>
+            <button id="clear-logs-btn">Clear Logs</button>
+            <div id="log-output" class="logs">Logs will appear here...</div>
+        </div>
+    </div>
+
+    <script>
+        // Log function
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log-output');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `[${timestamp}] [${type.toUpperCase()}] ${message}\n`;
+            // Auto-scroll to bottom
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // Clear logs
+        document.getElementById('clear-logs-btn').addEventListener('click', () => {
+            document.getElementById('log-output').innerHTML = '';
+            log('Logs cleared');
+        });
+
+        // Display browser information
+        function showBrowserInfo() {
+            const infoDiv = document.getElementById('browser-info');
+            infoDiv.textContent = '';
+            
+            const info = {
+                'User Agent': navigator.userAgent,
+                'Platform': navigator.platform,
+                'Language': navigator.language,
+                'Current URL': window.location.href,
+                'Origin': window.location.origin,
+                'Protocol': window.location.protocol,
+                'Host': window.location.host,
+                'Browser Versions': {
+                    'appCodeName': navigator.appCodeName,
+                    'appName': navigator.appName,
+                    'appVersion': navigator.appVersion,
+                    'product': navigator.product,
+                    'productSub': navigator.productSub,
+                }
+            };
+            
+            infoDiv.textContent = JSON.stringify(info, null, 2);
+        }
+
+        // Get server URL
+        function getServerUrl() {
+            // Default to same origin
+            return window.location.origin;
+        }
+
+        // Get selected endpoint
+        function getSelectedEndpoint() {
+            return document.getElementById('endpoint-select').value;
+        }
+
+        // Test connection
+        document.getElementById('test-connection-btn').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('connection-result');
+            resultDiv.innerHTML = 'Testing connection...';
+            
+            const useCredentials = document.getElementById('use-credentials').checked;
+            const includeCustomHeaders = document.getElementById('include-custom-headers').checked;
+            const endpoint = getSelectedEndpoint();
+            const serverUrl = getServerUrl();
+            const url = `${serverUrl}${endpoint}`;
+            
+            log(`Testing connection to: ${url}`);
+            log(`Use credentials: ${useCredentials}`);
+            log(`Include custom headers: ${includeCustomHeaders}`);
+            
+            try {
+                const fetchOptions = {
+                    method: 'GET',
+                    credentials: useCredentials ? 'include' : 'omit'
+                };
+                
+                if (includeCustomHeaders) {
+                    fetchOptions.headers = {
+                        'X-Test-Header': 'test-value',
+                        'Content-Type': 'application/json'
+                    };
+                    log('Added custom headers to request');
+                }
+                
+                log(`Sending fetch request to ${url}`);
+                const response = await fetch(url, fetchOptions);
+                log(`Received response with status: ${response.status}`);
+                
+                let headersText = 'Response Headers:\n';
+                response.headers.forEach((value, name) => {
+                    headersText += `${name}: ${value}\n`;
+                    log(`Received header: ${name}: ${value}`);
+                });
+                
+                const data = await response.json();
+                log('Successfully parsed JSON response');
+                
+                resultDiv.innerHTML = `
+                    <div class="success">Connection successful!</div>
+                    <strong>Status:</strong> ${response.status} ${response.statusText}
+                    <strong>Headers:</strong>
+                    <pre>${headersText}</pre>
+                    <strong>Data:</strong>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+                resultDiv.innerHTML = `
+                    <div class="error">Connection failed!</div>
+                    <strong>Error:</strong> ${error.message}
+                    <div>Check the browser console for more details.</div>
+                `;
+                console.error('Connection test error:', error);
+            }
+        });
+
+        // Test CORS headers
+        document.getElementById('test-cors-headers-btn').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('cors-headers-result');
+            resultDiv.innerHTML = 'Testing CORS headers...';
+            
+            const useCredentials = document.getElementById('use-credentials').checked;
+            const includeCustomHeaders = document.getElementById('include-custom-headers').checked;
+            const endpoint = getSelectedEndpoint();
+            const serverUrl = getServerUrl();
+            const url = `${serverUrl}${endpoint}`;
+            
+            log(`Testing CORS headers for: ${url}`);
+            log(`Use credentials: ${useCredentials}`);
+            log(`Include custom headers: ${includeCustomHeaders}`);
+            
+            try {
+                const fetchOptions = {
+                    method: 'GET',
+                    credentials: useCredentials ? 'include' : 'omit'
+                };
+                
+                if (includeCustomHeaders) {
+                    fetchOptions.headers = {
+                        'X-Test-Header': 'test-value',
+                        'Content-Type': 'application/json'
+                    };
+                }
+                
+                // Add cache-busting parameter to prevent caching
+                const cacheBuster = `?cb=${Date.now()}`;
+                log(`Sending CORS fetch request to ${url}${cacheBuster}`);
+                
+                const response = await fetch(`${url}${cacheBuster}`, fetchOptions);
+                log(`Received CORS response with status: ${response.status}`);
+                
+                // Focus on CORS-specific headers
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                    'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials'),
+                    'Access-Control-Expose-Headers': response.headers.get('Access-Control-Expose-Headers'),
+                    'Access-Control-Max-Age': response.headers.get('Access-Control-Max-Age')
+                };
+                
+                // Log all CORS headers
+                Object.entries(corsHeaders).forEach(([name, value]) => {
+                    if (value) {
+                        log(`CORS Header: ${name}: ${value}`);
+                    }
+                });
+                
+                // Check other relevant headers
+                const otherRelevantHeaders = {
+                    'Content-Type': response.headers.get('Content-Type'),
+                    'Vary': response.headers.get('Vary')
+                };
+                
+                // Log relevant non-CORS headers
+                Object.entries(otherRelevantHeaders).forEach(([name, value]) => {
+                    if (value) {
+                        log(`Relevant Header: ${name}: ${value}`);
+                    }
+                });
+                
+                const data = await response.json();
+                
+                // CORS validation
+                let corsValid = true;
+                let corsValidationMessages = [];
+                
+                // Check ACAO header (most important)
+                const acao = corsHeaders['Access-Control-Allow-Origin'];
+                if (!acao) {
+                    corsValid = false;
+                    corsValidationMessages.push('Missing Access-Control-Allow-Origin header');
+                } else if (acao !== '*' && acao !== window.location.origin) {
+                    corsValid = false;
+                    corsValidationMessages.push(`Access-Control-Allow-Origin value "${acao}" doesn't match origin "${window.location.origin}"`);
+                }
+                
+                // Check credentials if used
+                if (useCredentials && corsHeaders['Access-Control-Allow-Credentials'] !== 'true') {
+                    corsValid = false;
+                    corsValidationMessages.push('Missing or invalid Access-Control-Allow-Credentials header (should be "true")');
+                }
+                
+                // Build result HTML
+                let resultHTML = '';
+                if (corsValid) {
+                    resultHTML += `<div class="success">CORS configuration appears valid!</div>`;
+                } else {
+                    resultHTML += `<div class="error">CORS configuration issues detected:</div>`;
+                    resultHTML += `<ul>`;
+                    corsValidationMessages.forEach(msg => {
+                        resultHTML += `<li>${msg}</li>`;
+                    });
+                    resultHTML += `</ul>`;
+                }
+                
+                resultHTML += `<strong>CORS Headers:</strong><pre>`;
+                Object.entries(corsHeaders).forEach(([name, value]) => {
+                    if (value) {
+                        resultHTML += `${name}: ${value}\n`;
+                    }
+                });
+                resultHTML += `</pre>`;
+                
+                resultHTML += `<strong>Response Data:</strong><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                resultDiv.innerHTML = resultHTML;
+            } catch (error) {
+                log(`CORS Headers Error: ${error.message}`, 'error');
+                resultDiv.innerHTML = `
+                    <div class="error">CORS test failed!</div>
+                    <strong>Error:</strong> ${error.message}
+                    <div>This likely indicates a CORS configuration issue.</div>
+                    <div>Check the browser console for more details.</div>
+                `;
+                console.error('CORS Headers test error:', error);
+            }
+        });
+
+        // Test preflight
+        document.getElementById('test-preflight-btn').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('preflight-result');
+            resultDiv.innerHTML = 'Testing preflight request...';
+            
+            const useCredentials = document.getElementById('use-credentials').checked;
+            const endpoint = getSelectedEndpoint();
+            const serverUrl = getServerUrl();
+            const url = `${serverUrl}${endpoint}`;
+            
+            log(`Testing preflight for: ${url}`);
+            log(`Use credentials: ${useCredentials}`);
+            
+            try {
+                // This request will trigger a preflight because of:
+                // 1. Non-simple method (PUT)
+                // 2. Non-simple headers (X-Test-Header)
+                log('Sending request that will trigger preflight OPTIONS request');
+                
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Test-Header': 'preflight-test',
+                        'X-Preflight-Test': 'true'
+                    },
+                    credentials: useCredentials ? 'include' : 'omit',
+                    body: JSON.stringify({
+                        text: 'This request triggers a preflight',
+                        test: true
+                    })
+                });
+                
+                log(`Received response after preflight with status: ${response.status}`);
+                
+                // Get all response headers
+                let headersText = '';
+                response.headers.forEach((value, name) => {
+                    headersText += `${name}: ${value}\n`;
+                    log(`Response header: ${name}: ${value}`);
+                });
+                
+                try {
+                    const data = await response.json();
+                    log('Successfully parsed JSON response after preflight');
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">Preflight request successful!</div>
+                        <div class="info">The browser sent an OPTIONS request before this PUT request.</div>
+                        <strong>Status:</strong> ${response.status} ${response.statusText}
+                        <strong>Headers:</strong>
+                        <pre>${headersText}</pre>
+                        <strong>Data:</strong>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <div class="info">Check browser Network tab to see the OPTIONS request.</div>
+                    `;
+                } catch (e) {
+                    // Handle non-JSON response
+                    const text = await response.text();
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">Preflight request successful!</div>
+                        <div class="info">The browser sent an OPTIONS request before this PUT request.</div>
+                        <strong>Status:</strong> ${response.status} ${response.statusText}
+                        <strong>Headers:</strong>
+                        <pre>${headersText}</pre>
+                        <strong>Response (Text):</strong>
+                        <pre>${text}</pre>
+                        <div class="info">Check browser Network tab to see the OPTIONS request.</div>
+                    `;
+                }
+            } catch (error) {
+                log(`Preflight Error: ${error.message}`, 'error');
+                resultDiv.innerHTML = `
+                    <div class="error">Preflight request failed!</div>
+                    <strong>Error:</strong> ${error.message}
+                    <div>This means the OPTIONS preflight request was rejected.</div>
+                    <div>Common causes:</div>
+                    <ul>
+                        <li>Server not responding to OPTIONS requests</li>
+                        <li>Missing or incorrect CORS headers in OPTIONS response</li>
+                        <li>Network connectivity issues</li>
+                    </ul>
+                    <div>Check the browser console and Network tab for more details.</div>
+                `;
+                console.error('Preflight test error:', error);
+            }
+        });
+
+        // Initialize
+        window.onload = function() {
+            showBrowserInfo();
+            log('Page loaded, test tool initialized');
+            
+            // Log initial configuration
+            log(`Initial server URL: ${getServerUrl()}`);
+            log(`Initial endpoint: ${getSelectedEndpoint()}`);
+            log(`Use credentials: ${document.getElementById('use-credentials').checked}`);
+            log(`Include custom headers: ${document.getElementById('include-custom-headers').checked}`);
+        };
+    </script>
+</body>
+</html>
