@@ -1,11 +1,13 @@
+
 from flask import Blueprint, jsonify, request
-from rule_engine import RobinDecisionEngine, Rule
+from rule_engine import RobinDecisionEngine
 from rules_config_loader import load_rules_from_config
 import logging
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
 logger = logging.getLogger(__name__)
 
+# Load rules once on app start
 decision_engine = load_rules_from_config()
 
 @api_bp.route('/chat', methods=['POST'])

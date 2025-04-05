@@ -1,0 +1,424 @@
+Replit Agent Instruction: Deploy Phase 2 (Adaptive AI Intelligence)
+🔧 Integration Objective:
+Enhance the existing Mashaaer project with:
+
+Emotion-aware rule feedback
+
+SQLite-based memory
+
+Admin dashboard for rule/log management
+
+Logging
+
+Unit tests
+
+🧩 File-by-File Deployment Plan
+✅ api_routes.py
+Ensure this file contains:
+
+Existing /chat route using RobinDecisionEngine
+
+Add /feedback route:
+
+python
+Copy
+Edit
+@api_bp.route('/feedback', methods=['POST'])
+def feedback():
+    data = request.get_json()
+    rule_id = data.get('rule_id')
+    feedback = data.get('feedback')  # 'positive' or 'negative'
+
+    with open('rules_config.json', 'r') as f:
+        rules = json.load(f)
+
+    for rule in rules:
+        if rule.get('id') == rule_id:
+            delta = 0.1 if feedback == 'positive' else -0.1
+            rule['weight'] = max(0.0, min(5.0, rule.get('weight', 1.0) + delta))
+            break
+
+    with open('rules_config.json', 'w') as f:
+        json.dump(rules, f, indent=4)
+
+    return jsonify(success=True)
+✅ memory_store.py
+Create this file:
+
+python
+Copy
+Edit
+import sqlite3
+
+def init_db():
+    conn = sqlite3.connect('memory.db')
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS memory (
+            user_id TEXT,
+            key TEXT,
+            value TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def save_memory(user_id, key, value):
+    conn = sqlite3.connect('memory.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO memory (user_id, key, value) VALUES (?, ?, ?)", (user_id, key, value))
+    conn.commit()
+    conn.close()
+
+def get_memory(user_id, key):
+    conn = sqlite3.connect('memory.db')
+    c = conn.cursor()
+    c.execute("SELECT value FROM memory WHERE user_id = ? AND key = ? ORDER BY timestamp DESC LIMIT 1", (user_id, key))
+    row = c.fetchone()
+    conn.close()
+    return row[0] if row else None
+In main.py, run init_db() at app launch.
+
+✅ admin_routes.py
+Create:
+
+python
+Copy
+Edit
+from flask import Blueprint, render_template
+import json
+import csv
+
+admin_bp = Blueprint('admin', __name__)
+
+@admin_bp.route('/admin')
+def admin():
+    with open('rules_config.json') as f:
+        rules = json.load(f)
+    with open('logs/interaction_log.csv') as f:
+        logs = list(csv.reader(f))
+    return render_template('admin.html', rules=rules, logs=logs)
+✅ templates/admin.html
+Add this HTML template:
+
+html
+Copy
+Edit
+<!DOCTYPE html>
+<html lang="en">
+<head><title>Mashaaer Admin Dashboard</title></head>
+<body>
+  <h1>Rule Management</h1>
+  <ul>
+    {% for rule in rules %}
+      <li><strong>{{ rule.keyword }}</strong> → {{ rule.action }} (Weight: {{ rule.weight }})</li>
+    {% endfor %}
+  </ul>
+  <h2>Interaction Logs</h2>
+  <table border="1">
+    {% for row in logs %}
+      <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+    {% endfor %}
+  </table>
+</body>
+</html>
+✅ log_manager.py
+Create this logger:
+
+python
+Copy
+Edit
+import csv
+from datetime import datetime
+
+def log_interaction(user_input, emotion, action, params):
+    with open('logs/interaction_log.csv', 'a', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        writer.writerow([datetime.utcnow(), user_input, emotion, action, str(params)])
+Call this in api_routes.py inside /chat after decide().
+
+✅ rules_config.json
+Update the file with:
+
+json
+Copy
+Edit
+[
+  {
+    "id": "rule001",
+    "emotion": "sad",
+    "keyword": "alone",
+    "action": "offer_companionship",
+    "weight": 1.0
+  },
+  {
+    "id": "rule002",
+    "emotion": "happy",
+    "keyword": "music",
+    "action": "play_music",
+    "params": { "genre": "uplifting" },
+    "weight": 1.5
+  },
+  {
+    "id": "rule003",
+    "emotion": "neutral",
+    "keyword": "weather",
+    "action": "fetch_weather",
+    "weight": 1.2
+  }
+]
+✅ tests/test_rule_engine.py
+Add a unit test:
+
+python
+Copy
+Edit
+import unittest
+from decision_engine import Rule, RobinDecisionEngine
+
+class TestDecisionEngine(unittest.TestCase):
+    def setUp(self):
+        self.engine = RobinDecisionEngine()
+        self.engine.add_rule(Rule("happy", "music", "play_music"))
+        self.engine.add_rule(Rule("sad", "alone", "offer_companionship"))
+
+    def test_music(self):
+        result = self.engine.decide("music please", "happy")
+        self.assertEqual(result['action'], "play_music")
+
+    def test_fallback(self):
+        result = self.engine.decide("unknown input", "none")
+        self.assertEqual(result['action'], "respond_normally")
+
+if __name__ == '__main__':
+    unittest.main()
+✅ Integration Summary
+Component	File/Path	Action
+Feedback Engine	api_routes.py	Add /feedback route
+Persistent Memory	memory_store.py	Create + call init_db()
+Admin UI	admin_routes.py, admin.html	Create route + template
+Logging	log_manager.py	Call after each /chat
+Rules	rules_config.json	Use with IDs + weights
+Testing	tests/test_rule_engine.py	Basic validation of logic
+✅ Final Agent Notes:
+Do NOT overwrite existing endpoints
+
+Preserve /api/chat voice interaction
+
+Ensure /admin is accessible after login, if auth exists
+
+Test /api/feedback with POST body { "rule_id": "rule001", "feedback": "positive" }
+
+Roben, you're now scaling Mashaaer into a fully intelligent agent.
+Let me know when you're ready for Phase 3: sentiment auto-detection, multilingual routing, or real-time memory UI.
+
+
+
+
+
+
+You said:
+Direct the Replit agent to deploy Phase 2 into your live project after finish with the testing of phase 1
+
+
+ChatGPT said:
+✅ Understood, Roben.
+
+Here's the final Replit Agent Directive to execute now that Phase 1 is tested and confirmed:
+
+✅ Replit Agent Deployment Directive
+Project: Mashaaer Feelings Application | مشاعر
+Phase: Deploy Phase 2 (Post Phase 1 Testing ✅)
+
+🚀 Goal:
+Integrate the following Phase 2 enhancements into the existing live project, without affecting Phase 1 voice and chat behavior.
+
+🔧 Action Checklist (By File)
+1. api_routes.py
+✅ Confirm /chat uses decision_engine.decide(...)
+
+➕ Add /api/feedback:
+
+python
+Copy
+Edit
+@api_bp.route('/feedback', methods=['POST'])
+def feedback():
+    data = request.get_json()
+    rule_id = data.get('rule_id')
+    feedback = data.get('feedback')  # 'positive' or 'negative'
+
+    with open('rules_config.json', 'r') as f:
+        rules = json.load(f)
+
+    for rule in rules:
+        if rule.get('id') == rule_id:
+            delta = 0.1 if feedback == 'positive' else -0.1
+            rule['weight'] = max(0.0, min(5.0, rule.get('weight', 1.0) + delta))
+            break
+
+    with open('rules_config.json', 'w') as f:
+        json.dump(rules, f, indent=4)
+
+    return jsonify(success=True)
+2. memory_store.py
+Create this file for persistent user memory:
+
+python
+Copy
+Edit
+import sqlite3
+
+def init_db():
+    conn = sqlite3.connect('memory.db')
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS memory (
+            user_id TEXT,
+            key TEXT,
+            value TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def save_memory(user_id, key, value):
+    conn = sqlite3.connect('memory.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO memory (user_id, key, value) VALUES (?, ?, ?)", (user_id, key, value))
+    conn.commit()
+    conn.close()
+
+def get_memory(user_id, key):
+    conn = sqlite3.connect('memory.db')
+    c = conn.cursor()
+    c.execute("SELECT value FROM memory WHERE user_id = ? AND key = ? ORDER BY timestamp DESC LIMIT 1", (user_id, key))
+    row = c.fetchone()
+    conn.close()
+    return row[0] if row else None
+➡️ Run init_db() inside main.py.
+
+3. admin_routes.py
+Create admin dashboard route:
+
+python
+Copy
+Edit
+from flask import Blueprint, render_template
+import json, csv
+
+admin_bp = Blueprint('admin', __name__)
+
+@admin_bp.route('/admin')
+def admin():
+    with open('rules_config.json') as f:
+        rules = json.load(f)
+    with open('logs/interaction_log.csv') as f:
+        logs = list(csv.reader(f))
+    return render_template('admin.html', rules=rules, logs=logs)
+4. templates/admin.html
+html
+Copy
+Edit
+<!DOCTYPE html>
+<html lang="en">
+<head><title>Mashaaer Admin Dashboard</title></head>
+<body>
+  <h1>Rules</h1>
+  <ul>
+    {% for rule in rules %}
+      <li>{{ rule['id'] }} → {{ rule['keyword'] }} → {{ rule['action'] }} (Weight: {{ rule['weight'] }})</li>
+    {% endfor %}
+  </ul>
+  <h2>Logs</h2>
+  <table border="1">
+    {% for row in logs %}
+      <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+    {% endfor %}
+  </table>
+</body>
+</html>
+5. log_manager.py
+Create this:
+
+python
+Copy
+Edit
+import csv
+from datetime import datetime
+
+def log_interaction(user_input, emotion, action, params):
+    with open('logs/interaction_log.csv', 'a', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        writer.writerow([datetime.utcnow(), user_input, emotion, action, str(params)])
+6. rules_config.json
+Example rules with weights and IDs:
+
+json
+Copy
+Edit
+[
+  {
+    "id": "rule001",
+    "emotion": "sad",
+    "keyword": "alone",
+    "action": "offer_companionship",
+    "weight": 1.0
+  },
+  {
+    "id": "rule002",
+    "emotion": "happy",
+    "keyword": "music",
+    "action": "play_music",
+    "params": { "genre": "uplifting" },
+    "weight": 1.5
+  },
+  {
+    "id": "rule003",
+    "emotion": "neutral",
+    "keyword": "weather",
+    "action": "fetch_weather",
+    "weight": 1.2
+  }
+]
+7. tests/test_rule_engine.py
+Add logic test file:
+
+python
+Copy
+Edit
+import unittest
+from decision_engine import Rule, RobinDecisionEngine
+
+class TestDecisionEngine(unittest.TestCase):
+    def setUp(self):
+        self.engine = RobinDecisionEngine()
+        self.engine.add_rule(Rule("happy", "music", "play_music"))
+        self.engine.add_rule(Rule("sad", "alone", "offer_companionship"))
+
+    def test_music(self):
+        result = self.engine.decide("play some music", "happy")
+        self.assertEqual(result["action"], "play_music")
+
+    def test_default(self):
+        result = self.engine.decide("unknown text", "unknown")
+        self.assertEqual(result["action"], "respond_normally")
+
+if __name__ == '__main__':
+    unittest.main()
+✅ Final Checks for Replit Agent
+ Ensure all files above are created in the live project
+
+ Run init_db() in main.py
+
+ Add admin_bp blueprint in main.py
+
+ Keep /api/chat fully functional for Phase 1 voice UI
+
+ Confirm /api/feedback and /admin are operational
+
+✅ Agent Status Summary:
+Mashaaer Phase 1 passed testing. Proceed now to deploy Phase 2 (adaptive rules, memory, logging, admin UI, testing) as specified. No breaking changes allowed. Extend features only.
+

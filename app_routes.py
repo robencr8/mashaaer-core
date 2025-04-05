@@ -37,7 +37,7 @@ def register_routes(app):
             content = f.read()
         return render_template("markdown.html", content=content, title="Cosmic Loader Animations")
     
-    @app.route("/recommendations")
+    @app.route("/recommendations", methods=["GET"])
     def recommendations_page():
         """Show the AI-powered recommendations page"""
         logger.debug("Serving recommendations page")

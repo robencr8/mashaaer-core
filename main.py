@@ -137,3 +137,10 @@ try:
     logger.info("Successfully registered enhanced CORS and feedback routes")
 except Exception as e:
     logger.error(f"Error enhancing CORS: {str(e)}")
+
+# Add root route for the homepage
+@app.route("/", methods=["GET"])
+def index():
+    """Serve the main homepage"""
+    logger.debug("Serving homepage")
+    return render_template("index.html")
