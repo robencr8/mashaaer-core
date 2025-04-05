@@ -1,13 +1,202 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Minimal Test Page</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Replit Feedback Tool Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
 </head>
-<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <h1>Minimal Test Page</h1>
-    <p>This page exists solely for testing the web application feedback tool.</p>
-    <p style="color: green; font-weight: bold;">If you can see this page, the web server is working correctly!</p>
+<body>
+    <h1>Replit Feedback Tool Test</h1>
+    <p>This page tests connectivity with the server to diagnose any issues with the Replit web application feedback tool.</p>
+    
+    <div class="test-section">
+        <h2>1. Simple GET Request Test</h2>
+        <p>Tests a basic GET request to the root URL:</p>
+        <button onclick="testRootEndpoint()">Test Root Endpoint</button>
+        <div id="root-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Health Endpoint Test</h2>
+        <p>Tests the health check endpoint:</p>
+        <button onclick="testHealthEndpoint()">Test Health Endpoint</button>
+        <div id="health-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. CORS Preflight Test</h2>
+        <p>Tests CORS preflight (OPTIONS) request:</p>
+        <button onclick="testCORSPreflight()">Test CORS Preflight</button>
+        <div id="cors-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Network Information</h2>
+        <button onclick="showNetworkInfo()">Show Network Info</button>
+        <div id="network-info"></div>
+    </div>
+
+    <script>
+        const ROOT_URL = window.location.origin;
+
+        // Helper function to display results
+        function showResult(elementId, success, message, details = null) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `
+                <p class="${success ? 'success' : 'error'}">${message}</p>
+                ${details ? `<pre>${JSON.stringify(details, null, 2)}</pre>` : ''}
+            `;
+        }
+
+        // Test 1: Root endpoint
+        async function testRootEndpoint() {
+            try {
+                const response = await fetch(ROOT_URL + '/');
+                if (response.ok) {
+                    showResult('root-result', true, 'SUCCESS: Root endpoint is accessible!', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: Object.fromEntries([...response.headers]),
+                        url: response.url
+                    });
+                } else {
+                    showResult('root-result', false, `ERROR: Root endpoint returned status ${response.status}`, {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: Object.fromEntries([...response.headers]),
+                        url: response.url
+                    });
+                }
+            } catch (error) {
+                showResult('root-result', false, `ERROR: Failed to access root endpoint: ${error.message}`);
+                console.error('Root endpoint error:', error);
+            }
+        }
+
+        // Test 2: Health endpoint
+        async function testHealthEndpoint() {
+            try {
+                const response = await fetch(ROOT_URL + '/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('health-result', true, 'SUCCESS: Health endpoint is accessible!', {
+                        status: response.status,
+                        data: data,
+                        headers: Object.fromEntries([...response.headers]),
+                        url: response.url
+                    });
+                } else {
+                    showResult('health-result', false, `ERROR: Health endpoint returned status ${response.status}`, {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: Object.fromEntries([...response.headers]),
+                        url: response.url
+                    });
+                }
+            } catch (error) {
+                showResult('health-result', false, `ERROR: Failed to access health endpoint: ${error.message}`);
+                console.error('Health endpoint error:', error);
+            }
+        }
+
+        // Test 3: CORS Preflight
+        async function testCORSPreflight() {
+            try {
+                // Create a request with custom headers to trigger preflight
+                const response = await fetch(ROOT_URL + '/health', {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (response.ok) {
+                    showResult('cors-result', true, 'SUCCESS: CORS preflight is properly configured!', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: Object.fromEntries([...response.headers]),
+                        url: response.url
+                    });
+                } else {
+                    showResult('cors-result', false, `ERROR: CORS preflight returned status ${response.status}`, {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: Object.fromEntries([...response.headers]),
+                        url: response.url
+                    });
+                }
+            } catch (error) {
+                showResult('cors-result', false, `ERROR: CORS preflight failed: ${error.message}`);
+                console.error('CORS preflight error:', error);
+            }
+        }
+        
+        // Test 4: Network Information
+        function showNetworkInfo() {
+            const info = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                vendor: navigator.vendor,
+                language: navigator.language,
+                online: navigator.onLine,
+                origin: window.location.origin,
+                pathname: window.location.pathname,
+                protocol: window.location.protocol,
+                href: window.location.href
+            };
+            
+            if (navigator.connection) {
+                info.connection = {
+                    effectiveType: navigator.connection.effectiveType,
+                    downlink: navigator.connection.downlink,
+                    rtt: navigator.connection.rtt,
+                    saveData: navigator.connection.saveData
+                };
+            }
+            
+            document.getElementById('network-info').innerHTML = `
+                <pre>${JSON.stringify(info, null, 2)}</pre>
+            `;
+        }
+    </script>
 </body>
 </html>

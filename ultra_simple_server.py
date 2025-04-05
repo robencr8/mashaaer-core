@@ -1,9 +1,7 @@
 """
-Replit Health Check
+Ultra-Simple Test Server
 
-This is a very simple Flask application specifically designed to be accessible
-by the Replit web application feedback tool. It provides a minimal HTTP server
-with just the necessary routes for the feedback tool to function.
+This is the absolute minimal Flask application designed for Replit web application feedback tool.
 """
 
 from flask import Flask, Response, request
@@ -12,8 +10,8 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'OPTIONS'])
 def index():
-    """Provide a simple HTML page that the feedback tool can access"""
-    # Handle OPTIONS request for CORS preflight
+    """Root route with minimal HTML"""
+    # For OPTIONS requests
     if request.method == 'OPTIONS':
         response = Response('')
         response.headers['Access-Control-Allow-Origin'] = '*'
@@ -21,47 +19,43 @@ def index():
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         return response
     
-    # Simple HTML response
+    # For GET requests
     html = """<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Replit Health Check</title>
+  <meta charset="UTF-8">
+  <title>Ultra Simple Server</title>
 </head>
 <body>
-    <h1>Replit Health Check</h1>
-    <p>This server is configured for the Replit web application feedback tool.</p>
+  <h1>Ultra Simple Server</h1>
+  <p>This server is running and accessible to the Replit feedback tool.</p>
 </body>
 </html>"""
     
     response = Response(html, mimetype='text/html')
     response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     return response
 
 @app.route('/health', methods=['GET', 'OPTIONS'])
 def health():
-    """Simple health check endpoint"""
-    # Handle OPTIONS request for CORS preflight
+    """Health check endpoint specifically for the Replit feedback tool"""
+    # For OPTIONS requests
     if request.method == 'OPTIONS':
         response = Response('')
         response.headers['Access-Control-Allow-Origin'] = '*'
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
         return response
-    
-    # Return simple JSON status
+        
+    # For GET requests
     response = Response('{"status":"ok"}', mimetype='application/json')
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    return response
-
-@app.route('/<path:path>', methods=['OPTIONS'])
-def options(path):
-    """Handle OPTIONS requests"""
-    response = Response('')
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     return response
 
+# Only run the server if this script is executed directly
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)

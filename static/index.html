@@ -6,58 +6,48 @@
     <title>Mashaaer Feelings</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
             margin: 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-            color: #333;
-        }
-        h1 {
-            color: #5c2d91;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
         }
         .container {
-            max-width: 800px;
-            margin: 0 auto;
             background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
         }
-        .btn {
-            display: inline-block;
-            background-color: #5c2d91;
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            margin-top: 10px;
-            margin-right: 10px;
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
         }
-        .btn:hover {
-            background-color: #4a2370;
+        p {
+            color: #666;
+            line-height: 1.6;
+        }
+        .status {
+            margin-top: 1.5rem;
+            padding: 0.5rem;
+            border-radius: 5px;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Mashaaer Feelings</h1>
-        <p>Welcome to Mashaaer Feelings - Your AI-powered emotional companion.</p>
-        
-        <div>
-            <h2>Diagnostic Tools</h2>
-            <p>Use these tools to verify server connectivity and CORS configuration:</p>
-            <a href="/feedback-tool-guide" class="btn">Feedback Tool Guide</a>
-            <a href="/feedback-test" class="btn">Feedback Test Page</a>
-            <a href="/api/status" class="btn">API Status</a>
-            <a href="/api/feedback-tool-status" class="btn">Feedback Tool Status</a>
-        </div>
-        
-        <div>
-            <h2>Application</h2>
-            <p>Access the main application:</p>
-            <a href="/cosmic_onboarding" class="btn">Cosmic Onboarding</a>
-            <a href="/app" class="btn">Main Application</a>
-        </div>
+        <h1>Welcome to Mashaaer Feelings</h1>
+        <p>An AI-powered emotional companion application that recognizes and responds to users' emotions.</p>
+        <p>Features multilingual support and personalized voice responses through a cosmic onboarding experience.</p>
+        <div class="status">Server Status: Online</div>
     </div>
 </body>
 </html>
