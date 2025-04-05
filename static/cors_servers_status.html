@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Servers Status Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            background-color: #f5f7fa;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0066cc;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #0066cc;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .server-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            background-color: #f9f9f9;
+        }
+        .server-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .server-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .server-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #0066cc;
+            margin: 0;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-online {
+            background-color: #4CAF50;
+        }
+        .status-offline {
+            background-color: #F44336;
+        }
+        .status-unknown {
+            background-color: #FFC107;
+        }
+        .status-text {
+            display: inline-flex;
+            align-items: center;
+            font-weight: bold;
+        }
+        .status-online-text {
+            color: #4CAF50;
+        }
+        .status-offline-text {
+            color: #F44336;
+        }
+        .status-unknown-text {
+            color: #FFC107;
+        }
+        .server-details {
+            margin-top: 10px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+        .server-url {
+            font-family: monospace;
+            color: #444;
+            background-color: #f0f0f0;
+            padding: 3px 6px;
+            border-radius: 3px;
+            word-break: break-all;
+        }
+        .action-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 8px 12px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+        }
+        .btn:hover {
+            background-color: #0055aa;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .diagnostic-info {
+            margin-top: 15px;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            font-size: 0.9em;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .refresh-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-bottom: 20px;
+            transition: background-color 0.2s;
+        }
+        .refresh-btn:hover {
+            background-color: #218838;
+        }
+        .test-results {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #0066cc;
+        }
+        .test-item {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        .test-success {
+            color: #4CAF50;
+        }
+        .test-failure {
+            color: #F44336;
+        }
+        .navigation {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        .back-link {
+            color: #0066cc;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .back-link::before {
+            content: "←";
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CORS Servers Status Dashboard</h1>
+        
+        <button id="refreshAll" class="refresh-btn">Refresh All Servers</button>
+        
+        <div id="serversList">
+            <!-- Server cards will be dynamically generated here -->
+        </div>
+        
+        <div class="navigation">
+            <a href="/multi-cors-test" class="back-link">Back to Multi-CORS Testing Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const servers = [
+                {
+                    id: 'main',
+                    name: 'Main Application',
+                    description: 'The primary Flask application serving the Mashaaer Feelings web interface.',
+                    url: window.location.origin,
+                    healthEndpoint: '/health',
+                    testEndpoint: '/replit-feedback-test',
+                    port: 5000
+                },
+                {
+                    id: 'ultra-minimal',
+                    name: 'Ultra Minimal Server',
+                    description: 'A minimal Flask server with bare CORS functionality.',
+                    url: getUrlWithPort(5001),
+                    healthEndpoint: '/health',
+                    testEndpoint: '/replit-feedback-test',
+                    port: 5001
+                },
+                {
+                    id: 'cors-debug',
+                    name: 'CORS Debug Server',
+                    description: 'A dedicated server for CORS debugging with extensive logging.',
+                    url: getUrlWithPort(5010),
+                    healthEndpoint: '/health',
+                    testEndpoint: '/cors-test-minimal',
+                    port: 5010
+                },
+                {
+                    id: 'micro-http',
+                    name: 'Micro HTTP Server',
+                    description: 'A lightweight Python HTTP server with CORS headers.',
+                    url: getUrlWithPort(5020),
+                    healthEndpoint: '/health',
+                    testEndpoint: '/api/test',
+                    port: 5020
+                }
+            ];
+            
+            // Create server cards
+            renderServerCards(servers);
+            
+            // Set up refresh button
+            document.getElementById('refreshAll').addEventListener('click', () => {
+                checkAllServers(servers);
+            });
+            
+            // Initial check of all servers
+            checkAllServers(servers);
+        });
+        
+        function getUrlWithPort(port) {
+            const url = new URL(window.location.href);
+            return `${url.protocol}//${url.hostname}:${port}`;
+        }
+        
+        function renderServerCards(servers) {
+            const serversList = document.getElementById('serversList');
+            serversList.innerHTML = '';
+            
+            servers.forEach(server => {
+                const serverCard = document.createElement('div');
+                serverCard.classList.add('server-card');
+                serverCard.id = `server-${server.id}`;
+                
+                serverCard.innerHTML = `
+                    <div class="server-header">
+                        <h2 class="server-name">${server.name}</h2>
+                        <div class="status-text">
+                            <span class="status-indicator status-unknown"></span>
+                            <span class="status-unknown-text">Checking...</span>
+                        </div>
+                    </div>
+                    <p>${server.description}</p>
+                    <div class="server-details">
+                        <div><strong>URL:</strong> <span class="server-url">${server.url}</span></div>
+                        <div><strong>Port:</strong> ${server.port}</div>
+                        <div><strong>Health Endpoint:</strong> <span class="server-url">${server.url}${server.healthEndpoint}</span></div>
+                        <div><strong>Test Endpoint:</strong> <span class="server-url">${server.url}${server.testEndpoint}</span></div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn check-status-btn" data-server-id="${server.id}">Check Status</button>
+                        <button class="btn test-cors-btn" data-server-id="${server.id}">Test CORS</button>
+                        <button class="btn btn-secondary view-details-btn" data-server-id="${server.id}">View Details</button>
+                    </div>
+                    <div id="${server.id}-test-results" class="test-results" style="display: none;"></div>
+                    <div id="${server.id}-diagnostic" class="diagnostic-info" style="display: none;"></div>
+                `;
+                
+                serversList.appendChild(serverCard);
+            });
+            
+            // Add event listeners to buttons
+            document.querySelectorAll('.check-status-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const serverId = e.target.getAttribute('data-server-id');
+                    const server = servers.find(s => s.id === serverId);
+                    checkServerStatus(server);
+                });
+            });
+            
+            document.querySelectorAll('.test-cors-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const serverId = e.target.getAttribute('data-server-id');
+                    const server = servers.find(s => s.id === serverId);
+                    testCORS(server);
+                });
+            });
+            
+            document.querySelectorAll('.view-details-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const serverId = e.target.getAttribute('data-server-id');
+                    const diagnosticDiv = document.getElementById(`${serverId}-diagnostic`);
+                    
+                    if (diagnosticDiv.style.display === 'none') {
+                        diagnosticDiv.style.display = 'block';
+                        e.target.textContent = 'Hide Details';
+                    } else {
+                        diagnosticDiv.style.display = 'none';
+                        e.target.textContent = 'View Details';
+                    }
+                });
+            });
+        }
+        
+        function checkAllServers(servers) {
+            servers.forEach(server => {
+                checkServerStatus(server);
+            });
+        }
+        
+        function checkServerStatus(server) {
+            const statusIndicator = document.querySelector(`#server-${server.id} .status-indicator`);
+            const statusText = document.querySelector(`#server-${server.id} .status-text span:nth-child(2)`);
+            const diagnosticDiv = document.getElementById(`${server.id}-diagnostic`);
+            
+            // Update to checking state
+            statusIndicator.className = 'status-indicator status-unknown';
+            statusText.className = 'status-unknown-text';
+            statusText.textContent = 'Checking...';
+            
+            fetch(`${server.url}${server.healthEndpoint}`, { 
+                method: 'GET',
+                mode: 'cors',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error(`Server responded with status: ${response.status}`);
+            })
+            .then(data => {
+                // Server is online
+                statusIndicator.className = 'status-indicator status-online';
+                statusText.className = 'status-online-text';
+                statusText.textContent = 'Online';
+                
+                // Update diagnostic info
+                diagnosticDiv.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                // Server is offline or error
+                statusIndicator.className = 'status-indicator status-offline';
+                statusText.className = 'status-offline-text';
+                statusText.textContent = 'Offline';
+                
+                // Update diagnostic info
+                diagnosticDiv.textContent = `Error: ${error.message}`;
+            });
+        }
+        
+        function testCORS(server) {
+            const testResultsDiv = document.getElementById(`${server.id}-test-results`);
+            testResultsDiv.style.display = 'block';
+            testResultsDiv.innerHTML = '<p>Running CORS tests...</p>';
+            
+            fetch(`${server.url}${server.testEndpoint}`, {
+                method: 'GET',
+                mode: 'cors',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => {
+                let results = `<h3>CORS Test Results</h3>`;
+                
+                // Check if response has CORS headers
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+                };
+                
+                // Check each CORS header
+                results += `<div class="test-item">
+                    <span class="${corsHeaders['Access-Control-Allow-Origin'] ? 'test-success' : 'test-failure'}">
+                        ${corsHeaders['Access-Control-Allow-Origin'] ? '✓' : '✗'} Access-Control-Allow-Origin: ${corsHeaders['Access-Control-Allow-Origin'] || 'Missing'}
+                    </span>
+                </div>`;
+                
+                results += `<div class="test-item">
+                    <span class="${corsHeaders['Access-Control-Allow-Methods'] ? 'test-success' : 'test-failure'}">
+                        ${corsHeaders['Access-Control-Allow-Methods'] ? '✓' : '✗'} Access-Control-Allow-Methods: ${corsHeaders['Access-Control-Allow-Methods'] || 'Missing'}
+                    </span>
+                </div>`;
+                
+                results += `<div class="test-item">
+                    <span class="${corsHeaders['Access-Control-Allow-Headers'] ? 'test-success' : 'test-failure'}">
+                        ${corsHeaders['Access-Control-Allow-Headers'] ? '✓' : '✗'} Access-Control-Allow-Headers: ${corsHeaders['Access-Control-Allow-Headers'] || 'Missing'}
+                    </span>
+                </div>`;
+                
+                // Overall test result
+                const allHeadersPresent = corsHeaders['Access-Control-Allow-Origin'] && 
+                                          corsHeaders['Access-Control-Allow-Methods'] && 
+                                          corsHeaders['Access-Control-Allow-Headers'];
+                
+                results += `<div class="test-item" style="margin-top: 10px; font-weight: bold;">
+                    <span class="${allHeadersPresent ? 'test-success' : 'test-failure'}">
+                        ${allHeadersPresent ? '✓ CORS is properly configured' : '✗ CORS configuration is incomplete'}
+                    </span>
+                </div>`;
+                
+                testResultsDiv.innerHTML = results;
+                
+                return response.json();
+            })
+            .catch(error => {
+                testResultsDiv.innerHTML = `
+                <h3>CORS Test Results</h3>
+                <div class="test-item">
+                    <span class="test-failure">✗ CORS test failed: ${error.message}</span>
+                </div>
+                <div class="test-item" style="margin-top: 10px; font-weight: bold;">
+                    <span class="test-failure">✗ Server may be offline or CORS is not configured correctly</span>
+                </div>`;
+            });
+        }
+    </script>
+</body>
+</html>

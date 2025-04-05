@@ -1,6 +1,0 @@
-<name>
-Micro server
-</name>
-<command>
-python micro_http_server.py
-</command>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-CORS Testing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0066cc;
+            margin-top: 0;
+        }
+        h2 {
+            color: #0066cc;
+            margin-top: 20px;
+        }
+        p {
+            margin-bottom: 15px;
+        }
+        .links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .link-card {
+            flex: 1;
+            min-width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: white;
+            transition: transform 0.2s;
+        }
+        .link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .link-card h3 {
+            margin-top: 0;
+            color: #0066cc;
+        }
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .server-status {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #e9f5e9;
+            border-radius: 5px;
+            border-left: 5px solid #4caf50;
+        }
+        .note {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #fff9e6;
+            border-radius: 5px;
+            border-left: 5px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Multi-CORS Testing Dashboard</h1>
+        <p>This page provides links to all the CORS testing tools available in the Mashaaer project.</p>
+        
+        <div class="server-status">
+            <h2>CORS Servers Status</h2>
+            <p>We have multiple CORS-enabled servers running on different ports to help diagnose any cross-origin issues:</p>
+            <ul>
+                <li><strong>Main Application (Port 5000)</strong>: The primary Flask application</li>
+                <li><strong>Ultra Minimal Server (Port 5001)</strong>: A minimal Flask server with bare CORS functionality</li>
+                <li><strong>CORS Debug Server (Port 5010)</strong>: A dedicated server for CORS debugging</li>
+                <li><strong>Micro HTTP Server (Port 5020)</strong>: A lightweight Python HTTP server with CORS headers</li>
+            </ul>
+            <p><a href="/cors-servers-status">View CORS Servers Status Dashboard →</a></p>
+        </div>
+        
+        <h2>Testing Tools</h2>
+        <div class="links">
+            <div class="link-card">
+                <h3>CORS Servers Status</h3>
+                <p>View the status of all CORS servers and test their connectivity.</p>
+                <a href="/cors-servers-status">Open Dashboard →</a>
+            </div>
+            
+            <div class="link-card">
+                <h3>Enhanced CORS Test</h3>
+                <p>Test CORS with detailed request/response information.</p>
+                <a href="/cors-test-enhanced">Open Enhanced Test →</a>
+            </div>
+            
+            <div class="link-card">
+                <h3>Replit Feedback Test</h3>
+                <p>Special test endpoint for the Replit feedback tool.</p>
+                <a href="/replit-feedback-test">Open Test Endpoint →</a>
+            </div>
+        </div>
+        
+        <h2>Direct Access to Servers</h2>
+        <div class="links">
+            <div class="link-card">
+                <h3>Ultra Minimal Server</h3>
+                <p>Access the ultra minimal server directly.</p>
+                <a href="http://localhost:5001" target="_blank">Open Server (Port 5001) →</a>
+            </div>
+            
+            <div class="link-card">
+                <h3>CORS Debug Server</h3>
+                <p>Access the CORS debug server directly.</p>
+                <a href="http://localhost:5010" target="_blank">Open Server (Port 5010) →</a>
+            </div>
+            
+            <div class="link-card">
+                <h3>Micro HTTP Server</h3>
+                <p>Access the micro HTTP server directly.</p>
+                <a href="http://localhost:5020" target="_blank">Open Server (Port 5020) →</a>
+            </div>
+        </div>
+        
+        <div class="note">
+            <h2>Note on CORS Testing</h2>
+            <p>Cross-Origin Resource Sharing (CORS) issues can be challenging to debug because they involve complex interactions between browsers, servers, and security policies. Our multi-server approach helps isolate and identify specific CORS-related problems.</p>
+            <p>If you're experiencing CORS issues with the Replit feedback tool, try accessing the different test endpoints to narrow down the source of the problem.</p>
+        </div>
+    </div>
+</body>
+</html>

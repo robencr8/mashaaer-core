@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced CORS Testing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            color: #333;
+            background-color: #f5f7fa;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #0066cc;
+        }
+        h1 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        .panel {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .btn {
+            padding: 10px 15px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .btn:hover {
+            background-color: #0055aa;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .checkbox-group {
+            margin-bottom: 10px;
+        }
+        .checkbox-group label {
+            display: inline;
+            font-weight: normal;
+            margin-left: 5px;
+        }
+        .response-container {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            background-color: #f8f9fa;
+        }
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .response-status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .response-headers {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .response-body {
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+        .cors-status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .cors-success {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        .cors-warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        .cors-error {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            margin-right: 5px;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .history-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .history-item:hover {
+            background-color: #e9ecef;
+        }
+        .history-timestamp {
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .navbar .brand {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #0066cc;
+        }
+        .navbar-links {
+            display: flex;
+            gap: 15px;
+        }
+        .navbar-links a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        .navbar-links a:hover {
+            text-decoration: underline;
+        }
+        .navigation {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        .back-link {
+            color: #0066cc;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .back-link::before {
+            content: "←";
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <div class="brand">Enhanced CORS Testing Tool</div>
+            <div class="navbar-links">
+                <a href="/multi-cors-test">Dashboard</a>
+                <a href="/cors-servers-status">Servers Status</a>
+                <a href="/replit-feedback-test">Replit Test</a>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="request">Request</div>
+            <div class="tab" data-tab="advanced">Advanced</div>
+            <div class="tab" data-tab="history">History</div>
+            <div class="tab" data-tab="info">Info</div>
+        </div>
+        
+        <div id="requestTab" class="tab-content active">
+            <div class="panel">
+                <h2>Test CORS Configuration</h2>
+                <p>Use this tool to test if a server endpoint has CORS properly configured.</p>
+                
+                <div class="input-group">
+                    <label for="serverUrl">Server URL:</label>
+                    <input type="text" id="serverUrl" placeholder="Enter server URL (e.g., http://localhost:5000/replit-feedback-test)" value="">
+                </div>
+                
+                <div class="input-group">
+                    <label for="requestMethod">Request Method:</label>
+                    <select id="requestMethod">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                        <option value="OPTIONS">OPTIONS</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="requestHeaders">Request Headers (JSON):</label>
+                    <textarea id="requestHeaders">{
+  "Content-Type": "application/json",
+  "X-Custom-Header": "test-value"
+}</textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label for="requestBody">Request Body (for POST/PUT):</label>
+                    <textarea id="requestBody">{
+  "test": "data",
+  "timestamp": "2025-04-05T12:00:00Z"
+}</textarea>
+                </div>
+                
+                <button id="sendRequest" class="btn">Send Request</button>
+                <button id="resetForm" class="btn btn-secondary">Reset</button>
+            </div>
+            
+            <div id="responseContainer" class="response-container" style="display: none;">
+                <div class="response-header">
+                    <h3>Response</h3>
+                    <div id="responseStatus" class="response-status">Status: Unknown</div>
+                </div>
+                
+                <h4>CORS Headers:</h4>
+                <div id="corsHeaders" class="response-headers"></div>
+                
+                <div id="corsStatus" class="cors-status"></div>
+                
+                <h4>All Response Headers:</h4>
+                <div id="responseHeaders" class="response-headers"></div>
+                
+                <h4>Response Body:</h4>
+                <div id="responseBody" class="response-body"></div>
+            </div>
+        </div>
+        
+        <div id="advancedTab" class="tab-content">
+            <div class="panel">
+                <h2>Advanced CORS Testing</h2>
+                
+                <div class="input-group">
+                    <label for="customOrigin">Custom Origin:</label>
+                    <input type="text" id="customOrigin" placeholder="Enter custom origin (e.g., https://example.com)" value="">
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="includeCredentials">
+                    <label for="includeCredentials">Include Credentials (withCredentials = true)</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="sendPreflight">
+                    <label for="sendPreflight">Send Preflight OPTIONS Request First</label>
+                </div>
+                
+                <h3>Custom Headers</h3>
+                <div id="customHeadersContainer">
+                    <div class="input-group" style="display: flex; gap: 10px;">
+                        <input type="text" placeholder="Header Name" style="flex: 1;">
+                        <input type="text" placeholder="Header Value" style="flex: 1;">
+                        <button class="btn btn-secondary" style="flex: 0 0 auto;">Remove</button>
+                    </div>
+                </div>
+                <button id="addCustomHeader" class="btn btn-secondary">+ Add Header</button>
+            </div>
+        </div>
+        
+        <div id="historyTab" class="tab-content">
+            <div class="panel">
+                <h2>Request History</h2>
+                <p>Click on a previous request to load it again.</p>
+                
+                <div id="requestHistory">
+                    <!-- History items will be populated here -->
+                    <div class="history-item">
+                        <div><strong>GET</strong> /replit-feedback-test</div>
+                        <div>Status: 200 OK</div>
+                        <div class="history-timestamp">2025-04-05 12:30:45</div>
+                    </div>
+                </div>
+                
+                <button id="clearHistory" class="btn btn-secondary">Clear History</button>
+            </div>
+        </div>
+        
+        <div id="infoTab" class="tab-content">
+            <div class="panel">
+                <h2>About CORS Testing</h2>
+                <p>Cross-Origin Resource Sharing (CORS) is a security mechanism that allows or restricts resources on a web page to be requested from another domain outside the domain from which the first resource was served.</p>
+                
+                <h3>Key CORS Headers</h3>
+                <ul>
+                    <li><strong>Access-Control-Allow-Origin</strong> - Indicates whether the response can be shared with requesting code from the given origin.</li>
+                    <li><strong>Access-Control-Allow-Methods</strong> - Specifies the methods allowed when accessing the resource in response to a preflight request.</li>
+                    <li><strong>Access-Control-Allow-Headers</strong> - Used in response to a preflight request to indicate which HTTP headers can be used during the actual request.</li>
+                    <li><strong>Access-Control-Allow-Credentials</strong> - Indicates whether the response to the request can be exposed when the credentials flag is true.</li>
+                    <li><strong>Access-Control-Max-Age</strong> - Indicates how long the results of a preflight request can be cached.</li>
+                </ul>
+                
+                <h3>CORS Request Types</h3>
+                <p><strong>Simple Requests</strong> - GET, POST, or HEAD requests with standard headers and content types.</p>
+                <p><strong>Preflighted Requests</strong> - Requests that first send an OPTIONS request to check if the actual request is safe to send.</p>
+                
+                <h3>Common CORS Errors</h3>
+                <ul>
+                    <li>
+                        <strong>No 'Access-Control-Allow-Origin' header is present</strong> - The server is not including the necessary CORS headers in its response.
+                    </li>
+                    <li>
+                        <strong>Origin not allowed</strong> - The server's 'Access-Control-Allow-Origin' header doesn't match the requesting origin.
+                    </li>
+                    <li>
+                        <strong>Method not allowed</strong> - The HTTP method is not included in the 'Access-Control-Allow-Methods' header.
+                    </li>
+                    <li>
+                        <strong>Headers not allowed</strong> - One or more request headers are not included in the 'Access-Control-Allow-Headers'.
+                    </li>
+                    <li>
+                        <strong>Credentials not supported</strong> - Request with credentials requires 'Access-Control-Allow-Credentials: true'.
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <a href="/multi-cors-test" class="back-link">Back to Multi-CORS Testing Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set default server URL based on current origin
+            document.getElementById('serverUrl').value = `${window.location.origin}/replit-feedback-test`;
+            
+            // Tab switching
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(`${tabId}Tab`).classList.add('active');
+                });
+            });
+            
+            // Send Request Button
+            document.getElementById('sendRequest').addEventListener('click', sendCorsRequest);
+            
+            // Reset Form Button
+            document.getElementById('resetForm').addEventListener('click', () => {
+                document.getElementById('serverUrl').value = `${window.location.origin}/replit-feedback-test`;
+                document.getElementById('requestMethod').value = 'GET';
+                document.getElementById('requestHeaders').value = `{\n  "Content-Type": "application/json",\n  "X-Custom-Header": "test-value"\n}`;
+                document.getElementById('requestBody').value = `{\n  "test": "data",\n  "timestamp": "2025-04-05T12:00:00Z"\n}`;
+                document.getElementById('responseContainer').style.display = 'none';
+            });
+            
+            // Add Custom Header Button
+            document.getElementById('addCustomHeader').addEventListener('click', () => {
+                const container = document.getElementById('customHeadersContainer');
+                const headerGroup = document.createElement('div');
+                headerGroup.className = 'input-group';
+                headerGroup.style = 'display: flex; gap: 10px;';
+                
+                headerGroup.innerHTML = `
+                    <input type="text" placeholder="Header Name" style="flex: 1;">
+                    <input type="text" placeholder="Header Value" style="flex: 1;">
+                    <button class="btn btn-secondary remove-header" style="flex: 0 0 auto;">Remove</button>
+                `;
+                
+                container.appendChild(headerGroup);
+                
+                // Add event listener to the remove button
+                headerGroup.querySelector('.remove-header').addEventListener('click', () => {
+                    container.removeChild(headerGroup);
+                });
+            });
+            
+            // Add event listeners to existing remove buttons
+            document.querySelectorAll('.remove-header').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    const headerGroup = e.target.closest('.input-group');
+                    headerGroup.parentNode.removeChild(headerGroup);
+                });
+            });
+            
+            // Clear History Button
+            document.getElementById('clearHistory').addEventListener('click', () => {
+                document.getElementById('requestHistory').innerHTML = '';
+                localStorage.removeItem('corsTestHistory');
+            });
+            
+            // Load history from localStorage
+            loadHistory();
+        });
+        
+        function sendCorsRequest() {
+            const url = document.getElementById('serverUrl').value;
+            const method = document.getElementById('requestMethod').value;
+            let headers = {};
+            let body = null;
+            
+            try {
+                headers = JSON.parse(document.getElementById('requestHeaders').value);
+            } catch (e) {
+                alert('Invalid JSON in headers. Please check your syntax.');
+                return;
+            }
+            
+            if (method === 'POST' || method === 'PUT') {
+                try {
+                    body = document.getElementById('requestBody').value;
+                } catch (e) {
+                    alert('Invalid JSON in request body. Please check your syntax.');
+                    return;
+                }
+            }
+            
+            // Advanced options
+            const customOrigin = document.getElementById('customOrigin').value;
+            const includeCredentials = document.getElementById('includeCredentials').checked;
+            const sendPreflight = document.getElementById('sendPreflight').checked;
+            
+            // If custom origin is specified, add it to the headers
+            if (customOrigin) {
+                headers['Origin'] = customOrigin;
+            }
+            
+            // Show response container
+            document.getElementById('responseContainer').style.display = 'block';
+            document.getElementById('responseStatus').textContent = 'Status: Sending request...';
+            document.getElementById('responseStatus').className = 'response-status';
+            document.getElementById('corsHeaders').textContent = '';
+            document.getElementById('responseHeaders').textContent = '';
+            document.getElementById('responseBody').textContent = '';
+            document.getElementById('corsStatus').textContent = '';
+            document.getElementById('corsStatus').className = 'cors-status';
+            
+            // Send preflight request if requested
+            if (sendPreflight) {
+                sendOptionsRequest(url, headers)
+                    .then(preflightResult => {
+                        // Display preflight results
+                        document.getElementById('corsStatus').innerHTML += '<h4>Preflight Results:</h4>';
+                        document.getElementById('corsStatus').innerHTML += preflightResult;
+                        
+                        // Now send the actual request
+                        performActualRequest();
+                    })
+                    .catch(error => {
+                        document.getElementById('corsStatus').className = 'cors-status cors-error';
+                        document.getElementById('corsStatus').innerHTML += `<h4>Preflight Error:</h4><p>${error.message}</p>`;
+                    });
+            } else {
+                performActualRequest();
+            }
+            
+            function performActualRequest() {
+                // Define request options
+                const options = {
+                    method: method,
+                    headers: headers,
+                    mode: 'cors',
+                    credentials: includeCredentials ? 'include' : 'same-origin'
+                };
+                
+                if (body && (method === 'POST' || method === 'PUT')) {
+                    options.body = body;
+                }
+                
+                // Send the request
+                fetch(url, options)
+                    .then(response => {
+                        // Update response status
+                        document.getElementById('responseStatus').textContent = `Status: ${response.status} ${response.statusText}`;
+                        document.getElementById('responseStatus').className = response.ok ? 'response-status status-success' : 'response-status status-error';
+                        
+                        // Display CORS headers
+                        const corsHeadersText = displayCorsHeaders(response.headers);
+                        document.getElementById('corsHeaders').innerHTML = corsHeadersText;
+                        
+                        // Check CORS configuration
+                        const corsStatus = checkCorsConfiguration(response.headers);
+                        document.getElementById('corsStatus').className = `cors-status ${corsStatus.class}`;
+                        document.getElementById('corsStatus').innerHTML = corsStatus.message;
+                        
+                        // Display all response headers
+                        const headersText = Array.from(response.headers.entries())
+                            .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
+                            .join('<br>');
+                        document.getElementById('responseHeaders').innerHTML = headersText;
+                        
+                        // Try to parse response as JSON, fall back to text
+                        return response.text().then(text => {
+                            try {
+                                const json = JSON.parse(text);
+                                document.getElementById('responseBody').textContent = JSON.stringify(json, null, 2);
+                            } catch (e) {
+                                document.getElementById('responseBody').textContent = text;
+                            }
+                            
+                            // Save request to history
+                            saveToHistory(url, method, response.status, response.statusText);
+                            
+                            return response;
+                        });
+                    })
+                    .catch(error => {
+                        document.getElementById('responseStatus').textContent = `Error: ${error.message}`;
+                        document.getElementById('responseStatus').className = 'response-status status-error';
+                        
+                        document.getElementById('corsStatus').className = 'cors-status cors-error';
+                        document.getElementById('corsStatus').innerHTML = `
+                            <h4>CORS Error</h4>
+                            <p>The request failed, likely due to CORS restrictions. Check the console for more details.</p>
+                            <p>Error: ${error.message}</p>
+                        `;
+                        
+                        console.error('CORS request failed:', error);
+                    });
+            }
+        }
+        
+        function sendOptionsRequest(url, headers) {
+            return new Promise((resolve, reject) => {
+                fetch(url, {
+                    method: 'OPTIONS',
+                    headers: headers,
+                    mode: 'cors'
+                })
+                .then(response => {
+                    const corsHeadersText = displayCorsHeaders(response.headers);
+                    const corsStatus = checkCorsConfiguration(response.headers);
+                    
+                    resolve(`
+                        <div class="${corsStatus.class}">
+                            <p><strong>OPTIONS ${response.status} ${response.statusText}</strong></p>
+                            ${corsHeadersText}
+                            <p>${corsStatus.message}</p>
+                        </div>
+                    `);
+                })
+                .catch(error => {
+                    reject(error);
+                });
+            });
+        }
+        
+        function displayCorsHeaders(headers) {
+            const corsHeaders = [
+                'access-control-allow-origin',
+                'access-control-allow-methods',
+                'access-control-allow-headers',
+                'access-control-allow-credentials',
+                'access-control-max-age',
+                'access-control-expose-headers'
+            ];
+            
+            const result = corsHeaders
+                .filter(header => headers.get(header))
+                .map(header => `<div><strong>${header}:</strong> ${headers.get(header)}</div>`)
+                .join('');
+                
+            return result || '<div>No CORS headers found in response</div>';
+        }
+        
+        function checkCorsConfiguration(headers) {
+            const origin = headers.get('access-control-allow-origin');
+            const methods = headers.get('access-control-allow-methods');
+            const allowHeaders = headers.get('access-control-allow-headers');
+            const credentials = headers.get('access-control-allow-credentials');
+            
+            if (!origin) {
+                return {
+                    class: 'cors-error',
+                    message: `
+                        <h4>CORS Error: Missing Access-Control-Allow-Origin</h4>
+                        <p>The server response does not include the required 'Access-Control-Allow-Origin' header.</p>
+                        <p>This will cause browsers to block cross-origin requests due to the Same-Origin Policy.</p>
+                    `
+                };
+            }
+            
+            if (origin !== '*' && origin !== window.location.origin) {
+                return {
+                    class: 'cors-warning',
+                    message: `
+                        <h4>CORS Warning: Origin Restricted</h4>
+                        <p>The 'Access-Control-Allow-Origin' header is set to '${origin}', which does not match the origin of this page (${window.location.origin}).</p>
+                        <p>This may cause CORS errors if the requesting origin doesn't match exactly.</p>
+                    `
+                };
+            }
+            
+            if (!methods) {
+                return {
+                    class: 'cors-warning',
+                    message: `
+                        <h4>CORS Warning: Missing Access-Control-Allow-Methods</h4>
+                        <p>The server response does not specify which HTTP methods are allowed via the 'Access-Control-Allow-Methods' header.</p>
+                        <p>This may cause issues with non-simple requests that require preflight.</p>
+                    `
+                };
+            }
+            
+            if (!allowHeaders) {
+                return {
+                    class: 'cors-warning',
+                    message: `
+                        <h4>CORS Warning: Missing Access-Control-Allow-Headers</h4>
+                        <p>The server response does not specify which HTTP headers are allowed via the 'Access-Control-Allow-Headers' header.</p>
+                        <p>This may cause issues with requests that use custom headers.</p>
+                    `
+                };
+            }
+            
+            return {
+                class: 'cors-success',
+                message: `
+                    <h4>CORS Configuration Valid</h4>
+                    <p>The server has CORS properly configured. Cross-origin requests should work as expected.</p>
+                    <ul>
+                        <li>Allowed Origins: ${origin}</li>
+                        ${methods ? `<li>Allowed Methods: ${methods}</li>` : ''}
+                        ${allowHeaders ? `<li>Allowed Headers: ${allowHeaders}</li>` : ''}
+                        ${credentials ? `<li>Credentials Allowed: ${credentials}</li>` : ''}
+                    </ul>
+                `
+            };
+        }
+        
+        function saveToHistory(url, method, status, statusText) {
+            const history = JSON.parse(localStorage.getItem('corsTestHistory') || '[]');
+            
+            const historyItem = {
+                url,
+                method,
+                status,
+                statusText,
+                timestamp: new Date().toISOString()
+            };
+            
+            history.unshift(historyItem);
+            
+            // Keep only the last 10 items
+            if (history.length > 10) {
+                history.pop();
+            }
+            
+            localStorage.setItem('corsTestHistory', JSON.stringify(history));
+            
+            // Update the history display
+            loadHistory();
+        }
+        
+        function loadHistory() {
+            const historyContainer = document.getElementById('requestHistory');
+            historyContainer.innerHTML = '';
+            
+            const history = JSON.parse(localStorage.getItem('corsTestHistory') || '[]');
+            
+            if (history.length === 0) {
+                historyContainer.innerHTML = '<p>No request history yet.</p>';
+                return;
+            }
+            
+            history.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                const urlObj = new URL(item.url);
+                
+                historyItem.innerHTML = `
+                    <div><strong>${item.method}</strong> ${urlObj.pathname}</div>
+                    <div>Status: ${item.status} ${item.statusText}</div>
+                    <div class="history-timestamp">${new Date(item.timestamp).toLocaleString()}</div>
+                `;
+                
+                historyItem.addEventListener('click', () => {
+                    document.getElementById('serverUrl').value = item.url;
+                    document.getElementById('requestMethod').value = item.method;
+                    
+                    // Switch to the request tab
+                    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    document.querySelector('.tab[data-tab="request"]').classList.add('active');
+                    document.getElementById('requestTab').classList.add('active');
+                });
+                
+                historyContainer.appendChild(historyItem);
+            });
+        }
+    </script>
+</body>
+</html>

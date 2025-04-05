@@ -471,42 +471,50 @@ def minimal_test():
     logger.debug("Serving minimal test page")
     return send_from_directory('static', 'ultra_simple.html')
 
+@app.route('/multi-cors-test')
+def multi_cors_test():
+    """Multi-CORS testing dashboard"""
+    logger.debug("Serving multi-CORS testing dashboard")
+    return send_from_directory('static', 'multi_cors_test.html')
+
+@app.route('/cors-servers-status')
+def cors_servers_status():
+    """Dashboard for CORS servers status"""
+    logger.debug("Serving CORS servers status dashboard")
+    return send_from_directory('static', 'cors_servers_status.html')
+
+@app.route('/cors-test-enhanced')
+def cors_test_enhanced():
+    """Enhanced CORS test page"""
+    logger.debug("Serving enhanced CORS test page")
+    return send_from_directory('static_test', 'cors_test_enhanced.html')
+
+@app.route('/replit-feedback-test')
+def replit_feedback_test():
+    """Special endpoint for the Replit feedback tool"""
+    logger.debug("Replit feedback test requested")
+    response = jsonify({
+        "status": "ok",
+        "message": "Main server responding to Replit feedback tool",
+        "timestamp": datetime.datetime.now().isoformat(),
+        "origin": request.headers.get('Origin', 'Unknown'),
+        "request_headers": dict(request.headers)
+    })
+    
+    # Add explicit CORS headers for maximum compatibility
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+    
+    return response
+
 @app.route('/feedback-test')
 def feedback_test():
     """Test page for Replit feedback tool"""
     logger.debug("Serving feedback test page")
     return send_from_directory('static', 'feedback_test.html')
 
-@app.route('/replit-feedback-test')
-def replit_feedback_test():
-    """Minimal endpoint specifically for Replit feedback tool testing"""
-    logger.debug("Replit feedback test requested")
-    response = jsonify({
-        "status": "ok",
-        "message": "Replit feedback tool test successful",
-        "version": "1.0.0",
-        "timestamp": str(os.popen('date -u').read().strip())
-    })
-    
-    # Add explicit CORS headers
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-    
-    return response
-
-@app.route('/replit-feedback-test', methods=['OPTIONS'])
-def replit_feedback_test_options():
-    """Handle OPTIONS requests for the Replit feedback test endpoint"""
-    logger.debug("Replit feedback test OPTIONS request")
-    response = jsonify({})
-    
-    # Add explicit CORS headers
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-    
-    return response
+# OPTIONS requests are now handled by our enhanced replit_feedback_test route
 
 @app.route('/pwa-test')
 def pwa_test():
