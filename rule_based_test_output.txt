@@ -1,0 +1,78 @@
+Creating EmotionTracker for rule-based testing...
+Running 13 test cases...
+Tested: 'While I am excited about the new project, I am als...'
+  Expected: mixed, Detected: mixed, Correct: True
+  Expected emotions: ['happy', 'fearful'], Top detected: ['fearful', 'happy', 'excited']
+  Match rate: 1.00
+--------------------------------------------------------------------------------
+Tested: 'The bittersweet feeling of graduating - proud of m...'
+  Expected: mixed, Detected: mixed, Correct: True
+  Expected emotions: ['proud', 'sad'], Top detected: ['sad', 'proud', 'happy']
+  Match rate: 1.00
+--------------------------------------------------------------------------------
+Tested: 'I feel both happy that I won and sorry for my oppo...'
+  Expected: mixed, Detected: mixed, Correct: True
+  Expected emotions: ['happy', 'sad'], Top detected: ['sad', 'happy', 'satisfied']
+  Match rate: 1.00
+--------------------------------------------------------------------------------
+Tested: 'It's a bittersweet moment, finishing this chapter ...'
+  Expected: mixed, Detected: mixed, Correct: True
+  Expected emotions: ['happy', 'sad'], Top detected: ['satisfied', 'frustrated', 'happy']
+  Match rate: 0.50
+--------------------------------------------------------------------------------
+Tested: 'Looking at old photos makes me smile and sigh at t...'
+  Expected: mixed, Detected: happy, Correct: False
+  Expected emotions: ['happy', 'sad'], Top detected: ['happy', 'frustrated']
+  Match rate: 0.50
+--------------------------------------------------------------------------------
+Tested: 'The movie had me laughing through my tears...'
+  Expected: mixed, Detected: amused, Correct: False
+  Expected emotions: ['happy', 'sad'], Top detected: ['amused', 'disgusted']
+  Match rate: 0.00
+--------------------------------------------------------------------------------
+Tested: 'The promotion means moving to a new city, which is...'
+  Expected: mixed, Detected: lonely, Correct: False
+  Expected emotions: ['happy', 'fearful'], Top detected: ['lonely', 'happy', 'inspired']
+  Match rate: 0.50
+--------------------------------------------------------------------------------
+Tested: 'Leaving the job I've had for ten years. A new oppo...'
+  Expected: mixed, Detected: contemplative, Correct: False
+  Expected emotions: ['happy', 'sad'], Top detected: ['contemplative', 'confused', 'lonely']
+  Match rate: 0.00
+--------------------------------------------------------------------------------
+Tested: 'I achieved my goal, but the journey was so difficu...'
+  Expected: mixed, Detected: satisfied, Correct: False
+  Expected emotions: ['satisfied', 'frustrated'], Top detected: ['satisfied', 'frustrated', 'lonely']
+  Match rate: 1.00
+--------------------------------------------------------------------------------
+Tested: 'Saying goodbye at the airport, we promised to stay...'
+  Expected: mixed, Detected: mixed, Correct: True
+  Expected emotions: ['sad', 'hopeful'], Top detected: ['satisfied', 'frustrated', 'confused']
+  Match rate: 0.00
+--------------------------------------------------------------------------------
+Tested: 'I'm absolutely thrilled about getting the job offe...'
+  Expected: happy, Detected: contemplative, Correct: False
+  Expected emotions: ['happy', 'excited'], Top detected: ['contemplative', 'excited', 'happy']
+  Match rate: 1.00
+--------------------------------------------------------------------------------
+Tested: 'The news about the layoffs has me very worried abo...'
+  Expected: fearful, Detected: frustrated, Correct: False
+  Expected emotions: ['fearful', 'anxious'], Top detected: ['frustrated', 'sad', 'anxious']
+  Match rate: 1.00
+--------------------------------------------------------------------------------
+Tested: 'I'm just completely frustrated with this broken so...'
+  Expected: frustrated, Detected: frustrated, Correct: True
+  Expected emotions: ['frustrated', 'angry'], Top detected: ['frustrated', 'sad', 'confused']
+  Match rate: 1.00
+--------------------------------------------------------------------------------
+
+================================================================================
+TEST RESULTS SUMMARY
+================================================================================
+Total test cases: 13
+Overall accuracy: 46.15%
+Mixed emotion accuracy: 50.00% (5/10)
+Non-mixed emotion accuracy: 33.33% (1/3)
+Time taken: 4.69 seconds
+================================================================================
+Results saved to rule_based_test_results_20250405_104106.json

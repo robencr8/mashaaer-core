@@ -1,0 +1,713 @@
+{
+  "timestamp": "2025-04-05T10:41:06.214129",
+  "summary": {
+    "total": 13,
+    "correct": 6,
+    "wrong": 7,
+    "mixed_correct": 5,
+    "mixed_wrong": 5,
+    "non_mixed_correct": 1,
+    "non_mixed_wrong": 2,
+    "time_taken": 4.688748598098755,
+    "accuracy": 0.46153846153846156,
+    "mixed_accuracy": 0.5,
+    "non_mixed_accuracy": 0.3333333333333333
+  },
+  "results": [
+    {
+      "phrase": "While I am excited about the new project, I am also nervous about the tight deadline",
+      "expected": "mixed",
+      "detected": "mixed",
+      "correct": true,
+      "expected_emotions": [
+        "happy",
+        "fearful"
+      ],
+      "top_emotions": [
+        "fearful",
+        "happy",
+        "excited"
+      ],
+      "match_rate": 1.0,
+      "emotions": {
+        "happy": 0.1902936668147778,
+        "angry": 0.026979721831427817,
+        "fearful": 0.23085101638756805,
+        "disgusted": 0.020887654064466077,
+        "confused": 0.023699875342545185,
+        "excited": 0.061667935614692165,
+        "anxious": 0.030658774808440706,
+        "calm": 0.008584456946363396,
+        "embarrassed": 0.008584456946363396,
+        "amused": 0.029005109932379983,
+        "inspired": 0.027191838690973,
+        "satisfied": 0.048419652034944895,
+        "frustrated": 0.022226675239815384,
+        "contemplative": 0.02212617682879978,
+        "mixed": 0.2488229885164423
+      },
+      "intensity": 0.4478813793295961,
+      "metadata": {
+        "source": "rule-based",
+        "confidence": 0.2488229885164423,
+        "context_length": 0,
+        "pattern_strength": 1.02,
+        "mixed_emotion_info": {
+          "is_mixed": true,
+          "detected_patterns": [
+            {
+              "pattern": "excitement-anxiety",
+              "keywords1": [
+                "excited"
+              ],
+              "keywords2": [
+                "nervous",
+                "deadline"
+              ],
+              "context_cues": [
+                "while",
+                "also"
+              ],
+              "weight": 9.5
+            }
+          ],
+          "top_emotions": [
+            {
+              "emotion": "mixed",
+              "score": 0.2488229885164423
+            },
+            {
+              "emotion": "fearful",
+              "score": 0.23085101638756805
+            },
+            {
+              "emotion": "happy",
+              "score": 0.1902936668147778
+            }
+          ]
+        }
+      }
+    },
+    {
+      "phrase": "The bittersweet feeling of graduating - proud of my accomplishments but sad to leave friends behind",
+      "expected": "mixed",
+      "detected": "mixed",
+      "correct": true,
+      "expected_emotions": [
+        "proud",
+        "sad"
+      ],
+      "top_emotions": [
+        "sad",
+        "proud",
+        "happy"
+      ],
+      "match_rate": 1.0,
+      "emotions": {
+        "happy": 0.08421905752016977,
+        "sad": 0.2875521242482707,
+        "angry": 0.06842561051871007,
+        "fearful": 0.011963456865307604,
+        "anxious": 0.00957958547261941,
+        "bored": 0.02235236610277862,
+        "grateful": 0.01117618305138931,
+        "lonely": 0.012855583463504766,
+        "proud": 0.09334646453546265,
+        "amused": 0.019443364738653435,
+        "inspired": 0.025118434884713287,
+        "satisfied": 0.06631182132049467,
+        "frustrated": 0.01732423533857447,
+        "mixed": 0.27033171193935124
+      },
+      "intensity": 0.5175938236468872,
+      "metadata": {
+        "source": "rule-based",
+        "confidence": 0.2875521242482707,
+        "context_length": 0,
+        "pattern_strength": 1.0200000000000002,
+        "mixed_emotion_info": {
+          "is_mixed": true,
+          "detected_patterns": [
+            {
+              "pattern": "bittersweet",
+              "keywords1": [
+                "proud",
+                "accomplishments"
+              ],
+              "keywords2": [
+                "sad",
+                "bittersweet",
+                "leave",
+                "behind",
+                "end"
+              ],
+              "context_cues": [
+                "but",
+                "bittersweet"
+              ],
+              "weight": 11.4
+            },
+            {
+              "pattern": "angry-disappointment",
+              "keywords1": [
+                "sad"
+              ],
+              "keywords2": [
+                "bitter"
+              ],
+              "context_cues": [
+                "but"
+              ],
+              "weight": 11.4
+            }
+          ],
+          "top_emotions": [
+            {
+              "emotion": "sad",
+              "score": 0.2875521242482707
+            },
+            {
+              "emotion": "mixed",
+              "score": 0.27033171193935124
+            },
+            {
+              "emotion": "proud",
+              "score": 0.09334646453546265
+            }
+          ]
+        }
+      }
+    },
+    {
+      "phrase": "I feel both happy that I won and sorry for my opponent",
+      "expected": "mixed",
+      "detected": "mixed",
+      "correct": true,
+      "expected_emotions": [
+        "happy",
+        "sad"
+      ],
+      "top_emotions": [
+        "sad",
+        "happy",
+        "satisfied"
+      ],
+      "match_rate": 1.0,
+      "emotions": {
+        "happy": 0.08403237895219647,
+        "sad": 0.22201347228793536,
+        "inspired": 0.017637791974170862,
+        "satisfied": 0.03845159641829451,
+        "frustrated": 0.020371242372656133,
+        "contemplative": 0.015224322303584371,
+        "mixed": 0.6022691956911623
+      },
+      "intensity": 1.0,
+      "metadata": {
+        "source": "rule-based",
+        "confidence": 0.6022691956911623,
+        "context_length": 0,
+        "pattern_strength": 1.02,
+        "mixed_emotion_info": {
+          "is_mixed": true,
+          "detected_patterns": [],
+          "top_emotions": [
+            {
+              "emotion": "mixed",
+              "score": 0.6022691956911623
+            },
+            {
+              "emotion": "sad",
+              "score": 0.22201347228793536
+            },
+            {
+              "emotion": "happy",
+              "score": 0.08403237895219647
+            }
+          ]
+        }
+      }
+    },
+    {
+      "phrase": "It's a bittersweet moment, finishing this chapter of my life",
+      "expected": "mixed",
+      "detected": "mixed",
+      "correct": true,
+      "expected_emotions": [
+        "happy",
+        "sad"
+      ],
+      "top_emotions": [
+        "satisfied",
+        "frustrated",
+        "happy"
+      ],
+      "match_rate": 0.5,
+      "emotions": {
+        "happy": 0.023725674893671268,
+        "satisfied": 0.07729608092982687,
+        "frustrated": 0.02555991407254739,
+        "mixed": 0.8734183301039545
+      },
+      "intensity": 1.0,
+      "metadata": {
+        "source": "rule-based",
+        "confidence": 0.8734183301039545,
+        "context_length": 0,
+        "pattern_strength": 1.0199999999999998,
+        "mixed_emotion_info": {
+          "is_mixed": true,
+          "detected_patterns": [],
+          "top_emotions": [
+            {
+              "emotion": "mixed",
+              "score": 0.8734183301039545
+            },
+            {
+              "emotion": "satisfied",
+              "score": 0.07729608092982687
+            },
+            {
+              "emotion": "frustrated",
+              "score": 0.02555991407254739
+            }
+          ]
+        }
+      }
+    },
+    {
+      "phrase": "Looking at old photos makes me smile and sigh at the same time",
+      "expected": "mixed",
+      "detected": "happy",
+      "correct": false,
+      "expected_emotions": [
+        "happy",
+        "sad"
+      ],
+      "top_emotions": [
+        "happy",
+        "frustrated"
+      ],
+      "match_rate": 0.5,
+      "emotions": {
+        "happy": 0.89767808645266,
+        "frustrated": 0.10232191354734002
+      },
+      "intensity": 1.0,
+      "metadata": {
+        "source": "rule-based",
+        "confidence": 0.89767808645266,
+        "context_length": 0,
+        "pattern_strength": 1.0199999999999998,
+        "mixed_emotion_info": {
+          "is_mixed": false,
+          "detected_patterns": [],
+          "top_emotions": [
+            {
+              "emotion": "happy",
+              "score": 0.89767808645266
+            },
+            {
+              "emotion": "frustrated",
+              "score": 0.10232191354734002
+            }
+          ]
+        }
+      }
+    },
+    {
+      "phrase": "The movie had me laughing through my tears",
+      "expected": "mixed",
+      "detected": "amused",
+      "correct": false,
+      "expected_emotions": [
+        "happy",
+        "sad"
+      ],
+      "top_emotions": [
+        "amused",
+        "disgusted"
+      ],
+      "match_rate": 0.0,
+      "emotions": {
+        "disgusted": 0.35848262907617656,
+        "amused": 0.6415173709238233
+      },
+      "intensity": 0.962276056385735,
+      "metadata": {
+        "source": "rule-based",
+        "confidence": 0.6415173709238233,
+        "context_length": 0,
+        "pattern_strength": 1.02,
+        "mixed_emotion_info": {
+          "is_mixed": false,
+          "detected_patterns": [],
+          "top_emotions": [
+            {
+              "emotion": "amused",
+              "score": 0.6415173709238233
+            },
+            {
+              "emotion": "disgusted",
+              "score": 0.35848262907617656
+            }
+          ]
+        }
+      }
+    },
+    {
+      "phrase": "The promotion means moving to a new city, which is exciting but also scary",
+      "expected": "mixed",
+      "detected": "lonely",
+      "correct": false,
+      "expected_emotions": [
+        "happy",
+        "fearful"
+      ],
+      "top_emotions": [
+        "lonely",
+        "happy",
+        "inspired"
+      ],
+      "match_rate": 0.5,
+      "emotions": {
+        "happy": 0.2849008323173215,
+        "lonely": 0.3051199135071764,
+        "inspired": 0.21689454997305488,
+        "satisfied": 0.19308470420244722
+      },
+      "intensity": 0.45767987026076457,
+      "metadata": {
+        "source": "rule-based",
+        "confidence": 0.3051199135071764,
+        "context_length": 0,
+        "pattern_strength": 1.02,
+        "mixed_emotion_info": {
+          "is_mixed": false,
+          "detected_patterns": [],
+          "top_emotions": [
+            {
+              "emotion": "lonely",
+              "score": 0.3051199135071764
+            },
+            {
+              "emotion": "happy",
+              "score": 0.2849008323173215
+            },
+            {
+              "emotion": "inspired",
+              "score": 0.21689454997305488
+            }
+          ]
+        }
+      }
+    },
+    {
+      "phrase": "Leaving the job I've had for ten years. A new opportunity awaits, but I'll miss my colleagues.",
+      "expected": "mixed",
+      "detected": "contemplative",
+      "correct": false,
+      "expected_emotions": [
+        "happy",
+        "sad"
+      ],
+      "top_emotions": [
+        "contemplative",
+        "confused",
+        "lonely"
+      ],
+      "match_rate": 0.0,
+      "emotions": {
+        "confused": 0.299564430254014,
+        "tired": 0.06541017294728625,
+        "lonely": 0.13202299820530766,
+        "inspired": 0.04680920897916476,
+        "satisfied": 0.041648355739206444,
+        "frustrated": 0.05319657363523932,
+        "contemplative": 0.3613482602397815
+      },
+      "intensity": 0.5420223903596723,
+      "metadata": {
+        "source": "rule-based",
+        "confidence": 0.3613482602397815,
+        "context_length": 0,
+        "pattern_strength": 1.02,
+        "mixed_emotion_info": {
+          "is_mixed": false,
+          "detected_patterns": [],
+          "top_emotions": [
+            {
+              "emotion": "contemplative",
+              "score": 0.3613482602397815
+            },
+            {
+              "emotion": "confused",
+              "score": 0.299564430254014
+            },
+            {
+              "emotion": "lonely",
+              "score": 0.13202299820530766
+            }
+          ]
+        }
+      }
+    },
+    {
+      "phrase": "I achieved my goal, but the journey was so difficult that I'm not sure it was worth it",
+      "expected": "mixed",
+      "detected": "satisfied",
+      "correct": false,
+      "expected_emotions": [
+        "satisfied",
+        "frustrated"
+      ],
+      "top_emotions": [
+        "satisfied",
+        "frustrated",
+        "lonely"
+      ],
+      "match_rate": 1.0,
+      "emotions": {
+        "lonely": 0.1404428415158039,
+        "inspired": 0.1119074516106486,
+        "satisfied": 0.5589466823539578,
+        "frustrated": 0.1887030245195897
+      },
+      "intensity": 0.8384200235309367,
+      "metadata": {
+        "source": "rule-based",
+        "confidence": 0.5589466823539578,
+        "context_length": 0,
+        "pattern_strength": 1.02,
+        "mixed_emotion_info": {
+          "is_mixed": false,
+          "detected_patterns": [],
+          "top_emotions": [
+            {
+              "emotion": "satisfied",
+              "score": 0.5589466823539578
+            },
+            {
+              "emotion": "frustrated",
+              "score": 0.1887030245195897
+            },
+            {
+              "emotion": "lonely",
+              "score": 0.1404428415158039
+            }
+          ]
+        }
+      }
+    },
+    {
+      "phrase": "Saying goodbye at the airport, we promised to stay in touch",
+      "expected": "mixed",
+      "detected": "mixed",
+      "correct": true,
+      "expected_emotions": [
+        "sad",
+        "hopeful"
+      ],
+      "top_emotions": [
+        "satisfied",
+        "frustrated",
+        "confused"
+      ],
+      "match_rate": 0.0,
+      "emotions": {
+        "happy": 0.045143749167082595,
+        "sad": 0.029172577492172207,
+        "angry": 0.03067949685919797,
+        "fearful": 0.050295471639074704,
+        "surprised": 0.03067949685919797,
+        "confused": 0.12545674304574644,
+        "interested": 0.0340883298435533,
+        "excited": 0.017725931518647715,
+        "anxious": 0.02045299790613198,
+        "grateful": 0.023861830890487306,
+        "proud": 0.08673027986073212,
+        "amused": 0.061141563158461046,
+        "inspired": 0.09512854386367592,
+        "satisfied": 0.18572626371610937,
+        "frustrated": 0.143974602068091,
+        "contemplative": 0.019742122111638404,
+        "mixed": 0.1648504328921002
+      },
+      "intensity": 0.33430727468899685,
+      "metadata": {
+        "source": "rule-based",
+        "confidence": 0.18572626371610937,
+        "context_length": 0,
+        "pattern_strength": 1.0200000000000002,
+        "mixed_emotion_info": {
+          "is_mixed": true,
+          "detected_patterns": [],
+          "top_emotions": [
+            {
+              "emotion": "satisfied",
+              "score": 0.18572626371610937
+            },
+            {
+              "emotion": "frustrated",
+              "score": 0.143974602068091
+            },
+            {
+              "emotion": "confused",
+              "score": 0.12545674304574644
+            }
+          ]
+        }
+      }
+    },
+    {
+      "phrase": "I'm absolutely thrilled about getting the job offer!",
+      "expected": "happy",
+      "detected": "contemplative",
+      "correct": false,
+      "expected_emotions": [
+        "happy",
+        "excited"
+      ],
+      "top_emotions": [
+        "contemplative",
+        "excited",
+        "happy"
+      ],
+      "match_rate": 1.0,
+      "emotions": {
+        "happy": 0.17040486240771116,
+        "excited": 0.21471853951043524,
+        "tired": 0.052480960926312784,
+        "inspired": 0.11734622854869874,
+        "satisfied": 0.07721043979242717,
+        "frustrated": 0.07638943574979923,
+        "contemplative": 0.29144953306461574
+      },
+      "intensity": 0.4371742995969236,
+      "metadata": {
+        "source": "rule-based",
+        "confidence": 0.29144953306461574,
+        "context_length": 0,
+        "pattern_strength": 1.02,
+        "mixed_emotion_info": {
+          "is_mixed": false,
+          "detected_patterns": [],
+          "top_emotions": [
+            {
+              "emotion": "contemplative",
+              "score": 0.29144953306461574
+            },
+            {
+              "emotion": "excited",
+              "score": 0.21471853951043524
+            },
+            {
+              "emotion": "happy",
+              "score": 0.17040486240771116
+            }
+          ]
+        }
+      }
+    },
+    {
+      "phrase": "The news about the layoffs has me very worried about the future",
+      "expected": "fearful",
+      "detected": "frustrated",
+      "correct": false,
+      "expected_emotions": [
+        "fearful",
+        "anxious"
+      ],
+      "top_emotions": [
+        "frustrated",
+        "sad",
+        "anxious"
+      ],
+      "match_rate": 1.0,
+      "emotions": {
+        "sad": 0.16930863794163378,
+        "angry": 0.08378873679774188,
+        "fearful": 0.16634147677012637,
+        "confused": 0.095065451708354,
+        "excited": 0.13363354338749195,
+        "anxious": 0.16824128724790005,
+        "frustrated": 0.18362086614675202
+      },
+      "intensity": 0.27543129922012805,
+      "metadata": {
+        "source": "rule-based",
+        "confidence": 0.18362086614675202,
+        "context_length": 0,
+        "pattern_strength": 1.02,
+        "mixed_emotion_info": {
+          "is_mixed": false,
+          "detected_patterns": [],
+          "top_emotions": [
+            {
+              "emotion": "frustrated",
+              "score": 0.18362086614675202
+            },
+            {
+              "emotion": "sad",
+              "score": 0.16930863794163378
+            },
+            {
+              "emotion": "anxious",
+              "score": 0.16824128724790005
+            }
+          ]
+        }
+      }
+    },
+    {
+      "phrase": "I'm just completely frustrated with this broken software",
+      "expected": "frustrated",
+      "detected": "frustrated",
+      "correct": true,
+      "expected_emotions": [
+        "frustrated",
+        "angry"
+      ],
+      "top_emotions": [
+        "frustrated",
+        "sad",
+        "confused"
+      ],
+      "match_rate": 1.0,
+      "emotions": {
+        "sad": 0.28730645545823413,
+        "angry": 0.07082670386402962,
+        "fearful": 0.05685522160058553,
+        "confused": 0.14293901559598482,
+        "lonely": 0.0312631425840627,
+        "embarrassed": 0.11620006102692355,
+        "frustrated": 0.29460939987017964
+      },
+      "intensity": 0.44191409980526947,
+      "metadata": {
+        "source": "rule-based",
+        "confidence": 0.29460939987017964,
+        "context_length": 0,
+        "pattern_strength": 1.02,
+        "mixed_emotion_info": {
+          "is_mixed": false,
+          "detected_patterns": [],
+          "top_emotions": [
+            {
+              "emotion": "frustrated",
+              "score": 0.29460939987017964
+            },
+            {
+              "emotion": "sad",
+              "score": 0.28730645545823413
+            },
+            {
+              "emotion": "confused",
+              "score": 0.14293901559598482
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

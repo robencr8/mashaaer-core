@@ -173,22 +173,32 @@ def run_tests(emotion_tracker: EmotionTracker) -> Tuple[List[Dict[str, Any]], Di
         expected = test_case["expected"]
         expected_emotions = test_case.get("expected_emotions", [])
         
-        # Analyze using both methods available
-        openai_result = emotion_tracker._analyze_with_openai(phrase)
-        rule_result = emotion_tracker._analyze_with_rules(phrase)
-        combined_result = emotion_tracker.analyze_text_advanced(phrase)
+        # Skip OpenAI test to avoid quota issues - use only rule-based system
+        # openai_result = emotion_tracker._analyze_with_openai(phrase)
+        openai_result = None  # Skip OpenAI test
         
-        # Direct analyze_text method for simplicity
+        # Analyze using rule-based system
+        rule_result = emotion_tracker._analyze_with_rules(phrase)
+        
+        # Since we're skipping OpenAI, the combined method will just use rule-based
+        # Let's explicitly tell it to skip OpenAI
+        # Monkey patch the _analyze_with_openai method temporarily
+        original_openai_method = emotion_tracker._analyze_with_openai
+        emotion_tracker._analyze_with_openai = lambda x, context=None: None
+        combined_result = emotion_tracker.analyze_text_advanced(phrase)
+        emotion_tracker._analyze_with_openai = original_openai_method
+        
+        # Direct analyze_text method for simplicity (also patched)
         simple_result = emotion_tracker.analyze_text(phrase, return_details=True)
         
         # Extract the primary emotion from each result
-        detected_openai = openai_result["primary_emotion"] if openai_result else "error"
+        detected_openai = "skipped"  # Skip OpenAI test
         detected_rule = rule_result["primary_emotion"]
         detected_combined = combined_result["primary_emotion"]
         detected_simple = simple_result["primary_emotion"] if isinstance(simple_result, dict) else simple_result
         
         # Determine correctness (does the primary emotion match expected?)
-        is_correct_openai = (expected == detected_openai) if openai_result else False
+        is_correct_openai = False  # Skip OpenAI test
         is_correct_rule = (expected == detected_rule)
         is_correct_combined = (expected == detected_combined)
         is_correct_simple = (expected == detected_simple)
@@ -363,18 +373,22 @@ def main():
     """Main function to run mixed emotion tests"""
     print("Initializing test environment...")
     
-    # Initialize DB manager and emotion tracker
-    try:
-        # Import config to use with database manager
-        from config import config
-        db_manager = DatabaseManager(config)
-        emotion_tracker = EmotionTracker(db_manager)
-    except ImportError:
-        print("Error importing config. Using fallback approach...")
-        # Fallback approach if config import fails
-        import config_external
-        db_manager = DatabaseManager(config_external)
-        emotion_tracker = EmotionTracker(db_manager)
+    # Initialize DB manager and emotion tracker using direct database URL
+    # This simpler approach bypasses the config module entirely
+    import os
+    db_url = os.environ.get("DATABASE_URL")
+    
+    print(f"Using database URL: {db_url}")
+    
+    # Create a simplified config object with the essential attributes
+    class SimpleConfig:
+        def __init__(self, db_url):
+            self.DATABASE_URL = db_url
+            self.USE_POSTGRES = True if db_url and db_url.startswith("postgresql") else False
+    
+    config_obj = SimpleConfig(db_url)
+    db_manager = DatabaseManager(config_obj)
+    emotion_tracker = EmotionTracker(db_manager)
     
     print(f"Running {len(MIXED_EMOTION_TEST_CASES)} mixed emotion test cases...")
     results, stats = run_tests(emotion_tracker)
