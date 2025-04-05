@@ -762,7 +762,7 @@ class RecommendationEngine:
             """
             
             params = (user_id, recommendation_id, feedback_data, timestamp)
-            self.db_manager.execute_query(query, params, fetch=False)
+            self.db_manager.execute_query(query, params)
             
             logger.info(f"Logged recommendation feedback for user {user_id}")
             return True
@@ -784,7 +784,7 @@ class RecommendationEngine:
                 timestamp TIMESTAMP NOT NULL
             )
             """
-            self.db_manager.execute_query(recommendation_feedback_query, fetch=False)
+            self.db_manager.execute_query(recommendation_feedback_query)
             
             # Create table for user-recommendation interactions
             recommendation_interactions_query = """
@@ -797,7 +797,7 @@ class RecommendationEngine:
                 timestamp TIMESTAMP NOT NULL
             )
             """
-            self.db_manager.execute_query(recommendation_interactions_query, fetch=False)
+            self.db_manager.execute_query(recommendation_interactions_query)
             
             logger.info("Recommendation engine tables created successfully")
             

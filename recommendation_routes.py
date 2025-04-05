@@ -317,7 +317,7 @@ def _log_recommendation_interaction(user_id, recommendation_id, interaction_type
         """
         
         params = (user_id, recommendation_id, interaction_type, details_json, timestamp)
-        recommendation_engine.db_manager.execute_query(query, params, fetch=False)
+        recommendation_engine.db_manager.execute_query(query, params)
         
         logger.info(f"Logged {interaction_type} interaction for recommendation {recommendation_id}")
         return True
