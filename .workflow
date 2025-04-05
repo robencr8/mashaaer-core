@@ -1,7 +1,7 @@
 <workflow>
-<n>
+<name>
 Start application
-</n>
+</name>
 <command>
 gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app
 </command>

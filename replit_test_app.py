@@ -1,25 +1,30 @@
-from flask import Flask, jsonify
+"""
+Minimal Flask app for Replit testing
+"""
+from flask import Flask
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
+    """Main entry point"""
     return """
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Simple Flask App</title>
+        <title>Replit Test</title>
     </head>
     <body>
-        <h1>Hello from Flask!</h1>
-        <p>This is a simple Flask application running in Replit.</p>
+        <h1>Replit Test Server</h1>
+        <p>This simple server is working!</p>
     </body>
     </html>
     """
 
 @app.route('/health')
 def health():
-    return jsonify({"status": "ok"})
+    """Health check endpoint"""
+    return "OK", 200
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
