@@ -1,0 +1,38 @@
+{
+  "name": "مشاعر | Mashaaer Feelings",
+  "short_name": "مشاعر | Mashaaer",
+  "description": "مساعدك الذكي للتعرف على المشاعر | Your intelligent emotional companion",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c0e14",
+  "theme_color": "#8a2be2",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "orientation": "portrait",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["utilities", "education", "lifestyle"],
+  "screenshots": [],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "بدء محادثة جديدة | New Chat",
+      "short_name": "محادثة | Chat",
+      "description": "ابدأ محادثة جديدة مع مشاعر | Start a new chat with Mashaaer",
+      "url": "/?source=pwa"
+    }
+  ]
+}

@@ -229,3 +229,10 @@ def cors_test():
     """CORS test page to verify cross-origin configuration"""
     logger.info(f"CORS test page request received from {request.remote_addr}")
     return send_from_directory('static_test', 'cors_test.html')
+
+# Route for the offline page (for PWA)
+@app.route('/offline')
+def offline():
+    """Offline page for PWA"""
+    logger.info(f"Offline page request received from {request.remote_addr}")
+    return send_from_directory('static', 'offline.html')

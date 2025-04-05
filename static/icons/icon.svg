@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Background -->
+  <circle cx="256" cy="256" r="256" fill="#0c0e14"/>
+  
+  <!-- Glow effect -->
+  <circle cx="256" cy="256" r="230" fill="none" stroke="#8a2be2" stroke-width="5" opacity="0.5"/>
+  
+  <!-- Purple sphere -->
+  <circle cx="256" cy="256" r="160" fill="#8a2be2"/>
+  
+  <!-- Bright spots -->
+  <circle cx="196" cy="196" r="40" fill="white" opacity="0.2"/>
+  <circle cx="186" cy="186" r="20" fill="white" opacity="0.3"/>
+  
+  <!-- Orbit rings -->
+  <circle cx="256" cy="256" r="190" fill="none" stroke="#8a2be2" stroke-width="2" opacity="0.7"/>
+  <circle cx="256" cy="256" r="210" fill="none" stroke="#8a2be2" stroke-width="1.5" opacity="0.5"/>
+  <circle cx="256" cy="256" r="225" fill="none" stroke="#8a2be2" stroke-width="1" opacity="0.3"/>
+  
+  <!-- Orbital particles -->
+  <circle cx="446" cy="256" r="6" fill="#8a2be2"/>
+  <circle cx="256" cy="66" r="5" fill="#8a2be2"/>
+  <circle cx="66" cy="256" r="7" fill="#8a2be2"/>
+  
+  <!-- "م" Arabic letter for Mashaaer -->
+  <text x="256" y="280" font-family="Arial" font-size="80" font-weight="bold" fill="white" text-anchor="middle">م</text>
+</svg>
