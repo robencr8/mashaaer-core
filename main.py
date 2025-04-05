@@ -193,6 +193,16 @@ def simple_test():
     """Simple test page to verify web server is working"""
     return render_template('simple_test.html')
 
+@app.route('/hello')
+def hello():
+    """Simplest possible route to check server is responding"""
+    logger.info(f"Hello endpoint accessed from {request.remote_addr}")
+    return jsonify({
+        "message": "Hello from Mashaaer API!",
+        "time": datetime.now().isoformat(),
+        "status": "ok"
+    })
+
 # Route for the static test page
 @app.route('/static-test')
 def static_test():

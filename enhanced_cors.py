@@ -28,6 +28,7 @@ def configure_cors(app, dev_mode=False):
         'http://127.0.0.1:5000',
         # Replit-specific domains
         'https://*.replit.app',
+        'https://*.repl.co',
         'https://replit.com',
         # Wildcard for development
         '*'
@@ -35,29 +36,25 @@ def configure_cors(app, dev_mode=False):
     
     logger.info(f"Configuring enhanced CORS with origins: {allowed_origins}")
     
-    # Initialize CORS with permissive settings
+    # Initialize CORS with permissive settings - using wildcard origin
     CORS(app, 
-         resources={r"/*": {"origins": allowed_origins}},
+         resources={r"/*": {"origins": "*"}},
          supports_credentials=False,
-         methods=["GET", "POST", "OPTIONS", "HEAD"],
+         methods=["GET", "POST", "OPTIONS", "PUT", "DELETE", "HEAD"],
          allow_headers=["Content-Type", "Authorization", "X-Requested-With"])
     
     # Add custom CORS headers for all responses
     @app.after_request
     def add_cors_headers(response):
-        origin = request.headers.get('Origin', '*')
-        
-        # Log origin information for debugging
-        logger.debug(f"Request Origin: {origin}")
-        
-        # Set CORS headers with dynamic origin
-        response.headers['Access-Control-Allow-Origin'] = origin
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, HEAD'
+        # Using wildcard for all - this is necessary for Replit feedback tools
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT, DELETE, HEAD'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
         response.headers['Access-Control-Max-Age'] = '3600'  # Cache preflight request for 1 hour
         
         # Log the response headers for debugging
-        logger.debug(f"Response headers: {dict(response.headers)}")
+        logger.debug(f"Request from: {request.remote_addr}, Origin: {request.headers.get('Origin', 'None')}")
+        logger.debug(f"Response CORS headers: {response.headers.get('Access-Control-Allow-Origin')}")
         
         return response
     
@@ -66,12 +63,12 @@ def configure_cors(app, dev_mode=False):
     @app.route('/<path:path>', methods=['OPTIONS'])
     def options_handler(path=''):
         """Handle OPTIONS preflight requests"""
-        origin = request.headers.get('Origin', '*')
-        logger.debug(f"OPTIONS request from origin: {origin} for path: {path}")
+        logger.debug(f"OPTIONS request from {request.remote_addr} for path: {path}")
         
         response = Response('')
-        response.headers['Access-Control-Allow-Origin'] = origin
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, HEAD'
+        # Using wildcard origin for maximum compatibility with Replit tools
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT, DELETE, HEAD'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
         response.headers['Access-Control-Max-Age'] = '3600'
         
