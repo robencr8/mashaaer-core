@@ -1200,7 +1200,7 @@
           });
           
           // Play with catch for autoplay restrictions
-          sound.play().catch(err => {
+          sound.play().catch(err => { console.warn("Audio play error (likely autoplay restriction):", err); }).catch(err => {
             console.warn('Audio play error (likely autoplay restriction):', err);
             // Still cache the sound for future use when user interacts
             soundCache[soundType] = sound;
@@ -1243,7 +1243,7 @@
             });
             
             // Play with detailed error handling
-            sound.play().catch(err => {
+            sound.play().catch(err => { console.warn("Audio play error (likely autoplay restriction):", err); }).catch(err => {
               console.warn('Welcome sound play error (likely autoplay restriction):', err);
               // Cache for future use when user interacts
               soundCache['welcome'] = sound;
