@@ -26,3 +26,4 @@ timestamp,user_input,emotion,action,params
 2025-04-05T22:54:51.684911,I am so frustrated and angry about this situation!,sad,respond_normally,{},en
 2025-04-05T22:54:57.656479,I am happy and celebrating today!,happy,respond_normally,{},en
 2025-04-05T22:55:05.448524,I need some calming vibes right now,calm,respond_normally,{},en
+2025-04-05T23:24:50.754029,I feel sad and lonely today,sad,respond_normally,{},en
