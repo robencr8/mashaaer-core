@@ -103,6 +103,15 @@
     "description": "Arabic version of the calming exercises rule for anger"
   },
   {
+    "id": "rule001",
+    "emotion": "sad",
+    "keyword": "alone",
+    "action": "offer_companionship",
+    "weight": 1.21,
+    "lang": "en",
+    "description": "Offers companionship and emotional support when user expresses loneliness"
+  },
+  {
     "id": "rule003",
     "emotion": "neutral",
     "keyword": "weather",
@@ -134,15 +143,6 @@
     "description": "Provides personalized recommendations when specifically requested"
   },
   {
-    "id": "rule001",
-    "emotion": "sad",
-    "keyword": "alone",
-    "action": "offer_companionship",
-    "weight": 1.1,
-    "lang": "en",
-    "description": "Offers companionship and emotional support when user expresses loneliness"
-  },
-  {
     "id": "rule004",
     "emotion": "sad",
     "keyword": "وحيد",
@@ -150,5 +150,29 @@
     "weight": 1.1,
     "lang": "ar",
     "description": "Arabic version of the companionship rule for loneliness"
+  },
+  {
+    "id": "rule014",
+    "emotion": "tired",
+    "keyword": "exhausted",
+    "action": "suggest_rest",
+    "weight": 1.1,
+    "lang": "en",
+    "description": "Suggests rest when user expresses exhaustion",
+    "params": {
+      "rest_duration": 30
+    }
+  },
+  {
+    "id": "rule015",
+    "emotion": "tired",
+    "keyword": "مرهق",
+    "action": "suggest_rest",
+    "weight": 1.1,
+    "lang": "ar",
+    "description": "Suggests rest when user expresses exhaustion in Arabic",
+    "params": {
+      "rest_duration": 30
+    }
   }
 ]

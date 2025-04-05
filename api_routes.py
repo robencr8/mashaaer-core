@@ -626,6 +626,10 @@ def generate_response(action: str, params: Dict[str, Any], emotion: str, user_id
                 return f"ألاحظ أنك تبدو محبطًا. هل سيساعدك تجربة تمرين تنفس سريع معي؟ تنفس للداخل لمدة 4 عدات، وللخارج لمدة 6 عدات."
             else:
                 return f"عندما تشعر بهذه الطريقة، أخذ لحظة لنفسك قد يساعد. هل ترغب في تجربة تمرين {technique} سريع؟"
+                
+        elif action == 'suggest_rest':
+            rest_duration = params.get('rest_duration', 20)
+            return f"أرى أنك تشعر بالإرهاق يا {user_name}. أخذ استراحة قصيرة لمدة {rest_duration} دقيقة يمكن أن يساعد في استعادة طاقتك. هل تريد مني تعيين تذكير لطيف؟"
         
         # Default Arabic response
         return f"أفهم شعورك. هل هناك شيء محدد ترغب في التحدث عنه يا {user_name}؟"
@@ -648,6 +652,10 @@ def generate_response(action: str, params: Dict[str, Any], emotion: str, user_id
                 return f"I notice you seem frustrated. Would it help to try a quick breathing exercise with me? Breathe in for 4 counts, and out for 6 counts."
             else:
                 return f"When you're feeling this way, taking a moment for yourself can help. Would you like to try a quick {technique} exercise?"
+                
+        elif action == 'suggest_rest':
+            rest_duration = params.get('rest_duration', 20)
+            return f"I can see you're feeling exhausted, {user_name}. Taking a short {rest_duration}-minute break can help restore your energy. Would you like me to set a gentle reminder?"
         
         # Default English response
         return f"I understand how you're feeling. Is there anything specific you'd like to talk about, {user_name}?"
