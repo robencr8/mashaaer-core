@@ -110,11 +110,6 @@ def get_status():
     
     # Add more details if available
     try:
-        # Get uptime if core_launcher is available in main app
-        from main import core_launcher
-        if core_launcher is not None:
-            status['system']['uptime'] = core_launcher.get_uptime()
-            
         # Add database details if available
         if db_manager is not None:
             db_status = db_manager.get_status() if hasattr(db_manager, 'get_status') else {'status': 'unknown'}

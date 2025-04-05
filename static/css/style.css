@@ -1,0 +1,121 @@
+/* Robin AI Enhanced - Main CSS Styles */
+
+/* Base Styles */
+body {
+    overflow-x: hidden;
+}
+
+/* Custom Card Styles */
+.card {
+    margin-bottom: 20px;
+}
+
+.card-header {
+    font-weight: 500;
+}
+
+/* Emotion Timeline */
+.emotion-timeline .emotion-card {
+    border-radius: 10px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.emotion-timeline .emotion-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Profile Cards */
+.profile-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-card .profile-image {
+    transition: all 0.3s ease;
+}
+
+.profile-card:hover .profile-image {
+    transform: scale(1.05);
+}
+
+.profile-card .profile-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    backdrop-filter: blur(5px);
+}
+
+/* Dashboard Widgets */
+.dashboard-widget {
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.dashboard-stats {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+/* Custom Animations */
+.floating {
+    animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+/* Voice and Face Recognition */
+.recognition-active {
+    box-shadow: 0 0 15px #ff3e3e;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 62, 62, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(255, 62, 62, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 62, 62, 0); }
+}
+
+/* Admin Dashboard */
+.system-status {
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.status-online {
+    background-color: rgba(25, 135, 84, 0.2);
+    color: #28a745;
+}
+
+.status-offline {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+}
+
+/* SMS Notifications */
+.message-box {
+    border-left: 4px solid #0d6efd;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 0 5px 5px 0;
+}
+
+.message-sent {
+    border-left-color: #28a745;
+}
+
+.message-failed {
+    border-left-color: #dc3545;
+}

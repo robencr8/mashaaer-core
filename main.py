@@ -17,6 +17,7 @@ import logging
 import json
 import mimetypes
 import traceback
+import time
 from flask import Flask, render_template, request, jsonify, Response, redirect, url_for, send_from_directory, make_response
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -52,6 +53,9 @@ except Exception as e:
 # Create the Flask application
 app = Flask(__name__, static_folder='static')
 
+# Set the secret key for session management
+app.secret_key = os.environ.get("SESSION_SECRET", "mashaaer-feelings-dev-secret-key")
+
 # Import application components
 from config import Config
 from core_launcher import CoreLauncher
@@ -77,7 +81,8 @@ origins = [
     "http://localhost:5000",
     "http://127.0.0.1:5000",
     "http://localhost:3000",  # React development server
-    "null"  # For file:// URLs
+    "null",  # For file:// URLs
+    "*"  # Allow all origins for the web application feedback tool
 ]
 
 # Add Replit URLs to allowed origins
@@ -86,7 +91,7 @@ if 'REPLIT_URL' in os.environ:
 if 'REPL_SLUG' in os.environ and 'REPL_OWNER' in os.environ:
     origins.append(f"https://{os.environ['REPL_SLUG']}.{os.environ['REPL_OWNER']}.repl.co")
 
-CORS(app, resources={r"/*": {"origins": origins, "supports_credentials": True}})
+CORS(app, resources={r"/*": {"origins": origins}})
 
 # Initialize database
 db_manager = DatabaseManager(config)
@@ -105,7 +110,7 @@ init_api(app, db_manager, emotion_tracker, None, None, None, intent_classifier, 
 
 # Initialize mobile API routes
 from mobile_api_routes import init_mobile_api
-init_mobile_api(app, db_manager, emotion_tracker, None, None, intent_classifier)
+init_mobile_api(app, db_manager, emotion_tracker, None, None, intent_classifier, config, profile_manager)
 
 # Initialize feedback tool routes
 try:
@@ -119,7 +124,7 @@ except Exception as e:
 voice_recognition = VoiceRecognition(config) if config.VOICE_ENABLED else None
 
 # Face recognition instance (if enabled)
-face_detector = FaceDetector(config) if config.FACE_DETECTION_ENABLED else None
+face_detector = FaceDetector(config, db_manager) if config.FACE_DETECTION_ENABLED else None
 
 # Text-to-speech manager
 tts_manager = TTSManager(config)
@@ -279,8 +284,17 @@ def play_cosmic_sound():
     if sound_type == 'welcome':
         # Generate welcome message in the requested language
         text = "Welcome to Mashaaer Feelings. Create the future, I'm listening." if language == 'en' else "مرحبًا بك في مشاعر. اصنع المستقبل، أنا أسمعك."
-        filename = tts_manager.generate_tts(text, language)
-        return jsonify({'status': 'success', 'sound_path': f'/tts_cache/{filename}'})
+        # Check if tts_manager is initialized
+        if tts_manager is None:
+            return jsonify({'status': 'error', 'message': 'TTS not available'})
+        try:
+            # Pass "default" as the voice ID and language as the third parameter
+            # to match the TTSManager.generate_tts signature which expects (text, voice, language)
+            filename = tts_manager.generate_tts(text, "default", language)
+            return jsonify({'status': 'success', 'sound_path': f'/tts_cache/{filename}'})
+        except Exception as e:
+            logger.error(f"Error generating welcome TTS: {str(e)}")
+            return jsonify({'status': 'error', 'message': str(e)})
     else:
         return jsonify({'status': 'error', 'message': 'Invalid sound type'})
 
@@ -402,7 +416,11 @@ def speak():
         
         # Generate TTS file
         try:
-            audio_file = tts_manager.generate_tts(text, language, voice_id, emotion)
+            # The TTSManager.generate_tts only accepts text, voice (voice_id), and language
+            # We need to pass emotion through another channel or extend the method
+            if voice_id is None:
+                voice_id = "default"
+            audio_file = tts_manager.generate_tts(text, voice_id, language)
             
             # Return the file URL for the client to play
             return jsonify({

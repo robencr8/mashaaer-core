@@ -59,9 +59,16 @@ class Config:
         # Voice recognition settings
         self.VOICE_LANGUAGES = ["en-US", "ar"]
         self.DEFAULT_VOICE = os.environ.get("DEFAULT_VOICE", "en-US")
+        self.VOICE_ENABLED = self._get_bool_env("VOICE_ENABLED", True)
+        
+        # Face detection settings
+        self.FACE_DETECTION_ENABLED = self._get_bool_env("FACE_DETECTION_ENABLED", True)
         
         # TTS settings
         self.TTS_PROVIDER = "elevenlabs" if self.ELEVENLABS_API_KEY and not self.OFFLINE_MODE else "gtts"
+        
+        # Application URL for CORS and templates
+        self.APP_URL = os.environ.get("APP_URL", "https://mashaaer.replit.app")
         
         # Report configuration
         self._report_config()
@@ -83,6 +90,9 @@ class Config:
             self.logger.info(f"- PGDATABASE: {self.PGDATABASE}")
         self.logger.info(f"- TTS_PROVIDER: {self.TTS_PROVIDER}")
         self.logger.info(f"- Voice languages: {self.VOICE_LANGUAGES}")
+        self.logger.info(f"- VOICE_ENABLED: {self.VOICE_ENABLED}")
+        self.logger.info(f"- FACE_DETECTION_ENABLED: {self.FACE_DETECTION_ENABLED}")
+        self.logger.info(f"- APP_URL: {self.APP_URL}")
     
     def is_offline(self):
         """Check if system is in offline mode"""
