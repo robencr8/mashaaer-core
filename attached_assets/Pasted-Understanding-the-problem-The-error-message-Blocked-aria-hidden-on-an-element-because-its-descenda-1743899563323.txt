@@ -1,0 +1,21 @@
+Understanding the problem
+The error message "Blocked aria-hidden on an element because its descendant retained focus" indicates an accessibility issue. You've applied aria-hidden="true" to a parent element, intending to hide it and its contents from assistive technologies like screen readers. However, a descendant element within that parent still has focus. This creates a conflict because assistive technologies need to be able to interact with focused elements. Hiding a focused element prevents users who rely on these technologies from understanding or interacting with it.
+
+How to verify
+Inspect the HTML structure in DevTools. Locate the element with aria-hidden="true" (as indicated in the console message). Then, check its descendants to find the element with focus. You can also verify by manually interacting with the page and observing which element receives focus while the parent has aria-hidden="true".
+
+Suggested fix
+Instead of using aria-hidden="true" on the parent, consider using the inert attribute. The inert attribute will not only hide the element from assistive technologies but also prevent it from receiving focus, effectively resolving the conflict.
+
+Code
+
+<!-- Replace aria-hidden with inert -->
+<div class=" useView_view__C2mnv css-1gdmsm6 Surface_surfaceDefault__TcNI5" inert style="--useView--gap: 4px; --borderColor: var(--outline-dimmer); --focusedBorderColor: var(--accent-primary-default); --hoverBorderColor: var(--accent-primary-default);">…</div>
+Use code snippets with caution
+
+If inert is not suitable for your use case (e.g., you need to maintain the element's visual appearance but still hide it from accessibility), you'll need to manage the focus state of the descendant element before applying aria-hidden="true" to the parent. You might need to programmatically move focus to another element or remove it entirely from the descendant before hiding the parent.
+
+Summary
+Applying aria-hidden="true" to a parent element while a descendant retains focus creates an accessibility conflict. The inert attribute provides a more robust solution by both hiding the element from assistive technologies and preventing it from receiving focus. Alternatively, you can manage focus programmatically on the descendant before hiding the parent with aria-hidden="true".
+
+Data used to understand this message

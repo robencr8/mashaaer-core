@@ -1,0 +1,832 @@
+lockdown-install.js:1 Removing unpermitted intrinsics
+8518-437cb70ffa505d5d.js:1 Replit version f4019a11, pid2 version 0.0.1173
+_app-a44ccbf6754eb462.js:13 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+_app-a44ccbf6754eb462.js:13 [LaunchDarkly] LaunchDarkly client initialized
+ Removing unpermitted intrinsics
+_app-a44ccbf6754eb462.js:13 [TikTok Pixel] - Invalid pixel ID
+Issue: The pixel ID is invalid. This could prevent your pixel from receiving data.
+Suggestion: Please go to Events Manager and find the correct pixel ID.
+(anonymous) @ _app-a44ccbf6754eb462.js:13Understand this warningAI
+ Removing unpermitted intrinsics
+ Removing unpermitted intrinsics
+RobinAiCompanion:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+lockdown-install.js:1 Removing unpermitted intrinsics
+lockdown-install.js:1 Removing unpermitted intrinsics
+91Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.Understand this errorAI
+framework-6ec390c36ec224b5.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-6ec390c36ec224b5.js:1Understand this warningAI
+framework-6ec390c36ec224b5.js:1 Unrecognized feature: 'battery'.
+_ @ framework-6ec390c36ec224b5.js:1Understand this warningAI
+framework-6ec390c36ec224b5.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-6ec390c36ec224b5.js:1Understand this warningAI
+framework-6ec390c36ec224b5.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-6ec390c36ec224b5.js:1Understand this warningAI
+framework-6ec390c36ec224b5.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-6ec390c36ec224b5.js:1Understand this warningAI
+framework-6ec390c36ec224b5.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-6ec390c36ec224b5.js:1Understand this warningAI
+framework-6ec390c36ec224b5.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-6ec390c36ec224b5.js:1Understand this warningAI
+framework-6ec390c36ec224b5.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-6ec390c36ec224b5.js:1Understand this warningAI
+framework-6ec390c36ec224b5.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-6ec390c36ec224b5.js:1Understand this warningAI
+framework-6ec390c36ec224b5.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-6ec390c36ec224b5.js:1Understand this warningAI
+framework-6ec390c36ec224b5.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-6ec390c36ec224b5.js:1Understand this warningAI
+framework-6ec390c36ec224b5.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-6ec390c36ec224b5.js:1Understand this warningAI
+framework-6ec390c36ec224b5.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-6ec390c36ec224b5.js:1Understand this warningAI
+framework-6ec390c36ec224b5.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-6ec390c36ec224b5.js:1Understand this warningAI
+framework-6ec390c36ec224b5.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-6ec390c36ec224b5.js:1Understand this warningAI
+2stallwart.build.js:1 stallwart: failed ping 1
+stallwart.build.js:1 stallwart: failed ping 2
+_app-a44ccbf6754eb462.js:13 onClick is deprecated, please use onPress
+(anonymous) @ _app-a44ccbf6754eb462.js:13Understand this warningAI
+8635.ae705af613ee1135.js:1 WebSocket connection to 'wss://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5900/' failed: 
+value @ 8635.ae705af613ee1135.js:1Understand this errorAI
+_app-a44ccbf6754eb462.js:13 WebSocket on-error event
+(anonymous) @ _app-a44ccbf6754eb462.js:13Understand this warningAI
+_app-a44ccbf6754eb462.js:13 Failed when connecting: Connection closed (code: 1006)
+(anonymous) @ _app-a44ccbf6754eb462.js:13Understand this errorAI
+_app-a44ccbf6754eb462.js:13 WARN: A component changed from uncontrolled to controlled.
+(anonymous) @ _app-a44ccbf6754eb462.js:13Understand this warningAI
+_app-a44ccbf6754eb462.js:13 WARN: A component changed from controlled to uncontrolled.
+(anonymous) @ _app-a44ccbf6754eb462.js:13Understand this warningAI
+_app-a44ccbf6754eb462.js:13 WARN: A component changed from uncontrolled to controlled.
+(anonymous) @ _app-a44ccbf6754eb462.js:13Understand this warningAI
+stallwart.build.js:1 stallwart: failed ping 1
+stallwart.build.js:1 stallwart: failed ping 2
+stallwart.build.js:1 stallwart: failed ping 1
+stallwart.build.js:1 stallwart: failed ping 2
+2stallwart.build.js:1 stallwart: failed ping 1
+stallwart.build.js:1 stallwart: failed ping 2
+4stallwart.build.js:1 stallwart: failed ping 1
+stallwart.build.js:1 stallwart: failed ping 2
+stallwart.build.js:1 stallwart: failed ping 3
+stallwart.build.js:1 stallwart: failed ping 4
+stallwart.build.js:1 stallwart: failed ping 5
+stallwart.build.js:1 stallwart: session stalled
+_app-a44ccbf6754eb462.js:13 WARN: A component changed from uncontrolled to controlled.
+(anonymous) @ _app-a44ccbf6754eb462.js:13Understand this warningAI
+_app-a44ccbf6754eb462.js:13 task queue exceeded allotted deadline by 56ms
+(anonymous) @ _app-a44ccbf6754eb462.js:13Understand this warningAI
+_app-a44ccbf6754eb462.js:13 task queue exceeded allotted deadline by 51ms
+(anonymous) @ _app-a44ccbf6754eb462.js:13Understand this warningAI
+_app-a44ccbf6754eb462.js:13 task queue exceeded allotted deadline by 35ms
+(anonymous) @ _app-a44ccbf6754eb462.js:13Understand this warningAI
+_app-a44ccbf6754eb462.js:13 task queue exceeded allotted deadline by 51ms
+(anonymous) @ _app-a44ccbf6754eb462.js:13Understand this warningAI
+lockdown-install.js:1 Removing unpermitted intrinsics
+lockdown-install.js:1 Removing unpermitted intrinsics
+ Removing unpermitted intrinsics
+RobinAiCompanion:1 Access to fetch at 'https://sp.replit.com/v1/t' from origin 'https://replit.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.Understand this errorAI
+t:1 
+            
+            
+           Failed to load resource: net::ERR_FAILEDUnderstand this errorAI
+lockdown-install.js:1 Removing unpermitted intrinsics
+RobinAiCompanion:1 Blocked aria-hidden on an element because its descendant retained focus. The focus must not be hidden from assistive technology users. Avoid using aria-hidden on a focused element or its ancestor. Consider using the inert attribute instead, which will also prevent focus. For more details, see the aria-hidden section of the WAI-ARIA specification at https://w3c.github.io/aria/#aria-hidden.
+Element with focus: button
+Ancestor with aria-hidden:  <div class=​" useView_view__C2mnv css-1gdmsm6 Surface_surfaceDefault__TcNI5" aria-hidden=​"true" style=​"--useView--gap:​ 4px;​ --borderColor:​ var(--outline-dimmer)​;​ --focusedBorderColor:​ var(--accent-primary-default)​;​ --hoverBorderColor:​ var(--accent-primary-default)​;​">​…​</div>​flexUnderstand this errorAI
+lockdown-install.js:1 Removing unpermitted intrinsics
+lockdown-install.js:1 Removing unpermitted intrinsics
+RobinAiCompanion:1 Access to fetch at 'https://sp.replit.com/v1/t' from origin 'https://replit.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.Understand this errorAI
+t:1 
+            
+            
+           Failed to load resource: net::ERR_FAILEDUnderstand this errorAI
+lockdown-install.js:1 Removing unpermitted intrinsics
+attached_assets/Screenshot%202025-04-05%20172151.png:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()Understand this errorAI
+lockdown-install.js:1 Removing unpermitted intrinsics
+ Removing unpermitted intrinsics
+ Removing unpermitted intrinsics
+lockdown-install.js:1 Removing unpermitted intrinsics
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.Understand this warningAI
+b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar912%3A:32 Unrecognized feature: 'ambient-light-sensor'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'battery'.Understand this warningAI
+b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar912%3A:32 Unrecognized feature: 'battery'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.Understand this warningAI
+b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar912%3A:32 Unrecognized feature: 'execution-while-not-rendered'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.Understand this warningAI
+b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar912%3A:32 Unrecognized feature: 'execution-while-out-of-viewport'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.Understand this warningAI
+b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar912%3A:32 Unrecognized feature: 'layout-animations'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.Understand this warningAI
+b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar912%3A:32 Unrecognized feature: 'legacy-image-formats'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.Understand this warningAI
+b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar912%3A:32 Unrecognized feature: 'navigation-override'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.Understand this warningAI
+b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar912%3A:32 Unrecognized feature: 'oversized-images'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.Understand this warningAI
+b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar912%3A:32 Unrecognized feature: 'publickey-credentials'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.Understand this warningAI
+b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar912%3A:32 Unrecognized feature: 'speaker-selection'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.Understand this warningAI
+b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar912%3A:32 Unrecognized feature: 'unoptimized-images'.Understand this warningAI
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.Understand this warningAI
+b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar912%3A:32 Unrecognized feature: 'unsized-media'.Understand this warningAI
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.Understand this warningAI
+b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar912%3A:32 Allow attribute will take precedence over 'allowfullscreen'.Understand this warningAI
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.Understand this warningAI
+b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar912%3A:32 Allow attribute will take precedence over 'allowpaymentrequest'.Understand this warningAI
+lockdown-install.js:1 Removing unpermitted intrinsics
+ Service Worker تم تسجيله بنجاح: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/
+lockdown-install.js:1 Removing unpermitted intrinsics
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/sounds/cosmic.mp3
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/sounds/hover.mp3
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/cosmic-onboarding
+2 Error playing cosmic sound: TypeError: Failed to fetch
+(anonymous) @ b846eda6-3902-424b-8…plit.dev:5000/:1220Understand this errorAI
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/sounds/click.mp3
+ Error playing cosmic sound: TypeError: Failed to fetch
+(anonymous) @ b846eda6-3902-424b-8…plit.dev:5000/:1220Understand this errorAI
+lockdown-install.js:1 Removing unpermitted intrinsics
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/icons/icon-192x192.png
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/sounds/cosmic.mp3
+cosmic-onboarding:1526 Service Worker تم تسجيله بنجاح: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/sounds/hover.mp3
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.Understand this warningAI
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/cosmic-onboarding
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar912%3A
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/manifest.json
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.Understand this warningAI
+17Fetch finished loading: POST "<URL>".
+cosmic-onboarding:829 Recognition error: no-speech
+recognition.onerror @ cosmic-onboarding:829Understand this errorAI
+lockdown-install.js:1 Removing unpermitted intrinsics
+_app-a44ccbf6754eb462.js:13 XHR finished loading: POST "https://stats.g.doubleclick.net/j/collect?t=dc&aip=1&_r=3&v=1&_v=j101&tid=UA-25629695-1&cid=263281444.1743684247&jid=706402001&gjid=525182776&_gid=770949744.1743839743&_u=SCKAgEAjQAAAAGgCIAD~&z=121797156".
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+wd @ analytics.js:36
+pe @ analytics.js:35
+(anonymous) @ analytics.js:73
+(anonymous) @ analytics.js:38
+(anonymous) @ analytics.js:77
+(anonymous) @ analytics.js:57
+(anonymous) @ analytics.js:93
+(anonymous) @ analytics.js:92
+N @ analytics.js:94
+(anonymous) @ index.js:351
+(anonymous) @ protos.js:372
+(anonymous) @ protos.js:178
+(anonymous) @ index.ts:270
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ ajs-destination.bundle.ed53a26b6edc80c65d73.js:1
+(anonymous) @ index.ts:286
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ ajs-destination.bundle.ed53a26b6edc80c65d73.js:1
+(anonymous) @ delivery.js:28
+(anonymous) @ delivery.js:11
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ delivery.js:4
+o @ delivery.js:27
+(anonymous) @ event-queue.js:325
+(anonymous) @ event-queue.js:323
+r @ _app-a44ccbf6754eb462.js:13
+setTimeout
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+(anonymous) @ event-queue.js:321
+(anonymous) @ event-queue.js:320
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:273
+(anonymous) @ event-queue.js:181
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:169
+(anonymous) @ event-queue.js:135
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:128
+(anonymous) @ dispatch.js:25
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+h @ dispatch.js:18
+(anonymous) @ index.ts:460
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ index.ts:454
+(anonymous) @ index.ts:253
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ index.ts:241
+A @ _app-a44ccbf6754eb462.js:15
+CB @ 2124-b9ee59c09bf533a5.js:1
+ld @ framework-6ec390c36ec224b5.js:1
+od @ framework-6ec390c36ec224b5.js:1
+i @ framework-6ec390c36ec224b5.js:1
+uI @ framework-6ec390c36ec224b5.js:1
+(anonymous) @ framework-6ec390c36ec224b5.js:1
+uM @ framework-6ec390c36ec224b5.js:1
+uS @ framework-6ec390c36ec224b5.js:1
+C @ framework-6ec390c36ec224b5.js:1
+z @ framework-6ec390c36ec224b5.js:1
+_app-a44ccbf6754eb462.js:13 Fetch failed loading: POST "https://analytics.google.com/g/collect?v=2&tid=G-MPJY3F1YEL&gtm=45je5421h1v9135634466za200&_p=1743870974038&gcd=13l3l3l3l2l1&npa=0&dma=0&tag_exp=102788824~102803279~102813109~102887800~102926062~102975949~103016951~103021830~103027016&ul=en-us&sr=1524x858&cid=263281444.1743684247&ecid=2023290265&uaa=x86&uab=64&uafvl=Chromium%3B134.0.6998.178%7CNot%253AA-Brand%3B24.0.0.0%7CGoogle%2520Chrome%3B134.0.6998.178&uamb=0&uam=&uap=Windows&uapv=10.0.0&uaw=0&are=1&pae=1&frm=0&pscdl=noapi&_eu=ABAI&dl=https%3A%2F%2Freplit.com%2F%40robenedwan%2FRobinAiCompanion&dr=https%3A%2F%2Fwww.google.com%2F&dp=%2F%40robenedwan%2FRobinAiCompanion&dt=replEnvironmentDesktop&sid=1743870975&sct=8&seg=1&_tu=wAQ&_s=624&tfd=28471834".
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+Gc @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:214
+Cl @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:383
+AL @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:794
+h.flush @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:802
+h.xb @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:799
+h.add @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:801
+h.tk @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:820
+h.Kn @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:820
+(anonymous) @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:816
+Hm @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:404
+jo @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:414
+(anonymous) @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:816
+c @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:590
+Nx @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:590
+h.Jn @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:816
+c @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:832
+w @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:431
+Qm @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:405
+Wp @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:431
+Vp.flush @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:435
+Vp.push @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:433
+Op @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:428
+event @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:686
+uC @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:692
+b.push @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:697
+pC @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:697
+WC @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:708
+XC.b.push @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:709
+Sa @ analytics.js:42
+(anonymous) @ analytics.js:73
+(anonymous) @ analytics.js:38
+(anonymous) @ analytics.js:77
+(anonymous) @ analytics.js:57
+(anonymous) @ analytics.js:93
+(anonymous) @ analytics.js:92
+N @ analytics.js:94
+(anonymous) @ index.js:351
+(anonymous) @ protos.js:372
+(anonymous) @ protos.js:178
+(anonymous) @ index.ts:270
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ ajs-destination.bundle.ed53a26b6edc80c65d73.js:1
+(anonymous) @ index.ts:286
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ ajs-destination.bundle.ed53a26b6edc80c65d73.js:1
+(anonymous) @ delivery.js:28
+(anonymous) @ delivery.js:11
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ delivery.js:4
+o @ delivery.js:27
+(anonymous) @ event-queue.js:325
+(anonymous) @ event-queue.js:323
+r @ _app-a44ccbf6754eb462.js:13
+setTimeout
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+(anonymous) @ event-queue.js:321
+(anonymous) @ event-queue.js:320
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:273
+(anonymous) @ event-queue.js:181
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:169
+(anonymous) @ event-queue.js:135
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:128
+(anonymous) @ dispatch.js:25
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+h @ dispatch.js:18
+(anonymous) @ index.ts:460
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ index.ts:454
+(anonymous) @ index.ts:253
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ index.ts:241
+A @ _app-a44ccbf6754eb462.js:15
+CB @ 2124-b9ee59c09bf533a5.js:1
+ld @ framework-6ec390c36ec224b5.js:1
+od @ framework-6ec390c36ec224b5.js:1
+i @ framework-6ec390c36ec224b5.js:1
+uI @ framework-6ec390c36ec224b5.js:1
+(anonymous) @ framework-6ec390c36ec224b5.js:1
+uM @ framework-6ec390c36ec224b5.js:1
+uS @ framework-6ec390c36ec224b5.js:1
+C @ framework-6ec390c36ec224b5.js:1
+z @ framework-6ec390c36ec224b5.js:1
+_app-a44ccbf6754eb462.js:13 Fetch failed loading: POST "https://analytics.google.com/g/collect?v=2&tid=G-MPJY3F1YEL&gtm=45je5421h1v9135634466za200&_p=1743870974038&_gaz=1&gcd=13l3l3l3l2l1&npa=0&dma=0&tag_exp=102788824~102803279~102813109~102887800~102926062~102975949~103016951~103021830~103027016&ul=en-us&sr=1524x858&cid=263281444.1743684247&ecid=2023290265&uaa=x86&uab=64&uafvl=Chromium%3B134.0.6998.178%7CNot%253AA-Brand%3B24.0.0.0%7CGoogle%2520Chrome%3B134.0.6998.178&uamb=0&uam=&uap=Windows&uapv=10.0.0&uaw=0&are=1&pae=1&frm=0&pscdl=noapi&_eu=ABAI&_s=625&dl=https%3A%2F%2Freplit.com%2F%40robenedwan%2FRobinAiCompanion&dr=https%3A%2F%2Fwww.google.com%2F&dp=%2F%40robenedwan%2FRobinAiCompanion&dt=replEnvironmentDesktop&sid=1743870975&sct=8&seg=1&_tu=wAQ&en=VNC%20opened&_ee=1&ep.event_category=All&ep.value=0&tfd=28471835".
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+Gc @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:214
+Cl @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:383
+AL @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:794
+h.xb @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:799
+h.add @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:801
+h.tk @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:820
+h.Kn @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:820
+(anonymous) @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:816
+Hm @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:404
+jo @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:414
+(anonymous) @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:816
+c @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:590
+Nx @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:590
+h.Jn @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:816
+c @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:832
+w @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:431
+Qm @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:405
+Wp @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:431
+Vp.flush @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:435
+Vp.push @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:433
+Op @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:428
+event @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:686
+uC @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:692
+b.push @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:697
+pC @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:697
+WC @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:708
+XC.b.push @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:709
+Sa @ analytics.js:42
+(anonymous) @ analytics.js:73
+(anonymous) @ analytics.js:38
+(anonymous) @ analytics.js:77
+(anonymous) @ analytics.js:57
+(anonymous) @ analytics.js:93
+(anonymous) @ analytics.js:92
+N @ analytics.js:94
+(anonymous) @ index.js:351
+(anonymous) @ protos.js:372
+(anonymous) @ protos.js:178
+(anonymous) @ index.ts:270
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ ajs-destination.bundle.ed53a26b6edc80c65d73.js:1
+(anonymous) @ index.ts:286
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ ajs-destination.bundle.ed53a26b6edc80c65d73.js:1
+(anonymous) @ delivery.js:28
+(anonymous) @ delivery.js:11
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ delivery.js:4
+o @ delivery.js:27
+(anonymous) @ event-queue.js:325
+(anonymous) @ event-queue.js:323
+r @ _app-a44ccbf6754eb462.js:13
+setTimeout
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+(anonymous) @ event-queue.js:321
+(anonymous) @ event-queue.js:320
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:273
+(anonymous) @ event-queue.js:181
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:169
+(anonymous) @ event-queue.js:135
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:128
+(anonymous) @ dispatch.js:25
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+h @ dispatch.js:18
+(anonymous) @ index.ts:460
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ index.ts:454
+(anonymous) @ index.ts:253
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ index.ts:241
+A @ _app-a44ccbf6754eb462.js:15
+CB @ 2124-b9ee59c09bf533a5.js:1
+ld @ framework-6ec390c36ec224b5.js:1
+od @ framework-6ec390c36ec224b5.js:1
+i @ framework-6ec390c36ec224b5.js:1
+uI @ framework-6ec390c36ec224b5.js:1
+(anonymous) @ framework-6ec390c36ec224b5.js:1
+uM @ framework-6ec390c36ec224b5.js:1
+uS @ framework-6ec390c36ec224b5.js:1
+C @ framework-6ec390c36ec224b5.js:1
+z @ framework-6ec390c36ec224b5.js:1
+_app-a44ccbf6754eb462.js:13 Fetch failed loading: POST "https://analytics.google.com/g/collect?v=2&tid=G-MPJY3F1YEL&gtm=45je5421h1v9135634466za200&_p=1743870974038&gcd=13l3l3l3l2l1&npa=0&dma=0&tag_exp=102788824~102803279~102813109~102887800~102926062~102975949~103016951~103021830~103027016&ul=en-us&sr=1524x858&cid=263281444.1743684247&ecid=2023290265&uaa=x86&uab=64&uafvl=Chromium%3B134.0.6998.178%7CNot%253AA-Brand%3B24.0.0.0%7CGoogle%2520Chrome%3B134.0.6998.178&uamb=0&uam=&uap=Windows&uapv=10.0.0&uaw=0&are=1&pae=1&frm=0&pscdl=noapi&_eu=ABAI&dl=https%3A%2F%2Freplit.com%2F%40robenedwan%2FRobinAiCompanion&dr=https%3A%2F%2Fwww.google.com%2F&dp=%2F%40robenedwan%2FRobinAiCompanion&dt=replEnvironmentDesktop&sid=1743870975&sct=8&seg=1&_tu=wAQ&_s=626&tfd=28476866".
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+Gc @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:214
+Cl @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:383
+AL @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:794
+h.flush @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:802
+(anonymous) @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:799
+r @ _app-a44ccbf6754eb462.js:13
+setTimeout
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+h.xb @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:799
+h.add @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:801
+h.tk @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:820
+h.Kn @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:820
+(anonymous) @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:816
+Hm @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:404
+jo @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:414
+(anonymous) @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:816
+c @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:590
+Nx @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:590
+h.Jn @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:816
+c @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:832
+w @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:431
+Qm @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:405
+Wp @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:431
+Vp.flush @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:435
+Vp.push @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:433
+Op @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:428
+event @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:686
+uC @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:692
+b.push @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:697
+pC @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:697
+WC @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:708
+XC.b.push @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:709
+Sa @ analytics.js:42
+(anonymous) @ analytics.js:73
+(anonymous) @ analytics.js:38
+(anonymous) @ analytics.js:77
+(anonymous) @ analytics.js:57
+(anonymous) @ analytics.js:93
+(anonymous) @ analytics.js:92
+N @ analytics.js:94
+(anonymous) @ index.js:351
+(anonymous) @ protos.js:372
+(anonymous) @ protos.js:178
+(anonymous) @ index.ts:270
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ ajs-destination.bundle.ed53a26b6edc80c65d73.js:1
+(anonymous) @ index.ts:286
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ ajs-destination.bundle.ed53a26b6edc80c65d73.js:1
+(anonymous) @ delivery.js:28
+(anonymous) @ delivery.js:11
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ delivery.js:4
+o @ delivery.js:27
+(anonymous) @ event-queue.js:325
+(anonymous) @ event-queue.js:323
+r @ _app-a44ccbf6754eb462.js:13
+setTimeout
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+(anonymous) @ event-queue.js:321
+(anonymous) @ event-queue.js:320
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:273
+(anonymous) @ event-queue.js:181
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:169
+(anonymous) @ event-queue.js:135
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:128
+(anonymous) @ dispatch.js:25
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+h @ dispatch.js:18
+(anonymous) @ index.ts:460
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ index.ts:454
+(anonymous) @ index.ts:253
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ index.ts:241
+A @ _app-a44ccbf6754eb462.js:15
+CB @ 2124-b9ee59c09bf533a5.js:1
+ld @ framework-6ec390c36ec224b5.js:1
+od @ framework-6ec390c36ec224b5.js:1
+i @ framework-6ec390c36ec224b5.js:1
+uI @ framework-6ec390c36ec224b5.js:1
+(anonymous) @ framework-6ec390c36ec224b5.js:1
+uM @ framework-6ec390c36ec224b5.js:1
+u_ @ framework-6ec390c36ec224b5.js:1
+r6 @ framework-6ec390c36ec224b5.js:1
+(anonymous) @ framework-6ec390c36ec224b5.js:1
+uO @ framework-6ec390c36ec224b5.js:1
+uS @ framework-6ec390c36ec224b5.js:1
+C @ framework-6ec390c36ec224b5.js:1
+z @ framework-6ec390c36ec224b5.js:1
+service-worker.js:100 Service Worker: Caching new resource: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2Fcosmic-onboarding&id=%3Ar912%3A
+service-worker.js:93 Fetch finished loading: GET "https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/__replco/workspace_iframe.html?initialPath=%2Fcosmic-onboarding&id=%3Ar912%3A".
+(anonymous) @ service-worker.js:93
+Promise.then
+(anonymous) @ service-worker.js:86
+lockdown-install.js:1 Removing unpermitted intrinsics
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/cosmic-onboarding
+lockdown-install.js:1 Removing unpermitted intrinsics
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/icons/icon-192x192.png
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/sounds/cosmic.mp3
+cosmic-onboarding:1526 Service Worker تم تسجيله بنجاح: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/
+service-worker.js:74 Fetch finished loading: GET "https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/play-cosmic-sound?sound_type=welcome&language=en".
+(anonymous) @ service-worker.js:74
+cosmic-onboarding:1199 Fetch finished loading: GET "https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/play-cosmic-sound?sound_type=welcome&language=en".
+playCosmicSound @ cosmic-onboarding:1199
+(anonymous) @ cosmic-onboarding:1234
+service-worker.js:93 Fetch finished loading: GET "https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/sounds/en_welcome.mp3".
+(anonymous) @ service-worker.js:93
+Promise.then
+(anonymous) @ service-worker.js:86
+_app-a44ccbf6754eb462.js:13 Fetch failed loading: POST "https://analytics.google.com/g/collect?v=2&tid=G-MPJY3F1YEL&gtm=45je5421h1v9135634466za200&_p=1743870974038&gcd=13l3l3l3l2l1&npa=0&dma=0&tag_exp=102788824~102803279~102813109~102887800~102926062~102975949~103016951~103021830~103027016&ul=en-us&sr=1524x858&cid=263281444.1743684247&ecid=2023290265&uaa=x86&uab=64&uafvl=Chromium%3B134.0.6998.178%7CNot%253AA-Brand%3B24.0.0.0%7CGoogle%2520Chrome%3B134.0.6998.178&uamb=0&uam=&uap=Windows&uapv=10.0.0&uaw=0&are=1&pae=1&frm=0&pscdl=noapi&_eu=ABAI&_s=627&dl=https%3A%2F%2Freplit.com%2F%40robenedwan%2FRobinAiCompanion&dr=https%3A%2F%2Fwww.google.com%2F&dp=%2F%40robenedwan%2FRobinAiCompanion&dt=replEnvironmentDesktop&sid=1743870975&sct=8&seg=1&_tu=wAQ&en=Workspace%20Webview%20Used&_ee=1&ep.event_category=All&ep.value=0&_et=118&tfd=28484867".
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+Gc @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:214
+Cl @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:383
+AL @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:794
+h.flush @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:802
+(anonymous) @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:799
+r @ _app-a44ccbf6754eb462.js:13
+setTimeout
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+h.xb @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:799
+h.add @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:801
+h.tk @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:820
+h.Kn @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:820
+(anonymous) @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:816
+Hm @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:404
+jo @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:414
+(anonymous) @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:816
+c @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:590
+Nx @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:590
+h.Jn @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:816
+c @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:832
+w @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:431
+Qm @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:405
+Wp @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:431
+Vp.flush @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:435
+Vp.push @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:433
+Op @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:428
+event @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:686
+uC @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:692
+b.push @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:697
+pC @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:697
+WC @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:708
+XC.b.push @ js?id=G-MPJY3F1YEL&cx=c&_slc=1:709
+Sa @ analytics.js:42
+(anonymous) @ analytics.js:73
+(anonymous) @ analytics.js:38
+(anonymous) @ analytics.js:77
+(anonymous) @ analytics.js:57
+(anonymous) @ analytics.js:93
+(anonymous) @ analytics.js:92
+N @ analytics.js:94
+(anonymous) @ index.js:351
+(anonymous) @ protos.js:372
+(anonymous) @ protos.js:178
+(anonymous) @ index.ts:270
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ ajs-destination.bundle.ed53a26b6edc80c65d73.js:1
+(anonymous) @ index.ts:286
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ ajs-destination.bundle.ed53a26b6edc80c65d73.js:1
+(anonymous) @ delivery.js:28
+(anonymous) @ delivery.js:11
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ delivery.js:4
+o @ delivery.js:27
+(anonymous) @ event-queue.js:325
+(anonymous) @ event-queue.js:323
+r @ _app-a44ccbf6754eb462.js:13
+setTimeout
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+(anonymous) @ event-queue.js:321
+(anonymous) @ event-queue.js:320
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:273
+(anonymous) @ event-queue.js:181
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:169
+(anonymous) @ event-queue.js:135
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:128
+(anonymous) @ dispatch.js:25
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+h @ dispatch.js:18
+(anonymous) @ index.ts:460
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ index.ts:454
+(anonymous) @ index.ts:253
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ index.ts:241
+A @ _app-a44ccbf6754eb462.js:15
+U @ 2124-b9ee59c09bf533a5.js:1
+refresh @ 2124-b9ee59c09bf533a5.js:1
+(anonymous) @ 2124-b9ee59c09bf533a5.js:1
+(anonymous) @ _app-a44ccbf6754eb462.js:15
+(anonymous) @ _app-a44ccbf6754eb462.js:15
+onClick @ _app-a44ccbf6754eb462.js:15
+(anonymous) @ _app-a44ccbf6754eb462.js:1
+eB @ framework-6ec390c36ec224b5.js:1
+eH @ framework-6ec390c36ec224b5.js:1
+(anonymous) @ framework-6ec390c36ec224b5.js:1
+re @ framework-6ec390c36ec224b5.js:1
+rt @ framework-6ec390c36ec224b5.js:1
+(anonymous) @ framework-6ec390c36ec224b5.js:1
+uT @ framework-6ec390c36ec224b5.js:1
+eM @ framework-6ec390c36ec224b5.js:1
+ru @ framework-6ec390c36ec224b5.js:1
+tB @ framework-6ec390c36ec224b5.js:1
+tD @ framework-6ec390c36ec224b5.js:1
+r @ _app-a44ccbf6754eb462.js:13
