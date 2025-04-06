@@ -1,0 +1,280 @@
+/* 
+   Mood-Based Adaptive Themes - Mashaaer Feelings AI Application
+   Dynamic themes that adapt based on detected emotions
+*/
+
+:root {
+  /* Base variables copied from cosmic-theme.css */
+  --primary-purple: #9c27b0;
+  --primary-purple-light: #d0a0ff;
+  --primary-purple-dark: #6a0080;
+  --primary-glow: rgba(156, 39, 176, 0.6);
+  --dark-bg: #0f0f23;
+  --dark-bg-gradient: radial-gradient(circle at center, #151529 0%, #0c0c1d 100%);
+  --text-color: #ffffff;
+  --text-secondary: #e0d0ff;
+  --star-color: #ffffff;
+  --star-opacity: 0.8;
+  --orbit-color: rgba(255, 255, 255, 0.1);
+  --card-bg: rgba(18, 18, 18, 0.8);
+  --card-border: rgba(156, 39, 176, 0.3);
+  --input-bg: rgba(255, 255, 255, 0.1);
+  --input-border: rgba(255, 255, 255, 0.2);
+  
+  /* Theme transition timing */
+  --theme-transition: 1.2s;
+  
+  /* Particle effects */
+  --particle-color: rgba(255, 255, 255, 0.8);
+  --particle-speed: 1;
+}
+
+/* Happy Theme */
+[data-mood="happy"] {
+  --primary-color: #FFD700; /* Gold */
+  --primary-light: #FFEB99;
+  --primary-dark: #B8860B;
+  --primary-glow: rgba(255, 215, 0, 0.6);
+  --dark-bg: #1a1500;
+  --dark-bg-gradient: radial-gradient(circle at center, #392e00 0%, #1a1500 100%);
+  --text-color: #ffffff;
+  --text-secondary: #FFFACD;
+  --star-color: #FFFACD;
+  --star-opacity: 0.9;
+  --orbit-color: rgba(255, 215, 0, 0.15);
+  --card-bg: rgba(26, 21, 0, 0.8);
+  --card-border: rgba(255, 215, 0, 0.3);
+  --input-bg: rgba(255, 255, 255, 0.1);
+  --input-border: rgba(255, 215, 0, 0.2);
+  --particle-color: rgba(255, 215, 0, 0.8);
+  --particle-speed: 1.2;
+}
+
+/* Sad Theme */
+[data-mood="sad"] {
+  --primary-color: #0064ff; /* Blue */
+  --primary-light: #99c1ff;
+  --primary-dark: #0046b3;
+  --primary-glow: rgba(0, 100, 255, 0.6);
+  --dark-bg: #001433;
+  --dark-bg-gradient: radial-gradient(circle at center, #002966 0%, #001433 100%);
+  --text-color: #ffffff;
+  --text-secondary: #cce0ff;
+  --star-color: #e6f0ff;
+  --star-opacity: 0.7;
+  --orbit-color: rgba(0, 100, 255, 0.15);
+  --card-bg: rgba(0, 20, 51, 0.8);
+  --card-border: rgba(0, 100, 255, 0.3);
+  --input-bg: rgba(255, 255, 255, 0.1);
+  --input-border: rgba(0, 100, 255, 0.2);
+  --particle-color: rgba(0, 100, 255, 0.7);
+  --particle-speed: 0.7;
+}
+
+/* Angry Theme */
+[data-mood="angry"] {
+  --primary-color: #ff3c00; /* Red-Orange */
+  --primary-light: #ff8c66;
+  --primary-dark: #b32a00;
+  --primary-glow: rgba(255, 60, 0, 0.6);
+  --dark-bg: #330d00;
+  --dark-bg-gradient: radial-gradient(circle at center, #661a00 0%, #330d00 100%);
+  --text-color: #ffffff;
+  --text-secondary: #ffccbd;
+  --star-color: #ffebe5;
+  --star-opacity: 0.8;
+  --orbit-color: rgba(255, 60, 0, 0.15);
+  --card-bg: rgba(51, 13, 0, 0.8);
+  --card-border: rgba(255, 60, 0, 0.3);
+  --input-bg: rgba(255, 255, 255, 0.1);
+  --input-border: rgba(255, 60, 0, 0.2);
+  --particle-color: rgba(255, 60, 0, 0.8);
+  --particle-speed: 1.5;
+}
+
+/* Calm Theme (New) */
+[data-mood="calm"] {
+  --primary-color: #30D5C8; /* Turquoise */
+  --primary-light: #99EAE4;
+  --primary-dark: #20958C;
+  --primary-glow: rgba(48, 213, 200, 0.6);
+  --dark-bg: #003330;
+  --dark-bg-gradient: radial-gradient(circle at center, #005952 0%, #003330 100%);
+  --text-color: #ffffff;
+  --text-secondary: #CCF2EF;
+  --star-color: #E5F9F7;
+  --star-opacity: 0.7;
+  --orbit-color: rgba(48, 213, 200, 0.15);
+  --card-bg: rgba(0, 51, 48, 0.8);
+  --card-border: rgba(48, 213, 200, 0.3);
+  --input-bg: rgba(255, 255, 255, 0.1);
+  --input-border: rgba(48, 213, 200, 0.2);
+  --particle-color: rgba(48, 213, 200, 0.7);
+  --particle-speed: 0.5;
+}
+
+/* Neutral Theme (Default) */
+[data-mood="neutral"] {
+  --primary-color: #9c27b0; /* Purple */
+  --primary-light: #d0a0ff;
+  --primary-dark: #6a0080;
+  --primary-glow: rgba(156, 39, 176, 0.6);
+  --dark-bg: #0f0f23;
+  --dark-bg-gradient: radial-gradient(circle at center, #151529 0%, #0c0c1d 100%);
+  --text-color: #ffffff;
+  --text-secondary: #e0d0ff;
+  --star-color: #ffffff;
+  --star-opacity: 0.8;
+  --orbit-color: rgba(255, 255, 255, 0.1);
+  --card-bg: rgba(18, 18, 18, 0.8);
+  --card-border: rgba(156, 39, 176, 0.3);
+  --input-bg: rgba(255, 255, 255, 0.1);
+  --input-border: rgba(255, 255, 255, 0.2);
+  --particle-color: rgba(255, 255, 255, 0.8);
+  --particle-speed: 1;
+}
+
+/* Visual Element Customizations for Moods */
+
+/* Sphere Customizations */
+[data-mood="happy"] .sphere, 
+[data-mood="happy"] .cosmic-sphere {
+  background: radial-gradient(circle at 30% 30%, var(--primary-light), var(--primary-dark));
+  box-shadow: 0 0 60px var(--primary-glow);
+  animation: happy-pulse 4s infinite alternate, float 6s ease-in-out infinite;
+}
+
+[data-mood="sad"] .sphere,
+[data-mood="sad"] .cosmic-sphere {
+  background: radial-gradient(circle at 30% 30%, var(--primary-light), var(--primary-dark));
+  box-shadow: 0 0 50px var(--primary-glow);
+  animation: sad-pulse 5s infinite alternate, slow-float 8s ease-in-out infinite;
+}
+
+[data-mood="angry"] .sphere,
+[data-mood="angry"] .cosmic-sphere {
+  background: radial-gradient(circle at 30% 30%, var(--primary-light), var(--primary-dark));
+  box-shadow: 0 0 70px var(--primary-glow);
+  animation: angry-pulse 2s infinite alternate, quick-float 4s ease-in-out infinite;
+}
+
+[data-mood="calm"] .sphere,
+[data-mood="calm"] .cosmic-sphere {
+  background: radial-gradient(circle at 30% 30%, var(--primary-light), var(--primary-dark));
+  box-shadow: 0 0 45px var(--primary-glow);
+  animation: calm-pulse 6s infinite alternate, gentle-float 10s ease-in-out infinite;
+}
+
+/* Particle effects */
+[data-mood] .star {
+  background-color: var(--star-color);
+  opacity: var(--star-opacity);
+}
+
+[data-mood] .orbital-particle {
+  background-color: var(--primary-color);
+  box-shadow: 0 0 8px var(--primary-glow);
+}
+
+[data-mood] .orbit {
+  border-color: var(--orbit-color);
+}
+
+/* Button Customizations */
+[data-mood] .enter-button,
+[data-mood] .btn-primary {
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+  box-shadow: 0 5px 20px var(--primary-glow);
+}
+
+[data-mood] .enter-button:hover,
+[data-mood] .btn-primary:hover {
+  box-shadow: 0 8px 25px var(--primary-glow);
+}
+
+/* Typography Customizations */
+[data-mood] .title {
+  color: var(--primary-color);
+  text-shadow: 0 0 15px var(--primary-glow);
+}
+
+[data-mood] .subtitle {
+  color: var(--text-secondary);
+}
+
+/* Special Animations for Moods */
+@keyframes happy-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 40px var(--primary-glow);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 70px var(--primary-glow);
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}
+
+@keyframes sad-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 30px var(--primary-glow);
+    transform: translate(-50%, -50%) scale(0.98);
+  }
+  50% { 
+    box-shadow: 0 0 50px var(--primary-glow);
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes angry-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 40px var(--primary-glow);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 80px var(--primary-glow);
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+@keyframes calm-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 30px var(--primary-glow);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 45px var(--primary-glow);
+    transform: translate(-50%, -50%) scale(1.02);
+  }
+}
+
+@keyframes quick-float {
+  0%, 100% { transform: translate(-50%, -50%); }
+  25% { transform: translate(-53%, -50%); }
+  50% { transform: translate(-50%, -55%); }
+  75% { transform: translate(-47%, -50%); }
+}
+
+@keyframes slow-float {
+  0%, 100% { transform: translate(-50%, -50%); }
+  33% { transform: translate(-52%, -50%); }
+  66% { transform: translate(-50%, -53%); }
+}
+
+@keyframes gentle-float {
+  0%, 100% { transform: translate(-50%, -50%); }
+  25% { transform: translate(-51%, -50%); }
+  50% { transform: translate(-50%, -51%); }
+  75% { transform: translate(-49%, -50%); }
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  [data-mood] .title {
+    font-size: 1.8rem;
+  }
+  
+  [data-mood] .subtitle, 
+  [data-mood] .subtitle-en {
+    font-size: 0.9rem;
+  }
+}

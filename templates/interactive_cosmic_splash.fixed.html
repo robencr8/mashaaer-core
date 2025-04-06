@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="en" dir="ltr">
+<html lang="en" dir="ltr" id="html-root" data-mood="neutral">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -14,6 +14,7 @@
   <link rel="manifest" href="/static/manifest.json">
   <link rel="icon" href="/static/icons/icon-192x192.png">
   <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+  <link rel="stylesheet" href="/static/css/mood-themes.css">
   <style>
     body {
       margin: 0;
@@ -658,7 +659,7 @@
 
   <!-- Audio element for background sound -->
   <audio id="background-audio" loop>
-    <source src="/static/sounds/cosmic.mp3" type="audio/mp3">
+    <source src="/static/sounds/silence.mp3" type="audio/mp3">
   </audio>
 
   <script>
@@ -1233,19 +1234,9 @@
       // Play welcome sound now that audio is enabled
       playCosmicSound("welcome", currentLanguage);
 
-      // Only play background audio if user has enabled audio
-      // Using a silent sound file now for cosmic.mp3 to prevent TTS voice
-      if (document.getElementById('audio-icon').className === 'fas fa-volume-up') {
-        try {
-          const bgAudio = document.getElementById('background-audio');
-          // Set volume very low
-          bgAudio.volume = 0.1;
-          bgAudio.play().catch(err => {
-            console.error('Background audio play error:', err);
-          });
-        } catch (err) {
-          console.error('Error playing background audio:', err);
-        }
+      // Background audio is disabled to prevent the looping voice issue
+      // We'll only play the welcome sound (which has been fixed)
+      // This effectively stops the "cosmic ambient music" voice from playing
       }
     });
     
@@ -1535,6 +1526,57 @@
             });
         });
       }
+    </script>
+    
+    <!-- Mood Theme Manager -->
+    <script src="/static/js/mood-theme-manager.js"></script>
+    <script>
+      // Add emotions support to particle system
+      window.particleSystem = {
+        updateSettings: function(settings) {
+          // Update star colors
+          const stars = document.querySelectorAll('.star');
+          stars.forEach(star => {
+            star.style.backgroundColor = settings.color;
+            star.style.opacity = Math.random() * 0.4 + 0.4; // Varied opacity
+          });
+          
+          // Update animation speeds if needed
+          document.documentElement.style.setProperty('--particle-speed', settings.speed);
+        }
+      };
+      
+      // Connect emotion detection to theme system
+      function applyEmotionToSphere(emotion) {
+        // Remove all emotion classes from sphere glow
+        const sphereGlow = document.getElementById('sphere-glow');
+        sphereGlow.classList.remove('sphere-happy', 'sphere-sad', 'sphere-angry');
+        
+        // Add the new emotion class if not neutral
+        if (emotion !== 'neutral') {
+          sphereGlow.classList.add(`sphere-${emotion}`);
+        }
+        
+        // Update global emotion state
+        recognizedEmotion = emotion;
+        
+        // Update theme based on emotion
+        if (window.moodThemeManager) {
+          window.moodThemeManager.setMoodTheme(emotion);
+        }
+        
+        // Trigger particle color update based on emotion
+        updateParticleColors(emotion);
+      }
+      
+      // Handle emotion changes when the system dispatches emotion events
+      document.addEventListener('emotionDetected', function(e) {
+        if (e.detail && e.detail.emotion) {
+          if (window.moodThemeManager) {
+            window.moodThemeManager.setMoodTheme(e.detail.emotion);
+          }
+        }
+      });
     </script>
     </body>
 </html>
