@@ -1,265 +1,204 @@
 /**
- * Cosmic Sound System
+ * Cosmic Sound System - Fixed Version
  * 
- * Provides dynamic emotion-based ambient music that automatically 
- * switches based on the detected emotion.
+ * A completely rewritten and simplified version to fix the looping voice issue.
  */
 
-class CosmicSoundSystem {
-    constructor() {
-        // Audio context
-        this.audioContext = null;
-        
-        // Current playing audio element
-        this.currentAudio = null;
-        
-        // Current emotion being played
-        this.currentEmotion = null;
-        
-        // Path to audio files
-        this.audioPath = "/static/mobile/audio/";
-        
-        // Mapping of emotions to audio files
-        this.emotionTracks = {
-            "sad": "sad_cosmic.mp3",
-            "happy": "happy_cosmic.mp3",
-            "angry": "angry_cosmic.mp3",
-            "calm": "calm_cosmic.mp3",
-            "neutral": "cosmicmusic.mp3",  // Default track
-            "default": "cosmicmusic.mp3"   // Fallback
-        };
-        
-        // Track status
-        this.isInitialized = false;
-        this.isMuted = false;
-        
-        // Volume settings
-        this.defaultVolume = 0.3;  // 30% volume by default
-        this.currentVolume = this.defaultVolume;
-        
-        // Transition settings
-        this.fadeTime = 2000;  // 2 seconds fade in/out
-        
-        // Initialize the system
-        this.init();
-    }
-    
-    /**
-     * Initialize the cosmic sound system
-     */
-    init() {
-        try {
-            // Create audio context
-            window.AudioContext = window.AudioContext || window.webkitAudioContext;
-            this.audioContext = new AudioContext();
-            
-            // Pre-load emotional tracks
-            this.preloadTracks();
-            
-            this.isInitialized = true;
-            console.log("Cosmic Sound System initialized");
-        } catch (e) {
-            console.error("Failed to initialize Cosmic Sound System:", e);
-        }
-    }
-    
-    /**
-     * Preload audio tracks for faster switching
-     */
-    preloadTracks() {
-        for (const emotion in this.emotionTracks) {
-            const audio = new Audio(this.audioPath + this.emotionTracks[emotion]);
-            audio.preload = "auto";
-            audio.load();
-        }
-    }
-    
-    /**
-     * Play ambient track for the specified emotion
-     * @param {string} emotion - The detected emotion
-     */
-    playEmotionSoundscape(emotion) {
-        if (!this.isInitialized) {
-            console.warn("Cosmic Sound System not initialized");
-            return;
-        }
-        
-        // Normalize emotion to lowercase
-        emotion = emotion.toLowerCase();
-        
-        // If same emotion is already playing, do nothing
-        if (this.currentEmotion === emotion) {
-            return;
-        }
-        
-        // Map the emotion to a valid track
-        if (!this.emotionTracks[emotion]) {
-            emotion = "default";
-        }
-        
-        console.log(`Switching cosmic ambient track to: ${emotion}`);
-        
-        // Load the new audio track
-        const newAudio = new Audio(this.audioPath + this.emotionTracks[emotion]);
-        newAudio.loop = true;
-        newAudio.volume = 0;  // Start at zero for fade in
-        
-        // Event listener for when audio is ready to play
-        newAudio.addEventListener("canplaythrough", () => {
-            // If there's a current track playing, fade it out
-            if (this.currentAudio) {
-                this.fadeOut(this.currentAudio, () => {
-                    this.currentAudio.pause();
-                    this.currentAudio = null;
-                });
-            }
-            
-            // Start playing the new track and fade it in
-            newAudio.play()
-                .then(() => {
-                    this.fadeIn(newAudio);
-                    this.currentAudio = newAudio;
-                    this.currentEmotion = emotion;
-                })
-                .catch(error => {
-                    console.error("Error playing cosmic audio:", error);
-                    // Try to play on next user interaction
-                    document.addEventListener("click", () => {
-                        newAudio.play()
-                            .then(() => {
-                                this.fadeIn(newAudio);
-                                this.currentAudio = newAudio;
-                                this.currentEmotion = emotion;
-                            })
-                            .catch(e => console.error("Failed to play on user interaction:", e));
-                    }, { once: true });
-                });
-        });
-        
-        newAudio.load();
-    }
-    
-    /**
-     * Fade in the audio element
-     * @param {HTMLAudioElement} audio - The audio element to fade in
-     */
-    fadeIn(audio) {
-        if (!audio) return;
-        
-        let volume = 0;
-        const targetVolume = this.isMuted ? 0 : this.currentVolume;
-        const fadeInterval = 50; // ms
-        const step = targetVolume / (this.fadeTime / fadeInterval);
-        
-        const interval = setInterval(() => {
-            if (volume < targetVolume) {
-                volume = Math.min(volume + step, targetVolume);
-                audio.volume = volume;
-            } else {
-                clearInterval(interval);
-            }
-        }, fadeInterval);
-    }
-    
-    /**
-     * Fade out the audio element
-     * @param {HTMLAudioElement} audio - The audio element to fade out
-     * @param {Function} callback - Optional callback after fade out
-     */
-    fadeOut(audio, callback) {
-        if (!audio) return;
-        
-        let volume = audio.volume;
-        const fadeInterval = 50; // ms
-        const step = volume / (this.fadeTime / fadeInterval);
-        
-        const interval = setInterval(() => {
-            if (volume > 0.01) {
-                volume = Math.max(volume - step, 0);
-                audio.volume = volume;
-            } else {
-                clearInterval(interval);
-                audio.volume = 0;
-                if (callback) callback();
-            }
-        }, fadeInterval);
-    }
-    
-    /**
-     * Set the volume for the cosmic sound system
-     * @param {number} volume - Volume level (0.0 to 1.0)
-     */
-    setVolume(volume) {
-        // Ensure volume is between 0 and 1
-        volume = Math.max(0, Math.min(1, volume));
-        
-        this.currentVolume = volume;
-        
-        if (this.currentAudio && !this.isMuted) {
-            this.currentAudio.volume = volume;
-        }
-    }
-    
-    /**
-     * Mute or unmute the cosmic sound system
-     * @param {boolean} mute - Whether to mute (true) or unmute (false)
-     */
-    setMute(mute) {
-        this.isMuted = mute;
-        
-        if (this.currentAudio) {
-            if (mute) {
-                this.fadeOut(this.currentAudio);
-            } else {
-                this.fadeIn(this.currentAudio);
-            }
-        }
-    }
-    
-    /**
-     * Stop playing any currently playing tracks
-     */
-    stop() {
-        if (this.currentAudio) {
-            this.fadeOut(this.currentAudio, () => {
-                this.currentAudio.pause();
-                this.currentAudio = null;
-                this.currentEmotion = null;
-            });
-        }
-    }
-}
+// Global audio elements - one for each type of sound to prevent multiple instances
+const ambientAudio = new Audio();
+ambientAudio.loop = true;
+ambientAudio.volume = 0.3;
+let isMuted = false;
 
-// Create a global instance
-const cosmicSoundSystem = new CosmicSoundSystem();
+// UI sounds will use separate non-looping audio elements
+const uiAudio = new Audio();
+uiAudio.loop = false;
+uiAudio.volume = 0.5;
 
 /**
- * Play emotion soundscape - global function for easy access
+ * Play emotion soundscape
  * @param {string} emotion - The detected emotion
  */
 function playEmotionSoundscape(emotion) {
-    cosmicSoundSystem.playEmotionSoundscape(emotion);
+    // First stop any currently playing ambient track
+    stopCosmicSounds();
+    
+    console.log(`Starting new soundscape for: ${emotion}`);
+    
+    // Normalize emotion and map to file path
+    emotion = emotion.toLowerCase();
+    let trackFile;
+    
+    switch(emotion) {
+        case 'happy':
+            trackFile = 'happy_cosmic.mp3';
+            break;
+        case 'sad':
+            trackFile = 'sad_cosmic.mp3';
+            break;
+        case 'angry':
+            trackFile = 'angry_cosmic.mp3';
+            break;
+        case 'calm':
+            trackFile = 'calm_cosmic.mp3';
+            break;
+        default:
+            trackFile = 'cosmicmusic.mp3'; // Default track
+            break;
+    }
+    
+    // Set the source and start playing
+    ambientAudio.src = `/static/mobile/audio/${trackFile}`;
+    ambientAudio.currentTime = 0;
+    
+    // Play only if not muted
+    if (!isMuted) {
+        ambientAudio.play()
+            .catch(error => {
+                console.error("Error playing ambient audio:", error);
+            });
+    }
 }
 
 /**
- * Set the volume for the cosmic sound system
+ * Play UI interaction sound
+ * @param {string} soundType - The type of sound to play (click, hover, etc.)
+ * @param {number} volume - Optional volume override (0.0 to 1.0)
+ * @returns {Promise<boolean>} - Resolves to true if sound played successfully
+ */
+function playUISound(soundType, volume = null) {
+    if (isMuted) {
+        return Promise.resolve(false);
+    }
+    
+    // Map sound types to file names
+    let soundFile;
+    switch(soundType.toLowerCase()) {
+        case 'click':
+            soundFile = 'click.mp3';
+            break;
+        case 'hover':
+            soundFile = 'hover.mp3';
+            break;
+        case 'success':
+            soundFile = 'success.mp3';
+            break;
+        case 'error':
+            soundFile = 'error.mp3';
+            break;
+        case 'notification':
+            soundFile = 'notification.mp3';
+            break;
+        default:
+            console.warn(`Unknown UI sound type: ${soundType}`);
+            return Promise.resolve(false);
+    }
+    
+    // Set the source and volume
+    uiAudio.src = `/static/sounds/${soundFile}`;
+    uiAudio.volume = volume !== null ? volume : 0.5;
+    uiAudio.currentTime = 0;
+    
+    // Play the sound
+    return uiAudio.play()
+        .then(() => true)
+        .catch(error => {
+            console.warn(`Error playing UI sound:`, error);
+            return false;
+        });
+}
+
+/**
+ * Play welcome sound in specified language
+ * @param {string} language - The language code (en, ar)
+ * @param {number} volume - Optional volume override (0.0 to 1.0)
+ * @returns {Promise<boolean>} - Resolves to true if sound played successfully
+ */
+function playWelcomeSound(language = 'en', volume = null) {
+    if (isMuted) {
+        return Promise.resolve(false);
+    }
+    
+    // Set the source and volume
+    uiAudio.src = `/static/sounds/${language}_welcome.mp3`;
+    uiAudio.volume = volume !== null ? volume : 0.5;
+    uiAudio.currentTime = 0;
+    
+    // Play the sound
+    return uiAudio.play()
+        .then(() => true)
+        .catch(error => {
+            console.warn(`Error playing welcome sound:`, error);
+            return false;
+        });
+}
+
+/**
+ * Play a cosmic sound
+ * @param {string} soundType - The type of sound to play
+ * @param {string} language - The language code (optional)
+ * @param {number} volume - Optional volume override (0.0 to 1.0)
+ * @returns {Promise<boolean>} - Resolves to true if sound played successfully
+ */
+function playCosmicSound(soundType, language = null, volume = null) {
+    // Welcome sounds use language code
+    if (soundType === 'welcome' && language) {
+        return playWelcomeSound(language, volume);
+    }
+    
+    // UI sounds
+    return playUISound(soundType, volume);
+}
+
+/**
+ * Set the volume for ambient cosmic sounds
  * @param {number} volume - Volume level (0.0 to 1.0)
  */
 function setCosmicVolume(volume) {
-    cosmicSoundSystem.setVolume(volume);
+    // Ensure volume is between 0 and 1
+    volume = Math.max(0, Math.min(1, volume));
+    ambientAudio.volume = volume;
 }
 
 /**
- * Mute or unmute the cosmic sound system
+ * Set the volume for UI sounds
+ * @param {number} volume - Volume level (0.0 to 1.0)
+ */
+function setUISoundVolume(volume) {
+    // Ensure volume is between 0 and 1
+    volume = Math.max(0, Math.min(1, volume));
+    uiAudio.volume = volume;
+}
+
+/**
+ * Mute or unmute all sounds
  * @param {boolean} mute - Whether to mute (true) or unmute (false)
  */
 function muteCosmicSounds(mute) {
-    cosmicSoundSystem.setMute(mute);
+    isMuted = mute;
+    
+    if (mute) {
+        ambientAudio.pause();
+    } else if (ambientAudio.src) {
+        ambientAudio.play().catch(e => console.warn("Could not resume playback:", e));
+    }
 }
 
 /**
- * Stop playing any currently playing tracks
+ * Stop all ambient sounds
  */
 function stopCosmicSounds() {
-    cosmicSoundSystem.stop();
+    ambientAudio.pause();
+    ambientAudio.currentTime = 0;
+    ambientAudio.src = '';
 }
+
+// Initialize on page load - listen for first interaction to unlock audio
+document.addEventListener('DOMContentLoaded', () => {
+    document.body.addEventListener('click', () => {
+        // Create and play a silent audio to unlock audio context
+        const silent = new Audio('/static/sounds/silence.mp3');
+        silent.volume = 0.1;
+        silent.play().catch(e => console.log('Silent audio unlock:', e));
+    }, { once: true });
+});

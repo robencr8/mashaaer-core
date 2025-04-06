@@ -103,5 +103,12 @@ def register_routes(app):
         logger.debug("Serving sound test debugging page")
         return send_from_directory("static", "sound_test.html")
     
+    # Cosmic interaction sounds demo page
+    @app.route("/cosmic-interaction-demo")
+    def cosmic_interaction_demo():
+        """Demo page for testing cosmic interaction sounds""" 
+        logger.debug("Serving cosmic interaction demo page")
+        return send_from_directory("static", "cosmic_interaction_demo.html")
+
     # Return the app to allow chaining
     return app

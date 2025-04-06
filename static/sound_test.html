@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmic Sound Test</title>
+    <title>Sound System Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,140 +13,201 @@
             background-color: #f0f0f0;
         }
         h1 {
-            color: #8a2be2;
-            text-align: center;
-        }
-        .test-container {
-            background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            color: #333;
         }
         button {
-            background-color: #8a2be2;
+            padding: 10px 15px;
+            margin: 5px;
+            background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
-            margin: 5px;
         }
         button:hover {
-            background-color: #7a1bce;
+            background-color: #45a049;
         }
-        .result {
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .log {
             margin-top: 20px;
             padding: 15px;
-            background-color: #f9f9f9;
+            background-color: #fff;
             border-radius: 5px;
-            border-left: 4px solid #8a2be2;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
         }
-        pre {
-            overflow-x: auto;
-            background-color: #f0f0f0;
-            padding: 10px;
-            border-radius: 5px;
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        .info {
+            color: blue;
         }
     </style>
 </head>
 <body>
-    <h1>Cosmic Sound Test</h1>
+    <h1>Sound System Test</h1>
+    <p>This page tests the cosmic sound system with simplified logic.</p>
     
-    <div class="test-container">
-        <h2>1. Test Welcome Sound</h2>
-        <p>Test the welcome sound with different languages:</p>
-        <button onclick="testSound('welcome', 'en')">English Welcome</button>
-        <button onclick="testSound('welcome', 'ar')">Arabic Welcome</button>
-        <div class="result" id="welcome-result">Results will appear here</div>
+    <div class="controls">
+        <h2>Ambient Sound Controls</h2>
+        <button onclick="testHappy()">Play Happy</button>
+        <button onclick="testSad()">Play Sad</button>
+        <button onclick="testAngry()">Play Angry</button>
+        <button onclick="testCalm()">Play Calm</button>
+        <button onclick="testNeutral()">Play Neutral</button>
+        <button onclick="stopAll()">Stop All</button>
     </div>
-
-    <div class="test-container">
-        <h2>2. Test Click Sounds</h2>
-        <p>Test the UI click sound effect:</p>
-        <button onclick="testSound('click')">Play Click Sound</button>
-        <div class="result" id="click-result">Results will appear here</div>
+    
+    <div class="controls">
+        <h2>UI Sound Controls</h2>
+        <button onclick="testUISound('click')">Click</button>
+        <button onclick="testUISound('hover')">Hover</button>
+        <button onclick="testUISound('success')">Success</button>
+        <button onclick="testUISound('error')">Error</button>
+        <button onclick="testWelcome('en')">Welcome (EN)</button>
+        <button onclick="testWelcome('ar')">Welcome (AR)</button>
     </div>
-
-    <div class="test-container">
-        <h2>3. Test Hover Sounds</h2>
-        <p>Test the UI hover sound effect:</p>
-        <button onclick="testSound('hover')">Play Hover Sound</button>
-        <div class="result" id="hover-result">Results will appear here</div>
+    
+    <div class="controls">
+        <h2>Volume Controls</h2>
+        <label for="ambientVolume">Ambient Volume:</label>
+        <input type="range" id="ambientVolume" min="0" max="1" step="0.1" value="0.3" onchange="setAmbientVolume(this.value)">
+        <span id="ambientVolumeValue">0.3</span>
+        
+        <br><br>
+        
+        <label for="uiVolume">UI Volume:</label>
+        <input type="range" id="uiVolume" min="0" max="1" step="0.1" value="0.5" onchange="setUIVolume(this.value)">
+        <span id="uiVolumeValue">0.5</span>
+        
+        <br><br>
+        
+        <button onclick="toggleMute()">Mute/Unmute</button>
     </div>
-
-    <div class="test-container">
-        <h2>4. Audio Element Test</h2>
-        <p>Test direct audio element playback:</p>
-        <button id="play-direct">Play Direct Audio</button>
-        <div class="result" id="direct-result">Results will appear here</div>
+    
+    <div class="log" id="logContainer">
+        <div class="log-entry info">Sound test initialized. Click a button to begin testing.</div>
     </div>
-
+    
+    <script src="/static/js/cosmic_sound_system.js"></script>
     <script>
-        // Function to test the cosmic sound API
-        function testSound(soundType, language) {
-            const resultId = soundType + '-result';
-            const resultElement = document.getElementById(resultId);
-            
-            resultElement.innerHTML = `<p>Testing ${soundType} sound${language ? ' in ' + language : ''}...</p>`;
-            
-            // Construct the URL based on parameters
-            const url = `/api/play-cosmic-sound?sound_type=${soundType}${language ? '&language=' + language : ''}`;
-            
-            // Make the API request
-            fetch(url)
-                .then(response => {
-                    resultElement.innerHTML += `<p>Response status: ${response.status}</p>`;
-                    return response.json();
-                })
-                .then(data => {
-                    resultElement.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-                    
-                    // If successful, play the sound
-                    if (data.success && data.sound_path) {
-                        const audio = new Audio(data.sound_path);
-                        audio.volume = 0.5;
-                        audio.play()
-                            .then(() => {
-                                resultElement.innerHTML += `<p style="color: green;">Sound playing successfully!</p>`;
-                            })
-                            .catch(err => {
-                                resultElement.innerHTML += `<p style="color: red;">Error playing sound: ${err.message}</p>`;
-                            });
+        // Reference to log container
+        const logContainer = document.getElementById('logContainer');
+        
+        // Log function
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = message;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        // Test functions
+        function testHappy() {
+            log('Testing Happy ambient sound...', 'info');
+            playEmotionSoundscape('happy');
+            log('Happy ambient sound triggered.', 'success');
+        }
+        
+        function testSad() {
+            log('Testing Sad ambient sound...', 'info');
+            playEmotionSoundscape('sad');
+            log('Sad ambient sound triggered.', 'success');
+        }
+        
+        function testAngry() {
+            log('Testing Angry ambient sound...', 'info');
+            playEmotionSoundscape('angry');
+            log('Angry ambient sound triggered.', 'success');
+        }
+        
+        function testCalm() {
+            log('Testing Calm ambient sound...', 'info');
+            playEmotionSoundscape('calm');
+            log('Calm ambient sound triggered.', 'success');
+        }
+        
+        function testNeutral() {
+            log('Testing Neutral ambient sound...', 'info');
+            playEmotionSoundscape('neutral');
+            log('Neutral ambient sound triggered.', 'success');
+        }
+        
+        function stopAll() {
+            log('Stopping all sounds...', 'info');
+            stopCosmicSounds();
+            log('All sounds stopped.', 'success');
+        }
+        
+        function testUISound(type) {
+            log(`Testing UI sound: ${type}...`, 'info');
+            playUISound(type)
+                .then(success => {
+                    if (success) {
+                        log(`UI sound ${type} played successfully.`, 'success');
+                    } else {
+                        log(`Failed to play UI sound ${type}.`, 'error');
                     }
-                })
-                .catch(error => {
-                    resultElement.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
                 });
         }
-
-        // Test direct audio playback
-        document.getElementById('play-direct').addEventListener('click', function() {
-            const resultElement = document.getElementById('direct-result');
-            resultElement.innerHTML = '<p>Testing direct audio playback...</p>';
-            
-            try {
-                const audio = new Audio('/static/sounds/click.mp3');
-                audio.volume = 0.5;
-                audio.play()
-                    .then(() => {
-                        resultElement.innerHTML += `<p style="color: green;">Direct sound playing successfully!</p>`;
-                    })
-                    .catch(err => {
-                        resultElement.innerHTML += `<p style="color: red;">Error playing direct sound: ${err.message}</p>`;
-                    });
-            } catch (err) {
-                resultElement.innerHTML += `<p style="color: red;">Error creating audio element: ${err.message}</p>`;
+        
+        function testWelcome(language) {
+            log(`Testing Welcome sound (${language})...`, 'info');
+            playWelcomeSound(language)
+                .then(success => {
+                    if (success) {
+                        log(`Welcome sound (${language}) played successfully.`, 'success');
+                    } else {
+                        log(`Failed to play Welcome sound (${language}).`, 'error');
+                    }
+                });
+        }
+        
+        function setAmbientVolume(volume) {
+            const valueDisplay = document.getElementById('ambientVolumeValue');
+            valueDisplay.textContent = volume;
+            setCosmicVolume(parseFloat(volume));
+            log(`Ambient volume set to ${volume}`, 'info');
+        }
+        
+        function setUIVolume(volume) {
+            const valueDisplay = document.getElementById('uiVolumeValue');
+            valueDisplay.textContent = volume;
+            setUISoundVolume(parseFloat(volume));
+            log(`UI volume set to ${volume}`, 'info');
+        }
+        
+        let muted = false;
+        function toggleMute() {
+            muted = !muted;
+            muteCosmicSounds(muted);
+            log(`Sounds ${muted ? 'muted' : 'unmuted'}.`, 'info');
+        }
+        
+        // Track audio errors
+        window.addEventListener('error', function(e) {
+            if (e.target.tagName === 'AUDIO') {
+                log(`Audio error: ${e.target.error.message}`, 'error');
             }
-        });
-
-        // Enable click anywhere to activate audio (browser autoplay policy workaround)
-        document.addEventListener('click', function() {
-            // Create and play a silent audio
-            const silent = new Audio('/static/sounds/silence.mp3');
-            silent.volume = 0.1;
-            silent.play().catch(e => console.log('Silent audio error:', e));
-        }, { once: true });
+        }, true);
     </script>
 </body>
 </html>

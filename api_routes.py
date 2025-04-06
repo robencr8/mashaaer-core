@@ -769,7 +769,10 @@ def play_cosmic_sound_query():
         sound_mapping = {
             'welcome': 'welcome.mp3',
             'click': 'click.mp3',
-            'hover': 'hover.mp3'
+            'hover': 'hover.mp3',
+            'success': 'success.mp3',
+            'error': 'error.mp3',
+            'notification': 'notification.mp3'
         }
         
         # Default sound if type not found
@@ -785,9 +788,15 @@ def play_cosmic_sound_query():
         # Verify the file exists on the server
         file_path = os.path.join(current_app.root_path, 'static/sounds', file_name)
         if not os.path.exists(file_path):
-            # Try fallback to default sounds folder
-            file_path = os.path.join(current_app.root_path, 'static/mobile/audio', 'cosmic.mp3')
-            sound_path = '/static/mobile/audio/cosmic.mp3'
+            # Check in mobile/audio directory
+            alt_file_path = os.path.join(current_app.root_path, 'static/mobile/audio', file_name)
+            if os.path.exists(alt_file_path):
+                sound_path = f"/static/mobile/audio/{file_name}"
+                logger.info(f"Sound file found in alternate location: {sound_path}")
+            else:
+                # Try fallback to default sounds folder
+                file_path = os.path.join(current_app.root_path, 'static/mobile/audio', 'cosmic.mp3')
+                sound_path = '/static/mobile/audio/cosmic.mp3'
             
             # If even the fallback doesn't exist
             if not os.path.exists(file_path):

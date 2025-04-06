@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Interaction Sounds Demo</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #060d21;
+            color: #e0e0ff;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-image: radial-gradient(circle at center, #101a33 0%, #060d21 100%);
+        }
+        
+        header {
+            text-align: center;
+            padding: 2rem 0;
+            background-color: rgba(0,0,0,0.3);
+            width: 100%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: #9e7cff;
+            text-shadow: 0 0 5px #6a46c5;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            color: #8eb8ff;
+            margin-top: 0.5rem;
+        }
+        
+        main {
+            max-width: 800px;
+            width: 90%;
+            padding: 2rem;
+            background-color: rgba(18, 26, 50, 0.7);
+            border-radius: 10px;
+            margin: 2rem 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .demo-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            background-color: rgba(26, 35, 60, 0.7);
+            border-left: 4px solid #7c54ff;
+        }
+        
+        h2 {
+            color: #ad93ff;
+            margin-top: 0;
+            border-bottom: 1px solid #3d4b72;
+            padding-bottom: 0.5rem;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+        
+        button {
+            background-color: #2e3b5e;
+            color: #e0e0ff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        button:hover {
+            background-color: #3d4b72;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 3px rgba(0,0,0,0.3);
+        }
+        
+        button.primary {
+            background-color: #7c54ff;
+            color: white;
+        }
+        
+        button.primary:hover {
+            background-color: #9e7cff;
+        }
+        
+        .status {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            border-radius: 4px;
+            background-color: rgba(0,0,0,0.2);
+            min-height: 40px;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        label {
+            min-width: 100px;
+        }
+        
+        input[type="range"] {
+            flex-grow: 1;
+            height: 8px;
+            appearance: none;
+            background: #2e3b5e;
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #7c54ff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #9e7cff;
+            transform: scale(1.1);
+        }
+        
+        .volume-value {
+            min-width: 45px;
+            text-align: right;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.8rem;
+            color: #8a9ab8;
+            margin-top: auto;
+        }
+        
+        .cosmic-dot {
+            position: fixed;
+            z-index: -1;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(124, 84, 255, 0.7) 0%, rgba(124, 84, 255, 0) 70%);
+            animation: pulse 8s infinite alternate ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            100% {
+                transform: scale(1.2);
+                opacity: 0.3;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmic-dot" style="top: 20%; left: 10%; width: 300px; height: 300px; animation-delay: 0s;"></div>
+    <div class="cosmic-dot" style="top: 70%; left: 80%; width: 200px; height: 200px; animation-delay: -2s;"></div>
+    <div class="cosmic-dot" style="top: 85%; left: 30%; width: 150px; height: 150px; animation-delay: -4s;"></div>
+    
+    <header>
+        <h1>Cosmic Interaction Sounds</h1>
+        <div class="subtitle">Test the new sound API integration</div>
+    </header>
+    
+    <main>
+        <div class="demo-section">
+            <h2>Welcome Sounds</h2>
+            <p>Language-specific welcome sounds played through API:</p>
+            <div class="button-group">
+                <button class="primary" onclick="testWelcomeSound('en')">English Welcome</button>
+                <button class="primary" onclick="testWelcomeSound('ar')">Arabic Welcome</button>
+            </div>
+            <div class="status" id="welcome-status">Status will appear here...</div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>UI Interaction Sounds</h2>
+            <p>User interface sound effects to enhance interaction experience:</p>
+            <div class="button-group">
+                <button onclick="testUISound('click')">Click Sound</button>
+                <button onclick="testUISound('hover')">Hover Sound</button>
+                <button onclick="testUISound('success')">Success Sound</button>
+                <button onclick="testUISound('error')">Error Sound</button>
+                <button onclick="testUISound('notification')">Notification</button>
+            </div>
+            <div class="status" id="ui-status">Status will appear here...</div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>Ambient Emotion Soundscapes</h2>
+            <p>Background music that adapts to the user's emotional state:</p>
+            <div class="button-group">
+                <button onclick="testEmotionSound('happy')">Happy</button>
+                <button onclick="testEmotionSound('sad')">Sad</button>
+                <button onclick="testEmotionSound('angry')">Angry</button>
+                <button onclick="testEmotionSound('calm')">Calm</button>
+                <button onclick="testEmotionSound('neutral')">Neutral</button>
+                <button onclick="stopEmotionSound()">Stop</button>
+            </div>
+            <div class="status" id="emotion-status">Status will appear here...</div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>Custom API Sound</h2>
+            <p>Test any sound using the cosmic sound API:</p>
+            <div class="button-group">
+                <button onclick="testCosmicSound('click')">Click</button>
+                <button onclick="testCosmicSound('hover')">Hover</button>
+                <button onclick="testCosmicSound('welcome', 'en')">Welcome (EN)</button>
+                <button onclick="testCosmicSound('welcome', 'ar')">Welcome (AR)</button>
+            </div>
+            <div class="status" id="cosmic-status">Status will appear here...</div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>Volume Controls</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label for="ambient-volume">Ambient:</label>
+                    <input type="range" id="ambient-volume" min="0" max="1" step="0.1" value="0.3" onchange="updateAmbientVolume(this.value)">
+                    <span class="volume-value" id="ambient-volume-display">30%</span>
+                </div>
+                
+                <div class="control-group">
+                    <label for="ui-volume">UI Sounds:</label>
+                    <input type="range" id="ui-volume" min="0" max="1" step="0.1" value="0.5" onchange="updateUIVolume(this.value)">
+                    <span class="volume-value" id="ui-volume-display">50%</span>
+                </div>
+                
+                <div class="control-group">
+                    <button onclick="toggleMute()" id="mute-button">Mute All</button>
+                    <span id="mute-status">Sound is enabled</span>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>Mashaaer Feelings - Cosmic Sound System Demo</p>
+    </footer>
+    
+    <script src="/static/js/cosmic_sound_system.js"></script>
+    <script>
+        // Variable to track mute state
+        let isMuted = false;
+        
+        // Function to test welcome sounds
+        function testWelcomeSound(language) {
+            const statusElement = document.getElementById('welcome-status');
+            statusElement.innerHTML = `<p>Playing welcome sound in ${language === 'en' ? 'English' : 'Arabic'}...</p>`;
+            
+            playWelcomeSound(language)
+                .then(success => {
+                    if (success) {
+                        statusElement.innerHTML += `<p style="color: #7cff8e;">✓ Welcome sound played successfully!</p>`;
+                    } else {
+                        statusElement.innerHTML += `<p style="color: #ff7c7c;">✗ Error playing welcome sound.</p>`;
+                    }
+                });
+        }
+        
+        // Function to test UI sounds
+        function testUISound(soundType) {
+            const statusElement = document.getElementById('ui-status');
+            statusElement.innerHTML = `<p>Playing UI sound: ${soundType}...</p>`;
+            
+            playUISound(soundType)
+                .then(success => {
+                    if (success) {
+                        statusElement.innerHTML += `<p style="color: #7cff8e;">✓ UI sound played successfully!</p>`;
+                    } else {
+                        statusElement.innerHTML += `<p style="color: #ff7c7c;">✗ Error playing UI sound.</p>`;
+                    }
+                });
+        }
+        
+        // Function to test emotion soundscapes
+        function testEmotionSound(emotion) {
+            const statusElement = document.getElementById('emotion-status');
+            statusElement.innerHTML = `<p>Switching to ${emotion} ambient soundscape...</p>`;
+            
+            playEmotionSoundscape(emotion);
+            statusElement.innerHTML += `<p style="color: #7cff8e;">✓ Ambient soundscape changed to ${emotion}.</p>`;
+        }
+        
+        // Function to stop emotion soundscapes
+        function stopEmotionSound() {
+            const statusElement = document.getElementById('emotion-status');
+            statusElement.innerHTML = `<p>Stopping ambient soundscape...</p>`;
+            
+            stopCosmicSounds();
+            statusElement.innerHTML += `<p style="color: #7cff8e;">✓ Ambient soundscape stopped.</p>`;
+        }
+        
+        // Function to test any cosmic sound
+        function testCosmicSound(soundType, language = null) {
+            const statusElement = document.getElementById('cosmic-status');
+            statusElement.innerHTML = `<p>Playing cosmic sound: ${soundType}${language ? ' in ' + language : ''}...</p>`;
+            
+            playCosmicSound(soundType, language)
+                .then(success => {
+                    if (success) {
+                        statusElement.innerHTML += `<p style="color: #7cff8e;">✓ Cosmic sound played successfully!</p>`;
+                    } else {
+                        statusElement.innerHTML += `<p style="color: #ff7c7c;">✗ Error playing cosmic sound.</p>`;
+                    }
+                });
+        }
+        
+        // Function to update ambient volume
+        function updateAmbientVolume(volume) {
+            const displayElement = document.getElementById('ambient-volume-display');
+            const percentage = Math.round(volume * 100);
+            displayElement.textContent = `${percentage}%`;
+            
+            setCosmicVolume(parseFloat(volume));
+        }
+        
+        // Function to update UI sound volume
+        function updateUIVolume(volume) {
+            const displayElement = document.getElementById('ui-volume-display');
+            const percentage = Math.round(volume * 100);
+            displayElement.textContent = `${percentage}%`;
+            
+            setUISoundVolume(parseFloat(volume));
+        }
+        
+        // Function to toggle mute
+        function toggleMute() {
+            isMuted = !isMuted;
+            
+            const muteButton = document.getElementById('mute-button');
+            const muteStatus = document.getElementById('mute-status');
+            
+            muteCosmicSounds(isMuted);
+            
+            if (isMuted) {
+                muteButton.textContent = 'Unmute All';
+                muteStatus.textContent = 'Sound is muted';
+                muteStatus.style.color = '#ff7c7c';
+            } else {
+                muteButton.textContent = 'Mute All';
+                muteStatus.textContent = 'Sound is enabled';
+                muteStatus.style.color = '';
+            }
+        }
+    </script>
+</body>
+</html>
