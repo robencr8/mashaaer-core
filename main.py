@@ -168,6 +168,23 @@ except ImportError as e:
 except Exception as e:
     logger.error(f"Error registering admin routes: {str(e)}")
 
+# Register idiom translator routes
+try:
+    from idiom_routes import init_idiom_routes
+    from ai_model_router import AIModelRouter
+    
+    # Initialize AI model router for idiom translation
+    model_router = AIModelRouter()
+    
+    # Initialize idiom translator routes
+    idiom_bp = init_idiom_routes(app, model_router)
+    
+    logger.info("Idiom translator routes registered successfully")
+except ImportError as e:
+    logger.error(f"Could not import idiom translator routes: {str(e)}")
+except Exception as e:
+    logger.error(f"Error registering idiom translator routes: {str(e)}")
+
 # Add root route for the homepage
 @app.route("/", methods=["GET"])
 def index():

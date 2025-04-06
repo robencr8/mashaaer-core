@@ -2882,5 +2882,87 @@
         "confused": 2.52
       }
     }
+  ],
+  "2025-04-06": [
+    {
+      "time": "15:03:33",
+      "emotions": {
+        "happy": 2.315,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "15:04:23",
+      "emotions": {
+        "happy": 2.315,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "15:05:35",
+      "emotions": {
+        "happy": 2.315,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "15:06:36",
+      "emotions": {
+        "happy": 2.315,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "15:06:38",
+      "emotions": {
+        "sad": 11.030000000000001,
+        "inspired": 1.8,
+        "frustrated": 0.8
+      }
+    },
+    {
+      "time": "15:06:40",
+      "emotions": {
+        "angry": 3.12,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "15:07:04",
+      "emotions": {
+        "happy": 2.315,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    },
+    {
+      "time": "15:07:05",
+      "emotions": {
+        "sad": 11.030000000000001,
+        "inspired": 1.8,
+        "frustrated": 0.8
+      }
+    },
+    {
+      "time": "15:07:07",
+      "emotions": {
+        "angry": 3.12,
+        "neutral": 0.0,
+        "happy": 0.0
+      }
+    },
+    {
+      "time": "15:07:26",
+      "emotions": {
+        "happy": 2.315,
+        "satisfied": 1.75,
+        "fearful": 0.48999999999999994
+      }
+    }
   ]
 }
