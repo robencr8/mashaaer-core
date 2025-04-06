@@ -3,39 +3,286 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Direct Test Page</title>
+    <title>Mashaaer Direct Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        .container {
             max-width: 800px;
             margin: 0 auto;
+            background: white;
             padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .success { color: green; }
-        .error { color: red; }
+        h1 {
+            color: #4e2a8e;
+            text-align: center;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        button {
+            padding: 10px 20px;
+            background: #4e2a8e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #3b1f6a;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        pre {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            margin-top: 15px;
+            border: 1px solid #ddd;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        .url-display {
+            padding: 10px;
+            background: #eef;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
-    <h1>Mashaaer Direct Test Page</h1>
-    <p>This is a simple test page to verify that files can be accessed directly.</p>
-    <div id="status">Status: Checking connection...</div>
+    <div class="container">
+        <h1>Mashaaer Direct Test Page</h1>
+        
+        <div class="test-section">
+            <h2>Direct URL Test</h2>
+            <p>Test a direct URL request to the server:</p>
+            
+            <div class="url-display">
+                Currently testing URL: <span id="current-server-url">http://localhost:5000</span>
+            </div>
+            
+            <input type="text" id="server-url" placeholder="Server URL (e.g., http://localhost:5000)" value="http://localhost:5000">
+            <input type="text" id="endpoint-path" placeholder="Endpoint path (e.g., /api/minimal)" value="/api/minimal">
+            
+            <div style="margin: 15px 0;">
+                <button onclick="updateServerUrl()">Update Server URL</button>
+                <button onclick="testDirectUrl()">Test Direct URL</button>
+            </div>
+            
+            <pre id="direct-result">Results will appear here...</pre>
+        </div>
+        
+        <div class="test-section">
+            <h2>Fetch with CORS Headers</h2>
+            <p>Test fetch with explicit CORS headers:</p>
+            
+            <div>
+                <label for="origin-header">Origin Header:</label>
+                <input type="text" id="origin-header" value="https://replit.com">
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <button onclick="testWithCustomOrigin()">Test with Custom Origin</button>
+            </div>
+            
+            <pre id="cors-result">Results will appear here...</pre>
+        </div>
+        
+        <div class="test-section">
+            <h2>Server-Side Request</h2>
+            <p>Use the server to make a request to itself (bypasses CORS):</p>
+            
+            <div style="margin: 15px 0;">
+                <button onclick="testServerSideRequest()">Test Server-Side Request</button>
+            </div>
+            
+            <pre id="server-side-result">Results will appear here...</pre>
+        </div>
+    </div>
     
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const statusDiv = document.getElementById('status');
+        // Store the server URL
+        let serverUrl = 'http://localhost:5000';
+        
+        // Helper function to format JSON
+        function formatJson(obj) {
+            return JSON.stringify(obj, null, 2);
+        }
+        
+        // Update the server URL
+        function updateServerUrl() {
+            serverUrl = document.getElementById('server-url').value.trim();
+            if (!serverUrl) {
+                serverUrl = 'http://localhost:5000';
+                document.getElementById('server-url').value = serverUrl;
+            }
+            document.getElementById('current-server-url').textContent = serverUrl;
+        }
+        
+        // Test a direct URL request
+        async function testDirectUrl() {
+            const resultElement = document.getElementById('direct-result');
+            resultElement.textContent = 'Testing, please wait...';
             
-            // Check server connection
-            fetch(window.location.href)
-                .then(response => {
-                    if (response.ok) {
-                        statusDiv.innerHTML = '<span class="success">Status: Connection successful!</span>';
-                    } else {
-                        statusDiv.innerHTML = '<span class="error">Status: Connection failed with status ' + response.status + '</span>';
+            const endpoint = document.getElementById('endpoint-path').value.trim();
+            const fullUrl = serverUrl + (endpoint.startsWith('/') ? endpoint : '/' + endpoint);
+            
+            try {
+                const response = await fetch(fullUrl);
+                
+                // Get headers
+                const headers = {};
+                for (const [key, value] of response.headers.entries()) {
+                    headers[key] = value;
+                }
+                
+                // Get body
+                let responseData;
+                const contentType = response.headers.get('content-type') || '';
+                
+                if (contentType.includes('application/json')) {
+                    try {
+                        responseData = await response.json();
+                    } catch (e) {
+                        responseData = { error: 'Failed to parse JSON', message: e.message };
                     }
+                } else {
+                    responseData = await response.text();
+                }
+                
+                const result = {
+                    url: fullUrl,
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: headers,
+                    body: responseData
+                };
+                
+                resultElement.innerHTML = `<span class="success">Success!</span>\n${formatJson(result)}`;
+            } catch (error) {
+                resultElement.innerHTML = `<span class="error">Error:</span> ${error.message}\n\nURL: ${fullUrl}`;
+            }
+        }
+        
+        // Test with a custom Origin header
+        async function testWithCustomOrigin() {
+            const resultElement = document.getElementById('cors-result');
+            resultElement.textContent = 'Testing with custom Origin, please wait...';
+            
+            const endpoint = document.getElementById('endpoint-path').value.trim();
+            const fullUrl = serverUrl + (endpoint.startsWith('/') ? endpoint : '/' + endpoint);
+            const originValue = document.getElementById('origin-header').value.trim();
+            
+            try {
+                const response = await fetch(fullUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Origin': originValue
+                    }
+                });
+                
+                // Get headers
+                const headers = {};
+                for (const [key, value] of response.headers.entries()) {
+                    headers[key] = value;
+                }
+                
+                // Check for CORS headers
+                const corsInfo = {
+                    allowOrigin: response.headers.get('Access-Control-Allow-Origin'),
+                    allowMethods: response.headers.get('Access-Control-Allow-Methods'),
+                    allowHeaders: response.headers.get('Access-Control-Allow-Headers')
+                };
+                
+                // Get body
+                let responseData;
+                const contentType = response.headers.get('content-type') || '';
+                
+                if (contentType.includes('application/json')) {
+                    try {
+                        responseData = await response.json();
+                    } catch (e) {
+                        responseData = { error: 'Failed to parse JSON', message: e.message };
+                    }
+                } else {
+                    responseData = await response.text();
+                }
+                
+                const result = {
+                    url: fullUrl,
+                    originSent: originValue,
+                    status: response.status,
+                    statusText: response.statusText,
+                    corsHeaders: corsInfo,
+                    allHeaders: headers,
+                    body: responseData
+                };
+                
+                resultElement.innerHTML = `<span class="success">Success!</span>\n${formatJson(result)}`;
+            } catch (error) {
+                resultElement.innerHTML = `<span class="error">Error:</span> ${error.message}\n\nURL: ${fullUrl}\nOrigin: ${originValue}`;
+            }
+        }
+        
+        // Test a server-side request (this would require a server endpoint that makes requests)
+        function testServerSideRequest() {
+            const resultElement = document.getElementById('server-side-result');
+            resultElement.textContent = 'Requesting server-side proxy, please wait...';
+            
+            const endpoint = document.getElementById('endpoint-path').value.trim();
+            const targetUrl = serverUrl + (endpoint.startsWith('/') ? endpoint : '/' + endpoint);
+            
+            // We'll need a proxy endpoint on the server for this to work
+            const proxyUrl = `${serverUrl}/api/proxy-request?url=${encodeURIComponent(targetUrl)}`;
+            
+            fetch(proxyUrl)
+                .then(response => response.json())
+                .then(data => {
+                    resultElement.innerHTML = `<span class="success">Server-side request successful!</span>\n${formatJson(data)}`;
                 })
                 .catch(error => {
-                    statusDiv.innerHTML = '<span class="error">Status: Connection error - ' + error.message + '</span>';
+                    resultElement.innerHTML = `<span class="error">Error:</span> ${error.message}\n\nThis feature requires a /api/proxy-request endpoint on the server.`;
                 });
+        }
+        
+        // Initialize with current URL if available
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                const protocol = window.location.protocol;
+                const hostname = window.location.hostname;
+                const port = window.location.port ? `:${window.location.port}` : '';
+                
+                serverUrl = `${protocol}//${hostname}${port}`;
+                document.getElementById('server-url').value = serverUrl;
+                document.getElementById('current-server-url').textContent = serverUrl;
+            }
         });
     </script>
 </body>

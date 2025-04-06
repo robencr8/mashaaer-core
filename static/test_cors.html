@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+        h3 {
+            margin-top: 20px;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+        }
+        pre {
+            white-space: pre-wrap;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mashaaer CORS Testing Tool</h1>
+    <p>Use this page to test API endpoints with different origins and methods.</p>
+    
+    <h3>App URL Configuration</h3>
+    <div>
+        <p>Current origin: <strong id="current-origin"></strong></p>
+        <p>Enter base URL for the API (default is the current origin):</p>
+        <input type="text" id="api-base-url" style="width: 80%;" placeholder="https://your-api.example.com">
+    </div>
+    
+    <h3>Test Endpoints</h3>
+    <div>
+        <button onclick="testEndpoint('/api/minimal')">Test Minimal Endpoint</button>
+        <button onclick="testEndpoint('/api/feedback')">Test Feedback Endpoint</button>
+        <button onclick="testEndpoint('/api/health')">Test Health Endpoint</button>
+        <button onclick="testPost('/api/feedback')">Test POST to Feedback</button>
+    </div>
+    
+    <h3>Results</h3>
+    <div id="results"></div>
+    
+    <script>
+        document.getElementById('current-origin').textContent = window.location.origin;
+        document.getElementById('api-base-url').value = window.location.origin;
+        
+        const resultsDiv = document.getElementById('results');
+        
+        function getApiBaseUrl() {
+            const baseUrl = document.getElementById('api-base-url').value.trim();
+            return baseUrl || window.location.origin;
+        }
+        
+        function addResult(message, isSuccess, data = null) {
+            const resultElem = document.createElement('div');
+            resultElem.className = isSuccess ? 'result success' : 'result error';
+            
+            let content = `<h4>${message}</h4>`;
+            if (data) {
+                content += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            
+            resultElem.innerHTML = content;
+            resultsDiv.prepend(resultElem);
+        }
+        
+        async function testEndpoint(endpoint) {
+            try {
+                const baseUrl = getApiBaseUrl();
+                const fullUrl = `${baseUrl}${endpoint}`;
+                
+                addResult(`Testing GET request to ${fullUrl}`, true);
+                
+                const response = await fetch(fullUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    mode: 'cors'
+                });
+                
+                const data = await response.json();
+                
+                addResult(`Success! Status: ${response.status}`, true, {
+                    data,
+                    headers: {
+                        'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                        'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                        'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                        'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials')
+                    }
+                });
+            } catch (error) {
+                addResult(`Error: ${error.message}`, false);
+                console.error('Test error:', error);
+            }
+        }
+        
+        async function testPost(endpoint) {
+            try {
+                const baseUrl = getApiBaseUrl();
+                const fullUrl = `${baseUrl}${endpoint}`;
+                
+                addResult(`Testing POST request to ${fullUrl}`, true);
+                
+                const response = await fetch(fullUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        test: true,
+                        message: 'Testing POST request with CORS',
+                        timestamp: new Date().toISOString()
+                    }),
+                    credentials: 'include',
+                    mode: 'cors'
+                });
+                
+                const data = await response.json();
+                
+                addResult(`Success! Status: ${response.status}`, true, {
+                    data,
+                    headers: {
+                        'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                        'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                        'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                        'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials')
+                    }
+                });
+            } catch (error) {
+                addResult(`Error: ${error.message}`, false);
+                console.error('Test error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

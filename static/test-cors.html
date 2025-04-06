@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #4e2a8e;
+        }
+        button {
+            padding: 10px 15px;
+            background: #4e2a8e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #3b1f6a;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            min-height: 100px;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>CORS Test Page</h1>
+    <p>Use the buttons below to test various CORS endpoints:</p>
+    
+    <div>
+        <button onclick="testEndpoint('/api/minimal')">Test Minimal Endpoint</button>
+        <button onclick="testEndpoint('/api/cors-debug')">Test CORS Debug</button>
+        <button onclick="testEndpoint('/api/feedback')">Test Feedback Endpoint</button>
+        <button onclick="testOptionsRequest('/api/minimal')">Test OPTIONS Request</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+    
+    <div id="results">
+        <p>Results will appear here...</p>
+    </div>
+    
+    <script>
+        // Get the results element
+        const resultsEl = document.getElementById('results');
+        
+        // Clear results
+        function clearResults() {
+            resultsEl.innerHTML = '<p>Results cleared.</p>';
+        }
+        
+        // Test an endpoint
+        async function testEndpoint(endpoint) {
+            resultsEl.innerHTML = `<p>Testing ${endpoint}...</p>`;
+            
+            try {
+                const response = await fetch(endpoint);
+                
+                // Get response headers
+                const headers = {};
+                for (const [key, value] of response.headers.entries()) {
+                    headers[key] = value;
+                }
+                
+                // Show headers related to CORS
+                const corsHeaders = Object.keys(headers)
+                    .filter(key => key.toLowerCase().includes('access-control'))
+                    .reduce((obj, key) => {
+                        obj[key] = headers[key];
+                        return obj;
+                    }, {});
+                
+                // Get response data
+                const data = await response.json();
+                
+                // Display results
+                resultsEl.innerHTML = `
+                    <p class="success">✅ Success! Endpoint: ${endpoint}</p>
+                    <h3>CORS Headers:</h3>
+                    <pre>${JSON.stringify(corsHeaders, null, 2)}</pre>
+                    <h3>Response Data:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultsEl.innerHTML = `
+                    <p class="error">❌ Error! Endpoint: ${endpoint}</p>
+                    <pre>${error.toString()}</pre>
+                `;
+            }
+        }
+        
+        // Test an OPTIONS request
+        async function testOptionsRequest(endpoint) {
+            resultsEl.innerHTML = `<p>Testing OPTIONS for ${endpoint}...</p>`;
+            
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                // Get response headers
+                const headers = {};
+                for (const [key, value] of response.headers.entries()) {
+                    headers[key] = value;
+                }
+                
+                // Show headers related to CORS
+                const corsHeaders = Object.keys(headers)
+                    .filter(key => key.toLowerCase().includes('access-control'))
+                    .reduce((obj, key) => {
+                        obj[key] = headers[key];
+                        return obj;
+                    }, {});
+                
+                // Display results
+                resultsEl.innerHTML = `
+                    <p class="success">✅ Success! OPTIONS request for: ${endpoint}</p>
+                    <h3>Status:</h3>
+                    <p>${response.status} ${response.statusText}</p>
+                    <h3>CORS Headers:</h3>
+                    <pre>${JSON.stringify(corsHeaders, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultsEl.innerHTML = `
+                    <p class="error">❌ Error! OPTIONS request for: ${endpoint}</p>
+                    <pre>${error.toString()}</pre>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

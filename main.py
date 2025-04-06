@@ -15,6 +15,8 @@ import numpy as np
 from typing import Dict, List, Any, Optional, Tuple
 from enhanced_cors import enhance_cors
 from routes_feedback_tool import register_feedback_routes
+from direct_test_route import init_direct_test
+from direct_report_route import init_direct_report
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, 
@@ -93,8 +95,8 @@ app = Flask(__name__,
             static_folder='static',
             template_folder='templates')
 
-# Configure CORS with all origins allowed
-CORS(app, origins="*", supports_credentials=False)
+# Configure CORS with proper settings for all API routes
+CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
 # Set a secret key for session management
 app.secret_key = os.environ.get("SESSION_SECRET", "mashaaer_development_key")
@@ -147,11 +149,22 @@ except ImportError as e:
 except Exception as e:
     logger.error(f"Error registering recommendation routes: {str(e)}")
 
-# Apply enhanced CORS support
+# Apply enhanced CORS support with detailed debugging
 try:
+    # First apply the original CORS enhancement
     enhance_cors(app)
     register_feedback_routes(app)  # Register the feedback routes
-    logger.info("Successfully registered enhanced CORS and feedback routes")
+    
+    # Then apply our improved CORS debugging
+    from cors_debug import configure_cors_for_replit, add_minimal_test_endpoint
+    configure_cors_for_replit(app)
+    add_minimal_test_endpoint(app)
+    
+    # Register our custom feedback route for testing
+    from feedback_route import register_feedback_routes as register_dedicated_feedback_routes
+    register_dedicated_feedback_routes(app)
+    
+    logger.info("Successfully registered enhanced CORS configuration with debugging")
 except Exception as e:
     logger.error(f"Error enhancing CORS: {str(e)}")
 
@@ -322,10 +335,11 @@ def inject_versioned_url():
     """Make versioned_url available in all templates"""
     return dict(versioned_url=versioned_url)
 
-# Import direct test routes
-from direct_test_route import direct_test_bp
-app.register_blueprint(direct_test_bp)
-
-# Import direct report routes
-from direct_report_route import direct_report_bp
-app.register_blueprint(direct_report_bp)
+# Register additional diagnostic routes
+try:
+    # Initialize diagnostic test endpoints
+    init_direct_test(app)
+    init_direct_report(app)
+    logger.info("Diagnostic routes registered successfully")
+except Exception as e:
+    logger.error(f"Error registering diagnostic routes: {str(e)}")

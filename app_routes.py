@@ -1,166 +1,177 @@
-# Additional application routes for Mashaaer Feelings
-
-from flask import render_template, send_from_directory, redirect, url_for, Markup
-import logging
+"""
+Main application routes for Mashaaer Feelings
+"""
 import os
-import markdown
+import logging
+from flask import render_template, Blueprint, jsonify, request, send_from_directory, render_template_string
+import datetime
 
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# These routes are registered in main.py when importing this module
+# Create a blueprint for app routes
+app_routes_bp = Blueprint('app_routes', __name__)
+
+@app_routes_bp.route('/app')
+def app_home():
+    """Serve the app homepage"""
+    return render_template('index.html')
+
+@app_routes_bp.route('/replit-access-test')
+def replit_access_test():
+    """Simple test page for Replit access testing"""
+    test_html = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Replit Access Test</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 800px;
+                margin: 20px auto;
+                padding: 20px;
+                background-color: #f5f5f5;
+                color: #333;
+            }
+            .test-card {
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            h1 {
+                color: #4a2c8f;
+            }
+            button {
+                background: #4a2c8f;
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 4px;
+                cursor: pointer;
+                margin: 5px;
+                font-size: 14px;
+            }
+            button:hover {
+                background: #6039c0;
+            }
+            .result {
+                margin-top: 15px;
+                padding: 10px;
+                border-radius: 4px;
+                background: #f9f9f9;
+                border-left: 5px solid #4a2c8f;
+            }
+            .success {
+                border-left-color: #5cb85c;
+            }
+            .error {
+                border-left-color: #d9534f;
+            }
+            pre {
+                background: #f5f5f5;
+                padding: 10px;
+                border-radius: 4px;
+                overflow-x: auto;
+                font-size: 14px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="test-card">
+            <h1>Replit Access Test</h1>
+            <p>This page tests if the Mashaaer Feelings app is correctly accessible from the Replit domain.</p>
+            <p><strong>Current Time:</strong> """ + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + """</p>
+            <p><strong>Current Origin:</strong> <span id="origin"></span></p>
+        </div>
+        
+        <div class="test-card">
+            <h2>API Tests</h2>
+            <button onclick="testApi('/api/minimal')">Test Minimal API</button>
+            <button onclick="testApi('/api/feedback')">Test Feedback API</button>
+            <button onclick="testApi('/api/health')">Test Health API</button>
+            <div id="api-results"></div>
+        </div>
+        
+        <div class="test-card">
+            <h2>Debug Information</h2>
+            <div id="debug-info"></div>
+        </div>
+        
+        <script>
+            // Display current origin
+            document.getElementById('origin').textContent = window.location.origin;
+            
+            // Add debug info
+            const debugInfo = {
+                url: window.location.href,
+                userAgent: navigator.userAgent,
+                protocol: window.location.protocol,
+                host: window.location.host,
+                timestamp: new Date().toISOString()
+            };
+            document.getElementById('debug-info').innerHTML = `<pre>${JSON.stringify(debugInfo, null, 2)}</pre>`;
+            
+            // Function to test API endpoints
+            async function testApi(endpoint) {
+                const resultsDiv = document.getElementById('api-results');
+                const resultElement = document.createElement('div');
+                resultElement.className = 'result';
+                
+                try {
+                    // Show loading message
+                    resultElement.textContent = `Testing ${endpoint}...`;
+                    resultsDiv.prepend(resultElement);
+                    
+                    // Make the request
+                    const response = await fetch(endpoint, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include'
+                    });
+                    
+                    // Get response data
+                    const data = await response.json();
+                    
+                    // Update with result
+                    resultElement.className = 'result success';
+                    resultElement.innerHTML = `
+                        <h3>✅ ${endpoint} - Status: ${response.status}</h3>
+                        <p><strong>CORS Headers:</strong></p>
+                        <pre>Access-Control-Allow-Origin: ${response.headers.get('Access-Control-Allow-Origin') || 'Not set'}
+Access-Control-Allow-Methods: ${response.headers.get('Access-Control-Allow-Methods') || 'Not set'}
+Access-Control-Allow-Headers: ${response.headers.get('Access-Control-Allow-Headers') || 'Not set'}
+Access-Control-Allow-Credentials: ${response.headers.get('Access-Control-Allow-Credentials') || 'Not set'}</pre>
+                        <p><strong>Response Data:</strong></p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } catch (error) {
+                    // Update with error
+                    resultElement.className = 'result error';
+                    resultElement.innerHTML = `
+                        <h3>❌ ${endpoint} - Error</h3>
+                        <p>${error.message}</p>
+                    `;
+                    console.error('API test error:', error);
+                }
+            }
+        </script>
+    </body>
+    </html>
+    """
+    return render_template_string(test_html)
+
 def register_routes(app):
-    """Register routes with the Flask app"""
+    """Register all app routes with the Flask app"""
+    app.register_blueprint(app_routes_bp)
     
-    @app.route("/start")
-    def start_journey():
-        """Start the Mashaaer journey - main app entry point from cosmic homepage"""
-        logger.debug("Starting Mashaaer journey from cosmic homepage")
-        # Redirect to the main application interface
-        return render_template("mobile/index_app.html")
+    # We don't register the root route here as it's already defined in main.py
     
-    @app.route("/mobile")
-    def mobile_index():
-        """Mobile index route - redirects to root for new cosmic interface"""
-        logger.debug("Mobile index redirecting to root")
-        return redirect(url_for("index"))
-    
-    @app.route("/audio-test")
-    def audio_test():
-        """Audio test page for debugging autoplay issues"""
-        logger.debug("Serving audio test page")
-        return render_template("render_static", path="/audio_test.html")
-    
-    @app.route("/audio-fix")
-    def audio_fix_guide():
-        """Display the audio fix documentation"""
-        logger.debug("Serving audio fix guide")
-        with open("AUDIO_FIX.md", "r") as f:
-            content = f.read()
-        # Convert markdown to HTML
-        md_html = Markup(markdown.markdown(content))
-        return render_template("markdown.html", content=md_html, title="Audio Fix Guide")
-        
-    @app.route("/audio-bypass")
-    def audio_bypass_guide():
-        """Display the audio autoplay bypass documentation"""
-        logger.debug("Serving audio autoplay bypass guide")
-        with open("AUDIO_AUTOPLAY_BYPASS.md", "r") as f:
-            content = f.read()
-        # Convert markdown to HTML
-        md_html = Markup(markdown.markdown(content))
-        return render_template("markdown.html", content=md_html, title="Audio Autoplay Bypass Guide")
-    
-    @app.route("/cosmic-loader-demo")
-    def cosmic_loader_demo():
-        """Showcase page for cosmic loader animations"""
-        logger.debug("Serving cosmic loader demo page")
-        return render_template("cosmic_loader_demo.html")
-    
-    @app.route("/cosmic-loader-docs")
-    def cosmic_loader_docs():
-        """Documentation for cosmic loader animations"""
-        logger.debug("Serving cosmic loader documentation")
-        with open("COSMIC_LOADER_ANIMATIONS.md", "r") as f:
-            content = f.read()
-        # Convert markdown to HTML
-        md_html = Markup(markdown.markdown(content))
-        return render_template("markdown.html", content=md_html, title="Cosmic Loader Animations")
-    
-    @app.route("/recommendations", methods=["GET"])
-    def recommendations_page():
-        """Show the AI-powered recommendations page"""
-        logger.debug("Serving recommendations page")
-        return render_template("recommendations.html")
-    
-    @app.route("/contextual-recommendations", methods=["GET"])
-    def contextual_recommendations_page():
-        """Show the contextual emotion recommendation system page"""
-        logger.debug("Serving contextual recommendations page")
-        return render_template("contextual_recommendations.html")
-    
-    @app.route("/audio-activation")
-    def audio_activation():
-        """Audio activation bypass example page"""
-        logger.debug("Serving audio activation example page")
-        return send_from_directory("static", "audio_activation_integration.html")
-    
-    @app.route("/audio-bypass-ar")
-    def audio_bypass_ar():
-        """Audio activation bypass example page (Arabic)"""
-        logger.debug("Serving Arabic audio bypass example page")
-        return send_from_directory("static", "autoplay_bypass_example.html")
-    
-    @app.route("/audio-integration")
-    def audio_integration():
-        """Audio integration example with full implementation"""
-        logger.debug("Serving audio integration example page")
-        return send_from_directory("static", "audio_integration_example.html")
-    
-    @app.route("/audio-example")
-    def audio_example():
-        """Audio example page with link to other tests"""
-        logger.debug("Serving audio example page with links")
-        return send_from_directory("static", "audio_test_link.html")
-    
-    # Cosmic sound system test page
-    @app.route("/cosmic-sound-test")
-    def cosmic_sound_test():
-        """Cosmic sound system test page with interactive controls"""
-        logger.debug("Serving cosmic sound system test page")
-        return render_template("cosmic-sound-test.html")
-    
-    # New sound test page for debugging
-    @app.route("/sound-test")
-    def sound_test():
-        """Direct sound test page for debugging"""
-        logger.debug("Serving sound test debugging page")
-        return send_from_directory("static", "sound_test.html")
-    
-    # Cosmic interaction sounds demo page
-    @app.route("/cosmic-interaction-demo")
-    def cosmic_interaction_demo():
-        """Demo page for testing cosmic interaction sounds""" 
-        logger.debug("Serving cosmic interaction demo page")
-        return send_from_directory("static", "cosmic_interaction_demo.html")
-        
-    # Cosmic sound fix test page
-    @app.route("/cosmic-sound-fix")
-    def cosmic_sound_fix():
-        """Test page for demonstrating the cosmic sound fix"""
-        logger.debug("Serving cosmic sound fix test page")
-        return send_from_directory("static", "test_cosmic_sound.html")
-        
-    # Cosmic onboarding page
-    @app.route("/cosmic-onboarding")
-    def cosmic_onboarding():
-        """Serve the cosmic onboarding experience"""
-        logger.debug("Serving cosmic onboarding page")
-        return render_template("cosmic_onboarding.html")
-        
-    # Main application page after onboarding
-    @app.route("/app")
-    def app_page():
-        """Main application interface after onboarding"""
-        logger.debug("Serving main application interface")
-        return render_template("app.html")
-
-    # Theme testing page
-    @app.route("/test-themes")
-    def test_themes():
-        """Test page for mood-based theme system"""
-        logger.debug("Serving mood-based theme test page")
-        return send_from_directory("static", "test_themes.html")
-        
-    # Theme documentation
-    @app.route("/mood-themes")
-    def mood_themes_docs():
-        """Documentation for mood-based theme system"""
-        logger.debug("Serving mood-based theme documentation")
-        with open("MOOD_BASED_THEMES.md", "r") as f:
-            content = f.read()
-        # Convert markdown to HTML
-        md_html = Markup(markdown.markdown(content))
-        return render_template("markdown.html", content=md_html, title="Mood-Based Adaptive Theme System")
-
-    # Return the app to allow chaining
-    return app
+    logger.info("App routes registered successfully")

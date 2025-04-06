@@ -3,37 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Test Page</title>
+    <title>Mashaaer Simple Test Page</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
+            margin: 0;
             padding: 20px;
-            text-align: center;
-        }
-        h1 {
+            background-color: #f5f5f5;
             color: #333;
         }
-        p {
-            color: #666;
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4e2a8e;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background: #4e2a8e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #3b1f6a;
+        }
+        pre {
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
         }
         .success {
             color: green;
             font-weight: bold;
         }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <h1>Simple Test Page</h1>
-    <p>This is a very simple static HTML page to verify the server is running and serving static files correctly.</p>
-    <p class="success">If you can see this page, the server is working correctly!</p>
-    <p>Current time: <span id="current-time"></span></p>
+    <div class="container">
+        <h1>Mashaaer Simple Test Page</h1>
+        <p>This page tests basic connectivity and CORS functionality for the Mashaaer Feelings application.</p>
+        
+        <div class="test-section">
+            <h2>1. Simple GET Request</h2>
+            <button onclick="testGet('/api/minimal')">Test GET /api/minimal</button>
+            <pre id="get-result">Click to test...</pre>
+        </div>
+        
+        <div class="test-section">
+            <h2>2. CORS Preflight Test</h2>
+            <button onclick="testOptions('/api/minimal')">Test OPTIONS /api/minimal</button>
+            <pre id="options-result">Click to test...</pre>
+        </div>
+        
+        <div class="test-section">
+            <h2>3. Feedback Route Test</h2>
+            <button onclick="testGet('/api/feedback')">Test GET /api/feedback</button>
+            <pre id="feedback-result">Click to test...</pre>
+        </div>
+        
+        <div class="test-section">
+            <h2>4. CORS Debug Endpoint</h2>
+            <button onclick="testGet('/api/cors-debug')">Test GET /api/cors-debug</button>
+            <pre id="cors-debug-result">Click to test...</pre>
+        </div>
+        
+        <div class="test-section">
+            <h2>5. Your Browser Information</h2>
+            <button onclick="showBrowserInfo()">Show Browser Info</button>
+            <pre id="browser-info">Click to display...</pre>
+        </div>
+
+        <div class="test-section">
+            <h2>6. Request with Origin Header</h2>
+            <button onclick="testWithOrigin('/api/minimal')">Test with Origin Header</button>
+            <pre id="origin-result">Click to test...</pre>
+        </div>
+    </div>
     
     <script>
-        // Display the current time
-        document.getElementById('current-time').textContent = new Date().toLocaleString();
+        // Base URL for API requests - change this if your server is on a different domain
+        const baseUrl = window.location.origin;
+        
+        // Helper function to format JSON
+        function formatJson(obj) {
+            return JSON.stringify(obj, null, 2);
+        }
+        
+        // Test GET request
+        async function testGet(endpoint) {
+            const resultId = endpoint === '/api/feedback' ? 'feedback-result' : 
+                            endpoint === '/api/cors-debug' ? 'cors-debug-result' : 'get-result';
+            
+            document.getElementById(resultId).textContent = 'Testing...';
+            
+            try {
+                const response = await fetch(baseUrl + endpoint);
+                
+                // Display response headers
+                const headers = {};
+                for (const [key, value] of response.headers.entries()) {
+                    headers[key] = value;
+                }
+                
+                // Display response data
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    data = { error: 'Not a JSON response', text: await response.text() };
+                }
+                
+                const result = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: headers,
+                    data: data
+                };
+                
+                document.getElementById(resultId).innerHTML = 
+                    '<span class="success">Success!</span><br>' + formatJson(result);
+                
+            } catch (error) {
+                document.getElementById(resultId).innerHTML = 
+                    '<span class="error">Error:</span> ' + error.message;
+            }
+        }
+        
+        // Test OPTIONS request (CORS preflight)
+        async function testOptions(endpoint) {
+            document.getElementById('options-result').textContent = 'Testing...';
+            
+            try {
+                const response = await fetch(baseUrl + endpoint, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                // Display response headers
+                const headers = {};
+                for (const [key, value] of response.headers.entries()) {
+                    headers[key] = value;
+                }
+                
+                const result = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: headers
+                };
+                
+                document.getElementById('options-result').innerHTML = 
+                    '<span class="success">Success!</span><br>' + formatJson(result);
+                
+            } catch (error) {
+                document.getElementById('options-result').innerHTML = 
+                    '<span class="error">Error:</span> ' + error.message;
+            }
+        }
+        
+        // Show browser information
+        function showBrowserInfo() {
+            const info = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                cookiesEnabled: navigator.cookieEnabled,
+                currentUrl: window.location.href,
+                origin: window.location.origin
+            };
+            
+            document.getElementById('browser-info').textContent = formatJson(info);
+        }
+        
+        // Test with Origin header
+        async function testWithOrigin(endpoint) {
+            document.getElementById('origin-result').textContent = 'Testing...';
+            
+            try {
+                const response = await fetch(baseUrl + endpoint, {
+                    method: 'GET',
+                    headers: {
+                        'Origin': 'https://replit.com'
+                    }
+                });
+                
+                // Display response headers
+                const headers = {};
+                for (const [key, value] of response.headers.entries()) {
+                    headers[key] = value;
+                }
+                
+                // Display response data
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    data = { error: 'Not a JSON response', text: await response.text() };
+                }
+                
+                const result = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: headers,
+                    data: data
+                };
+                
+                document.getElementById('origin-result').innerHTML = 
+                    '<span class="success">Success!</span><br>' + formatJson(result);
+                
+            } catch (error) {
+                document.getElementById('origin-result').innerHTML = 
+                    '<span class="error">Error:</span> ' + error.message;
+            }
+        }
     </script>
 </body>
 </html>
