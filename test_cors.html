@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        pre {
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>CORS Test for Mashaaer Feelings API</h1>
+    
+    <div class="test-section">
+        <h2>1. Health Check Test</h2>
+        <button onclick="testHealth()">Test Health Endpoint</button>
+        <div id="health-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. API Status Test</h2>
+        <button onclick="testApiStatus()">Test API Status</button>
+        <div id="api-status-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Browser Information</h2>
+        <div id="browser-info"></div>
+    </div>
+
+    <script>
+        // Display browser information
+        function showBrowserInfo() {
+            const browserInfoDiv = document.getElementById('browser-info');
+            browserInfoDiv.innerHTML = `
+                <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+                <p><strong>Platform:</strong> ${navigator.platform}</p>
+                <p><strong>Cookies Enabled:</strong> ${navigator.cookieEnabled}</p>
+                <p><strong>Language:</strong> ${navigator.language}</p>
+            `;
+        }
+        
+        // Test the health endpoint
+        async function testHealth() {
+            const resultsDiv = document.getElementById('health-results');
+            resultsDiv.innerHTML = '<p>Testing connection to health endpoint...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:5000/health', {
+                    method: 'GET'
+                });
+                
+                const statusText = response.status === 200 ? 
+                    '<span class="success">Success!</span>' : 
+                    `<span class="error">Failed with status: ${response.status}</span>`;
+                
+                const data = await response.text();
+                resultsDiv.innerHTML = `
+                    <p>${statusText}</p>
+                    <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                    <p><strong>Response:</strong></p>
+                    <pre>${data}</pre>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <p><span class="error">Error!</span></p>
+                    <p><strong>Error Type:</strong> ${error.name}</p>
+                    <p><strong>Error Message:</strong> ${error.message}</p>
+                `;
+                console.error('Health test failed:', error);
+            }
+        }
+        
+        // Test the API status endpoint
+        async function testApiStatus() {
+            const resultsDiv = document.getElementById('api-status-results');
+            resultsDiv.innerHTML = '<p>Testing connection to API status endpoint...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/status', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const statusText = response.status === 200 ? 
+                    '<span class="success">Success!</span>' : 
+                    `<span class="error">Failed with status: ${response.status}</span>`;
+                
+                const data = await response.json();
+                resultsDiv.innerHTML = `
+                    <p>${statusText}</p>
+                    <p><strong>Status:</strong> ${response.status} ${response.statusText}</p>
+                    <p><strong>Response:</strong></p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <p><span class="error">Error!</span></p>
+                    <p><strong>Error Type:</strong> ${error.name}</p>
+                    <p><strong>Error Message:</strong> ${error.message}</p>
+                `;
+                console.error('API status test failed:', error);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            showBrowserInfo();
+        });
+    </script>
+</body>
+</html>
