@@ -321,3 +321,11 @@ def versioned_url(path):
 def inject_versioned_url():
     """Make versioned_url available in all templates"""
     return dict(versioned_url=versioned_url)
+
+# Import direct test routes
+from direct_test_route import direct_test_bp
+app.register_blueprint(direct_test_bp)
+
+# Import direct report routes
+from direct_report_route import direct_report_bp
+app.register_blueprint(direct_report_bp)

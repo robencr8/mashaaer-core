@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Mashaaer Direct Test Page</h1>
+    <p>This is a simple test page to verify that files can be accessed directly.</p>
+    <div id="status">Status: Checking connection...</div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusDiv = document.getElementById('status');
+            
+            // Check server connection
+            fetch(window.location.href)
+                .then(response => {
+                    if (response.ok) {
+                        statusDiv.innerHTML = '<span class="success">Status: Connection successful!</span>';
+                    } else {
+                        statusDiv.innerHTML = '<span class="error">Status: Connection failed with status ' + response.status + '</span>';
+                    }
+                })
+                .catch(error => {
+                    statusDiv.innerHTML = '<span class="error">Status: Connection error - ' + error.message + '</span>';
+                });
+        });
+    </script>
+</body>
+</html>

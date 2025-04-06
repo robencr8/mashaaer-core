@@ -1,6 +1,1 @@
-<name>
-Ultra Minimal CORS Server
-</name>
-<command>
-python ultra_minimal_server.py
-</command>
+{"altname":"Ultra Minimal Test","bin":["python3","ultra_minimal_test.py"],"hidden":false}

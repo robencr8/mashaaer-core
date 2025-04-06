@@ -1,0 +1,193 @@
+{
+  "timestamp": "2025-04-06 17:08:21",
+  "base_url": "http://localhost:5000",
+  "tests": [
+    {
+      "test": "Server Health",
+      "status": "PASS",
+      "details": {
+        "status_code": 200,
+        "response_time": 0.0046
+      }
+    },
+    {
+      "test": "Emotion Analysis (Happy)",
+      "status": "FAIL",
+      "details": {
+        "text": "I am feeling really great today!",
+        "response": {
+          "emotion_data": {
+            "emotions": {
+              "anxious": 0.07003585441145878,
+              "fearful": 0.08532743579753416,
+              "grateful": 0.08170849681336856,
+              "happy": 0.25776817357805576,
+              "hopeful": 0.12207889146389586,
+              "inspired": 0.060029322601762816,
+              "satisfied": 0.3230518253339241
+            },
+            "intensity": 0.4845777380008862,
+            "metadata": {
+              "confidence": 0.3230518253339241,
+              "context_length": 0,
+              "mixed_emotion_info": {
+                "detected_patterns": [],
+                "is_mixed": false,
+                "top_emotions": [
+                  {
+                    "emotion": "satisfied",
+                    "score": 0.3230518253339241
+                  },
+                  {
+                    "emotion": "happy",
+                    "score": 0.25776817357805576
+                  },
+                  {
+                    "emotion": "hopeful",
+                    "score": 0.12207889146389586
+                  }
+                ]
+              },
+              "pattern_strength": 1.028,
+              "source": "rule-based"
+            },
+            "primary_emotion": "satisfied"
+          },
+          "primary_emotion": "satisfied",
+          "success": true
+        }
+      }
+    },
+    {
+      "test": "Emotion Analysis (Sad)",
+      "status": "PASS",
+      "details": {
+        "text": "I feel so alone and depressed today.",
+        "detected_emotion": "sad"
+      }
+    },
+    {
+      "test": "Chat API (Happy)",
+      "status": "FAIL",
+      "details": {
+        "response": {
+          "action": "respond_normally",
+          "cosmic_soundscape": {
+            "emotion": "happy",
+            "play": true,
+            "track": "happy_cosmic.mp3"
+          },
+          "detected_emotion": "happy",
+          "reply": "I understand how you're feeling. Is there anything specific you'd like to talk about, there?"
+        }
+      }
+    },
+    {
+      "test": "Chat API (Sad)",
+      "status": "FAIL",
+      "details": {
+        "response": {
+          "action": "offer_companionship",
+          "cosmic_soundscape": {
+            "emotion": "sad",
+            "play": true,
+            "track": "sad_cosmic.mp3"
+          },
+          "detected_emotion": "sad",
+          "reply": "Hi there, I'm here for you. You're not alone, and I'm happy to keep you company whenever you need someone to talk to."
+        }
+      }
+    },
+    {
+      "test": "Contextual Recommendations",
+      "status": "FAIL",
+      "details": {
+        "status_code": 400
+      }
+    },
+    {
+      "test": "Idiom Translation (EN->AR)",
+      "status": "FAIL",
+      "details": {
+        "status_code": 405
+      }
+    },
+    {
+      "test": "Idiom Translation (AR->EN)",
+      "status": "FAIL",
+      "details": {
+        "status_code": 405
+      }
+    },
+    {
+      "test": "Cosmic Sound Info",
+      "status": "PASS",
+      "details": {
+        "emotion": "happy",
+        "track": "happy_cosmic.mp3"
+      }
+    },
+    {
+      "test": "Cosmic Sound File",
+      "status": "PASS",
+      "details": {
+        "content_type": "audio/mpeg",
+        "content_length": 193768
+      }
+    },
+    {
+      "test": "Text to Speech",
+      "status": "FAIL",
+      "details": {
+        "status_code": 405
+      }
+    },
+    {
+      "test": "Bilingual Support (English)",
+      "status": "FAIL",
+      "details": {
+        "response": {
+          "action": "respond_normally",
+          "cosmic_soundscape": {
+            "emotion": "neutral",
+            "play": true,
+            "track": "neutral_cosmic.mp3"
+          },
+          "detected_emotion": "neutral",
+          "reply": "I understand how you're feeling. Is there anything specific you'd like to talk about, there?"
+        }
+      }
+    },
+    {
+      "test": "Bilingual Support (Arabic)",
+      "status": "FAIL",
+      "details": {
+        "response": {
+          "action": "respond_normally",
+          "cosmic_soundscape": {
+            "emotion": "neutral",
+            "play": true,
+            "track": "neutral_cosmic.mp3"
+          },
+          "detected_emotion": "neutral",
+          "reply": "\u0623\u0641\u0647\u0645 \u0634\u0639\u0648\u0631\u0643. \u0647\u0644 \u0647\u0646\u0627\u0643 \u0634\u064a\u0621 \u0645\u062d\u062f\u062f \u062a\u0631\u063a\u0628 \u0641\u064a \u0627\u0644\u062a\u062d\u062f\u062b \u0639\u0646\u0647 \u064a\u0627 there\u061f"
+        }
+      }
+    },
+    {
+      "test": "Cache System",
+      "status": "FAIL",
+      "details": {
+        "responses_match": true,
+        "cache_speedup": false,
+        "first_call_time": 0.0031692981719970703,
+        "second_call_time": 0.0036029815673828125
+      }
+    }
+  ],
+  "summary": {
+    "total": 14,
+    "passed": 4,
+    "failed": 10
+  }
+}

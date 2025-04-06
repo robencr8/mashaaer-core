@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer Testing Report</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f7fa;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background: linear-gradient(135deg, #4e2a8e 0%, #7646c1 100%);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 30px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+        h2 {
+            color: #4e2a8e;
+            border-bottom: 2px solid #4e2a8e;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        .status-card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .card-header {
+            background-color: #4e2a8e;
+            color: white;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .card-body {
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e1e1e1;
+        }
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+            display: inline-block;
+            min-width: 80px;
+        }
+        .pass {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .fail {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .partial {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .note {
+            background-color: #e2e3e5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4e2a8e;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .next-steps {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .next-steps h3 {
+            margin-top: 0;
+            color: #4e2a8e;
+        }
+        .next-steps ol {
+            margin-left: 20px;
+            padding-left: 15px;
+        }
+        .next-steps li {
+            margin-bottom: 10px;
+        }
+        .check {
+            color: #28a745;
+        }
+        .x-mark {
+            color: #dc3545;
+        }
+        .warning {
+            color: #ffc107;
+        }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Mashaaer Feelings Testing Report</h1>
+            <p>Comprehensive evaluation of application functionality</p>
+        </header>
+        
+        <div class="note">
+            <p><strong>Note:</strong> This report was generated as an alternative to the Replit web application feedback tool, which has been experiencing connectivity issues. This page provides a static summary of test results and can be accessed directly via the server.</p>
+        </div>
+        
+        <section class="section">
+            <h2>Test Overview</h2>
+            <div class="status-card">
+                <div class="card-header">Testing Approach</div>
+                <div class="card-body">
+                    <p>Due to persistent issues with the Replit web application feedback tool, we've implemented a multi-faceted testing approach:</p>
+                    <ol>
+                        <li><strong>Direct API Testing</strong>: Using the <code>comprehensive_test.py</code> script to test all API endpoints</li>
+                        <li><strong>Manual Testing</strong>: Using <code>curl</code> and other command-line tools to verify server responses</li>
+                        <li><strong>Static HTML Testing</strong>: Creating standalone HTML test pages that can be served directly</li>
+                        <li><strong>Alternative Testing Documents</strong>: Creating detailed documentation of test procedures and results</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2>Server Connectivity</h2>
+            <div class="status-card">
+                <div class="card-header">Connectivity Test Results</div>
+                <div class="card-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Test Method</th>
+                                <th>Result</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Direct HTTP request</td>
+                                <td><span class="status pass">PASS</span></td>
+                                <td>Server responds with 200 OK</td>
+                            </tr>
+                            <tr>
+                                <td>Static file serving</td>
+                                <td><span class="status pass">PASS</span></td>
+                                <td>Static files are served correctly</td>
+                            </tr>
+                            <tr>
+                                <td>Direct test route</td>
+                                <td><span class="status pass">PASS</span></td>
+                                <td>Test route responds with 200 OK</td>
+                            </tr>
+                            <tr>
+                                <td>Replit feedback tool</td>
+                                <td><span class="status fail">FAIL</span></td>
+                                <td>Tool cannot connect to server</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2>API Functionality</h2>
+            <div class="status-card">
+                <div class="card-header">API Endpoint Test Results</div>
+                <div class="card-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>API Endpoint</th>
+                                <th>Status</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Server Health</td>
+                                <td><span class="status pass">PASS</span></td>
+                                <td>Server responds correctly</td>
+                            </tr>
+                            <tr>
+                                <td>Emotion Analysis</td>
+                                <td><span class="status partial">PARTIAL</span></td>
+                                <td>Detects sad correctly but classifies happy as satisfied</td>
+                            </tr>
+                            <tr>
+                                <td>Chat API</td>
+                                <td><span class="status fail">FAIL</span></td>
+                                <td>API structure mismatch with test expectations</td>
+                            </tr>
+                            <tr>
+                                <td>Contextual Recommendations</td>
+                                <td><span class="status fail">FAIL</span></td>
+                                <td>Returns 400 Bad Request</td>
+                            </tr>
+                            <tr>
+                                <td>Idiom Translation</td>
+                                <td><span class="status fail">FAIL</span></td>
+                                <td>Returns 405 Method Not Allowed</td>
+                            </tr>
+                            <tr>
+                                <td>Cosmic Sound</td>
+                                <td><span class="status pass">PASS</span></td>
+                                <td>Both info and file endpoints work correctly</td>
+                            </tr>
+                            <tr>
+                                <td>Text to Speech</td>
+                                <td><span class="status fail">FAIL</span></td>
+                                <td>Returns 405 Method Not Allowed</td>
+                            </tr>
+                            <tr>
+                                <td>Bilingual Support</td>
+                                <td><span class="status fail">FAIL</span></td>
+                                <td>Response structure mismatch with test expectations</td>
+                            </tr>
+                            <tr>
+                                <td>Cache System</td>
+                                <td><span class="status fail">FAIL</span></td>
+                                <td>No cache speedup detected</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2>Test Files Created</h2>
+            <div class="status-card">
+                <div class="card-header">Testing Resources</div>
+                <div class="card-body">
+                    <ul>
+                        <li><strong>static/frontend_test.html</strong>: HTML-based test page for frontend functionality</li>
+                        <li><strong>direct_test.html</strong>: Direct test page with dedicated server route</li>
+                        <li><strong>comprehensive_test.py</strong>: Python script for API testing</li>
+                        <li><strong>FEEDBACK_TESTING_GUIDE.md</strong>: Comprehensive testing guide document</li>
+                        <li><strong>TEST_RESULTS.md</strong>: Detailed test results and analysis</li>
+                        <li><strong>test_results_20250406_170828.json</strong>: JSON output from comprehensive test run</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <div class="next-steps">
+            <h3>Next Steps</h3>
+            <ol>
+                <li><strong>API Standardization</strong>: Ensure all API endpoints follow consistent response structures</li>
+                <li><strong>Method Support</strong>: Verify that all API endpoints support the appropriate HTTP methods</li>
+                <li><strong>Frontend Testing</strong>: Continue developing standalone test tools that don't rely on the Replit feedback tool</li>
+                <li><strong>Documentation</strong>: Maintain detailed documentation of all testing procedures and results for reference</li>
+            </ol>
+        </div>
+        
+        <footer>
+            <p>Generated on April 6, 2025 | Mashaaer Feelings Application</p>
+        </footer>
+    </div>
+</body>
+</html>

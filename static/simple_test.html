@@ -1,17 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Test Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            color: #666;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-  <h1>Simple Test Page</h1>
-  <p>This is a very simple test page to check if static files are being served correctly.</p>
-  <p>Current time: <span id="time"></span></p>
-  
-  <script>
-    document.getElementById('time').textContent = new Date().toLocaleString();
-  </script>
+    <h1>Simple Test Page</h1>
+    <p>This is a very simple static HTML page to verify the server is running and serving static files correctly.</p>
+    <p class="success">If you can see this page, the server is working correctly!</p>
+    <p>Current time: <span id="current-time"></span></p>
+    
+    <script>
+        // Display the current time
+        document.getElementById('current-time').textContent = new Date().toLocaleString();
+    </script>
 </body>
 </html>

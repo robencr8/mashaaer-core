@@ -1,6 +1,1 @@
-<name>
-Simple server
-</name>
-<command>
-python simple_server.py
-</command>
+{"altname":"Health Check","bin":["python","health_check.py"],"hidden":false}
