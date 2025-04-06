@@ -1,1 +1,1 @@
-run = "gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app"
+run = "python3 run_server.py"

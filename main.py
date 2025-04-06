@@ -974,3 +974,13 @@ try:
     logger.info("Diagnostic routes registered successfully")
 except Exception as e:
     logger.error(f"Error registering diagnostic routes: {str(e)}")
+
+# Add main entry point for running the application directly
+if __name__ == "__main__":
+    import os
+    # Always use port 8080 as default
+    port = 8080
+    # Override with environment variable if provided
+    if "PORT" in os.environ:
+        port = int(os.environ.get("PORT"))
+    app.run(host='0.0.0.0', port=port, debug=True)
