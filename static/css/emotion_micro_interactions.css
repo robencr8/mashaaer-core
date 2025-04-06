@@ -1,0 +1,182 @@
+/**
+ * Emotion Micro-Interactions CSS
+ * Provides styling for emotion-based visual effects and transitions
+ */
+
+/* Emotion transition container */
+.emotion-transition {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9000;
+}
+
+/* Individual sparkle particles */
+.emotion-sparkle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--emotion-primary, #9370DB);
+  opacity: 0;
+  box-shadow: 0 0 8px var(--emotion-primary, #9370DB);
+  pointer-events: none;
+}
+
+/* Pulse animation for notifications and highlights */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pulse-animation {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+/* Ripple effect for buttons and interactive elements */
+@keyframes ripple-effect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  background-color: rgba(255, 255, 255, 0.3);
+  animation: ripple-effect 0.6s linear;
+  pointer-events: none;
+}
+
+/* Emotion-specific colors */
+.emotion-happy {
+  --emotion-primary: #FFD700;
+  --emotion-secondary: #FFA500;
+}
+
+.emotion-sad {
+  --emotion-primary: #4169E1;
+  --emotion-secondary: #1E90FF;
+}
+
+.emotion-angry {
+  --emotion-primary: #FF4500;
+  --emotion-secondary: #FF6347;
+}
+
+.emotion-calm {
+  --emotion-primary: #48D1CC;
+  --emotion-secondary: #20B2AA;
+}
+
+.emotion-excited {
+  --emotion-primary: #FF1493;
+  --emotion-secondary: #FF69B4;
+}
+
+.emotion-confused {
+  --emotion-primary: #9932CC;
+  --emotion-secondary: #8B008B;
+}
+
+.emotion-neutral {
+  --emotion-primary: #9370DB;
+  --emotion-secondary: #7B68EE;
+}
+
+/* Rating stars animation */
+@keyframes star-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.star.active {
+  animation: star-pulse 0.3s ease-in-out;
+}
+
+/* Emotion option selection animation */
+@keyframes emotion-select {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.emotion-option.active {
+  animation: emotion-select 0.3s ease-in-out;
+}
+
+/* Success sparkle effect */
+@keyframes success-sparkle {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.2) rotate(180deg);
+  }
+  70% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.3) translateY(-25px) rotate(360deg);
+  }
+}
+
+/* Error shake animation */
+@keyframes error-shake {
+  0% { transform: translateX(0); }
+  10% { transform: translateX(-5px); }
+  20% { transform: translateX(5px); }
+  30% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  50% { transform: translateX(-5px); }
+  60% { transform: translateX(5px); }
+  70% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+  90% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+.error-shake {
+  animation: error-shake 0.6s ease-in-out;
+}
+
+/* Focus glow effect */
+.focus-glow {
+  transition: box-shadow 0.3s ease;
+}
+
+.focus-glow:focus {
+  box-shadow: 0 0 15px var(--emotion-primary, #9370DB);
+  outline: none;
+}
