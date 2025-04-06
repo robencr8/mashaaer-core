@@ -6,13 +6,24 @@ and server connectivity.
 """
 import logging
 import requests
-from flask import Blueprint, render_template, request, jsonify, send_from_directory
+from flask import Blueprint, render_template, request, jsonify, send_from_directory, make_response
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 direct_test_bp = Blueprint('direct_test', __name__)
+
+@direct_test_bp.route("/api/ping", methods=["GET"])
+def ping():
+    """Simple ping endpoint for basic connectivity testing"""
+    logger.debug("Ping request received")
+    response = make_response(jsonify({"status": "ok", "message": "Replit test success"}), 200)
+    response.headers['Content-Type'] = 'application/json'
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    return response
 
 @direct_test_bp.route('/direct-test')
 def direct_test():
