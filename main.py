@@ -224,9 +224,18 @@ def direct_feedback():
     # Handle POST request for feedback submission
     if request.method == "POST":
         try:
-            # Forward request to our API feedback handler
-            from api_feedback import process_direct_feedback
-            return process_direct_feedback()
+            # Get the JSON data from the request
+            data = request.get_json()
+            
+            # Forward to API endpoint using internal request
+            response = app.test_client().post(
+                '/api/direct-feedback',
+                json=data,
+                headers={'Content-Type': 'application/json'}
+            )
+            
+            # Return the API response
+            return response.get_data(), response.status_code, response.headers.items()
         except Exception as e:
             logger.error(f"Error processing feedback: {str(e)}")
             return jsonify({
@@ -900,6 +909,17 @@ def direct_feedback():
 # This is now handled by recommendation_routes.py
 
 # Add emotion analysis API endpoint
+@app.route("/health", methods=["GET", "OPTIONS"])
+def health():
+    """Health check endpoint"""
+    logger.debug("Health check endpoint accessed")
+    return jsonify({
+        "status": "ok",
+        "message": "Mashaaer Feelings service is running",
+        "environment": platform.system(),
+        "timestamp": datetime.datetime.now().isoformat()
+    })
+
 @app.route("/api/analyze-emotion", methods=["POST"])
 def analyze_emotion():
     """Analyze text for emotional content and return the detected emotion"""
