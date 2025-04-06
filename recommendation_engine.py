@@ -549,18 +549,22 @@ class RecommendationEngine:
 
     def _generate_recommendations(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Generate personalized recommendations using AI.
+        Generate personalized recommendations using AI with enhanced context awareness.
 
         Args:
             user_data: Collected user data
 
         Returns:
-            Dictionary containing recommendations
+            Dictionary containing context-aware recommendations
         """
         try:
             # Create input for OpenAI
             current_emotion = user_data.get("current_emotion", {})
             current_primary = current_emotion.get("primary_emotion", "neutral") if current_emotion else "neutral"
+            
+            # Extract emotion details including intensity if available
+            emotion_intensity = current_emotion.get("intensity", 0.5) if current_emotion else 0.5
+            emotion_details = current_emotion.get("emotion_data", {}) if current_emotion else {}
             
             emotion_history = user_data.get("emotion_history", [])
             recent_emotions = [e.get("primary_emotion", "neutral") for e in emotion_history[:5]]
@@ -595,69 +599,114 @@ class RecommendationEngine:
             day_of_week = current_time.strftime("%A").lower()
             is_weekend = day_of_week in ["saturday", "sunday"]
             
+            # Enhanced contextual factors
+            season = self._get_current_season()
+            weather_context = user_data.get("context", {}).get("weather", {})
+            location_context = user_data.get("context", {}).get("location", {})
+            social_context = user_data.get("context", {}).get("social", {})
+            cultural_events = self._get_cultural_events(day_of_week, current_time.month, current_time.day)
+            
+            # Identify emotional patterns
+            emotion_patterns = user_data.get("emotion_patterns", {})
+            emotion_trends = emotion_patterns.get("trends", {})
+            emotion_transitions = emotion_patterns.get("transitions", {})
+            
+            # Get past recommendation effectiveness
+            past_recommendations = self._get_past_recommendation_effectiveness(
+                user_id=user_data.get("user_id", "")
+            )
+            
             # Format user data for prompt
             prompt_data = {
                 "current_emotion": current_primary,
+                "emotion_intensity": emotion_intensity,
+                "emotion_details": emotion_details,
                 "recent_emotions": recent_emotions,
+                "emotion_trends": emotion_trends,
                 "wellbeing_score": wellbeing_score,
                 "challenges": challenge_types,
                 "language": preferences.get("language", "en"),
                 "time_of_day": time_of_day,
                 "day_of_week": day_of_week,
                 "is_weekend": is_weekend,
+                "season": season,
+                "weather": weather_context,
+                "location": location_context,
+                "social_context": social_context,
+                "cultural_events": cultural_events,
                 "interests": preferences.get("interests", ""),
-                "recent_activity_types": recent_activity_types
+                "recent_activity_types": recent_activity_types,
+                "past_effective_recommendations": past_recommendations
             }
             
-            # Prepare system prompt
+            # Prepare enhanced system prompt with contextual awareness
             system_prompt = """
-            You are Mashaaer, an AI emotional wellbeing advisor designed to provide holistic, culturally-sensitive recommendations to improve emotional wellbeing.
+            You are Mashaaer, an advanced contextual emotional wellbeing advisor designed to provide holistic, 
+            culturally-sensitive recommendations that are deeply personalized to the user's current context.
             
-            Based on the user's emotional data and context, provide thoughtful recommendations in these categories:
-            1. Immediate actions - Quick activities to improve the current emotional state
-            2. Well-being practices - Long-term practices to build emotional resilience
-            3. Social connections - Ways to leverage social support for emotional health
-            4. Creative expression - Art, music, or writing activities suited to their emotional state
-            5. Reflective insights - Thoughtful observations about patterns in their emotional journey
-            6. Engagement activities - Interactive experiences tailored to their interests and current context
+            Based on the user's emotional data and comprehensive contextual information, provide thoughtful 
+            recommendations in these categories:
+            
+            1. Immediate actions - Quick activities to improve the current emotional state, specifically tailored to time, location and weather
+            2. Well-being practices - Long-term practices to build emotional resilience, adapted to the user's lifestyle patterns
+            3. Social connections - Ways to leverage social support for emotional health, considering cultural sensitivities
+            4. Creative expression - Art, music, or writing activities suited to their emotional state and available environment
+            5. Reflective insights - Thoughtful observations about patterns in their emotional journey with cultural nuance
+            6. Contextual suggestions - Context-specific recommendations based on time, season, location, and cultural factors
+            7. Engagement activities - Interactive experiences tailored to their interests and current context
             
             Keep these guidelines in mind:
             - Be supportive, not clinical or diagnostic
-            - Respect cultural sensitivities of Middle Eastern contexts
-            - Focus on practical, accessible suggestions
-            - Be specific and actionable, not generic
-            - Adapt recommendations to the time of day and week (weekday/weekend)
-            - Consider their personal interests and past activities
-            - Include a mix of short-term and long-term recommendations
+            - Respect cultural sensitivities of Middle Eastern contexts with deep cultural awareness
+            - Focus on practical, accessible suggestions that match the user's exact circumstances
+            - Be highly specific and actionable, not generic - reference the exact contextual factors
+            - Precisely adapt recommendations to the time of day, season, weather, and sociocultural context
+            - Consider the effectiveness of past recommendations for this user
+            - Observe emotional patterns and trends to provide relevant insights
             - Format all responses in JSON
-            - Provide recommendations appropriate for their current emotional state
-            - Suggest digital engagement activities like interactive media, apps, or online communities
-            - Include recommendations that encourage healthy platform engagement
-            - Suggest techniques for emotional regulation based on current state
+            - Include recommendations that consider the intensity of the emotion (stronger emotions need more immediate relief)
+            - Suggest techniques for emotional regulation based on current state and cultural context
             """
             
-            # Create user prompt with enhanced context
+            # Create user prompt with enhanced contextual awareness
             user_prompt = f"""
-            Please provide personalized recommendations based on this emotional data and context:
+            Please provide highly personalized, context-aware recommendations based on this comprehensive emotional and contextual data:
+            
+            EMOTIONAL CONTEXT:
             - Current emotion: {prompt_data['current_emotion']}
+            - Emotion intensity: {prompt_data['emotion_intensity']} (0.0-1.0 scale)
             - Recent emotions: {', '.join(prompt_data['recent_emotions'])}
+            - Emotional trends: {prompt_data['emotion_trends']}
             - Wellbeing score: {prompt_data['wellbeing_score']} (0.0-1.0 scale)
             - Challenges: {', '.join(prompt_data['challenges']) if prompt_data['challenges'] else 'None identified'}
-            - Preferred language: {prompt_data['language']}
+            
+            TEMPORAL CONTEXT:
             - Time of day: {prompt_data['time_of_day']}
             - Day of week: {prompt_data['day_of_week']} (weekend: {str(prompt_data['is_weekend']).lower()})
+            - Season: {prompt_data['season']}
+            - Cultural events: {prompt_data['cultural_events'] if prompt_data['cultural_events'] else 'None identified'}
+            
+            ENVIRONMENTAL CONTEXT:
+            - Weather: {prompt_data['weather'] if prompt_data['weather'] else 'No weather data available'}
+            - Location context: {prompt_data['location'] if prompt_data['location'] else 'No location data available'}
+            
+            PERSONAL CONTEXT:
+            - Preferred language: {prompt_data['language']}
             - Interests: {prompt_data['interests'] if prompt_data['interests'] else 'Not specified'}
             - Recent activities: {', '.join(prompt_data['recent_activity_types']) if prompt_data['recent_activity_types'] else 'No recent activities recorded'}
+            - Social context: {prompt_data['social_context'] if prompt_data['social_context'] else 'No social context available'}
+            - Past effective recommendations: {prompt_data['past_effective_recommendations'] if prompt_data['past_effective_recommendations'] else 'No past recommendation data'}
             
             Respond in JSON format with these sections:
             {{
-                "immediate_actions": [list of 3-5 immediate actions],
-                "wellbeing_practices": [list of 3-5 practices],
-                "social_connections": [list of 2-3 suggestions],
-                "creative_expression": [list of 2-3 activities],
-                "reflective_insights": [list of 2-3 insights],
+                "immediate_actions": [list of 3-5 immediate actions that specifically reference current context],
+                "wellbeing_practices": [list of 3-5 practices tailored to emotional patterns],
+                "social_connections": [list of 2-3 suggestions with cultural awareness],
+                "creative_expression": [list of 2-3 activities matched to emotion and environment],
+                "reflective_insights": [list of 2-3 insights based on emotional trends],
+                "contextual_suggestions": [list of 2-4 recommendations specifically leveraging time, season, or cultural context],
                 "engagement_activities": [list of 2-4 digital or interactive engagement suggestions],
-                "affirmation": "A supportive affirmation based on their emotional state"
+                "affirmation": "A supportive affirmation based on their emotional state and cultural context"
             }}
             """
             
@@ -1126,3 +1175,136 @@ class RecommendationEngine:
             
         except Exception as e:
             logger.error(f"Error creating recommendation engine tables: {str(e)}")
+            
+    def _get_current_season(self) -> str:
+        """
+        Determine the current season based on the date.
+        
+        Returns:
+            String representing the current season ('winter', 'spring', 'summer', 'fall')
+        """
+        current_date = datetime.now()
+        month = current_date.month
+        day = current_date.day
+        
+        # Northern hemisphere seasons
+        if (month == 3 and day >= 20) or (month > 3 and month < 6) or (month == 6 and day < 21):
+            return "spring"
+        elif (month == 6 and day >= 21) or (month > 6 and month < 9) or (month == 9 and day < 22):
+            return "summer"
+        elif (month == 9 and day >= 22) or (month > 9 and month < 12) or (month == 12 and day < 21):
+            return "fall"
+        else:  # (month == 12 and day >= 21) or (month < 3) or (month == 3 and day < 20)
+            return "winter"
+    
+    def _get_cultural_events(self, day_of_week: str, month: int, day: int) -> str:
+        """
+        Identify cultural or seasonal events occurring on or near the current date.
+        
+        Args:
+            day_of_week: Current day of the week
+            month: Current month (1-12)
+            day: Current day of month
+            
+        Returns:
+            String describing relevant cultural events or an empty string if none
+        """
+        events = []
+        
+        # Major holiday seasons
+        if month == 12 and day > 15:
+            events.append("winter holiday season")
+        elif month == 1 and day == 1:
+            events.append("New Year's Day")
+        elif month == 10 and day >= 25 and day <= 31:
+            events.append("Halloween season")
+        
+        # Ramadan (approximate, as it varies by year)
+        # This is just a placeholder - in a real implementation, you would use a proper
+        # Islamic calendar calculation or API to determine if it's Ramadan
+        if (month == 3 and day >= 10) or (month == 4 and day <= 10):
+            events.append("potentially Ramadan period (varies by year)")
+            
+        # Weekend
+        if day_of_week in ["friday", "saturday"]:
+            events.append("weekend")
+            
+        # Return formatted string
+        if events:
+            return ", ".join(events)
+        return ""
+    
+    def _get_past_recommendation_effectiveness(self, user_id: str) -> List[str]:
+        """
+        Analyze which past recommendations were most effective for this user.
+        
+        Args:
+            user_id: Unique identifier for the user
+            
+        Returns:
+            List of successful recommendation types for this user
+        """
+        try:
+            if not user_id:
+                return []
+                
+            # Query for implemented/highly rated recommendations
+            query = """
+            SELECT rf.feedback 
+            FROM recommendation_feedback rf 
+            WHERE rf.user_id = ? 
+            ORDER BY rf.timestamp DESC 
+            LIMIT 10
+            """
+            
+            params = (user_id,)
+            result = self.db_manager.execute_query(query, params)
+            
+            effective_types = []
+            for record in result:
+                try:
+                    # Parse feedback JSON
+                    feedback = json.loads(record["feedback"]) if isinstance(record["feedback"], str) else record["feedback"]
+                    
+                    # Check if user found it helpful
+                    if feedback.get("helpful", False):
+                        # Extract implemented recommendations
+                        implemented = feedback.get("implemented", [])
+                        for item in implemented:
+                            if "." in item:  # Items are formatted as "category.index"
+                                category = item.split(".")[0]
+                                if category not in effective_types:
+                                    effective_types.append(category)
+                except (json.JSONDecodeError, KeyError) as e:
+                    logger.warning(f"Error parsing recommendation feedback: {str(e)}")
+            
+            return effective_types
+                
+        except Exception as e:
+            logger.error(f"Error analyzing past recommendation effectiveness: {str(e)}")
+            return []
+            
+    def _get_weather_forecast(self, location: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Get the current weather forecast to enhance contextual recommendations.
+        
+        Args:
+            location: Optional location string (city, region)
+            
+        Returns:
+            Dictionary with weather data or empty dict if unavailable
+        """
+        # Note: In a production environment, this would connect to a weather API
+        # For now, we'll return a placeholder with default weather
+        
+        try:
+            # If we had a weather API integration, we would call it here
+            # weather_data = weather_api.get_forecast(location)
+            
+            # For now, return empty placeholder - the system will adapt recommendations
+            # based on whether weather data is available or not
+            return {}
+            
+        except Exception as e:
+            logger.error(f"Error fetching weather forecast: {str(e)}")
+            return {}

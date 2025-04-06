@@ -72,6 +72,12 @@ def register_routes(app):
         logger.debug("Serving recommendations page")
         return render_template("recommendations.html")
     
+    @app.route("/contextual-recommendations", methods=["GET"])
+    def contextual_recommendations_page():
+        """Show the contextual emotion recommendation system page"""
+        logger.debug("Serving contextual recommendations page")
+        return render_template("contextual_recommendations.html")
+    
     @app.route("/audio-activation")
     def audio_activation():
         """Audio activation bypass example page"""

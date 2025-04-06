@@ -27,3 +27,4 @@ anthropic
 flask-markdown
 markdown
 openai
+anthropic

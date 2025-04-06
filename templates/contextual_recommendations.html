@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en" data-mood="neutral">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6a0080">
+  <meta name="description" content="Mashaaer AI - Contextual Emotion Recommendations">
+  <title>Contextual Recommendations - Mashaaer AI</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="icon" href="/static/icons/icon-192x192.png">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/mood-themes.css">
+  <link rel="stylesheet" href="/static/css/app.css">
+  <style>
+    /* Additional styles for the contextual recommendations page */
+    .context-container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      background-color: rgba(18, 18, 40, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 1rem;
+      border: 1px solid rgba(156, 39, 176, 0.3);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .page-title {
+      font-size: 1.8rem;
+      color: var(--primary-purple-light);
+      margin-bottom: 1.5rem;
+      text-align: center;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(156, 39, 176, 0.3);
+    }
+    
+    .context-section {
+      margin-bottom: 2rem;
+    }
+    
+    .section-title {
+      font-size: 1.4rem;
+      color: var(--primary-purple-light);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .context-form {
+      background-color: rgba(0, 0, 0, 0.2);
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 0.8rem;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(156, 39, 176, 0.3);
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 1rem;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-purple);
+      box-shadow: 0 0 0 2px rgba(156, 39, 176, 0.5);
+    }
+    
+    select.form-control {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.7rem center;
+      background-size: 1em;
+    }
+    
+    .btn {
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      background-color: var(--primary-purple);
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .btn:hover {
+      background-color: var(--primary-purple-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .recommendations-result {
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      border-left: 3px solid var(--primary-purple);
+    }
+    
+    .context-info {
+      background-color: rgba(0, 0, 0, 0.15);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .context-tag {
+      display: inline-block;
+      background-color: rgba(156, 39, 176, 0.2);
+      color: var(--text-light);
+      padding: 0.3rem 0.6rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+      margin: 0.2rem;
+    }
+    
+    .recommendation-category {
+      margin-bottom: 1.5rem;
+    }
+    
+    .category-title {
+      font-size: 1.1rem;
+      color: var(--primary-purple-light);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .recommendation-list {
+      list-style-type: none;
+    }
+    
+    .recommendation-item {
+      padding: 0.8rem;
+      border-radius: 0.5rem;
+      background-color: rgba(255, 255, 255, 0.05);
+      margin-bottom: 0.5rem;
+      transition: all 0.3s;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+    }
+    
+    .recommendation-item:hover {
+      background-color: rgba(156, 39, 176, 0.1);
+      transform: translateX(5px);
+    }
+    
+    .recommendation-icon {
+      margin-right: 0.8rem;
+      color: var(--primary-purple-light);
+      font-size: 1.2rem;
+      padding-top: 0.2rem;
+    }
+    
+    .loading-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 200px;
+    }
+    
+    .cosmic-loader {
+      width: 80px;
+      height: 80px;
+      position: relative;
+    }
+    
+    .cosmic-loader .circle {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      border-top-color: var(--primary-purple);
+      animation: spin 1.5s linear infinite;
+    }
+    
+    .cosmic-loader .circle:nth-child(2) {
+      width: 70%;
+      height: 70%;
+      top: 15%;
+      left: 15%;
+      border-top-color: var(--primary-purple-light);
+      animation-duration: 2s;
+      animation-direction: reverse;
+    }
+    
+    .cosmic-loader .circle:nth-child(3) {
+      width: 40%;
+      height: 40%;
+      top: 30%;
+      left: 30%;
+      border-top-color: #d1c4e9;
+      animation-duration: 1s;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .nav-back {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      margin-bottom: 1rem;
+      color: var(--text-light);
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    
+    .nav-back:hover {
+      color: var(--primary-purple-light);
+      transform: translateX(-5px);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .context-container {
+        margin: 1rem;
+        padding: 1rem;
+      }
+      
+      .page-title {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Stars background -->
+  <div class="stars-background" id="stars-container"></div>
+  
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="logo">
+      <img src="/static/icons/icon-192x192.png" alt="Mashaaer AI Logo">
+      <span>Mashaaer</span>
+    </div>
+    <div class="controls">
+      <button class="control-btn" id="languageToggle" title="Toggle Language">
+        <i class="fas fa-language"></i>
+      </button>
+      <button class="control-btn" id="soundToggle" title="Toggle Sound">
+        <i class="fas fa-volume-up"></i>
+      </button>
+      <button class="control-btn" id="themeToggle" title="Toggle Theme">
+        <i class="fas fa-moon"></i>
+      </button>
+      <a href="/app" class="control-btn" title="Back to Main App">
+        <i class="fas fa-home"></i>
+      </a>
+    </div>
+  </header>
+  
+  <!-- Main Content -->
+  <main>
+    <div class="context-container">
+      <a href="/app" class="nav-back">
+        <i class="fas fa-arrow-left"></i> Back to main interface
+      </a>
+      
+      <h1 class="page-title">Contextual Emotion Recommendations</h1>
+      
+      <section class="context-section">
+        <h2 class="section-title">
+          <i class="fas fa-brain"></i>
+          Context-Aware Personalized Recommendations
+        </h2>
+        <div class="context-info">
+          <p>Our AI system analyzes multiple contextual factors to provide deeply personalized recommendations based on your current emotional state, time of day, season, cultural events, and past preferences.</p>
+          <div style="margin-top: 0.5rem;">
+            <span class="context-tag"><i class="fas fa-clock"></i> Time-aware</span>
+            <span class="context-tag"><i class="fas fa-calendar"></i> Seasonal</span>
+            <span class="context-tag"><i class="fas fa-globe"></i> Cultural</span>
+            <span class="context-tag"><i class="fas fa-history"></i> Adaptive</span>
+            <span class="context-tag"><i class="fas fa-user"></i> Personalized</span>
+          </div>
+        </div>
+        
+        <div class="context-form">
+          <form id="contextForm">
+            <div class="form-group">
+              <label for="currentEmotion">Current Emotional State</label>
+              <select id="currentEmotion" class="form-control" required>
+                <option value="">Select your current emotion</option>
+                <option value="joy">Joy / Happiness</option>
+                <option value="sadness">Sadness</option>
+                <option value="anger">Anger</option>
+                <option value="fear">Fear / Anxiety</option>
+                <option value="surprise">Surprise</option>
+                <option value="disgust">Disgust</option>
+                <option value="trust">Trust</option>
+                <option value="anticipation">Anticipation</option>
+                <option value="exhaustion">Exhaustion</option>
+                <option value="confusion">Confusion</option>
+                <option value="calm">Calm / Peaceful</option>
+                <option value="neutral">Neutral</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="emotionIntensity">Emotion Intensity</label>
+              <input type="range" id="emotionIntensity" class="form-control" min="0" max="100" value="50">
+              <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 0.2rem;">
+                <span>Low</span>
+                <span>Medium</span>
+                <span>High</span>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="contextLocation">Your Current Setting</label>
+              <select id="contextLocation" class="form-control">
+                <option value="">Select your current setting</option>
+                <option value="home">At Home</option>
+                <option value="work">At Work / Office</option>
+                <option value="school">At School / University</option>
+                <option value="social">Social Gathering</option>
+                <option value="outdoors">Outdoors / Nature</option>
+                <option value="commuting">Commuting / Traveling</option>
+                <option value="public">Public Place</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="contextSocial">Social Context</label>
+              <select id="contextSocial" class="form-control">
+                <option value="">Select your social context</option>
+                <option value="alone">Alone</option>
+                <option value="family">With Family</option>
+                <option value="partner">With Partner</option>
+                <option value="friends">With Friends</option>
+                <option value="colleagues">With Colleagues</option>
+                <option value="strangers">Among Strangers</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="contextSituation">Specific Situation (Optional)</label>
+              <input type="text" id="contextSituation" class="form-control" placeholder="E.g., preparing for presentation, family dinner, creative block">
+            </div>
+            
+            <button type="submit" class="btn" id="getRecommendationsBtn">
+              <i class="fas fa-magic"></i> Generate Recommendations
+            </button>
+          </form>
+        </div>
+      </section>
+      
+      <!-- Results section (initially hidden) -->
+      <div id="recommendationsResults" class="recommendations-result" style="display: none;">
+        <div id="loadingRecommendations" class="loading-container">
+          <div class="cosmic-loader">
+            <div class="circle"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+          </div>
+        </div>
+        
+        <div id="recommendationsContent" style="display: none;">
+          <div class="context-info" id="contextSummary">
+            <!-- Context summary will be inserted here -->
+          </div>
+          
+          <div class="recommendation-category">
+            <h3 class="category-title">
+              <i class="fas fa-bolt"></i> Immediate Actions
+            </h3>
+            <ul class="recommendation-list" id="immediateActions">
+              <!-- Recommendations will be inserted here -->
+            </ul>
+          </div>
+          
+          <div class="recommendation-category">
+            <h3 class="category-title">
+              <i class="fas fa-heart"></i> Wellbeing Practices
+            </h3>
+            <ul class="recommendation-list" id="wellbeingPractices">
+              <!-- Recommendations will be inserted here -->
+            </ul>
+          </div>
+          
+          <div class="recommendation-category">
+            <h3 class="category-title">
+              <i class="fas fa-users"></i> Social Connections
+            </h3>
+            <ul class="recommendation-list" id="socialConnections">
+              <!-- Recommendations will be inserted here -->
+            </ul>
+          </div>
+          
+          <div class="recommendation-category">
+            <h3 class="category-title">
+              <i class="fas fa-lightbulb"></i> Reflective Insights
+            </h3>
+            <ul class="recommendation-list" id="reflectiveInsights">
+              <!-- Recommendations will be inserted here -->
+            </ul>
+          </div>
+          
+          <div class="recommendation-category">
+            <h3 class="category-title">
+              <i class="fas fa-map-pin"></i> Contextual Suggestions
+            </h3>
+            <ul class="recommendation-list" id="contextualSuggestions">
+              <!-- Recommendations will be inserted here -->
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>© 2025 Mashaaer AI - Your Cosmic Companion</p>
+  </footer>
+  
+  <!-- Audio elements for sound effects -->
+  <audio id="bgAudio" loop preload="auto">
+    <source src="/static/sounds/cosmic.mp3" type="audio/mp3">
+  </audio>
+  <audio id="notificationSound" preload="auto">
+    <source src="/static/sounds/notification.mp3" type="audio/mp3">
+  </audio>
+  
+  <!-- Scripts -->
+  <script src="/static/js/mood-theme-manager.js"></script>
+  <script src="/static/js/cosmic_sound_system.js"></script>
+  <script>
+    // DOM Elements
+    const starsContainer = document.getElementById('stars-container');
+    const contextForm = document.getElementById('contextForm');
+    const getRecommendationsBtn = document.getElementById('getRecommendationsBtn');
+    const recommendationsResults = document.getElementById('recommendationsResults');
+    const loadingRecommendations = document.getElementById('loadingRecommendations');
+    const recommendationsContent = document.getElementById('recommendationsContent');
+    const contextSummary = document.getElementById('contextSummary');
+    const immediateActions = document.getElementById('immediateActions');
+    const wellbeingPractices = document.getElementById('wellbeingPractices');
+    const socialConnections = document.getElementById('socialConnections');
+    const reflectiveInsights = document.getElementById('reflectiveInsights');
+    const contextualSuggestions = document.getElementById('contextualSuggestions');
+    const soundToggle = document.getElementById('soundToggle');
+    const themeToggle = document.getElementById('themeToggle');
+    const languageToggle = document.getElementById('languageToggle');
+    const bgAudio = document.getElementById('bgAudio');
+    const notificationSound = document.getElementById('notificationSound');
+    
+    // Configuration
+    let currentLanguage = localStorage.getItem('mashaaer-language') || 'en';
+    let audioEnabled = localStorage.getItem('audioEnabled') !== 'false';
+    let darkTheme = true;
+    let userId = localStorage.getItem('mashaaer-user-id') || generateUserId();
+    
+    // Set initial HTML direction based on language
+    document.documentElement.setAttribute('dir', currentLanguage === 'ar' ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', currentLanguage);
+    
+    // Initialize
+    function initApp() {
+      createStars();
+      setupEventListeners();
+      
+      // Set initial audio state
+      updateAudioState(audioEnabled);
+      
+      // Check if we need to update theme
+      loadThemeState();
+    }
+    
+    // Create stars background
+    function createStars() {
+      const count = 200;
+      starsContainer.innerHTML = '';
+      
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        
+        // Random position
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        
+        // Random size
+        const size = Math.random() * 3 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        
+        // Random animation properties
+        star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+        star.style.setProperty('--delay', `${Math.random() * 2}s`);
+        star.style.setProperty('--base-opacity', `${Math.random() * 0.5 + 0.3}`);
+        star.style.setProperty('--min-opacity', `${Math.random() * 0.2}`);
+        
+        starsContainer.appendChild(star);
+      }
+    }
+    
+    // Setup event listeners
+    function setupEventListeners() {
+      // Form submission
+      contextForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        getRecommendations();
+      });
+      
+      // Toggle audio
+      soundToggle.addEventListener('click', () => {
+        audioEnabled = !audioEnabled;
+        localStorage.setItem('audioEnabled', audioEnabled);
+        updateAudioState(audioEnabled);
+      });
+      
+      // Toggle theme
+      themeToggle.addEventListener('click', toggleTheme);
+      
+      // Toggle language
+      languageToggle.addEventListener('click', toggleLanguage);
+    }
+    
+    // Update audio state
+    function updateAudioState(enabled) {
+      if (enabled) {
+        soundToggle.innerHTML = '<i class="fas fa-volume-up"></i>';
+        try {
+          bgAudio.volume = 0.3;
+          bgAudio.play().catch(err => {
+            console.error('Background audio play error:', err);
+          });
+        } catch (err) {
+          console.error('Error playing background audio:', err);
+        }
+      } else {
+        soundToggle.innerHTML = '<i class="fas fa-volume-mute"></i>';
+        try {
+          bgAudio.pause();
+        } catch (err) {
+          console.error('Error pausing background audio:', err);
+        }
+      }
+    }
+    
+    // Toggle theme
+    function toggleTheme() {
+      darkTheme = !darkTheme;
+      document.documentElement.setAttribute('data-mood', darkTheme ? 'neutral' : 'joy');
+      themeToggle.innerHTML = darkTheme ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+      localStorage.setItem('mashaaer-theme', darkTheme ? 'dark' : 'light');
+    }
+    
+    // Load theme state
+    function loadThemeState() {
+      const savedTheme = localStorage.getItem('mashaaer-theme');
+      if (savedTheme) {
+        darkTheme = savedTheme === 'dark';
+        document.documentElement.setAttribute('data-mood', darkTheme ? 'neutral' : 'joy');
+        themeToggle.innerHTML = darkTheme ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+      }
+    }
+    
+    // Toggle language
+    function toggleLanguage() {
+      currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+      document.documentElement.setAttribute('dir', currentLanguage === 'ar' ? 'rtl' : 'ltr');
+      document.documentElement.setAttribute('lang', currentLanguage);
+      localStorage.setItem('mashaaer-language', currentLanguage);
+      
+      // If we had translation functionality, we would update UI text here
+    }
+    
+    // Generate unique user ID
+    function generateUserId() {
+      const userId = 'user_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('mashaaer-user-id', userId);
+      return userId;
+    }
+    
+    // Get recommendations based on form data
+    function getRecommendations() {
+      // Play notification sound if enabled
+      if (audioEnabled) {
+        notificationSound.play().catch(err => {
+          console.error('Error playing notification sound:', err);
+        });
+      }
+      
+      // Show results section and loading state
+      recommendationsResults.style.display = 'block';
+      loadingRecommendations.style.display = 'flex';
+      recommendationsContent.style.display = 'none';
+      
+      // Scroll to results section
+      recommendationsResults.scrollIntoView({ behavior: 'smooth' });
+      
+      // Get form data
+      const formData = {
+        user_id: userId,
+        emotion_data: {
+          primary_emotion: document.getElementById('currentEmotion').value,
+          intensity: parseInt(document.getElementById('emotionIntensity').value) / 100,
+        },
+        context_type: "situation",
+        context_details: {
+          type: "emotional_support",
+          description: document.getElementById('contextSituation').value || "General emotional support",
+          location: document.getElementById('contextLocation').value,
+          social_setting: document.getElementById('contextSocial').value
+        },
+        force_refresh: true
+      };
+      
+      // Make API request to get recommendations
+      fetch('/api/recommendations/contextual', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          displayRecommendations(data.contextual_recommendations || data.recommendations, formData);
+        } else {
+          throw new Error(data.message || 'Failed to get recommendations');
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching recommendations:', error);
+        displayErrorState(error.message);
+      })
+      .finally(() => {
+        // Hide loading state
+        loadingRecommendations.style.display = 'none';
+        recommendationsContent.style.display = 'block';
+      });
+    }
+    
+    // Display recommendations
+    function displayRecommendations(recommendations, formData) {
+      // Create context summary
+      const emotionName = formData.emotion_data.primary_emotion;
+      const emotionIntensity = formData.emotion_data.intensity > 0.7 ? 'high' : 
+                              formData.emotion_data.intensity > 0.3 ? 'moderate' : 'low';
+      const locationSetting = formData.context_details?.location || 'unspecified location';
+      const socialContext = formData.context_details?.social_setting || 'unspecified social setting';
+      
+      contextSummary.innerHTML = `
+        <p>Personalized recommendations based on your <strong>${emotionIntensity} ${emotionName}</strong> 
+        emotional state at <strong>${locationSetting}</strong> while <strong>${socialContext}</strong>.</p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.8;">
+          Generated with contextual awareness of time, season, and cultural factors.
+        </p>
+      `;
+      
+      // Clear previous recommendations
+      immediateActions.innerHTML = '';
+      wellbeingPractices.innerHTML = '';
+      socialConnections.innerHTML = '';
+      reflectiveInsights.innerHTML = '';
+      contextualSuggestions.innerHTML = '';
+      
+      // Add new recommendations
+      populateRecommendationList(immediateActions, recommendations.immediate_actions || []);
+      populateRecommendationList(wellbeingPractices, recommendations.wellbeing_practices || []);
+      populateRecommendationList(socialConnections, recommendations.social_connections || []);
+      populateRecommendationList(reflectiveInsights, recommendations.reflective_insights || []);
+      populateRecommendationList(contextualSuggestions, recommendations.contextual_suggestions || []);
+    }
+    
+    // Populate recommendation list
+    function populateRecommendationList(container, items) {
+      if (!items || items.length === 0) {
+        const listItem = document.createElement('li');
+        listItem.className = 'recommendation-item';
+        listItem.innerHTML = '<div class="recommendation-icon"><i class="fas fa-info-circle"></i></div><div>No recommendations available for this category.</div>';
+        container.appendChild(listItem);
+        return;
+      }
+      
+      items.forEach(item => {
+        const listItem = document.createElement('li');
+        listItem.className = 'recommendation-item';
+        
+        // Generate a random icon from available options
+        const icons = ['star', 'heart', 'smile', 'thumbs-up', 'check-circle', 'lightbulb', 'sun', 'moon', 'cloud', 'tree', 'coffee', 'book', 'music', 'walking', 'biking', 'running', 'meditation', 'spa', 'water', 'seedling'];
+        const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+        
+        listItem.innerHTML = `
+          <div class="recommendation-icon"><i class="fas fa-${randomIcon}"></i></div>
+          <div>${item}</div>
+        `;
+        
+        container.appendChild(listItem);
+      });
+    }
+    
+    // Display error state
+    function displayErrorState(errorMessage) {
+      contextSummary.innerHTML = `
+        <p style="color: #e57373;"><i class="fas fa-exclamation-triangle"></i> Error: ${errorMessage}</p>
+        <p style="margin-top: 0.5rem;">Please try again or adjust your input parameters.</p>
+      `;
+      
+      // Clear previous recommendations and show error message
+      const containers = [immediateActions, wellbeingPractices, socialConnections, reflectiveInsights, contextualSuggestions];
+      containers.forEach(container => {
+        container.innerHTML = '';
+        const listItem = document.createElement('li');
+        listItem.className = 'recommendation-item';
+        listItem.innerHTML = '<div class="recommendation-icon"><i class="fas fa-exclamation-circle"></i></div><div>Unable to load recommendations.</div>';
+        container.appendChild(listItem);
+      });
+    }
+    
+    // Initialize the application
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>

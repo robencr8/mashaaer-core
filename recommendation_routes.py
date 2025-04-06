@@ -43,7 +43,8 @@ def init_recommendation_api(app, _db_manager, _emotion_tracker):
 @recommendation_bp.route('/get', methods=['POST'])
 def get_recommendations():
     """
-    Get personalized recommendations based on user's emotional data
+    Get context-aware personalized recommendations based on user's emotional data
+    and comprehensive contextual factors.
     
     This endpoint should be accessed via POST since it analyzes user data
     and generates personalized content.
@@ -51,8 +52,33 @@ def get_recommendations():
     Request body:
     {
         "user_id": "user123",  // Optional, will use session ID if not provided
-        "emotion_data": {...},  // Optional current emotional state
-        "context": {...},      // Optional additional context
+        "emotion_data": {      // Optional current emotional state
+            "primary_emotion": "joy",
+            "intensity": 0.7,   // Optional intensity (0.0-1.0)
+            "emotion_data": {}  // Optional detailed emotion data
+        },  
+        "context": {           // Optional enhanced contextual data
+            "weather": {       // Optional weather context
+                "condition": "sunny",
+                "temperature": 25,
+                "humidity": 40
+            },
+            "location": {      // Optional location context
+                "city": "Dubai",
+                "indoor": true,
+                "setting": "office"
+            },
+            "social": {        // Optional social context
+                "alone": false,
+                "with_family": true,
+                "event_type": "dinner"
+            },
+            "device": {        // Optional device context
+                "type": "mobile",
+                "screen_size": "medium",
+                "capabilities": ["audio", "haptic"]
+            }
+        },
         "force_refresh": false  // Optional, force regeneration of recommendations
     }
     
@@ -65,9 +91,18 @@ def get_recommendations():
             "social_connections": [...],
             "creative_expression": [...],
             "reflective_insights": [...],
+            "contextual_suggestions": [...],
+            "engagement_activities": [...],
             "affirmation": "...",
             "current_emotion": "joy",
             "wellbeing_score": 0.75,
+            "context": {
+                "time_of_day": "evening",
+                "day_of_week": "friday",
+                "is_weekend": true,
+                "season": "summer",
+                "weather": { ... }
+            },
             "generated_at": "2025-04-05T12:34:56"
         },
         "recommendation_id": "rec_123abc"
@@ -83,17 +118,26 @@ def get_recommendations():
             user_id = session.get('user_id', f"anonymous_{uuid4().hex[:8]}")
             
         # Log the request
-        logger.info(f"Generating recommendations for user: {user_id}")
+        logger.info(f"Generating context-aware recommendations for user: {user_id}")
         
         # Extract other parameters
         emotion_data = data.get('emotion_data')
-        context = data.get('context')
+        context = data.get('context', {})
         force_refresh = data.get('force_refresh', False)
         
+        # Add enhanced location-based context if available
+        if context and 'location' in context:
+            location = context.get('location', {})
+            city = location.get('city')
+            if city:
+                # In a production environment, we would fetch real weather data here
+                # based on the location, or use geolocation services to enhance context
+                pass
+                
         # Generate a unique recommendation ID
         recommendation_id = f"rec_{uuid4().hex[:12]}"
         
-        # Get recommendations
+        # Get context-aware recommendations
         recommendations = recommendation_engine.get_recommendations(
             user_id=user_id,
             emotion_data=emotion_data,
@@ -114,7 +158,7 @@ def get_recommendations():
         })
         
     except Exception as e:
-        logger.error(f"Error generating recommendations: {str(e)}")
+        logger.error(f"Error generating context-aware recommendations: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Failed to generate recommendations',
@@ -242,6 +286,115 @@ def get_contextual_greeting():
         return jsonify({
             'success': False,
             'error': 'Failed to generate greeting',
+            'message': str(e)
+        }), 500
+
+
+@recommendation_bp.route('/contextual', methods=['POST'])
+def get_contextual_recommendations():
+    """
+    Get highly specific recommendations for a particular context, event, or activity
+    
+    This endpoint provides deeply contextualized recommendations for specific situations,
+    whether that's a stressful work meeting, family gathering, creative block, etc.
+    
+    Request body:
+    {
+        "user_id": "user123",  // Optional, will use session ID if not provided
+        "emotion_data": {      // Optional current emotional state
+            "primary_emotion": "anxiety",
+            "intensity": 0.8,
+            "emotion_data": {}  
+        },
+        "context_type": "event" | "activity" | "situation",
+        "context_details": {
+            "type": "work_meeting" | "family_gathering" | "creative_session" | "conflict" | "decision",
+            "description": "Preparing for an important presentation to senior management",
+            "urgency": "immediate" | "today" | "this_week",  // Optional timing context
+            "importance": 0.9,  // Optional importance level (0.0-1.0)
+            "location": "office" | "home" | "public",  // Optional location context
+            "social_setting": "alone" | "small_group" | "large_group"  // Optional social context
+        }
+    }
+    
+    Returns:
+    {
+        "success": true,
+        "contextual_recommendations": {
+            "before": [...],  // Recommendations for before the event/activity
+            "during": [...],  // Recommendations for during the event/activity
+            "after": [...],   // Recommendations for after the event/activity
+            "emotional_regulation": [...],  // Specific emotional regulation techniques
+            "perspective_shifts": [...],   // Ways to reframe or view the situation
+            "reflection_prompts": [...]    // Questions to consider about the situation
+        },
+        "recommendation_id": "rec_123abc"
+    }
+    """
+    try:
+        # Get request data
+        data = request.get_json() or {}
+        
+        # Get user ID (from request or session)
+        user_id = data.get('user_id')
+        if not user_id:
+            user_id = session.get('user_id', f"anonymous_{uuid4().hex[:8]}")
+            
+        # Get context details
+        emotion_data = data.get('emotion_data')
+        context_type = data.get('context_type')
+        context_details = data.get('context_details', {})
+        
+        # Validate required fields
+        if not context_type or not context_details:
+            return jsonify({
+                'success': False,
+                'error': 'Missing context information'
+            }), 400
+            
+        # Generate a unique recommendation ID
+        recommendation_id = f"rec_contextual_{uuid4().hex[:10]}"
+        
+        # Prepare the context for the AI
+        enhanced_context = {
+            "context_type": context_type,
+            "details": context_details,
+            "user_id": user_id,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # Get contextual recommendations using the recommendation engine
+        recommendations = recommendation_engine.get_recommendations(
+            user_id=user_id,
+            emotion_data=emotion_data,
+            context=enhanced_context,
+            force_refresh=True  # Always fresh for contextual recommendations
+        )
+        
+        # Add the recommendation ID
+        recommendations['recommendation_id'] = recommendation_id
+        
+        # Log the interaction
+        _log_recommendation_interaction(
+            user_id, 
+            recommendation_id, 
+            "contextual_generated",
+            {
+                "context_type": context_type,
+                "context_summary": context_details.get("description", "")
+            }
+        )
+        
+        return jsonify({
+            'success': True,
+            'contextual_recommendations': recommendations
+        })
+        
+    except Exception as e:
+        logger.error(f"Error generating contextual recommendations: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to generate contextual recommendations',
             'message': str(e)
         }), 500
 

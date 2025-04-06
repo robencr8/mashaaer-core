@@ -11,6 +11,9 @@ from typing import Dict, Any, List, Optional, Tuple
 
 from ai_model_router import AIModelRouter
 
+# Set up logging
+logger = logging.getLogger(__name__)
+
 # Import mock data for testing and fallback
 try:
     from mock_idiom_data import ENGLISH_IDIOMS, ARABIC_IDIOMS, MOCK_TRANSLATIONS
@@ -18,9 +21,6 @@ try:
 except ImportError:
     logger.warning("Mock idiom data not available. Some fallback functionality may be limited.")
     MOCK_DATA_AVAILABLE = False
-
-# Set up logging
-logger = logging.getLogger(__name__)
 
 class IdiomTranslator:
     """
@@ -326,7 +326,24 @@ Respond with a JSON array using the following structure:
         # Handle API errors
         if not response["success"]:
             logger.error("Failed to get common idioms: %s", response.get("error", "Unknown error"))
-            return []
+            
+            # Use mock data if available
+            if MOCK_DATA_AVAILABLE:
+                logger.info("Using mock idiom data for language: %s, emotion: %s", language, emotion)
+                if language == 'en':
+                    idiom_data = ENGLISH_IDIOMS
+                elif language == 'ar':
+                    idiom_data = ARABIC_IDIOMS
+                else:
+                    return []
+                
+                # If emotion is specified, filter by that emotion, otherwise use 'general'
+                emotion_key = emotion.lower() if emotion else 'general'
+                # If the specific emotion is not in our data, fall back to general
+                if emotion_key not in idiom_data:
+                    emotion_key = 'general'
+                
+                return idiom_data.get(emotion_key, [])
         
         # Parse response to extract idioms list
         try:

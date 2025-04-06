@@ -1,0 +1,474 @@
+/**
+ * Contextual Recommendation UI Styling
+ * Provides cosmic-themed styles for the context-aware recommendation interface
+ */
+
+.cosmic-panel {
+    background: linear-gradient(135deg, rgba(20, 10, 40, 0.95) 0%, rgba(40, 20, 80, 0.9) 100%);
+    color: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 5px 25px rgba(100, 50, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.recommendation-panel {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.recommendation-panel .header {
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.recommendation-panel .title {
+    font-size: 24px;
+    margin: 0 0 8px;
+    background: linear-gradient(90deg, #a78fff, #78e4ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+}
+
+.recommendation-panel .subtitle {
+    opacity: 0.8;
+    margin: 0;
+    font-size: 16px;
+}
+
+/* Context selector styling */
+.context-selector {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.context-selector h3 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #f0f0ff;
+}
+
+.context-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.cosmic-button {
+    background: linear-gradient(135deg, #6236ff 0%, #9000ff 100%);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 10px rgba(98, 54, 255, 0.4);
+}
+
+.cosmic-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(98, 54, 255, 0.6);
+}
+
+.cosmic-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 5px rgba(98, 54, 255, 0.4);
+}
+
+/* Context form styling */
+.context-form {
+    background: rgba(30, 15, 60, 0.5);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.context-form h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 18px;
+    text-align: center;
+    color: #f0f0ff;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #d0d0ff;
+}
+
+.form-group select,
+.form-group textarea,
+.form-group input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: rgba(20, 10, 35, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.form-group select:focus,
+.form-group textarea:focus,
+.form-group input[type="text"]:focus {
+    outline: none;
+    border-color: #6236ff;
+    box-shadow: 0 0 0 2px rgba(98, 54, 255, 0.25);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.range-slider {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.range-slider input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.2);
+    outline: none;
+}
+
+.range-slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #6236ff;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.range-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.form-actions {
+    margin-top: 25px;
+    text-align: center;
+}
+
+.submit-button {
+    min-width: 180px;
+}
+
+/* Recommendation results styling */
+.recommendation-results-content {
+    background: rgba(30, 15, 60, 0.5);
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.recommendation-results-content h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 20px;
+    text-align: center;
+    color: #f0f0ff;
+}
+
+.recommendation-affirmation {
+    background: rgba(98, 54, 255, 0.15);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-style: italic;
+    font-size: 16px;
+    color: #d0d0ff;
+    border-left: 3px solid #6236ff;
+}
+
+.recommendation-tabs {
+    margin-bottom: 25px;
+}
+
+.tab-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+}
+
+.tab-button {
+    padding: 8px 15px;
+    background: rgba(30, 15, 70, 0.5);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+    background: rgba(98, 54, 255, 0.2);
+}
+
+.tab-button.active {
+    background: #6236ff;
+    color: white;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+.recommendation-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.recommendation-item {
+    margin-bottom: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 12px 15px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.recommendation-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.recommendation-item.clicked {
+    background: rgba(98, 54, 255, 0.2);
+}
+
+.item-content {
+    display: flex;
+    align-items: flex-start;
+}
+
+.item-icon {
+    margin-right: 12px;
+    font-size: 18px;
+    color: #9b7dff;
+    flex-shrink: 0;
+}
+
+.item-text {
+    flex: 1;
+    line-height: 1.5;
+}
+
+.recommendation-feedback {
+    text-align: center;
+    margin: 25px 0;
+}
+
+.recommendation-feedback p {
+    margin: 0 0 12px;
+    font-size: 16px;
+    color: #d0d0ff;
+}
+
+.feedback-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.feedback-useful,
+.feedback-not-useful {
+    min-width: 120px;
+}
+
+.feedback-useful.selected {
+    background: linear-gradient(135deg, #36a9ff 0%, #22c55e 100%);
+}
+
+.feedback-not-useful.selected {
+    background: linear-gradient(135deg, #ff6236 0%, #ff9000 100%);
+}
+
+.feedback-thank-you {
+    color: #a78fff;
+    font-size: 16px;
+    text-align: center;
+    padding: 10px;
+    margin: 15px 0;
+    animation: fadeIn 0.5s ease;
+}
+
+.recommendation-actions {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.back-button {
+    background: rgba(255, 255, 255, 0.1);
+    color: #d0d0ff;
+}
+
+.back-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Loading overlay */
+.cosmic-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(20, 10, 40, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    border-radius: 12px;
+}
+
+.cosmic-loader {
+    text-align: center;
+}
+
+.cosmic-sphere {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #6236ff 0%, #9000ff 100%);
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    box-shadow: 0 0 30px #6236ff;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+.cosmic-loader p {
+    color: #d0d0ff;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Error message */
+.cosmic-error-message {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(20, 10, 40, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    border-radius: 12px;
+}
+
+.error-content {
+    background: rgba(40, 20, 80, 0.8);
+    padding: 25px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 80%;
+}
+
+.error-content h3 {
+    margin-top: 0;
+    color: #ff6b6b;
+    margin-bottom: 15px;
+}
+
+.error-content p {
+    margin-bottom: 20px;
+    color: #f0f0ff;
+}
+
+/* RTL support for Arabic */
+.rtl-form {
+    direction: rtl;
+    text-align: right;
+}
+
+.rtl-form .item-icon {
+    margin-right: 0;
+    margin-left: 12px;
+}
+
+.rtl-content {
+    direction: rtl;
+    text-align: right;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 20px rgba(98, 54, 255, 0.5);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(98, 54, 255, 0.8);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 20px rgba(98, 54, 255, 0.5);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .context-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .context-buttons .cosmic-button {
+        width: 100%;
+        max-width: 240px;
+    }
+    
+    .tab-buttons {
+        justify-content: center;
+    }
+    
+    .recommendation-affirmation {
+        font-size: 14px;
+    }
+}
