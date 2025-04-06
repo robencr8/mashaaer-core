@@ -1233,14 +1233,19 @@
       // Play welcome sound now that audio is enabled
       playCosmicSound("welcome", currentLanguage);
 
-      // Try to play background audio with error handling
-      try {
-        const bgAudio = document.getElementById('background-audio');
-        bgAudio.play().catch(err => {
-          console.error('Background audio play error:', err);
-        });
-      } catch (err) {
-        console.error('Error playing background audio:', err);
+      // Only play background audio if user has enabled audio
+      // Using a silent sound file now for cosmic.mp3 to prevent TTS voice
+      if (document.getElementById('audio-icon').className === 'fas fa-volume-up') {
+        try {
+          const bgAudio = document.getElementById('background-audio');
+          // Set volume very low
+          bgAudio.volume = 0.1;
+          bgAudio.play().catch(err => {
+            console.error('Background audio play error:', err);
+          });
+        } catch (err) {
+          console.error('Error playing background audio:', err);
+        }
       }
     });
     

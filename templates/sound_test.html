@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer Sound Diagnostic</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .panel {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button.danger {
+            background-color: #f44336;
+        }
+        button.warning {
+            background-color: #ff9800;
+        }
+        button.info {
+            background-color: #2196F3;
+        }
+        .log {
+            height: 200px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            font-family: monospace;
+        }
+        .soundfile {
+            margin: 10px 0;
+            border: 1px solid #eee;
+            padding: 10px;
+            background-color: #fafafa;
+            border-radius: 4px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-left: 10px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <h1>Mashaaer Sound Diagnostic Tool</h1>
+    
+    <div class="panel">
+        <h2>Audio System Status</h2>
+        <p>This page helps diagnose and fix audio issues in the Mashaaer application.</p>
+        <button id="resetAudio" class="danger">Reset Audio System</button>
+        <button id="toggleMute" class="warning">Mute All Sound</button>
+        <span style="margin-left: 20px">
+            Debug Mode: 
+            <label class="switch">
+                <input type="checkbox" id="debugToggle">
+                <span class="slider"></span>
+            </label>
+        </span>
+    </div>
+
+    <div class="panel">
+        <h2>Sound File Management</h2>
+        <div id="soundFiles">
+            <!-- Sound file list will be populated here -->
+            <div class="soundfile">
+                Loading sound files...
+            </div>
+        </div>
+        <button id="refreshFiles" class="info">Refresh List</button>
+    </div>
+
+    <div class="panel">
+        <h2>Test Audio Playback</h2>
+        <button id="testWelcome">Test Welcome Sound</button>
+        <button id="testClick">Test UI Click</button>
+        <button id="testCustom">Test Custom Sound</button>
+        <input type="text" id="customSound" placeholder="Sound name, e.g. 'cosmic'" value="cosmic">
+    </div>
+
+    <div class="panel">
+        <h2>Debug Log</h2>
+        <div id="logOutput" class="log"></div>
+        <button id="clearLog">Clear Log</button>
+    </div>
+
+    <!-- Hidden audio elements -->
+    <audio id="testAudio" style="display:none;"></audio>
+
+    <script>
+        // Initialize variables
+        let muted = false;
+        let debugMode = false;
+        
+        // DOM Elements
+        const logOutput = document.getElementById('logOutput');
+        const testAudio = document.getElementById('testAudio');
+        const resetAudioBtn = document.getElementById('resetAudio');
+        const toggleMuteBtn = document.getElementById('toggleMute');
+        const debugToggle = document.getElementById('debugToggle');
+        const refreshFilesBtn = document.getElementById('refreshFiles');
+        const testWelcomeBtn = document.getElementById('testWelcome');
+        const testClickBtn = document.getElementById('testClick');
+        const testCustomBtn = document.getElementById('testCustom');
+        const customSoundInput = document.getElementById('customSound');
+        const clearLogBtn = document.getElementById('clearLog');
+        const soundFilesList = document.getElementById('soundFiles');
+        
+        // Logging function
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.textContent = `[${timestamp}] [${type}] ${message}`;
+            
+            if (type === 'error') {
+                entry.style.color = 'red';
+            } else if (type === 'success') {
+                entry.style.color = 'green';
+            } else if (type === 'warning') {
+                entry.style.color = 'orange';
+            }
+            
+            logOutput.appendChild(entry);
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+        
+        // Initialize the page
+        function init() {
+            log('Sound diagnostic tool initialized');
+            refreshSoundFiles();
+            
+            // Check for AudioContext support
+            if (window.AudioContext || window.webkitAudioContext) {
+                log('AudioContext is supported in this browser', 'success');
+            } else {
+                log('AudioContext is NOT supported in this browser', 'error');
+            }
+            
+            // Detect browser autoplay policy
+            testAudio.src = '/static/sounds/click.mp3';
+            testAudio.volume = 0.1;
+            
+            testAudio.play().then(() => {
+                log('Browser allows autoplay of audio', 'success');
+            }).catch(error => {
+                log(`Browser blocks autoplay: ${error.message}`, 'warning');
+                log('User interaction required to unlock audio', 'info');
+            });
+        }
+        
+        // Event listeners
+        resetAudioBtn.addEventListener('click', function() {
+            log('Resetting audio system...');
+            // Stop any playing audio
+            testAudio.pause();
+            testAudio.currentTime = 0;
+            
+            // Remove and recreate the audio element
+            const newAudio = document.createElement('audio');
+            newAudio.id = 'testAudio';
+            newAudio.style.display = 'none';
+            testAudio.parentNode.replaceChild(newAudio, testAudio);
+            
+            log('Audio system reset complete', 'success');
+        });
+        
+        toggleMuteBtn.addEventListener('click', function() {
+            muted = !muted;
+            testAudio.muted = muted;
+            toggleMuteBtn.textContent = muted ? 'Unmute All Sound' : 'Mute All Sound';
+            log(`All sound ${muted ? 'muted' : 'unmuted'}`);
+        });
+        
+        debugToggle.addEventListener('change', function() {
+            debugMode = this.checked;
+            log(`Debug mode ${debugMode ? 'enabled' : 'disabled'}`);
+        });
+        
+        refreshFilesBtn.addEventListener('click', refreshSoundFiles);
+        
+        testWelcomeBtn.addEventListener('click', function() {
+            playSound('welcome');
+        });
+        
+        testClickBtn.addEventListener('click', function() {
+            playSound('click');
+        });
+        
+        testCustomBtn.addEventListener('click', function() {
+            const soundName = customSoundInput.value.trim();
+            if (soundName) {
+                playSound(soundName);
+            } else {
+                log('Please enter a sound name', 'warning');
+            }
+        });
+        
+        clearLogBtn.addEventListener('click', function() {
+            logOutput.innerHTML = '';
+            log('Log cleared');
+        });
+        
+        // Function to play a sound
+        function playSound(soundName) {
+            log(`Attempting to play sound: ${soundName}`);
+            
+            // First try the static sounds directory
+            testAudio.src = `/static/sounds/${soundName}.mp3`;
+            
+            testAudio.oncanplaythrough = function() {
+                log(`Sound loaded: ${soundName}`, 'success');
+                testAudio.play().then(() => {
+                    log(`Sound playing: ${soundName}`, 'success');
+                }).catch(error => {
+                    log(`Error playing sound: ${error.message}`, 'error');
+                });
+            };
+            
+            testAudio.onerror = function() {
+                log(`Sound not found in static/sounds, trying mobile/audio...`, 'warning');
+                
+                // Try alternative location
+                testAudio.src = `/static/mobile/audio/${soundName}.mp3`;
+                
+                testAudio.onerror = function() {
+                    log(`Sound file not found: ${soundName}`, 'error');
+                };
+            };
+        }
+        
+        // Function to refresh sound files list
+        function refreshSoundFiles() {
+            log('Refreshing sound files list...');
+            
+            // In a real implementation, we'd fetch this from the server
+            // For this demo, we'll just display static examples
+            const soundFilesContent = `
+                <div class="soundfile">
+                    <strong>/static/sounds/cosmic.mp3</strong> - Cosmic ambient sound
+                    <button onclick="playSound('cosmic')" class="info">Play</button>
+                </div>
+                <div class="soundfile">
+                    <strong>/static/sounds/welcome.mp3</strong> - Welcome message
+                    <button onclick="playSound('welcome')" class="info">Play</button>
+                </div>
+                <div class="soundfile">
+                    <strong>/static/sounds/click.mp3</strong> - UI click sound
+                    <button onclick="playSound('click')" class="info">Play</button>
+                </div>
+                <div class="soundfile">
+                    <strong>/static/mobile/audio/cosmic.mp3</strong> - Mobile cosmic sound
+                    <button onclick="playSound('cosmic_mobile')" class="info">Play</button>
+                </div>
+            `;
+            
+            soundFilesList.innerHTML = soundFilesContent;
+            log('Sound files list refreshed', 'success');
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', init);
+        
+        // Allow playing individual sounds from console for debugging
+        window.playSound = playSound;
+    </script>
+</body>
+</html>

@@ -35,8 +35,9 @@ SOUND_DEFINITIONS = {
     "greeting": {"en": "I'm listening to you", "ar": "أنا أستمع إليك"}
 }
 
-# Background music file (we'll use a TTS-generated ambient sound for now)
-BACKGROUND_MUSIC = {"en": "cosmic ambient music", "ar": "موسيقى كونية"}
+# Background music file - IMPORTANT: Use silent file instead of TTS to prevent voice
+# saying "cosmic ambient music" over and over
+BACKGROUND_MUSIC = {"en": "", "ar": ""}
 
 def generate_sound_with_tts(text, language, filename):
     """Generate a sound file using the application's TTS API"""

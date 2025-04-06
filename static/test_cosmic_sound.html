@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Sound Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .controls {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #666;
+        }
+        .note {
+            color: #777;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cosmic Sound Test Page</h1>
+    <p>This page tests if the cosmic background sound issue has been fixed.</p>
+    
+    <div class="controls">
+        <h2>Welcome Sound Test</h2>
+        <p>Click the button below to play the welcome sound. This should work properly.</p>
+        <button id="playWelcomeBtn">Play Welcome Sound</button>
+    </div>
+    
+    <div class="controls">
+        <h2>Background Cosmic Sound Test</h2>
+        <p>Click the button below to play the cosmic background sound. This should now be silent (no voice saying "cosmic ambient music").</p>
+        <button id="playCosmicBtn">Play Cosmic Background</button>
+    </div>
+    
+    <div class="controls">
+        <h2>Autoplay Test</h2>
+        <p>The audio below attempts to autoplay. You may need to click the page first for browsers to allow it.</p>
+        <p class="note">Cosmic background sound plays:</p>
+        <audio id="backgroundAudio" src="/static/sounds/cosmic.mp3" loop></audio>
+        <button id="toggleBgAudio">Start/Stop Background Audio</button>
+    </div>
+    
+    <script>
+        // Get elements
+        const playWelcomeBtn = document.getElementById('playWelcomeBtn');
+        const playCosmicBtn = document.getElementById('playCosmicBtn');
+        const toggleBgAudio = document.getElementById('toggleBgAudio');
+        const backgroundAudio = document.getElementById('backgroundAudio');
+        
+        // Configure welcome sound
+        let welcomeSound = new Audio('/static/sounds/en_welcome.mp3');
+        
+        // Configure cosmic sound
+        let cosmicSound = new Audio('/static/sounds/cosmic.mp3');
+        
+        // Event listeners
+        playWelcomeBtn.addEventListener('click', function() {
+            welcomeSound.play().catch(e => {
+                console.error("Error playing welcome sound:", e);
+            });
+        });
+        
+        playCosmicBtn.addEventListener('click', function() {
+            cosmicSound.play().catch(e => {
+                console.error("Error playing cosmic sound:", e);
+            });
+        });
+        
+        toggleBgAudio.addEventListener('click', function() {
+            if (backgroundAudio.paused) {
+                backgroundAudio.play().catch(e => {
+                    console.error("Error playing background audio:", e);
+                });
+                toggleBgAudio.textContent = "Stop Background Audio";
+            } else {
+                backgroundAudio.pause();
+                toggleBgAudio.textContent = "Start Background Audio";
+            }
+        });
+        
+        // Console log to indicate successful loading
+        console.log("Cosmic Sound Test Page loaded");
+    </script>
+</body>
+</html>
