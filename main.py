@@ -216,7 +216,7 @@ def index():
     return render_template("index.html")
 
 # Add direct feedback tool route with HTML response and enhanced UX
-@app.route("/direct-feedback", methods=["GET", "POST"])
+@app.route('/direct-feedback', methods=['GET', 'POST'])
 def direct_feedback():
     """Serve an enhanced feedback page with visual confirmations and sound effects"""
     logger.debug("Serving enhanced direct feedback page")

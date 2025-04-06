@@ -359,6 +359,7 @@
    * 
    * @param {string} emotion - The emotional state
    * @param {Element} [sourceElement] - Optional element to originate the transition effect from
+   */
   function setEmotion(emotion, sourceElement = null) {
     if (!config.emotionColors[emotion]) {
       console.warn(`Unknown emotion: ${emotion}, defaulting to neutral`);
@@ -379,6 +380,25 @@
     // Create transition sparkle effect
     createEmotionTransitionEffect(previousEmotion, emotion, sourceElement);
     
+    // Update CSS variables for colors
+    const colors = config.emotionColors[emotion];
+    document.documentElement.style.setProperty('--emotion-primary', colors.primary);
+    document.documentElement.style.setProperty('--emotion-secondary', colors.secondary);
+    
+    // Update body class for emotion-specific styling
+    document.body.classList.remove(
+      ...Object.keys(config.emotionColors).map(e => `emotion-${e}`)
+    );
+    document.body.classList.add(`emotion-${emotion}`);
+    
+    // Play transition sound if enabled
+    if (config.soundEnabled) {
+      playSound('transition');
+    }
+    
+    return currentEmotion;
+  }
+  
   /**
    * Create a sparkle effect for emotion transitions
    * 
@@ -458,180 +478,68 @@
       }
     }, 2000);
   }
-
-    // Update CSS variables for colors
-    const colors = config.emotionColors[emotion];
-    document.documentElement.style.setProperty('--emotion-primary', colors.primary);
-    document.documentElement.style.setProperty('--emotion-secondary', colors.secondary);
-    
-    // Update body class for emotion-specific styling
-    document.body.classList.remove(
-      ...Object.keys(config.emotionColors).map(e => `emotion-${e}`)
-    );
-    document.body.classList.add(`emotion-${emotion}`);
-    
-    // Play transition sound if enabled
-    if (config.soundEnabled) {
-      playSound('transition');
-    }
-    
-    return currentEmotion;
-  }
-    // Update CSS variables for colors
-    const colors = config.emotionColors[emotion];
-    document.documentElement.style.setProperty('--emotion-primary', colors.primary);
-    document.documentElement.style.setProperty('--emotion-secondary', colors.secondary);
-    
-    // Update body class for emotion-specific styling
-    document.body.classList.remove(
-      ...Object.keys(config.emotionColors).map(e => `emotion-${e}`)
-    );
-    document.body.classList.add(`emotion-${emotion}`);
-    
-    // Play transition sound if enabled
-    if (config.soundEnabled) {
-      playSound('transition');
-    }
-    
-    return currentEmotion;
-  }
   
   /**
-   * Create a sparkle effect for emotion transitions
-   * 
-   * @param {string} fromEmotion - The previous emotion
-   * @param {string} toEmotion - The new emotion
-   * @param {Element} [sourceElement] - Optional element to originate the effect from
-   */
-  function createEmotionTransitionEffect(fromEmotion, toEmotion, sourceElement = null) {
-    // Create a container for the sparkle particles
-    const container = document.createElement('div');
-    container.className = 'emotion-transition';
-    container.style.position = 'fixed';
-    container.style.top = '0';
-    container.style.left = '0';
-    container.style.width = '100%';
-    container.style.height = '100%';
-    container.style.pointerEvents = 'none';
-    container.style.zIndex = '10000';
-    document.body.appendChild(container);
-    
-    // Determine the origin point for particles
-    let originX, originY;
-    
-    if (sourceElement) {
-      // If a source element is provided, use its center
-      const rect = sourceElement.getBoundingClientRect();
-      originX = rect.left + rect.width / 2;
-      originY = rect.top + rect.height / 2;
-    } else {
-      // Otherwise, use the emotion display area if it exists
-      const emotionDisplayEl = document.querySelector('.emotion-display') || 
-                               document.querySelector('.emotion-icon') ||
-                               document.querySelector('#current-emotion-icon');
-      
-      if (emotionDisplayEl) {
-        const rect = emotionDisplayEl.getBoundingClientRect();
-        originX = rect.left + rect.width / 2;
-        originY = rect.top + rect.height / 2;
-      } else {
-        // Default to center of the screen
-        originX = window.innerWidth / 2;
-        originY = window.innerHeight / 2;
-      }
-    }
-    
-    // Number of particles to create
-    const particleCount = 20;
-    
-    // Create sparkle particles
-    for (let i = 0; i < particleCount; i++) {
-      const sparkle = document.createElement('div');
-      sparkle.className = `emotion-sparkle emotion-${toEmotion}`;
-      
-      // Random size (4-10px)
-      const size = 4 + Math.random() * 6;
-      sparkle.style.width = `${size}px`;
-      sparkle.style.height = `${size}px`;
-      
-      // Position at origin
-      sparkle.style.left = `${originX}px`;
-      sparkle.style.top = `${originY}px`;
-      
-      // Set random sparkle travel direction variable
-      sparkle.style.setProperty('--sparkle-x', `${(Math.random() * 80) - 40}px`);
-      
-      // Add random delay
-      sparkle.style.animationDelay = `${Math.random() * 0.2}s`;
-      
-      // Add to container
-      container.appendChild(sparkle);
-    }
-    
-    // Remove container after all animations complete
-    setTimeout(() => {
-      if (document.body.contains(container)) {
-        document.body.removeChild(container);
-      }
-    }, 2000);
-  }
-  
-  /**
-   * Create a notification toast
+   * Create a notification element
    * 
    * @param {string} message - Notification message
-   * @param {Object} options - Configuration options
+   * @param {string} type - Notification type: 'info', 'success', 'warning', 'error'
+   * @param {Object} options - Additional options
+   * @returns {Element} - The created notification element
    */
-  function notify(message, options = {}) {
-    if (!config.notificationsEnabled) return;
+  function createNotification(message, type = 'info', options = {}) {
+    if (!config.notificationsEnabled) return null;
     
     // Default options
     const settings = Object.assign({
-      type: 'info', // info, success, error, warning
-      duration: 3000,
-      position: 'top-center',
+      duration: 4000,
       sound: true,
-      emotion: currentEmotion
+      icon: true,
+      emotion: null,
+      position: 'top-right' // 'top-right', 'top-left', 'bottom-right', 'bottom-left'
     }, options);
     
+    // Map type to emotion if not specified
+    if (!settings.emotion) {
+      switch (type) {
+        case 'success': settings.emotion = 'happy'; break;
+        case 'error': settings.emotion = 'angry'; break;
+        case 'warning': settings.emotion = 'fearful'; break;
+        default: settings.emotion = 'neutral';
+      }
+    }
+    
+    // Get colors for styling
+    const colors = config.emotionColors[settings.emotion];
+    
     // Create notification container if it doesn't exist
-    let container = document.querySelector('.mashaaer-notifications');
+    let container = document.querySelector('.mashaaer-notification-container');
     if (!container) {
       container = document.createElement('div');
-      container.className = 'mashaaer-notifications';
+      container.className = 'mashaaer-notification-container';
       
-      // Style container
+      // Set container style
       container.style.position = 'fixed';
-      container.style.zIndex = '9999';
+      container.style.zIndex = '10000';
       
-      // Set position
+      // Position container based on settings
       switch (settings.position) {
         case 'top-left':
           container.style.top = '20px';
-          container.style.left = '20px';
-          break;
-        case 'top-right':
-          container.style.top = '20px';
-          container.style.right = '20px';
-          break;
-        case 'bottom-left':
-          container.style.bottom = '20px';
           container.style.left = '20px';
           break;
         case 'bottom-right':
           container.style.bottom = '20px';
           container.style.right = '20px';
           break;
-        case 'bottom-center':
+        case 'bottom-left':
           container.style.bottom = '20px';
-          container.style.left = '50%';
-          container.style.transform = 'translateX(-50%)';
+          container.style.left = '20px';
           break;
-        case 'top-center':
+        case 'top-right':
         default:
           container.style.top = '20px';
-          container.style.left = '50%';
-          container.style.transform = 'translateX(-50%)';
+          container.style.right = '20px';
       }
       
       document.body.appendChild(container);
@@ -639,230 +547,194 @@
     
     // Create notification element
     const notification = document.createElement('div');
-    notification.className = `mashaaer-notification notification-${settings.type}`;
-    
-    // Style notification
-    notification.style.padding = '15px 20px';
-    notification.style.marginBottom = '10px';
-    notification.style.borderRadius = '8px';
-    notification.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-    notification.style.color = '#fff';
-    notification.style.fontWeight = '500';
-    notification.style.minWidth = '200px';
-    notification.style.maxWidth = '400px';
+    notification.className = 'mashaaer-notification';
     notification.style.opacity = '0';
     notification.style.transform = 'translateY(-20px)';
-    notification.style.transition = 'all 0.3s ease';
+    notification.style.transition = 'all 0.3s ease-out';
     
-    // Set background color based on type
-    switch (settings.type) {
-      case 'success':
-        notification.style.backgroundColor = '#28a745';
-        break;
-      case 'error':
-        notification.style.backgroundColor = '#dc3545';
-        break;
-      case 'warning':
-        notification.style.backgroundColor = '#ffc107';
-        notification.style.color = '#212529';
-        break;
-      case 'info':
-      default:
-        notification.style.backgroundColor = config.emotionColors[settings.emotion].primary;
+    // Add icon if enabled
+    if (settings.icon) {
+      const iconSpan = document.createElement('span');
+      iconSpan.className = 'notification-icon';
+      
+      // Set icon based on type
+      switch (type) {
+        case 'success': iconSpan.textContent = '✓'; break;
+        case 'error': iconSpan.textContent = '✗'; break;
+        case 'warning': iconSpan.textContent = '⚠'; break;
+        default: iconSpan.textContent = 'ℹ';
+      }
+      
+      notification.appendChild(iconSpan);
     }
     
-    // Set content
-    notification.textContent = message;
+    // Add message
+    const messageSpan = document.createElement('span');
+    messageSpan.textContent = message;
+    notification.appendChild(messageSpan);
     
-    // Add notification to container
+    // Add close button
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '×';
+    closeBtn.style.background = 'none';
+    closeBtn.style.border = 'none';
+    closeBtn.style.color = 'white';
+    closeBtn.style.fontSize = '20px';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.marginLeft = 'auto';
+    closeBtn.style.padding = '0 0 0 10px';
+    
+    // Style notification element
+    notification.style.display = 'flex';
+    notification.style.alignItems = 'center';
+    notification.style.padding = '12px 15px';
+    notification.style.marginBottom = '10px';
+    notification.style.background = `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`;
+    notification.style.borderRadius = '8px';
+    notification.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
+    notification.style.color = 'white';
+    
+    notification.appendChild(closeBtn);
+    
+    // Add to container
     container.appendChild(notification);
     
-    // Show notification with animation
+    // Play sound if enabled
+    if (settings.sound) {
+      playSound('notification');
+    }
+    
+    // Animate in
     setTimeout(() => {
       notification.style.opacity = '1';
       notification.style.transform = 'translateY(0)';
     }, 10);
     
-    // Play sound if enabled
-    if (settings.sound) {
-      const soundType = settings.type === 'success' ? 'success' : 
-                       settings.type === 'error' ? 'error' : 'notification';
-      playSound(soundType);
-    }
-    
-    // Set timeout to remove notification
-    setTimeout(() => {
-      // Hide notification with animation
+    // Set up close handler
+    const closeNotification = () => {
       notification.style.opacity = '0';
       notification.style.transform = 'translateY(-20px)';
       
-      // Remove notification after animation
       setTimeout(() => {
         if (container.contains(notification)) {
           container.removeChild(notification);
         }
         
         // Remove container if empty
-        if (container.childNodes.length === 0) {
+        if (container.children.length === 0) {
           document.body.removeChild(container);
         }
       }, 300);
-    }, settings.duration);
-  }
-  
-  /**
-   * Enable or disable sound effects
-   * 
-   * @param {boolean} enabled - Whether sound should be enabled
-   */
-  function setAudioEnabled(enabled) {
-    config.soundEnabled = enabled;
+    };
     
-    if (enabled) {
-      // Trigger welcome sound
-      playSound('welcome');
+    // Close on button click
+    closeBtn.addEventListener('click', closeNotification);
+    
+    // Auto close after duration
+    if (settings.duration > 0) {
+      setTimeout(closeNotification, settings.duration);
     }
     
-    return config.soundEnabled;
+    return notification;
   }
   
   /**
-   * Enable or disable particle effects
+   * Show success notification
    * 
-   * @param {boolean} enabled - Whether particles should be enabled
+   * @param {string} message - Success message
+   * @param {Object} options - Notification options
+   * @returns {Element} - The notification element
    */
-  function setParticlesEnabled(enabled) {
-    config.particlesEnabled = enabled;
-    return config.particlesEnabled;
+  function showSuccess(message, options = {}) {
+    return createNotification(message, 'success', options);
   }
   
   /**
-   * Create a floating message that animates up and fades
+   * Show error notification
    * 
-   * @param {string|Element} target - Target element or selector
-   * @param {string} message - Message to display
-   * @param {Object} options - Configuration options
+   * @param {string} message - Error message
+   * @param {Object} options - Notification options
+   * @returns {Element} - The notification element
    */
-  function floatingMessage(target, message, options = {}) {
-    // Default options
-    const settings = Object.assign({
-      duration: 1000,
-      color: config.emotionColors[currentEmotion].primary,
-      offset: { x: 0, y: -20 }
-    }, options);
+  function showError(message, options = {}) {
+    return createNotification(message, 'error', options);
+  }
+  
+  /**
+   * Initialize floating particles in the background for cosmic effect
+   * 
+   * @param {number} count - Number of particles to create
+   */
+  function initCosmicParticles(count = 30) {
+    if (!config.particlesEnabled) return;
     
-    // Get target element
-    const element = typeof target === 'string' 
-      ? document.querySelector(target) 
-      : target;
+    // Create container for particles
+    const container = document.createElement('div');
+    container.className = 'cosmic-particles-container';
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.pointerEvents = 'none';
+    container.style.zIndex = '0';
+    document.body.appendChild(container);
+    
+    // Get colors for current emotion
+    const colors = config.emotionColors[currentEmotion];
+    
+    // Create particles
+    for (let i = 0; i < count; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'cosmic-floating';
       
-    if (!element) {
-      console.warn(`Target element not found for floating message: ${target}`);
-      return;
+      // Random size (2-5px)
+      const size = 2 + Math.random() * 3;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      
+      // Random position
+      particle.style.left = `${Math.random() * 100}%`;
+      particle.style.top = `${Math.random() * 100}%`;
+      
+      // Random color (primary or secondary)
+      const color = Math.random() > 0.5 ? colors.primary : colors.secondary;
+      particle.style.backgroundColor = color;
+      particle.style.boxShadow = `0 0 ${size * 2}px ${color}`;
+      
+      // Random float direction
+      particle.style.setProperty('--float-x', `${(Math.random() * 60) - 30}px`);
+      
+      // Random animation duration (8-15s)
+      const duration = 8 + Math.random() * 7;
+      particle.style.animationDuration = `${duration}s`;
+      
+      // Random delay
+      const delay = Math.random() * 5;
+      particle.style.animationDelay = `${delay}s`;
+      
+      // Add to container
+      container.appendChild(particle);
     }
-    
-    // Get element position
-    const rect = element.getBoundingClientRect();
-    const startX = rect.left + rect.width / 2 + settings.offset.x;
-    const startY = rect.top + settings.offset.y;
-    
-    // Create message element
-    const messageEl = document.createElement('div');
-    messageEl.textContent = message;
-    messageEl.style.position = 'fixed';
-    messageEl.style.left = `${startX}px`;
-    messageEl.style.top = `${startY}px`;
-    messageEl.style.transform = 'translate(-50%, -50%)';
-    messageEl.style.color = settings.color;
-    messageEl.style.fontWeight = '600';
-    messageEl.style.fontSize = '18px';
-    messageEl.style.textShadow = '0 0 5px rgba(0, 0, 0, 0.3)';
-    messageEl.style.zIndex = '9999';
-    messageEl.style.pointerEvents = 'none';
-    messageEl.style.opacity = '0';
-    messageEl.style.transition = `opacity 0.5s ease, transform ${settings.duration}ms ease`;
-    
-    // Add to document
-    document.body.appendChild(messageEl);
-    
-    // Start animation
-    setTimeout(() => {
-      messageEl.style.opacity = '1';
-      messageEl.style.transform = `translate(-50%, calc(-50% - 40px))`;
-    }, 10);
-    
-    // Remove after animation
-    setTimeout(() => {
-      messageEl.style.opacity = '0';
-      setTimeout(() => {
-        if (document.body.contains(messageEl)) {
-          document.body.removeChild(messageEl);
-        }
-      }, 500);
-    }, settings.duration);
   }
   
-  // Add global style for animations
-  function addGlobalStyles() {
-    if (document.getElementById('mashaaer-interactions-styles')) return;
-    
-    const style = document.createElement('style');
-    style.id = 'mashaaer-interactions-styles';
-    style.textContent = `
-      /* Common interaction styles */
-      .has-interactions {
-        transition: all 0.2s ease;
-      }
-      
-      /* Cosmic visual effects */
-      @keyframes cosmic-pulse {
-        0% {
-          box-shadow: 0 0 0 0 rgba(147, 112, 219, 0.7);
-        }
-        70% {
-          box-shadow: 0 0 0 15px rgba(147, 112, 219, 0);
-        }
-        100% {
-          box-shadow: 0 0 0 0 rgba(147, 112, 219, 0);
-        }
-      }
-      
-      /* Notification animations */
-      @keyframes notification-slide-in {
-        0% {
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-        100% {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-    `;
-    document.head.appendChild(style);
-  }
-  
-  // Initialize when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-      addGlobalStyles();
-      init();
-    });
-  } else {
-    addGlobalStyles();
-    init();
-  }
-  
-  // Export API
-  window.MashaaerInteractions = {
-    createEmotionTransitionEffect,
-    applyTo,
-    playSound,
-    createParticleBurst,
+  // Expose public API
+  window.MashaaerEffects = {
+    init,
     setEmotion,
-    notify,
-    setAudioEnabled,
-    setParticlesEnabled,
-    floatingMessage
+    playSound,
+    applyTo,
+    createParticleBurst,
+    showSuccess,
+    showError,
+    createNotification,
+    initCosmicParticles,
+    getSoundEnabled: () => config.soundEnabled,
+    setSoundEnabled: (enabled) => { config.soundEnabled = !!enabled; },
+    getParticlesEnabled: () => config.particlesEnabled,
+    setParticlesEnabled: (enabled) => { config.particlesEnabled = !!enabled; }
   };
+  
+  // Auto-initialize on DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', init);
 })();
