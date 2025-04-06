@@ -123,6 +123,20 @@ def register_routes(app):
         """Test page for demonstrating the cosmic sound fix"""
         logger.debug("Serving cosmic sound fix test page")
         return send_from_directory("static", "test_cosmic_sound.html")
+        
+    # Cosmic onboarding page
+    @app.route("/cosmic-onboarding")
+    def cosmic_onboarding():
+        """Serve the cosmic onboarding experience"""
+        logger.debug("Serving cosmic onboarding page")
+        return render_template("cosmic_onboarding.html")
+        
+    # Main application page after onboarding
+    @app.route("/app")
+    def app_page():
+        """Main application interface after onboarding"""
+        logger.debug("Serving main application interface")
+        return render_template("app.html")
 
     # Theme testing page
     @app.route("/test-themes")

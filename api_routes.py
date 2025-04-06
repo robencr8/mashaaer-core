@@ -822,6 +822,21 @@ def play_cosmic_sound_query():
             'error': str(e)
         }), 500
 
+@api_bp.route('/contextual-greeting', methods=['GET'])
+def contextual_greeting():
+    """
+    Get a context-aware greeting based on time of day, day of week, and language
+    
+    Query parameters:
+        language: The language code ('en', 'ar')
+    
+    Returns:
+        JSON with greeting text
+    """
+    # Redirect to the existing endpoint in recommendation_routes.py
+    from recommendation_routes import get_contextual_greeting
+    return get_contextual_greeting()
+
 def generate_response(action: str, params: Dict[str, Any], emotion: str, user_id: str, language: str = 'en') -> str:
     """
     Generate a response based on the action and parameters

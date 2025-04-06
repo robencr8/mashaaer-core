@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en" data-mood="neutral">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6a0080">
+  <meta name="description" content="Mashaaer AI - Your emotional AI companion">
+  <title>Mashaaer AI</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="icon" href="/static/icons/icon-192x192.png">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/static/css/mood-themes.css">
+  <link rel="stylesheet" href="/static/css/app.css">
+  <style>
+    :root {
+      --primary-purple: #9c27b0;
+      --primary-purple-light: #ba68c8;
+      --primary-purple-dark: #6a0080;
+      --background-dark: #0c0c1d;
+      --text-light: #f5f5f5;
+      --card-bg: rgba(18, 18, 40, 0.8);
+      --transition-speed: 0.5s;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background-dark);
+      color: var(--text-light);
+      min-height: 100vh;
+      transition: background-color var(--transition-speed);
+      overflow-x: hidden;
+    }
+    
+    .stars-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+    
+    .star {
+      position: absolute;
+      background-color: #fff;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: twinkle var(--duration, 4s) infinite ease-in-out;
+      animation-delay: var(--delay, 0s);
+    }
+    
+    @keyframes twinkle {
+      0%, 100% {
+        opacity: var(--base-opacity, 0.8);
+      }
+      50% {
+        opacity: var(--min-opacity, 0.3);
+      }
+    }
+    
+    /* Header section */
+    .app-header {
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: rgba(12, 12, 29, 0.7);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .logo img {
+      width: 40px;
+      height: 40px;
+    }
+    
+    .logo span {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary-purple-light);
+    }
+    
+    .controls {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .control-btn {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      font-size: 1.2rem;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s;
+      background-color: rgba(156, 39, 176, 0.2);
+    }
+    
+    .control-btn:hover {
+      background-color: rgba(156, 39, 176, 0.4);
+    }
+    
+    /* Main content */
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+      gap: 2rem;
+    }
+    
+    /* Chat section */
+    .chat-container {
+      background-color: var(--card-bg);
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(156, 39, 176, 0.3);
+      display: flex;
+      flex-direction: column;
+      height: 60vh;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .message {
+      max-width: 80%;
+      padding: 0.8rem 1rem;
+      border-radius: 1rem;
+      position: relative;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .user-message {
+      align-self: flex-end;
+      background-color: var(--primary-purple);
+      color: white;
+      border-top-right-radius: 0.2rem;
+    }
+    
+    .ai-message {
+      align-self: flex-start;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      border-top-left-radius: 0.2rem;
+    }
+    
+    .message-time {
+      font-size: 0.7rem;
+      opacity: 0.7;
+      margin-top: 0.3rem;
+      text-align: right;
+    }
+    
+    .chat-input {
+      padding: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      background-color: rgba(0, 0, 0, 0.2);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .chat-input input {
+      flex: 1;
+      padding: 0.8rem 1rem;
+      border-radius: 2rem;
+      border: none;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 1rem;
+    }
+    
+    .chat-input input:focus {
+      outline: none;
+      background-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 0 2px rgba(156, 39, 176, 0.5);
+    }
+    
+    .send-btn {
+      border: none;
+      background-color: var(--primary-purple);
+      color: white;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .send-btn:hover {
+      background-color: var(--primary-purple-dark);
+    }
+    
+    .voice-btn {
+      border: none;
+      background-color: var(--primary-purple-light);
+      color: white;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .voice-btn:hover {
+      background-color: var(--primary-purple);
+    }
+    
+    /* Emotion and recommendation sections */
+    .widgets-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    .emotion-tracker, .recommendations {
+      background-color: var(--card-bg);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(156, 39, 176, 0.3);
+    }
+    
+    .widget-title {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--primary-purple-light);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .emotion-display {
+      display: flex;
+      align-items: center;
+      background-color: rgba(0, 0, 0, 0.2);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .emotion-icon {
+      font-size: 2rem;
+      margin-right: 1rem;
+    }
+    
+    .emotion-text {
+      font-size: 1.1rem;
+    }
+    
+    .emotion-history {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+    
+    .emotion-history::-webkit-scrollbar {
+      height: 5px;
+    }
+    
+    .emotion-history::-webkit-scrollbar-thumb {
+      background-color: rgba(156, 39, 176, 0.5);
+      border-radius: 5px;
+    }
+    
+    .emotion-item {
+      min-width: 60px;
+      text-align: center;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      background-color: rgba(0, 0, 0, 0.2);
+      font-size: 0.8rem;
+    }
+    
+    .recs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    
+    .rec-item {
+      background-color: rgba(0, 0, 0, 0.2);
+      padding: 0.8rem;
+      border-radius: 0.5rem;
+      border-left: 3px solid var(--primary-purple);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .rec-item:hover {
+      background-color: rgba(156, 39, 176, 0.2);
+      transform: translateX(5px);
+    }
+    
+    /* Footer */
+    .app-footer {
+      margin-top: 2rem;
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .widgets-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .main-container {
+        padding: 0.5rem;
+      }
+      
+      .chat-container {
+        height: 50vh;
+      }
+      
+      .message {
+        max-width: 90%;
+      }
+    }
+    
+    /* Loading indicator */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.5rem 1rem;
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 1rem;
+      width: fit-content;
+      margin-top: 0.5rem;
+    }
+    
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--primary-purple-light);
+      border-radius: 50%;
+      animation: typingAnimation 1.5s infinite ease-in-out;
+    }
+    
+    .typing-dot:nth-child(1) {
+      animation-delay: 0s;
+    }
+    
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.3s;
+    }
+    
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.6s;
+    }
+    
+    @keyframes typingAnimation {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+      }
+      50% {
+        transform: scale(1.2);
+        opacity: 1;
+      }
+    }
+    
+    /* Arabic support */
+    [dir="rtl"] .user-message {
+      align-self: flex-start;
+      border-top-right-radius: 1rem;
+      border-top-left-radius: 0.2rem;
+    }
+    
+    [dir="rtl"] .ai-message {
+      align-self: flex-end;
+      border-top-left-radius: 1rem;
+      border-top-right-radius: 0.2rem;
+    }
+    
+    [dir="rtl"] .message-time {
+      text-align: left;
+    }
+    
+    [dir="rtl"] .emotion-icon {
+      margin-right: 0;
+      margin-left: 1rem;
+    }
+    
+    [dir="rtl"] .rec-item {
+      border-left: none;
+      border-right: 3px solid var(--primary-purple);
+    }
+    
+    [dir="rtl"] .rec-item:hover {
+      transform: translateX(-5px);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Audio elements for sound effects and speech -->
+  <audio id="bgAudio" loop preload="auto">
+    <source src="/static/sounds/cosmic.mp3" type="audio/mp3">
+  </audio>
+  <audio id="notificationSound" preload="auto">
+    <source src="/static/sounds/notification.mp3" type="audio/mp3">
+  </audio>
+  <audio id="ttsAudio" preload="auto"></audio>
+  
+  <!-- Stars background -->
+  <div class="stars-background" id="stars-container"></div>
+  
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="logo">
+      <img src="/static/icons/icon-192x192.png" alt="Mashaaer AI Logo">
+      <span>Mashaaer</span>
+    </div>
+    <div class="controls">
+      <button class="control-btn" id="languageToggle" title="Toggle Language">
+        <i class="fas fa-language"></i>
+      </button>
+      <button class="control-btn" id="soundToggle" title="Toggle Sound">
+        <i class="fas fa-volume-up"></i>
+      </button>
+      <button class="control-btn" id="themeToggle" title="Toggle Theme">
+        <i class="fas fa-moon"></i>
+      </button>
+      <button class="control-btn" id="menuToggle" title="Menu">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="main-container">
+    <!-- Chat Container -->
+    <section class="chat-container">
+      <div class="chat-messages" id="chat-messages">
+        <!-- AI Welcome Message -->
+        <div class="message ai-message">
+          <div id="greeting-message">Welcome to Mashaaer AI! How can I assist you today?</div>
+          <div class="message-time">Just now</div>
+        </div>
+        <!-- Typing indicator -->
+        <div class="typing-indicator" id="typing-indicator" style="display: none;">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="message-input" placeholder="Type your message..." aria-label="Message input">
+        <button class="voice-btn" id="voice-btn" title="Voice input">
+          <i class="fas fa-microphone"></i>
+        </button>
+        <button class="send-btn" id="send-btn" title="Send message">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </section>
+    
+    <!-- Widgets Container -->
+    <div class="widgets-container">
+      <!-- Emotion Tracker Widget -->
+      <section class="emotion-tracker">
+        <h2 class="widget-title">
+          <i class="fas fa-heartbeat"></i>
+          Emotion Tracker
+        </h2>
+        <div class="emotion-display">
+          <div class="emotion-icon" id="current-emotion-icon">
+            <i class="fas fa-smile"></i>
+          </div>
+          <div class="emotion-text" id="current-emotion-text">
+            Neutral
+          </div>
+        </div>
+        <div class="emotion-history" id="emotion-history">
+          <!-- Emotion history items will be added dynamically -->
+        </div>
+      </section>
+      
+      <!-- Recommendations Widget -->
+      <section class="recommendations">
+        <h2 class="widget-title">
+          <i class="fas fa-lightbulb"></i>
+          Recommendations
+        </h2>
+        <div class="recs-list" id="recommendations-list">
+          <!-- Recommendations will be added dynamically -->
+          <div class="rec-item">Take a moment to breathe deeply</div>
+          <div class="rec-item">Listen to your favorite music</div>
+          <div class="rec-item">Connect with a friend today</div>
+        </div>
+      </section>
+    </div>
+  </main>
+  
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>© 2025 Mashaaer AI - Your Cosmic Companion</p>
+  </footer>
+  
+  <!-- Scripts -->
+  <script src="/static/js/mood-theme-manager.js"></script>
+  <script src="/static/js/cosmic_sound_system.js"></script>
+  <script src="/static/js/audio-fix.js"></script>
+  <script src="/static/js/contextual-greeting.js"></script>
+  <script>
+    // DOM elements
+    const starsContainer = document.getElementById('stars-container');
+    const chatMessages = document.getElementById('chat-messages');
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-btn');
+    const voiceButton = document.getElementById('voice-btn');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const soundToggle = document.getElementById('soundToggle');
+    const themeToggle = document.getElementById('themeToggle');
+    const languageToggle = document.getElementById('languageToggle');
+    const greetingMessage = document.getElementById('greeting-message');
+    const currentEmotionIcon = document.getElementById('current-emotion-icon');
+    const currentEmotionText = document.getElementById('current-emotion-text');
+    const emotionHistory = document.getElementById('emotion-history');
+    const recommendationsList = document.getElementById('recommendations-list');
+    const bgAudio = document.getElementById('bgAudio');
+    const notificationSound = document.getElementById('notificationSound');
+    const ttsAudio = document.getElementById('ttsAudio');
+    
+    // Configuration
+    let currentLanguage = localStorage.getItem('mashaaer-language') || 'en';
+    let currentEmotion = 'neutral';
+    let audioEnabled = localStorage.getItem('audioEnabled') !== 'false';
+    let userName = localStorage.getItem('mashaaer-user-name') || '';
+    let darkTheme = true;
+    let isListening = false;
+    let userId = localStorage.getItem('mashaaer-user-id') || generateUserId();
+    
+    // Set initial HTML direction based on language
+    document.documentElement.setAttribute('dir', currentLanguage === 'ar' ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', currentLanguage);
+    
+    // Initialize components
+    function initApp() {
+      createStars();
+      updateGreeting();
+      setupEventListeners();
+      fetchRecommendations();
+      
+      // Set initial audio state
+      updateAudioState(audioEnabled);
+      
+      // Check if we need to update theme
+      loadThemeState();
+    }
+    
+    // Create stars background
+    function createStars() {
+      const starsCount = Math.floor(window.innerWidth * window.innerHeight / 1000);
+      for (let i = 0; i < starsCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        
+        // Random size
+        const size = Math.random() * 2 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        
+        // Random position
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        
+        // Random animation duration and delay
+        star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+        star.style.setProperty('--delay', `${Math.random() * 2}s`);
+        
+        // Random base opacity
+        star.style.setProperty('--base-opacity', `${Math.random() * 0.5 + 0.3}`);
+        star.style.setProperty('--min-opacity', `${Math.random() * 0.2}`);
+        
+        starsContainer.appendChild(star);
+      }
+    }
+    
+    // Set up event listeners
+    function setupEventListeners() {
+      // Send message on button click
+      sendButton.addEventListener('click', sendMessage);
+      
+      // Send message on Enter key press
+      messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          sendMessage();
+        }
+      });
+      
+      // Toggle voice recognition
+      voiceButton.addEventListener('click', toggleVoiceRecognition);
+      
+      // Toggle audio
+      soundToggle.addEventListener('click', () => {
+        audioEnabled = !audioEnabled;
+        localStorage.setItem('audioEnabled', audioEnabled);
+        updateAudioState(audioEnabled);
+      });
+      
+      // Toggle theme
+      themeToggle.addEventListener('click', toggleTheme);
+      
+      // Toggle language
+      languageToggle.addEventListener('click', toggleLanguage);
+      
+      // Handle clicks on recommendation items
+      recommendationsList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('rec-item')) {
+          // Add the recommendation text to the input
+          messageInput.value = e.target.textContent;
+          messageInput.focus();
+        }
+      });
+    }
+    
+    // Update audio state
+    function updateAudioState(enabled) {
+      if (enabled) {
+        soundToggle.innerHTML = '<i class="fas fa-volume-up"></i>';
+        try {
+          bgAudio.volume = 0.3;
+          bgAudio.play().catch(err => {
+            console.error('Background audio play error:', err);
+          });
+        } catch (err) {
+          console.error('Error playing background audio:', err);
+        }
+      } else {
+        soundToggle.innerHTML = '<i class="fas fa-volume-mute"></i>';
+        bgAudio.pause();
+      }
+    }
+    
+    // Load theme state
+    function loadThemeState() {
+      // Set default theme based on mood
+      updateThemeForMood(currentEmotion);
+    }
+    
+    // Toggle between light and dark theme
+    function toggleTheme() {
+      darkTheme = !darkTheme;
+      if (darkTheme) {
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        document.body.classList.remove('light-theme');
+      } else {
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        document.body.classList.add('light-theme');
+      }
+    }
+    
+    // Toggle between languages (English and Arabic)
+    function toggleLanguage() {
+      currentLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+      localStorage.setItem('mashaaer-language', currentLanguage);
+      document.documentElement.setAttribute('dir', currentLanguage === 'ar' ? 'rtl' : 'ltr');
+      document.documentElement.setAttribute('lang', currentLanguage);
+      updateUIText();
+      updateGreeting();
+    }
+    
+    // Update UI text based on current language
+    function updateUIText() {
+      const translations = {
+        messagePlaceholder: {
+          en: 'Type your message...',
+          ar: 'اكتب رسالتك...'
+        },
+        emotionTracker: {
+          en: 'Emotion Tracker',
+          ar: 'متتبع المشاعر'
+        },
+        recommendations: {
+          en: 'Recommendations',
+          ar: 'التوصيات'
+        },
+        footer: {
+          en: '© 2025 Mashaaer AI - Your Cosmic Companion',
+          ar: '© 2025 مشاعر الذكاء الاصطناعي - رفيقك الكوني'
+        }
+      };
+      
+      // Update placeholders and text content
+      messageInput.placeholder = translations.messagePlaceholder[currentLanguage];
+      document.querySelector('.emotion-tracker .widget-title').innerHTML = 
+        `<i class="fas fa-heartbeat"></i> ${translations.emotionTracker[currentLanguage]}`;
+      document.querySelector('.recommendations .widget-title').innerHTML = 
+        `<i class="fas fa-lightbulb"></i> ${translations.recommendations[currentLanguage]}`;
+      document.querySelector('.app-footer p').textContent = translations.footer[currentLanguage];
+    }
+    
+    // Update greeting based on time and language
+    function updateGreeting() {
+      // Use the contextual greeting from the loaded script if available
+      if (typeof getContextualGreeting === 'function') {
+        fetch('/api/recommendations/greeting?language=' + currentLanguage)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && data.greeting) {
+              greetingMessage.textContent = data.greeting;
+              if (userName) {
+                greetingMessage.textContent += ` ${userName}!`;
+              }
+            }
+          })
+          .catch(err => {
+            console.error('Error fetching contextual greeting:', err);
+            setFallbackGreeting();
+          });
+      } else {
+        setFallbackGreeting();
+      }
+    }
+    
+    // Fallback greeting if API is unavailable
+    function setFallbackGreeting() {
+      const hour = new Date().getHours();
+      let greeting = '';
+      
+      if (currentLanguage === 'en') {
+        if (hour < 12) greeting = 'Good morning';
+        else if (hour < 18) greeting = 'Good afternoon';
+        else greeting = 'Good evening';
+        
+        if (userName) {
+          greeting += `, ${userName}!`;
+        } else {
+          greeting += '!';
+        }
+        
+        greeting += ' How can I assist you today?';
+      } else {
+        // Arabic greeting
+        if (hour < 12) greeting = 'صباح الخير';
+        else if (hour < 18) greeting = 'مساء الخير';
+        else greeting = 'مساء الخير';
+        
+        if (userName) {
+          greeting += `، ${userName}!`;
+        } else {
+          greeting += '!';
+        }
+        
+        greeting += ' كيف يمكنني مساعدتك اليوم؟';
+      }
+      
+      greetingMessage.textContent = greeting;
+    }
+    
+    // Send a message
+    function sendMessage() {
+      const message = messageInput.value.trim();
+      if (!message) return;
+      
+      // Add message to chat
+      addMessage(message, 'user');
+      
+      // Clear input field
+      messageInput.value = '';
+      
+      // Show typing indicator
+      typingIndicator.style.display = 'flex';
+      
+      // Send to API and get response
+      fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: message,
+          user_id: userId,
+          lang: currentLanguage
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Hide typing indicator
+        typingIndicator.style.display = 'none';
+        
+        if (data.success) {
+          // Add AI response to chat
+          addMessage(data.response, 'ai');
+          
+          // Play notification sound if audio is enabled
+          if (audioEnabled) {
+            notificationSound.play().catch(err => {
+              console.error('Error playing notification sound:', err);
+            });
+          }
+          
+          // Speak the response if TTS is enabled
+          if (audioEnabled) {
+            speakText(data.response, currentLanguage);
+          }
+          
+          // Update emotion if detected
+          if (data.detected_emotion) {
+            updateEmotionDisplay(data.detected_emotion);
+          }
+          
+          // Refresh recommendations
+          fetchRecommendations();
+        } else {
+          // Handle error
+          addMessage('Sorry, I encountered an error. Please try again.', 'ai');
+        }
+      })
+      .catch(error => {
+        // Hide typing indicator
+        typingIndicator.style.display = 'none';
+        
+        // Add error message
+        addMessage('Sorry, there was a connection error. Please try again.', 'ai');
+        console.error('Error:', error);
+      });
+    }
+    
+    // Add a message to the chat
+    function addMessage(text, sender) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${sender}-message`;
+      
+      const messageContent = document.createElement('div');
+      messageContent.textContent = text;
+      
+      const timeDiv = document.createElement('div');
+      timeDiv.className = 'message-time';
+      
+      // Format time as HH:MM
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      timeDiv.textContent = `${hours}:${minutes}`;
+      
+      messageDiv.appendChild(messageContent);
+      messageDiv.appendChild(timeDiv);
+      
+      chatMessages.appendChild(messageDiv);
+      
+      // Scroll to bottom
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // Toggle voice recognition
+    function toggleVoiceRecognition() {
+      if (isListening) {
+        // Stop listening
+        isListening = false;
+        voiceButton.innerHTML = '<i class="fas fa-microphone"></i>';
+        voiceButton.classList.remove('listening');
+      } else {
+        // Start listening
+        isListening = true;
+        voiceButton.innerHTML = '<i class="fas fa-microphone-slash"></i>';
+        voiceButton.classList.add('listening');
+        
+        // We'll simulate voice recognition for now
+        // In a real app, this would use the Web Speech API or a similar service
+        setTimeout(() => {
+          isListening = false;
+          voiceButton.innerHTML = '<i class="fas fa-microphone"></i>';
+          voiceButton.classList.remove('listening');
+          
+          // In a real implementation, this would be the recognized text
+          const recognizedText = 'How are you today?';
+          messageInput.value = recognizedText;
+          messageInput.focus();
+        }, 3000);
+      }
+    }
+    
+    // Update emotion display
+    function updateEmotionDisplay(emotion) {
+      currentEmotion = emotion;
+      
+      // Update the HTML data-mood attribute for theme system
+      document.documentElement.setAttribute('data-mood', emotion);
+      
+      // Update icons and text
+      let iconClass = 'fa-smile';
+      let emotionLabel = 'Neutral';
+      
+      switch (emotion) {
+        case 'happy':
+          iconClass = 'fa-laugh-beam';
+          emotionLabel = currentLanguage === 'en' ? 'Happy' : 'سعيد';
+          break;
+        case 'sad':
+          iconClass = 'fa-sad-tear';
+          emotionLabel = currentLanguage === 'en' ? 'Sad' : 'حزين';
+          break;
+        case 'angry':
+          iconClass = 'fa-angry';
+          emotionLabel = currentLanguage === 'en' ? 'Angry' : 'غاضب';
+          break;
+        case 'anxious':
+          iconClass = 'fa-frown-open';
+          emotionLabel = currentLanguage === 'en' ? 'Anxious' : 'قلق';
+          break;
+        case 'neutral':
+        default:
+          iconClass = 'fa-smile';
+          emotionLabel = currentLanguage === 'en' ? 'Neutral' : 'محايد';
+          break;
+      }
+      
+      currentEmotionIcon.innerHTML = `<i class="fas ${iconClass}"></i>`;
+      currentEmotionText.textContent = emotionLabel;
+      
+      // Add to emotion history
+      addEmotionToHistory(emotion, emotionLabel, iconClass);
+      
+      // Update theme for mood
+      updateThemeForMood(emotion);
+    }
+    
+    // Add emotion to history
+    function addEmotionToHistory(emotion, label, iconClass) {
+      const emotionItem = document.createElement('div');
+      emotionItem.className = 'emotion-item';
+      emotionItem.innerHTML = `
+        <i class="fas ${iconClass}"></i>
+        <div>${label}</div>
+      `;
+      
+      // Add custom class based on emotion
+      emotionItem.classList.add(`emotion-${emotion}`);
+      
+      // Insert at the beginning
+      if (emotionHistory.firstChild) {
+        emotionHistory.insertBefore(emotionItem, emotionHistory.firstChild);
+      } else {
+        emotionHistory.appendChild(emotionItem);
+      }
+      
+      // Limit to 5 items
+      if (emotionHistory.children.length > 5) {
+        emotionHistory.removeChild(emotionHistory.lastChild);
+      }
+    }
+    
+    // Update theme based on mood
+    function updateThemeForMood(mood) {
+      // This function uses the imported mood-theme-manager.js
+      if (typeof setMoodTheme === 'function') {
+        setMoodTheme(mood);
+      }
+    }
+    
+    // Fetch recommendations based on current emotion
+    function fetchRecommendations() {
+      fetch(`/api/recommendations?emotion=${currentEmotion}&language=${currentLanguage}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.recommendations) {
+            // Clear previous recommendations
+            recommendationsList.innerHTML = '';
+            
+            // Add new recommendations
+            data.recommendations.forEach(rec => {
+              const recItem = document.createElement('div');
+              recItem.className = 'rec-item';
+              recItem.textContent = rec.text;
+              recommendationsList.appendChild(recItem);
+            });
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching recommendations:', err);
+        });
+    }
+    
+    // Speak text using TTS
+    function speakText(text, language) {
+      // Set the audio source to the TTS endpoint
+      const encodedText = encodeURIComponent(text);
+      ttsAudio.src = `/api/tts?text=${encodedText}&lang=${language}`;
+      
+      // Play the audio
+      ttsAudio.play().catch(err => {
+        console.error('Error playing TTS audio:', err);
+      });
+    }
+    
+    // Generate a random user ID
+    function generateUserId() {
+      const id = 'user_' + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('mashaaer-user-id', id);
+      return id;
+    }
+    
+    // Initialize app on load
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>

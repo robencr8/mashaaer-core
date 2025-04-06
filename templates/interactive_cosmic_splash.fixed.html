@@ -757,6 +757,7 @@
     html[dir="rtl"] .contextual-greeting.loading::after {
       margin-left: 0;
       margin-right: 0.5rem;
+  <script src="/static/js/audio-fix.js"></script>
     }
 </head>
 
@@ -1458,21 +1459,7 @@
       });
     }
     
-    // Play background audio on page interaction
-    document.addEventListener('click', function() {
-      // Hide the audio notification
-      document.getElementById("audio-notification").style.display = "none";
-      
-      // Enable audio and update UI
-      audioEnabled = true;
-      document.getElementById('audio-icon').className = 'fas fa-volume-up';
-      
-      // Play welcome sound now that audio is enabled
-      playCosmicSound("welcome", currentLanguage);
-
-      // Background audio is disabled to prevent the looping voice issue
-      // We'll only play the welcome sound (which has been fixed)
-      // This effectively stops the "cosmic ambient music" voice from playing
+    // Play background audio on page interaction - FIXED to prevent looping voice
       }
     });
     
