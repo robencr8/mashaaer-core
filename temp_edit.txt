@@ -1,0 +1,58 @@
+    // Update emotion display
+    function updateEmotionDisplay(emotion) {
+      // Store previous emotion for transition effect
+      const previousEmotion = currentEmotion;
+      
+      // Update current emotion
+      currentEmotion = emotion;
+      
+      // Update the HTML data-mood attribute for theme system
+      document.documentElement.setAttribute('data-mood', emotion);
+      
+      // Update icons and text
+      let iconClass = 'fa-smile';
+      let emotionLabel = 'Neutral';
+      
+      switch (emotion) {
+        case 'happy':
+          iconClass = 'fa-laugh-beam';
+          emotionLabel = currentLanguage === 'en' ? 'Happy' : 'سعيد';
+          break;
+        case 'sad':
+          iconClass = 'fa-sad-tear';
+          emotionLabel = currentLanguage === 'en' ? 'Sad' : 'حزين';
+          break;
+        case 'angry':
+          iconClass = 'fa-angry';
+          emotionLabel = currentLanguage === 'en' ? 'Angry' : 'غاضب';
+          break;
+        case 'anxious':
+          iconClass = 'fa-frown-open';
+          emotionLabel = currentLanguage === 'en' ? 'Anxious' : 'قلق';
+          break;
+        case 'neutral':
+        default:
+          iconClass = 'fa-smile';
+          emotionLabel = currentLanguage === 'en' ? 'Neutral' : 'محايد';
+          break;
+      }
+      
+      currentEmotionIcon.innerHTML = `<i class="fas ${iconClass}"></i>`;
+      currentEmotionText.textContent = emotionLabel;
+      
+      // Add to emotion history
+      addEmotionToHistory(emotion, emotionLabel, iconClass);
+      
+      // Update theme for mood
+      updateThemeForMood(emotion);
+      
+      // Trigger sparkle transition effect if emotion has changed
+      if (previousEmotion && previousEmotion !== emotion) {
+        // Call our new transition effect function
+        createEmotionTransitionEffect(previousEmotion, emotion, currentEmotionIcon);
+        
+        // Also play transition sound via MashaaerInteractions if available
+        if (window.MashaaerInteractions && window.MashaaerInteractions.playSound) {
+          window.MashaaerInteractions.playSound('transition');
+        }
+      }

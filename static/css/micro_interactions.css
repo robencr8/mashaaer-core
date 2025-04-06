@@ -108,6 +108,362 @@
   }
 }
 
+/* Emotion Transition Sparkle Effects */
+.emotion-transition {
+  position: relative;
+}
+
+.emotion-sparkle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--emotion-primary);
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: 0 0 8px var(--emotion-primary);
+  animation: emotion-sparkle 1.2s ease-out forwards;
+}
+
+@keyframes emotion-sparkle {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translateY(20px) translateX(var(--sparkle-x, 10px)) rotate(360deg);
+  }
+}
+
+/* Specialized emotion transition effects per emotion */
+.emotion-sparkle.emotion-happy {
+  background-color: #FFD700;
+  box-shadow: 0 0 12px #FFA500;
+  animation: emotion-sparkle-happy 1.2s ease-out forwards;
+}
+
+.emotion-sparkle.emotion-sad {
+  background-color: #4169E1;
+  box-shadow: 0 0 12px #1E90FF;
+  animation: emotion-sparkle-sad 1.5s ease-out forwards;
+}
+
+.emotion-sparkle.emotion-angry {
+  background-color: #FF4500;
+  box-shadow: 0 0 12px #FF6347;
+  animation: emotion-sparkle-angry 1s ease-out forwards;
+}
+
+.emotion-sparkle.emotion-surprised {
+  background-color: #8A2BE2;
+  box-shadow: 0 0 15px #9370DB;
+  animation: emotion-sparkle-surprised 0.8s ease-out forwards;
+}
+
+.emotion-sparkle.emotion-fearful {
+  background-color: #800080;
+  box-shadow: 0 0 10px #483D8B;
+  animation: emotion-sparkle-fearful 1.4s ease-out forwards;
+}
+
+.emotion-sparkle.emotion-neutral {
+  background-color: #9370DB;
+  box-shadow: 0 0 8px #7B68EE;
+  animation: emotion-sparkle-neutral 1.2s ease-out forwards;
+}
+
+@keyframes emotion-sparkle-happy {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.2) rotate(180deg);
+  }
+  70% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.3) translateY(-25px) translateX(var(--sparkle-x, 15px)) rotate(360deg);
+  }
+}
+
+@keyframes emotion-sparkle-sad {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  30% {
+    opacity: 0.9;
+    transform: scale(1) rotate(90deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translateY(30px) translateX(var(--sparkle-x, -10px)) rotate(180deg);
+  }
+}
+
+@keyframes emotion-sparkle-angry {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.3) rotate(45deg);
+  }
+  60% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.1) translateY(10px) translateX(var(--sparkle-x, 20px)) rotate(90deg);
+  }
+}
+
+@keyframes emotion-sparkle-surprised {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(1.4) rotate(90deg);
+  }
+  85% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translateY(-20px) translateX(var(--sparkle-x, -15px)) rotate(270deg);
+  }
+}
+
+@keyframes emotion-sparkle-fearful {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  25% {
+    opacity: 0.8;
+    transform: scale(0.9) rotate(45deg);
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.1) translateY(15px) translateX(var(--sparkle-x, -20px)) rotate(135deg);
+  }
+}
+
+@keyframes emotion-sparkle-neutral {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 0.9;
+    transform: scale(1) rotate(120deg);
+  }
+  80% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translateY(5px) translateX(var(--sparkle-x, 5px)) rotate(240deg);
+  }
+}
+
+/* Emotion Transition Sparkle Effects */
+.emotion-transition {
+  position: relative;
+}
+
+.emotion-sparkle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--emotion-primary);
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: 0 0 8px var(--emotion-primary);
+  animation: emotion-sparkle 1.2s ease-out forwards;
+}
+
+@keyframes emotion-sparkle {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translateY(20px) translateX(var(--sparkle-x, 10px)) rotate(360deg);
+  }
+}
+
+/* Specialized emotion transition effects per emotion */
+.emotion-sparkle.emotion-happy {
+  background-color: #FFD700;
+  box-shadow: 0 0 12px #FFA500;
+  animation: emotion-sparkle-happy 1.2s ease-out forwards;
+}
+
+.emotion-sparkle.emotion-sad {
+  background-color: #4169E1;
+  box-shadow: 0 0 12px #1E90FF;
+  animation: emotion-sparkle-sad 1.5s ease-out forwards;
+}
+
+.emotion-sparkle.emotion-angry {
+  background-color: #FF4500;
+  box-shadow: 0 0 12px #FF6347;
+  animation: emotion-sparkle-angry 1s ease-out forwards;
+}
+
+.emotion-sparkle.emotion-surprised {
+  background-color: #8A2BE2;
+  box-shadow: 0 0 15px #9370DB;
+  animation: emotion-sparkle-surprised 0.8s ease-out forwards;
+}
+
+.emotion-sparkle.emotion-fearful {
+  background-color: #800080;
+  box-shadow: 0 0 10px #483D8B;
+  animation: emotion-sparkle-fearful 1.4s ease-out forwards;
+}
+
+.emotion-sparkle.emotion-neutral {
+  background-color: #9370DB;
+  box-shadow: 0 0 8px #7B68EE;
+  animation: emotion-sparkle-neutral 1.2s ease-out forwards;
+}
+
+@keyframes emotion-sparkle-happy {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.2) rotate(180deg);
+  }
+  70% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.3) translateY(-25px) translateX(var(--sparkle-x, 15px)) rotate(360deg);
+  }
+}
+
+@keyframes emotion-sparkle-sad {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  30% {
+    opacity: 0.9;
+    transform: scale(1) rotate(90deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translateY(30px) translateX(var(--sparkle-x, -10px)) rotate(180deg);
+  }
+}
+
+@keyframes emotion-sparkle-angry {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.3) rotate(45deg);
+  }
+  60% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.1) translateY(10px) translateX(var(--sparkle-x, 20px)) rotate(90deg);
+  }
+}
+
+@keyframes emotion-sparkle-surprised {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(1.4) rotate(90deg);
+  }
+  85% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translateY(-20px) translateX(var(--sparkle-x, -15px)) rotate(270deg);
+  }
+}
+
+@keyframes emotion-sparkle-fearful {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  25% {
+    opacity: 0.8;
+    transform: scale(0.9) rotate(45deg);
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.1) translateY(15px) translateX(var(--sparkle-x, -20px)) rotate(135deg);
+  }
+}
+
+@keyframes emotion-sparkle-neutral {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 0.9;
+    transform: scale(1) rotate(120deg);
+  }
+  80% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translateY(5px) translateX(var(--sparkle-x, 5px)) rotate(240deg);
+  }
+}
+
 /* Voice Button Animation */
 .voice-prompt-button.voice-hover {
   background-color: rgba(147, 112, 219, 0.8);
@@ -311,5 +667,249 @@
   50% {
     opacity: 1;
     transform: scale(1.2);
+  }
+}
+
+/* Emotion Transition Sparkle Effects */
+.emotion-transition {
+  position: relative;
+}
+
+.emotion-sparkle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--emotion-primary);
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+  box-shadow: 0 0 8px var(--emotion-primary);
+  animation: emotion-sparkle 1.2s ease-out forwards;
+}
+
+@keyframes emotion-sparkle {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translateY(20px) translateX(var(--sparkle-x, 10px)) rotate(360deg);
+  }
+}
+
+/* Specialized emotion transition effects per emotion */
+.emotion-sparkle.emotion-happy {
+  background-color: #FFD700;
+  box-shadow: 0 0 12px #FFA500;
+  animation: emotion-sparkle-happy 1.2s ease-out forwards;
+}
+
+.emotion-sparkle.emotion-sad {
+  background-color: #4169E1;
+  box-shadow: 0 0 12px #1E90FF;
+  animation: emotion-sparkle-sad 1.5s ease-out forwards;
+}
+
+.emotion-sparkle.emotion-angry {
+  background-color: #FF4500;
+  box-shadow: 0 0 12px #FF6347;
+  animation: emotion-sparkle-angry 1s ease-out forwards;
+}
+
+.emotion-sparkle.emotion-surprised {
+  background-color: #8A2BE2;
+  box-shadow: 0 0 15px #9370DB;
+  animation: emotion-sparkle-surprised 0.8s ease-out forwards;
+}
+
+.emotion-sparkle.emotion-fearful {
+  background-color: #800080;
+  box-shadow: 0 0 10px #483D8B;
+  animation: emotion-sparkle-fearful 1.4s ease-out forwards;
+}
+
+.emotion-sparkle.emotion-neutral {
+  background-color: #9370DB;
+  box-shadow: 0 0 8px #7B68EE;
+  animation: emotion-sparkle-neutral 1.2s ease-out forwards;
+}
+
+@keyframes emotion-sparkle-happy {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.2) rotate(180deg);
+  }
+  70% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.3) translateY(-25px) translateX(var(--sparkle-x, 15px)) rotate(360deg);
+  }
+}
+
+@keyframes emotion-sparkle-sad {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  30% {
+    opacity: 0.9;
+    transform: scale(1) rotate(90deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translateY(30px) translateX(var(--sparkle-x, -10px)) rotate(180deg);
+  }
+}
+
+@keyframes emotion-sparkle-angry {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1.3) rotate(45deg);
+  }
+  60% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.1) translateY(10px) translateX(var(--sparkle-x, 20px)) rotate(90deg);
+  }
+}
+
+@keyframes emotion-sparkle-surprised {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(1.4) rotate(90deg);
+  }
+  85% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translateY(-20px) translateX(var(--sparkle-x, -15px)) rotate(270deg);
+  }
+}
+
+@keyframes emotion-sparkle-fearful {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  25% {
+    opacity: 0.8;
+    transform: scale(0.9) rotate(45deg);
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.1) translateY(15px) translateX(var(--sparkle-x, -20px)) rotate(135deg);
+  }
+}
+
+@keyframes emotion-sparkle-neutral {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  20% {
+    opacity: 0.9;
+    transform: scale(1) rotate(120deg);
+  }
+  80% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translateY(5px) translateX(var(--sparkle-x, 5px)) rotate(240deg);
+  }
+}
+
+/* Emotion Transition Sparkle Effects */
+.emotion-transition {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10000;
+}
+
+.emotion-sparkle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  animation: sparkle-move 2s ease-out forwards;
+}
+
+/* Emotion-specific sparkle colors */
+.emotion-sparkle.emotion-happy {
+  background: radial-gradient(circle, rgba(255,223,89,1) 0%, rgba(255,187,0,0) 70%);
+  box-shadow: 0 0 10px 2px rgba(255,223,89,0.8);
+}
+
+.emotion-sparkle.emotion-sad {
+  background: radial-gradient(circle, rgba(100,181,246,1) 0%, rgba(30,136,229,0) 70%);
+  box-shadow: 0 0 10px 2px rgba(100,181,246,0.8);
+}
+
+.emotion-sparkle.emotion-angry {
+  background: radial-gradient(circle, rgba(239,83,80,1) 0%, rgba(229,57,53,0) 70%);
+  box-shadow: 0 0 10px 2px rgba(239,83,80,0.8);
+}
+
+.emotion-sparkle.emotion-anxious {
+  background: radial-gradient(circle, rgba(171,71,188,1) 0%, rgba(142,36,170,0) 70%);
+  box-shadow: 0 0 10px 2px rgba(171,71,188,0.8);
+}
+
+.emotion-sparkle.emotion-neutral {
+  background: radial-gradient(circle, rgba(158,158,158,1) 0%, rgba(117,117,117,0) 70%);
+  box-shadow: 0 0 10px 2px rgba(158,158,158,0.8);
+}
+
+/* Default sparkle color for any other emotions */
+.emotion-sparkle {
+  background: radial-gradient(circle, rgba(147,112,219,1) 0%, rgba(123,104,238,0) 70%);
+  box-shadow: 0 0 10px 2px rgba(147,112,219,0.8);
+}
+
+@keyframes sparkle-move {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--sparkle-x)), calc(-50% - 80px)) scale(0.5);
   }
 }

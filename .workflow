@@ -1,1 +1,1 @@
-{"altname":"Health Check","bin":["python","health_check.py"],"hidden":false}
+run = "gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app"

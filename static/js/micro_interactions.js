@@ -60,6 +60,7 @@
       'welcome': 'welcome.mp3',
       'cosmic': 'cosmic.mp3',
       'listen_start': 'listen_start.mp3',
+      'transition': 'transition.mp3', // Custom sound for emotion transitions
       'listen_stop': 'listen_stop.mp3'
     },
     // Store last sound played times to prevent sound flooding
@@ -357,15 +358,107 @@
    * Set the current emotion, updating CSS variables
    * 
    * @param {string} emotion - The emotional state
-   */
-  function setEmotion(emotion) {
+   * @param {Element} [sourceElement] - Optional element to originate the transition effect from
+  function setEmotion(emotion, sourceElement = null) {
     if (!config.emotionColors[emotion]) {
       console.warn(`Unknown emotion: ${emotion}, defaulting to neutral`);
-      emotion = 'neutral';
+      emotion = "neutral";
     }
     
+    // If emotion hasn't changed, no need for transition effects
+    if (emotion === currentEmotion) {
+      return currentEmotion;
+    }
+    
+    // Store previous emotion for transition effect
+    const previousEmotion = currentEmotion;
+    
+    // Update current emotion
     currentEmotion = emotion;
     
+    // Create transition sparkle effect
+    createEmotionTransitionEffect(previousEmotion, emotion, sourceElement);
+    
+  /**
+   * Create a sparkle effect for emotion transitions
+   * 
+   * @param {string} fromEmotion - The previous emotion
+   * @param {string} toEmotion - The new emotion
+   * @param {Element} [sourceElement] - Optional element to originate the effect from
+   */
+  function createEmotionTransitionEffect(fromEmotion, toEmotion, sourceElement = null) {
+    // Create a container for the sparkle particles
+    const container = document.createElement('div');
+    container.className = 'emotion-transition';
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.pointerEvents = 'none';
+    container.style.zIndex = '10000';
+    document.body.appendChild(container);
+    
+    // Determine the origin point for particles
+    let originX, originY;
+    
+    if (sourceElement) {
+      // If a source element is provided, use its center
+      const rect = sourceElement.getBoundingClientRect();
+      originX = rect.left + rect.width / 2;
+      originY = rect.top + rect.height / 2;
+    } else {
+      // Otherwise, use the emotion display area if it exists
+      const emotionDisplayEl = document.querySelector('.emotion-display') || 
+                           document.querySelector('.emotion-icon') ||
+                           document.querySelector('#current-emotion-icon');
+      
+      if (emotionDisplayEl) {
+        const rect = emotionDisplayEl.getBoundingClientRect();
+        originX = rect.left + rect.width / 2;
+        originY = rect.top + rect.height / 2;
+      } else {
+        // Default to center of the screen
+        originX = window.innerWidth / 2;
+        originY = window.innerHeight / 2;
+      }
+    }
+    
+    // Number of particles to create
+    const particleCount = 20;
+    
+    // Create sparkle particles
+    for (let i = 0; i < particleCount; i++) {
+      const sparkle = document.createElement('div');
+      sparkle.className = `emotion-sparkle emotion-${toEmotion}`;
+      
+      // Random size (4-10px)
+      const size = 4 + Math.random() * 6;
+      sparkle.style.width = `${size}px`;
+      sparkle.style.height = `${size}px`;
+      
+      // Position at origin
+      sparkle.style.left = `${originX}px`;
+      sparkle.style.top = `${originY}px`;
+      
+      // Set random sparkle travel direction variable
+      sparkle.style.setProperty('--sparkle-x', `${(Math.random() * 80) - 40}px`);
+      
+      // Add random delay
+      sparkle.style.animationDelay = `${Math.random() * 0.2}s`;
+      
+      // Add to container
+      container.appendChild(sparkle);
+    }
+    
+    // Remove container after all animations complete
+    setTimeout(() => {
+      if (document.body.contains(container)) {
+        document.body.removeChild(container);
+      }
+    }, 2000);
+  }
+
     // Update CSS variables for colors
     const colors = config.emotionColors[emotion];
     document.documentElement.style.setProperty('--emotion-primary', colors.primary);
@@ -377,7 +470,110 @@
     );
     document.body.classList.add(`emotion-${emotion}`);
     
+    // Play transition sound if enabled
+    if (config.soundEnabled) {
+      playSound('transition');
+    }
+    
     return currentEmotion;
+  }
+    // Update CSS variables for colors
+    const colors = config.emotionColors[emotion];
+    document.documentElement.style.setProperty('--emotion-primary', colors.primary);
+    document.documentElement.style.setProperty('--emotion-secondary', colors.secondary);
+    
+    // Update body class for emotion-specific styling
+    document.body.classList.remove(
+      ...Object.keys(config.emotionColors).map(e => `emotion-${e}`)
+    );
+    document.body.classList.add(`emotion-${emotion}`);
+    
+    // Play transition sound if enabled
+    if (config.soundEnabled) {
+      playSound('transition');
+    }
+    
+    return currentEmotion;
+  }
+  
+  /**
+   * Create a sparkle effect for emotion transitions
+   * 
+   * @param {string} fromEmotion - The previous emotion
+   * @param {string} toEmotion - The new emotion
+   * @param {Element} [sourceElement] - Optional element to originate the effect from
+   */
+  function createEmotionTransitionEffect(fromEmotion, toEmotion, sourceElement = null) {
+    // Create a container for the sparkle particles
+    const container = document.createElement('div');
+    container.className = 'emotion-transition';
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.pointerEvents = 'none';
+    container.style.zIndex = '10000';
+    document.body.appendChild(container);
+    
+    // Determine the origin point for particles
+    let originX, originY;
+    
+    if (sourceElement) {
+      // If a source element is provided, use its center
+      const rect = sourceElement.getBoundingClientRect();
+      originX = rect.left + rect.width / 2;
+      originY = rect.top + rect.height / 2;
+    } else {
+      // Otherwise, use the emotion display area if it exists
+      const emotionDisplayEl = document.querySelector('.emotion-display') || 
+                               document.querySelector('.emotion-icon') ||
+                               document.querySelector('#current-emotion-icon');
+      
+      if (emotionDisplayEl) {
+        const rect = emotionDisplayEl.getBoundingClientRect();
+        originX = rect.left + rect.width / 2;
+        originY = rect.top + rect.height / 2;
+      } else {
+        // Default to center of the screen
+        originX = window.innerWidth / 2;
+        originY = window.innerHeight / 2;
+      }
+    }
+    
+    // Number of particles to create
+    const particleCount = 20;
+    
+    // Create sparkle particles
+    for (let i = 0; i < particleCount; i++) {
+      const sparkle = document.createElement('div');
+      sparkle.className = `emotion-sparkle emotion-${toEmotion}`;
+      
+      // Random size (4-10px)
+      const size = 4 + Math.random() * 6;
+      sparkle.style.width = `${size}px`;
+      sparkle.style.height = `${size}px`;
+      
+      // Position at origin
+      sparkle.style.left = `${originX}px`;
+      sparkle.style.top = `${originY}px`;
+      
+      // Set random sparkle travel direction variable
+      sparkle.style.setProperty('--sparkle-x', `${(Math.random() * 80) - 40}px`);
+      
+      // Add random delay
+      sparkle.style.animationDelay = `${Math.random() * 0.2}s`;
+      
+      // Add to container
+      container.appendChild(sparkle);
+    }
+    
+    // Remove container after all animations complete
+    setTimeout(() => {
+      if (document.body.contains(container)) {
+        document.body.removeChild(container);
+      }
+    }, 2000);
   }
   
   /**
@@ -659,6 +855,7 @@
   
   // Export API
   window.MashaaerInteractions = {
+    createEmotionTransitionEffect,
     applyTo,
     playSound,
     createParticleBurst,

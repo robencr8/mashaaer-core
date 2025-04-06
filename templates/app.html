@@ -983,6 +983,10 @@
     
     // Update emotion display
     function updateEmotionDisplay(emotion) {
+      // Store previous emotion for transition effect
+      const previousEmotion = currentEmotion;
+      
+      // Update current emotion
       currentEmotion = emotion;
       
       // Update the HTML data-mood attribute for theme system
@@ -1024,6 +1028,17 @@
       
       // Update theme for mood
       updateThemeForMood(emotion);
+      
+      // Trigger sparkle transition effect if emotion has changed
+      if (previousEmotion && previousEmotion !== emotion) {
+        // Call our new transition effect function
+        createEmotionTransitionEffect(previousEmotion, emotion, currentEmotionIcon);
+        
+        // Also play transition sound via MashaaerInteractions if available
+        if (window.MashaaerInteractions && window.MashaaerInteractions.playSound) {
+          window.MashaaerInteractions.playSound('transition');
+        }
+      }
     }
     
     // Add emotion to history
