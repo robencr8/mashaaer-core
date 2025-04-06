@@ -1,14 +1,14 @@
 {
-  "name": "مشاعر | Mashaaer Feelings",
-  "short_name": "مشاعر",
+  "name": "Mashaaer | مشاعر",
+  "short_name": "Mashaaer",
   "description": "The emotional AI companion that understands your feelings",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#180538",
   "theme_color": "#9370DB",
   "orientation": "portrait",
-  "dir": "rtl",
-  "lang": "ar",
+  "dir": "ltr",
+  "lang": "en",
   "categories": [
     "utilities",
     "productivity",

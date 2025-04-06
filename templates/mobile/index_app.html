@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html id="html-root" lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -16,10 +16,10 @@
   <script src="/static/mobile/js/emotion_audio_integration.js"></script>
   <script>
     function setLang(lang) {
-      document.documentElement.lang = lang;
+      const html = document.getElementById("html-root"); html.lang = lang;
       document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
-      localStorage.setItem('preferredLanguage', lang);
-      alert(lang === 'ar' ? 'تم تغيير اللغة إلى العربية' : 'Language switched to English');
+      localStorage.setItem('mashaaer-language', lang);
+      showToast(lang === 'ar' ? 'تم تغيير اللغة إلى العربية' : 'Language switched to English');
     }
   </script>
 </head>
@@ -209,7 +209,7 @@
       }
       
       // Check for saved language preference
-      const savedLang = localStorage.getItem('preferredLanguage');
+      const savedLang = localStorage.getItem("mashaaer-language");
       if (savedLang) {
         setLang(savedLang);
       }

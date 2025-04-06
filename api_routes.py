@@ -2,7 +2,7 @@
 API Routes for Mashaaer Feelings Application
 Handles chat, feedback, and other API endpoints
 """
-from flask import Blueprint, request, jsonify, current_app, Flask
+from flask import Blueprint, request, jsonify, current_app, Flask, send_file
 import logging
 from datetime import datetime
 import os
@@ -75,11 +75,11 @@ def chat():
             return jsonify({'success': False, 'error': 'No data provided'}), 400
         
         # Extract required fields
-        message = data.get('message')
+        user_input = data.get('message')
         language = data.get('lang', 'en')  # Default language is English
         user_id = data.get('user_id', 'anonymous')
         
-        if not message:
+        if not user_input:
             return jsonify({
                 'success': False, 
                 'error': 'Missing required field: message'
@@ -88,8 +88,8 @@ def chat():
         # Auto-detect emotion if not provided
         emotion = data.get('emotion')
         if not emotion:
-            emotion = detect_emotion_from_text(message)
-            logger.info(f"Auto-detected emotion '{emotion}' for message: '{message}'")
+            emotion = detect_emotion_from_text(user_input)
+            logger.info(f"Auto-detected emotion '{emotion}' for message: '{user_input}'")
         
         # Store any user-specific data in the engine memory
         if user_id != 'anonymous':
@@ -102,15 +102,11 @@ def chat():
                 robin_engine.store_memory(user_id, 'name', user_name)
         
         # Use RobinDecisionEngine to decide the appropriate action
-        decision = robin_engine.decide(message, emotion)
+        result = robin_engine.decide(user_input, emotion)
+        action = result["action"]
+        params = result.get("params", {})
         
-        action = decision.get('action', 'respond_normally')
-        params = decision.get('params', {})
-        
-        # For compatibility with the existing system, also check rules_loader
-        # to get the rule_id that matched
-        matched_rules = rules_loader.match_rules(emotion, message, language)
-        rule_id = matched_rules[0].get('id') if matched_rules else None
+        logger.info(f"[Mashaaer Chat] Input: '{user_input}' | Emotion: {emotion} | Action: {action}")
         
         # Generate response based on action
         response_text = generate_response(action, params, emotion, user_id, language)
@@ -122,21 +118,37 @@ def chat():
             'track': f"{emotion}_cosmic.mp3"
         }
         
-        response = {
-            'success': True,
-            'action': action,
-            'response': response_text,
-            'rule_matched': rule_id,
-            'detected_emotion': emotion,
-            'params': params,
-            'cosmic_soundscape': cosmic_soundscape
-        }
+        # Map actions to specific responses
+        if action == "play_music":
+            return jsonify({
+                "reply": response_text, 
+                "action": action, 
+                "song": params.get("genre", "uplifting"),
+                "cosmic_soundscape": cosmic_soundscape,
+                "detected_emotion": emotion
+            })
+        elif action == "fetch_weather":
+            return jsonify({
+                "reply": response_text, 
+                "action": action,
+                "cosmic_soundscape": cosmic_soundscape,
+                "detected_emotion": emotion
+            })
+        elif action == "offer_companionship":
+            return jsonify({
+                "reply": response_text, 
+                "action": action,
+                "cosmic_soundscape": cosmic_soundscape,
+                "detected_emotion": emotion
+            })
+        else:
+            return jsonify({
+                "reply": response_text, 
+                "action": action,
+                "cosmic_soundscape": cosmic_soundscape,
+                "detected_emotion": emotion
+            })
         
-        # Log the interaction
-        log_interaction(message, emotion, response.get('action'), response.get('params', {}), language)
-        
-        return jsonify(response)
-    
     except Exception as e:
         logger.error(f"Error processing chat: {str(e)}")
         return jsonify({
@@ -646,11 +658,15 @@ def cosmic_sound():
             emotion = 'neutral'  # Default to neutral if invalid
         
         # Cosmic soundscape information
+        track_name = f"{emotion}_cosmic.mp3" if emotion != 'neutral' else "cosmicmusic.mp3"
+        
         cosmic_soundscape = {
             'emotion': emotion,
-            'track': f"{emotion}_cosmic.mp3" if emotion != 'neutral' else "cosmicmusic.mp3",
+            'track': track_name,
             'duration': 120,  # 2 minutes approximation
-            'volume': volume
+            'volume': volume,
+            # Add direct URL to the audio file for frontend access
+            'audio_url': f"/static/mobile/audio/{track_name}"
         }
         
         # Log the request
@@ -676,8 +692,125 @@ def cosmic_sound():
         logger.error(f"Error processing cosmic sound request: {str(e)}")
         return jsonify({
             'success': False,
-            'error': 'Failed to process cosmic sound request',
-            'message': str(e)
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/play-cosmic-sound/<emotion>', methods=['GET'])
+def play_cosmic_sound(emotion):
+    """
+    Direct endpoint to serve cosmic sound files for specific emotions
+    
+    Args:
+        emotion: The emotion to play cosmic sound for (happy, sad, angry, calm, neutral)
+    
+    Returns:
+        The audio file as a response with appropriate MIME type
+    """
+    try:
+        # Map emotions to valid track names
+        valid_emotions = ['happy', 'sad', 'angry', 'calm', 'neutral']
+        
+        # Validate emotion
+        if emotion not in valid_emotions:
+            emotion = 'neutral'  # Default to neutral if invalid
+        
+        # Determine track name
+        track_name = f"{emotion}_cosmic.mp3" if emotion != 'neutral' else "cosmicmusic.mp3"
+        
+        # Construct file path
+        file_path = os.path.join(current_app.root_path, 'static/mobile/audio', track_name)
+        
+        # Check if file exists
+        if not os.path.exists(file_path):
+            logger.error(f"Cosmic sound file not found: {file_path}")
+            return jsonify({
+                'success': False,
+                'error': f"Audio file for {emotion} emotion not found"
+            }), 404
+        
+        # Log the request
+        logger.info(f"Serving cosmic sound file for emotion: {emotion}, file: {track_name}")
+        
+        # Return the audio file with appropriate headers
+        return send_file(
+            file_path,
+            mimetype="audio/mpeg",
+            as_attachment=False,
+            conditional=True
+        )
+    
+    except Exception as e:
+        logger.error(f"Error serving cosmic sound file: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+        
+@api_bp.route('/play-cosmic-sound', methods=['GET'])
+def play_cosmic_sound_query():
+    """
+    Serve cosmic sound files based on query parameters
+    
+    Query parameters:
+        sound_type: The type of sound to play ('welcome', 'click', etc.)
+        language: The language code ('en', 'ar')
+    
+    Returns:
+        JSON response with path to the sound file
+    """
+    try:
+        # Extract query parameters
+        sound_type = request.args.get('sound_type', 'welcome')
+        language = request.args.get('language', 'en')
+        
+        logger.info(f"Cosmic sound query request - Sound type: {sound_type}, Language: {language}")
+        
+        # Map sound types to file paths
+        sound_mapping = {
+            'welcome': 'welcome.mp3',
+            'click': 'click.mp3',
+            'hover': 'hover.mp3'
+        }
+        
+        # Default sound if type not found
+        file_name = sound_mapping.get(sound_type, 'cosmic.mp3')
+        
+        # Add language prefix for welcome sounds
+        if sound_type == 'welcome':
+            file_name = f"{language}_{file_name}"
+        
+        # Construct the path to the sound file
+        sound_path = f"/static/sounds/{file_name}"
+        
+        # Verify the file exists on the server
+        file_path = os.path.join(current_app.root_path, 'static/sounds', file_name)
+        if not os.path.exists(file_path):
+            # Try fallback to default sounds folder
+            file_path = os.path.join(current_app.root_path, 'static/mobile/audio', 'cosmic.mp3')
+            sound_path = '/static/mobile/audio/cosmic.mp3'
+            
+            # If even the fallback doesn't exist
+            if not os.path.exists(file_path):
+                logger.warning(f"Sound file not found: {file_name}, no fallback available")
+                return jsonify({
+                    'success': False,
+                    'error': f"Sound file not found: {file_name}"
+                }), 404
+            
+            logger.info(f"Using fallback sound: {sound_path}")
+        
+        # Return the path to the sound file
+        return jsonify({
+            'success': True,
+            'sound_path': sound_path,
+            'message': f"Sound file path for: {sound_type}"
+        })
+    
+    except Exception as e:
+        logger.error(f"Error processing cosmic sound query: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
         }), 500
 
 def generate_response(action: str, params: Dict[str, Any], emotion: str, user_id: str, language: str = 'en') -> str:

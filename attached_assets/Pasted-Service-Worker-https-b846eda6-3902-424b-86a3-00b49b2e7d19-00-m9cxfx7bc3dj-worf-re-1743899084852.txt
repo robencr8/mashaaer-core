@@ -1,0 +1,287 @@
+Service Worker تم تسجيله بنجاح: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/
+VM479:536 
+            
+            
+           GET https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/play-cosmic-sound?sound_type=welcome&language=en 405 (Method Not Allowed)
+playCosmicSound @ VM479:536
+(anonymous) @ VM479:571Understand this errorAI
+VM479:557 Error playing cosmic sound: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ VM479:557
+Promise.catch
+playCosmicSound @ VM479:556
+(anonymous) @ VM479:571Understand this errorAI
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/sounds/hover.mp3
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/cosmic-onboarding
+VM479:557 Error playing cosmic sound: TypeError: Failed to fetch
+    at playCosmicSound (VM479:536:7)
+    at HTMLDocument.<anonymous> (VM479:571:7)
+(anonymous) @ VM479:557
+Promise.catch
+playCosmicSound @ VM479:556
+(anonymous) @ VM479:571Understand this errorAI
+VM486 lockdown-install.js:1 Removing unpermitted intrinsics
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/icons/icon-192x192.png
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/sounds/cosmic.mp3
+cosmic-onboarding:1526 Service Worker تم تسجيله بنجاح: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/
+_app-a44ccbf6754eb462.js:13 XHR finished loading: POST "https://stats.g.doubleclick.net/j/collect?t=dc&aip=1&_r=3&v=1&_v=j101&tid=UA-25629695-1&cid=263281444.1743684247&jid=1622047949&gjid=433092792&_gid=770949744.1743839743&_u=SCKAgEAjQAAAAGgCIAD~&z=1693170802".
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+wd @ analytics.js:36
+pe @ analytics.js:35
+(anonymous) @ analytics.js:73
+(anonymous) @ analytics.js:38
+(anonymous) @ analytics.js:77
+(anonymous) @ analytics.js:57
+(anonymous) @ analytics.js:93
+(anonymous) @ analytics.js:92
+N @ analytics.js:94
+(anonymous) @ index.js:351
+(anonymous) @ protos.js:372
+(anonymous) @ protos.js:178
+(anonymous) @ index.ts:270
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ ajs-destination.bundle.ed53a26b6edc80c65d73.js:1
+(anonymous) @ index.ts:286
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ ajs-destination.bundle.ed53a26b6edc80c65d73.js:1
+(anonymous) @ delivery.js:28
+(anonymous) @ delivery.js:11
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ delivery.js:4
+o @ delivery.js:27
+(anonymous) @ event-queue.js:325
+(anonymous) @ event-queue.js:323
+r @ _app-a44ccbf6754eb462.js:13
+setTimeout
+(anonymous) @ _app-a44ccbf6754eb462.js:13
+(anonymous) @ event-queue.js:321
+(anonymous) @ event-queue.js:320
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:273
+(anonymous) @ event-queue.js:181
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:169
+(anonymous) @ event-queue.js:135
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ event-queue.js:128
+(anonymous) @ dispatch.js:25
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+h @ dispatch.js:18
+(anonymous) @ index.ts:460
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ index.ts:454
+(anonymous) @ index.ts:253
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ index.ts:241
+A @ _app-a44ccbf6754eb462.js:15
+CB @ 2124-b9ee59c09bf533a5.js:1
+ld @ framework-6ec390c36ec224b5.js:1
+od @ framework-6ec390c36ec224b5.js:1
+i @ framework-6ec390c36ec224b5.js:1
+uI @ framework-6ec390c36ec224b5.js:1
+(anonymous) @ framework-6ec390c36ec224b5.js:1
+uM @ framework-6ec390c36ec224b5.js:1
+uS @ framework-6ec390c36ec224b5.js:1
+C @ framework-6ec390c36ec224b5.js:1
+z @ framework-6ec390c36ec224b5.js:1
+lockdown-install.js:1 Removing unpermitted intrinsics
+content_script.js:1 
+            
+            
+           GET https://replit.com/@robenedwan/attached_assets/Screenshot%202025-04-05%20172151.png 404 (Not Found)
+#k @ content_script.js:1
+scanElementForQRCode @ content_script.js:1
+(anonymous) @ content_script.js:1
+setTimeout
+#g @ content_script.js:1
+await in #g
+#y.e.#E @ content_script.js:1Understand this errorAI
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/sounds/cosmic.mp3
+cosmic-onboarding:1199 
+            
+            
+           GET https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/play-cosmic-sound?sound_type=welcome&language=en 405 (Method Not Allowed)
+playCosmicSound @ cosmic-onboarding:1199
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1220 Error playing cosmic sound: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ cosmic-onboarding:1220
+Promise.catch
+playCosmicSound @ cosmic-onboarding:1219
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1199 
+            
+            
+           GET https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/play-cosmic-sound?sound_type=welcome&language=en 405 (Method Not Allowed)
+playCosmicSound @ cosmic-onboarding:1199
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1220 Error playing cosmic sound: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ cosmic-onboarding:1220
+Promise.catch
+playCosmicSound @ cosmic-onboarding:1219
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1199 
+            
+            
+           GET https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/play-cosmic-sound?sound_type=welcome&language=en 405 (Method Not Allowed)
+playCosmicSound @ cosmic-onboarding:1199
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1220 Error playing cosmic sound: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ cosmic-onboarding:1220
+Promise.catch
+playCosmicSound @ cosmic-onboarding:1219
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1199 
+            
+            
+           GET https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/play-cosmic-sound?sound_type=welcome&language=en 405 (Method Not Allowed)
+playCosmicSound @ cosmic-onboarding:1199
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1220 Error playing cosmic sound: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ cosmic-onboarding:1220
+Promise.catch
+playCosmicSound @ cosmic-onboarding:1219
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1199 
+            
+            
+           GET https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/play-cosmic-sound?sound_type=welcome&language=en 405 (Method Not Allowed)
+playCosmicSound @ cosmic-onboarding:1199
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1220 Error playing cosmic sound: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ cosmic-onboarding:1220
+Promise.catch
+playCosmicSound @ cosmic-onboarding:1219
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1199 
+            
+            
+           GET https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/play-cosmic-sound?sound_type=welcome&language=ar 405 (Method Not Allowed)
+playCosmicSound @ cosmic-onboarding:1199
+(anonymous) @ cosmic-onboarding:1109Understand this errorAI
+cosmic-onboarding:1220 Error playing cosmic sound: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ cosmic-onboarding:1220
+Promise.catch
+playCosmicSound @ cosmic-onboarding:1219
+(anonymous) @ cosmic-onboarding:1109Understand this errorAI
+cosmic-onboarding:1199 
+            
+            
+           GET https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/play-cosmic-sound?sound_type=welcome&language=ar 405 (Method Not Allowed)
+playCosmicSound @ cosmic-onboarding:1199
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1220 Error playing cosmic sound: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ cosmic-onboarding:1220
+Promise.catch
+playCosmicSound @ cosmic-onboarding:1219
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1199 
+            
+            
+           GET https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/play-cosmic-sound?sound_type=welcome&language=ar 405 (Method Not Allowed)
+playCosmicSound @ cosmic-onboarding:1199
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1220 Error playing cosmic sound: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ cosmic-onboarding:1220
+Promise.catch
+playCosmicSound @ cosmic-onboarding:1219
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1199 
+            
+            
+           GET https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/play-cosmic-sound?sound_type=welcome&language=en 405 (Method Not Allowed)
+playCosmicSound @ cosmic-onboarding:1199
+(anonymous) @ cosmic-onboarding:1109Understand this errorAI
+cosmic-onboarding:1220 Error playing cosmic sound: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ cosmic-onboarding:1220
+Promise.catch
+playCosmicSound @ cosmic-onboarding:1219
+(anonymous) @ cosmic-onboarding:1109Understand this errorAI
+cosmic-onboarding:1199 
+            
+            
+           GET https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/play-cosmic-sound?sound_type=welcome&language=en 405 (Method Not Allowed)
+playCosmicSound @ cosmic-onboarding:1199
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1220 Error playing cosmic sound: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ cosmic-onboarding:1220
+Promise.catch
+playCosmicSound @ cosmic-onboarding:1219
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/sounds/hover.mp3
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/cosmic-onboarding
+cosmic-onboarding:1220 Error playing cosmic sound: TypeError: Failed to fetch
+    at playCosmicSound (cosmic-onboarding:1199:7)
+    at HTMLDocument.<anonymous> (cosmic-onboarding:1234:7)
+(anonymous) @ cosmic-onboarding:1220
+Promise.catch
+playCosmicSound @ cosmic-onboarding:1219
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+lockdown-install.js:1 Removing unpermitted intrinsics
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/icons/icon-192x192.png
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/sounds/cosmic.mp3
+cosmic-onboarding:1526 Service Worker تم تسجيله بنجاح: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/
+cosmic-onboarding:1199 
+            
+            
+           GET https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/play-cosmic-sound?sound_type=welcome&language=en 405 (Method Not Allowed)
+playCosmicSound @ cosmic-onboarding:1199
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1220 Error playing cosmic sound: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ cosmic-onboarding:1220
+Promise.catch
+playCosmicSound @ cosmic-onboarding:1219
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/sounds/listen_start.mp3
+service-worker.js:88 Service Worker: Serving from cache: https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/static/sounds/hover.mp3
+cosmic-onboarding:1199 
+            
+            
+           GET https://b846eda6-3902-424b-86a3-00b49b2e7d19-00-m9cxfx7bc3dj.worf.replit.dev:5000/api/play-cosmic-sound?sound_type=welcome&language=en 405 (Method Not Allowed)
+playCosmicSound @ cosmic-onboarding:1199
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:1220 Error playing cosmic sound: SyntaxError: Unexpected token '<', "<!doctype "... is not valid JSON
+(anonymous) @ cosmic-onboarding:1220
+Promise.catch
+playCosmicSound @ cosmic-onboarding:1219
+(anonymous) @ cosmic-onboarding:1234Understand this errorAI
+cosmic-onboarding:829 Recognition error: no-speech
+recognition.onerror @ cosmic-onboarding:829Understand this errorAI
