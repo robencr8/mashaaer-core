@@ -877,7 +877,7 @@ class RecommendationEngine:
 
     def get_contextual_greeting(self, language: str = 'en') -> str:
         """
-        Generate a time-appropriate contextual greeting based on current time.
+        Generate a time-appropriate contextual greeting based on current time, day, and special dates.
         
         Args:
             language: Language code ('en' or 'ar')
@@ -887,12 +887,18 @@ class RecommendationEngine:
         """
         current_time = datetime.now()
         
+        # Check for special dates first
+        month_day = (current_time.month, current_time.day)
+        special_greeting = self._check_special_date(month_day, language)
+        if special_greeting:
+            return special_greeting
+        
         # Determine time of day
-        if current_time.hour < 6:
+        if current_time.hour < 5:
             time_of_day = "night" if language == 'en' else "ليل"
         elif current_time.hour < 12:
             time_of_day = "morning" if language == 'en' else "صباح"
-        elif current_time.hour < 18:
+        elif current_time.hour < 17:
             time_of_day = "afternoon" if language == 'en' else "ظهر"
         else:
             time_of_day = "evening" if language == 'en' else "مساء"
@@ -900,30 +906,156 @@ class RecommendationEngine:
         # Determine day type
         day_of_week = current_time.strftime("%A").lower()
         is_weekend = day_of_week in ["saturday", "sunday"]
+        is_friday = day_of_week == "friday"  # Special for Arabic cultures
         
-        day_type = "weekend" if is_weekend else "weekday"
-        day_type_ar = "عطلة نهاية الأسبوع" if is_weekend else "يوم عمل"
-        
-        # Format greeting
+        # Generate day-specific greetings
         if language == 'en':
-            if time_of_day == "night":
-                return f"Good night on this {day_type}"
-            elif time_of_day == "morning":
-                return f"Good morning! Ready for a bright {day_type}?"
-            elif time_of_day == "afternoon":
-                return f"Good afternoon! How's your {day_type} going?"
-            else:
-                return f"Good evening! Winding down your {day_type}?"
+            greeting = self._get_english_greeting(time_of_day, day_of_week, is_weekend)
         else:
-            # Arabic greetings
-            if time_of_day == "ليل":
-                return f"مساء الخير في {day_type_ar}"
-            elif time_of_day == "صباح":
-                return f"صباح الخير! جاهز ليوم {day_type_ar} مشرق؟"
-            elif time_of_day == "ظهر":
-                return f"مساء الخير! كيف يسير {day_type_ar}؟"
-            else:
-                return f"مساء الخير! هل تنهي {day_type_ar}؟"
+            greeting = self._get_arabic_greeting(time_of_day, day_of_week, is_weekend, is_friday)
+            
+        return greeting
+    
+    def _check_special_date(self, month_day: tuple, language: str) -> str:
+        """Check if current date is a special date and return appropriate greeting"""
+        # Dictionary of special dates: (month, day): (english_greeting, arabic_greeting)
+        special_dates = {
+            # New Year's Day
+            (1, 1): ("Happy New Year! Here's to new beginnings and emotions.", 
+                   "كل عام وأنتم بخير! لبدايات جديدة ومشاعر جديدة."),
+            # Valentine's Day
+            (2, 14): ("Happy Valentine's Day! A day to celebrate love in all its forms.", 
+                    "عيد حب سعيد! يوم للاحتفال بالحب بجميع أشكاله."),
+            # International Happiness Day
+            (3, 20): ("Today is International Day of Happiness! How are you feeling?", 
+                     "اليوم هو اليوم العالمي للسعادة! كيف تشعر؟"),
+            # World Mental Health Day
+            (10, 10): ("Today is World Mental Health Day. How are you taking care of your emotional well-being?", 
+                      "اليوم هو اليوم العالمي للصحة النفسية. كيف تعتني بصحتك العاطفية؟")
+        }
+        
+        return special_dates.get(month_day, [None, None])[0 if language == 'en' else 1]
+    
+    def _get_english_greeting(self, time_of_day: str, day_of_week: str, is_weekend: bool) -> str:
+        """Generate appropriate English greeting based on time and day"""
+        # Variations for each time of day
+        night_greetings = [
+            "Still awake? The cosmos never sleeps, and neither do you.",
+            "The quiet night is perfect for reflection.",
+            "Stars are shining, and so is your inner light."
+        ]
+        
+        morning_greetings = [
+            "Good morning! The universe awakens with you today.",
+            "Rise and shine! A new day of cosmic energy awaits.",
+            "Morning light brings new possibilities and emotions."
+        ]
+        
+        afternoon_greetings = [
+            "Good afternoon! How's your day's journey going?",
+            "The day is in full swing. How are your emotions flowing?",
+            "Afternoon greetings! The cosmos is vibrant with energy."
+        ]
+        
+        evening_greetings = [
+            "Good evening! Time to reflect on today's emotional journey.",
+            "As the day winds down, how does your emotional cosmos feel?",
+            "Evening has arrived. Let's take a moment to feel the cosmic calm."
+        ]
+        
+        # Select appropriate greeting set
+        if time_of_day == "night":
+            greetings = night_greetings
+        elif time_of_day == "morning":
+            greetings = morning_greetings
+        elif time_of_day == "afternoon":
+            greetings = afternoon_greetings
+        else:
+            greetings = evening_greetings
+            
+        # Day-specific additions
+        if is_weekend:
+            weekend_suffix = " Enjoy your weekend journey!"
+        else:
+            weekday_names = {
+                "monday": " Beginning a new week with fresh emotions.",
+                "tuesday": " Tuesday's energy flows through the cosmos.",
+                "wednesday": " Midweek reflections guide your path.",
+                "thursday": " Almost to the weekend, stay emotionally balanced.",
+                "friday": " Friday's vibrations bring joy to the cosmos."
+            }
+            weekend_suffix = weekday_names.get(day_of_week, "")
+            
+        # Choose a random greeting and add day-specific suffix
+        import random
+        greeting = random.choice(greetings)
+        
+        # One in three chance to add the day-specific suffix
+        if random.choice([True, False, False]):
+            greeting += weekend_suffix
+            
+        return greeting
+        
+    def _get_arabic_greeting(self, time_of_day: str, day_of_week: str, is_weekend: bool, is_friday: bool) -> str:
+        """Generate appropriate Arabic greeting based on time and day"""
+        # Variations for each time of day
+        night_greetings = [
+            "مازلت مستيقظًا؟ الكون لا ينام أبدًا، وكذلك أنت.",
+            "الليل الهادئ مثالي للتأمل.",
+            "النجوم تتلألأ، وكذلك نورك الداخلي."
+        ]
+        
+        morning_greetings = [
+            "صباح الخير! يستيقظ الكون معك اليوم.",
+            "أشرق وتألق! يوم جديد من طاقة الكون في انتظارك.",
+            "ضوء الصباح يجلب إمكانيات ومشاعر جديدة."
+        ]
+        
+        afternoon_greetings = [
+            "مساء الخير! كيف تسير رحلة يومك؟",
+            "النهار في كامل نشاطه. كيف تتدفق مشاعرك؟",
+            "تحيات المساء! الكون نابض بالحياة والطاقة."
+        ]
+        
+        evening_greetings = [
+            "مساء الخير! حان وقت التفكير في رحلة اليوم العاطفية.",
+            "مع اقتراب نهاية اليوم، كيف يشعر كونك العاطفي؟",
+            "لقد حل المساء. دعنا نأخذ لحظة لنشعر بهدوء الكون."
+        ]
+        
+        # Select appropriate greeting set
+        if time_of_day == "ليل":
+            greetings = night_greetings
+        elif time_of_day == "صباح":
+            greetings = morning_greetings
+        elif time_of_day == "ظهر":
+            greetings = afternoon_greetings
+        else:
+            greetings = evening_greetings
+            
+        # Special handling for Friday in Islamic culture
+        if is_friday:
+            day_suffix = " جمعة مباركة!"
+        elif is_weekend:
+            day_suffix = " استمتع برحلة عطلة نهاية الأسبوع!"
+        else:
+            weekday_names = {
+                "monday": " بداية أسبوع جديد بمشاعر جديدة.",
+                "tuesday": " طاقة الثلاثاء تتدفق عبر الكون.",
+                "wednesday": " تأملات منتصف الأسبوع ترشد طريقك.",
+                "thursday": " على وشك الوصول إلى عطلة نهاية الأسبوع، حافظ على توازنك العاطفي."
+            }
+            day_suffix = weekday_names.get(day_of_week, "")
+            
+        # Choose a random greeting and add day-specific suffix
+        import random
+        greeting = random.choice(greetings)
+        
+        # One in three chance to add the day-specific suffix
+        if random.choice([True, False, False]):
+            greeting += day_suffix
+            
+        return greeting
                 
     def log_recommendation_feedback(
         self,

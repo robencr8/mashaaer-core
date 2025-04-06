@@ -13,7 +13,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="manifest" href="/static/manifest.json">
   <link rel="icon" href="/static/icons/icon-192x192.png">
-  <link rel="stylesheet" href="/static/css/contextual-greeting.css">
   <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
   <link rel="stylesheet" href="/static/css/mood-themes.css">
   <style>
@@ -799,9 +798,6 @@
     <h1 class="title" id="title">مشاعر | Mashaaer</h1>
     <!-- Contextual Greeting Component -->
     <div class="contextual-greeting loading" id="contextual-greeting"></div>
-    <!-- Contextual Greeting Component -->
-    <div class="contextual-greeting loading" id="contextual-greeting"></div>
-    <div id="contextual-greeting" class="contextual-greeting-container loading"></div>
     <p class="subtitle" id="subtitle">اصنع المستقبل، أنا أسمعك</p>
     <p class="subtitle-en" id="subtitle-en">Create the future, I hear you</p>
     
@@ -906,6 +902,8 @@
       // We'll only initialize speech recognition, but NOT play sounds automatically
       // Initialize contextual greeting
     // Get a reference to the contextual greeting element
+    const contextualGreeting = document.getElementById("contextual-greeting");
+      initContextualGreeting();
     // Show audio notification
     document.getElementById("audio-notification").style.display = "block";
 
@@ -1696,6 +1694,7 @@
         
     // Fetch contextual greeting from API
     // Get a reference to the contextual greeting element
+    const contextualGreeting = document.getElementById("contextual-greeting");
     function initContextualGreeting() {
       const greetingContainer = document.getElementById("contextual-greeting");
       if (!greetingContainer) return;
@@ -1802,72 +1801,6 @@
             });
         });
       }
-      
-    // Contextual Greeting Functions
-    function initContextualGreeting() {
-      if (!contextualGreeting) {
-        return;
-      }
-      
-      // Get language preference - use data-lang attribute of active language option
-      const activeLangOption = document.querySelector('.lang-option.active');
-      const language = activeLangOption ? activeLangOption.getAttribute('data-lang') : 'en';
-      
-      // Store the language
-      localStorage.setItem('mashaaer-language', language);
-      
-      // Fetch greeting from the API
-      fetchContextualGreeting(language)
-        .then(greeting => {
-          // Update greeting container
-          contextualGreeting.textContent = greeting;
-          contextualGreeting.setAttribute('data-loaded', 'true');
-          
-          // Remove loading state
-          contextualGreeting.classList.remove('loading');
-          
-          // Apply fade-in animation
-          setTimeout(() => {
-            contextualGreeting.classList.add('visible');
-          }, 100);
-        })
-        .catch(error => {
-          console.error('Error fetching contextual greeting:', error);
-          
-          // Display fallback greeting
-          const fallbackGreeting = language === 'ar' ? 
-            'مرحباً بك في مشاعر' : 
-            'Welcome to Mashaaer';
-            
-          contextualGreeting.textContent = fallbackGreeting;
-          contextualGreeting.setAttribute('data-loaded', 'true');
-          contextualGreeting.classList.remove('loading');
-          contextualGreeting.classList.add('visible');
-        });
-    }
-    
-    function fetchContextualGreeting(language) {
-      return new Promise((resolve, reject) => {
-        fetch(`/api/recommendations/greeting?language=${language}`)
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Failed to fetch greeting');
-            }
-            return response.json();
-          })
-          .then(data => {
-            if (data.success && data.greeting) {
-              resolve(data.greeting);
-            } else {
-              reject(new Error('Invalid greeting response'));
-            }
-          })
-          .catch(error => {
-            console.error('Greeting fetch error:', error);
-            reject(error);
-          });
-      });
-    }
     </script>
     
     <!-- Mood Theme Manager -->
@@ -2078,6 +2011,3 @@
           });
       });
     }
-
-    <!-- Contextual Greeting Script -->
-    <script src="/static/js/contextual-greeting.js"></script>

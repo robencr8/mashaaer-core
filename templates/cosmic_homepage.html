@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/meteor-shower.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/cosmic-theme.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/contextual_greeting.css') }}">
   <style>
     body {
       margin: 0;
@@ -207,6 +206,47 @@
       background: rgba(138, 43, 226, 0.3);
       transform: rotate(45deg);
     }
+
+    /* Contextual Greeting Styles */
+    .contextual-greeting {
+      font-family: 'Comfortaa', 'Cairo', sans-serif;
+      position: relative;
+      transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+      opacity: 0;
+      transform: translateY(10px);
+      margin-bottom: 1.2rem;
+      font-size: 1.6rem;
+      font-weight: 500;
+      text-align: center;
+      display: block;
+      line-height: 1.4;
+      min-height: 2.5rem;
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .contextual-greeting.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .contextual-greeting.loading::after {
+      content: "";
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      margin-left: 0.5rem;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #8a2be2;
+      animation: greeting-spin 1s infinite linear;
+      vertical-align: middle;
+    }
+
+    @keyframes greeting-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
     
     /* RTL Support */
     html[dir="rtl"] .settings-icon {
@@ -217,6 +257,16 @@
     html[dir="rtl"] .menu-item i {
       margin-right: 0;
       margin-left: 8px;
+    }
+
+    html[dir="rtl"] .contextual-greeting {
+      direction: rtl;
+      font-family: 'Cairo', 'Comfortaa', sans-serif;
+    }
+
+    html[dir="rtl"] .contextual-greeting.loading::after {
+      margin-left: 0;
+      margin-right: 0.5rem;
     }
     
     /* Mobile responsiveness */
@@ -245,6 +295,12 @@
       h1 {
         font-size: 2rem;
       }
+
+      .contextual-greeting {
+        font-size: 1.4rem;
+        min-height: 2.2rem;
+        margin-bottom: 1rem;
+      }
       
       .welcome-message {
         font-size: 1rem;
@@ -260,6 +316,31 @@
         width: 100%;
       }
     }
+
+    @media (max-width: 480px) {
+      .contextual-greeting {
+        font-size: 1.2rem;
+        min-height: 2rem;
+        margin-bottom: 0.8rem;
+      }
+    }
+
+    /* Data-mood specific styling */
+    html[data-mood="happy"] .contextual-greeting {
+      color: rgba(255, 236, 179, 0.95);
+    }
+
+    html[data-mood="sad"] .contextual-greeting {
+      color: rgba(179, 229, 252, 0.95);
+    }
+
+    html[data-mood="angry"] .contextual-greeting {
+      color: rgba(255, 205, 179, 0.95);
+    }
+
+    html[data-mood="neutral"] .contextual-greeting {
+      color: rgba(216, 195, 255, 0.95);
+    }
   </style>
 </head>
 <body>
@@ -267,7 +348,7 @@
     <h1>Mashaaer Feelings</h1>
     
     <!-- Contextual Greeting Component -->
-    <div class="contextual-greeting loading">Welcome to Mashaaer</div>
+    <div class="contextual-greeting loading" id="contextual-greeting">Welcome to Mashaaer</div>
     
     <div class="welcome-message">
       <p>Hello <span id="user-name">there</span>! Your cosmic journey has begun. Explore your emotions, connect with your feelings, and discover new insights about yourself.</p>
@@ -291,7 +372,6 @@
   <div class="settings-icon" onclick="window.location.href='/user/settings'"><i class="fas fa-gear"></i></div>
 
   <script src="{{ url_for('static', filename='js/meteor-shower.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/contextual_greeting.js') }}"></script>
   <script>
     // Set theme based on session language
     const userLanguage = "{{ session.get('language', 'en') }}";
@@ -305,15 +385,79 @@
       document.documentElement.setAttribute('lang', 'ar');
     }
     
-    // Store language in localStorage for consistency
-    localStorage.setItem('mashaaer-language', userLanguage);
-    
     // Initialize user data
     document.addEventListener('DOMContentLoaded', function() {
       // Get user name from session (passed from backend)
       const userName = "{{ session.get('nickname', '') }}" || "{{ session.get('full_name', '').split(' ')[0] }}" || "there";
       document.getElementById('user-name').textContent = userName;
+      
+      // Initialize the contextual greeting component
+      initContextualGreeting();
     });
+    
+    // Contextual Greeting Functions
+    function initContextualGreeting() {
+      const greetingContainer = document.getElementById('contextual-greeting');
+      
+      if (!greetingContainer) {
+        return;
+      }
+      
+      // Get language preference
+      const language = userLanguage;
+      
+      // Fetch greeting from the API
+      fetchContextualGreeting(language)
+        .then(greeting => {
+          // Update all greeting containers with the greeting
+          greetingContainer.textContent = greeting;
+          greetingContainer.setAttribute('data-loaded', 'true');
+          
+          // Remove loading state
+          greetingContainer.classList.remove('loading');
+          
+          // Apply fade-in animation
+          setTimeout(() => {
+            greetingContainer.classList.add('visible');
+          }, 100);
+        })
+        .catch(error => {
+          console.error('Error fetching contextual greeting:', error);
+          
+          // Display fallback greeting
+          const fallbackGreeting = language === 'ar' ? 
+            'مرحباً بك في مشاعر' : 
+            'Welcome to Mashaaer';
+            
+          greetingContainer.textContent = fallbackGreeting;
+          greetingContainer.setAttribute('data-loaded', 'true');
+          greetingContainer.classList.remove('loading');
+          greetingContainer.classList.add('visible');
+        });
+    }
+    
+    function fetchContextualGreeting(language) {
+      return new Promise((resolve, reject) => {
+        fetch(`/api/recommendations/greeting?language=${language}`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch greeting');
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success && data.greeting) {
+              resolve(data.greeting);
+            } else {
+              reject(new Error('Invalid greeting response'));
+            }
+          })
+          .catch(error => {
+            console.error('Greeting fetch error:', error);
+            reject(error);
+          });
+      });
+    }
     
     // Play cosmic sound on sphere click
     function playCosmic() {
