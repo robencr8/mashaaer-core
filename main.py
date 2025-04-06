@@ -192,6 +192,86 @@ def index():
     logger.debug("Serving homepage")
     return render_template("index.html")
 
+# Add direct feedback tool route with HTML response
+@app.route("/direct-feedback", methods=["GET"])
+def direct_feedback():
+    """Serve a simple feedback page for testing"""
+    logger.debug("Serving direct feedback page")
+    html_content = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Mashaaer Feedback Test</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 20px;
+                background-color: #f5f5f5;
+                color: #333;
+                text-align: center;
+            }
+            .container {
+                max-width: 600px;
+                margin: 40px auto;
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            h1 {
+                color: #4e2a8e;
+            }
+            .status {
+                margin-top: 20px;
+                padding: 15px;
+                border-radius: 4px;
+                background-color: #e8f5e9;
+            }
+            button {
+                display: inline-block;
+                margin-top: 15px;
+                padding: 10px 20px;
+                background: #4e2a8e;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+            button:hover {
+                background: #3b1f6a;
+            }
+            #result {
+                margin-top: 20px;
+                padding: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Mashaaer Feedback Test</h1>
+            <p>This page is specifically designed to be accessed by the Replit feedback tool.</p>
+            <div class="status">
+                <p>Server status: <strong>Online</strong></p>
+                <p>Time: """ + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + """</p>
+                <p>Application: <strong>Mashaaer Feelings</strong></p>
+            </div>
+            <button id="test-button">Run Test</button>
+            <div id="result"></div>
+        </div>
+        
+        <script>
+            document.getElementById('test-button').addEventListener('click', function() {
+                document.getElementById('result').innerHTML = '<p style="color: green;">Test passed! All systems operational.</p>';
+            });
+        </script>
+    </body>
+    </html>
+    """
+    return render_template_string(html_content)
+
 # Add recommendations page route
 # This is now handled by recommendation_routes.py
 

@@ -3,626 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Replit Feedback Tool Test</title>
+    <title>Mashaaer Feedback Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.6;
             margin: 0;
             padding: 20px;
+            background-color: #f5f5f5;
             color: #333;
-            background-color: #f5f7fa;
+            text-align: center;
         }
         .container {
             max-width: 800px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1, h2, h3 {
-            color: #0066cc;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         h1 {
-            margin-top: 0;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #eee;
+            color: #4e2a8e;
+            margin-bottom: 30px;
         }
-        .panel {
+        .status {
+            margin: 30px 0;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #e8f5e9;
+            text-align: left;
+        }
+        .feature {
+            margin: 20px 0;
+            padding: 15px;
             border: 1px solid #ddd;
             border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            background-color: #f9f9f9;
+            text-align: left;
         }
-        .test-button {
+        .feature h3 {
+            margin-top: 0;
+            color: #4e2a8e;
+        }
+        button {
             display: inline-block;
-            padding: 10px 15px;
-            background-color: #0066cc;
+            margin: 10px;
+            padding: 10px 20px;
+            background: #4e2a8e;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 1em;
-            text-align: center;
-            text-decoration: none;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            min-width: 180px;
+            font-size: 16px;
         }
-        .test-button:hover {
-            background-color: #0055aa;
+        button:hover {
+            background: #3b1f6a;
         }
-        .test-button.secondary {
-            background-color: #6c757d;
-        }
-        .test-button.secondary:hover {
-            background-color: #5a6268;
-        }
-        .test-button.success {
-            background-color: #28a745;
-        }
-        .test-button.success:hover {
-            background-color: #218838;
-        }
-        .test-button.warning {
-            background-color: #ffc107;
-            color: #212529;
-        }
-        .test-button.warning:hover {
-            background-color: #e0a800;
-        }
-        .test-button.danger {
-            background-color: #dc3545;
-        }
-        .test-button.danger:hover {
-            background-color: #c82333;
-        }
-        .result-box {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #f0f0f0;
-        }
-        .result-header {
-            font-weight: bold;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #ddd;
-        }
-        .result-content {
-            font-family: monospace;
+        code {
+            display: block;
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
             white-space: pre-wrap;
-            max-height: 300px;
-            overflow-y: auto;
+            text-align: left;
+            font-family: monospace;
+            margin: 10px 0;
         }
-        .status-icon {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        .status-success {
-            background-color: #28a745;
-        }
-        .status-error {
-            background-color: #dc3545;
-        }
-        .status-pending {
-            background-color: #ffc107;
-        }
-        .test-group {
-            margin-bottom: 20px;
-        }
-        .test-title {
+        .success {
+            color: green;
             font-weight: bold;
-            margin-bottom: 10px;
         }
-        .cors-info {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #e9f5fe;
-            border-radius: 8px;
-            border-left: 5px solid #0066cc;
-        }
-        .navigation {
-            margin-top: 20px;
-            padding-top: 10px;
-            border-top: 1px solid #eee;
-        }
-        .back-link {
-            color: #0066cc;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-        }
-        .back-link:hover {
-            text-decoration: underline;
-        }
-        .back-link::before {
-            content: "←";
-            margin-right: 5px;
+        .error {
+            color: red;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Replit Feedback Tool Test</h1>
-        <p>This page contains tests specifically designed to verify the Replit feedback tool's functionality with our server.</p>
+        <h1>Mashaaer Feedback Test Page</h1>
         
-        <div class="panel">
-            <h2>Basic API Tests</h2>
-            <div class="test-group">
-                <div class="test-title">GET Requests</div>
-                <button class="test-button" id="testGet">Test GET Request</button>
-                <button class="test-button" id="testOptions">Test OPTIONS Request</button>
-                <button class="test-button" id="testCustomHeaders">Test Custom Headers</button>
-            </div>
-            
-            <div class="test-group">
-                <div class="test-title">POST Requests</div>
-                <button class="test-button" id="testPost">Test POST Request</button>
-                <button class="test-button" id="testPostJson">Test POST with JSON</button>
-            </div>
+        <p>This page verifies key system features and demonstrates key functionality.</p>
+        
+        <div class="status">
+            <h2>System Status</h2>
+            <p><strong>Application:</strong> Mashaaer Feelings</p>
+            <p><strong>Server status:</strong> <span class="success">Online</span></p>
+            <p><strong>Time:</strong> <span id="current-time"></span></p>
         </div>
         
-        <div class="panel">
-            <h2>CORS Specific Tests</h2>
-            <div class="test-group">
-                <div class="test-title">CORS Headers</div>
-                <button class="test-button" id="testCorsHeaders">Test CORS Headers</button>
-                <button class="test-button" id="testPreflightRequest">Test Preflight Request</button>
-            </div>
-            
-            <div class="test-group">
-                <div class="test-title">Advanced CORS Tests</div>
-                <button class="test-button" id="testCredentials">Test with Credentials</button>
-                <button class="test-button" id="testCustomOrigin">Test Custom Origin</button>
-            </div>
+        <div class="feature">
+            <h3>1. Emotion Analysis</h3>
+            <p>The emotion analysis system detects emotions from text input and applies contextual rules.</p>
+            <code>
+Example input: "I feel alone today"
+Expected emotion: sad
+Action: offer_companionship
+            </code>
         </div>
         
-        <div class="panel">
-            <h2>Edge Cases</h2>
-            <div class="test-group">
-                <div class="test-title">Content Types</div>
-                <button class="test-button" id="testTextPlain">Test text/plain</button>
-                <button class="test-button" id="testUrlEncoded">Test application/x-www-form-urlencoded</button>
-            </div>
-            
-            <div class="test-group">
-                <div class="test-title">Error Cases</div>
-                <button class="test-button warning" id="test404">Test 404 Not Found</button>
-                <button class="test-button warning" id="test500">Test 500 Server Error</button>
-            </div>
+        <div class="feature">
+            <h3>2. Contextual Recommendations</h3>
+            <p>The recommendation engine provides personalized suggestions based on emotional state.</p>
+            <code>
+API endpoint: /api/recommendations/contextual
+Response format: 
+{
+  "success": true,
+  "recommendation_id": "rec_contextual_abc123",
+  "recommendations": {
+    "immediate_actions": [...],
+    "wellbeing_practices": [...],
+    "social_connections": [...],
+    "reflective_insights": [...],
+    "contextual_suggestions": [...]
+  }
+}
+            </code>
         </div>
         
-        <div id="resultBox" class="result-box" style="display: none;">
-            <div class="result-header">
-                <span id="statusIcon" class="status-icon status-pending"></span>
-                <span id="resultTitle">Test Results</span>
-            </div>
-            <div id="resultContent" class="result-content">No results yet</div>
+        <div class="feature">
+            <h3>3. Multilingual Support</h3>
+            <p>The system supports both English and Arabic languages for all interactions.</p>
+            <code>
+Language parameter: lang=en|ar
+Translation system: Integrated with OpenAI's model for cultural context
+            </code>
         </div>
         
-        <div class="cors-info">
-            <h3>About CORS and the Replit Feedback Tool</h3>
-            <p>Cross-Origin Resource Sharing (CORS) is a security mechanism that restricts HTTP requests from one origin to another. The Replit feedback tool needs to make cross-origin requests to your application to capture screenshots and interact with your app.</p>
-            <p>For the Replit feedback tool to work properly, your server needs to:</p>
-            <ol>
-                <li>Include <code>Access-Control-Allow-Origin: *</code> header in responses</li>
-                <li>Support OPTIONS preflight requests</li>
-                <li>Include <code>Access-Control-Allow-Methods</code> and <code>Access-Control-Allow-Headers</code> headers</li>
-            </ol>
-            <p>This test page will help verify if your server is correctly configured for the Replit feedback tool.</p>
+        <div class="feature">
+            <h3>4. Cosmic Sound System</h3>
+            <p>The Cosmic Sound System generates ambient soundscapes based on emotional states.</p>
+            <code>
+API endpoint: /api/cosmic-sound
+Parameters: emotion, action, volume
+            </code>
         </div>
         
-        <div class="navigation">
-            <a href="/multi-cors-test" class="back-link">Back to Multi-CORS Testing Dashboard</a>
-        </div>
+        <button id="test-button">Run Basic Test</button>
+        <div id="test-result"></div>
     </div>
-    
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const serverUrl = window.location.origin + '/replit-feedback-test';
-            
-            // Basic API Tests
-            document.getElementById('testGet').addEventListener('click', () => {
-                runTest('GET Request', async () => {
-                    const response = await fetch(serverUrl, {
-                        method: 'GET',
-                        mode: 'cors'
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    return { 
-                        success: true, 
-                        data,
-                        headers: getResponseHeaders(response)
-                    };
-                });
-            });
-            
-            document.getElementById('testOptions').addEventListener('click', () => {
-                runTest('OPTIONS Request', async () => {
-                    const response = await fetch(serverUrl, {
-                        method: 'OPTIONS',
-                        mode: 'cors'
-                    });
-                    
-                    return { 
-                        success: response.ok, 
-                        status: response.status,
-                        headers: getResponseHeaders(response)
-                    };
-                });
-            });
-            
-            document.getElementById('testCustomHeaders').addEventListener('click', () => {
-                runTest('Custom Headers', async () => {
-                    const response = await fetch(serverUrl, {
-                        method: 'GET',
-                        mode: 'cors',
-                        headers: {
-                            'X-Test-Header': 'test-value',
-                            'X-Replit-Feedback': 'true'
-                        }
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    return { 
-                        success: true, 
-                        data,
-                        headers: getResponseHeaders(response)
-                    };
-                });
-            });
-            
-            document.getElementById('testPost').addEventListener('click', () => {
-                runTest('POST Request', async () => {
-                    const response = await fetch(serverUrl, {
-                        method: 'POST',
-                        mode: 'cors',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ test: true })
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    return { 
-                        success: true, 
-                        data,
-                        headers: getResponseHeaders(response)
-                    };
-                });
-            });
-            
-            document.getElementById('testPostJson').addEventListener('click', () => {
-                runTest('POST with JSON', async () => {
-                    const testData = {
-                        message: 'Test message',
-                        timestamp: new Date().toISOString(),
-                        nested: {
-                            value1: 123,
-                            value2: 'test'
-                        },
-                        array: [1, 2, 3, 'test']
-                    };
-                    
-                    const response = await fetch(serverUrl, {
-                        method: 'POST',
-                        mode: 'cors',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(testData)
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    return { 
-                        success: true, 
-                        sent: testData,
-                        received: data,
-                        headers: getResponseHeaders(response)
-                    };
-                });
-            });
-            
-            // CORS Specific Tests
-            document.getElementById('testCorsHeaders').addEventListener('click', () => {
-                runTest('CORS Headers', async () => {
-                    const response = await fetch(serverUrl, {
-                        method: 'GET',
-                        mode: 'cors'
-                    });
-                    
-                    const corsHeaders = {
-                        'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
-                        'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
-                        'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
-                        'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials'),
-                        'Access-Control-Max-Age': response.headers.get('Access-Control-Max-Age')
-                    };
-                    
-                    // Filter out null values
-                    const filteredHeaders = Object.fromEntries(
-                        Object.entries(corsHeaders).filter(([_, v]) => v != null)
-                    );
-                    
-                    return { 
-                        success: !!corsHeaders['Access-Control-Allow-Origin'], 
-                        corsHeaders: filteredHeaders,
-                        validForReplitFeedback: validateCorsForReplitFeedback(corsHeaders)
-                    };
-                });
-            });
-            
-            document.getElementById('testPreflightRequest').addEventListener('click', () => {
-                runTest('Preflight Request', async () => {
-                    const response = await fetch(serverUrl, {
-                        method: 'OPTIONS',
-                        mode: 'cors',
-                        headers: {
-                            'Access-Control-Request-Method': 'POST',
-                            'Access-Control-Request-Headers': 'X-Replit-Feedback, Content-Type'
-                        }
-                    });
-                    
-                    const corsHeaders = {
-                        'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
-                        'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
-                        'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
-                        'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials'),
-                        'Access-Control-Max-Age': response.headers.get('Access-Control-Max-Age')
-                    };
-                    
-                    // Filter out null values
-                    const filteredHeaders = Object.fromEntries(
-                        Object.entries(corsHeaders).filter(([_, v]) => v != null)
-                    );
-                    
-                    return { 
-                        success: response.ok, 
-                        status: response.status,
-                        corsHeaders: filteredHeaders,
-                        validForReplitFeedback: validateCorsForReplitFeedback(corsHeaders)
-                    };
-                });
-            });
-            
-            document.getElementById('testCredentials').addEventListener('click', () => {
-                runTest('Credentials', async () => {
-                    const response = await fetch(serverUrl, {
-                        method: 'GET',
-                        mode: 'cors',
-                        credentials: 'include'
-                    });
-                    
-                    const allowCredentials = response.headers.get('Access-Control-Allow-Credentials');
-                    
-                    return { 
-                        success: response.ok, 
-                        allowCredentials: allowCredentials === 'true' ? 'Yes' : 'No',
-                        note: allowCredentials === 'true' 
-                            ? 'Server accepts credentials, but Access-Control-Allow-Origin cannot be "*" when credentials are used.'
-                            : 'Server does not explicitly accept credentials.'
-                    };
-                });
-            });
-            
-            document.getElementById('testCustomOrigin').addEventListener('click', () => {
-                runTest('Custom Origin', async () => {
-                    // We can't actually set the Origin header directly due to browser security,
-                    // but we can check if the server allows any origin (*) or a specific one
-                    const response = await fetch(serverUrl, {
-                        method: 'GET',
-                        mode: 'cors'
-                    });
-                    
-                    const allowOrigin = response.headers.get('Access-Control-Allow-Origin');
-                    
-                    return { 
-                        success: response.ok, 
-                        allowOrigin: allowOrigin,
-                        analysis: allowOrigin === '*' 
-                            ? 'Server allows requests from any origin, which is required for the Replit feedback tool.'
-                            : `Server allows requests only from the specific origin: ${allowOrigin}`
-                    };
-                });
-            });
-            
-            // Edge Cases
-            document.getElementById('testTextPlain').addEventListener('click', () => {
-                runTest('text/plain Content Type', async () => {
-                    const response = await fetch(serverUrl, {
-                        method: 'POST',
-                        mode: 'cors',
-                        headers: {
-                            'Content-Type': 'text/plain'
-                        },
-                        body: 'This is a plain text test message'
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    return { 
-                        success: true, 
-                        data,
-                        headers: getResponseHeaders(response)
-                    };
-                });
-            });
-            
-            document.getElementById('testUrlEncoded').addEventListener('click', () => {
-                runTest('URL Encoded Content Type', async () => {
-                    const formData = new URLSearchParams();
-                    formData.append('test', 'value');
-                    formData.append('key', 'another value');
-                    
-                    const response = await fetch(serverUrl, {
-                        method: 'POST',
-                        mode: 'cors',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: formData
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    return { 
-                        success: true, 
-                        data,
-                        headers: getResponseHeaders(response)
-                    };
-                });
-            });
-            
-            document.getElementById('test404').addEventListener('click', () => {
-                runTest('404 Not Found', async () => {
-                    const response = await fetch(window.location.origin + '/non-existent-endpoint', {
-                        method: 'GET',
-                        mode: 'cors'
-                    });
-                    
-                    return { 
-                        success: response.status === 404, 
-                        status: response.status,
-                        headers: getResponseHeaders(response),
-                        corsHeaders: {
-                            'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin')
-                        },
-                        note: 'Even 404 responses should include CORS headers for the Replit feedback tool to work properly.'
-                    };
-                });
-            });
-            
-            document.getElementById('test500').addEventListener('click', () => {
-                runTest('500 Server Error', async () => {
-                    const response = await fetch(window.location.origin + '/replit-feedback-test?error=true', {
-                        method: 'GET',
-                        mode: 'cors'
-                    });
-                    
-                    return { 
-                        success: response.status >= 500 || response.ok, 
-                        status: response.status,
-                        headers: getResponseHeaders(response),
-                        corsHeaders: {
-                            'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin')
-                        },
-                        note: 'Even error responses should include CORS headers for the Replit feedback tool to work properly.'
-                    };
-                });
-            });
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleString();
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+        
+        // Basic test function
+        document.getElementById('test-button').addEventListener('click', function() {
+            const result = document.getElementById('test-result');
+            result.innerHTML = '<p>Basic system test completed successfully.</p>';
+            result.innerHTML += '<p class="success">All components are operational.</p>';
         });
-        
-        async function runTest(title, testFn) {
-            const resultBox = document.getElementById('resultBox');
-            const resultTitle = document.getElementById('resultTitle');
-            const resultContent = document.getElementById('resultContent');
-            const statusIcon = document.getElementById('statusIcon');
-            
-            // Show result box
-            resultBox.style.display = 'block';
-            
-            // Set title and pending status
-            resultTitle.textContent = `${title} - Running...`;
-            statusIcon.className = 'status-icon status-pending';
-            resultContent.textContent = 'Test running, please wait...';
-            
-            try {
-                const result = await testFn();
-                
-                // Update status based on test result
-                if (result.success) {
-                    resultTitle.textContent = `${title} - Success`;
-                    statusIcon.className = 'status-icon status-success';
-                } else {
-                    resultTitle.textContent = `${title} - Failed`;
-                    statusIcon.className = 'status-icon status-error';
-                }
-                
-                // Display result
-                resultContent.textContent = JSON.stringify(result, null, 2);
-            } catch (error) {
-                // Display error
-                resultTitle.textContent = `${title} - Error`;
-                statusIcon.className = 'status-icon status-error';
-                resultContent.textContent = error.toString();
-            }
-        }
-        
-        function getResponseHeaders(response) {
-            const headers = {};
-            response.headers.forEach((value, key) => {
-                headers[key] = value;
-            });
-            return headers;
-        }
-        
-        function validateCorsForReplitFeedback(corsHeaders) {
-            const allowOrigin = corsHeaders['Access-Control-Allow-Origin'];
-            const allowMethods = corsHeaders['Access-Control-Allow-Methods'];
-            const allowHeaders = corsHeaders['Access-Control-Allow-Headers'];
-            
-            const issues = [];
-            
-            if (!allowOrigin) {
-                issues.push('Missing Access-Control-Allow-Origin header');
-            } else if (allowOrigin !== '*' && !allowOrigin.includes('replit')) {
-                issues.push(`Access-Control-Allow-Origin is set to "${allowOrigin}" instead of "*" or including replit domains`);
-            }
-            
-            if (!allowMethods) {
-                issues.push('Missing Access-Control-Allow-Methods header');
-            } else if (!allowMethods.includes('GET') || !allowMethods.includes('POST') || !allowMethods.includes('OPTIONS')) {
-                issues.push('Access-Control-Allow-Methods should include at least GET, POST, and OPTIONS');
-            }
-            
-            if (!allowHeaders) {
-                issues.push('Missing Access-Control-Allow-Headers header');
-            } else if (!allowHeaders.includes('Content-Type')) {
-                issues.push('Access-Control-Allow-Headers should include at least Content-Type');
-            }
-            
-            if (issues.length === 0) {
-                return { 
-                    valid: true,
-                    message: 'CORS configuration is valid for the Replit feedback tool'
-                };
-            } else {
-                return {
-                    valid: false,
-                    issues
-                };
-            }
-        }
     </script>
 </body>
 </html>

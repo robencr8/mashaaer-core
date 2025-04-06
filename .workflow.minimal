@@ -1,2 +1,5 @@
-name = "Minimal application"
-command = "gunicorn --bind 0.0.0.0:5001 --reuse-port --reload minimal_app:app"
+name = "Minimal Server"
+entrypoint = "python ultra_minimal_server.py"
+run = "python ultra_minimal_server.py"
+language = "python3"
+docs = """Minimal Flask server for testing"""
