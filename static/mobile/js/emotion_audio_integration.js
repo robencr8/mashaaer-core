@@ -1,301 +1,275 @@
 /**
- * Emotion Audio Integration for Mashaaer Feelings
- * 
- * This file provides integration between the API responses
- * and the cosmic sound system, automatically triggering
- * the appropriate cosmic ambient sounds based on detected emotions.
+ * Cosmic Emotion Audio Integration
+ * This module provides functions to play and manage audio tracks based on emotions
  */
 
-// Initialize global variables
+// Constants for volume and track settings
+const DEFAULT_VOLUME = 0.5;
+const FADE_DURATION = 1000;
+const BASE_AUDIO_PATH = '/static/mobile/audio/';
+
+// Track references
+let currentTrack = null;
 let currentEmotion = null;
-let isMuted = false;
-let currentVolume = 0.5; // Default volume: 50%
 let audioContext = null;
-let currentAudio = null;
-let fadeTime = 2000; // Fade transition time in milliseconds
+let gainNode = null;
+let audioSource = null;
 
-// Audio tracks configuration
+// Map of emotion to track filenames
 const EMOTION_TRACKS = {
-    "happy": "/static/mobile/audio/happy_cosmic.mp3",
-    "sad": "/static/mobile/audio/sad_cosmic.mp3",
-    "angry": "/static/mobile/audio/angry_cosmic.mp3",
-    "calm": "/static/mobile/audio/calm_cosmic.mp3",
-    "neutral": "/static/mobile/audio/cosmicmusic.mp3"
-};
-
-// Animation parameters for UI
-const EMOTION_ANIMATIONS = {
-    "happy": { color: "#ffdd66", pulseSpeed: "fast", intensity: "high" },
-    "sad": { color: "#6688cc", pulseSpeed: "slow", intensity: "low" },
-    "angry": { color: "#ff6655", pulseSpeed: "medium", intensity: "high" },
-    "calm": { color: "#66ccbb", pulseSpeed: "very-slow", intensity: "medium" },
-    "neutral": { color: "#aaccee", pulseSpeed: "medium", intensity: "medium" }
+    'happy': 'happy_cosmic.mp3',
+    'sad': 'sad_cosmic.mp3',
+    'angry': 'angry_cosmic.mp3',
+    'calm': 'calm_cosmic.mp3',
+    'neutral': 'calm_cosmic.mp3', // Use calm for neutral
+    'anxious': 'sad_cosmic.mp3',  // Use sad for anxious
+    'tired': 'sad_cosmic.mp3',    // Use sad for tired
+    'excited': 'happy_cosmic.mp3' // Use happy for excited
 };
 
 /**
- * Handle emotion response from API
- * This function should be called when receiving responses
- * from /api/chat or other emotion-returning endpoints
- * 
- * @param {Object} response - API response containing emotion data
+ * Initialize the Web Audio API context
  */
-function handleEmotionResponse(response) {
-    // Check if response contains cosmic_soundscape information
-    if (response && response.cosmic_soundscape) {
-        const soundscape = response.cosmic_soundscape;
+function initAudioContext() {
+    try {
+        // Create AudioContext
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioContext = new AudioContext();
         
-        // Play the emotion soundtrack if auto-play is enabled
-        if (soundscape.play === true) {
-            playEmotionTrack(soundscape.emotion);
-        }
+        // Create gain node for volume control
+        gainNode = audioContext.createGain();
+        gainNode.gain.value = DEFAULT_VOLUME;
+        gainNode.connect(audioContext.destination);
         
-        // Update UI elements if available
-        updateEmotionUI(soundscape.emotion);
-    } else if (response && response.detected_emotion) {
-        // Fallback to detected_emotion if cosmic_soundscape not present
-        playEmotionTrack(response.detected_emotion);
-        updateEmotionUI(response.detected_emotion);
-    }
-    
-    // Handle voice response if present
-    if (response && response.voice_url) {
-        playVoiceResponse(response.voice_url);
+        console.log('Audio context initialized successfully');
+        return true;
+    } catch (error) {
+        console.error('Failed to initialize audio context:', error);
+        return false;
     }
 }
 
 /**
- * Play the emotion track for the specified emotion
- * 
- * @param {string} emotion - The emotion to play (happy, sad, angry, calm, neutral)
+ * Play emotion track for the specified emotion
+ * @param {string} emotion - The emotion to play audio for
+ * @param {number} volume - Optional volume level (0.0 to 1.0)
+ * @param {boolean} loop - Whether to loop the track (default: true)
+ * @returns {Promise} - Resolves when track starts playing
  */
-function playEmotionTrack(emotion) {
-    // If same emotion is already playing, do nothing
-    if (currentEmotion === emotion) {
+function playEmotionTrack(emotion, volume = DEFAULT_VOLUME, loop = true) {
+    // Ensure emotion name is valid and converted to lowercase
+    emotion = emotion?.toLowerCase() || 'neutral';
+    
+    // If no matched emotion, default to neutral
+    if (!EMOTION_TRACKS[emotion]) {
+        emotion = 'neutral';
+    }
+    
+    const trackFile = EMOTION_TRACKS[emotion];
+    const trackUrl = `${BASE_AUDIO_PATH}${trackFile}`;
+    
+    console.log(`Playing emotion track for '${emotion}': ${trackFile}`);
+    
+    // Initialize audio context on demand (needed for browsers with autoplay restrictions)
+    if (!audioContext) {
+        if (!initAudioContext()) {
+            return Promise.reject('Could not initialize audio context');
+        }
+    }
+    
+    // If the requested emotion is already playing, just adjust volume
+    if (currentEmotion === emotion && currentTrack) {
+        console.log(`${emotion} track already playing, adjusting volume to ${volume}`);
+        setVolume(volume);
+        return Promise.resolve();
+    }
+    
+    // Stop current track with fade out if there is one playing
+    if (currentTrack) {
+        stopTrack(true);
+    }
+    
+    // Create and play the new track
+    return new Promise((resolve, reject) => {
+        const audio = new Audio(trackUrl);
+        audio.loop = loop;
+        audio.volume = 0;  // Start at zero volume for fade in
+        
+        // Connect to Web Audio API for more advanced sound control
+        audioSource = audioContext.createMediaElementSource(audio);
+        audioSource.connect(gainNode);
+        
+        // Set volume with fade in
+        gainNode.gain.value = 0;
+        gainNode.gain.linearRampToValueAtTime(
+            volume,
+            audioContext.currentTime + (FADE_DURATION / 1000)
+        );
+        
+        // Handle errors
+        audio.onerror = (error) => {
+            console.error(`Error playing ${emotion} track:`, error);
+            reject(error);
+        };
+        
+        // Start playback
+        audio.play().then(() => {
+            currentTrack = audio;
+            currentEmotion = emotion;
+            console.log(`Started playing ${emotion} track`);
+            resolve();
+        }).catch((error) => {
+            console.error('Error starting playback:', error);
+            
+            // Special handling for autoplay restrictions
+            if (error.name === 'NotAllowedError') {
+                console.warn('Autoplay prevented by browser. User interaction required.');
+                
+                // Create a user activation button if needed
+                createActivationButton();
+            }
+            
+            reject(error);
+        });
+    });
+}
+
+/**
+ * Stop the currently playing track
+ * @param {boolean} fadeOut - Whether to fade out gradually
+ * @returns {Promise} - Resolves when track is stopped
+ */
+function stopTrack(fadeOut = true) {
+    if (!currentTrack) {
+        return Promise.resolve();
+    }
+    
+    return new Promise((resolve) => {
+        const track = currentTrack;
+        
+        if (fadeOut && gainNode) {
+            // Fade out volume
+            gainNode.gain.linearRampToValueAtTime(
+                0,
+                audioContext.currentTime + (FADE_DURATION / 2 / 1000)
+            );
+            
+            // Stop after fade completes
+            setTimeout(() => {
+                track.pause();
+                track.currentTime = 0;
+                resolve();
+            }, FADE_DURATION / 2);
+        } else {
+            // Stop immediately
+            track.pause();
+            track.currentTime = 0;
+            resolve();
+        }
+        
+        // Clear references
+        currentTrack = null;
+        currentEmotion = null;
+    });
+}
+
+/**
+ * Set the volume of the currently playing track
+ * @param {number} volume - Volume level (0.0 to 1.0)
+ */
+function setVolume(volume) {
+    if (gainNode) {
+        gainNode.gain.linearRampToValueAtTime(
+            volume,
+            audioContext.currentTime + 0.1
+        );
+    } else if (currentTrack) {
+        currentTrack.volume = volume;
+    }
+}
+
+/**
+ * Get information about the currently playing track
+ * @returns {Object} - Track information
+ */
+function getCurrentTrackInfo() {
+    if (!currentTrack || !currentEmotion) {
+        return {
+            playing: false,
+            emotion: null,
+            track: null,
+            volume: 0
+        };
+    }
+    
+    return {
+        playing: !currentTrack.paused,
+        emotion: currentEmotion,
+        track: EMOTION_TRACKS[currentEmotion],
+        volume: gainNode ? gainNode.gain.value : currentTrack.volume
+    };
+}
+
+/**
+ * Create an activation button for browsers with autoplay restrictions
+ * This button will be displayed when autoplay is blocked
+ */
+function createActivationButton() {
+    // Check if button already exists
+    if (document.getElementById('audio-activation-button')) {
         return;
     }
     
-    // Default to neutral if unknown emotion
-    if (!EMOTION_TRACKS[emotion]) {
-        emotion = "neutral";
-    }
+    const button = document.createElement('button');
+    button.id = 'audio-activation-button';
+    button.textContent = '🔊 Enable Audio';
+    button.style.position = 'fixed';
+    button.style.bottom = '20px';
+    button.style.right = '20px';
+    button.style.zIndex = '9999';
+    button.style.padding = '10px 15px';
+    button.style.backgroundColor = 'rgba(103, 58, 183, 0.9)';
+    button.style.color = 'white';
+    button.style.border = 'none';
+    button.style.borderRadius = '5px';
+    button.style.cursor = 'pointer';
+    button.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
     
-    console.log(`Playing cosmic ambient for ${emotion} emotion`);
-    
-    // Create audio context if not already created
-    if (!audioContext) {
-        try {
-            window.AudioContext = window.AudioContext || window.webkitAudioContext;
-            audioContext = new AudioContext();
-        } catch (e) {
-            console.error("Web Audio API not supported in this browser", e);
-            return;
-        }
-    }
-    
-    // Load and play the new track
-    const audioPath = EMOTION_TRACKS[emotion];
-    const newAudio = new Audio(audioPath);
-    newAudio.loop = true;
-    newAudio.volume = 0; // Start at zero for fade in
-    
-    // When audio is ready, start playing with fade
-    newAudio.addEventListener("canplaythrough", () => {
-        // Fade out current audio if playing
-        if (currentAudio) {
-            fadeOutAudio(currentAudio, () => {
-                currentAudio.pause();
-                currentAudio = null;
-            });
+    // Add click handler
+    button.addEventListener('click', () => {
+        // Resume AudioContext (needed for Chrome)
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
         }
         
-        // Start playing new audio with fade in
-        newAudio.play()
-            .then(() => {
-                fadeInAudio(newAudio);
-                currentAudio = newAudio;
-                currentEmotion = emotion;
-            })
-            .catch(error => {
-                console.error("Error playing cosmic audio:", error);
-                
-                // Try again on user interaction (for autoplay policy)
-                document.addEventListener("click", () => {
-                    newAudio.play()
-                        .then(() => {
-                            fadeInAudio(newAudio);
-                            currentAudio = newAudio;
-                            currentEmotion = emotion;
-                        })
-                        .catch(e => console.error("Failed to play on user interaction", e));
-                }, { once: true });
-            });
+        // Try playing again
+        if (currentEmotion) {
+            playEmotionTrack(currentEmotion);
+        } else {
+            playEmotionTrack('neutral');
+        }
+        
+        // Remove the button
+        document.body.removeChild(button);
     });
     
-    newAudio.load();
+    // Add to page
+    document.body.appendChild(button);
 }
 
 /**
- * Fade in audio element
- * 
- * @param {HTMLAudioElement} audio - Audio element to fade in
+ * Handle emotion response from API
+ * @param {Object} response - API response with emotion data
  */
-function fadeInAudio(audio) {
-    if (!audio) return;
-    
-    let volume = 0;
-    const targetVolume = isMuted ? 0 : currentVolume;
-    const fadeInterval = 50; // ms
-    const step = targetVolume / (fadeTime / fadeInterval);
-    
-    const interval = setInterval(() => {
-        if (volume < targetVolume) {
-            volume = Math.min(volume + step, targetVolume);
-            audio.volume = volume;
-        } else {
-            clearInterval(interval);
-        }
-    }, fadeInterval);
-}
-
-/**
- * Fade out audio element
- * 
- * @param {HTMLAudioElement} audio - Audio element to fade out
- * @param {Function} callback - Optional callback after fade out
- */
-function fadeOutAudio(audio, callback) {
-    if (!audio) return;
-    
-    let volume = audio.volume;
-    const fadeInterval = 50; // ms
-    const step = volume / (fadeTime / fadeInterval);
-    
-    const interval = setInterval(() => {
-        if (volume > 0.01) {
-            volume = Math.max(volume - step, 0);
-            audio.volume = volume;
-        } else {
-            clearInterval(interval);
-            audio.volume = 0;
-            if (callback) callback();
-        }
-    }, fadeInterval);
-}
-
-/**
- * Play voice response audio
- * 
- * @param {string} voiceUrl - URL to the voice audio file
- */
-function playVoiceResponse(voiceUrl) {
-    // Temporarily reduce cosmic sound volume during voice playback
-    if (currentAudio) {
-        const originalVolume = currentAudio.volume;
-        currentAudio.volume = originalVolume * 0.3; // Reduce to 30%
-        
-        const voiceAudio = new Audio(voiceUrl);
-        voiceAudio.addEventListener("ended", () => {
-            // Restore original volume when voice ends
-            if (currentAudio) {
-                currentAudio.volume = originalVolume;
-            }
-        });
-        
-        voiceAudio.play().catch(error => {
-            console.error("Error playing voice response:", error);
-        });
-    } else {
-        // Just play the voice if no cosmic audio is playing
-        const voiceAudio = new Audio(voiceUrl);
-        voiceAudio.play().catch(error => {
-            console.error("Error playing voice response:", error);
-        });
+function handleEmotionResponse(response) {
+    if (response && response.primary_emotion) {
+        playEmotionTrack(response.primary_emotion);
     }
 }
 
-/**
- * Update UI elements based on emotion
- * Add this function to your project to reflect the current emotion in the UI
- * 
- * @param {string} emotion - The current emotion
- */
-function updateEmotionUI(emotion) {
-    // Get animation parameters for this emotion
-    const animation = EMOTION_ANIMATIONS[emotion] || EMOTION_ANIMATIONS.neutral;
-    
-    // Update UI elements if they exist
-    const emotionIndicator = document.getElementById('emotion-indicator');
-    if (emotionIndicator) {
-        emotionIndicator.className = `emotion-indicator ${emotion}`;
-        emotionIndicator.setAttribute('data-emotion', emotion);
-    }
-    
-    const emotionLabel = document.getElementById('emotion-label');
-    if (emotionLabel) {
-        emotionLabel.textContent = emotion.charAt(0).toUpperCase() + emotion.slice(1);
-    }
-    
-    const emotionPulse = document.getElementById('emotion-pulse');
-    if (emotionPulse) {
-        emotionPulse.style.backgroundColor = animation.color;
-        emotionPulse.className = `emotion-pulse ${animation.pulseSpeed} ${animation.intensity}`;
-    }
-    
-    // Dispatch custom event for other components to react
-    document.dispatchEvent(new CustomEvent('emotionChanged', { 
-        detail: { emotion, animation } 
-    }));
-}
-
-/**
- * Set volume for all cosmic sounds
- * 
- * @param {number} volume - Volume level (0.0 to 1.0)
- */
-function setCosmicVolume(volume) {
-    // Ensure volume is between 0 and 1
-    volume = Math.max(0, Math.min(1, volume));
-    currentVolume = volume;
-    
-    // Apply to current audio if playing and not muted
-    if (currentAudio && !isMuted) {
-        currentAudio.volume = volume;
-    }
-}
-
-/**
- * Mute or unmute cosmic sounds
- * 
- * @param {boolean} mute - Whether to mute (true) or unmute (false)
- */
-function muteCosmicSounds(mute) {
-    isMuted = mute;
-    
-    if (currentAudio) {
-        if (mute) {
-            fadeOutAudio(currentAudio);
-        } else {
-            fadeInAudio(currentAudio);
-        }
-    }
-}
-
-/**
- * Stop all cosmic sounds
- */
-function stopCosmicSounds() {
-    if (currentAudio) {
-        fadeOutAudio(currentAudio, () => {
-            currentAudio.pause();
-            currentAudio = null;
-            currentEmotion = null;
-        });
-    }
-}
-
-// Export functions for global use
-window.handleEmotionResponse = handleEmotionResponse;
+// Export functions for global access
 window.playEmotionTrack = playEmotionTrack;
-window.setCosmicVolume = setCosmicVolume;
-window.muteCosmicSounds = muteCosmicSounds;
-window.stopCosmicSounds = stopCosmicSounds;
+window.stopEmotionTrack = stopTrack;
+window.setEmotionVolume = setVolume;
+window.getEmotionTrackInfo = getCurrentTrackInfo;
+window.handleEmotionResponse = handleEmotionResponse;

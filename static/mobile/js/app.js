@@ -1,838 +1,635 @@
-// ApiService class - handles API communication
-class ApiService {
-  // Emotion data API methods
-  static async fetchEmotionTimeline(days = 7, sessionOnly = false, sessionId = null) {
-    let url = '/api/emotion-data?days=' + days;
+/**
+ * Mashaaer Application Javascript
+ * Handles interaction, UI elements, and API communication
+ */
 
-    if (sessionOnly && sessionId) {
-      url += '&session_only=true&session_id=' + sessionId;
-    }
+// Global state
+const appState = {
+  activeTab: 'home',
+  currentEmotion: 'neutral',
+  user: {
+    id: localStorage.getItem('user_id') || generateUserId(),
+    name: localStorage.getItem('user_name') || '',
+    preferences: JSON.parse(localStorage.getItem('user_preferences') || '{}')
+  },
+  messages: [],
+  recording: false,
+  cameraActive: false,
+  apiConnected: false
+};
 
-    try {
-      const response = await fetch(url);
+// DOM Elements
+let elements = {};
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch emotion timeline');
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching emotion timeline:', error);
-      throw error;
-    }
-  }
-
-  // Face recognition API methods
-  static async getFaceProfiles() {
-    try {
-      const response = await fetch('/api/face-recognition-data');
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch face profiles');
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching face profiles:', error);
-      throw error;
-    }
-  }
-
-  // Voice API methods
-  static async processVoiceInput(audioBlob) {
-    try {
-      const formData = new FormData();
-      formData.append('audio', audioBlob);
-
-      const response = await fetch('/api/listen', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to process voice input');
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error processing voice input:', error);
-      throw error;
-    }
-  }
-
-  // Text-to-speech API methods
-  static async speakText(text, voice = 'default', language = 'en-US') {
-    try {
-      const response = await fetch('/api/speak', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          text: text,
-          voice: voice,
-          language: language
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate speech');
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error generating speech:', error);
-      throw error;
-    }
-  }
-
-  // User settings API methods
-  static async getUserSettings() {
-    try {
-      const response = await fetch('/api/user/settings');
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch user settings');
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching user settings:', error);
-      throw error;
-    }
-  }
-
-  // SMS notification API methods
-  static async sendSmsAlert(phoneNumber, message) {
-    try {
-      const response = await fetch('/api/send-sms-alert', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          phone_number: phoneNumber,
-          message: message
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to send SMS alert');
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error sending SMS alert:', error);
-      throw error;
-    }
-  }
-}
-
-// VoiceRecorder class - handles voice recording and API communication
-class VoiceRecorder {
-  constructor(options = {}) {
-    this.options = {
-      onStart: options.onStart || function() {},
-      onStop: options.onStop || function() {},
-      onResult: options.onResult || function() {},
-      onError: options.onError || function() {},
-      maxRecordingTime: options.maxRecordingTime || 10000 // 10 seconds by default
-    };
-
-    this.mediaRecorder = null;
-    this.audioChunks = [];
-    this.isRecording = false;
-    this.stream = null;
-    this.timeoutId = null;
-  }
-
-  // Start recording
-  start() {
-    if (this.isRecording) {
-      return;
-    }
-
-    this.audioChunks = [];
-
-    // Get user media (microphone)
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => {
-        this.stream = stream;
-        this.mediaRecorder = new MediaRecorder(stream);
-
-        // Set up event handlers
-        this.mediaRecorder.addEventListener('dataavailable', event => {
-          this.audioChunks.push(event.data);
-        });
-
-        this.mediaRecorder.addEventListener('stop', () => {
-          this._processRecording();
-        });
-
-        // Start recording
-        this.mediaRecorder.start();
-        this.isRecording = true;
-
-        // Call onStart callback
-        this.options.onStart();
-
-        // Set timeout for maximum recording duration
-        this.timeoutId = setTimeout(() => {
-          if (this.isRecording) {
-            this.stop();
-          }
-        }, this.options.maxRecordingTime);
-      })
-      .catch(error => {
-        this.options.onError(error);
-      });
-  }
-
-  // Stop recording
-  stop() {
-    if (!this.isRecording || !this.mediaRecorder) {
-      return;
-    }
-
-    // Clear timeout
-    if (this.timeoutId) {
-      clearTimeout(this.timeoutId);
-      this.timeoutId = null;
-    }
-
-    // Stop recording
-    this.mediaRecorder.stop();
-    this.isRecording = false;
-
-    // Stop all tracks in the stream
-    if (this.stream) {
-      this.stream.getTracks().forEach(track => track.stop());
-      this.stream = null;
-    }
-
-    // Call onStop callback
-    this.options.onStop();
-  }
-
-  // Process the recording and send to API
-  _processRecording() {
-    // Create audio blob from chunks
-    const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-
-    // Use ApiService to process voice input
-    ApiService.processVoiceInput(audioBlob)
-      .then(data => {
-        if (data.success) {
-          // Call onResult callback with the data
-          this.options.onResult({
-            success: true,
-            text: data.text,
-            emotion: data.emotion,
-            intent: data.intent
-          });
-        } else {
-          throw new Error(data.error || 'Voice recognition failed');
-        }
-      })
-      .catch(error => {
-        console.error('Error in voice recognition:', error);
-        this.options.onError(error);
-      });
-  }
-}
-
+/**
+ * Initialize the application
+ */
 document.addEventListener('DOMContentLoaded', function() {
-  // DOM elements
-  const userStatus = document.getElementById('userStatus');
-  const aiStatusText = document.getElementById('aiStatusText');
-  const voiceButton = document.getElementById('voiceButton');
-  const cameraButton = document.getElementById('cameraButton');
-  const textButton = document.getElementById('textButton');
-  const messagesContainer = document.getElementById('messages');
-  const textInputModal = document.getElementById('textInputModal');
-  const closeTextModal = document.getElementById('closeTextModal');
-  const textInput = document.getElementById('textInput');
-  const sendTextButton = document.getElementById('sendTextButton');
-  const cameraView = document.getElementById('cameraView');
-  const closeCameraButton = document.getElementById('closeCameraButton');
-  const cameraStream = document.getElementById('cameraStream');
-  const takePictureButton = document.getElementById('takePictureButton');
-  const voiceRecordingOverlay = document.getElementById('voiceRecordingOverlay');
-  const stopRecordingButton = document.getElementById('stopRecordingButton');
-  const errorModal = document.getElementById('errorModal');
-  const errorMessage = document.getElementById('errorMessage');
-  const closeErrorModal = document.getElementById('closeErrorModal');
-  const errorOkButton = document.getElementById('errorOkButton');
-  const tabs = document.querySelectorAll('.tab');
+  // Cache DOM elements
+  cacheElements();
+  
+  // Set up event listeners
+  setupEventListeners();
+  
+  // Load messages from local storage
+  loadMessages();
+  
+  // Initialize user interface
+  initializeUI();
+  
+  // Check API connection
+  checkApiConnection();
+});
 
-  // App state
-  let appState = {
-    connected: false,
-    cameraActive: false,
-    recordingVoice: false,
-    mediaRecorder: null,
-    stream: null,
-    voiceRecorder: null,
-    currentTab: 'home',
-    sessionId: null
+/**
+ * Cache DOM elements for faster access
+ */
+function cacheElements() {
+  elements = {
+    messages: document.getElementById('messages'),
+    textInput: document.getElementById('textInput'),
+    sendTextButton: document.getElementById('sendTextButton'),
+    voiceButton: document.getElementById('voiceButton'),
+    cameraButton: document.getElementById('cameraButton'),
+    textButton: document.getElementById('textButton'),
+    textInputModal: document.getElementById('textInputModal'),
+    closeTextModal: document.getElementById('closeTextModal'),
+    cameraView: document.getElementById('cameraView'),
+    cameraStream: document.getElementById('cameraStream'),
+    closeCameraButton: document.getElementById('closeCameraButton'),
+    takePictureButton: document.getElementById('takePictureButton'),
+    voiceRecordingOverlay: document.getElementById('voiceRecordingOverlay'),
+    stopRecordingButton: document.getElementById('stopRecordingButton'),
+    tabs: document.querySelectorAll('.tab'),
+    aiStatusText: document.getElementById('aiStatusText'),
+    personalityType: document.getElementById('personalityType'),
+    errorModal: document.getElementById('errorModal'),
+    errorMessage: document.getElementById('errorMessage'),
+    closeErrorModal: document.getElementById('closeErrorModal'),
+    errorOkButton: document.getElementById('errorOkButton')
   };
+}
 
-  // Initialize connection with the server
-  initializeApp();
-
-  // Button event listeners
-  voiceButton.addEventListener('click', startVoiceRecording);
-  cameraButton.addEventListener('click', startCamera);
-  textButton.addEventListener('click', showTextInput);
-  closeTextModal.addEventListener('click', hideTextInput);
-  sendTextButton.addEventListener('click', sendTextMessage);
-  closeCameraButton.addEventListener('click', stopCamera);
-  takePictureButton.addEventListener('click', takePicture);
-  stopRecordingButton.addEventListener('click', stopVoiceRecording);
-  closeErrorModal.addEventListener('click', hideErrorModal);
-  errorOkButton.addEventListener('click', hideErrorModal);
-
+/**
+ * Set up event listeners for all interactive elements
+ */
+function setupEventListeners() {
+  // Text input modal
+  elements.textButton.addEventListener('click', () => {
+    elements.textInputModal.style.display = 'block';
+    elements.textInput.focus();
+  });
+  
+  elements.closeTextModal.addEventListener('click', () => {
+    elements.textInputModal.style.display = 'none';
+  });
+  
+  elements.sendTextButton.addEventListener('click', sendTextMessage);
+  
+  elements.textInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendTextMessage();
+    }
+  });
+  
+  // Camera functionality
+  elements.cameraButton.addEventListener('click', openCamera);
+  elements.closeCameraButton.addEventListener('click', closeCamera);
+  elements.takePictureButton.addEventListener('click', takePicture);
+  
+  // Voice recording
+  elements.voiceButton.addEventListener('click', startVoiceRecording);
+  elements.stopRecordingButton.addEventListener('click', stopVoiceRecording);
+  
   // Tab navigation
-  tabs.forEach(tab => {
-    tab.addEventListener('click', function() {
-      const tabName = this.getAttribute('data-tab');
-      changeTab(tabName);
+  elements.tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabName = tab.getAttribute('data-tab');
+      switchTab(tabName);
     });
   });
+  
+  // Error modal
+  elements.closeErrorModal.addEventListener('click', () => {
+    elements.errorModal.style.display = 'none';
+  });
+  
+  elements.errorOkButton.addEventListener('click', () => {
+    elements.errorModal.style.display = 'none';
+  });
+}
 
-  // Initialize the application
-  function initializeApp() {
-    // Check server connection
-    checkServerStatus()
-      .then(status => {
-        if (status.online) {
-          setConnected(true);
-          aiStatusText.textContent = 'Connected';
-
-          // Get the session ID
-          appState.sessionId = status.session.id;
-
-          // Load recent messages
-          loadRecentMessages();
-
-          // Initialize voice recorder
-          initializeVoiceRecorder();
-        } else {
-          setConnected(false);
-          aiStatusText.textContent = 'Server Offline';
-          showError('Could not connect to Robin AI server. Please try again later.');
-        }
-      })
-      .catch(error => {
-        console.error('Error initializing app:', error);
-        setConnected(false);
-        aiStatusText.textContent = 'Connection Error';
-        showError('Could not connect to Robin AI server. Please check your internet connection.');
-      });
+/**
+ * Initialize user interface elements
+ */
+function initializeUI() {
+  // Set current emotion display
+  updateEmotionDisplay('neutral');
+  
+  // Set active tab
+  switchTab('home');
+  
+  // Set user name if available
+  if (appState.user.name) {
+    console.log(`Welcome back, ${appState.user.name}!`);
   }
+}
 
-  // Check server status
-  function checkServerStatus() {
-    return fetch('/api/status')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Server status check failed');
-        }
-        return response.json();
-      });
+/**
+ * Check API connection status
+ */
+async function checkApiConnection() {
+  try {
+    const status = await apiService.getStatus();
+    
+    if (status && status.success) {
+      appState.apiConnected = true;
+      elements.aiStatusText.textContent = 'Connected';
+      document.querySelector('.status-dot').classList.add('online');
+      
+      // Log API capabilities
+      console.log('API capabilities:', status.capabilities);
+    } else {
+      appState.apiConnected = false;
+      elements.aiStatusText.textContent = 'Offline Mode';
+      document.querySelector('.status-dot').classList.add('offline');
+    }
+  } catch (error) {
+    console.error('API connection error:', error);
+    appState.apiConnected = false;
+    elements.aiStatusText.textContent = 'Connection Error';
+    document.querySelector('.status-dot').classList.add('error');
   }
+}
 
-  // Load recent messages
-  function loadRecentMessages() {
-    fetch('/api/recent-conversations?session_only=true&limit=10')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to load messages');
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data.conversations && data.conversations.length > 0) {
-          // Clear existing messages
-          messagesContainer.innerHTML = '';
+/**
+ * Generate a unique user ID
+ */
+function generateUserId() {
+  const id = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  localStorage.setItem('user_id', id);
+  return id;
+}
 
-          // Add messages in chronological order (oldest first)
-          data.conversations.reverse().forEach(conversation => {
-            addMessage(conversation.user_input, 'user', new Date(conversation.timestamp));
-            addMessage(conversation.response, 'assistant', new Date(conversation.timestamp));
-          });
-        } else {
-          // Add a welcome message if no conversation history
-          addMessage('Hello! How can I assist you today?', 'assistant', new Date());
-        }
-      })
-      .catch(error => {
-        console.error('Error loading messages:', error);
-        // Add a fallback message
-        addMessage('Hello! How can I assist you today?', 'assistant', new Date());
-      });
+/**
+ * Switch between tabs
+ */
+function switchTab(tabName) {
+  appState.activeTab = tabName;
+  
+  // Update active tab UI
+  elements.tabs.forEach(tab => {
+    if (tab.getAttribute('data-tab') === tabName) {
+      tab.classList.add('active');
+    } else {
+      tab.classList.remove('active');
+    }
+  });
+  
+  // Handle tab-specific actions
+  switch (tabName) {
+    case 'home':
+      // Already on home tab
+      break;
+    case 'emotions':
+      // Redirect to emotions page
+      window.location.href = '/mobile/emotions';
+      break;
+    case 'profiles':
+      // Redirect to profiles page
+      window.location.href = '/mobile/profiles';
+      break;
+    case 'settings':
+      // Redirect to settings page
+      window.location.href = '/mobile/settings';
+      break;
   }
+}
 
-  // Initialize voice recorder
-  function initializeVoiceRecorder() {
-    appState.voiceRecorder = new VoiceRecorder({
-      onStart: () => {
-        console.log('Voice recording started');
-      },
-      onStop: () => {
-        console.log('Voice recording stopped');
-      },
-      onResult: (data) => {
-        console.log('Voice recognition result:', data);
-        if (data.success && data.text) {
-          // Hide the recording overlay
-          voiceRecordingOverlay.classList.remove('visible');
-          appState.recordingVoice = false;
+/**
+ * Send a text message
+ */
+function sendTextMessage() {
+  const text = elements.textInput.value.trim();
+  
+  if (!text) {
+    return;
+  }
+  
+  // Add user message to UI
+  addMessage('user', text);
+  
+  // Clear input
+  elements.textInput.value = '';
+  
+  // Close modal
+  elements.textInputModal.style.display = 'none';
+  
+  // Send to API
+  processUserInput(text);
+}
 
-          // Add user message to conversation
-          addMessage(data.text, 'user', new Date());
-
-          // Get response from Robin AI (emotion will be provided by the server)
-          processUserInput(data.text, data.emotion);
-        } else {
-          showError('Sorry, I could not understand what you said. Please try again.');
-        }
-      },
-      onError: (error) => {
-        console.error('Voice recognition error:', error);
-        voiceRecordingOverlay.classList.remove('visible');
-        appState.recordingVoice = false;
-        showError('An error occurred while processing your voice. Please try again.');
-      },
-      maxRecordingTime: 10000 // 10 seconds max
+/**
+ * Process user input through the API
+ */
+async function processUserInput(text, emotion = null) {
+  try {
+    // Show typing indicator
+    showTypingIndicator();
+    
+    // Call API
+    const response = await apiService.sendMessage({
+      message: text,
+      emotion: emotion,
+      user_id: appState.user.id
     });
-  }
-
-  // Start voice recording
-  function startVoiceRecording() {
-    if (!appState.connected) {
-      showError('Cannot record voice while offline. Please check your connection.');
-      return;
-    }
-
-    if (appState.recordingVoice) {
-      return; // Already recording
-    }
-
-    // Show recording overlay
-    voiceRecordingOverlay.classList.add('visible');
-    appState.recordingVoice = true;
-
-    // Start recording
-    try {
-      appState.voiceRecorder.start();
-    } catch (error) {
-      console.error('Error starting voice recorder:', error);
-      voiceRecordingOverlay.classList.remove('visible');
-      appState.recordingVoice = false;
-      showError('Could not access microphone. Please check your microphone permissions.');
-    }
-  }
-
-  // Stop voice recording
-  function stopVoiceRecording() {
-    if (appState.recordingVoice) {
-      appState.voiceRecorder.stop();
-      voiceRecordingOverlay.classList.remove('visible');
-      appState.recordingVoice = false;
-    }
-  }
-
-  // Start camera
-  function startCamera() {
-    if (appState.cameraActive) {
-      return; // Already active
-    }
-
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      showError('Camera access is not supported by your browser.');
-      return;
-    }
-
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-      .then(stream => {
-        appState.stream = stream;
-        cameraStream.srcObject = stream;
-        cameraView.classList.add('visible');
-        appState.cameraActive = true;
-      })
-      .catch(error => {
-        console.error('Error accessing camera:', error);
-        showError('Could not access camera. Please check your camera permissions.');
-      });
-  }
-
-  // Stop camera
-  function stopCamera() {
-    if (appState.cameraActive && appState.stream) {
-      // Stop all tracks in the stream
-      appState.stream.getTracks().forEach(track => track.stop());
-      cameraStream.srcObject = null;
-      appState.stream = null;
-    }
-
-    cameraView.classList.remove('visible');
-    appState.cameraActive = false;
-  }
-
-  // Take picture
-  function takePicture() {
-    if (!appState.cameraActive) {
-      return;
-    }
-
-    try {
-      // Create a canvas element to capture the image
-      const canvas = document.createElement('canvas');
-      canvas.width = cameraStream.videoWidth;
-      canvas.height = cameraStream.videoHeight;
-      const context = canvas.getContext('2d');
-
-      // Draw the video frame to the canvas
-      context.drawImage(cameraStream, 0, 0, canvas.width, canvas.height);
-
-      // Convert to blob for upload
-      canvas.toBlob(blob => {
-        // Stop the camera
-        stopCamera();
-
-        // Upload image for face detection
-        uploadImageForDetection(blob);
-      }, 'image/jpeg');
-    } catch (error) {
-      console.error('Error taking picture:', error);
-      showError('Failed to capture image. Please try again.');
-    }
-  }
-
-  // Upload image for face detection
-  function uploadImageForDetection(blob) {
-    if (!appState.connected) {
-      showError('Cannot process image while offline. Please check your connection.');
-      return;
-    }
-
-    // Create form data
-    const formData = new FormData();
-    formData.append('image', blob, 'image.jpg');
-
-    // Send to API
-    fetch('/api/detect-face', {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Face detection failed');
+    
+    // Hide typing indicator
+    hideTypingIndicator();
+    
+    if (response && response.success) {
+      // Add AI response to UI
+      addMessage('ai', response.response);
+      
+      // Update emotion display if detected
+      if (response.detected_emotion) {
+        updateEmotionDisplay(response.detected_emotion);
       }
-      return response.json();
-    })
-    .then(data => {
-      if (data.success) {
-        const faceCount = data.result.count || 0;
-
-        if (faceCount > 0) {
-          // Add user message
-          addMessage('📷 Image captured with ' + faceCount + ' face(s) detected', 'user', new Date());
-
-          // Process face detection result
-          processFaceDetection(data.result);
-        } else {
-          addMessage('📷 Image captured (no faces detected)', 'user', new Date());
-          addMessage('I did not detect any faces in the image. Would you like me to analyze something else?', 'assistant', new Date());
-        }
-      } else {
-        throw new Error(data.error || 'Face detection failed');
+      
+      // Handle audio response if present
+      if (response.audio_url) {
+        playAudioResponse(response.audio_url);
       }
-    })
-    .catch(error => {
-      console.error('Error in face detection:', error);
-      showError('Could not analyze the image. Please try again.');
-    });
-  }
-
-  // Process face detection result
-  function processFaceDetection(result) {
-    // Start constructing the response message
-    let responseText = '';
-
-    if (result.faces && result.faces.length > 0) {
-      // Check if any faces were recognized
-      const recognizedFaces = result.faces.filter(face => face.recognized);
-
-      if (recognizedFaces.length > 0) {
-        // Build greeting for recognized faces
-        const names = recognizedFaces.map(face => face.name);
-        const uniqueNames = [...new Set(names)];
-
-        if (uniqueNames.length === 1) {
-          responseText = `Hello, ${uniqueNames[0]}! `;
-
-          // Add emotion if available
-          const emotion = recognizedFaces[0].emotion;
-          if (emotion && emotion !== 'neutral') {
-            responseText += `You seem ${emotion} today. `;
+      
+      // Handle cosmic sound
+      if (response.detected_emotion) {
+        try {
+          if (typeof playEmotionTrack === 'function') {
+            playEmotionTrack(response.detected_emotion);
           }
-        } else {
-          // Multiple people recognized
-          responseText = `Hello, ${uniqueNames.join(' and ')}! `;
+        } catch (e) {
+          console.log('Cosmic sound system not available', e);
         }
-
-        responseText += 'How can I assist you today?';
-      } else {
-        // Faces detected but not recognized
-        responseText = `I see ${result.faces.length} ${result.faces.length === 1 ? 'person' : 'people'}, but I don't recognize ${result.faces.length === 1 ? 'them' : 'any of them'}. Would you like to add ${result.faces.length === 1 ? 'this person' : 'these people'} to my recognition database?`;
+      }
+      
+      // Process any additional parameters
+      if (response.params) {
+        processResponseParams(response.params);
       }
     } else {
-      // Fallback message
-      responseText = 'I processed your image, but I couldn\'t find any clear face details. Would you like me to try again?';
+      // Show error
+      showError('Failed to get response from AI', response?.error || 'Unknown error');
     }
-
-    // Add the assistant message
-    addMessage(responseText, 'assistant', new Date());
+  } catch (error) {
+    hideTypingIndicator();
+    showError('Error communicating with the server', error.message);
+    console.error('API error:', error);
+    
+    // Add fallback response in offline mode
+    addMessage('ai', 'I seem to be experiencing connectivity issues. Please try again later.');
   }
+}
 
-  // Show text input modal
-  function showTextInput() {
-    textInputModal.classList.add('visible');
-    textInput.focus();
-  }
+/**
+ * Update the emotion display
+ */
+function updateEmotionDisplay(emotion) {
+  appState.currentEmotion = emotion;
+  elements.personalityType.textContent = emotion.charAt(0).toUpperCase() + emotion.slice(1);
+  
+  // Update UI based on emotion
+  const emotionClasses = ['happy', 'sad', 'angry', 'neutral', 'calm', 'anxious', 'tired', 'excited'];
+  
+  elements.personalityType.classList.remove(...emotionClasses);
+  elements.personalityType.classList.add(emotion);
+}
 
-  // Hide text input modal
-  function hideTextInput() {
-    textInputModal.classList.remove('visible');
-    textInput.value = '';
-  }
-
-  // Send text message
-  function sendTextMessage() {
-    const text = textInput.value.trim();
-
-    if (!text) {
-      return;
-    }
-
-    if (!appState.connected) {
-      showError('Cannot send message while offline. Please check your connection.');
-      return;
-    }
-
-    // Add user message
-    addMessage(text, 'user', new Date());
-
-    // Clear input
-    textInput.value = '';
-
-    // Hide modal
-    hideTextInput();
-
-    // Process user input
-    processUserInput(text);
-  }
-
-  // Process user input
-  function processUserInput(text, emotion) {
-    // Create a form data object with text input
-    const formData = new FormData();
-    formData.append('text', text);
-
-    if (emotion) {
-      formData.append('emotion', emotion);
-    }
-
-    // Use ApiService to process the input
-    ApiService.processVoiceInput(formData)
-      .then(data => {
-        if (data.success) {
-          // Get response from the server
-          getAIResponse(text, data.emotion, data.intent);
-        } else {
-          throw new Error(data.error || 'Error processing input');
-        }
-      })
-      .catch(error => {
-        console.error('Error sending user input:', error);
-        addMessage('Sorry, I encountered an error processing your request. Please try again.', 'assistant', new Date());
-      });
-  }
-
-  // Get AI response
-  function getAIResponse(userInput, emotion, intent) {
-    // Update status
-    aiStatusText.textContent = 'Thinking...';
-
-    // Use the contextual response API
-    fetch('/api/contextual-response', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        text: userInput,
-        emotion: emotion,
-        intent: intent
-      })
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Error getting contextual response');
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.success) {
-        // Get the contextual response
-        const responseText = data.response;
-
-        // Add the response message to the chat
-        addMessage(responseText, 'assistant', new Date());
-
-        // Reset status
-        aiStatusText.textContent = 'Connected';
-
-        // Update personality display
-        const personalityType = document.getElementById('personalityType');
-        if (personalityType && data.personality) {
-          // Capitalize first letter of personality 
-          const formattedPersonality = data.personality.charAt(0).toUpperCase() + data.personality.slice(1);
-          personalityType.textContent = formattedPersonality;
-
-          // Add a subtle visual effect to show personality change
-          personalityType.classList.add('highlight');
-          setTimeout(() => {
-            personalityType.classList.remove('highlight');
-          }, 1000);
-        }
-
-        // Now play the response using TTS with ApiService
-        ApiService.speakText(responseText, data.voice || 'default', data.language || 'en-US')
-          .then(ttsData => {
-            if (ttsData.success && ttsData.audio_path) {
-              playAudio(ttsData.audio_path);
-            }
-          })
-          .catch(error => {
-            console.error('Error with TTS:', error);
-          });
-      } else {
-        throw new Error(data.error || 'Error getting response');
-      }
-    })
-    .catch(error => {
-      console.error('Error getting AI response:', error);
-      addMessage('Sorry, I encountered an error generating a response. Please try again.', 'assistant', new Date());
-      aiStatusText.textContent = 'Connected';
+/**
+ * Open camera interface
+ */
+async function openCamera() {
+  try {
+    elements.cameraView.style.display = 'flex';
+    appState.cameraActive = true;
+    
+    const stream = await navigator.mediaDevices.getUserMedia({ 
+      video: { facingMode: 'user' }, 
+      audio: false 
     });
+    
+    elements.cameraStream.srcObject = stream;
+  } catch (error) {
+    closeCamera();
+    showError('Camera Access Error', 'Could not access your camera. Please check permissions and try again.');
+    console.error('Camera error:', error);
   }
+}
 
-  // Play audio
-  function playAudio(audioPath) {
-    const audio = new Audio(audioPath);
+/**
+ * Close camera interface
+ */
+function closeCamera() {
+  if (elements.cameraStream.srcObject) {
+    elements.cameraStream.srcObject.getTracks().forEach(track => track.stop());
+    elements.cameraStream.srcObject = null;
+  }
+  
+  elements.cameraView.style.display = 'none';
+  appState.cameraActive = false;
+}
+
+/**
+ * Take a picture for emotion analysis
+ */
+async function takePicture() {
+  try {
+    // Create canvas for screenshot
+    const canvas = document.createElement('canvas');
+    canvas.width = elements.cameraStream.videoWidth;
+    canvas.height = elements.cameraStream.videoHeight;
+    const ctx = canvas.getContext('2d');
+    
+    // Draw video frame to canvas
+    ctx.drawImage(elements.cameraStream, 0, 0);
+    
+    // Get image data
+    const imageData = canvas.toDataURL('image/jpeg');
+    
+    // Close camera view
+    closeCamera();
+    
+    // Show loading message
+    addMessage('user', 'Analyzing facial expression...');
+    showTypingIndicator();
+    
+    // Send to API for analysis
+    const response = await apiService.analyzeImage(imageData);
+    
+    // Hide typing indicator
+    hideTypingIndicator();
+    
+    if (response && response.success) {
+      // Update emotion
+      if (response.detected_emotion) {
+        updateEmotionDisplay(response.detected_emotion);
+      }
+      
+      // Show response
+      addMessage('ai', response.response);
+      
+      // Handle cosmic sound
+      if (response.detected_emotion && typeof playEmotionTrack === 'function') {
+        playEmotionTrack(response.detected_emotion);
+      }
+    } else {
+      showError('Face Analysis Error', response?.error || 'Could not analyze facial expression');
+      addMessage('ai', 'I had trouble analyzing your facial expression. Could you try again or tell me how you feel?');
+    }
+  } catch (error) {
+    hideTypingIndicator();
+    showError('Face Analysis Error', error.message);
+    console.error('Face analysis error:', error);
+    addMessage('ai', 'I encountered an error while analyzing your facial expression. Could you tell me how you feel instead?');
+  }
+}
+
+/**
+ * Start voice recording
+ */
+function startVoiceRecording() {
+  elements.voiceRecordingOverlay.style.display = 'flex';
+  appState.recording = true;
+  
+  // TODO: Implement actual voice recording
+  // This would use the MediaRecorder API
+  
+  console.log('Voice recording started');
+}
+
+/**
+ * Stop voice recording and process audio
+ */
+function stopVoiceRecording() {
+  elements.voiceRecordingOverlay.style.display = 'none';
+  appState.recording = false;
+  
+  // TODO: Implement actual voice recording stop and processing
+  // This would send the recorded audio to the server
+  
+  console.log('Voice recording stopped');
+  
+  // Simulate voice processing (remove in production)
+  addMessage('user', '[Voice input: "I feel happy today"]');
+  showTypingIndicator();
+  
+  setTimeout(() => {
+    hideTypingIndicator();
+    addMessage('ai', 'I hear the happiness in your voice! That\'s wonderful. Would you like to share what made your day bright?');
+    updateEmotionDisplay('happy');
+    
+    // Play happy cosmic sound
+    if (typeof playEmotionTrack === 'function') {
+      playEmotionTrack('happy');
+    }
+  }, 1500);
+}
+
+/**
+ * Add a message to the conversation
+ */
+function addMessage(sender, text) {
+  const timestamp = new Date();
+  
+  // Create message object
+  const message = {
+    id: Date.now().toString(),
+    sender,
+    text,
+    timestamp
+  };
+  
+  // Add to state
+  appState.messages.push(message);
+  
+  // Save to local storage
+  saveMessages();
+  
+  // Add to UI
+  const messageElement = document.createElement('div');
+  messageElement.className = `message message-${sender}`;
+  messageElement.innerHTML = `
+    <div class="message-text">${text}</div>
+    <div class="message-time">${formatTime(timestamp)}</div>
+  `;
+  
+  elements.messages.appendChild(messageElement);
+  
+  // Scroll to bottom
+  elements.messages.scrollTop = elements.messages.scrollHeight;
+}
+
+/**
+ * Show typing indicator in chat
+ */
+function showTypingIndicator() {
+  const typingElement = document.createElement('div');
+  typingElement.className = 'message message-ai typing-indicator';
+  typingElement.id = 'typingIndicator';
+  typingElement.innerHTML = `
+    <div class="typing-dots">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  `;
+  
+  elements.messages.appendChild(typingElement);
+  elements.messages.scrollTop = elements.messages.scrollHeight;
+}
+
+/**
+ * Hide typing indicator
+ */
+function hideTypingIndicator() {
+  const typingElement = document.getElementById('typingIndicator');
+  if (typingElement) {
+    elements.messages.removeChild(typingElement);
+  }
+}
+
+/**
+ * Play audio response from URL
+ */
+function playAudioResponse(audioUrl) {
+  try {
+    const audio = new Audio(audioUrl);
     audio.play().catch(error => {
-      console.error('Error playing audio:', error);
-    });
-  }
-
-  // Add message to conversation
-  function addMessage(text, sender, timestamp) {
-    const messageElement = document.createElement('div');
-    messageElement.className = `message ${sender}`;
-
-    const messageText = document.createElement('div');
-    messageText.className = 'message-text';
-    messageText.textContent = text;
-
-    const messageTime = document.createElement('div');
-    messageTime.className = 'message-time';
-    messageTime.textContent = formatTime(timestamp);
-
-    messageElement.appendChild(messageText);
-    messageElement.appendChild(messageTime);
-
-    messagesContainer.appendChild(messageElement);
-
-    // Scroll to bottom
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-  }
-
-  // Format time
-  function formatTime(timestamp) {
-    return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-
-  // Change tab
-  function changeTab(tabName) {
-    if (tabName === appState.currentTab) {
-      return;
-    }
-
-    // Update active tab
-    tabs.forEach(tab => {
-      if (tab.getAttribute('data-tab') === tabName) {
-        tab.classList.add('active');
-      } else {
-        tab.classList.remove('active');
+      console.error('Audio playback error:', error);
+      
+      // Create activation button for browsers with autoplay restrictions
+      if (error.name === 'NotAllowedError') {
+        createAudioActivationButton(audioUrl);
       }
     });
-
-    // Update current tab
-    appState.currentTab = tabName;
-
-    // Handle tab-specific actions
-    switch (tabName) {
-      case 'home':
-        // Navigate to home view
-        window.location.href = '/mobile';
-        break;
-      case 'emotions':
-        // Navigate to emotions page
-        window.location.href = '/mobile/emotions';
-        break;
-      case 'profiles':
-        // Navigate to profiles page
-        window.location.href = '/mobile/profiles';
-        break;
-      case 'settings':
-        // Navigate to settings page
-        window.location.href = '/mobile/settings';
-        break;
-      case 'help':
-        // Navigate to help page
-        window.location.href = '/mobile/help';
-        break;
-      case 'contact':
-        // Navigate to contact page
-        window.location.href = '/mobile/contact';
-        break;
-    }
+  } catch (error) {
+    console.error('Error playing audio response:', error);
   }
+}
 
-  // Set connection status
-  function setConnected(connected) {
-    appState.connected = connected;
-
-    if (connected) {
-      userStatus.classList.add('online');
-      userStatus.querySelector('.status-text').textContent = 'Online';
-    } else {
-      userStatus.classList.remove('online');
-      userStatus.querySelector('.status-text').textContent = 'Offline';
-    }
+/**
+ * Create audio activation button for browsers with autoplay restrictions
+ */
+function createAudioActivationButton(audioUrl) {
+  // Check if button already exists
+  if (document.getElementById('audio-activation-button')) {
+    return;
   }
+  
+  const button = document.createElement('button');
+  button.id = 'audio-activation-button';
+  button.textContent = '🔊 Play Response';
+  button.style.position = 'fixed';
+  button.style.bottom = '80px';
+  button.style.right = '20px';
+  button.style.zIndex = '9999';
+  button.style.padding = '10px 15px';
+  button.style.backgroundColor = 'rgba(103, 58, 183, 0.9)';
+  button.style.color = 'white';
+  button.style.border = 'none';
+  button.style.borderRadius = '5px';
+  button.style.cursor = 'pointer';
+  button.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+  
+  // Add click handler
+  button.addEventListener('click', () => {
+    const audio = new Audio(audioUrl);
+    audio.play();
+    document.body.removeChild(button);
+  });
+  
+  // Add to page
+  document.body.appendChild(button);
+}
 
-  // Show error modal
-  function showError(message) {
-    errorMessage.textContent = message;
-    errorModal.classList.add('visible');
-  }
+/**
+ * Process additional response parameters
+ */
+function processResponseParams(params) {
+  // TODO: Handle specific parameters based on your application needs
+  console.log('Response parameters:', params);
+}
 
-  // Hide error modal
-  function hideErrorModal() {
-    errorModal.classList.remove('visible');
+/**
+ * Show error modal
+ */
+function showError(title, message) {
+  elements.errorMessage.innerHTML = `<strong>${title}</strong><br>${message}`;
+  elements.errorModal.style.display = 'block';
+}
+
+/**
+ * Save messages to local storage
+ */
+function saveMessages() {
+  // Limit to last 50 messages
+  const messagesToSave = appState.messages.slice(-50);
+  localStorage.setItem('messages', JSON.stringify(messagesToSave));
+}
+
+/**
+ * Load messages from local storage
+ */
+function loadMessages() {
+  try {
+    const savedMessages = JSON.parse(localStorage.getItem('messages') || '[]');
+    appState.messages = savedMessages;
+    
+    // Add to UI
+    elements.messages.innerHTML = '';
+    savedMessages.forEach(message => {
+      const messageElement = document.createElement('div');
+      messageElement.className = `message message-${message.sender}`;
+      messageElement.innerHTML = `
+        <div class="message-text">${message.text}</div>
+        <div class="message-time">${formatTime(new Date(message.timestamp))}</div>
+      `;
+      
+      elements.messages.appendChild(messageElement);
+    });
+    
+    // Scroll to bottom
+    elements.messages.scrollTop = elements.messages.scrollHeight;
+  } catch (error) {
+    console.error('Error loading messages:', error);
   }
-});
+}
+
+/**
+ * Format timestamp for display
+ */
+function formatTime(date) {
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+/**
+ * Show toast notification
+ */
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.classList.add('show');
+  }, 100);
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => {
+      document.body.removeChild(toast);
+    }, 300);
+  }, 3000);
+}

@@ -1,86 +1,121 @@
-// Mashaaer PWA Service Worker
-const CACHE_NAME = 'mashaaer-cache-v1';
-const urlsToCache = [
+/**
+ * Service Worker for Mashaaer Feelings Application
+ * Provides offline support and caching for the Progressive Web App
+ */
+
+const CACHE_NAME = 'mashaaer-cosmic-v1';
+
+// Resources to pre-cache
+const PRECACHE_URLS = [
   '/',
   '/start',
+  '/static/mobile/css/mobile_style.css',
   '/static/mobile/css/app.css',
   '/static/mobile/js/emotion_audio_integration.js',
+  '/static/mobile/js/app.js',
+  '/static/mobile/js/api-service.js',
   '/static/mobile/audio/happy_cosmic.mp3',
   '/static/mobile/audio/sad_cosmic.mp3',
   '/static/mobile/audio/angry_cosmic.mp3',
   '/static/mobile/audio/calm_cosmic.mp3',
-  '/static/mobile/audio/cosmicmusic.mp3',
-  '/static/mobile/manifest.json'
+  '/static/mobile/images/robin-icon-192.png',
+  '/static/mobile/images/robin-icon-512.png'
 ];
 
-// Install stage sets up the cache-array to configure pre-cache content
+// Install event - pre-cache critical resources
 self.addEventListener('install', event => {
-  console.log('Service Worker: Installing');
+  console.log('Service Worker: Installing...');
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Service Worker: Caching Files');
-        return cache.addAll(urlsToCache);
+        console.log('Service Worker: Caching app shell and content');
+        return cache.addAll(PRECACHE_URLS);
       })
-      .then(() => self.skipWaiting())
+      .then(() => {
+        console.log('Service Worker: Installation complete');
+        return self.skipWaiting();
+      })
   );
 });
 
-// Activate the service worker and clear old caches
+// Activate event - clean up old caches
 self.addEventListener('activate', event => {
-  console.log('Service Worker: Activating');
-  const cacheWhitelist = [CACHE_NAME];
+  console.log('Service Worker: Activating...');
+  
+  const currentCaches = [CACHE_NAME];
+  
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            console.log('Service Worker: Cleaning Old Cache');
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
+    caches.keys()
+      .then(cacheNames => {
+        return cacheNames.filter(cacheName => !currentCaches.includes(cacheName));
+      })
+      .then(cachesToDelete => {
+        return Promise.all(cachesToDelete.map(cacheToDelete => {
+          console.log('Service Worker: Clearing old cache:', cacheToDelete);
+          return caches.delete(cacheToDelete);
+        }));
+      })
+      .then(() => {
+        console.log('Service Worker: Activation complete');
+        return self.clients.claim();
+      })
   );
 });
 
-// Serve cached content when offline
+// Fetch event - serve from cache or network
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        return fetch(event.request).then(
-          fetchResponse => {
-            // Check if we received a valid response
-            if(!fetchResponse || fetchResponse.status !== 200 || fetchResponse.type !== 'basic') {
-              return fetchResponse;
-            }
-
-            // If it's a valid navigation response, cache it
-            if (event.request.mode === 'navigate' || 
-                (event.request.method === 'GET' && 
-                 event.request.headers.get('accept').includes('text/html'))) {
+  // Skip cross-origin requests
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+  
+  // Skip requests to API endpoints
+  if (event.request.url.includes('/api/')) {
+    return;
+  }
+  
+  // For GET requests, try cache first, then network
+  if (event.request.method === 'GET') {
+    event.respondWith(
+      caches.match(event.request)
+        .then(cachedResponse => {
+          if (cachedResponse) {
+            console.log('Service Worker: Serving from cache:', event.request.url);
+            return cachedResponse;
+          }
+          
+          return fetch(event.request)
+            .then(response => {
+              // Don't cache non-success responses
+              if (!response || response.status !== 200 || response.type !== 'basic') {
+                return response;
+              }
               
-              // Clone the response as it can only be used once
-              var responseToCache = fetchResponse.clone();
+              // Clone the response to cache it and return it
+              const responseToCache = response.clone();
+              
               caches.open(CACHE_NAME)
                 .then(cache => {
+                  console.log('Service Worker: Caching new resource:', event.request.url);
                   cache.put(event.request, responseToCache);
                 });
-            }
-            
-            return fetchResponse;
-          }
-        );
-      }).catch(() => {
-        // If fetch fails, deliver the offline page for navigation requests
-        if (event.request.mode === 'navigate') {
-          return caches.match('/');
-        }
-      })
-  );
+              
+              return response;
+            });
+        })
+        .catch(error => {
+          console.error('Service Worker: Fetch failed:', error);
+          // You could return a custom offline page here
+          return caches.match('/static/mobile/offline.html');
+        })
+    );
+  }
+});
+
+// Handle messages from clients
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

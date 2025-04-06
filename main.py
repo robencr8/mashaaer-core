@@ -212,3 +212,15 @@ def analyze_emotion():
             'error': 'Failed to analyze emotion',
             'message': str(e)
         }), 500
+
+# Add versioned_url function for cache busting
+def versioned_url(path):
+    """Add version string to URL for cache busting"""
+    version = int(time.time())
+    return f"/static/{path}?v={version}"
+
+# Add versioned_url to template context
+@app.context_processor
+def inject_versioned_url():
+    """Make versioned_url available in all templates"""
+    return dict(versioned_url=versioned_url)

@@ -1,311 +1,142 @@
 /**
- * Robin AI Mobile API Service
- * Handles all API calls to the Flask backend
+ * API Service for Mashaaer Application
+ * Handles all communication with the backend API
  */
-class ApiService {
-  constructor() {
-    this.baseUrl = '/api';
-    this.headers = {
+
+const apiService = (function() {
+  // Base API URL - defaults to current origin
+  const BASE_URL = '';
+  
+  // Default request options
+  const defaultOptions = {
+    headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
+    },
+    credentials: 'same-origin'
+  };
+  
+  /**
+   * Make an API request
+   * @param {string} endpoint - API endpoint path
+   * @param {string} method - HTTP method (GET, POST, etc.)
+   * @param {Object} data - Request body for POST/PUT requests
+   * @returns {Promise} - Resolves with response data
+   */
+  async function apiRequest(endpoint, method = 'GET', data = null) {
+    const url = `${BASE_URL}${endpoint}`;
+    
+    const options = {
+      ...defaultOptions,
+      method
     };
-  }
-
-  /**
-   * Get system status
-   * @returns {Promise<Object>} System status information
-   */
-  async getStatus() {
-    return this.get('/status');
-  }
-
-  /**
-   * Get emotion data 
-   * @param {Number} days Number of days of data to retrieve
-   * @param {Boolean} sessionOnly Only get data for current session
-   * @param {String} sessionId Get data for specific session ID
-   * @returns {Promise<Object>} Emotion data
-   */
-  async getEmotionData(days = 7, sessionOnly = false, sessionId = null) {
-    const params = new URLSearchParams();
-    params.append('days', days);
     
-    if (sessionOnly) {
-      params.append('session_only', 'true');
+    if (data) {
+      options.body = JSON.stringify(data);
     }
-    
-    if (sessionId) {
-      params.append('session_id', sessionId);
-    }
-    
-    return this.get('/emotion-data', params);
-  }
-
-  /**
-   * Get face recognition data
-   * @param {Number} limit Number of records to retrieve
-   * @param {Boolean} sessionOnly Only get data for current session
-   * @returns {Promise<Object>} Face recognition data
-   */
-  async getFaceRecognitionData(limit = 20, sessionOnly = false) {
-    const params = new URLSearchParams();
-    params.append('limit', limit);
-    
-    if (sessionOnly) {
-      params.append('session_only', 'true');
-    }
-    
-    return this.get('/face-recognition-data', params);
-  }
-
-  /**
-   * Get all profiles
-   * @returns {Promise<Object>} All saved profiles
-   */
-  async getProfiles() {
-    return this.get('/profiles');
-  }
-
-  /**
-   * Get profile by name
-   * @param {String} name Profile name
-   * @returns {Promise<Object>} Profile data
-   */
-  async getProfile(name) {
-    return this.get(`/profile/${name}`);
-  }
-
-  /**
-   * Send SMS notification
-   * @param {String} toNumber Recipient phone number
-   * @param {String} message Message content
-   * @returns {Promise<Object>} SMS send result
-   */
-  async sendSms(toNumber, message) {
-    return this.post('/send-sms', {
-      phone_number: toNumber,
-      message: message
-    });
-  }
-
-  /**
-   * Send SMS alert notification
-   * @param {String} toNumber Recipient phone number
-   * @param {String} alertType Alert type
-   * @param {Object} alertData Alert data
-   * @returns {Promise<Object>} SMS alert send result
-   */
-  async sendSmsAlert(toNumber, alertType, alertData = {}) {
-    return this.post('/send-sms-alert', {
-      phone_number: toNumber,
-      alert_type: alertType,
-      ...alertData // Spread the alert data directly into the payload
-    });
-  }
-
-  /**
-   * Log emotion detection
-   * @param {String} emotion Detected emotion
-   * @param {String} text Text content
-   * @param {String} source Source of emotion
-   * @param {Number} intensity Emotion intensity
-   * @returns {Promise<Object>} Log result
-   */
-  async logEmotion(emotion, text = '', source = 'text', intensity = 0.5) {
-    return this.post('/log-emotion', {
-      emotion: emotion,
-      text: text,
-      source: source,
-      intensity: intensity
-    });
-  }
-
-  /**
-   * Fetch emotion timeline data
-   * @param {Number} days Number of days to include
-   * @param {Boolean} sessionOnly Only include current session
-   * @param {String} sessionId Specific session ID (optional)
-   * @returns {Promise<Object>} Emotion timeline data
-   */
-  async fetchEmotionTimeline(days = 7, sessionOnly = false, sessionId = null) {
-    const params = new URLSearchParams();
-    params.append('days', days);
-    
-    if (sessionOnly) {
-      params.append('session_only', 'true');
-    }
-    
-    if (sessionId) {
-      params.append('session_id', sessionId);
-    }
-    
-    return this.get('/emotion-data', params);
-  }
-
-  /**
-   * Generic GET request
-   * @param {String} endpoint API endpoint
-   * @param {URLSearchParams} params Query parameters
-   * @returns {Promise<Object>} Response data
-   */
-  async get(endpoint, params = null) {
-    try {
-      const url = this.buildUrl(endpoint, params);
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: this.headers
-      });
-      
-      return this.handleResponse(response);
-    } catch (error) {
-      return this.handleError(error);
-    }
-  }
-
-  /**
-   * Generic POST request
-   * @param {String} endpoint API endpoint
-   * @param {Object} data Request body data
-   * @returns {Promise<Object>} Response data
-   */
-  async post(endpoint, data) {
-    try {
-      const url = this.buildUrl(endpoint);
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: this.headers,
-        body: JSON.stringify(data)
-      });
-      
-      return this.handleResponse(response);
-    } catch (error) {
-      return this.handleError(error);
-    }
-  }
-
-  /**
-   * Build the complete URL for an API request
-   * @param {String} endpoint API endpoint
-   * @param {URLSearchParams} params Query parameters
-   * @returns {String} Complete URL
-   */
-  buildUrl(endpoint, params = null) {
-    // Make sure the endpoint starts with a slash
-    if (!endpoint.startsWith('/')) {
-      endpoint = '/' + endpoint;
-    }
-    
-    // Construct the full URL
-    let url = this.baseUrl + endpoint;
-    
-    // Create a new params object if one wasn't provided
-    if (!params) {
-      params = new URLSearchParams();
-    }
-    
-    // Force cache busting for all requests
-    // Especially important for emotion and face recognition data
-    const cacheBuster = Date.now();
-    params.set('_t', cacheBuster);
-    
-    // Add a version parameter to ensure different versions of the app don't clash
-    const appVersion = window.ROBIN_VERSION || '1.0';
-    params.set('v', appVersion);
-    
-    // Add query parameters to the URL
-    url += '?' + params.toString();
-    
-    return url;
-  }
-
-  /**
-   * Handle API response
-   * @param {Response} response Fetch response object
-   * @returns {Promise<Object>} Parsed response data
-   */
-  async handleResponse(response) {
-    let data;
     
     try {
-      data = await response.json();
+      const response = await fetch(url, options);
+      
+      // Check if the response is JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const responseData = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(responseData.error || `API error: ${response.status}`);
+        }
+        
+        return responseData;
+      } else {
+        // Handle non-JSON responses
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || `API error: ${response.status}`);
+        }
+        
+        return { success: true, message: 'Request successful (non-JSON response)' };
+      }
     } catch (error) {
-      console.error('Error parsing JSON response:', error);
-      
-      if (typeof showToast === 'function') {
-        showToast('Error parsing server response', 'error');
-      }
-      
-      return {
-        success: false,
-        error: 'Invalid JSON response from server',
-        status: response.status,
-        parsing_error: true
-      };
+      console.error(`API request error (${endpoint}):`, error);
+      throw error;
     }
-    
-    // Ensure data is always an object, even if the API returns null or empty
-    if (!data || typeof data !== 'object') {
-      console.warn('API returned invalid data format:', data);
-      data = {};
-    }
-    
-    if (!response.ok) {
-      // Show error toast if the showToast function is available
-      if (typeof showToast === 'function') {
-        const errorMessage = data.error || `API Error ${response.status}: ${response.statusText}`;
-        showToast(errorMessage, 'error');
-      }
-      
-      return {
-        success: false,
-        error: data.error || `API Error ${response.status}: ${response.statusText}`,
-        status: response.status
-      };
-    }
-    
-    // For emotion data responses, ensure there's always valid data even if API returns empty
-    if (response.url.includes('/emotion-data') && (!data.emotions || !data.emotions.data)) {
-      console.warn('Emotion data missing or invalid, providing fallback structure');
-      // Ensure we have a valid structure even if API returns incomplete data
-      if (!data.emotions) {
-        data.emotions = { data: [] };
-      } else if (!data.emotions.data) {
-        data.emotions.data = [];
-      }
-    }
-    
-    return {
-      success: true,
-      ...data,
-      timestamp: Date.now() // Add timestamp to every response for tracking
-    };
   }
-
-  /**
-   * Handle API error
-   * @param {Error} error Error object
-   * @returns {Object} Standardized error response
-   */
-  handleError(error) {
-    console.error('API Error:', error);
+  
+  // Public API methods
+  return {
+    /**
+     * Get API status
+     * @returns {Promise} - API status information
+     */
+    getStatus: () => apiRequest('/api/status'),
     
-    // Show error toast if the showToast function is available
-    if (typeof showToast === 'function') {
-      showToast(error.message || 'Network error. Please check your connection.', 'error');
-    }
+    /**
+     * Send a chat message
+     * @param {Object} data - Message data
+     * @returns {Promise} - API response
+     */
+    sendMessage: (data) => apiRequest('/api/chat', 'POST', data),
     
-    return {
-      success: false,
-      error: error.message || 'Network error. Please check your connection.',
-      status: 0
-    };
-  }
-}
-
-// Create a global instance of the API service
-const apiService = new ApiService();
-
-// Export for module usage if needed
-if (typeof module !== 'undefined') {
-  module.exports = apiService;
-}
+    /**
+     * Analyze an image for emotion detection
+     * @param {string} imageData - Base64 encoded image data
+     * @returns {Promise} - Analysis results
+     */
+    analyzeImage: (imageData) => apiRequest('/api/analyze-image', 'POST', { image: imageData }),
+    
+    /**
+     * Get personalized recommendations
+     * @param {string} userId - User ID for personalization
+     * @param {string} emotion - Current emotion for context
+     * @returns {Promise} - Recommendation results
+     */
+    getRecommendations: (userId, emotion) => 
+      apiRequest('/api/recommendations', 'POST', { user_id: userId, emotion }),
+    
+    /**
+     * Submit feedback on a response
+     * @param {Object} data - Feedback data
+     * @returns {Promise} - API response
+     */
+    submitFeedback: (data) => apiRequest('/api/feedback', 'POST', data),
+    
+    /**
+     * Save a user memory
+     * @param {string} userId - User ID
+     * @param {string} key - Memory key
+     * @param {string} value - Memory value
+     * @returns {Promise} - API response
+     */
+    setMemory: (userId, key, value) => 
+      apiRequest('/api/memory', 'POST', { user_id: userId, key, value }),
+    
+    /**
+     * Get a user memory
+     * @param {string} userId - User ID
+     * @param {string} key - Memory key
+     * @returns {Promise} - Memory value
+     */
+    getMemory: (userId, key) => apiRequest(`/api/memory/${userId}/${key}`),
+    
+    /**
+     * Control cosmic ambient sound
+     * @param {Object} data - Sound control parameters
+     * @returns {Promise} - API response
+     */
+    controlCosmicSound: (data) => apiRequest('/api/cosmic-sound', 'POST', data),
+    
+    /**
+     * Analyze text for emotion
+     * @param {string} text - Text to analyze
+     * @returns {Promise} - Analysis results
+     */
+    analyzeEmotion: (text) => apiRequest('/api/analyze-emotion', 'POST', { text }),
+    
+    /**
+     * Get system information
+     * @returns {Promise} - System information
+     */
+    getSystemInfo: () => apiRequest('/api/system-info')
+  };
+})();

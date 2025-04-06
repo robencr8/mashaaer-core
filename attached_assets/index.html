@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mashaaer | Cosmic Emotion Companion</title>
+  <link rel="manifest" href="/static/mobile/manifest.json" />
+  <link rel="stylesheet" href="/static/mobile/css/app.css" />
+  <script src="/static/mobile/js/emotion_audio_integration.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/static/mobile/service-worker.js')
+          .then(function (registration) {
+            console.log('ServiceWorker registered:', registration.scope);
+          }, function (err) {
+            console.log('ServiceWorker registration failed:', err);
+          });
+      });
+    }
+  </script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(ellipse at center, #0d0d2b 0%, #000000 100%);
+      color: white;
+      overflow: hidden;
+    }
+    .cosmic-orb {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #5c2d91, #845ec2);
+      box-shadow: 0 0 60px 15px rgba(132, 94, 194, 0.6);
+      margin: 50px auto;
+      animation: pulse 6s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    .greeting {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 1.5rem;
+      line-height: 2.2rem;
+    }
+    .start-btn {
+      display: block;
+      margin: 40px auto;
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      background-color: #845ec2;
+      border: none;
+      border-radius: 12px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .start-btn:hover {
+      background-color: #a178df;
+    }
+    canvas#stars {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="stars"></canvas>
+  <div class="cosmic-orb"></div>
+  <div class="greeting">
+    <p>Welcome to <strong>Mashaaer</strong></p>
+    <p>Your Cosmic Companion for Emotions & Mindfulness</p>
+  </div>
+  <button class="start-btn" onclick="startMashaaer()">Start Journey</button>
+
+  <script>
+    function startMashaaer() {
+      window.location.href = '/start';
+    }
+
+    const canvas = document.getElementById('stars');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const stars = Array.from({ length: 200 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.5 + 0.5
+    }));
+
+    function drawStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'white';
+      for (const star of stars) {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.r, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+    }
+
+    function animateStars() {
+      drawStars();
+      for (const star of stars) {
+        star.y += 0.3;
+        if (star.y > canvas.height) star.y = 0;
+      }
+      requestAnimationFrame(animateStars);
+    }
+
+    animateStars();
+  </script>
+</body>
+</html>
