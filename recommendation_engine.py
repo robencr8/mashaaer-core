@@ -92,6 +92,27 @@ class RecommendationEngine:
             "timestamp": time.time()
         }
         
+        # Add time-based context information
+        current_time = datetime.now()
+        time_of_day = ""
+        if current_time.hour < 6:
+            time_of_day = "night"
+        elif current_time.hour < 12:
+            time_of_day = "morning"
+        elif current_time.hour < 18:
+            time_of_day = "afternoon"
+        else:
+            time_of_day = "evening"
+            
+        day_of_week = current_time.strftime("%A").lower()
+        is_weekend = day_of_week in ["saturday", "sunday"]
+        
+        # Add context to the recommendations
+        recommendations["context"] = {
+            "time_of_day": time_of_day,
+            "day_of_week": day_of_week,
+            "is_weekend": is_weekend
+        }
         return recommendations
 
     def _collect_user_data(self, user_id: str) -> Dict[str, Any]:
@@ -548,43 +569,85 @@ class RecommendationEngine:
             challenges = user_data.get("challenges", [])
             challenge_types = [c.get("type") for c in challenges]
             
+            # Get user preferences and context
+            preferences = user_data.get("preferences", {})
+            recent_activities = user_data.get("recent_activities", [])
+            recent_activity_types = []
+            
+            # Extract activity types from recent activities
+            for activity in recent_activities[:10]:  # Look at last 10 activities
+                activity_type = activity.get("action", "")
+                if activity_type and activity_type not in recent_activity_types:
+                    recent_activity_types.append(activity_type)
+            
+            # Get time of day and day of week for more contextual recommendations
+            current_time = datetime.now()
+            time_of_day = ""
+            if current_time.hour < 6:
+                time_of_day = "night"
+            elif current_time.hour < 12:
+                time_of_day = "morning"
+            elif current_time.hour < 18:
+                time_of_day = "afternoon"
+            else:
+                time_of_day = "evening"
+                
+            day_of_week = current_time.strftime("%A").lower()
+            is_weekend = day_of_week in ["saturday", "sunday"]
+            
             # Format user data for prompt
             prompt_data = {
                 "current_emotion": current_primary,
                 "recent_emotions": recent_emotions,
                 "wellbeing_score": wellbeing_score,
                 "challenges": challenge_types,
-                "language": user_data.get("preferences", {}).get("language", "en")
+                "language": preferences.get("language", "en"),
+                "time_of_day": time_of_day,
+                "day_of_week": day_of_week,
+                "is_weekend": is_weekend,
+                "interests": preferences.get("interests", ""),
+                "recent_activity_types": recent_activity_types
             }
             
             # Prepare system prompt
             system_prompt = """
             You are Mashaaer, an AI emotional wellbeing advisor designed to provide holistic, culturally-sensitive recommendations to improve emotional wellbeing.
             
-            Based on the user's emotional data, provide thoughtful recommendations in these categories:
+            Based on the user's emotional data and context, provide thoughtful recommendations in these categories:
             1. Immediate actions - Quick activities to improve the current emotional state
             2. Well-being practices - Long-term practices to build emotional resilience
             3. Social connections - Ways to leverage social support for emotional health
             4. Creative expression - Art, music, or writing activities suited to their emotional state
             5. Reflective insights - Thoughtful observations about patterns in their emotional journey
+            6. Engagement activities - Interactive experiences tailored to their interests and current context
             
             Keep these guidelines in mind:
             - Be supportive, not clinical or diagnostic
             - Respect cultural sensitivities of Middle Eastern contexts
             - Focus on practical, accessible suggestions
             - Be specific and actionable, not generic
+            - Adapt recommendations to the time of day and week (weekday/weekend)
+            - Consider their personal interests and past activities
             - Include a mix of short-term and long-term recommendations
             - Format all responses in JSON
+            - Provide recommendations appropriate for their current emotional state
+            - Suggest digital engagement activities like interactive media, apps, or online communities
+            - Include recommendations that encourage healthy platform engagement
+            - Suggest techniques for emotional regulation based on current state
             """
             
-            # Create user prompt
+            # Create user prompt with enhanced context
             user_prompt = f"""
-            Please provide personalized recommendations based on this emotional data:
+            Please provide personalized recommendations based on this emotional data and context:
             - Current emotion: {prompt_data['current_emotion']}
             - Recent emotions: {', '.join(prompt_data['recent_emotions'])}
             - Wellbeing score: {prompt_data['wellbeing_score']} (0.0-1.0 scale)
             - Challenges: {', '.join(prompt_data['challenges']) if prompt_data['challenges'] else 'None identified'}
             - Preferred language: {prompt_data['language']}
+            - Time of day: {prompt_data['time_of_day']}
+            - Day of week: {prompt_data['day_of_week']} (weekend: {str(prompt_data['is_weekend']).lower()})
+            - Interests: {prompt_data['interests'] if prompt_data['interests'] else 'Not specified'}
+            - Recent activities: {', '.join(prompt_data['recent_activity_types']) if prompt_data['recent_activity_types'] else 'No recent activities recorded'}
             
             Respond in JSON format with these sections:
             {{
@@ -593,6 +656,7 @@ class RecommendationEngine:
                 "social_connections": [list of 2-3 suggestions],
                 "creative_expression": [list of 2-3 activities],
                 "reflective_insights": [list of 2-3 insights],
+                "engagement_activities": [list of 2-4 digital or interactive engagement suggestions],
                 "affirmation": "A supportive affirmation based on their emotional state"
             }}
             """
@@ -618,6 +682,25 @@ class RecommendationEngine:
             recommendations["generated_at"] = datetime.now().isoformat()
             recommendations["current_emotion"] = current_primary
             recommendations["wellbeing_score"] = wellbeing_score
+            recommendations["context"] = {
+                "time_of_day": time_of_day,
+                "day_of_week": day_of_week,
+                "is_weekend": is_weekend
+            }
+            
+            # Add recommendation IDs to each item to track interactions
+            categories = ["immediate_actions", "wellbeing_practices", "social_connections", 
+                         "creative_expression", "reflective_insights", "engagement_activities"]
+            
+            for category in categories:
+                if category in recommendations and isinstance(recommendations[category], list):
+                    for i, item in enumerate(recommendations[category]):
+                        if isinstance(item, str):
+                            recommendations[category][i] = {
+                                "id": f"{category}_{i}",
+                                "text": item,
+                                "category": category
+                            }
             
             return recommendations
             
@@ -639,6 +722,21 @@ class RecommendationEngine:
         """
         current_emotion = user_data.get("current_emotion", {})
         current_primary = current_emotion.get("primary_emotion", "neutral") if current_emotion else "neutral"
+        
+        # Get time of day for context
+        current_time = datetime.now()
+        time_of_day = ""
+        if current_time.hour < 6:
+            time_of_day = "night"
+        elif current_time.hour < 12:
+            time_of_day = "morning"
+        elif current_time.hour < 18:
+            time_of_day = "afternoon"
+        else:
+            time_of_day = "evening"
+            
+        day_of_week = current_time.strftime("%A").lower()
+        is_weekend = day_of_week in ["saturday", "sunday"]
         
         # Basic recommendations based on emotion categories
         positive_emotions = ["joy", "happiness", "contentment", "excitement", "love", "gratitude", "pride"]
@@ -669,6 +767,11 @@ class RecommendationEngine:
                     "Notice what activities or people contribute to your positive emotions",
                     "Reflect on how you can sustain this emotional state"
                 ],
+                "engagement_activities": [
+                    "Join a virtual community focused on a topic that interests you",
+                    "Take a mindfulness break with a guided cosmic meditation in our app",
+                    "Share a positive thought in a community forum"
+                ],
                 "affirmation": "You deserve to experience joy and positivity. Allow yourself to fully embrace these feelings."
             }
         elif current_primary in negative_emotions:
@@ -697,6 +800,11 @@ class RecommendationEngine:
                     "Your emotions are valid and provide important information",
                     "Difficult emotions are temporary and will evolve with time"
                 ],
+                "engagement_activities": [
+                    "Try our 5-minute guided emotional release exercise",
+                    "Explore breathing visualizations in the cosmic realm interface",
+                    "Listen to emotion-specific ambient sounds in our application"
+                ],
                 "affirmation": "It's okay to not be okay. You have the strength to navigate through challenging emotions."
             }
         else:  # Neutral emotions
@@ -723,6 +831,11 @@ class RecommendationEngine:
                     "Neutral states are good times for reflection and planning",
                     "Consider what emotional states you'd like to cultivate"
                 ],
+                "engagement_activities": [
+                    "Try the daily emotion reflection exercise in our app",
+                    "Explore the emotion visualization tools",
+                    "Participate in our community mood board activity"
+                ],
                 "affirmation": "You are present and aware, ready to shape your emotional journey."
             }
         
@@ -731,9 +844,87 @@ class RecommendationEngine:
         recommendations["current_emotion"] = current_primary
         recommendations["wellbeing_score"] = user_data.get("wellbeing_score", 0.5)
         recommendations["is_fallback"] = True
+        recommendations["context"] = {
+            "time_of_day": time_of_day,
+            "day_of_week": day_of_week,
+            "is_weekend": is_weekend
+        }
         
+        # Convert recommendations to the structured format with IDs
+        categories = ["immediate_actions", "wellbeing_practices", "social_connections", 
+                     "creative_expression", "reflective_insights", "engagement_activities"]
+        
+        for category in categories:
+            if category in recommendations and isinstance(recommendations[category], list):
+                for i, item in enumerate(recommendations[category]):
+                    if isinstance(item, str):
+                        recommendations[category][i] = {
+                            "id": f"{category}_{i}",
+                            "text": item,
+                            "category": category
+                        }
+        
+            # Add time-based context information
+            context = {
+                "time_of_day": time_of_day,
+                "day_of_week": day_of_week,
+                "is_weekend": is_weekend
+            }
+            
+            # Add context to the recommendations
+            recommendations["context"] = context
         return recommendations
 
+    def get_contextual_greeting(self, language: str = 'en') -> str:
+        """
+        Generate a time-appropriate contextual greeting based on current time.
+        
+        Args:
+            language: Language code ('en' or 'ar')
+            
+        Returns:
+            Contextual greeting string
+        """
+        current_time = datetime.now()
+        
+        # Determine time of day
+        if current_time.hour < 6:
+            time_of_day = "night" if language == 'en' else "ليل"
+        elif current_time.hour < 12:
+            time_of_day = "morning" if language == 'en' else "صباح"
+        elif current_time.hour < 18:
+            time_of_day = "afternoon" if language == 'en' else "ظهر"
+        else:
+            time_of_day = "evening" if language == 'en' else "مساء"
+            
+        # Determine day type
+        day_of_week = current_time.strftime("%A").lower()
+        is_weekend = day_of_week in ["saturday", "sunday"]
+        
+        day_type = "weekend" if is_weekend else "weekday"
+        day_type_ar = "عطلة نهاية الأسبوع" if is_weekend else "يوم عمل"
+        
+        # Format greeting
+        if language == 'en':
+            if time_of_day == "night":
+                return f"Good night on this {day_type}"
+            elif time_of_day == "morning":
+                return f"Good morning! Ready for a bright {day_type}?"
+            elif time_of_day == "afternoon":
+                return f"Good afternoon! How's your {day_type} going?"
+            else:
+                return f"Good evening! Winding down your {day_type}?"
+        else:
+            # Arabic greetings
+            if time_of_day == "ليل":
+                return f"مساء الخير في {day_type_ar}"
+            elif time_of_day == "صباح":
+                return f"صباح الخير! جاهز ليوم {day_type_ar} مشرق؟"
+            elif time_of_day == "ظهر":
+                return f"مساء الخير! كيف يسير {day_type_ar}؟"
+            else:
+                return f"مساء الخير! هل تنهي {day_type_ar}؟"
+                
     def log_recommendation_feedback(
         self,
         user_id: str,

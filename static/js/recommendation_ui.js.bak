@@ -372,12 +372,6 @@ class RecommendationUI {
                 items: this.recommendations.reflective_insights || []
             },
             {
-            },
-            {
-                id: 'engagement_activities',
-                title: this.options.language === 'ar' ? 'أنشطة التفاعل' : 'Engagement Activities',
-                icon: '✨',
-                items: this.recommendations.engagement_activities || []
                 id: 'engagement_activities',
                 title: this.options.language === 'ar' ? 'أنشطة التفاعل' : 'Engagement Activities',
                 icon: '✨',
@@ -397,47 +391,30 @@ class RecommendationUI {
             
             tab.addEventListener('click', () => {
                 this.showSection(section.id);
-            // Add context information for time-sensitive sections
-            if (this.recommendations.context && section.id === 'immediate_actions') {
-                const contextInfo = document.createElement('div');
-                contextInfo.className = 'context-info';
-                
-                const timeOfDay = this.recommendations.context.time_of_day;
-                const dayOfWeek = this.recommendations.context.day_of_week;
-                const isWeekend = this.recommendations.context.is_weekend;
-                
-                let contextMessage = '';
-                if (this.options.language === 'ar') {
-                    contextMessage = `توصيات مخصصة لـ ${timeOfDay === 'morning' ? 'الصباح' : 
-                        timeOfDay === 'afternoon' ? 'بعد الظهر' : 
-                        timeOfDay === 'evening' ? 'المساء' : 'الليل'} 
-                        في ${isWeekend ? 'عطلة نهاية الأسبوع' : 'يوم عمل'}`;
-                } else {
-                    contextMessage = `Recommendations tailored for your ${timeOfDay} ${isWeekend ? 'weekend' : 'weekday'}`;
-                }
-                
-                contextInfo.textContent = contextMessage;
-                sectionContent.appendChild(contextInfo);
-            }
             });
             
             this.tabsContainer.appendChild(tab);
             
+            // Create section content
+            const sectionContent = document.createElement('div');
+            sectionContent.className = 'recommendations-section';
+            sectionContent.dataset.section = section.id;
+            
+            const sectionTitle = document.createElement('h3');
+            sectionTitle.className = 'section-title';
+            sectionTitle.innerHTML = `<span class="icon">${section.icon}</span> ${section.title}`;
+            
+            const itemsList = document.createElement('ul');
+            itemsList.className = 'recommendations-items';
+            
             section.items.forEach((item, itemIndex) => {
                 const listItem = document.createElement('li');
                 listItem.className = 'recommendation-item';
-                
-                // Handle both string items and object items with the new structure
-                const itemText = typeof item === 'string' ? item : item.text;
-                const itemId = typeof item === 'string' ? `${section.id}_${itemIndex}` : item.id;
-                const itemCategory = typeof item === 'string' ? section.id : item.category;
-                
                 listItem.dataset.index = itemIndex;
-                listItem.dataset.id = itemId;
                 
                 const itemContent = document.createElement('div');
                 itemContent.className = 'item-content';
-                itemContent.textContent = itemText;
+                itemContent.textContent = item;
                 
                 const itemActions = document.createElement('div');
                 itemActions.className = 'item-actions';
@@ -455,12 +432,26 @@ class RecommendationUI {
                     this.logInteraction(
                         listItem.classList.contains('implemented') ? 'implemented' : 'unimplemented',
                         {
-                            section: itemCategory,
-                            item_id: itemId,
-                            item_text: itemText
+                            section: section.id,
+                            index: itemIndex,
+                            text: item
                         }
                     );
                 });
+                
+                itemActions.appendChild(implementButton);
+                listItem.appendChild(itemContent);
+                listItem.appendChild(itemActions);
+                itemsList.appendChild(listItem);
+            });
+            
+            sectionContent.appendChild(sectionTitle);
+            sectionContent.appendChild(itemsList);
+            this.contentContainer.appendChild(sectionContent);
+            
+            // Hide all sections initially
+            sectionContent.style.display = 'none';
+        });
         
         // Show the first section by default
         if (nonEmptySections.length > 0) {

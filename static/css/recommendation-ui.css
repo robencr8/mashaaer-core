@@ -1,0 +1,615 @@
+/**
+ * Recommendation UI Styling
+ * Provides styles for the AI-powered recommendation interface
+ */
+
+.recommendations-container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* Theme Styles */
+.recommendations-container.theme-cosmic {
+    background: linear-gradient(135deg, rgba(20, 10, 40, 0.95) 0%, rgba(40, 20, 80, 0.9) 100%);
+    color: #fff;
+    box-shadow: 0 5px 25px rgba(100, 50, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.recommendations-container.theme-light {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 240, 250, 0.9) 100%);
+    color: #333;
+}
+
+.recommendations-container.theme-dark {
+    background: linear-gradient(135deg, rgba(30, 30, 35, 0.95) 0%, rgba(20, 20, 25, 0.9) 100%);
+    color: #eee;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Header Styling */
+.recommendations-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.theme-light .recommendations-header {
+    border-bottom-color: rgba(0, 0, 0, 0.1);
+}
+
+.recommendations-title {
+    font-size: 1.8rem;
+    margin: 0 0 5px 0;
+    font-weight: 600;
+    background: linear-gradient(90deg, #9d6aff, #53c5ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+}
+
+.theme-light .recommendations-title {
+    background: linear-gradient(90deg, #7040c0, #3087d0);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.recommendations-subtitle {
+    font-size: 1rem;
+    margin: 0;
+    opacity: 0.8;
+}
+
+/* Loading State */
+.recommendations-loading {
+    text-align: center;
+    padding: 40px 0;
+}
+
+.cosmic-orb-loader {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #9d6aff, #53c5ff);
+    margin-bottom: 15px;
+    animation: pulse 1.5s infinite alternate, rotate 3s linear infinite;
+    box-shadow: 0 0 20px rgba(100, 80, 255, 0.5);
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.8); opacity: 0.7; }
+    100% { transform: scale(1.1); opacity: 1; }
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.recommendations-empty-state, 
+.recommendations-error-state {
+    text-align: center;
+    padding: 40px 0;
+    display: none;
+}
+
+.empty-icon, .error-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    display: inline-block;
+}
+
+.refresh-button {
+    background: linear-gradient(90deg, #9d6aff, #53c5ff);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 30px;
+    margin-top: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.refresh-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(100, 80, 255, 0.3);
+}
+
+/* Tabs */
+.recommendations-tabs {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.recommendations-tab {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 30px;
+    color: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.theme-light .recommendations-tab {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.recommendations-tab:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.theme-light .recommendations-tab:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.recommendations-tab.active {
+    background: linear-gradient(90deg, #9d6aff, #53c5ff);
+    color: white;
+    box-shadow: 0 5px 15px rgba(100, 80, 255, 0.3);
+}
+
+.recommendations-tab .icon {
+    font-size: 1.2rem;
+}
+
+/* Sections */
+.recommendations-section {
+    display: none;
+    margin-bottom: 20px;
+    animation: fadeIn 0.5s ease;
+}
+
+.recommendations-section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+    font-weight: 500;
+}
+
+.section-title .icon {
+    font-size: 1.5rem;
+}
+
+/* Context Info */
+.context-info {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.theme-light .context-info {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.theme-cosmic .context-info {
+    border-left: 3px solid rgba(157, 106, 255, 0.6);
+}
+
+.context-info::before {
+    content: "⏱️";
+    font-size: 1.1rem;
+}
+
+/* Items */
+.recommendations-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.recommendation-item {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.theme-light .recommendation-item {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.recommendation-item:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.theme-light .recommendation-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.item-content {
+    flex: 1;
+}
+
+.item-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.implement-button {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: inherit;
+}
+
+.theme-light .implement-button {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.implement-button:hover {
+    background: rgba(157, 106, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.recommendation-item.implemented {
+    background: rgba(157, 106, 255, 0.15);
+    border-left: 3px solid #9d6aff;
+}
+
+.theme-light .recommendation-item.implemented {
+    background: rgba(157, 106, 255, 0.1);
+}
+
+.recommendation-item.implemented .implement-button {
+    background: rgba(157, 106, 255, 0.8);
+    color: white;
+}
+
+/* Affirmation */
+.recommendations-affirmation {
+    background: linear-gradient(135deg, rgba(157, 106, 255, 0.2) 0%, rgba(83, 197, 255, 0.2) 100%);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+    text-align: center;
+    border-left: 4px solid #9d6aff;
+}
+
+.theme-light .recommendations-affirmation {
+    background: linear-gradient(135deg, rgba(157, 106, 255, 0.1) 0%, rgba(83, 197, 255, 0.1) 100%);
+}
+
+.recommendations-affirmation blockquote {
+    margin: 0;
+    font-size: 1.1rem;
+    font-style: italic;
+    font-weight: 500;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.theme-light .recommendations-affirmation blockquote {
+    color: rgba(0, 0, 0, 0.75);
+}
+
+/* Footer */
+.recommendations-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.theme-light .recommendations-footer {
+    border-top-color: rgba(0, 0, 0, 0.1);
+}
+
+.recommendations-refresh-button,
+.recommendations-feedback-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 30px;
+    color: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.theme-light .recommendations-refresh-button,
+.theme-light .recommendations-feedback-button {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.recommendations-refresh-button:hover,
+.recommendations-feedback-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.theme-light .recommendations-refresh-button:hover,
+.theme-light .recommendations-feedback-button:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.recommendations-feedback-button {
+    background: linear-gradient(90deg, rgba(157, 106, 255, 0.3), rgba(83, 197, 255, 0.3));
+}
+
+.recommendations-feedback-button:hover {
+    background: linear-gradient(90deg, rgba(157, 106, 255, 0.5), rgba(83, 197, 255, 0.5));
+}
+
+/* Feedback Form */
+.feedback-form-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.feedback-form {
+    background: linear-gradient(135deg, rgba(20, 10, 40, 0.95) 0%, rgba(40, 20, 80, 0.9) 100%);
+    border-radius: 10px;
+    padding: 25px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    color: white;
+}
+
+.theme-light .feedback-form {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 240, 250, 0.9) 100%);
+    color: #333;
+}
+
+.feedback-form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.feedback-form-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+}
+
+.close-button:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.feedback-form-group {
+    margin-bottom: 20px;
+}
+
+.feedback-form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.feedback-form-input,
+.feedback-form-textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: inherit;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.theme-light .feedback-form-input,
+.theme-light .feedback-form-textarea {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.feedback-form-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.feedback-form-rating {
+    display: flex;
+    gap: 8px;
+}
+
+.rating-star {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.3);
+    transition: all 0.2s ease;
+}
+
+.theme-light .rating-star {
+    color: rgba(0, 0, 0, 0.2);
+}
+
+.rating-star:hover,
+.rating-star.active {
+    color: #ffcc00;
+    transform: scale(1.1);
+}
+
+.feedback-form-submit {
+    background: linear-gradient(90deg, #9d6aff, #53c5ff);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.feedback-form-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(100, 80, 255, 0.3);
+}
+
+/* RTL Support */
+[dir="rtl"] .recommendations-tab,
+[dir="rtl"] .section-title,
+[dir="rtl"] .item-actions {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .recommendation-item.implemented {
+    border-left: none;
+    border-right: 3px solid #9d6aff;
+}
+
+[dir="rtl"] .recommendations-affirmation {
+    border-left: none;
+    border-right: 4px solid #9d6aff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .recommendations-container {
+        padding: 15px;
+        margin: 0 10px;
+    }
+    
+    .recommendations-title {
+        font-size: 1.5rem;
+    }
+    
+    .recommendations-tab .title {
+        display: none;
+    }
+    
+    .recommendations-tab .icon {
+        font-size: 1.4rem;
+    }
+    
+    .recommendations-tab {
+        padding: 10px;
+    }
+    
+    .section-title {
+        font-size: 1.2rem;
+    }
+    
+    .recommendation-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .item-actions {
+        align-self: flex-end;
+        margin-top: 10px;
+    }
+    
+    .feedback-form {
+        padding: 20px;
+        max-width: 100%;
+        margin: 0 15px;
+    }
+}
+
+/* Mood-based Themes */
+.recommendations-container[data-mood="happy"] {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 170, 0, 0.2) 100%);
+    box-shadow: 0 5px 25px rgba(255, 200, 0, 0.2);
+}
+
+.theme-light .recommendations-container[data-mood="happy"] {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 170, 0, 0.1) 100%);
+}
+
+.recommendations-container[data-mood="sad"] {
+    background: linear-gradient(135deg, rgba(0, 100, 255, 0.2) 0%, rgba(0, 50, 200, 0.2) 100%);
+    box-shadow: 0 5px 25px rgba(0, 100, 255, 0.2);
+}
+
+.theme-light .recommendations-container[data-mood="sad"] {
+    background: linear-gradient(135deg, rgba(0, 100, 255, 0.1) 0%, rgba(0, 50, 200, 0.1) 100%);
+}
+
+.recommendations-container[data-mood="angry"] {
+    background: linear-gradient(135deg, rgba(255, 60, 0, 0.2) 0%, rgba(200, 30, 0, 0.2) 100%);
+    box-shadow: 0 5px 25px rgba(255, 60, 0, 0.2);
+}
+
+.theme-light .recommendations-container[data-mood="angry"] {
+    background: linear-gradient(135deg, rgba(255, 60, 0, 0.1) 0%, rgba(200, 30, 0, 0.1) 100%);
+}
+
+.recommendations-container[data-mood="neutral"] {
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(100, 30, 180, 0.2) 100%);
+    box-shadow: 0 5px 25px rgba(138, 43, 226, 0.2);
+}
+
+.theme-light .recommendations-container[data-mood="neutral"] {
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.1) 0%, rgba(100, 30, 180, 0.1) 100%);
+}

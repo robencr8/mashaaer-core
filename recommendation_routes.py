@@ -211,6 +211,40 @@ def submit_recommendation_feedback():
         }), 500
 
 
+@recommendation_bp.route('/greeting', methods=['GET'])
+def get_contextual_greeting():
+    """
+    Get a time-appropriate contextual greeting
+    
+    Query parameters:
+    - language: Language code ('en' or 'ar'), defaults to 'en'
+    
+    Returns:
+    {
+        "success": true,
+        "greeting": "Good morning! Ready for a bright weekday?"
+    }
+    """
+    try:
+        language = request.args.get('language', 'en')
+        if language not in ['en', 'ar']:
+            language = 'en'  # Default to English for unsupported languages
+            
+        greeting = recommendation_engine.get_contextual_greeting(language)
+        
+        return jsonify({
+            'success': True,
+            'greeting': greeting
+        })
+        
+    except Exception as e:
+        logger.error(f"Error generating contextual greeting: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to generate greeting',
+            'message': str(e)
+        }), 500
+
 @recommendation_bp.route('/interaction', methods=['POST'])
 def log_recommendation_interaction():
     """
