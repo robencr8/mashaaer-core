@@ -24,3 +24,5 @@ beautifulsoup4
 textblob
 apscheduler
 anthropic
+flask-markdown
+markdown

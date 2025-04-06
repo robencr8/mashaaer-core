@@ -292,7 +292,7 @@ async function processUserInput(text, emotion = null) {
 }
 
 /**
- * Update the emotion display
+ * Update the emotion display and theme
  */
 function updateEmotionDisplay(emotion) {
   appState.currentEmotion = emotion;
@@ -303,6 +303,16 @@ function updateEmotionDisplay(emotion) {
   
   elements.personalityType.classList.remove(...emotionClasses);
   elements.personalityType.classList.add(emotion);
+  
+  // Apply mood theme if available
+  try {
+    if (window.moodThemeManager) {
+      window.moodThemeManager.setMoodTheme(emotion);
+      console.log(`Applied ${emotion} mood theme`);
+    }
+  } catch (e) {
+    console.log('Mood theme system not available', e);
+  }
 }
 
 /**

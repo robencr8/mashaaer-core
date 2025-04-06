@@ -1,8 +1,9 @@
 # Additional application routes for Mashaaer Feelings
 
-from flask import render_template, send_from_directory, redirect, url_for
+from flask import render_template, send_from_directory, redirect, url_for, Markup
 import logging
 import os
+import markdown
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,9 @@ def register_routes(app):
         logger.debug("Serving audio fix guide")
         with open("AUDIO_FIX.md", "r") as f:
             content = f.read()
-        return render_template("markdown.html", content=content, title="Audio Fix Guide")
+        # Convert markdown to HTML
+        md_html = Markup(markdown.markdown(content))
+        return render_template("markdown.html", content=md_html, title="Audio Fix Guide")
         
     @app.route("/audio-bypass")
     def audio_bypass_guide():
@@ -43,7 +46,9 @@ def register_routes(app):
         logger.debug("Serving audio autoplay bypass guide")
         with open("AUDIO_AUTOPLAY_BYPASS.md", "r") as f:
             content = f.read()
-        return render_template("markdown.html", content=content, title="Audio Autoplay Bypass Guide")
+        # Convert markdown to HTML
+        md_html = Markup(markdown.markdown(content))
+        return render_template("markdown.html", content=md_html, title="Audio Autoplay Bypass Guide")
     
     @app.route("/cosmic-loader-demo")
     def cosmic_loader_demo():
@@ -57,7 +62,9 @@ def register_routes(app):
         logger.debug("Serving cosmic loader documentation")
         with open("COSMIC_LOADER_ANIMATIONS.md", "r") as f:
             content = f.read()
-        return render_template("markdown.html", content=content, title="Cosmic Loader Animations")
+        # Convert markdown to HTML
+        md_html = Markup(markdown.markdown(content))
+        return render_template("markdown.html", content=md_html, title="Cosmic Loader Animations")
     
     @app.route("/recommendations", methods=["GET"])
     def recommendations_page():
@@ -116,6 +123,24 @@ def register_routes(app):
         """Test page for demonstrating the cosmic sound fix"""
         logger.debug("Serving cosmic sound fix test page")
         return send_from_directory("static", "test_cosmic_sound.html")
+
+    # Theme testing page
+    @app.route("/test-themes")
+    def test_themes():
+        """Test page for mood-based theme system"""
+        logger.debug("Serving mood-based theme test page")
+        return send_from_directory("static", "test_themes.html")
+        
+    # Theme documentation
+    @app.route("/mood-themes")
+    def mood_themes_docs():
+        """Documentation for mood-based theme system"""
+        logger.debug("Serving mood-based theme documentation")
+        with open("MOOD_BASED_THEMES.md", "r") as f:
+            content = f.read()
+        # Convert markdown to HTML
+        md_html = Markup(markdown.markdown(content))
+        return render_template("markdown.html", content=md_html, title="Mood-Based Adaptive Theme System")
 
     # Return the app to allow chaining
     return app

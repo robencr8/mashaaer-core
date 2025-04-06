@@ -641,6 +641,13 @@
     
     <button class="enter-button" id="enter-button">البدء | Start</button>
     
+    <div style="margin-top: 15px;">
+      <a href="/mood-themes" style="color: rgba(255,255,255,0.7); font-size: 0.8rem; text-decoration: none; transition: color 0.3s;">Theme Documentation</a>
+    </div>
+    <div style="margin-top: 15px;">
+      <a href="/mood-themes" style="color: rgba(255,255,255,0.7); font-size: 0.8rem; text-decoration: none; transition: color 0.3s;">Theme Documentation</a>
+    </div>
+    
     <div class="voice-status" id="voice-status">
       <div class="voice-indicator">
         <div class="voice-waves"></div>
@@ -970,6 +977,15 @@
       
       // Update global emotion state
       recognizedEmotion = emotion;
+      
+      // Apply mood-based theme to the entire page
+      document.documentElement.setAttribute('data-mood', emotion);
+      
+      // Dispatch custom event for theme change
+      const event = new CustomEvent('emotionDetected', {
+        detail: { emotion: emotion }
+      });
+      document.dispatchEvent(event);
       
       // Change particle colors based on emotion
       updateParticleColors(emotion);

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root" data-mood="neutral">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mashaaer Mood Theme Tester</title>
+  <link rel="stylesheet" href="/static/css/mood-themes.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+      background: var(--dark-bg-gradient);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--theme-transition) ease;
+    }
+    
+    .container {
+      max-width: 800px;
+      text-align: center;
+      padding: 2rem;
+    }
+    
+    .mood-selector {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    
+    .mood-button {
+      padding: 1rem 1.5rem;
+      border: none;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: white;
+    }
+    
+    .happy-btn {
+      background-color: #FFD700;
+    }
+    
+    .sad-btn {
+      background-color: #0064FF;
+    }
+    
+    .angry-btn {
+      background-color: #FF3C00;
+    }
+    
+    .calm-btn {
+      background-color: #30D5C8;
+    }
+    
+    .neutral-btn {
+      background-color: #9C27B0;
+    }
+    
+    .theme-preview {
+      margin-top: 2rem;
+      padding: 2rem;
+      border-radius: 15px;
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .theme-title {
+      font-size: 2rem;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      text-shadow: 0 0 10px var(--primary-glow);
+    }
+    
+    .theme-description {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+    }
+    
+    .cosmic-sphere {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, var(--primary-light), var(--primary-dark));
+      margin: 2rem auto;
+      box-shadow: 0 0 50px var(--primary-glow);
+      animation: pulse 4s infinite alternate, float 6s ease-in-out infinite;
+      position: relative;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 30px var(--primary-glow); }
+      100% { box-shadow: 0 0 70px var(--primary-glow); }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    .test-button {
+      background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      border-radius: 30px;
+      cursor: pointer;
+      margin-top: 2rem;
+      box-shadow: 0 5px 15px var(--primary-glow);
+      transition: all 0.3s ease;
+    }
+    
+    .test-button:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px var(--primary-glow);
+    }
+    
+    .color-palette {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    .color-sample {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: white;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="theme-title">Mashaaer Mood Theme Tester</h1>
+    <p class="theme-description">Select a mood to see how the theme changes</p>
+    
+    <div class="mood-selector">
+      <button class="mood-button happy-btn" data-mood="happy">Happy</button>
+      <button class="mood-button sad-btn" data-mood="sad">Sad</button>
+      <button class="mood-button angry-btn" data-mood="angry">Angry</button>
+      <button class="mood-button calm-btn" data-mood="calm">Calm</button>
+      <button class="mood-button neutral-btn" data-mood="neutral">Neutral</button>
+    </div>
+    
+    <div class="cosmic-sphere"></div>
+    
+    <div class="theme-preview">
+      <h2 class="theme-title">Current Mood: <span id="current-mood">Neutral</span></h2>
+      <p class="theme-description">This is how the application will appear with this mood theme</p>
+      
+      <div class="color-palette">
+        <div class="color-sample" id="primary-color">Primary</div>
+        <div class="color-sample" id="primary-light">Light</div>
+        <div class="color-sample" id="primary-dark">Dark</div>
+        <div class="color-sample" id="glow-color">Glow</div>
+      </div>
+      
+      <button class="test-button">Sample Button</button>
+    </div>
+  </div>
+  
+  <script src="/static/js/mood-theme-manager.js"></script>
+  <script>
+    // Update theme previews when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      updateColorSamples();
+    });
+    
+    // Set up event listeners for mood buttons
+    const moodButtons = document.querySelectorAll('.mood-button');
+    moodButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const mood = this.getAttribute('data-mood');
+        
+        // Use the MoodThemeManager to change the theme
+        window.moodThemeManager.setMoodTheme(mood);
+        
+        // Update the current mood display
+        document.getElementById('current-mood').textContent = 
+          mood.charAt(0).toUpperCase() + mood.slice(1);
+        
+        // Update color samples
+        updateColorSamples();
+      });
+    });
+    
+    // Update the color sample displays
+    function updateColorSamples() {
+      const style = getComputedStyle(document.documentElement);
+      
+      const primaryColor = style.getPropertyValue('--primary-color');
+      const primaryLight = style.getPropertyValue('--primary-light');
+      const primaryDark = style.getPropertyValue('--primary-dark');
+      const primaryGlow = style.getPropertyValue('--primary-glow');
+      
+      document.getElementById('primary-color').style.backgroundColor = primaryColor;
+      document.getElementById('primary-light').style.backgroundColor = primaryLight;
+      document.getElementById('primary-dark').style.backgroundColor = primaryDark;
+      document.getElementById('glow-color').style.backgroundColor = primaryGlow;
+    }
+  </script>
+</body>
+</html>
