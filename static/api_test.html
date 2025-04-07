@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #6a1b9a;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #f9f9ff;
+            border-radius: 8px;
+            border-left: 4px solid #6a1b9a;
+        }
+        h2 {
+            margin-top: 0;
+            color: #6a1b9a;
+        }
+        button {
+            background: #6a1b9a;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #9c27b0;
+        }
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            margin-top: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            display: none;
+        }
+        .success {
+            border-left: 4px solid #4CAF50;
+        }
+        .error {
+            border-left: 4px solid #F44336;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mashaaer API Test</h1>
+        
+        <div class="section">
+            <h2>API Status Check</h2>
+            <button id="checkApiBtn">Check API Status</button>
+            <div id="apiStatusResult" class="result"></div>
+        </div>
+        
+        <div class="section">
+            <h2>User Feedback Test</h2>
+            <div class="input-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" value="Test User">
+            </div>
+            <div class="input-group">
+                <label for="feedback">Feedback:</label>
+                <textarea id="feedback">This is a test feedback message from the API test page.</textarea>
+            </div>
+            <div class="input-group">
+                <label for="emotion">Emotion:</label>
+                <select id="emotion">
+                    <option value="happy">Happy</option>
+                    <option value="sad">Sad</option>
+                    <option value="angry">Angry</option>
+                    <option value="default">Default</option>
+                </select>
+            </div>
+            <button id="sendFeedbackBtn">Send Feedback</button>
+            <div id="feedbackResult" class="result"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Emotion Analysis Test</h2>
+            <div class="input-group">
+                <label for="textInput">Text to Analyze:</label>
+                <textarea id="textInput">I am feeling very happy today! It's a beautiful day.</textarea>
+            </div>
+            <button id="analyzeBtn">Analyze Emotion</button>
+            <div id="emotionResult" class="result"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Voice Logic Test</h2>
+            <div class="input-group">
+                <label for="ttsText">Text for Speech:</label>
+                <textarea id="ttsText">Hello, this is a test of the text-to-speech system.</textarea>
+            </div>
+            <div class="input-group">
+                <label for="ttsLanguage">Language:</label>
+                <select id="ttsLanguage">
+                    <option value="auto">Auto-detect</option>
+                    <option value="en">English</option>
+                    <option value="ar">Arabic</option>
+                </select>
+            </div>
+            <button id="ttsBtn">Generate Speech</button>
+            <div id="ttsResult" class="result"></div>
+            <audio id="audioPlayer" controls style="width: 100%; margin-top: 10px; display: none;"></audio>
+        </div>
+    </div>
+
+    <script>
+        // API Status Check
+        document.getElementById('checkApiBtn').addEventListener('click', async () => {
+            const resultElement = document.getElementById('apiStatusResult');
+            resultElement.style.display = 'block';
+            resultElement.textContent = 'Checking...';
+            
+            try {
+                const response = await fetch('/api/verify-feedback');
+                const data = await response.json();
+                
+                resultElement.textContent = JSON.stringify(data, null, 2);
+                resultElement.className = data.success ? 'result success' : 'result error';
+            } catch (error) {
+                resultElement.textContent = `Error: ${error.message}`;
+                resultElement.className = 'result error';
+            }
+        });
+        
+        // User Feedback Test
+        document.getElementById('sendFeedbackBtn').addEventListener('click', async () => {
+            const resultElement = document.getElementById('feedbackResult');
+            resultElement.style.display = 'block';
+            resultElement.textContent = 'Sending...';
+            
+            const data = {
+                name: document.getElementById('name').value,
+                feedback: document.getElementById('feedback').value,
+                emotion: document.getElementById('emotion').value,
+                rating: 5,
+                language: 'en',
+                app_version: '1.0.0',
+                device_info: navigator.userAgent
+            };
+            
+            try {
+                const response = await fetch('/api/user-feedback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                resultElement.textContent = JSON.stringify(result, null, 2);
+                resultElement.className = result.success ? 'result success' : 'result error';
+                
+                // If there's a sound effect, play it
+                if (result.success && result.sound_effect) {
+                    const audio = new Audio(result.sound_effect);
+                    audio.play().catch(e => console.log('Audio play prevented:', e));
+                }
+            } catch (error) {
+                resultElement.textContent = `Error: ${error.message}`;
+                resultElement.className = 'result error';
+            }
+        });
+        
+        // Emotion Analysis Test
+        document.getElementById('analyzeBtn').addEventListener('click', async () => {
+            const resultElement = document.getElementById('emotionResult');
+            resultElement.style.display = 'block';
+            resultElement.textContent = 'Analyzing...';
+            
+            const data = {
+                text: document.getElementById('textInput').value,
+                language: 'auto'
+            };
+            
+            try {
+                const response = await fetch('/api/emotion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                resultElement.textContent = JSON.stringify(result, null, 2);
+                resultElement.className = result.success ? 'result success' : 'result error';
+            } catch (error) {
+                resultElement.textContent = `Error: ${error.message}`;
+                resultElement.className = 'result error';
+            }
+        });
+        
+        // Voice Logic Test
+        document.getElementById('ttsBtn').addEventListener('click', async () => {
+            const resultElement = document.getElementById('ttsResult');
+            const audioPlayer = document.getElementById('audioPlayer');
+            
+            resultElement.style.display = 'block';
+            resultElement.textContent = 'Generating...';
+            audioPlayer.style.display = 'none';
+            
+            const data = {
+                text: document.getElementById('ttsText').value,
+                language: document.getElementById('ttsLanguage').value,
+                use_cache: true
+            };
+            
+            try {
+                const response = await fetch('/api/voice_logic', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                resultElement.textContent = JSON.stringify(result, null, 2);
+                resultElement.className = result.success ? 'result success' : 'result error';
+                
+                if (result.success && result.audio_url) {
+                    audioPlayer.src = result.audio_url;
+                    audioPlayer.style.display = 'block';
+                }
+            } catch (error) {
+                resultElement.textContent = `Error: ${error.message}`;
+                resultElement.className = 'result error';
+            }
+        });
+    </script>
+</body>
+</html>

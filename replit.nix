@@ -1,5 +1,6 @@
 {pkgs}: {
   deps = [
+    pkgs.lsof
     pkgs.ffmpeg
     pkgs.ffmpeg-full
     pkgs.xsimd

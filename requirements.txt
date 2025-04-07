@@ -28,3 +28,6 @@ flask-markdown
 markdown
 openai
 anthropic
+langdetect
+gtts
+textblob

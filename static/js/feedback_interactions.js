@@ -171,7 +171,7 @@
         });
         
         // Send the feedback
-        fetch('/api/feedback/process', {
+        fetch('/api/user-feedback', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

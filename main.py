@@ -132,10 +132,21 @@ except Exception as e:
 try:
     from api_routes import init_api
     from app_routes import register_routes  # Import function to register additional routes
+    from voice_logic import init_voice_logic  # Import voice logic routes
+    from emotion_api import init_emotion_api  # Import emotion API routes
+    from feedback_api import init_feedback_api  # Import feedback API routes
     
     # Initialize API routes
     api_blueprint = init_api(app, db_manager, emotion_tracker, face_detector, 
                           tts_manager, voice_recognition, intent_classifier, config)
+    
+    # Register our additional API endpoints
+    voice_bp = init_voice_logic(app)
+    emotion_bp = init_emotion_api(app)
+    feedback_bp = init_feedback_api(app)
+    
+    # Store TTS manager in app config for access from other routes
+    app.config['tts_manager'] = tts_manager
     
     # Register additional routes from app_routes.py
     register_routes(app)
@@ -145,6 +156,8 @@ except ImportError as e:
     logger.error(f"Could not import API routes: {str(e)}")
 except Exception as e:
     logger.error(f"Error registering API routes: {str(e)}")
+    import traceback
+    logger.error(f"API routes registration traceback: {traceback.format_exc()}")
 
 # Import and register recommendation routes
 try:
