@@ -1,5 +1,0 @@
-name = "Minimal Server"
-entrypoint = "python ultra_minimal_server.py"
-run = "python ultra_minimal_server.py"
-language = "python3"
-docs = """Minimal Flask server for testing"""

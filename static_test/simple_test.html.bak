@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer Simple Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #6a1b9a;
+        }
+        h2 {
+            color: #8e24aa;
+            margin-top: 30px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background-color: #6a1b9a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #8e24aa;
+        }
+        pre {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        textarea {
+            width: 100%;
+            height: 80px;
+            margin: 10px 0;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .notification-type {
+            display: inline-block;
+            padding: 8px 15px;
+            margin: 5px;
+            background-color: #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .notification-type.selected {
+            background-color: #6a1b9a;
+            color: white;
+        }
+        .notification-form {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mashaaer Simple Test</h1>
+        <p>This is a minimal test page to verify server connectivity and test Telegram notifications.</p>
+        
+        <h2>API Connection Tests</h2>
+        <div class="test-section">
+            <button id="healthBtn">Test API Health</button>
+            <pre id="healthResult">Click the button to test...</pre>
+        </div>
+        
+        <div class="test-section">
+            <button id="statusBtn">Test API Status</button>
+            <pre id="statusResult">Click the button to test...</pre>
+        </div>
+        
+        <div class="test-section">
+            <button id="feedbackBtn">Test Feedback Verification</button>
+            <pre id="feedbackResult">Click the button to test...</pre>
+        </div>
+        
+        <h2>Telegram Notification Tests</h2>
+        
+        <div class="test-section">
+            <button id="telegramStatusBtn">Check Telegram Status</button>
+            <pre id="telegramStatusResult">Click the button to check Telegram connectivity...</pre>
+        </div>
+        
+        <div class="test-section">
+            <h3>Direct Message Notification</h3>
+            <textarea id="messageText" placeholder="Enter notification message...">Mashaaer API test notification! 🪐</textarea>
+            <button id="sendMessageBtn">Send Message</button>
+            <pre id="messageResult">Results will appear here...</pre>
+        </div>
+        
+        <div class="test-section">
+            <h3>System Notifications</h3>
+            <p>Select notification type:</p>
+            <div class="notification-types">
+                <span class="notification-type selected" data-type="startup">Startup</span>
+                <span class="notification-type" data-type="error">Error</span>
+                <span class="notification-type" data-type="stats">Stats</span>
+                <span class="notification-type" data-type="custom">Custom</span>
+            </div>
+            
+            <!-- Startup Notification Form -->
+            <div id="startup-form" class="notification-form" style="display: block;">
+                <div>
+                    <label for="version">Version:</label>
+                    <input type="text" id="version" value="1.0">
+                </div>
+                <div>
+                    <label for="env">Environment:</label>
+                    <input type="text" id="env" value="testing">
+                </div>
+                <button id="sendStartupBtn">Send Startup Notification</button>
+                <pre id="startupResult">Results will appear here...</pre>
+            </div>
+            
+            <!-- Error Notification Form -->
+            <div id="error-form" class="notification-form">
+                <div>
+                    <label for="errorType">Error Type:</label>
+                    <input type="text" id="errorType" value="api_connection">
+                </div>
+                <div>
+                    <label for="errorDetails">Error Details:</label>
+                    <textarea id="errorDetails">Failed to connect to external API service</textarea>
+                </div>
+                <div>
+                    <label for="severity">Severity:</label>
+                    <select id="severity">
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+                <button id="sendErrorBtn">Send Error Notification</button>
+                <pre id="errorResult">Results will appear here...</pre>
+            </div>
+            
+            <!-- Stats Notification Form -->
+            <div id="stats-form" class="notification-form">
+                <div>
+                    <label for="users">User Count:</label>
+                    <input type="text" id="users" value="120">
+                </div>
+                <div>
+                    <label for="interactions">Interactions:</label>
+                    <input type="text" id="interactions" value="500">
+                </div>
+                <div>
+                    <label for="apiCalls">API Calls:</label>
+                    <input type="text" id="apiCalls" value="1200">
+                </div>
+                <button id="sendStatsBtn">Send Stats Notification</button>
+                <pre id="statsResult">Results will appear here...</pre>
+            </div>
+            
+            <!-- Custom Notification Form -->
+            <div id="custom-form" class="notification-form">
+                <div>
+                    <label for="customTitle">Title:</label>
+                    <input type="text" id="customTitle" value="Test Event">
+                </div>
+                <div>
+                    <label for="customContent">Content (JSON format):</label>
+                    <textarea id="customContent">{"key1": "value1", "key2": "value2", "status": "testing"}</textarea>
+                </div>
+                <button id="sendCustomBtn">Send Custom Notification</button>
+                <pre id="customResult">Results will appear here...</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Connection Tests
+        document.getElementById('healthBtn').addEventListener('click', async () => {
+            const resultElem = document.getElementById('healthResult');
+            resultElem.textContent = 'Testing API health...';
+            
+            try {
+                const response = await fetch('/api-health');
+                const data = await response.json();
+                resultElem.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultElem.textContent = 'Error: ' + error.message;
+            }
+        });
+        
+        document.getElementById('statusBtn').addEventListener('click', async () => {
+            const resultElem = document.getElementById('statusResult');
+            resultElem.textContent = 'Testing API status...';
+            
+            try {
+                const response = await fetch('/api-status');
+                const data = await response.json();
+                resultElem.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultElem.textContent = 'Error: ' + error.message;
+            }
+        });
+        
+        document.getElementById('feedbackBtn').addEventListener('click', async () => {
+            const resultElem = document.getElementById('feedbackResult');
+            resultElem.textContent = 'Testing feedback verification...';
+            
+            try {
+                const response = await fetch('/api/verify-feedback');
+                const data = await response.json();
+                resultElem.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultElem.textContent = 'Error: ' + error.message;
+            }
+        });
+        
+        // Telegram Status Check
+        document.getElementById('telegramStatusBtn').addEventListener('click', async () => {
+            const resultElem = document.getElementById('telegramStatusResult');
+            resultElem.textContent = 'Checking Telegram status...';
+            
+            try {
+                const response = await fetch('/api/notifications/status');
+                const data = await response.json();
+                resultElem.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultElem.textContent = 'Error: ' + error.message;
+            }
+        });
+        
+        // Send Direct Message
+        document.getElementById('sendMessageBtn').addEventListener('click', async () => {
+            const resultElem = document.getElementById('messageResult');
+            const message = document.getElementById('messageText').value;
+            resultElem.textContent = 'Sending message...';
+            
+            try {
+                const response = await fetch('/api/notifications/telegram/notify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        parse_mode: 'Markdown'
+                    })
+                });
+                const data = await response.json();
+                resultElem.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultElem.textContent = 'Error: ' + error.message;
+            }
+        });
+        
+        // Notification Type Selection
+        document.querySelectorAll('.notification-type').forEach(elem => {
+            elem.addEventListener('click', () => {
+                // Update selection
+                document.querySelectorAll('.notification-type').forEach(e => e.classList.remove('selected'));
+                elem.classList.add('selected');
+                
+                // Hide all forms
+                document.querySelectorAll('.notification-form').forEach(form => {
+                    form.style.display = 'none';
+                });
+                
+                // Show selected form
+                const type = elem.getAttribute('data-type');
+                document.getElementById(`${type}-form`).style.display = 'block';
+            });
+        });
+        
+        // Send Startup Notification
+        document.getElementById('sendStartupBtn').addEventListener('click', async () => {
+            const resultElem = document.getElementById('startupResult');
+            const version = document.getElementById('version').value;
+            const env = document.getElementById('env').value;
+            resultElem.textContent = 'Sending startup notification...';
+            
+            try {
+                const response = await fetch('/api/notifications/telegram/system', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: 'startup',
+                        data: {
+                            version: version,
+                            env: env
+                        }
+                    })
+                });
+                const data = await response.json();
+                resultElem.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultElem.textContent = 'Error: ' + error.message;
+            }
+        });
+        
+        // Send Error Notification
+        document.getElementById('sendErrorBtn').addEventListener('click', async () => {
+            const resultElem = document.getElementById('errorResult');
+            const errorType = document.getElementById('errorType').value;
+            const details = document.getElementById('errorDetails').value;
+            const severity = document.getElementById('severity').value;
+            resultElem.textContent = 'Sending error notification...';
+            
+            try {
+                const response = await fetch('/api/notifications/telegram/system', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: 'error',
+                        data: {
+                            error_type: errorType,
+                            details: details,
+                            severity: severity
+                        }
+                    })
+                });
+                const data = await response.json();
+                resultElem.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultElem.textContent = 'Error: ' + error.message;
+            }
+        });
+        
+        // Send Stats Notification
+        document.getElementById('sendStatsBtn').addEventListener('click', async () => {
+            const resultElem = document.getElementById('statsResult');
+            const users = document.getElementById('users').value;
+            const interactions = document.getElementById('interactions').value;
+            const apiCalls = document.getElementById('apiCalls').value;
+            resultElem.textContent = 'Sending stats notification...';
+            
+            try {
+                const response = await fetch('/api/notifications/telegram/system', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: 'stats',
+                        data: {
+                            users: parseInt(users),
+                            interactions: parseInt(interactions),
+                            api_calls: parseInt(apiCalls)
+                        }
+                    })
+                });
+                const data = await response.json();
+                resultElem.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultElem.textContent = 'Error: ' + error.message;
+            }
+        });
+        
+        // Send Custom Notification
+        document.getElementById('sendCustomBtn').addEventListener('click', async () => {
+            const resultElem = document.getElementById('customResult');
+            const title = document.getElementById('customTitle').value;
+            let content;
+            
+            try {
+                content = JSON.parse(document.getElementById('customContent').value);
+            } catch (e) {
+                resultElem.textContent = 'Error: Invalid JSON in content field';
+                return;
+            }
+            
+            resultElem.textContent = 'Sending custom notification...';
+            
+            try {
+                const response = await fetch('/api/notifications/telegram/system', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: 'custom',
+                        data: {
+                            title: title,
+                            content: content
+                        }
+                    })
+                });
+                const data = await response.json();
+                resultElem.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultElem.textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

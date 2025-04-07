@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Notification Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], 
+        select, 
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            position: relative;
+            top: 1px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            background-color: #f8f8f8;
+            border-left: 4px solid #3498db;
+            overflow-wrap: break-word;
+        }
+        .success {
+            border-left-color: #2ecc71;
+        }
+        .error {
+            border-left-color: #e74c3c;
+        }
+        pre {
+            white-space: pre-wrap;
+            margin: 0;
+        }
+        .hidden {
+            display: none;
+        }
+        .advanced-fields {
+            border-top: 1px solid #eee;
+            margin-top: 15px;
+            padding-top: 15px;
+        }
+        .toggle-advanced {
+            color: #3498db;
+            cursor: pointer;
+            text-decoration: underline;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-col {
+            flex: 1;
+        }
+        .icon {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Telegram Notification Test</h1>
+    
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" data-tab="direct">Direct Message</div>
+            <div class="tab" data-tab="system">System Notification</div>
+            <div class="tab" data-tab="status">System Status</div>
+        </div>
+        
+        <!-- Direct Message Tab -->
+        <div class="tab-content active" id="direct-tab">
+            <form id="direct-form">
+                <div class="form-group">
+                    <label for="message">Message:</label>
+                    <textarea id="message" placeholder="Enter your message here..."></textarea>
+                </div>
+                
+                <div class="toggle-advanced">+ Advanced Options</div>
+                <div class="advanced-fields hidden">
+                    <div class="form-group">
+                        <label for="parse-mode">Parse Mode:</label>
+                        <select id="parse-mode">
+                            <option value="Markdown">Markdown</option>
+                            <option value="HTML">HTML</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit">
+                    <span class="icon">📤</span> Send Direct Message
+                </button>
+            </form>
+        </div>
+        
+        <!-- System Notification Tab -->
+        <div class="tab-content" id="system-tab">
+            <form id="system-form">
+                <div class="form-group">
+                    <label for="notification-type">Notification Type:</label>
+                    <select id="notification-type">
+                        <option value="startup">Startup</option>
+                        <option value="error">Error</option>
+                        <option value="stats">Usage Statistics</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                
+                <!-- Startup Fields -->
+                <div class="type-fields" id="startup-fields">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="startup-version">Version:</label>
+                                <input type="text" id="startup-version" value="1.0">
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="startup-env">Environment:</label>
+                                <select id="startup-env">
+                                    <option value="production">Production</option>
+                                    <option value="staging">Staging</option>
+                                    <option value="testing">Testing</option>
+                                    <option value="development">Development</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Error Fields -->
+                <div class="type-fields hidden" id="error-fields">
+                    <div class="form-group">
+                        <label for="error-type">Error Type:</label>
+                        <input type="text" id="error-type" placeholder="e.g., DATABASE_CONNECTION">
+                    </div>
+                    <div class="form-group">
+                        <label for="error-details">Error Details:</label>
+                        <textarea id="error-details" placeholder="Detailed error information..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="error-severity">Severity:</label>
+                        <select id="error-severity">
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Stats Fields -->
+                <div class="type-fields hidden" id="stats-fields">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="stats-users">Users:</label>
+                                <input type="number" id="stats-users" value="100">
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group">
+                                <label for="stats-interactions">Interactions:</label>
+                                <input type="number" id="stats-interactions" value="500">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="stats-api-calls">API Calls:</label>
+                        <input type="number" id="stats-api-calls" value="1000">
+                    </div>
+                </div>
+                
+                <!-- Custom Fields -->
+                <div class="type-fields hidden" id="custom-fields">
+                    <div class="form-group">
+                        <label for="custom-title">Title:</label>
+                        <input type="text" id="custom-title" placeholder="Custom notification title">
+                    </div>
+                    <div class="form-group">
+                        <label for="custom-content">Content (JSON):</label>
+                        <textarea id="custom-content" placeholder='{"key1": "value1", "key2": "value2"}'></textarea>
+                    </div>
+                </div>
+                
+                <button type="submit">
+                    <span class="icon">🚀</span> Send System Notification
+                </button>
+            </form>
+        </div>
+        
+        <!-- Status Tab -->
+        <div class="tab-content" id="status-tab">
+            <p>Check the current status of the Telegram notification system.</p>
+            <button id="check-status">
+                <span class="icon">🔍</span> Check Status
+            </button>
+        </div>
+        
+        <!-- Results Area -->
+        <div class="result hidden">
+            <pre id="result-content"></pre>
+        </div>
+    </div>
+    
+    <script>
+        // Tab Switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+                
+                // Show corresponding content
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+                
+                // Hide result
+                document.querySelector('.result').classList.add('hidden');
+            });
+        });
+        
+        // Toggle Advanced Options
+        document.querySelector('.toggle-advanced').addEventListener('click', () => {
+            const advancedFields = document.querySelector('.advanced-fields');
+            advancedFields.classList.toggle('hidden');
+            const toggle = document.querySelector('.toggle-advanced');
+            toggle.textContent = advancedFields.classList.contains('hidden') ? '+ Advanced Options' : '- Advanced Options';
+        });
+        
+        // Toggle Type-specific Fields
+        document.getElementById('notification-type').addEventListener('change', function() {
+            document.querySelectorAll('.type-fields').forEach(field => field.classList.add('hidden'));
+            document.getElementById(`${this.value}-fields`).classList.remove('hidden');
+        });
+        
+        // Direct Message Form Submit
+        document.getElementById('direct-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = document.getElementById('message').value;
+            const parseMode = document.getElementById('parse-mode').value;
+            
+            if (!message) {
+                showResult('Please enter a message.', false);
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/notifications/telegram/notify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message,
+                        parse_mode: parseMode
+                    })
+                });
+                
+                const data = await response.json();
+                showResult(JSON.stringify(data, null, 2), data.success);
+            } catch (error) {
+                showResult(`Error: ${error.message}`, false);
+            }
+        });
+        
+        // System Notification Form Submit
+        document.getElementById('system-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const notificationType = document.getElementById('notification-type').value;
+            let payload = { type: notificationType, data: {} };
+            
+            switch (notificationType) {
+                case 'startup':
+                    payload.data = {
+                        version: document.getElementById('startup-version').value,
+                        env: document.getElementById('startup-env').value
+                    };
+                    break;
+                case 'error':
+                    payload.data = {
+                        error_type: document.getElementById('error-type').value,
+                        details: document.getElementById('error-details').value,
+                        severity: document.getElementById('error-severity').value
+                    };
+                    break;
+                case 'stats':
+                    payload.data = {
+                        users: parseInt(document.getElementById('stats-users').value),
+                        interactions: parseInt(document.getElementById('stats-interactions').value),
+                        api_calls: parseInt(document.getElementById('stats-api-calls').value)
+                    };
+                    break;
+                case 'custom':
+                    try {
+                        const contentText = document.getElementById('custom-content').value;
+                        const content = contentText ? JSON.parse(contentText) : {};
+                        payload.data = {
+                            title: document.getElementById('custom-title').value,
+                            content
+                        };
+                    } catch (error) {
+                        showResult(`Invalid JSON in content field: ${error.message}`, false);
+                        return;
+                    }
+                    break;
+            }
+            
+            try {
+                const response = await fetch('/api/notifications/telegram/system', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                showResult(JSON.stringify(data, null, 2), data.success);
+            } catch (error) {
+                showResult(`Error: ${error.message}`, false);
+            }
+        });
+        
+        // Check Status Button Click
+        document.getElementById('check-status').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/notifications/status');
+                const data = await response.json();
+                showResult(JSON.stringify(data, null, 2), data.success);
+            } catch (error) {
+                showResult(`Error: ${error.message}`, false);
+            }
+        });
+        
+        // Show Result
+        function showResult(content, success) {
+            const resultElement = document.querySelector('.result');
+            resultElement.classList.remove('hidden', 'success', 'error');
+            resultElement.classList.add(success ? 'success' : 'error');
+            document.getElementById('result-content').textContent = content;
+        }
+    </script>
+</body>
+</html>

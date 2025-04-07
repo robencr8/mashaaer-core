@@ -231,12 +231,107 @@ except ImportError as e:
 except Exception as e:
     logger.error(f"Error registering idiom translator routes: {str(e)}")
 
+# Register Telegram notification routes
+try:
+    from telegram_routes import init_telegram_notification_api
+    
+    # Initialize Telegram notification routes
+    telegram_bp = init_telegram_notification_api(app)
+    
+    logger.info("Telegram notification routes registered successfully")
+except ImportError as e:
+    logger.error(f"Could not import Telegram notification routes: {str(e)}")
+except Exception as e:
+    logger.error(f"Error registering Telegram notification routes: {str(e)}")
+
 # Add root route for the homepage
 @app.route("/", methods=["GET"])
 def index():
     """Serve the main homepage"""
     logger.debug("Serving homepage")
-    return render_template("index.html")
+    try:
+        return render_template("index.html")
+    except Exception as e:
+        # Return a basic health check response if the template is missing
+        return jsonify({
+            "success": True,
+            "status": "API server is running",
+            "version": "1.0",
+            "timestamp": datetime.datetime.utcnow().isoformat(),
+            "endpoints": [
+                "/api/verify-feedback",
+                "/api/user-feedback",
+                "/api/emotion",
+                "/api/voice_logic"
+            ]
+        })
+
+# Add a simple health check endpoint
+@app.route("/api-health", methods=["GET"])
+def api_health():
+    """API Health check endpoint"""
+    logger.debug("API Health check accessed")
+    return jsonify({
+        "success": True,
+        "status": "API server is running",
+        "version": "1.0",
+        "timestamp": datetime.datetime.utcnow().isoformat()
+    })
+
+# Add a simple test page route
+@app.route("/test", methods=["GET"])
+def test_page():
+    """Test page endpoint"""
+    logger.debug("Test page accessed")
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Mashaaer API Test</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { color: #6a1b9a; }
+            button { padding: 10px; margin: 10px 0; }
+            pre { background: #f5f5f5; padding: 10px; border-radius: 4px; }
+        </style>
+    </head>
+    <body>
+        <h1>Mashaaer API Test</h1>
+        <button id="testBtn">Test API Connection</button>
+        <pre id="result">Results will appear here...</pre>
+
+        <script>
+            document.getElementById('testBtn').addEventListener('click', async () => {
+                const resultElem = document.getElementById('result');
+                resultElem.textContent = 'Testing API connection...';
+                
+                try {
+                    const response = await fetch('/api/verify-feedback');
+                    const data = await response.json();
+                    resultElem.textContent = JSON.stringify(data, null, 2);
+                } catch (error) {
+                    resultElem.textContent = 'Error: ' + error.message;
+                }
+            });
+        </script>
+    </body>
+    </html>
+    """
+    return render_template_string(html)
+
+@app.route('/simple-test', methods=['GET'])
+def simple_test_page():
+    """Serve a simple test page for debugging"""
+    logger.debug("Simple test page accessed")
+    return send_from_directory('static_test', 'simple_test.html')
+
+@app.route('/notify-telegram', methods=['GET'])
+def notify_telegram_test_page():
+    """Serve a test page for Telegram notifications"""
+    logger.debug("Telegram notification test page accessed")
+    return send_from_directory('static_test', 'notify_telegram.html')
 
 # Add direct access to the feedback page
 @app.route("/direct-feedback", methods=["GET"])
@@ -948,10 +1043,10 @@ legacy_html_content = """
 # This is now handled by recommendation_routes.py
 
 # Add emotion analysis API endpoint
-@app.route("/health", methods=["GET", "OPTIONS"])
-def health():
-    """Health check endpoint"""
-    logger.debug("Health check endpoint accessed")
+@app.route("/api-status", methods=["GET", "OPTIONS"])
+def api_status():
+    """API status check endpoint"""
+    logger.debug("API status endpoint accessed")
     return jsonify({
         "status": "ok",
         "message": "Mashaaer Feelings service is running",

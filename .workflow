@@ -1,6 +1,2 @@
-<name>
-Start application
-</name>
-<command>
-python minimal_feedback.py
-</command>
+name = "Minimal app"
+command = "python minimal_app.py"
