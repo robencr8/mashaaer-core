@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer Feelings - Feedback</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-color: #0a0a2a;
+            background-image: radial-gradient(circle at center, #1a1a4a, #0a0a2a);
+            color: #f0f0ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .feedback-container {
+            width: 90%;
+            max-width: 600px;
+            background-color: rgba(20, 20, 40, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feedback-title {
+            font-size: 28px;
+            color: #fff;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .feedback-subtitle {
+            font-size: 16px;
+            color: #ccc;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .feedback-form label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ddd;
+            font-weight: 500;
+        }
+        
+        .feedback-form input[type="text"],
+        .feedback-form textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background-color: rgba(30, 30, 60, 0.6);
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .feedback-form input[type="text"]:focus,
+        .feedback-form textarea:focus {
+            border-color: #7878ff;
+            box-shadow: 0 0 8px rgba(120, 120, 255, 0.5);
+            outline: none;
+        }
+        
+        .feedback-form textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .emotion-selection {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .emotion-selector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 12px;
+            transition: transform 0.2s, background-color 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .emotion-selector:hover {
+            transform: translateY(-5px);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .emotion-selector.selected {
+            border-color: #7878ff;
+            background-color: rgba(120, 120, 255, 0.2);
+        }
+        
+        .emotion-icon {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+        
+        .emotion-label {
+            font-size: 14px;
+            color: #ddd;
+        }
+        
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background-color: #7878ff;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 10px;
+        }
+        
+        .submit-btn:hover {
+            background-color: #5a5aff;
+        }
+        
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <div class="feedback-container">
+        <h1 class="feedback-title">Share Your Feelings</h1>
+        <p class="feedback-subtitle">We value your emotional experience and feedback</p>
+        
+        <form id="feedback-form" class="feedback-form">
+            <label for="name">Your Name (Optional)</label>
+            <input type="text" id="name" name="name" placeholder="Enter your name">
+            
+            <label for="feedback">Your Feedback</label>
+            <textarea id="feedback" name="feedback" placeholder="Tell us how you feel about Mashaaer..."></textarea>
+            
+            <label>How do you feel right now?</label>
+            <div class="emotion-selection">
+                <div class="emotion-selector" data-emotion="happy">
+                    <div class="emotion-icon">😊</div>
+                    <div class="emotion-label">Happy</div>
+                </div>
+                <div class="emotion-selector" data-emotion="excited">
+                    <div class="emotion-icon">🤩</div>
+                    <div class="emotion-label">Excited</div>
+                </div>
+                <div class="emotion-selector" data-emotion="calm">
+                    <div class="emotion-icon">😌</div>
+                    <div class="emotion-label">Calm</div>
+                </div>
+                <div class="emotion-selector" data-emotion="neutral">
+                    <div class="emotion-icon">😐</div>
+                    <div class="emotion-label">Neutral</div>
+                </div>
+                <div class="emotion-selector" data-emotion="confused">
+                    <div class="emotion-icon">🤔</div>
+                    <div class="emotion-label">Confused</div>
+                </div>
+                <div class="emotion-selector" data-emotion="sad">
+                    <div class="emotion-icon">😢</div>
+                    <div class="emotion-label">Sad</div>
+                </div>
+            </div>
+            
+            <input type="hidden" id="emotion" name="emotion" value="neutral">
+            
+            <button type="submit" class="submit-btn">Send Feedback</button>
+        </form>
+    </div>
+    
+    <script>
+        // Select all emotion selectors
+        const emotionSelectors = document.querySelectorAll('.emotion-selector');
+        const emotionInput = document.getElementById('emotion');
+        
+        // Add click event to each emotion selector
+        emotionSelectors.forEach(selector => {
+            selector.addEventListener('click', function() {
+                // Remove selected class from all selectors
+                emotionSelectors.forEach(s => s.classList.remove('selected'));
+                
+                // Add selected class to clicked selector
+                this.classList.add('selected');
+                
+                // Update hidden input value
+                emotionInput.value = this.getAttribute('data-emotion');
+            });
+        });
+        
+        // Handle form submission
+        document.getElementById('feedback-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = {
+                name: document.getElementById('name').value || 'Anonymous',
+                feedback: document.getElementById('feedback').value,
+                emotion: emotionInput.value,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Send data to server
+            fetch('/api/enhanced-feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Thank you for your feedback!');
+                    document.getElementById('feedback-form').reset();
+                    emotionSelectors.forEach(s => s.classList.remove('selected'));
+                } else {
+                    alert('Error submitting feedback: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                alert('Error submitting feedback: ' + error.message);
+            });
+        });
+    </script>
+</body>
+</html>

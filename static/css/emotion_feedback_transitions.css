@@ -1,0 +1,172 @@
+/**
+ * Emotion Feedback Transitions
+ * CSS for handling animated transitions between emotional states in the feedback system
+ */
+
+/* Emotion transition overlay */
+.emotion-transition {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0;
+}
+
+/* Base transition animation */
+@keyframes emotionTransition {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+/* Apply animation when active */
+.emotion-transition.active {
+  animation: emotionTransition 1.5s ease-out forwards;
+}
+
+/* Emotion-specific background colors */
+.emotion-happy {
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, rgba(255, 165, 0, 0) 70%);
+}
+
+.emotion-sad {
+  background: radial-gradient(circle, rgba(65, 105, 225, 0.2) 0%, rgba(30, 144, 255, 0) 70%);
+}
+
+.emotion-angry {
+  background: radial-gradient(circle, rgba(255, 69, 0, 0.2) 0%, rgba(255, 99, 71, 0) 70%);
+}
+
+.emotion-calm {
+  background: radial-gradient(circle, rgba(72, 209, 204, 0.2) 0%, rgba(32, 178, 170, 0) 70%);
+}
+
+.emotion-excited {
+  background: radial-gradient(circle, rgba(255, 20, 147, 0.2) 0%, rgba(255, 105, 180, 0) 70%);
+}
+
+.emotion-confused {
+  background: radial-gradient(circle, rgba(153, 50, 204, 0.2) 0%, rgba(139, 0, 139, 0) 70%);
+}
+
+.emotion-neutral {
+  background: radial-gradient(circle, rgba(147, 112, 219, 0.2) 0%, rgba(123, 104, 238, 0) 70%);
+}
+
+/* Particle effects for emotions */
+.particles-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 999;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0;
+  transform: translateY(0);
+}
+
+@keyframes particleAnimation {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0);
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100px) scale(1);
+  }
+}
+
+/* Submit button special effects */
+.submit-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  transform: scale(1);
+  opacity: 0;
+}
+
+.submit-btn.clicked::after {
+  animation: submit-ripple 1s ease-out;
+}
+
+@keyframes submit-ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(80);
+    opacity: 0;
+  }
+}
+
+/* Success feedback effect */
+.success-feedback {
+  animation: success-pulse 1s ease-in-out;
+}
+
+@keyframes success-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+/* Error feedback effect */
+.error-feedback {
+  animation: error-shake 0.5s ease-in-out;
+}
+
+@keyframes error-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(-5px);
+  }
+  40%, 80% {
+    transform: translateX(5px);
+  }
+}

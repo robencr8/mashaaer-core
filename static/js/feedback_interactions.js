@@ -3,6 +3,8 @@
  * 
  * This module provides specialized micro-interactions for the feedback experience,
  * with sound effects, visual transitions, and emotion-based effects.
+ * 
+ * Version 2.0 - Updated with enhanced transitions and particle effects
  */
 
 (function() {
@@ -10,30 +12,42 @@
   const config = {
     soundEnabled: true,
     visualEffectsEnabled: true,
+    particleEffectsEnabled: true,
     emotionColors: {
       'happy': {
         primary: '#FFD700',    // Gold
-        secondary: '#FFA500'   // Orange
+        secondary: '#FFA500',  // Orange
+        particle: '#FFDF00'    // Golden Yellow
       },
       'sad': {
         primary: '#4169E1',    // Royal Blue
-        secondary: '#1E90FF'   // Dodger Blue
+        secondary: '#1E90FF',  // Dodger Blue
+        particle: '#6495ED'    // Cornflower Blue
       },
       'calm': {
         primary: '#48D1CC',    // Medium Turquoise
-        secondary: '#20B2AA'   // Light Sea Green
+        secondary: '#20B2AA',  // Light Sea Green
+        particle: '#5F9EA0'    // Cadet Blue
       },
       'excited': {
         primary: '#FF1493',    // Deep Pink
-        secondary: '#FF69B4'   // Hot Pink
+        secondary: '#FF69B4',  // Hot Pink
+        particle: '#FF69B4'    // Hot Pink
       },
       'confused': {
         primary: '#9932CC',    // Dark Orchid
-        secondary: '#8B008B'   // Dark Magenta
+        secondary: '#8B008B',  // Dark Magenta
+        particle: '#9370DB'    // Medium Purple
+      },
+      'angry': {
+        primary: '#FF4500',    // Orange Red
+        secondary: '#FF6347',  // Tomato
+        particle: '#FF7F50'    // Coral
       },
       'neutral': {
         primary: '#9370DB',    // Medium Purple
-        secondary: '#7B68EE'   // Medium Slate Blue
+        secondary: '#7B68EE',  // Medium Slate Blue
+        particle: '#8A2BE2'    // Blue Violet
       }
     },
     sounds: {
@@ -42,490 +56,373 @@
       'success': '/static/sounds/success.mp3',
       'error': '/static/sounds/error.mp3',
       'transition': '/static/sounds/transition.mp3'
+    },
+    particles: {
+      count: 25,        // Number of particles to create
+      duration: 2000,   // Animation duration in ms
+      spread: 100,      // How far particles spread 
+      speed: 1.5,       // Animation speed multiplier
+      size: {
+        min: 4,         // Minimum particle size
+        max: 10         // Maximum particle size
+      }
     }
   };
 
   // Current state
   let currentEmotion = 'neutral';
   let audioContext = null;
-  let soundCache = {};
+  let particlesContainer = null;
 
-  /**
-   * Initialize audio context on user interaction
-   */
-  function initAudioContext() {
+  // Initialize the module
+  function init() {
+    console.log('Initializing enhanced feedback interactions...');
+    
+    // Create audio context (lazy init)
     try {
-      if (!audioContext) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        audioContext = new AudioContext();
-        console.log('Audio context initialized');
-      }
-      return true;
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
     } catch (e) {
-      console.error('Failed to initialize audio context:', e);
-      return false;
+      console.warn('Web Audio API not supported in this browser');
+      config.soundEnabled = false;
     }
+    
+    // Create transition overlay element
+    const overlay = document.createElement('div');
+    overlay.className = 'emotion-transition';
+    document.body.appendChild(overlay);
+    
+    // Create particles container
+    particlesContainer = document.createElement('div');
+    particlesContainer.className = 'particles-container';
+    document.body.appendChild(particlesContainer);
+    
+    // Set up event listeners
+    setupEventListeners();
+    
+    // Auto-detect initial emotion from the page
+    detectInitialEmotion();
+    
+    console.log('Feedback interactions initialized');
   }
-
-  /**
-   * Play a sound effect with proper handling for mobile devices
-   * 
-   * @param {string} soundType - The type of sound to play
-   * @param {number} volume - Volume level (0.0 to 1.0)
-   * @returns {Promise} - Resolves when sound plays or fails
-   */
-  function playSound(soundType, volume = 0.5) {
-    if (!config.soundEnabled) return Promise.resolve(false);
-    
-    // Initialize audio context on demand (needed for mobile)
-    if (!initAudioContext()) {
-      return Promise.resolve(false);
-    }
-    
-    return new Promise((resolve) => {
-      // Use existing audio element if available
-      const audioEl = document.querySelector(`audio[data-sound="${soundType}"]`);
-      if (audioEl) {
-        audioEl.volume = volume;
-        audioEl.currentTime = 0;
-        
-        audioEl.play()
-          .then(() => resolve(true))
-          .catch(err => {
-            console.warn(`Error playing sound (${soundType}):`, err);
-            resolve(false);
-          });
-          
-        return;
-      }
+  
+  // Set up event listeners for interactive elements
+  function setupEventListeners() {
+    // Button hover effects
+    document.querySelectorAll('.feedback-btn, .submit-btn').forEach(btn => {
+      btn.addEventListener('mouseenter', function() {
+        playSound('hover');
+        this.style.transform = 'scale(1.05)';
+        this.style.transition = 'transform 0.2s ease-out';
+      });
       
-      // If no audio element exists, create one dynamically
-      const soundUrl = config.sounds[soundType];
-      if (!soundUrl) {
-        console.warn(`Sound type not found: ${soundType}`);
-        resolve(false);
-        return;
-      }
+      btn.addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1)';
+      });
       
-      // Use cached audio if available
-      if (soundCache[soundType]) {
-        soundCache[soundType].volume = volume;
-        soundCache[soundType].currentTime = 0;
-        
-        soundCache[soundType].play()
-          .then(() => resolve(true))
-          .catch(err => {
-            console.warn(`Error playing cached sound (${soundType}):`, err);
-            resolve(false);
-          });
-          
-        return;
-      }
-      
-      // Create and cache a new audio object
-      const audio = new Audio(soundUrl);
-      audio.volume = volume;
-      
-      // Cache for future use
-      soundCache[soundType] = audio;
-      
-      audio.play()
-        .then(() => resolve(true))
-        .catch(err => {
-          console.warn(`Error playing new sound (${soundType}):`, err);
-          resolve(false);
-        });
-    });
-  }
-
-  /**
-   * Create an emotion transition effect with sparkles
-   * 
-   * @param {string} fromEmotion - Starting emotion 
-   * @param {string} toEmotion - Target emotion
-   * @param {Element} sourceElement - Optional source element
-   */
-  function createEmotionTransitionEffect(fromEmotion, toEmotion, sourceElement = null) {
-    if (!config.visualEffectsEnabled) return;
-    
-    // Skip if emotion hasn't changed
-    if (fromEmotion === toEmotion) return;
-    
-    // Update current emotion
-    currentEmotion = toEmotion;
-    
-    // Play transition sound
-    playSound('transition', 0.4);
-    
-    // Create container for particles
-    const container = document.createElement('div');
-    container.className = 'emotion-transition';
-    document.body.appendChild(container);
-    
-    // Determine origin point for particles
-    let originX, originY;
-    
-    if (sourceElement) {
-      // If source element provided, use its center
-      const rect = sourceElement.getBoundingClientRect();
-      originX = rect.left + rect.width / 2;
-      originY = rect.top + rect.height / 2;
-    } else {
-      // Otherwise try to find emotion display/indicator
-      const emotionEl = document.querySelector('.emotion-option.active') || 
-                        document.querySelector('.emotion-display') ||
-                        document.querySelector('.star.active');
-      
-      if (emotionEl) {
-        const rect = emotionEl.getBoundingClientRect();
-        originX = rect.left + rect.width / 2;
-        originY = rect.top + rect.height / 2;
-      } else {
-        // Default to center of viewport
-        originX = window.innerWidth / 2;
-        originY = window.innerHeight / 2;
-      }
-    }
-    
-    // Get emotion colors or use neutral as fallback
-    const colors = config.emotionColors[toEmotion] || config.emotionColors.neutral;
-    
-    // Create sparkle particles
-    const particleCount = 24;
-    
-    for (let i = 0; i < particleCount; i++) {
-      // Create particle element
-      const particle = document.createElement('div');
-      particle.className = 'emotion-sparkle';
-      
-      // Random size (4-12px)
-      const size = 4 + Math.random() * 8;
-      particle.style.width = `${size}px`;
-      particle.style.height = `${size}px`;
-      
-      // Apply emotion-specific styling
-      particle.style.backgroundColor = i % 2 === 0 ? colors.primary : colors.secondary;
-      particle.style.boxShadow = `0 0 6px ${i % 2 === 0 ? colors.primary : colors.secondary}`;
-      
-      // Set initial position at origin
-      particle.style.left = `${originX}px`;
-      particle.style.top = `${originY}px`;
-      
-      // Calculate animation parameters
-      const angle = (i / particleCount) * 360;
-      const distance = 30 + Math.random() * 80;
-      const duration = 0.8 + Math.random() * 1.2;
-      const delay = Math.random() * 0.3;
-      
-      // Set transition for animation
-      particle.style.transition = `all ${duration}s cubic-bezier(0.165, 0.84, 0.44, 1) ${delay}s`;
-      
-      // Add to container
-      container.appendChild(particle);
-      
-      // Schedule animation
-      setTimeout(() => {
-        // Calculate end position using angle and distance
-        const endX = originX + distance * Math.cos(angle * Math.PI / 180);
-        const endY = originY + distance * Math.sin(angle * Math.PI / 180);
-        
-        // Set transform and opacity for animation
-        particle.style.opacity = '1';
-        particle.style.transform = `translate(${endX - originX}px, ${endY - originY}px) scale(${Math.random() * 0.5 + 0.5})`;
-        
-        // Fade out after slight delay
+      btn.addEventListener('click', function() {
+        playSound('click');
+        this.classList.add('clicked');
         setTimeout(() => {
-          particle.style.opacity = '0';
-        }, duration * 500);
-      }, 10);
-    }
-    
-    // Remove container after animation completes
-    setTimeout(() => {
-      if (document.body.contains(container)) {
-        document.body.removeChild(container);
-      }
-    }, 3000);
-  }
-
-  /**
-   * Create a success celebration effect with confetti
-   * 
-   * @param {Element} container - Container element for the effect
-   */
-  function createSuccessFeedbackEffect(container) {
-    if (!config.visualEffectsEnabled) return;
-    
-    if (!container) {
-      container = document.querySelector('.container') || document.body;
-    }
-    
-    // Create particle container
-    const particleContainer = document.createElement('div');
-    particleContainer.style.position = 'absolute';
-    particleContainer.style.top = '0';
-    particleContainer.style.left = '0';
-    particleContainer.style.width = '100%';
-    particleContainer.style.height = '100%';
-    particleContainer.style.pointerEvents = 'none';
-    particleContainer.style.zIndex = '100';
-    container.appendChild(particleContainer);
-    
-    // Play success sound
-    playSound('success', 0.5);
-    
-    // Create confetti particles
-    const colors = ['#FFD700', '#4169E1', '#FF4500', '#8A2BE2', '#9370DB'];
-    const particleCount = 40;
-    
-    for (let i = 0; i < particleCount; i++) {
-      const particle = document.createElement('div');
-      
-      // Randomize shape (circle or rectangle)
-      const isCircle = Math.random() > 0.5;
-      
-      // Set style
-      particle.style.position = 'absolute';
-      particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-      
-      if (isCircle) {
-        const size = 5 + Math.random() * 8;
-        particle.style.width = particle.style.height = `${size}px`;
-        particle.style.borderRadius = '50%';
-      } else {
-        const width = 4 + Math.random() * 6;
-        const height = 10 + Math.random() * 12;
-        particle.style.width = `${width}px`;
-        particle.style.height = `${height}px`;
-      }
-      
-      // Set initial position
-      particle.style.left = `${50 + (Math.random() * 20 - 10)}%`;
-      particle.style.top = '0';
-      
-      // Add to container
-      particleContainer.appendChild(particle);
-      
-      // Animate
-      const duration = 1.5 + Math.random() * 2;
-      const delay = Math.random() * 0.4;
-      
-      particle.style.transition = `all ${duration}s ease-out ${delay}s`;
-      
-      // Schedule animation
-      setTimeout(() => {
-        particle.style.transform = `translateY(${90 + Math.random() * 10}vh) 
-                                 translateX(${Math.random() * 100 - 50}px) 
-                                 rotate(${Math.random() * 360}deg)`;
-        particle.style.opacity = '0';
-      }, 10);
-    }
-    
-    // Clean up particles after animation
-    setTimeout(() => {
-      if (container.contains(particleContainer)) {
-        container.removeChild(particleContainer);
-      }
-    }, 4000);
-  }
-
-  /**
-   * Apply micro-interactions to feedback form elements
-   * 
-   * @param {string} formSelector - Selector for the feedback form
-   */
-  function enhanceFeedbackForm(formSelector = '#feedbackForm') {
-    const form = document.querySelector(formSelector);
-    if (!form) return;
-    
-    // Add hover sound to interactive elements
-    const interactiveElements = form.querySelectorAll('button, .star, .emotion-option');
-    interactiveElements.forEach(el => {
-      el.addEventListener('mouseenter', () => playSound('hover', 0.2));
-      el.addEventListener('click', () => playSound('click', 0.4));
+          this.classList.remove('clicked');
+        }, 1000);
+      });
     });
     
-    // Handle star rating
-    const stars = form.querySelectorAll('.star');
-    let currentRating = 0;
+    // Emotion selection
+    document.querySelectorAll('.emotion-selector').forEach(item => {
+      item.addEventListener('click', function() {
+        const emotion = this.dataset.emotion;
+        if (emotion) {
+          setEmotion(emotion);
+          
+          // Highlight selected emotion
+          document.querySelectorAll('.emotion-selector').forEach(el => {
+            el.classList.remove('selected');
+          });
+          this.classList.add('selected');
+          
+          // If there's a hidden input for emotion, update it
+          const emotionInput = document.querySelector('input[name="emotion"]');
+          if (emotionInput) {
+            emotionInput.value = emotion;
+          }
+        }
+      });
+    });
     
-    stars.forEach(star => {
-      star.addEventListener('click', function() {
-        const value = parseInt(this.dataset.value);
-        currentRating = value;
+    // Form submission
+    const form = document.querySelector('#feedback-form');
+    if (form) {
+      form.addEventListener('submit', function(event) {
+        event.preventDefault();
         
-        // Update active state
-        stars.forEach(s => {
-          s.classList.toggle('active', parseInt(s.dataset.value) <= value);
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span class="spinner"></span> Sending...';
+        }
+        
+        // Get form data
+        const formData = new FormData(this);
+        const jsonData = {};
+        formData.forEach((value, key) => {
+          jsonData[key] = value;
         });
         
-        // Create emotion transition based on rating
-        if (value >= 4) {
-          createEmotionTransitionEffect('neutral', 'happy', this);
-        } else if (value <= 2) {
-          createEmotionTransitionEffect('neutral', 'sad', this);
-        }
-      });
-    });
-    
-    // Handle emotion selection
-    const emotionOptions = form.querySelectorAll('.emotion-option');
-    let selectedEmotion = '';
-    
-    emotionOptions.forEach(option => {
-      option.addEventListener('click', function() {
-        // Clear previous selection
-        emotionOptions.forEach(opt => opt.classList.remove('active'));
-        
-        // Set new selection
-        this.classList.add('active');
-        selectedEmotion = this.dataset.emotion;
-        
-        // Create emotion transition effect
-        createEmotionTransitionEffect('neutral', selectedEmotion, this);
-      });
-    });
-    
-    // Handle form submission
-    form.addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      // Get form data
-      const name = form.querySelector('#name').value;
-      const feedback = form.querySelector('#feedback').value;
-      
-      // Basic validation
-      if (!feedback) {
-        playSound('error', 0.5);
-        const resultDiv = document.querySelector('#feedback-result');
-        if (resultDiv) {
-          resultDiv.textContent = 'Please provide your feedback';
-          resultDiv.className = 'error';
-          resultDiv.style.display = 'block';
-        }
-        return;
-      }
-      
-      // Prepare data
-      const data = {
-        name: name || 'Anonymous',
-        rating: currentRating,
-        emotion: selectedEmotion,
-        feedback: feedback,
-        timestamp: new Date().toISOString()
-      };
-      
-      // Show loading state
-      const submitBtn = form.querySelector('.submit-btn');
-      const originalBtnText = submitBtn.textContent;
-      submitBtn.textContent = 'Sending...';
-      submitBtn.disabled = true;
-      
-      // Submit data
-      fetch('/direct-feedback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      })
-      .then(response => response.json())
-      .then(data => {
-        const resultDiv = document.querySelector('#feedback-result');
-        
-        if (data.success) {
-          // Success case
-          resultDiv.textContent = 'Thank you for your feedback!';
-          resultDiv.className = 'success';
+        // Send the feedback
+        fetch('/api/feedback/process', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(jsonData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          // Reset form
           form.reset();
           
-          // Reset UI state
-          stars.forEach(s => s.classList.remove('active'));
-          emotionOptions.forEach(opt => opt.classList.remove('active'));
+          // Show success message
+          showFeedbackConfirmation(data);
           
-          // Play success effects
-          createEmotionTransitionEffect('neutral', 'happy');
-          createSuccessFeedbackEffect(document.querySelector('.container'));
-        } else {
-          // Error case
-          resultDiv.textContent = data.message || 'Error submitting feedback';
-          resultDiv.className = 'error';
-          playSound('error', 0.5);
-        }
-        
-        // Show result
-        resultDiv.style.display = 'block';
-        resultDiv.classList.add('pulse-animation');
-        
-        // Remove pulse animation after delay
-        setTimeout(() => {
-          resultDiv.classList.remove('pulse-animation');
-        }, 2000);
-      })
-      .catch(error => {
-        const resultDiv = document.querySelector('#feedback-result');
-        resultDiv.textContent = 'Error submitting feedback: ' + error.message;
-        resultDiv.className = 'error';
-        resultDiv.style.display = 'block';
-        playSound('error', 0.5);
-      })
-      .finally(() => {
-        // Reset button state
-        submitBtn.textContent = originalBtnText;
-        submitBtn.disabled = false;
-      });
-    });
-  }
-
-  /**
-   * Set sound enabled/disabled
-   * 
-   * @param {boolean} enabled - Whether sound should be enabled
-   */
-  function setSoundEnabled(enabled) {
-    config.soundEnabled = enabled;
-  }
-
-  /**
-   * Set visual effects enabled/disabled
-   * 
-   * @param {boolean} enabled - Whether visual effects should be enabled
-   */
-  function setVisualEffectsEnabled(enabled) {
-    config.visualEffectsEnabled = enabled;
-  }
-
-  // Initialize on document load
-  document.addEventListener('DOMContentLoaded', function() {
-    // Initialize audio system on user interaction
-    document.addEventListener('click', initAudioContext, { once: true });
-    
-    // Setup toggle buttons
-    const audioToggle = document.getElementById('toggleAudio');
-    if (audioToggle) {
-      audioToggle.addEventListener('click', function() {
-        setSoundEnabled(!config.soundEnabled);
-        this.querySelector('i').className = config.soundEnabled ? 
-          'fas fa-volume-up' : 'fas fa-volume-mute';
+          // Reset button
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Send Feedback';
+            submitBtn.classList.add('success-feedback');
+            setTimeout(() => {
+              submitBtn.classList.remove('success-feedback');
+            }, 1000);
+          }
           
-        // Play sound if enabling
-        if (config.soundEnabled) {
-          playSound('click', 0.4);
-        }
+          // Play success sound and effect
+          playSound('success');
+          triggerParticleEffect(data.emotion_effect || 'happy');
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          
+          // Reset button
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Try Again';
+            submitBtn.classList.add('error-feedback');
+            setTimeout(() => {
+              submitBtn.classList.remove('error-feedback');
+            }, 1000);
+          }
+          
+          // Play error sound
+          playSound('error');
+        });
       });
     }
+  }
+  
+  // Set current emotion and apply visual changes
+  function setEmotion(emotion) {
+    if (currentEmotion === emotion) return;
     
-    // Enhance feedback form
-    enhanceFeedbackForm();
-  });
-
+    // Store previous emotion for transition
+    const previousEmotion = currentEmotion;
+    
+    // Update current emotion
+    currentEmotion = emotion;
+    
+    // Apply transition effect
+    const overlay = document.querySelector('.emotion-transition');
+    if (overlay && config.visualEffectsEnabled) {
+      // Remove previous classes
+      overlay.className = 'emotion-transition';
+      
+      // Add new emotion class
+      overlay.classList.add(`emotion-${emotion}`);
+      
+      // Trigger animation
+      void overlay.offsetWidth; // Force reflow
+      overlay.classList.add('active');
+      
+      // Play transition sound
+      playSound('transition');
+      
+      // Reset animation after it completes
+      setTimeout(() => {
+        overlay.classList.remove('active');
+      }, 1500);
+    }
+    
+    // Update UI colors based on emotion
+    updateUIColors(emotion);
+    
+    console.log(`Emotion changed from ${previousEmotion} to ${emotion}`);
+  }
+  
+  // Update UI colors based on selected emotion
+  function updateUIColors(emotion) {
+    const colors = config.emotionColors[emotion] || config.emotionColors.neutral;
+    
+    // Update form elements with the emotion color
+    document.querySelectorAll('.feedback-form .submit-btn').forEach(btn => {
+      btn.style.backgroundColor = colors.primary;
+      btn.style.borderColor = colors.secondary;
+    });
+    
+    // Update other UI elements
+    document.querySelectorAll('.emotion-accent').forEach(el => {
+      el.style.color = colors.primary;
+    });
+    
+    document.querySelectorAll('.emotion-border').forEach(el => {
+      el.style.borderColor = colors.primary;
+    });
+  }
+  
+  // Play sound effect
+  function playSound(soundType) {
+    if (!config.soundEnabled) return;
+    
+    const soundUrl = config.sounds[soundType];
+    if (!soundUrl) return;
+    
+    try {
+      // Lazy initialize audio context on first use (to comply with autoplay policies)
+      if (!audioContext) {
+        audioContext = new AudioContext();
+      }
+      
+      // Check if context is in suspended state (autoplay policy)
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+      
+      // Create and play sound
+      const audio = new Audio(soundUrl);
+      audio.volume = soundType === 'hover' ? 0.3 : 0.6; // Lower volume for hover sounds
+      audio.play().catch(e => {
+        console.warn(`Sound playback failed: ${e.message}`);
+      });
+    } catch (e) {
+      console.warn(`Error playing sound: ${e.message}`);
+    }
+  }
+  
+  // Show feedback confirmation message
+  function showFeedbackConfirmation(data) {
+    // Create or get confirmation element
+    let confirmationEl = document.getElementById('feedback-confirmation');
+    if (!confirmationEl) {
+      confirmationEl = document.createElement('div');
+      confirmationEl.id = 'feedback-confirmation';
+      confirmationEl.className = 'feedback-confirmation';
+      document.body.appendChild(confirmationEl);
+    }
+    
+    // Set content and style
+    confirmationEl.innerHTML = `
+      <div class="confirmation-content">
+        <div class="confirmation-icon">✓</div>
+        <div class="confirmation-message">${data.message || 'Thank you for your feedback!'}</div>
+      </div>
+    `;
+    
+    // Apply emotion-specific styling
+    const emotion = data.emotion_effect || 'happy';
+    const colors = config.emotionColors[emotion] || config.emotionColors.happy;
+    confirmationEl.style.backgroundColor = colors.primary;
+    confirmationEl.style.borderColor = colors.secondary;
+    
+    // Show the confirmation
+    confirmationEl.classList.add('visible');
+    
+    // Hide after delay
+    setTimeout(() => {
+      confirmationEl.classList.remove('visible');
+    }, 3000);
+  }
+  
+  // Create and animate particles for an emotion-based effect
+  function triggerParticleEffect(emotion) {
+    if (!config.particleEffectsEnabled || !particlesContainer) return;
+    
+    const colors = config.emotionColors[emotion] || config.emotionColors.happy;
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    
+    // Clear existing particles
+    particlesContainer.innerHTML = '';
+    
+    // Create new particles
+    for (let i = 0; i < config.particles.count; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      
+      // Random size
+      const size = Math.random() * 
+        (config.particles.size.max - config.particles.size.min) + 
+        config.particles.size.min;
+      
+      // Random position within spread radius
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.random() * config.particles.spread;
+      const x = centerX + Math.cos(angle) * distance;
+      const y = centerY + Math.sin(angle) * distance;
+      
+      // Apply styles
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      particle.style.backgroundColor = colors.particle;
+      particle.style.left = `${x}px`;
+      particle.style.top = `${y}px`;
+      
+      // Add to container
+      particlesContainer.appendChild(particle);
+      
+      // Animate with random delays
+      setTimeout(() => {
+        particle.style.animation = `particleAnimation ${config.particles.duration / 1000 * config.particles.speed}s ease-out forwards`;
+      }, Math.random() * 500);
+      
+      // Remove particle after animation completes
+      setTimeout(() => {
+        if (particle.parentNode === particlesContainer) {
+          particlesContainer.removeChild(particle);
+        }
+      }, config.particles.duration + 600);
+    }
+  }
+  
+  // Detect initial emotion from the page context
+  function detectInitialEmotion() {
+    // Check for emotion parameter in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const emotionParam = urlParams.get('emotion');
+    if (emotionParam && config.emotionColors[emotionParam]) {
+      setEmotion(emotionParam);
+      return;
+    }
+    
+    // Check for hidden input with emotion
+    const emotionInput = document.querySelector('input[name="emotion"]');
+    if (emotionInput && emotionInput.value && config.emotionColors[emotionInput.value]) {
+      setEmotion(emotionInput.value);
+      return;
+    }
+    
+    // Default emotion remains neutral
+  }
+  
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+  
   // Expose public API
-  window.FeedbackInteractions = {
-    playSound,
-    createEmotionTransitionEffect,
-    createSuccessFeedbackEffect,
-    setSoundEnabled,
-    setVisualEffectsEnabled
+  window.feedbackInteractions = {
+    setEmotion: setEmotion,
+    playSound: playSound,
+    triggerEffect: triggerParticleEffect
   };
-
 })();

@@ -215,39 +215,56 @@ def index():
     logger.debug("Serving homepage")
     return render_template("index.html")
 
-# Add direct feedback tool route with HTML response and enhanced UX
-@app.route('/direct-feedback', methods=['GET', 'POST'])
+# Add direct access to the feedback page
+@app.route("/direct-feedback", methods=["GET"])
 def direct_feedback():
-    """Serve an enhanced feedback page with visual confirmations and sound effects"""
-    logger.debug("Serving enhanced direct feedback page")
+    """Serve the feedback page directly"""
+    logger.debug("Direct feedback page accessed")
+    try:
+        from enhanced_feedback import get_enhanced_feedback_html
+        return render_template_string(get_enhanced_feedback_html())
+    except ImportError:
+        logger.error("Could not import enhanced_feedback module")
+        return render_template("feedback.html")
+    except Exception as e:
+        logger.error(f"Error serving direct feedback page: {str(e)}")
+        return render_template("feedback.html")
+
+# Add enhanced feedback routes
+try:
+    from enhanced_feedback import register_enhanced_feedback_routes
     
-    # Handle POST request for feedback submission
-    if request.method == "POST":
+    # Register enhanced feedback routes
+    register_enhanced_feedback_routes(app)
+    
+    # Legacy direct-feedback route now handled by direct_feedback function at the top level
+            
+    @app.route('/api/enhanced-feedback', methods=['POST'])
+    def legacy_feedback_api():
+        """Process enhanced feedback for backward compatibility"""
+        logger.debug("Processing enhanced feedback from legacy endpoint")
+        
         try:
-            # Get the JSON data from the request
             data = request.get_json()
-            
-            # Forward to API endpoint using internal request
-            response = app.test_client().post(
-                '/api/direct-feedback',
-                json=data,
-                headers={'Content-Type': 'application/json'}
-            )
-            
-            # Return the API response
-            return response.get_data(), response.status_code, response.headers.items()
+            # For POST requests, forward to enhanced API endpoint
+            from enhanced_feedback import process_enhanced_feedback
+            return process_enhanced_feedback()
         except Exception as e:
-            logger.error(f"Error processing feedback: {str(e)}")
+            logger.error(f"Error forwarding feedback: {str(e)}")
             return jsonify({
                 "success": False,
                 "message": "Error processing feedback",
-                "error": str(e),
-                "emotion_effect": "confused",
-                "sound_effect": "/static/sounds/error.mp3"
+                "error": str(e)
             }), 500
     
-    # For GET requests, serve the feedback form
-    html_content = """
+    logger.info("Enhanced feedback routes registered successfully")
+except ImportError as e:
+    logger.error(f"Could not import enhanced feedback module: {str(e)}")
+except Exception as e:
+    logger.error(f"Error registering enhanced feedback routes: {str(e)}")
+
+# Legacy HTML content (kept for reference but not used)
+legacy_html_content = """
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -903,7 +920,6 @@ def direct_feedback():
     </body>
     </html>
     """
-    return render_template_string(html_content)
 
 # Add recommendations page route
 # This is now handled by recommendation_routes.py

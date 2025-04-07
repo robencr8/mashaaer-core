@@ -1,96 +1,238 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000" viewBox="0 0 1000 1000">
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <radialGradient id="starGlow" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
-      <stop offset="0%" stop-color="white"/>
-      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    <radialGradient id="bg-gradient" cx="50%" cy="50%" r="70%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#1a1a4a" />
+      <stop offset="100%" stop-color="#0a0a2a" />
     </radialGradient>
-    <radialGradient id="purpleGlow" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
-      <stop offset="0%" stop-color="#9370DB"/>
-      <stop offset="100%" stop-color="rgba(147,112,219,0)"/>
-    </radialGradient>
-    <radialGradient id="blueGlow" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
-      <stop offset="0%" stop-color="#4169E1"/>
-      <stop offset="100%" stop-color="rgba(65,105,225,0)"/>
-    </radialGradient>
-    <radialGradient id="goldGlow" cx="0.5" cy="0.5" r="0.5" fx="0.5" fy="0.5">
-      <stop offset="0%" stop-color="#FFD700"/>
-      <stop offset="100%" stop-color="rgba(255,215,0,0)"/>
-    </radialGradient>
+    
     <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="5" result="blur"/>
-      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
+    
+    <linearGradient id="star-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="1" />
+      <stop offset="100%" stop-color="#fff" stop-opacity="0.3" />
+    </linearGradient>
+    
+    <linearGradient id="nebula-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7b68ee" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#4b0082" stop-opacity="0" />
+    </linearGradient>
+    
+    <linearGradient id="nebula-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9370db" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#8a2be2" stop-opacity="0" />
+    </linearGradient>
+    
+    <linearGradient id="nebula-gradient-3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5f9ea0" stop-opacity="0.1" />
+      <stop offset="100%" stop-color="#48d1cc" stop-opacity="0" />
+    </linearGradient>
+    
+    <filter id="space-noise" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" result="noise" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.5 0" result="space" />
+      <feComposite operator="in" in="SourceGraphic" in2="space" result="comp" />
+      <feBlend mode="multiply" in="comp" in2="SourceGraphic" result="blend" />
+    </filter>
+    
+    <g id="star">
+      <circle cx="0" cy="0" r="1.5" fill="url(#star-gradient)" filter="url(#glow)" />
+    </g>
+    
+    <g id="dim-star">
+      <circle cx="0" cy="0" r="0.8" fill="#fff" opacity="0.5" />
+    </g>
+    
+    <g id="tiny-star">
+      <circle cx="0" cy="0" r="0.5" fill="#fff" opacity="0.3" />
+    </g>
   </defs>
   
   <!-- Background -->
-  <rect width="100%" height="100%" fill="#000010"/>
+  <rect width="100%" height="100%" fill="url(#bg-gradient)" />
   
-  <!-- Larger cosmic clouds -->
-  <circle cx="200" cy="300" r="300" fill="url(#purpleGlow)" opacity="0.1"/>
-  <circle cx="800" cy="200" r="200" fill="url(#blueGlow)" opacity="0.08"/>
-  <circle cx="500" cy="700" r="350" fill="url(#purpleGlow)" opacity="0.07"/>
-  <circle cx="150" cy="800" r="180" fill="url(#goldGlow)" opacity="0.05"/>
-  <circle cx="900" cy="850" r="250" fill="url(#purpleGlow)" opacity="0.09"/>
+  <!-- Nebulae -->
+  <circle cx="400" cy="300" r="250" fill="url(#nebula-gradient-1)" opacity="0.2" filter="url(#space-noise)" />
+  <ellipse cx="1200" cy="700" rx="350" ry="300" fill="url(#nebula-gradient-2)" opacity="0.15" filter="url(#space-noise)" />
+  <ellipse cx="900" cy="200" rx="200" ry="150" fill="url(#nebula-gradient-3)" opacity="0.1" filter="url(#space-noise)" />
   
-  <!-- Medium stars -->
-  <g fill="white" filter="url(#glow)">
-    <circle cx="100" cy="100" r="1.2" opacity="0.8"/>
-    <circle cx="220" cy="150" r="1.3" opacity="0.7"/>
-    <circle cx="350" cy="50" r="1.5" opacity="0.9"/>
-    <circle cx="480" cy="120" r="1.4" opacity="0.8"/>
-    <circle cx="600" cy="80" r="1.6" opacity="0.7"/>
-    <circle cx="750" cy="120" r="1.3" opacity="0.9"/>
-    <circle cx="880" cy="70" r="1.4" opacity="0.8"/>
-    <circle cx="950" cy="150" r="1.5" opacity="0.7"/>
-  </g>
+  <!-- Stars - Bright -->
+  <use href="#star" x="126" y="84" />
+  <use href="#star" x="733" y="129" />
+  <use href="#star" x="1211" y="315" />
+  <use href="#star" x="1565" y="720" />
+  <use href="#star" x="340" y="495" />
+  <use href="#star" x="895" y="752" />
+  <use href="#star" x="1753" y="187" />
+  <use href="#star" x="452" y="862" />
+  <use href="#star" x="1647" y="458" />
+  <use href="#star" x="210" y="271" />
+  <use href="#star" x="975" y="431" />
+  <use href="#star" x="1352" y="682" />
+  <use href="#star" x="583" y="921" />
+  <use href="#star" x="1125" y="93" />
+  <use href="#star" x="288" y="734" />
+  <use href="#star" x="1438" y="197" />
+  <use href="#star" x="677" y="376" />
+  <use href="#star" x="1832" y="624" />
+  <use href="#star" x="412" y="158" />
+  <use href="#star" x="963" y="689" />
   
-  <!-- Bright stars with glow -->
-  <g filter="url(#glow)">
-    <circle cx="150" cy="180" r="2.5" fill="white" opacity="0.95"/>
-    <circle cx="150" cy="180" r="5" fill="url(#starGlow)" opacity="0.5"/>
-    
-    <circle cx="420" cy="350" r="3" fill="white" opacity="0.95"/>
-    <circle cx="420" cy="350" r="8" fill="url(#starGlow)" opacity="0.5"/>
-    
-    <circle cx="780" cy="180" r="2.8" fill="white" opacity="0.95"/>
-    <circle cx="780" cy="180" r="7" fill="url(#starGlow)" opacity="0.5"/>
-    
-    <circle cx="850" cy="650" r="3.2" fill="white" opacity="0.95"/>
-    <circle cx="850" cy="650" r="9" fill="url(#starGlow)" opacity="0.5"/>
-    
-    <circle cx="250" cy="720" r="2.7" fill="white" opacity="0.95"/>
-    <circle cx="250" cy="720" r="6" fill="url(#starGlow)" opacity="0.5"/>
-    
-    <circle cx="640" cy="480" r="3.5" fill="white" opacity="0.95"/>
-    <circle cx="640" cy="480" r="10" fill="url(#starGlow)" opacity="0.5"/>
-    
-    <circle cx="300" cy="500" r="3" fill="#FFD700" opacity="0.9"/>
-    <circle cx="300" cy="500" r="8" fill="url(#goldGlow)" opacity="0.5"/>
-    
-    <circle cx="750" cy="350" r="2.8" fill="#4169E1" opacity="0.9"/>
-    <circle cx="750" cy="350" r="7" fill="url(#blueGlow)" opacity="0.5"/>
-    
-    <circle cx="520" cy="200" r="3.2" fill="#9370DB" opacity="0.9"/>
-    <circle cx="520" cy="200" r="9" fill="url(#purpleGlow)" opacity="0.5"/>
-  </g>
+  <!-- Stars - Medium -->
+  <use href="#dim-star" x="186" y="152" />
+  <use href="#dim-star" x="792" y="243" />
+  <use href="#dim-star" x="1329" y="179" />
+  <use href="#dim-star" x="1624" y="689" />
+  <use href="#dim-star" x="246" y="521" />
+  <use href="#dim-star" x="917" y="832" />
+  <use href="#dim-star" x="1692" y="287" />
+  <use href="#dim-star" x="378" y="912" />
+  <use href="#dim-star" x="1529" y="532" />
+  <use href="#dim-star" x="157" y="341" />
+  <use href="#dim-star" x="823" y="412" />
+  <use href="#dim-star" x="1287" y="642" />
+  <use href="#dim-star" x="624" y="867" />
+  <use href="#dim-star" x="1072" y="132" />
+  <use href="#dim-star" x="326" y="787" />
+  <use href="#dim-star" x="1472" y="267" />
+  <use href="#dim-star" x="732" y="343" />
+  <use href="#dim-star" x="1894" y="587" />
+  <use href="#dim-star" x="488" y="193" />
+  <use href="#dim-star" x="897" y="654" />
+  <use href="#dim-star" x="1176" y="423" />
+  <use href="#dim-star" x="542" y="678" />
+  <use href="#dim-star" x="1342" y="354" />
+  <use href="#dim-star" x="287" y="421" />
+  <use href="#dim-star" x="963" y="231" />
+  <use href="#dim-star" x="1523" y="765" />
+  <use href="#dim-star" x="423" y="678" />
+  <use href="#dim-star" x="1187" y="532" />
+  <use href="#dim-star" x="743" y="812" />
+  <use href="#dim-star" x="1632" y="321" />
+  <use href="#dim-star" x="378" y="254" />
+  <use href="#dim-star" x="857" y="487" />
+  <use href="#dim-star" x="1243" y="789" />
+  <use href="#dim-star" x="632" y="123" />
+  <use href="#dim-star" x="1432" y="478" />
+  <use href="#dim-star" x="276" y="643" />
+  <use href="#dim-star" x="987" y="321" />
+  <use href="#dim-star" x="1723" y="542" />
+  <use href="#dim-star" x="513" y="765" />
+  <use href="#dim-star" x="1123" y="243" />
   
-  <!-- Tiny pinpoint stars -->
-  <g fill="white">
-    <circle cx="50" cy="50" r="0.8" opacity="0.6"/>
-    <circle cx="120" cy="80" r="0.7" opacity="0.7"/>
-    <circle cx="190" cy="30" r="0.9" opacity="0.5"/>
-    <circle cx="270" cy="70" r="0.8" opacity="0.6"/>
-    <circle cx="320" cy="40" r="0.7" opacity="0.7"/>
-    <circle cx="380" cy="90" r="0.9" opacity="0.5"/>
-    <circle cx="440" cy="60" r="0.8" opacity="0.6"/>
-    <circle cx="510" cy="40" r="0.7" opacity="0.7"/>
-    <circle cx="580" cy="30" r="0.9" opacity="0.5"/>
-    <circle cx="650" cy="60" r="0.8" opacity="0.6"/>
-    <circle cx="720" cy="40" r="0.7" opacity="0.7"/>
-    <circle cx="790" cy="90" r="0.9" opacity="0.5"/>
-    <circle cx="850" cy="50" r="0.8" opacity="0.6"/>
-    <circle cx="920" cy="80" r="0.7" opacity="0.7"/>
-    <circle cx="970" cy="30" r="0.9" opacity="0.5"/>
-  </g>
+  <!-- Stars - Tiny -->
+  <use href="#tiny-star" x="157" y="212" />
+  <use href="#tiny-star" x="723" y="169" />
+  <use href="#tiny-star" x="1278" y="238" />
+  <use href="#tiny-star" x="1589" y="654" />
+  <use href="#tiny-star" x="298" y="532" />
+  <use href="#tiny-star" x="967" y="798" />
+  <use href="#tiny-star" x="1723" y="321" />
+  <use href="#tiny-star" x="412" y="876" />
+  <use href="#tiny-star" x="1572" y="498" />
+  <use href="#tiny-star" x="187" y="387" />
+  <use href="#tiny-star" x="876" y="432" />
+  <use href="#tiny-star" x="1312" y="679" />
+  <use href="#tiny-star" x="589" y="843" />
+  <use href="#tiny-star" x="1043" y="178" />
+  <use href="#tiny-star" x="354" y="732" />
+  <use href="#tiny-star" x="1487" y="232" />
+  <use href="#tiny-star" x="698" y="321" />
+  <use href="#tiny-star" x="1832" y="564" />
+  <use href="#tiny-star" x="456" y="176" />
+  <use href="#tiny-star" x="945" y="627" />
+  <use href="#tiny-star" x="1143" y="398" />
+  <use href="#tiny-star" x="568" y="654" />
+  <use href="#tiny-star" x="1376" y="387" />
+  <use href="#tiny-star" x="254" y="432" />
+  <use href="#tiny-star" x="934" y="254" />
+  <use href="#tiny-star" x="1487" y="743" />
+  <use href="#tiny-star" x="398" y="654" />
+  <use href="#tiny-star" x="1154" y="498" />
+  <use href="#tiny-star" x="776" y="798" />
+  <use href="#tiny-star" x="1598" y="354" />
+  <use href="#tiny-star" x="356" y="287" />
+  <use href="#tiny-star" x="823" y="465" />
+  <use href="#tiny-star" x="1221" y="765" />
+  <use href="#tiny-star" x="598" y="156" />
+  <use href="#tiny-star" x="1398" y="453" />
+  <use href="#tiny-star" x="243" y="621" />
+  <use href="#tiny-star" x="923" y="342" />
+  <use href="#tiny-star" x="1687" y="521" />
+  <use href="#tiny-star" x="487" y="732" />
+  <use href="#tiny-star" x="1098" y="267" />
+  <use href="#tiny-star" x="356" y="189" />
+  <use href="#tiny-star" x="876" y="398" />
+  <use href="#tiny-star" x="1532" y="627" />
+  <use href="#tiny-star" x="245" y="532" />
+  <use href="#tiny-star" x="987" y="189" />
+  <use href="#tiny-star" x="1321" y="487" />
+  <use href="#tiny-star" x="654" y="752" />
+  <use href="#tiny-star" x="1432" y="345" />
+  <use href="#tiny-star" x="321" y="698" />
+  <use href="#tiny-star" x="998" y="543" />
+  <use href="#tiny-star" x="1763" y="287" />
+  <use href="#tiny-star" x="543" y="432" />
+  <use href="#tiny-star" x="1243" y="621" />
+  <use href="#tiny-star" x="132" y="453" />
+  <use href="#tiny-star" x="842" y="732" />
+  <use href="#tiny-star" x="1487" y="176" />
+  <use href="#tiny-star" x="356" y="876" />
+  <use href="#tiny-star" x="1165" y="321" />
+  <use href="#tiny-star" x="632" y="564" />
+  <use href="#tiny-star" x="1354" y="453" />
+  <use href="#tiny-star" x="211" y="678" />
+  <use href="#tiny-star" x="956" y="176" />
+  <use href="#tiny-star" x="1532" y="354" />
+  <use href="#tiny-star" x="432" y="487" />
+  <use href="#tiny-star" x="1187" y="698" />
+  <use href="#tiny-star" x="345" y="345" />
+  <use href="#tiny-star" x="889" y="567" />
+  <use href="#tiny-star" x="1654" y="432" />
+  <use href="#tiny-star" x="534" y="678" />
+  <use href="#tiny-star" x="1087" y="356" />
+  <use href="#tiny-star" x="276" y="789" />
+  <use href="#tiny-star" x="998" y="498" />
+  <use href="#tiny-star" x="1432" y="654" />
+  <use href="#tiny-star" x="398" y="321" />
+  <use href="#tiny-star" x="1098" y="732" />
+  <use href="#tiny-star" x="187" y="543" />
+  <use href="#tiny-star" x="954" y="398" />
+  <use href="#tiny-star" x="1598" y="234" />
+  <use href="#tiny-star" x="456" y="621" />
+  <use href="#tiny-star" x="1254" y="453" />
+  <use href="#tiny-star" x="165" y="321" />
+  <use href="#tiny-star" x="876" y="621" />
+  <use href="#tiny-star" x="1432" y="287" />
+  <use href="#tiny-star" x="368" y="789" />
+  <use href="#tiny-star" x="1087" y="432" />
+  <use href="#tiny-star" x="643" y="254" />
+  <use href="#tiny-star" x="1354" y="543" />
+  <use href="#tiny-star" x="289" y="487" />
+  <use href="#tiny-star" x="987" y="276" />
+  <use href="#tiny-star" x="1532" y="698" />
+  <use href="#tiny-star" x="423" y="398" />
+  <use href="#tiny-star" x="1132" y="621" />
+  <use href="#tiny-star" x="765" y="345" />
+  <use href="#tiny-star" x="1487" y="543" />
+  <use href="#tiny-star" x="321" y="189" />
+  <use href="#tiny-star" x="876" y="543" />
+  <use href="#tiny-star" x="1221" y="321" />
+  <use href="#tiny-star" x="567" y="487" />
+  <use href="#tiny-star" x="1354" y="732" />
+  <use href="#tiny-star" x="254" y="398" />
+  <use href="#tiny-star" x="967" y="456" />
+  <use href="#tiny-star" x="1654" y="345" />
+  <use href="#tiny-star" x="487" y="567" />
+  <use href="#tiny-star" x="1165" y="234" />
+  <use href="#tiny-star" x="123" y="678" />
+  <use href="#tiny-star" x="842" y="345" />
+  <use href="#tiny-star" x="1498" y="621" />
+  <use href="#tiny-star" x="389" y="234" />
+  <use href="#tiny-star" x="954" y="567" />
+  
+  <!-- Apply a subtle overlay to enhance the cosmic effect -->
+  <rect width="100%" height="100%" fill="url(#bg-gradient)" opacity="0.3" filter="url(#space-noise)" />
 </svg>
