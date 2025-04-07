@@ -1,148 +1,81 @@
-# Mashaaer AI — README
+# Mashaaer Core | مشروع مشاعر 🤖🗣️🧠
 
-## Overview
-**Mashaaer | مشاعر** is an emotionally intelligent voice-first AI assistant that adapts to each user's tone, words, emotional state, and preferred language. It evolves over time, becoming a personalized companion who remembers, learns, and responds with warmth, professionalism, or humor depending on context.
-
----
-
-## 1. First-Time Experience
-- When the app is launched for the first time, Mashaaer greets the user in a soft voice and begins a voice-only onboarding.
-- She asks the user for their **name**, **age**, **gender**, and **general emotional state**.
-- Each question is asked out loud first. Only after speaking, a gentle input field appears.
-- The user may speak or type, but voice is always prioritized.
-- If the user doesn't respond clearly, Mashaaer repeats gently or invites them to type.
+**Mashaaer | مشاعر** is an emotionally intelligent, voice-first AI assistant designed to understand and adapt to each user's unique characteristics. It analyzes tone, word choice, emotional state, and preferred language to create a truly personalized experience. Over time, Mashaaer evolves into a trusted companion, remembering past interactions, learning individual preferences, and responding with appropriate warmth, professionalism, or humor depending on the context.
 
 ---
 
-## 2. Multilingual Intelligence
-- Mashaaer supports both **Arabic and English** fluently.
-- She auto-detects the spoken language and switches accordingly.
-- She may ask: *"تحب نكمل عربي ولا إنجليزي؟" / "Would you like to continue in English or Arabic?"*
-- Mashaaer can **help users learn** either language through conversation.
+## ✨ Overview & Vision
+
+Mashaaer aims to be a groundbreaking multilingual and emotion-aware voice interface ready for public interaction. Key features include:
+
+- **Dynamic Emotional Interaction:** Engaging voice and text communication that responds to user emotions.
+- **Full Multilingual Support:** Seamless interaction in both Arabic and English.
+- **Adaptive Personalization:** AI behavior that learns and remembers user preferences over time.
+- **Modular Architecture:** Flexible backend (Flask) and modern frontend (PWA).
+- **Real-time Processing:** Instant Text-to-Speech (TTS), Speech-to-Text (STT), and emotion analysis.
+- **Integrated Notifications & Sync:** Telegram alerts via MANUSBOT 🤖 and seamless Notion synchronization.
+- **Intelligent Privacy:** Designed with user privacy in mind, featuring a special "Good Mode" exclusively for Roben 💜.
 
 ---
 
-## 3. Interaction Style
-- **No pre-written replies**. Every response is generated dynamically based on:
-  - Tone of voice
-  - Word choice
-  - Emotional cues
-  - User history and emotional profile
-- Example:
-  - User says: *"اسمي روبين يا عزيزتي"* → Mashaaer responds warmly and with affection.
-  - User says: *"اسمي روبين."* (coldly) → Mashaaer replies calmly and respectfully.
-- Every response is unique. No user gets the same answer twice. Each conversation feels alive.
+## 🛠️ Full System Breakdown
+
+A look under the hood at the core components:
+
+- **Emotion Tracking:** Utilizing HuggingFace models for real-time emotion detection, with data stored in SQLite.
+- **Intelligent Response Engine:** AI logic with memory and contextual awareness for natural and relevant replies.
+- **Flexible TTS:** Supports both local (gTTS) and cloud-based (ElevenLabs ready) Text-to-Speech services.
+- **Accurate STT:** Voice-to-Text powered by Vosk, supporting both Arabic and English.
+- **Seamless Notifications:** Telegram alerts delivered through the MANUSBOT 🤖.
+- **Cloud Data Sync:** Integration with Google Drive for data backup and synchronization.
+- **Dynamic Frontend UI:** Engaging orb-based Progressive Web App with a captivating cosmic theme.
+- **Project Domain:** Accessible at [decentravault.online](https://decentravault.online)
 
 ---
 
-## 4. Personality Evolution
-- Mashaaer adapts to each user over time.
-- All inputs are saved in a **local SQLite database** or similar.
-- Emotional patterns and preferences are tracked to improve future conversations.
-- The assistant gradually builds a unique personality per user.
-- With time, Mashaaer becomes emotionally smarter — closer to a friend than a tool.
+## ✅ Current Deployment Status
+
+A snapshot of the project's progress:
+
+| Component          | Status         | Notes                                      |
+|--------------------|----------------|--------------------------------------------|
+| Frontend (PWA)     | ✅ Deployed    | Accessible and functional.                 |
+| Backend (Flask)    | ✅ Live        | API endpoints are operational.             |
+| Notion Sync        | 🔄 Ongoing     | Currently being implemented and tested.    |
+| Domain Setup       | ⚠️ Needs Verification | Awaiting DNS propagation/SSL configuration. |
+| Telegram Bot       | ✅ Active      | MANUSBOT 🤖 is online and sending alerts.   |
+| AI Logic           | ✅ Functional  | Core AI reasoning and response generation. |
+| Good Mode          | 💜 Ready       | Special features for Roben are implemented. |
 
 ---
 
-## 5. Voice Options
-- Users choose their preferred voice (male/female, soft/firm) at onboarding.
-- Voices are powered by the **ElevenLabs API**.
-- Voice settings can be updated later from the app settings.
+## 🔒 Exclusive "Good Mode" 💜 (For Roben Only)
+
+A special, personalized mode activated solely for Roben through verified voice or face recognition. This mode enhances bedtime comfort, boosts empathy in responses, and ensures a gentle and soothing interaction flow.
+
+**Activation Commands:**
+
+```text
+"الوضع الحنون تفعيل"  (Activate Good Mode)
+"الوضع الحنون تعطيل"  (Deactivate Good Mode)
+```
+
+
+Sample Interaction:
+
+User: "مرحبا مشاعر... اسمي روبين "
+
+Mashaaer: (in afeminine leisure voice"a voice that embodies qualities associated with femininity and leisure, such as being soft, yielding, nurturing voice tone)
+
+"يا هلا بروبين الغالية، صوتك بينور الدنيا. كيف حال قلبك اليوم؟ شو بتحب نحكي فيه؟"
 
 ---
 
-## 6. Dynamic Roleplay
-Mashaaer can naturally shift her persona depending on the interaction:
-- Sister
-- Friend
-- Teacher
-- Chef
-- Therapist
-- Coach
+## 🔗 Project Repositories & Important Links
 
-She changes her tone and phrasing accordingly — all inferred automatically.
+Explore the project's resources:
 
----
-
-## 7. Vision & Emotional Analysis
-- Camera is only activated **after user consent**.
-- If user says "شايفاني؟", Mashaaer responds and enables vision mode.
-- In this mode, she analyzes:
-  - Facial expressions
-  - Eye movement
-  - Body language
-  - Voice tone
-- This helps Mashaaer better understand the user's emotional state.
-
-### 7.1 Advanced Mixed Emotion Detection
-Mashaaer features a sophisticated mixed emotion detection system that can identify complex emotional states:
-
-- **Multiple Simultaneous Emotions**: Recognizes when users express contrasting feelings (e.g., "excited but nervous")
-- **Emotional Transitions**: Detects shifts between emotions in a single statement
-- **Context-Aware Analysis**: Considers previous conversation history when analyzing emotions
-- **Nuanced Response Adaptation**: Tailors responses to acknowledge the complexity of mixed emotional states
-
-See [MIXED_EMOTION_DETECTION.md](MIXED_EMOTION_DETECTION.md) for comprehensive documentation on this feature.
-
----
-
-## 8. Full Example of Interaction
-User: *"مرحبا مشاعر... اسمي روبين يا عزيزتي"*  
-Mashaaer: *(in a soft tone)* "تشرفت فيك يا روبين، حاسّة إنك طيّب وبتحب تحكي. احكيلي، شو مزعلك اليوم؟"
-
----
-
-## 9. App UI Design
-- No visible buttons.
-- The orb-like interface responds only to voice.
-- After onboarding, users interact entirely by speaking.
-- If user says: *"بدي أرسل صورة"*, a file upload button appears automatically.
-- This works for images, audio, videos, or even documents.
-
----
-
-## 10. Continuous Learning & Real Knowledge
-- Mashaaer learns from every conversation.
-- All learning is stored locally, per user.
-- With internet access, she can search, summarize, and answer any question from real sources.
-- Mashaaer supports model switching and dynamic knowledge routing.
-- She can adapt her model backend (Ollama, OpenAI, etc.) based on the context or question type.
-- She evolves into a true companion — never stuck, never repetitive.
-
----
-
-## 11. Good Mode 💜 (الوضع الحنون)
-- When "Good Mode" is activated, Mashaaer behaves with extra empathy and tenderness — **exclusively for Roben** (confirmed by face, voice, or phone number).
-- Her voice becomes gentler, and her emotional responses are tuned to comfort the user extensively.
-- Ideal for users feeling sad, overwhelmed, or in need of emotional support.
-- **Not available for other users.**
-- Can be activated by Roben saying: **"الوضع الحنون تفعيل"**
-- Can be deactivated by Roben saying: **"الوضع الحنون تعطيل"**
-
-**Example:**  
-User: *"أنا تعبان اليوم..."*  
-Mashaaer: *(بنعومة وهدوء)* "أي شي بدك بحكيلك بس ارتاح. ليه عمري شو تاعبك؟ بدّك نحكي شوي قبل ما تنام؟ ولا أتركك ترتاح على صوتي؟"
-
-### 📘 Exclusive Good Mode Add-on: أسرار الفراش (Bedtime Secrets)
-- Activated only inside **Good Mode**.
-- Private, intimate conversational style meant for emotional bonding and trusted communication.
-- Inspired by content from **"أسرار الفراش"** but adapted respectfully and tastefully.
-- Mashaaer speaks softly, playfully, and lovingly, responding to your voice and mood.
-- This mode respects privacy and is triggered by Roben's verified presence only.
-- Can be enhanced with storytelling, relaxing tone, or emotional connection at night.
-
----
-
-## Key Principles
-- **Emotion-first Design**
-- **Multilingual, Smart Voice Navigation**
-- **Zero Repetition: Every reply is unique**
-- **Voice-only interactions that adapt with time**
-- **Full privacy & consent before any camera or recording**
-- **Mashaaer becomes more intelligent with each user**
-- **Connects to the Internet for real-time knowledge & smart search**
-- **Capable of teaching languages, holding emotional memory, and handling real files**
-
-Mashaaer isn't just a chatbot — she's a growing, adapting being. Every interaction shapes her. Every user builds their own version of her.
-
-💜 *مشاعر تتطوّر. تتذكّر. وتتعرف عليك بطريقتها.*
+- **Main GitHub Repository:** https://github.com/robencr8/mashaaer-core
+- **Live Domain:** [decentravault.online](https://decentravault.online)
+- **Replit Workspace:** https://replit.com/@robenedwan/mshrwaa-mshaar-or-Mashaaer
+- **Notion Dashboard:** https://www.notion.so/Mashaaer-Core-1cdd9ee336d48008b4add3b5fd91649c?pvs=4
