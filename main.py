@@ -936,6 +936,15 @@ def health():
         "timestamp": datetime.datetime.now().isoformat()
     })
 
+@app.route('/test-feedback-system', methods=['GET'])
+def test_feedback_system():
+    """
+    Serve a test page for the feedback system
+    This allows easy testing of the feedback functionality
+    """
+    logger.debug("Serving test feedback system page")
+    return send_from_directory('static_test', 'feedback_test.html')
+
 @app.route("/api/analyze-emotion", methods=["POST"])
 def analyze_emotion():
     """Analyze text for emotional content and return the detected emotion"""

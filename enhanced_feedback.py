@@ -414,9 +414,116 @@ def get_enhanced_feedback_html():
         <!-- Scripts -->
         <script src="/static/js/feedback_interactions.js"></script>
         <script>
-            // Optional script for any additional initialization
+            // Form submission handling with enhanced visual and audio feedback
             document.addEventListener('DOMContentLoaded', function() {
                 console.log('Enhanced feedback page loaded');
+                
+                // Get the form element
+                const form = document.getElementById('feedback-form');
+                
+                // Override the form submission handler from feedback_interactions.js
+                if (form) {
+                    form.addEventListener('submit', function(event) {
+                        event.preventDefault();
+                        
+                        // Show loading state
+                        const submitBtn = this.querySelector('button[type="submit"]');
+                        if (submitBtn) {
+                            submitBtn.disabled = true;
+                            submitBtn.innerHTML = '<span class="spinner"></span> Sending...';
+                        }
+                        
+                        // Get form data
+                        const formData = new FormData(this);
+                        const jsonData = {};
+                        formData.forEach((value, key) => {
+                            jsonData[key] = value;
+                        });
+                        
+                        console.log('Submitting feedback:', jsonData);
+                        
+                        // Send the feedback to the correct endpoint
+                        fetch('/api/enhanced-feedback', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(jsonData)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Feedback response:', data);
+                            
+                            // Reset form
+                            form.reset();
+                            
+                            // Show success message
+                            showFeedbackConfirmation(data);
+                            
+                            // Reset button
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = 'Send Feedback';
+                                submitBtn.classList.add('success-feedback');
+                                setTimeout(() => {
+                                    submitBtn.classList.remove('success-feedback');
+                                }, 1000);
+                            }
+                            
+                            // Play success sound and effect
+                            if (window.feedbackInteractions) {
+                                window.feedbackInteractions.playSound('success');
+                                window.feedbackInteractions.triggerEffect(data.emotion_effect || 'happy');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            
+                            // Reset button
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = 'Try Again';
+                                submitBtn.classList.add('error-feedback');
+                                setTimeout(() => {
+                                    submitBtn.classList.remove('error-feedback');
+                                }, 1000);
+                            }
+                            
+                            // Play error sound
+                            if (window.feedbackInteractions) {
+                                window.feedbackInteractions.playSound('error');
+                            }
+                        });
+                    });
+                }
+                
+                // Function to display feedback confirmation
+                function showFeedbackConfirmation(data) {
+                    // Create or get confirmation element
+                    let confirmationEl = document.getElementById('feedback-confirmation');
+                    if (!confirmationEl) {
+                        confirmationEl = document.createElement('div');
+                        confirmationEl.id = 'feedback-confirmation';
+                        confirmationEl.className = 'feedback-confirmation';
+                        document.body.appendChild(confirmationEl);
+                    }
+                    
+                    // Set content based on response
+                    confirmationEl.innerHTML = `
+                        <div class="confirmation-content">
+                            <div class="confirmation-icon">✓</div>
+                            <div class="confirmation-message">${data.message || 'Thank you for your feedback!'}</div>
+                        </div>
+                    `;
+                    
+                    // Make visible
+                    confirmationEl.classList.add('visible');
+                    
+                    // Hide after delay
+                    setTimeout(() => {
+                        confirmationEl.classList.remove('visible');
+                    }, 3000);
+                }
             });
         </script>
     </body>
@@ -460,9 +567,9 @@ def get_sound_for_emotion(emotion):
     emotion_sounds = {
         'happy': 'success.mp3',
         'excited': 'success.mp3',
-        'calm': 'calm.mp3',
+        'calm': 'notification.mp3',  # Using notification.mp3 as calm.mp3 may not exist
         'confused': 'notification.mp3',
-        'sad': 'subtle.mp3',
+        'sad': 'notification.mp3',   # Changed from subtle.mp3 which doesn't exist
         'angry': 'error.mp3',
         'neutral': 'notification.mp3'
     }

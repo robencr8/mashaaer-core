@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer Feedback Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 10px 15px;
+            background-color: #7878ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background-color: #5a5aff;
+        }
+        
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border-left: 4px solid #7878ff;
+            font-family: monospace;
+            white-space: pre-wrap;
+            display: none;
+        }
+        
+        .iframe-container {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            height: 600px;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mashaaer Feedback System Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Direct Feedback Page</h2>
+        <div class="button-container">
+            <button onclick="loadInIframe('/direct-feedback')">Load Feedback Page in iframe</button>
+            <button onclick="openInNewTab('/direct-feedback')">Open Feedback Page in New Tab</button>
+        </div>
+        
+        <div class="iframe-container">
+            <iframe id="test-frame" title="Feedback Test"></iframe>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Feedback API</h2>
+        <div class="button-container">
+            <button onclick="testFeedbackAPI()">Test API Submission</button>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+    
+    <script>
+        // Load page in iframe
+        function loadInIframe(url) {
+            document.getElementById('test-frame').src = url;
+        }
+        
+        // Open in new tab
+        function openInNewTab(url) {
+            window.open(url, '_blank');
+        }
+        
+        // Test the feedback API
+        function testFeedbackAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Sending test feedback...';
+            
+            // Create test data with various emotions to test different responses
+            const emotions = ['happy', 'sad', 'confused', 'angry', 'excited', 'calm', 'neutral'];
+            const selectedEmotion = emotions[Math.floor(Math.random() * emotions.length)];
+            
+            const testData = {
+                name: 'Test User',
+                feedback: `This is a test feedback with ${selectedEmotion} emotion. The cosmic interface design is impressive!`,
+                emotion: selectedEmotion,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Log the test data
+            console.log('Sending test feedback with emotion:', selectedEmotion);
+            
+            fetch('/api/enhanced-feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(testData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultDiv.textContent = 'API Response:\n' + JSON.stringify(data, null, 2);
+                
+                // Show success message
+                if (data.success) {
+                    resultDiv.style.borderLeft = '4px solid green';
+                } else {
+                    resultDiv.style.borderLeft = '4px solid red';
+                }
+            })
+            .catch(error => {
+                resultDiv.textContent = 'Error: ' + error.message;
+                resultDiv.style.borderLeft = '4px solid red';
+            });
+        }
+        
+        // Load feedback page on startup
+        window.onload = function() {
+            loadInIframe('/direct-feedback');
+        };
+    </script>
+</body>
+</html>

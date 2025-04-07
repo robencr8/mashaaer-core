@@ -1,1 +1,6 @@
-run = "python main_port8080.py"
+<name>
+Minimal Feedback
+</name>
+<command>
+python minimal_feedback.py
+</command>
