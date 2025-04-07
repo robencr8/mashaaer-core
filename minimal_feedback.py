@@ -139,6 +139,191 @@ def test_feedback_system():
     logger.debug("Serving test feedback system page")
     return send_from_directory('static_test', 'feedback_test.html')
 
+@app.route('/connection-test')
+def connection_test():
+    """Serve connection test page for feedback system"""
+    logger.debug("Serving connection test page")
+    return '''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Mashaaer Feedback Connection Tester</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f5f5f5;
+            }
+            .result {
+                padding: 15px;
+                margin: 10px 0;
+                border-radius: 5px;
+            }
+            .success {
+                background-color: #d4edda;
+                border: 1px solid #c3e6cb;
+                color: #155724;
+            }
+            .error {
+                background-color: #f8d7da;
+                border: 1px solid #f5c6cb;
+                color: #721c24;
+            }
+            .info {
+                background-color: #d1ecf1;
+                border: 1px solid #bee5eb;
+                color: #0c5460;
+            }
+            pre {
+                background-color: #f8f9fa;
+                padding: 10px;
+                border-radius: 5px;
+                overflow-x: auto;
+                border: 1px solid #ddd;
+            }
+            button {
+                padding: 10px 16px;
+                background-color: #7878ff;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                margin-right: 10px;
+                margin-bottom: 10px;
+                font-weight: bold;
+            }
+            button:hover {
+                background-color: #5a5aff;
+            }
+            h1, h2 {
+                color: #333;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Mashaaer Feedback Connection Tester</h1>
+        
+        <div>
+            <button id="testServerStatus">Test Server Status</button>
+            <button id="testFeedbackPage">Test Feedback Page</button>
+            <button id="testApiEndpoint">Test API Endpoint</button>
+            <button id="clearResults">Clear Results</button>
+        </div>
+        
+        <h2>Test Results:</h2>
+        <div id="results"></div>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const resultsDiv = document.getElementById('results');
+                
+                function addResult(message, type = 'info', data = null) {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = `result ${type}`;
+                    
+                    const timestamp = new Date().toISOString();
+                    resultDiv.innerHTML = `<strong>${timestamp}</strong>: ${message}`;
+                    
+                    if (data) {
+                        const preElem = document.createElement('pre');
+                        preElem.textContent = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+                        resultDiv.appendChild(preElem);
+                    }
+                    
+                    resultsDiv.prepend(resultDiv);
+                }
+                
+                // Test server status
+                document.getElementById('testServerStatus').addEventListener('click', function() {
+                    addResult('Testing server status...', 'info');
+                    
+                    fetch('/verify-feedback')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.text();
+                        })
+                        .then(data => {
+                            addResult('Server is active and responding', 'success', data);
+                        })
+                        .catch(error => {
+                            addResult(`Server test failed: ${error.message}`, 'error');
+                        });
+                });
+                
+                // Test feedback page
+                document.getElementById('testFeedbackPage').addEventListener('click', function() {
+                    addResult('Testing direct-feedback page...', 'info');
+                    
+                    fetch('/direct-feedback')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.text();
+                        })
+                        .then(data => {
+                            addResult('Feedback page loaded successfully', 'success', 
+                                `Page size: ${data.length} bytes`);
+                        })
+                        .catch(error => {
+                            addResult(`Feedback page test failed: ${error.message}`, 'error');
+                        });
+                });
+                
+                // Test API endpoint
+                document.getElementById('testApiEndpoint').addEventListener('click', function() {
+                    addResult('Testing API endpoint...', 'info');
+                    
+                    const testData = {
+                        name: 'Connection Tester',
+                        feedback: 'This is an automated test of the feedback API',
+                        emotion: 'neutral',
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    fetch('/api/enhanced-feedback', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(testData)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        addResult('API endpoint is working correctly', 'success', data);
+                    })
+                    .catch(error => {
+                        addResult(`API endpoint test failed: ${error.message}`, 'error');
+                    });
+                });
+                
+                // Clear results
+                document.getElementById('clearResults').addEventListener('click', function() {
+                    resultsDiv.innerHTML = '';
+                });
+                
+                // Initial message
+                addResult('Connection tester initialized', 'info', {
+                    url: window.location.href,
+                    timestamp: new Date().toISOString()
+                });
+            });
+        </script>
+    </body>
+    </html>
+    '''
+
 # --- CORS Headers for API endpoints ---
 @app.after_request
 def add_cors_headers(response):

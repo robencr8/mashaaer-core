@@ -1,6 +1,6 @@
 <name>
-Simple server
+Simple Feedback
 </name>
 <command>
-python simple_server.py
+python simple_feedback.py
 </command>

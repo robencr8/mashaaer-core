@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer Feedback Connection Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #ddd;
+        }
+        button {
+            padding: 10px 16px;
+            background-color: #7878ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #5a5aff;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-form {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .emotion-selection {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .emotion-option {
+            padding: 8px 15px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+        }
+        .emotion-option.selected {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mashaaer Feedback Connection Tester</h1>
+    
+    <div class="button-group">
+        <button id="testServerStatus">Check Server Status</button>
+        <button id="testDirectFeedback">Test Direct Feedback Page</button>
+        <button id="testStaticResources">Test Static Resources</button>
+        <button id="testApiEndpoint">Test API Endpoint</button>
+        <button id="clearResults">Clear Results</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Manual Feedback API Test</h2>
+        <div class="test-form">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" placeholder="Your name (optional)">
+            </div>
+            <div class="form-group">
+                <label for="feedback">Feedback:</label>
+                <textarea id="feedback" placeholder="Enter your feedback message"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Select Emotion:</label>
+                <div class="emotion-selection">
+                    <div class="emotion-option" data-emotion="happy">Happy 😊</div>
+                    <div class="emotion-option" data-emotion="excited">Excited 🤩</div>
+                    <div class="emotion-option" data-emotion="calm">Calm 😌</div>
+                    <div class="emotion-option" data-emotion="neutral">Neutral 😐</div>
+                    <div class="emotion-option" data-emotion="confused">Confused 🤔</div>
+                    <div class="emotion-option" data-emotion="sad">Sad 😢</div>
+                </div>
+            </div>
+            <button id="submitFeedback">Submit Feedback</button>
+        </div>
+    </div>
+    
+    <h2>Test Results:</h2>
+    <div id="results"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get DOM elements
+            const resultsDiv = document.getElementById('results');
+            const testServerBtn = document.getElementById('testServerStatus');
+            const testDirectFeedbackBtn = document.getElementById('testDirectFeedback');
+            const testStaticResourcesBtn = document.getElementById('testStaticResources');
+            const testApiEndpointBtn = document.getElementById('testApiEndpoint');
+            const clearResultsBtn = document.getElementById('clearResults');
+            const submitFeedbackBtn = document.getElementById('submitFeedback');
+            
+            // Emotion selection
+            const emotionOptions = document.querySelectorAll('.emotion-option');
+            let selectedEmotion = 'neutral';
+            
+            emotionOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    emotionOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedEmotion = this.getAttribute('data-emotion');
+                });
+            });
+            
+            // Function to add a result
+            function addResult(message, type = 'info', data = null) {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = `result ${type}`;
+                
+                const timestamp = new Date().toISOString();
+                resultDiv.innerHTML = `<strong>${timestamp}</strong>: ${message}`;
+                
+                if (data) {
+                    const preElem = document.createElement('pre');
+                    preElem.textContent = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+                    resultDiv.appendChild(preElem);
+                }
+                
+                resultsDiv.prepend(resultDiv);
+            }
+            
+            // Test server status
+            testServerBtn.addEventListener('click', function() {
+                addResult('Checking server status...', 'info');
+                
+                fetch('/verify-feedback')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        addResult('Server is running', 'success', data);
+                    })
+                    .catch(error => {
+                        addResult(`Server status check failed: ${error.message}`, 'error');
+                    });
+            });
+            
+            // Test direct feedback page
+            testDirectFeedbackBtn.addEventListener('click', function() {
+                addResult('Testing direct feedback page...', 'info');
+                
+                fetch('/direct-feedback')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.text();
+                    })
+                    .then(data => {
+                        addResult('Direct feedback page is accessible', 'success', 
+                            `Page loaded successfully (${data.length} bytes)`);
+                    })
+                    .catch(error => {
+                        addResult(`Direct feedback page test failed: ${error.message}`, 'error');
+                    });
+            });
+            
+            // Test static resources
+            testStaticResourcesBtn.addEventListener('click', function() {
+                addResult('Testing static resources...', 'info');
+                
+                const resources = [
+                    '/static/sounds/success.mp3',
+                    '/static/sounds/notification.mp3',
+                    '/static/sounds/error.mp3',
+                    '/static/css/main.css',
+                    '/static/css/cosmic-theme.css'
+                ];
+                
+                let successCount = 0;
+                let failedResources = [];
+                
+                Promise.all(resources.map(url => 
+                    fetch(url)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}`);
+                            }
+                            successCount++;
+                            return { url, status: 'success' };
+                        })
+                        .catch(error => {
+                            failedResources.push({ url, error: error.message });
+                            return { url, status: 'error', message: error.message };
+                        })
+                ))
+                .then(results => {
+                    if (successCount === resources.length) {
+                        addResult('All static resources loaded successfully', 'success', results);
+                    } else {
+                        addResult(`${successCount}/${resources.length} resources loaded successfully`, 
+                            'error', { results, failedResources });
+                    }
+                });
+            });
+            
+            // Test API endpoint
+            testApiEndpointBtn.addEventListener('click', function() {
+                addResult('Testing API endpoint with a simple request...', 'info');
+                
+                const testData = {
+                    name: 'Connection Tester',
+                    feedback: 'This is an automated test of the feedback API',
+                    emotion: 'neutral',
+                    timestamp: new Date().toISOString()
+                };
+                
+                fetch('/api/enhanced-feedback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                })
+                .then(response => {
+                    const contentType = response.headers.get('content-type');
+                    const isJson = contentType && contentType.includes('application/json');
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    if (isJson) {
+                        return response.json();
+                    } else {
+                        return response.text().then(text => {
+                            throw new Error(`Expected JSON response but got: ${text}`);
+                        });
+                    }
+                })
+                .then(data => {
+                    addResult('API endpoint is working correctly', 'success', data);
+                })
+                .catch(error => {
+                    addResult(`API endpoint test failed: ${error.message}`, 'error');
+                    
+                    // Additional diagnostic information
+                    addResult('Diagnostic Information for API request', 'info', {
+                        requestData: testData,
+                        error: error.toString(),
+                        timeStamp: new Date().toISOString()
+                    });
+                });
+            });
+            
+            // Submit feedback form
+            submitFeedbackBtn.addEventListener('click', function() {
+                const name = document.getElementById('name').value || 'Anonymous Tester';
+                const feedback = document.getElementById('feedback').value;
+                
+                if (!feedback) {
+                    addResult('Please enter feedback text', 'error');
+                    return;
+                }
+                
+                addResult('Submitting feedback to API...', 'info');
+                
+                const formData = {
+                    name: name,
+                    feedback: feedback,
+                    emotion: selectedEmotion,
+                    timestamp: new Date().toISOString()
+                };
+                
+                fetch('/api/enhanced-feedback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    addResult('Feedback submitted successfully', 'success', data);
+                })
+                .catch(error => {
+                    addResult(`Feedback submission failed: ${error.message}`, 'error');
+                    
+                    // Show complete request details for debugging
+                    addResult('Complete request details', 'info', {
+                        url: '/api/enhanced-feedback',
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: formData
+                    });
+                });
+            });
+            
+            // Clear results
+            clearResultsBtn.addEventListener('click', function() {
+                resultsDiv.innerHTML = '';
+            });
+            
+            // Initial diagnostics
+            addResult('Feedback Connection Tester Initialized', 'info');
+            
+            // Browser information
+            const browserInfo = {
+                userAgent: navigator.userAgent,
+                vendor: navigator.vendor,
+                language: navigator.language,
+                platform: navigator.platform,
+                cookieEnabled: navigator.cookieEnabled
+            };
+            
+            addResult('Browser Information', 'info', browserInfo);
+            
+            // Page URL information
+            const urlInfo = {
+                href: window.location.href,
+                host: window.location.host,
+                hostname: window.location.hostname,
+                pathname: window.location.pathname,
+                protocol: window.location.protocol,
+                origin: window.location.origin
+            };
+            
+            addResult('Page URL Information', 'info', urlInfo);
+            
+            // Set one emotion as selected by default
+            document.querySelector('.emotion-option[data-emotion="neutral"]').classList.add('selected');
+        });
+    </script>
+</body>
+</html>
