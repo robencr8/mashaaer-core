@@ -1,24 +1,34 @@
 <!DOCTYPE html>
 <html id="html-root" lang="en" dir="ltr" data-mood="neutral">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Mashaaer | AI Emotional Companion</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="{{ versioned_url('mobile/css/mobile_style.css') }}">
-  <link rel="stylesheet" href="{{ versioned_url('mobile/css/app.css') }}">
-  <link rel="stylesheet" href="/static/css/mood-themes.css">
-  <!-- Add to homescreen for iOS -->
-  <link rel="apple-touch-icon" href="{{ versioned_url('mobile/images/robin-icon-192.png') }}">
-  <link rel="manifest" href="{{ versioned_url('mobile/manifest.json') }}">
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="{{ versioned_url('mobile/css/mobile_style.css') }}" />
+  <link rel="stylesheet" href="{{ versioned_url('mobile/css/app.css') }}" />
+  <link rel="stylesheet" href="/static/css/mood-themes.css" />
+
+  <!-- Icons + PWA Manifest -->
+  <link rel="apple-touch-icon" href="{{ versioned_url('mobile/images/robin-icon-192.png') }}" />
+  <link rel="manifest" href="{{ versioned_url('mobile/manifest.json') }}" />
+
+  <!-- JS -->
   <script src="/static/mobile/js/emotion_audio_integration.js"></script>
   <script src="/static/js/mood-theme-manager.js"></script>
+
+  <!-- Lang Toggle -->
   <script>
     function setLang(lang) {
-      const html = document.getElementById("html-root"); html.lang = lang;
+      const html = document.getElementById("html-root");
+      html.lang = lang;
       document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
       localStorage.setItem('mashaaer-language', lang);
       showToast(lang === 'ar' ? 'تم تغيير اللغة إلى العربية' : 'Language switched to English');
@@ -27,10 +37,10 @@
 </head>
 <body>
   <div class="app-container">
+    <!-- Header -->
     <header>
       <h1>Mashaaer</h1>
       <h2>Your Cosmic Companion for Emotions & Mindfulness</h2>
-      
       <div class="cosmic-orb">
         <div class="orbit"></div>
         <div class="orbit"></div>
@@ -38,16 +48,17 @@
         <div class="orb"></div>
       </div>
     </header>
-    
-    <div class="intro-voice">
-      "Welcome to the emotional cosmos..."
-    </div>
 
+    <!-- Voice Intro -->
+    <div class="intro-voice">"Welcome to the emotional cosmos..."</div>
+
+    <!-- Lang Switch -->
     <div class="lang-toggle">
       <button class="lang-btn" onclick="setLang('en')">English</button>
       <button class="lang-btn" onclick="setLang('ar')">العربية</button>
     </div>
 
+    <!-- Features -->
     <div class="features">
       <div class="feature">✨ Voice Interaction Interface</div>
       <div class="feature">🌌 AI Emotional Intelligence</div>
@@ -56,6 +67,7 @@
       <div class="feature">💫 Memory System</div>
     </div>
 
+    <!-- Action Buttons -->
     <div class="actions">
       <div class="action-button voice-button" id="voiceButton">
         <div class="button-icon"><i class="fas fa-microphone"></i></div>
@@ -71,6 +83,7 @@
       </div>
     </div>
 
+    <!-- Quick Links -->
     <div class="button-group">
       <a class="button" href="/recommendations">🧠 Recommendations</a>
       <a class="button" href="/mobile/emotions">💫 Emotion Timeline</a>
@@ -79,6 +92,7 @@
       <a class="button" href="/admin">⚙️ Admin Panel</a>
     </div>
 
+    <!-- Conversation Log -->
     <div class="conversation" id="conversation">
       <div class="conversation-header">
         <h3>Conversation</h3>
@@ -91,11 +105,10 @@
           <div class="personality-type" id="personalityType">Neutral</div>
         </div>
       </div>
-      <div class="conversation-messages" id="messages">
-        <!-- Messages will be populated here -->
-      </div>
+      <div class="conversation-messages" id="messages"></div>
     </div>
 
+    <!-- Modals -->
     <div class="modal" id="textInputModal">
       <div class="modal-content">
         <div class="modal-header">
@@ -146,94 +159,62 @@
       </div>
     </div>
 
+    <!-- Tab Bar -->
     <div class="tab-bar">
-      <div class="tab active" data-tab="home">
-        <i class="fas fa-home"></i>
-        <span>Home</span>
-      </div>
-      <div class="tab" data-tab="emotions">
-        <i class="fas fa-chart-line"></i>
-        <span>Emotions</span>
-      </div>
-      <div class="tab" data-tab="profiles">
-        <i class="fas fa-user"></i>
-        <span>Profiles</span>
-      </div>
-      <div class="tab" data-tab="settings">
-        <i class="fas fa-cog"></i>
-        <span>Settings</span>
-      </div>
+      <div class="tab active" data-tab="home"><i class="fas fa-home"></i><span>Home</span></div>
+      <div class="tab" data-tab="emotions"><i class="fas fa-chart-line"></i><span>Emotions</span></div>
+      <div class="tab" data-tab="profiles"><i class="fas fa-user"></i><span>Profiles</span></div>
+      <div class="tab" data-tab="settings"><i class="fas fa-cog"></i><span>Settings</span></div>
     </div>
   </div>
 
-  <footer>
-    Mashaaer • Cosmic Emotion Companion • v2.0
-  </footer>
+  <footer>Mashaaer • Cosmic Emotion Companion • v2.0</footer>
 
+  <!-- Script Injections -->
   <script src="{{ versioned_url('js/voice_recorder.js') }}"></script>
   <script src="{{ versioned_url('mobile/js/api-service.js') }}"></script>
   <script src="{{ versioned_url('mobile/js/app.js') }}"></script>
-  
+
   <script>
-    // Initialize API status check
-    document.addEventListener('DOMContentLoaded', async function() {
+    // Init logic
+    document.addEventListener('DOMContentLoaded', async () => {
       try {
-        // Play ambient cosmic sound on page load (happy emotion by default)
         window.playEmotionTrack('neutral');
-        
+
         const statusElement = document.getElementById('aiStatusText');
         if (statusElement) {
           statusElement.textContent = 'Checking connection...';
-          
-          // Get system status from API
           const status = await apiService.getStatus();
-          
-          if (status && status.success) {
+
+          if (status?.success) {
             statusElement.textContent = 'Connected';
             document.querySelector('.status-dot').classList.add('online');
-            
-            // Update personality if available
-            if (status.notifications && status.notifications.available) {
-              console.log('Notifications available:', status.notifications);
-            }
           } else {
             statusElement.textContent = 'Offline Mode';
             document.querySelector('.status-dot').classList.add('offline');
           }
         }
+
+        const savedLang = localStorage.getItem("mashaaer-language");
+        if (savedLang) setLang(savedLang);
+
       } catch (error) {
-        console.error('Error checking API status:', error);
-        const statusElement = document.getElementById('aiStatusText');
-        if (statusElement) {
-          statusElement.textContent = 'Connection Error';
-          document.querySelector('.status-dot').classList.add('error');
-        }
-      }
-      
-      // Check for saved language preference
-      const savedLang = localStorage.getItem("mashaaer-language");
-      if (savedLang) {
-        setLang(savedLang);
+        console.error('Connection error:', error);
+        document.getElementById('aiStatusText').textContent = 'Connection Error';
+        document.querySelector('.status-dot').classList.add('error');
       }
     });
-    
-    // Toast notification system
+
     function showToast(message, type = 'info') {
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
       toast.textContent = message;
-      
       document.body.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.classList.add('show');
-      }, 100);
-      
+
+      setTimeout(() => toast.classList.add('show'), 100);
       setTimeout(() => {
         toast.classList.remove('show');
-        setTimeout(() => {
-          document.body.removeChild(toast);
-        }, 300);
+        setTimeout(() => toast.remove(), 300);
       }, 3000);
     }
   </script>

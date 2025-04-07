@@ -1,99 +1,56 @@
 """
-Simplified Feedback Application
-A lightweight Flask application focusing only on the feedback functionality.
+Enhanced Feedback Module for Mashaaer Feelings
+This module provides comprehensive feedback functionalities with emotional micro-interactions.
 """
-from flask import Flask, jsonify, request, render_template_string
+from flask import Blueprint, jsonify, request, render_template_string, current_app
 from flask_cors import CORS
 import os
 import logging
 import datetime
 import json
 import time
+from typing import Dict, Any
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, 
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+                   format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Create the Flask application instance
-app = Flask(__name__, 
-            static_folder='static',
-            template_folder='templates')
+# Create blueprint
+enhanced_feedback_bp = Blueprint('enhanced_feedback', __name__)
 
-# Configure CORS with proper settings for all routes
-CORS(app, supports_credentials=True)
+# Configure CORS for all routes in this blueprint
+CORS(enhanced_feedback_bp, supports_credentials=True)
 
-# Set a secret key for session management
-app.secret_key = os.environ.get("SESSION_SECRET", "mashaaer_development_key")
-
-# Ensure feedback directory exists
+# Ensure feedback data directory exists
 os.makedirs('data/feedback', exist_ok=True)
 
-# Add root route for a simple homepage
-@app.route("/", methods=["GET"])
+@enhanced_feedback_bp.route("/enhanced-feedback", methods=["GET"])
 def index():
-    """Serve a simple homepage"""
-    logger.debug("Serving homepage")
-    return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Mashaaer Feedback System</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 20px;
-                line-height: 1.6;
-                background: #1a1a2e;
-                color: #fff;
-            }
-            h1 {
-                color: #9370DB;
-            }
-            a {
-                color: #7B68EE;
-                text-decoration: none;
-            }
-            a:hover {
-                text-decoration: underline;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>Mashaaer Feedback System</h1>
-        <p>This is a simplified version of the feedback system.</p>
-        <p><a href="/direct-feedback">Try our enhanced feedback form</a></p>
-        <p>Check the <a href="/health">/health</a> endpoint for status information.</p>
-    </body>
-    </html>
-    """
+    """Serve the enhanced feedback system homepage"""
+    logger.debug("Serving enhanced feedback homepage")
+    return render_template_string(get_enhanced_feedback_html())
 
-# Health check endpoint
-@app.route("/health", methods=["GET", "OPTIONS"])
+@enhanced_feedback_bp.route("/enhanced-feedback/health", methods=["GET", "OPTIONS"])
 def health():
-    """Health check endpoint"""
-    logger.debug("Health check endpoint accessed")
+    """Health check endpoint for enhanced feedback system"""
+    logger.debug("Enhanced feedback health check endpoint accessed")
     return jsonify({
         "status": "ok",
-        "message": "Mashaaer Feedback service is running",
-        "environment": os.environ.get("REPL_SLUG", "unknown"),
+        "message": "Mashaaer Enhanced Feedback service is running",
+        "environment": os.environ.get("REPL_SLUG", "local"),
         "timestamp": datetime.datetime.now().isoformat()
     })
 
-# API endpoint for direct feedback
-@app.route('/api/direct-feedback', methods=['POST', 'OPTIONS'])
-def process_direct_feedback():
+@enhanced_feedback_bp.route('/api/enhanced-feedback', methods=['POST', 'OPTIONS'])
+def process_enhanced_feedback():
     """
-    Process direct feedback with emotion-driven response
+    Process enhanced feedback with emotion-driven response
     """
     if request.method == 'OPTIONS':
         return '', 200
         
-    logger.info("Received feedback request")
+    logger.info("Received enhanced feedback request")
     
     try:
         # Get the JSON data from the request
@@ -141,8 +98,7 @@ def process_direct_feedback():
             "sound_effect": "/static/sounds/error.mp3"
         }), 500
 
-# Direct feedback page with enhanced UX
-@app.route('/direct-feedback', methods=['GET', 'POST'])
+@enhanced_feedback_bp.route('/enhanced-feedback/direct', methods=['GET', 'POST'])
 def direct_feedback():
     """Serve an enhanced feedback page with visual confirmations and sound effects"""
     logger.debug("Serving enhanced direct feedback page")
@@ -154,8 +110,8 @@ def direct_feedback():
             data = request.get_json()
             
             # Forward to API endpoint using internal request
-            response = app.test_client().post(
-                '/api/direct-feedback',
+            response = current_app.test_client().post(
+                '/api/enhanced-feedback',
                 json=data,
                 headers={'Content-Type': 'application/json'}
             )
@@ -173,7 +129,11 @@ def direct_feedback():
             }), 500
     
     # For GET requests, serve the feedback form
-    html_content = """
+    return render_template_string(get_enhanced_feedback_html())
+
+def get_enhanced_feedback_html():
+    """Returns the HTML template for the enhanced feedback page"""
+    return """
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -475,7 +435,7 @@ def direct_feedback():
                     </div>
                 </div>
                 
-                <button type="submit" class="submit-btn">Send Feedback</button>
+                <button type="submit" class="submit-btn">Submit Feedback</button>
             </form>
             
             <div id="feedback-result"></div>
@@ -483,279 +443,235 @@ def direct_feedback():
         
         <div class="emotion-transition" id="emotion-transition"></div>
         
-        <!-- Audio elements for sound effects -->
-        <audio id="hover-sound" preload="auto">
-            <source src="/static/sounds/hover.mp3" type="audio/mpeg">
-        </audio>
-        <audio id="click-sound" preload="auto">
-            <source src="/static/sounds/click.mp3" type="audio/mpeg">
-        </audio>
-        <audio id="success-sound" preload="auto">
-            <source src="/static/sounds/success.mp3" type="audio/mpeg">
-        </audio>
-        <audio id="error-sound" preload="auto">
-            <source src="/static/sounds/error.mp3" type="audio/mpeg">
-        </audio>
-        <audio id="transition-sound" preload="auto">
-            <source src="/static/sounds/transition.mp3" type="audio/mpeg">
-        </audio>
+        <!-- Sound effect audio elements -->
+        <audio id="sound-hover" preload="auto"></audio>
+        <audio id="sound-click" preload="auto"></audio>
+        <audio id="sound-success" preload="auto"></audio>
+        <audio id="sound-error" preload="auto"></audio>
+        <audio id="sound-transition" preload="auto"></audio>
         
+        <script src="/static/js/micro_interactions.js"></script>
+        <script src="/static/js/feedback_interactions.js"></script>
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Elements
-                const form = document.getElementById('feedback-form');
-                const resultDiv = document.getElementById('feedback-result');
-                const stars = document.querySelectorAll('.star');
-                const emotionOptions = document.querySelectorAll('.emotion-option');
-                const audioToggle = document.querySelector('.audio-toggle');
-                const transitionContainer = document.getElementById('emotion-transition');
-                
-                // Audio elements
-                const hoverSound = document.getElementById('hover-sound');
-                const clickSound = document.getElementById('click-sound');
-                const successSound = document.getElementById('success-sound');
-                const errorSound = document.getElementById('error-sound');
-                const transitionSound = document.getElementById('transition-sound');
-                
-                // State
-                let selectedRating = 0;
-                let selectedEmotion = '';
-                let soundEnabled = true;
-                
-                // Initialize
-                function initialize() {
-                    // Set up audio toggle
-                    audioToggle.addEventListener('click', function() {
-                        soundEnabled = !soundEnabled;
-                        audioToggle.textContent = soundEnabled ? '🔊' : '🔇';
+            // Track the current state
+            let currentRating = 0;
+            let currentEmotion = '';
+            let soundEnabled = true;
+            
+            // Get DOM elements
+            const form = document.getElementById('feedback-form');
+            const resultDiv = document.getElementById('feedback-result');
+            const stars = document.querySelectorAll('.star');
+            const emotionOptions = document.querySelectorAll('.emotion-option');
+            const audioToggle = document.querySelector('.audio-toggle');
+            const transitionElement = document.getElementById('emotion-transition');
+            
+            // Audio elements
+            const soundHover = document.getElementById('sound-hover');
+            const soundClick = document.getElementById('sound-click');
+            const soundSuccess = document.getElementById('sound-success');
+            const soundError = document.getElementById('sound-error');
+            const soundTransition = document.getElementById('sound-transition');
+            
+            // Set audio sources
+            soundHover.src = '/static/sounds/hover.mp3';
+            soundClick.src = '/static/sounds/click.mp3';
+            soundSuccess.src = '/static/sounds/success.mp3';
+            soundError.src = '/static/sounds/error.mp3';
+            soundTransition.src = '/static/sounds/transition.mp3';
+            
+            // Initialize the form
+            function initialize() {
+                // Star rating functionality
+                stars.forEach(star => {
+                    star.addEventListener('click', function() {
+                        if (soundEnabled) soundClick.play();
                         
-                        if (soundEnabled) {
-                            playSound(clickSound);
+                        const value = parseInt(this.getAttribute('data-value'));
+                        currentRating = value;
+                        
+                        // Update visual state
+                        stars.forEach(s => {
+                            if (parseInt(s.getAttribute('data-value')) <= value) {
+                                s.classList.add('active');
+                            } else {
+                                s.classList.remove('active');
+                            }
+                        });
+                    });
+                    
+                    star.addEventListener('mouseover', function() {
+                        if (soundEnabled) soundHover.play();
+                    });
+                });
+                
+                // Emotion selection functionality
+                emotionOptions.forEach(option => {
+                    option.addEventListener('click', function() {
+                        if (soundEnabled) soundClick.play();
+                        
+                        const emotion = this.getAttribute('data-emotion');
+                        const previousEmotion = currentEmotion;
+                        currentEmotion = emotion;
+                        
+                        // Update visual state
+                        emotionOptions.forEach(o => o.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        // If emotion changed, play transition sound and show effect
+                        if (previousEmotion && previousEmotion !== emotion) {
+                            if (soundEnabled) soundTransition.play();
+                            showEmotionTransition(emotion);
                         }
                     });
                     
-                    // Set up star rating
-                    stars.forEach(star => {
-                        // Hover effects
-                        star.addEventListener('mouseenter', function() {
-                            const value = parseInt(this.dataset.value);
-                            highlightStars(value);
-                            if (soundEnabled) playSound(hoverSound);
-                        });
-                        
-                        star.addEventListener('mouseleave', function() {
-                            highlightStars(selectedRating);
-                        });
-                        
-                        // Click to select
-                        star.addEventListener('click', function() {
-                            selectedRating = parseInt(this.dataset.value);
-                            highlightStars(selectedRating);
-                            if (soundEnabled) playSound(clickSound);
-                        });
+                    option.addEventListener('mouseover', function() {
+                        if (soundEnabled) soundHover.play();
                     });
-                    
-                    // Set up emotion options
-                    emotionOptions.forEach(option => {
-                        // Hover effects
-                        option.addEventListener('mouseenter', function() {
-                            if (soundEnabled) playSound(hoverSound);
-                        });
-                        
-                        // Click to select
-                        option.addEventListener('click', function() {
-                            const emotion = this.dataset.emotion;
-                            
-                            // Deselect previous emotion
-                            emotionOptions.forEach(opt => opt.classList.remove('active'));
-                            
-                            // Select new emotion
-                            this.classList.add('active');
-                            selectedEmotion = emotion;
-                            
-                            if (soundEnabled) playSound(clickSound);
-                        });
-                    });
-                    
-                    // Set up form submission
-                    form.addEventListener('submit', submitFeedback);
-                }
+                });
                 
-                // Highlight stars up to a certain value
-                function highlightStars(value) {
-                    stars.forEach(star => {
-                        const starValue = parseInt(star.dataset.value);
-                        if (starValue <= value) {
-                            star.classList.add('active');
-                        } else {
-                            star.classList.remove('active');
-                        }
-                    });
-                }
-                
-                // Play sound with error handling
-                function playSound(audioElement) {
-                    if (!soundEnabled) return;
+                // Toggle sound effects
+                audioToggle.addEventListener('click', function() {
+                    soundEnabled = !soundEnabled;
+                    this.textContent = soundEnabled ? '🔊' : '🔇';
                     
-                    // Reset sound to beginning
-                    audioElement.currentTime = 0;
-                    
-                    // Play with error handling
-                    const playPromise = audioElement.play();
-                    
-                    if (playPromise !== undefined) {
-                        playPromise.catch(error => {
-                            console.warn('Audio playback error:', error);
-                        });
+                    if (soundEnabled) {
+                        soundClick.play();
                     }
-                }
+                });
                 
-                // Create sparkle effect for emotions
-                function createSparkleEffect(emotion) {
-                    // Clear previous effects
-                    transitionContainer.innerHTML = '';
+                // Form submission
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
                     
-                    // Play transition sound
-                    playSound(transitionSound);
+                    if (soundEnabled) soundClick.play();
                     
-                    // Define colors based on emotion
-                    let colors = ['#FFD700', '#FFC107', '#FFEB3B']; // Default (happy) colors
+                    const nameInput = document.getElementById('name');
+                    const feedbackInput = document.getElementById('feedback');
                     
-                    if (emotion === 'sad') {
-                        colors = ['#42A5F5', '#2196F3', '#1976D2'];
-                    } else if (emotion === 'angry') {
-                        colors = ['#EF5350', '#F44336', '#D32F2F'];
-                    } else if (emotion === 'calm') {
-                        colors = ['#66BB6A', '#4CAF50', '#388E3C'];
-                    } else if (emotion === 'excited') {
-                        colors = ['#FF9800', '#FF5722', '#FFEB3B'];
-                    } else if (emotion === 'confused') {
-                        colors = ['#AB47BC', '#9C27B0', '#7B1FA2'];
-                    }
-                    
-                    // Create sparkles
-                    for (let i = 0; i < 50; i++) {
-                        createSparkle(colors);
-                    }
-                }
-                
-                // Create individual sparkle
-                function createSparkle(colors) {
-                    const sparkle = document.createElement('div');
-                    sparkle.style.position = 'absolute';
-                    sparkle.style.width = Math.random() * 15 + 5 + 'px';
-                    sparkle.style.height = sparkle.style.width;
-                    sparkle.style.borderRadius = '50%';
-                    sparkle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    sparkle.style.boxShadow = `0 0 ${Math.random() * 10 + 5}px ${sparkle.style.backgroundColor}`;
-                    sparkle.style.opacity = Math.random() + 0.5;
-                    
-                    // Random position
-                    sparkle.style.left = Math.random() * 100 + 'vw';
-                    sparkle.style.top = Math.random() * 100 + 'vh';
-                    
-                    // Add to container
-                    transitionContainer.appendChild(sparkle);
-                    
-                    // Animate with random duration
-                    const duration = Math.random() * 2 + 1;
-                    sparkle.style.animation = `sparkle-fade ${duration}s ease-out forwards`;
-                    
-                    // Remove after animation
-                    setTimeout(() => {
-                        if (transitionContainer.contains(sparkle)) {
-                            transitionContainer.removeChild(sparkle);
-                        }
-                    }, duration * 1000);
-                }
-                
-                // Submit feedback
-                function submitFeedback(event) {
-                    event.preventDefault();
-                    
-                    // Get form data
-                    const formData = {
-                        name: document.getElementById('name').value || 'Anonymous',
-                        feedback: document.getElementById('feedback').value,
-                        rating: selectedRating,
-                        emotion: selectedEmotion
-                    };
-                    
-                    // Submit via fetch
-                    fetch('/api/direct-feedback', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(formData)
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Display result
-                        resultDiv.innerHTML = data.message;
-                        resultDiv.className = data.success ? 'success' : 'error';
-                        resultDiv.style.display = 'block';
-                        
-                        // Play appropriate sound
-                        if (data.success) {
-                            playSound(successSound);
-                        } else {
-                            playSound(errorSound);
-                        }
-                        
-                        // Create sparkle effect based on emotion
-                        if (data.emotion_effect) {
-                            createSparkleEffect(data.emotion_effect);
-                        }
-                        
-                        // Reset form after success
-                        if (data.success) {
-                            setTimeout(() => {
-                                form.reset();
-                                selectedRating = 0;
-                                highlightStars(0);
-                                emotionOptions.forEach(opt => opt.classList.remove('active'));
-                                selectedEmotion = '';
-                            }, 2000);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        resultDiv.innerHTML = 'An error occurred while submitting feedback. Please try again.';
+                    // Validate feedback is provided
+                    if (!feedbackInput.value.trim()) {
+                        resultDiv.textContent = 'Please provide your feedback.';
                         resultDiv.className = 'error';
                         resultDiv.style.display = 'block';
-                        playSound(errorSound);
-                    });
-                }
-                
-                // Add sparkle animation to CSS
-                const styleSheet = document.createElement('style');
-                styleSheet.innerHTML = `
-                    @keyframes sparkle-fade {
-                        0% {
-                            transform: scale(0) rotate(0deg);
-                            opacity: 0;
-                        }
-                        50% {
-                            opacity: 1;
-                        }
-                        100% {
-                            transform: scale(1) rotate(180deg);
-                            opacity: 0;
-                        }
+                        if (soundEnabled) soundError.play();
+                        return;
                     }
-                `;
-                document.head.appendChild(styleSheet);
+                    
+                    // Prepare form data
+                    const formData = {
+                        name: nameInput.value.trim() || 'Anonymous',
+                        feedback: feedbackInput.value.trim(),
+                        rating: currentRating,
+                        emotion: currentEmotion || 'neutral',
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    try {
+                        // Send data to API
+                        const response = await fetch('/api/enhanced-feedback', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(formData)
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            // Show success message
+                            resultDiv.textContent = data.message;
+                            resultDiv.className = 'success';
+                            resultDiv.style.display = 'block';
+                            
+                            // Play success sound and show emotion effect
+                            if (soundEnabled) soundSuccess.play();
+                            showEmotionTransition(data.emotion_effect || 'happy');
+                            
+                            // Reset form
+                            form.reset();
+                            stars.forEach(s => s.classList.remove('active'));
+                            emotionOptions.forEach(o => o.classList.remove('active'));
+                            currentRating = 0;
+                            currentEmotion = '';
+                        } else {
+                            // Show error message
+                            resultDiv.textContent = data.message || 'Error submitting feedback.';
+                            resultDiv.className = 'error';
+                            resultDiv.style.display = 'block';
+                            
+                            // Play error sound
+                            if (soundEnabled) soundError.play();
+                        }
+                    } catch (error) {
+                        // Show error message
+                        resultDiv.textContent = 'Error submitting feedback: ' + error.message;
+                        resultDiv.className = 'error';
+                        resultDiv.style.display = 'block';
+                        
+                        // Play error sound
+                        if (soundEnabled) soundError.play();
+                    }
+                });
+            }
+            
+            // Show emotion transition effect
+            function showEmotionTransition(emotion) {
+                // Emotion color mappings
+                const emotionColors = {
+                    'happy': {primary: '#FFD700', secondary: '#FFA500'},
+                    'sad': {primary: '#4169E1', secondary: '#1E90FF'},
+                    'angry': {primary: '#FF4500', secondary: '#FF6347'},
+                    'calm': {primary: '#48D1CC', secondary: '#20B2AA'},
+                    'excited': {primary: '#FF1493', secondary: '#FF69B4'},
+                    'confused': {primary: '#9932CC', secondary: '#8B008B'},
+                    'neutral': {primary: '#9370DB', secondary: '#7B68EE'}
+                };
                 
-                // Initialize the form
-                initialize();
-            });
+                // Set colors for the emotion
+                const colors = emotionColors[emotion] || emotionColors.neutral;
+                
+                // Apply animation
+                transitionElement.style.background = `radial-gradient(circle, ${colors.primary}00 0%, ${colors.secondary}00 100%)`;
+                transitionElement.style.animation = 'none';
+                
+                // Force reflow
+                void transitionElement.offsetWidth;
+                
+                // Add animation
+                transitionElement.style.background = `radial-gradient(circle, ${colors.primary}33 0%, ${colors.secondary}00 100%)`;
+                transitionElement.style.animation = 'emotionTransition 1.5s ease-out forwards';
+            }
+            
+            // Add emotion transition animation to the stylesheet
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes emotionTransition {
+                    0% {
+                        opacity: 0;
+                        transform: scale(0.8);
+                    }
+                    50% {
+                        opacity: 0.5;
+                        transform: scale(1.1);
+                    }
+                    100% {
+                        opacity: 0;
+                        transform: scale(1.5);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Initialize the form
+            initialize();
         </script>
     </body>
     </html>
     """
-    
-    return html_content
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8081, debug=True)
+def register_enhanced_feedback_routes(app):
+    """Register enhanced feedback routes with the Flask application"""
+    app.register_blueprint(enhanced_feedback_bp)
+    logger.info("Enhanced feedback routes registered successfully")

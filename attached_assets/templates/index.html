@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mashaaer Core</title>
+  <link rel="manifest" href="/manifest.json" />
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at center, #0d0d2b 0%, #000 100%);
+      color: white;
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+      overflow: hidden;
+    }
+    #cosmic-sphere {
+      width: 200px;
+      height: 200px;
+      margin: 100px auto;
+      border-radius: 50%;
+      background: radial-gradient(circle, #6f00ff, #1f0036);
+      box-shadow: 0 0 30px 10px #6f00ff;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    #cosmic-sphere.listening {
+      box-shadow: 0 0 60px 20px #ff00cc;
+      transform: scale(1.05);
+    }
+    #response {
+      margin-top: 40px;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="cosmic-sphere" onclick="handleSphereClick()">
+    <span>✨</span>
+  </div>
+
+  <div id="response">Tap the sphere to begin</div>
+
+  <script>
+    let listening = false;
+
+    async function handleSphereClick() {
+      const sphere = document.getElementById('cosmic-sphere');
+      const responseBox = document.getElementById('response');
+
+      sphere.classList.add('listening');
+      responseBox.textContent = 'Listening...';
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
+        let chunks = [];
+
+        recorder.ondataavailable = e => chunks.push(e.data);
+
+        recorder.onstop = async () => {
+          const blob = new Blob(chunks, { type: 'audio/webm' });
+          const formData = new FormData();
+          formData.append('audio', blob, 'recording.webm');
+
+          const res = await fetch('/api/voice_logic', {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await res.json();
+          responseBox.textContent = data.reply || 'No response';
+          speakText(data.reply);
+          sphere.classList.remove('listening');
+        };
+
+        recorder.start();
+        setTimeout(() => recorder.stop(), 4000); // 4 second input
+
+      } catch (err) {
+        console.error(err);
+        responseBox.textContent = 'Mic access denied';
+        sphere.classList.remove('listening');
+      }
+    }
+
+    function speakText(text) {
+      if (!window.speechSynthesis) return;
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'en';
+      speechSynthesis.speak(utter);
+    }
+  </script>
+</body>
+</html>

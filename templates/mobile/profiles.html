@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Profiles - Robin AI Mobile</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="/static/mobile/css/app.css">
-  <link rel="stylesheet" href="/static/mobile/css/profiles.css">
-  <link rel="apple-touch-icon" href="/static/mobile/images/robin-icon-192.png">
-  <link rel="manifest" href="/static/mobile/manifest.json">
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/static/mobile/css/app.css" />
+  <link rel="stylesheet" href="/static/mobile/css/profiles.css" />
+
+  <!-- PWA Manifest -->
+  <link rel="apple-touch-icon" href="/static/mobile/images/robin-icon-192.png" />
+  <link rel="manifest" href="/static/mobile/manifest.json" />
 </head>
 <body>
   <div class="app-container">
+    <!-- Header -->
     <div class="header">
       <div class="logo">
         <span class="icon">🤖</span>
@@ -26,20 +33,24 @@
       </div>
     </div>
 
+    <!-- Page Title -->
     <div class="page-title">
       <h2>Face Profiles</h2>
     </div>
 
+    <!-- Add Profile Button -->
     <div class="profile-actions">
       <button id="addProfileButton" class="action-btn">
         <i class="fas fa-plus"></i> Add New Profile
       </button>
     </div>
 
+    <!-- Profiles List -->
     <div class="profiles-container" id="profilesContainer">
-      <!-- Profiles will be populated here -->
+      <!-- JS will populate profiles here -->
     </div>
 
+    <!-- Profile Modal -->
     <div class="modal" id="profileModal">
       <div class="modal-content">
         <div class="modal-header">
@@ -47,11 +58,12 @@
           <button class="close-button" id="closeProfileModal">&times;</button>
         </div>
         <div class="modal-body" id="profileModalBody">
-          <!-- Profile details will be populated here -->
+          <!-- JS will inject profile detail here -->
         </div>
       </div>
     </div>
 
+    <!-- Add Profile Modal -->
     <div class="modal" id="addProfileModal">
       <div class="modal-content">
         <div class="modal-header">
@@ -61,7 +73,7 @@
         <div class="modal-body">
           <div class="form-group">
             <label for="profileName">Name:</label>
-            <input type="text" id="profileName" placeholder="Enter name">
+            <input type="text" id="profileName" placeholder="Enter name" />
           </div>
           <div class="form-group">
             <label>Photo:</label>
@@ -75,14 +87,14 @@
           <div class="form-group">
             <label>Metadata (optional):</label>
             <div class="metadata-fields">
-              <input type="text" id="metadataKey" placeholder="Key">
-              <input type="text" id="metadataValue" placeholder="Value">
+              <input type="text" id="metadataKey" placeholder="Key" />
+              <input type="text" id="metadataValue" placeholder="Value" />
               <button id="addMetadataButton" class="small-btn">
                 <i class="fas fa-plus"></i>
               </button>
             </div>
             <div id="metadataList" class="metadata-list">
-              <!-- Metadata items will be added here -->
+              <!-- Metadata will appear here -->
             </div>
           </div>
           <button id="saveProfileButton" class="send-button">Save Profile</button>
@@ -90,6 +102,7 @@
       </div>
     </div>
 
+    <!-- Camera View -->
     <div class="camera-view" id="profileCameraView">
       <div class="camera-header">
         <button class="close-button" id="closeProfileCameraButton">&times;</button>
@@ -102,26 +115,24 @@
       </div>
     </div>
 
+    <!-- Tab Bar -->
     <div class="tab-bar">
       <div class="tab" data-tab="home">
-        <i class="fas fa-home"></i>
-        <span>Home</span>
+        <i class="fas fa-home"></i><span>Home</span>
       </div>
       <div class="tab" data-tab="emotions">
-        <i class="fas fa-chart-line"></i>
-        <span>Emotions</span>
+        <i class="fas fa-chart-line"></i><span>Emotions</span>
       </div>
       <div class="tab active" data-tab="profiles">
-        <i class="fas fa-user"></i>
-        <span>Profiles</span>
+        <i class="fas fa-user"></i><span>Profiles</span>
       </div>
       <div class="tab" data-tab="settings">
-        <i class="fas fa-cog"></i>
-        <span>Settings</span>
+        <i class="fas fa-cog"></i><span>Settings</span>
       </div>
     </div>
   </div>
 
+  <!-- JS -->
   <script src="/static/mobile/js/profiles.js"></script>
 </body>
 </html>

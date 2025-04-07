@@ -2,5 +2,5 @@
 Feedback Application
 </name>
 <command>
-gunicorn --bind 0.0.0.0:8080 --reuse-port --reload feedback_app:app
+python feedback_app.py
 </command>
