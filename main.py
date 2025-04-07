@@ -174,6 +174,16 @@ try:
     from feedback_route import register_feedback_routes as register_dedicated_feedback_routes
     register_dedicated_feedback_routes(app)
     
+    # Register improved simple feedback form
+    try:
+        from feedback_form import register_feedback_form_routes
+        register_feedback_form_routes(app)
+        logger.info("Simple feedback form routes registered successfully")
+    except ImportError as e:
+        logger.error(f"Could not import feedback form module: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error registering feedback form routes: {str(e)}")
+    
     logger.info("Successfully registered enhanced CORS configuration with debugging")
 except Exception as e:
     logger.error(f"Error enhancing CORS: {str(e)}")
