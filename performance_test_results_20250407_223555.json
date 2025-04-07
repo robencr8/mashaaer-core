@@ -1,0 +1,508 @@
+{
+  "timestamp": "2025-04-07T22:35:54.886110",
+  "base_url": "http://localhost:5000",
+  "tests": {
+    "api_health": {
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 8.483171463012695,
+      "description": "API Health Check",
+      "timestamp": "2025-04-07T22:35:54.894896",
+      "response_data": {
+        "status": "API server is running",
+        "success": true,
+        "timestamp": "2025-04-07T22:35:54.892406",
+        "version": "1.0"
+      }
+    },
+    "api_status": {
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 3.840923309326172,
+      "description": "API Status Check",
+      "timestamp": "2025-04-07T22:35:54.899109",
+      "response_data": {
+        "environment": "Linux",
+        "message": "Mashaaer Feelings service is running",
+        "status": "ok",
+        "timestamp": "2025-04-07T22:35:54.897872"
+      }
+    },
+    "emotion_detection_en": {
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 14.119386672973633,
+      "description": "Emotion Detection - English",
+      "timestamp": "2025-04-07T22:35:54.913786",
+      "response_data": {
+        "confidence": 1.0,
+        "detected_language": "en",
+        "emotion_scores": {
+          "angry": 0.0,
+          "bored": 0.0,
+          "calm": 0.0,
+          "confused": 0.0,
+          "disgust": 0.0,
+          "embarrassed": 0.0,
+          "fear": 0.0,
+          "grateful": 0.0,
+          "happy": 1.0,
+          "hopeful": 0.10714285714285715,
+          "love": 0.0,
+          "proud": 0.0,
+          "sad": 0.0,
+          "surprise": 0.0,
+          "\u0623\u0645\u0644": 0.0,
+          "\u062d\u0628": 0.0,
+          "\u062d\u0632\u064a\u0646": 0.0,
+          "\u062e\u0627\u0626\u0641": 0.0,
+          "\u0633\u0639\u064a\u062f": 0.0,
+          "\u063a\u0627\u0636\u0628": 0.0,
+          "\u0641\u062e\u0648\u0631": 0.0,
+          "\u0645\u062a\u0641\u0627\u062c\u0626": 0.0,
+          "\u0645\u062d\u0631\u062c": 0.0,
+          "\u0645\u0634\u0648\u0634": 0.0,
+          "\u0645\u0642\u0631\u0641": 0.0,
+          "\u0645\u0644\u0644": 0.0,
+          "\u0645\u0645\u062a\u0646": 0.0,
+          "\u0647\u0627\u062f\u0626": 0.0
+        },
+        "primary_emotion": "happy",
+        "success": true,
+        "timestamp": "2025-04-07T22:35:54.912143"
+      }
+    },
+    "emotion_detection_ar": {
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 9.669780731201172,
+      "description": "Emotion Detection - Arabic",
+      "timestamp": "2025-04-07T22:35:54.923880",
+      "response_data": {
+        "confidence": 0.0,
+        "detected_language": "ar",
+        "emotion_scores": {
+          "angry": 0.0,
+          "bored": 0.0,
+          "calm": 0.0,
+          "confused": 0.0,
+          "disgust": 0.0,
+          "embarrassed": 0.0,
+          "fear": 0.0,
+          "grateful": 0.0,
+          "happy": 0.0,
+          "hopeful": 0.0,
+          "love": 0.0,
+          "proud": 0.0,
+          "sad": 0.0,
+          "surprise": 0.0,
+          "\u0623\u0645\u0644": 0.0,
+          "\u062d\u0628": 0.0,
+          "\u062d\u0632\u064a\u0646": 0.0,
+          "\u062e\u0627\u0626\u0641": 0.0,
+          "\u0633\u0639\u064a\u062f": 0.0,
+          "\u063a\u0627\u0636\u0628": 0.0,
+          "\u0641\u062e\u0648\u0631": 0.0,
+          "\u0645\u062a\u0641\u0627\u062c\u0626": 0.0,
+          "\u0645\u062d\u0631\u062c": 0.0,
+          "\u0645\u0634\u0648\u0634": 0.0,
+          "\u0645\u0642\u0631\u0641": 0.0,
+          "\u0645\u0644\u0644": 0.0,
+          "\u0645\u0645\u062a\u0646": 0.0,
+          "\u0647\u0627\u062f\u0626": 0.0
+        },
+        "primary_emotion": "happy",
+        "success": true,
+        "timestamp": "2025-04-07T22:35:54.920298"
+      }
+    },
+    "emotion_detection_mixed": {
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 11.801481246948242,
+      "description": "Emotion Detection - Mixed Emotions",
+      "timestamp": "2025-04-07T22:35:54.936295",
+      "response_data": {
+        "confidence": 1.0,
+        "detected_language": "en",
+        "emotion_scores": {
+          "angry": 0.0,
+          "bored": 0.0,
+          "calm": 0.0,
+          "confused": 0.0,
+          "disgust": 0.0,
+          "embarrassed": 0.0,
+          "fear": 1.0,
+          "grateful": 0.0,
+          "happy": 0.7239583333333334,
+          "hopeful": 0.059375000000000004,
+          "love": 0.0,
+          "proud": 0.0,
+          "sad": 0.0,
+          "surprise": 0.0,
+          "\u0623\u0645\u0644": 0.0,
+          "\u062d\u0628": 0.0,
+          "\u062d\u0632\u064a\u0646": 0.0,
+          "\u062e\u0627\u0626\u0641": 0.0,
+          "\u0633\u0639\u064a\u062f": 0.0,
+          "\u063a\u0627\u0636\u0628": 0.0,
+          "\u0641\u062e\u0648\u0631": 0.0,
+          "\u0645\u062a\u0641\u0627\u062c\u0626": 0.0,
+          "\u0645\u062d\u0631\u062c": 0.0,
+          "\u0645\u0634\u0648\u0634": 0.0,
+          "\u0645\u0642\u0631\u0641": 0.0,
+          "\u0645\u0644\u0644": 0.0,
+          "\u0645\u0645\u062a\u0646": 0.0,
+          "\u0647\u0627\u062f\u0626": 0.0
+        },
+        "primary_emotion": "fear",
+        "success": true,
+        "timestamp": "2025-04-07T22:35:54.931719"
+      }
+    },
+    "voice_logic_en": {
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 5.128383636474609,
+      "description": "Voice Logic - English",
+      "timestamp": "2025-04-07T22:35:54.941899",
+      "response_data": {
+        "audio_url": "/tts_cache/dcae8a34ef4719872cffc7c0a5c38798.mp3",
+        "cache_hit": true,
+        "detected_language": "en",
+        "success": true
+      }
+    },
+    "voice_logic_ar": {
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 3.3872127532958984,
+      "description": "Voice Logic - Arabic",
+      "timestamp": "2025-04-07T22:35:54.945593",
+      "response_data": {
+        "audio_url": "/tts_cache/35e66ca14f0381c97a8475c73bb3aaf7.mp3",
+        "cache_hit": true,
+        "detected_language": "ar",
+        "success": true
+      }
+    },
+    "verify_feedback": {
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 6.9522857666015625,
+      "description": "Feedback Verification",
+      "timestamp": "2025-04-07T22:35:54.953731",
+      "response_data": {
+        "status": "Feedback API is operational",
+        "success": true,
+        "timestamp": "2025-04-07T22:35:54.950677",
+        "version": "1.0"
+      }
+    },
+    "user_feedback": {
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 4.831075668334961,
+      "description": "User Feedback Submission",
+      "timestamp": "2025-04-07T22:35:54.958900",
+      "response_data": {
+        "emotion_effect": "happy",
+        "feedback_id": "1744065354_2115",
+        "message": "Your positive feedback brightens our day! Thank you for sharing your happiness with us.",
+        "sound_effect": "/static/sounds/happy_chime.mp3",
+        "success": true,
+        "timestamp": "2025-04-07T22:35:54.956711"
+      }
+    },
+    "enhanced_feedback": {
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 4.387140274047852,
+      "description": "Enhanced Feedback Submission",
+      "timestamp": "2025-04-07T22:35:54.963589",
+      "response_data": {
+        "emotion_effect": "excited",
+        "message": "Thank you for your feedback!",
+        "sound_effect": "/static/sounds/success.mp3",
+        "success": true,
+        "timestamp": "2025-04-07T22:35:54.962150"
+      }
+    },
+    "telegram_notification": {
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 333.76479148864746,
+      "description": "Telegram Notification",
+      "timestamp": "2025-04-07T22:35:55.297636",
+      "response_data": {
+        "message": "Notification sent successfully",
+        "success": true,
+        "timestamp": "2025-04-07T22:35:55.296352"
+      }
+    },
+    "system_notification": {
+      "success": true,
+      "status_code": 200,
+      "response_time_ms": 336.9326591491699,
+      "description": "System Notification",
+      "timestamp": "2025-04-07T22:35:55.634942",
+      "response_data": {
+        "message": "System notification sent successfully",
+        "success": true,
+        "timestamp": "2025-04-07T22:35:55.633651",
+        "type": "stats"
+      }
+    }
+  },
+  "load_tests": {
+    "api_health": {
+      "stats": {
+        "total_requests": 5,
+        "successful_requests": 5,
+        "success_rate": 1.0,
+        "total_time_ms": 14.930248260498047,
+        "avg_response_time_ms": 5.472564697265625,
+        "min_response_time_ms": 3.3636093139648438,
+        "max_response_time_ms": 7.261514663696289,
+        "median_response_time_ms": 5.5389404296875,
+        "requests_per_second": 334.8906135224043,
+        "stdev_response_time_ms": 1.6889427809499729
+      },
+      "individual_results": [
+        {
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 3.3636093139648438,
+          "description": "API Health Load Test",
+          "timestamp": "2025-04-07T22:35:55.641117",
+          "response_data": {
+            "status": "API server is running",
+            "success": true,
+            "timestamp": "2025-04-07T22:35:55.640243",
+            "version": "1.0"
+          }
+        },
+        {
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 7.261514663696289,
+          "description": "API Health Load Test",
+          "timestamp": "2025-04-07T22:35:55.643409",
+          "response_data": {
+            "status": "API server is running",
+            "success": true,
+            "timestamp": "2025-04-07T22:35:55.641276",
+            "version": "1.0"
+          }
+        },
+        {
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 6.964206695556641,
+          "description": "API Health Load Test",
+          "timestamp": "2025-04-07T22:35:55.648195",
+          "response_data": {
+            "status": "API server is running",
+            "success": true,
+            "timestamp": "2025-04-07T22:35:55.647233",
+            "version": "1.0"
+          }
+        },
+        {
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 5.5389404296875,
+          "description": "API Health Load Test",
+          "timestamp": "2025-04-07T22:35:55.649176",
+          "response_data": {
+            "status": "API server is running",
+            "success": true,
+            "timestamp": "2025-04-07T22:35:55.648309",
+            "version": "1.0"
+          }
+        },
+        {
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 4.234552383422852,
+          "description": "API Health Load Test",
+          "timestamp": "2025-04-07T22:35:55.650087",
+          "response_data": {
+            "status": "API server is running",
+            "success": true,
+            "timestamp": "2025-04-07T22:35:55.649324",
+            "version": "1.0"
+          }
+        }
+      ]
+    },
+    "api_status": {
+      "stats": {
+        "total_requests": 5,
+        "successful_requests": 5,
+        "success_rate": 1.0,
+        "total_time_ms": 17.087697982788086,
+        "avg_response_time_ms": 8.110952377319336,
+        "min_response_time_ms": 6.040811538696289,
+        "max_response_time_ms": 10.750055313110352,
+        "median_response_time_ms": 7.8563690185546875,
+        "requests_per_second": 292.6081678782213,
+        "stdev_response_time_ms": 1.7987826799761577
+      },
+      "individual_results": [
+        {
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 7.065534591674805,
+          "description": "API Status Load Test",
+          "timestamp": "2025-04-07T22:35:55.658582",
+          "response_data": {
+            "environment": "Linux",
+            "message": "Mashaaer Feelings service is running",
+            "status": "ok",
+            "timestamp": "2025-04-07T22:35:55.654882"
+          }
+        },
+        {
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 7.8563690185546875,
+          "description": "API Status Load Test",
+          "timestamp": "2025-04-07T22:35:55.660758",
+          "response_data": {
+            "environment": "Linux",
+            "message": "Mashaaer Feelings service is running",
+            "status": "ok",
+            "timestamp": "2025-04-07T22:35:55.659065"
+          }
+        },
+        {
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 6.040811538696289,
+          "description": "API Status Load Test",
+          "timestamp": "2025-04-07T22:35:55.662305",
+          "response_data": {
+            "environment": "Linux",
+            "message": "Mashaaer Feelings service is running",
+            "status": "ok",
+            "timestamp": "2025-04-07T22:35:55.661222"
+          }
+        },
+        {
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 10.750055313110352,
+          "description": "API Status Load Test",
+          "timestamp": "2025-04-07T22:35:55.665262",
+          "response_data": {
+            "environment": "Linux",
+            "message": "Mashaaer Feelings service is running",
+            "status": "ok",
+            "timestamp": "2025-04-07T22:35:55.662027"
+          }
+        },
+        {
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 8.841991424560547,
+          "description": "API Status Load Test",
+          "timestamp": "2025-04-07T22:35:55.667592",
+          "response_data": {
+            "environment": "Linux",
+            "message": "Mashaaer Feelings service is running",
+            "status": "ok",
+            "timestamp": "2025-04-07T22:35:55.663853"
+          }
+        }
+      ]
+    },
+    "verify_feedback": {
+      "stats": {
+        "total_requests": 5,
+        "successful_requests": 5,
+        "success_rate": 1.0,
+        "total_time_ms": 22.344350814819336,
+        "avg_response_time_ms": 8.550357818603516,
+        "min_response_time_ms": 3.8242340087890625,
+        "max_response_time_ms": 15.21921157836914,
+        "median_response_time_ms": 6.45136833190918,
+        "requests_per_second": 223.7702066816761,
+        "stdev_response_time_ms": 5.368718980559343
+      },
+      "individual_results": [
+        {
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 13.32235336303711,
+          "description": "Feedback Verification Load Test",
+          "timestamp": "2025-04-07T22:35:55.682502",
+          "response_data": {
+            "status": "Feedback API is operational",
+            "success": true,
+            "timestamp": "2025-04-07T22:35:55.672578",
+            "version": "1.0"
+          }
+        },
+        {
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 15.21921157836914,
+          "description": "Feedback Verification Load Test",
+          "timestamp": "2025-04-07T22:35:55.685866",
+          "response_data": {
+            "status": "Feedback API is operational",
+            "success": true,
+            "timestamp": "2025-04-07T22:35:55.683113",
+            "version": "1.0"
+          }
+        },
+        {
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 3.8242340087890625,
+          "description": "Feedback Verification Load Test",
+          "timestamp": "2025-04-07T22:35:55.688216",
+          "response_data": {
+            "status": "Feedback API is operational",
+            "success": true,
+            "timestamp": "2025-04-07T22:35:55.686732",
+            "version": "1.0"
+          }
+        },
+        {
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 6.45136833190918,
+          "description": "Feedback Verification Load Test",
+          "timestamp": "2025-04-07T22:35:55.689169",
+          "response_data": {
+            "status": "Feedback API is operational",
+            "success": true,
+            "timestamp": "2025-04-07T22:35:55.687570",
+            "version": "1.0"
+          }
+        },
+        {
+          "success": true,
+          "status_code": 200,
+          "response_time_ms": 3.934621810913086,
+          "description": "Feedback Verification Load Test",
+          "timestamp": "2025-04-07T22:35:55.690440",
+          "response_data": {
+            "status": "Feedback API is operational",
+            "success": true,
+            "timestamp": "2025-04-07T22:35:55.689433",
+            "version": "1.0"
+          }
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "test_completed": "2025-04-07T22:35:55.691428",
+    "iterations": 1,
+    "concurrent_requests": 5,
+    "base_url": "http://localhost:5000"
+  }
+}
