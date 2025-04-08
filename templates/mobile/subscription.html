@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الاشتراكات - مشاعر</title>
+    
+    <!-- Cosmic Theme -->
+    <link rel="stylesheet" href="/static/mobile/css/mobile-app.css">
+    <link rel="stylesheet" href="/static/mobile/css/rtl.css" id="direction-stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="subscription-page rtl">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <button id="back-button" class="back-button">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <h1 class="page-title">الاشتراكات</h1>
+            <div class="header-spacer"></div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="app-content">
+            <!-- Current Plan Section -->
+            <section>
+                <h2>خطة الاشتراك الحالية</h2>
+                <div class="card">
+                    <div class="plan-status">
+                        <div class="plan-name">
+                            <span>الخطة:</span>
+                            <strong id="current-plan">أساسية</strong>
+                        </div>
+                        <div class="plan-status-indicator">
+                            <span>الحالة:</span>
+                            <span id="current-plan-status">
+                                <span class="status-dot online"></span> نشط
+                            </span>
+                        </div>
+                    </div>
+                    <div id="plan-details">
+                        <!-- Plan details will be loaded here -->
+                        <div class="loading-spinner"></div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Upgrade Plans Section -->
+            <section>
+                <h2>ترقية الاشتراك</h2>
+                
+                <!-- Basic Plan -->
+                <div class="plan-card" data-plan-id="basic">
+                    <div class="plan-header">
+                        <h3>الأساسية</h3>
+                        <div class="plan-price">مجاني</div>
+                    </div>
+                    <div class="plan-features">
+                        <ul>
+                            <li>تفاعل صوتي أساسي</li>
+                            <li>التعرف على المشاعر الأساسية</li>
+                            <li>دعم اللغة العربية والإنجليزية</li>
+                            <li>تاريخ المشاعر لمدة 7 أيام</li>
+                        </ul>
+                    </div>
+                    <button class="select-plan-button primary-button">خطتك الحالية</button>
+                </div>
+                
+                <!-- Pro Plan -->
+                <div class="plan-card" data-plan-id="pro">
+                    <div class="plan-header">
+                        <h3>الاحترافية</h3>
+                        <div class="plan-price">$9.99/شهر</div>
+                    </div>
+                    <div class="plan-features">
+                        <ul>
+                            <li>كل ميزات الخطة الأساسية</li>
+                            <li>تاريخ المشاعر لمدة 30 يومًا</li>
+                            <li>3 شخصيات صوتية مميزة</li>
+                            <li>تحليل مشاعر متقدم</li>
+                        </ul>
+                    </div>
+                    <button class="select-plan-button primary-button">اختر هذه الخطة</button>
+                </div>
+                
+                <!-- Supreme Plan -->
+                <div class="plan-card" data-plan-id="supreme">
+                    <div class="plan-header">
+                        <h3>المتفوقة</h3>
+                        <div class="plan-price">$19.99/شهر</div>
+                    </div>
+                    <div class="plan-features">
+                        <ul>
+                            <li>كل ميزات الخطة الاحترافية</li>
+                            <li>تاريخ المشاعر غير محدود</li>
+                            <li>جميع الشخصيات الصوتية</li>
+                            <li>تحليل مشاعر فائق الدقة</li>
+                            <li>دعم أولوي</li>
+                        </ul>
+                    </div>
+                    <button class="select-plan-button primary-button">اختر هذه الخطة</button>
+                </div>
+            </section>
+            
+            <!-- Plan Comparison Table -->
+            <section>
+                <h2>مقارنة الخطط</h2>
+                <div class="card">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>الميزة</th>
+                                <th>الأساسية</th>
+                                <th>الاحترافية</th>
+                                <th>المتفوقة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>تاريخ المشاعر</td>
+                                <td>7 أيام</td>
+                                <td>30 يوم</td>
+                                <td>غير محدود</td>
+                            </tr>
+                            <tr>
+                                <td>شخصيات صوتية</td>
+                                <td>2</td>
+                                <td>5</td>
+                                <td>جميع الشخصيات</td>
+                            </tr>
+                            <tr>
+                                <td>دعم اللغات</td>
+                                <td>العربية والإنجليزية</td>
+                                <td>العربية والإنجليزية</td>
+                                <td>العربية والإنجليزية</td>
+                            </tr>
+                            <tr>
+                                <td>تحليل المشاعر</td>
+                                <td>أساسي</td>
+                                <td>متقدم</td>
+                                <td>فائق الدقة</td>
+                            </tr>
+                            <tr>
+                                <td>دعم فني</td>
+                                <td>أساسي</td>
+                                <td>متقدم</td>
+                                <td>أولوي</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- Billing History Section -->
+            <section>
+                <h2>سجل الفواتير</h2>
+                <div class="card">
+                    <table class="billing-table">
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>الخطة</th>
+                                <th>المبلغ</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="billing-history-body">
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    <div class="loading-spinner"></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div id="no-bills-message" class="no-bills-message" style="display: none;">
+                        لا توجد فواتير حتى الآن
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Payment Methods Section -->
+            <section>
+                <h2>طرق الدفع</h2>
+                <div class="card">
+                    <div id="payment-methods">
+                        <div class="no-payment-methods">
+                            لا توجد طرق دفع محفوظة
+                        </div>
+                    </div>
+                    
+                    <button id="add-payment-method" class="primary-button mt-2">
+                        <i class="fas fa-plus"></i> إضافة طريقة دفع
+                    </button>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Footer Navigation -->
+        <footer class="app-footer">
+            <nav class="footer-nav">
+                <a href="/mobile" class="nav-item">
+                    <i class="fas fa-home nav-icon"></i>
+                    <span class="nav-text">الرئيسية</span>
+                </a>
+                <a href="/mobile/emotions" class="nav-item">
+                    <i class="fas fa-heart nav-icon"></i>
+                    <span class="nav-text">المشاعر</span>
+                </a>
+                <a href="/mobile/profiles" class="nav-item">
+                    <i class="fas fa-user nav-icon"></i>
+                    <span class="nav-text">الملفات</span>
+                </a>
+                <a href="/mobile/settings" class="nav-item active">
+                    <i class="fas fa-cog nav-icon"></i>
+                    <span class="nav-text">الإعدادات</span>
+                </a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Language Switch Button -->
+    <button id="language-toggle" class="language-toggle">
+        <span class="lang-icon">🌐</span>
+        <span class="lang-text">EN</span>
+    </button>
+    
+    <!-- Scripts -->
+    <script src="/static/mobile/js/app.js"></script>
+    <script src="/static/mobile/js/language-switcher.js"></script>
+    <script src="/static/mobile/js/subscription.js"></script>
+</body>
+</html>

@@ -31,3 +31,5 @@ anthropic
 langdetect
 gtts
 textblob
+openai
+openai

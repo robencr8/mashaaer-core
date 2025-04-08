@@ -9,6 +9,14 @@ import logging
 import re
 from datetime import datetime
 
+# Try to import the EmotionModulator
+try:
+    from emotion_modulator import EmotionModulator
+    EMOTION_MODULATOR_AVAILABLE = True
+except ImportError:
+    EMOTION_MODULATOR_AVAILABLE = False
+    print("Warning: EmotionModulator not available, using basic tone adaptation")
+
 logger = logging.getLogger(__name__)
 
 class ProfileManager:
@@ -17,6 +25,15 @@ class ProfileManager:
     def __init__(self, db_manager):
         self.db_manager = db_manager
         self.current_profile = None
+        
+        # Initialize emotion modulator if available
+        self.emotion_modulator = None
+        if EMOTION_MODULATOR_AVAILABLE:
+            try:
+                self.emotion_modulator = EmotionModulator()
+                logger.info("Emotion modulator initialized successfully")
+            except Exception as e:
+                logger.error(f"Failed to initialize emotion modulator: {str(e)}")
         
         # Default profile settings
         self.default_profile = {
@@ -430,16 +447,56 @@ class ProfileManager:
         else:
             return f"{greeting} {name}"
     
-    def adapt_response(self, text, language=None):
-        """Adapt a response based on user's preferred tone and language"""
+    def adapt_response(self, text, language=None, user_emotion=None):
+        """
+        Adapt a response based on user's preferred tone and language using advanced emotion modulation
+        
+        Args:
+            text (str): Original text to adapt
+            language (str): Language code (en, ar) - determines adaptation style
+            user_emotion (str): Optional detected user emotion for context
+            
+        Returns:
+            str: Adapted text with appropriate emotional tone
+        """
         current_profile = self.get_current_profile()
         
         if not language:
             language = current_profile.get('language', 'en')
             
         preferred_tone = current_profile.get('preferred_tone', 'neutral')
+        
+        # If emotion modulator is available, use it for advanced adaptation
+        if self.emotion_modulator and self.emotion_modulator.is_available():
+            logger.debug(f"Using emotion modulator for text adaptation (tone: {preferred_tone})")
+            
+            # Map our tone categories to emotion modulator emotion types
+            tone_to_emotion = {
+                'playful': 'happy',
+                'formal': 'neutral',
+                'calm': 'neutral',
+                'assertive': 'neutral',
+                'neutral': 'neutral'
+            }
+            
+            # Get target emotion based on preferred tone
+            target_emotion = tone_to_emotion.get(preferred_tone, 'neutral')
+            
+            # Use emotion modulator to transform text
+            modulated_text = self.emotion_modulator.modulate_text(
+                text, 
+                target_emotion=target_emotion, 
+                user_emotion=user_emotion,
+                language=language
+            )
+            
+            logger.debug(f"Text adaptation complete: '{text[:30]}...' → '{modulated_text[:30]}...'")
+            return modulated_text
+        
+        # Fallback to basic adaptation if modulator is not available
         tone_style = self.get_tone_response_style(preferred_tone)
         
+        # Basic adaptation rules
         # For playful tone, maybe add emojis
         if preferred_tone == 'playful' and language == 'en':
             if not text.endswith(('!', '?', '.')):
@@ -450,4 +507,5 @@ class ProfileManager:
             if not text.endswith(('!', '?', '.')):
                 text += '.'
         
+        logger.debug(f"Basic text adaptation complete (tone: {preferred_tone})")
         return text

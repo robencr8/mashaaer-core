@@ -1,7 +1,8 @@
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, Text, Boolean, BigInteger, DateTime
+from sqlalchemy import Column, Integer, String, Float, Text, Boolean, BigInteger, DateTime, ForeignKey, Numeric
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from datetime import datetime
 
 Base = declarative_base()
@@ -20,6 +21,7 @@ class EmotionData(Base):
     intensity = Column(Float)
     text = Column(Text)
     source = Column(String)
+    context = Column(Text, nullable=True)  # Added context for emotion timeline
 
 class Face(Base):
     __tablename__ = 'faces'
@@ -50,6 +52,41 @@ class VoiceLog(Base):
     success = Column(Boolean, default=False)
     device_info = Column(Text, nullable=True)
     context = Column(String, nullable=True)
+
+class UserProfile(Base):
+    """User profile with subscription and preference information"""
+    __tablename__ = 'user_profiles'
+    user_id = Column(String, primary_key=True)
+    username = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    last_login = Column(DateTime, nullable=True)
+    subscription_plan = Column(String, default='basic')  # 'basic', 'pro', 'supreme'
+    subscription_expires = Column(DateTime, nullable=True)
+    voice_personality = Column(String, default='classic-arabic')
+    voice_speed = Column(Float, default=1.0)
+    voice_pitch = Column(Float, default=1.0)
+    preferred_language = Column(String, default='ar')
+    last_intent = Column(String, nullable=True)
+    is_offline_enabled = Column(Boolean, default=False)
+    is_private_mode = Column(Boolean, default=False)
+
+class SubscriptionHistory(Base):
+    """History of subscription changes and billing"""
+    __tablename__ = 'subscription_history'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String, ForeignKey('user_profiles.user_id'))
+    date = Column(DateTime, server_default=func.now())
+    description = Column(String)
+    amount = Column(Numeric(10, 2))
+    status = Column(String)  # 'paid', 'pending', 'refunded'
+    transaction_id = Column(String, nullable=True)
+    
+    # Relationship
+    user = relationship("UserProfile", back_populates="billing_history")
+
+# Add relationship to UserProfile
+UserProfile.billing_history = relationship("SubscriptionHistory", back_populates="user", cascade="all, delete-orphan")
 
 class Cache(Base):
     """

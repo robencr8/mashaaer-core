@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إعدادات الصوت - مشاعر</title>
+    
+    <!-- Cosmic Theme -->
+    <link rel="stylesheet" href="/static/mobile/css/mobile-app.css">
+    <link rel="stylesheet" href="/static/mobile/css/rtl.css" id="direction-stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="voice-settings-page rtl">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <button id="back-button" class="back-button">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <h1 class="page-title">إعدادات الصوت</h1>
+            <div class="header-spacer"></div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="app-content">
+            <!-- Voice Personality Section -->
+            <section>
+                <h2>شخصية الصوت</h2>
+                <p class="section-description">
+                    اختر الشخصية التي تفضلها للمساعد الصوتي
+                </p>
+                
+                <div class="personality-cards">
+                    <!-- Cosmic Personality -->
+                    <div class="personality-card selected" data-personality-id="cosmic">
+                        <div class="personality-icon">
+                            <i class="fas fa-moon"></i>
+                        </div>
+                        <div class="personality-info">
+                            <h3>كونية</h3>
+                            <p>صوت مميز ذو طابع كوني مع لمسة من الغموض.</p>
+                        </div>
+                        <button class="select-button primary-button">اختيار</button>
+                    </div>
+                    
+                    <!-- Friendly Personality -->
+                    <div class="personality-card" data-personality-id="friendly">
+                        <div class="personality-icon">
+                            <i class="fas fa-smile"></i>
+                        </div>
+                        <div class="personality-info">
+                            <h3>ودية</h3>
+                            <p>صوت دافئ وودود، مثالي للمحادثات اليومية.</p>
+                        </div>
+                        <button class="select-button primary-button">اختيار</button>
+                    </div>
+                    
+                    <!-- Professional Personality - Locked for Basic Plan -->
+                    <div class="personality-card locked" data-personality-id="professional">
+                        <div class="personality-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="personality-info">
+                            <h3>محترفة</h3>
+                            <p>صوت رسمي ومهني، مثالي للمهام والأعمال.</p>
+                        </div>
+                        <div class="lock-indicator">
+                            <i class="fas fa-lock lock-icon"></i>
+                            <span>متاح في الخطة الاحترافية</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Poetic Personality - Locked for Basic Plan -->
+                    <div class="personality-card locked" data-personality-id="poetic">
+                        <div class="personality-icon">
+                            <i class="fas fa-feather-alt"></i>
+                        </div>
+                        <div class="personality-info">
+                            <h3>شاعرية</h3>
+                            <p>صوت ملهم ذو طابع أدبي، مثالي للأوقات الإبداعية.</p>
+                        </div>
+                        <div class="lock-indicator">
+                            <i class="fas fa-lock lock-icon"></i>
+                            <span>متاح في الخطة الاحترافية</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Humorous Personality - Locked for Basic and Pro Plan -->
+                    <div class="personality-card locked" data-personality-id="humorous">
+                        <div class="personality-icon">
+                            <i class="fas fa-laugh"></i>
+                        </div>
+                        <div class="personality-info">
+                            <h3>فكاهية</h3>
+                            <p>صوت مرح وخفيف الظل، يضيف البهجة لتجربتك.</p>
+                        </div>
+                        <div class="lock-indicator">
+                            <i class="fas fa-lock lock-icon"></i>
+                            <span>متاح في الخطة المتفوقة</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Test Voice -->
+                <div class="voice-test-container">
+                    <button id="test-voice-button" class="test-voice-button">
+                        <i class="fas fa-play"></i>
+                        اختبار الصوت
+                    </button>
+                    
+                    <div id="test-phrase-display" class="card mt-2" style="display: none;">
+                        <!-- Test phrase will be displayed here -->
+                    </div>
+                </div>
+                
+                <!-- Upgrade Prompt -->
+                <div id="voice-upgrade-prompt" class="upgrade-card mt-3">
+                    <h3>احصل على المزيد من الشخصيات</h3>
+                    <p>
+                        قم بالترقية إلى الخطة الاحترافية أو المتفوقة للوصول إلى شخصيات صوتية مميزة.
+                    </p>
+                    <a href="/mobile/settings/subscription" class="upgrade-button">ترقية الآن</a>
+                </div>
+            </section>
+            
+            <!-- Voice Parameters Section -->
+            <section>
+                <h2>إعدادات الصوت المتقدمة</h2>
+                <div class="card">
+                    <!-- Voice Rate -->
+                    <div class="form-group">
+                        <label for="voice-rate">سرعة الصوت:</label>
+                        <div class="range-control">
+                            <input type="range" id="voice-rate" min="0.5" max="1.5" step="0.1" value="1">
+                            <span id="voice-rate-value" class="range-value">1</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Voice Pitch -->
+                    <div class="form-group">
+                        <label for="voice-pitch">طبقة الصوت:</label>
+                        <div class="range-control">
+                            <input type="range" id="voice-pitch" min="0.5" max="1.5" step="0.1" value="1">
+                            <span id="voice-pitch-value" class="range-value">1</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Voice Volume -->
+                    <div class="form-group">
+                        <label for="voice-volume">مستوى الصوت:</label>
+                        <div class="range-control">
+                            <input type="range" id="voice-volume" min="0" max="1" step="0.1" value="1">
+                            <span id="voice-volume-value" class="range-value">1</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Voice Recognition Settings -->
+            <section>
+                <h2>إعدادات التعرف على الصوت</h2>
+                <div class="card">
+                    <div class="form-group">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="continuous-listening" checked>
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">الاستماع المستمر</span>
+                        </label>
+                        <p class="setting-description">
+                            يتيح للمساعد الاستماع باستمرار للأوامر بدون الضغط على زر التنشيط
+                        </p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="auto-detect-language" checked>
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">كشف اللغة تلقائيًا</span>
+                        </label>
+                        <p class="setting-description">
+                            التعرف التلقائي على اللغة المستخدمة في الكلام
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Footer Navigation -->
+        <footer class="app-footer">
+            <nav class="footer-nav">
+                <a href="/mobile" class="nav-item">
+                    <i class="fas fa-home nav-icon"></i>
+                    <span class="nav-text">الرئيسية</span>
+                </a>
+                <a href="/mobile/emotions" class="nav-item">
+                    <i class="fas fa-heart nav-icon"></i>
+                    <span class="nav-text">المشاعر</span>
+                </a>
+                <a href="/mobile/profiles" class="nav-item">
+                    <i class="fas fa-user nav-icon"></i>
+                    <span class="nav-text">الملفات</span>
+                </a>
+                <a href="/mobile/settings" class="nav-item active">
+                    <i class="fas fa-cog nav-icon"></i>
+                    <span class="nav-text">الإعدادات</span>
+                </a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Language Switch Button -->
+    <button id="language-toggle" class="language-toggle">
+        <span class="lang-icon">🌐</span>
+        <span class="lang-text">EN</span>
+    </button>
+    
+    <!-- Scripts -->
+    <script src="/static/mobile/js/app.js"></script>
+    <script src="/static/mobile/js/language-switcher.js"></script>
+    <script src="/static/mobile/js/voice-agent.js"></script>
+    <script src="/static/mobile/js/voice-settings.js"></script>
+</body>
+</html>

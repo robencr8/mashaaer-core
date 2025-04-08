@@ -1,0 +1,72 @@
+/* RTL Specific Styles for Mashaaer Mobile Voice Agent */
+
+body.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Header RTL Adjustments */
+body.rtl .back-button {
+  transform: scaleX(-1);
+}
+
+/* Card RTL Adjustments */
+body.rtl .personality-icon {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+body.rtl .select-button {
+  margin-left: 0;
+  margin-right: 1rem;
+}
+
+body.rtl .lock-indicator {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+body.rtl .lock-icon {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Timeline RTL Adjustments */
+body.rtl .timeline-item::after {
+  left: auto;
+  right: 20px;
+}
+
+body.rtl .timeline-emotion-icon {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+/* Form RTL Adjustments */
+body.rtl .form-group input[type="range"] {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+/* Table RTL Adjustments */
+body.rtl .comparison-table th:first-child,
+body.rtl .comparison-table td:first-child,
+body.rtl .billing-table th,
+body.rtl .billing-table td {
+  text-align: right;
+}
+
+/* Button RTL Adjustments */
+body.rtl .test-voice-button {
+  flex-direction: row-reverse;
+}
+
+body.rtl .view-button {
+  flex-direction: row-reverse;
+}
+
+@media (max-width: 480px) {
+  body.rtl .form-group input[type="range"] {
+    margin-left: 0;
+  }
+}

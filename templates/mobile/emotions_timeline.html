@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تاريخ المشاعر - مشاعر</title>
+    
+    <!-- Cosmic Theme -->
+    <link rel="stylesheet" href="/static/mobile/css/mobile-app.css">
+    <link rel="stylesheet" href="/static/mobile/css/rtl.css" id="direction-stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Chart.js for emotion graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="emotions-page rtl">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <button id="back-button" class="back-button">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <h1 class="page-title">تاريخ المشاعر</h1>
+            <div class="header-spacer"></div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="app-content">
+            <!-- Emotion Stats Section -->
+            <section class="emotion-stats-section">
+                <div class="emotion-stat-card">
+                    <div class="stat-title">المشاعر الأكثر شيوعًا</div>
+                    <div id="most-common-emotion" class="stat-value">-</div>
+                </div>
+                <div class="emotion-stat-card">
+                    <div class="stat-title">إجمالي السجلات</div>
+                    <div id="emotion-entry-count" class="stat-value">0</div>
+                </div>
+            </section>
+            
+            <!-- Emotion Filter Section -->
+            <section class="emotion-filter-section">
+                <div class="filter-controls">
+                    <div class="view-toggle">
+                        <button id="graph-view" class="view-button active">
+                            <i class="fas fa-chart-bar"></i>
+                            رسم بياني
+                        </button>
+                        <button id="timeline-view" class="view-button">
+                            <i class="fas fa-stream"></i>
+                            جدول زمني
+                        </button>
+                    </div>
+                    
+                    <div class="time-filter">
+                        <label for="time-range-select">المدة الزمنية:</label>
+                        <select id="time-range-select">
+                            <option value="day">يوم</option>
+                            <option value="week">أسبوع</option>
+                            <option value="month" selected>شهر</option>
+                            <option value="year">سنة</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- No Emotions Message -->
+            <div id="no-emotions-message" class="no-data-message" style="display: none;">
+                لا توجد سجلات للمشاعر في الفترة المحددة
+            </div>
+            
+            <!-- Emotions Chart -->
+            <div id="emotions-chart-container" class="card">
+                <canvas id="emotions-chart"></canvas>
+            </div>
+            
+            <!-- Emotions Timeline -->
+            <div id="emotions-timeline-container" class="card" style="display: none;">
+                <ul id="emotions-timeline-list" class="emotions-timeline-list">
+                    <!-- Emotion timeline items will be loaded here -->
+                </ul>
+            </div>
+            
+            <!-- Timeline Item Template -->
+            <template id="timeline-item-template">
+                <li class="timeline-item">
+                    <div class="timeline-emotion-icon">😊</div>
+                    <div class="timeline-content">
+                        <div class="timeline-header">
+                            <div class="timeline-emotion">سعيد</div>
+                            <div class="timeline-date">10 أبريل 2025, 10:30</div>
+                        </div>
+                        <div class="timeline-context">أثناء المحادثة مع المساعد</div>
+                    </div>
+                </li>
+            </template>
+            
+            <!-- Upgrade Prompt Section -->
+            <section id="plan-upgrade-prompt" class="info-card">
+                <h3>احصل على المزيد من البيانات</h3>
+                <p>
+                    قم بالترقية إلى الخطة الاحترافية للوصول إلى سجل مشاعر لمدة 30 يومًا،
+                    أو الخطة المتفوقة للوصول غير المحدود!
+                </p>
+                <a href="/mobile/settings/subscription" class="upgrade-button">ترقية الآن</a>
+            </section>
+        </main>
+        
+        <!-- Footer Navigation -->
+        <footer class="app-footer">
+            <nav class="footer-nav">
+                <a href="/mobile" class="nav-item">
+                    <i class="fas fa-home nav-icon"></i>
+                    <span class="nav-text">الرئيسية</span>
+                </a>
+                <a href="/mobile/emotions" class="nav-item active">
+                    <i class="fas fa-heart nav-icon"></i>
+                    <span class="nav-text">المشاعر</span>
+                </a>
+                <a href="/mobile/profiles" class="nav-item">
+                    <i class="fas fa-user nav-icon"></i>
+                    <span class="nav-text">الملفات</span>
+                </a>
+                <a href="/mobile/settings" class="nav-item">
+                    <i class="fas fa-cog nav-icon"></i>
+                    <span class="nav-text">الإعدادات</span>
+                </a>
+            </nav>
+        </footer>
+    </div>
+    
+    <!-- Language Switch Button -->
+    <button id="language-toggle" class="language-toggle">
+        <span class="lang-icon">🌐</span>
+        <span class="lang-text">EN</span>
+    </button>
+    
+    <!-- Scripts -->
+    <script src="/static/mobile/js/app.js"></script>
+    <script src="/static/mobile/js/language-switcher.js"></script>
+    <script src="/static/mobile/js/emotions.js"></script>
+</body>
+</html>
