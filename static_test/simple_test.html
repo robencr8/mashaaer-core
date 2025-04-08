@@ -1,212 +1,170 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Mashaaer Test Center</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mashaaer Simple Test</title>
+    <link rel="stylesheet" href="/static/css/cosmic-theme.css">
+    <link rel="stylesheet" href="/static/css/rtl.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f5f5f5;
-            color: #333;
+        .feature-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2rem;
         }
-        h1 {
-            color: #6a1b9a;
+        
+        .feature-card {
+            flex: 1;
+            min-width: 250px;
+            max-width: 350px;
+            background-color: rgba(30, 35, 60, 0.6);
+            border-radius: var(--border-radius-md);
+            padding: var(--space-md);
+            margin-bottom: var(--space-md);
+            border-left: 4px solid #6060ff;
+            transition: all 0.3s ease;
+            text-align: left;
         }
-        h2 {
-            color: #8e24aa;
-            margin-top: 30px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 40, 0.3);
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        
+        [dir="rtl"] .feature-card {
+            text-align: right;
+            border-left: none;
+            border-right: 4px solid #6060ff;
         }
-        button {
-            background-color: #6a1b9a;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
+        
+        .version {
+            margin-top: 3rem;
+            opacity: 0.6;
+            font-size: 0.8rem;
+        }
+        
+        .cosmic-sphere {
             cursor: pointer;
-            margin: 10px 0;
+            margin: 1.5rem auto;
         }
-        button:hover {
-            background-color: #8e24aa;
+        
+        .language-switcher {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(30, 35, 60, 0.7);
+            padding: 0.5rem;
+            border-radius: 30px;
+            display: flex;
+            gap: 0.5rem;
         }
-        pre {
-            background: #f0f0f0;
-            padding: 10px;
-            border-radius: 4px;
-            overflow-x: auto;
+        
+        .lang-btn {
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-        .test-section {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
+        
+        .lang-btn.active {
+            background: rgba(111, 0, 255, 0.7);
+            border-color: transparent;
         }
-        textarea {
-            width: 100%;
-            height: 80px;
-            margin: 10px 0;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+        
+        [dir="rtl"] .language-switcher {
+            right: auto;
+            left: 1.5rem;
         }
     </style>
 </head>
 <body>
+    <div class="language-switcher">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="ar">عربي</button>
+    </div>
+    
     <div class="container">
-        <h1>Mashaaer Simple Test</h1>
-        <p>This is a minimal test page to verify server connectivity and test Telegram notifications.</p>
+        <h1><span class="cosmic-glow" data-text-en="Mashaaer Test Center" data-text-ar="مركز اختبار مشاعر">Mashaaer Test Center</span></h1>
         
-        <h2>API Connection Tests</h2>
-        <div class="test-section">
-            <button id="healthBtn">Test API Health</button>
-            <pre id="healthResult">Click the button to test...</pre>
+        <p class="intro-text" data-text-en="Welcome to the Mashaaer Test Center. Here you can explore and test different features of the Mashaaer emotional AI platform." data-text-ar="مرحبًا بك في مركز اختبار مشاعر. هنا يمكنك استكشاف واختبار الميزات المختلفة لمنصة الذكاء الاصطناعي العاطفي مشاعر.">
+            Welcome to the Mashaaer Test Center. Here you can explore and test different features of the Mashaaer emotional AI platform.
+        </p>
+        
+        <div class="cosmic-sphere" id="cosmic-sphere" onclick="window.location.href='/'">
+            <span>✨</span>
         </div>
         
-        <div class="test-section">
-            <button id="statusBtn">Test API Status</button>
-            <pre id="statusResult">Click the button to test...</pre>
+        <div class="cosmic-section">
+            <h2 data-text-en="Test Interfaces" data-text-ar="واجهات الاختبار">Test Interfaces</h2>
+            
+            <div class="feature-cards">
+                <div class="feature-card">
+                    <h3 data-text-en="Emotion Analysis" data-text-ar="تحليل المشاعر">Emotion Analysis</h3>
+                    <p data-text-en="Test the emotion analysis capabilities using our clean testing interface." data-text-ar="اختبر قدرات تحليل المشاعر باستخدام واجهة الاختبار النظيفة الخاصة بنا.">
+                        Test the emotion analysis capabilities using our clean testing interface.
+                    </p>
+                    <a href="/emotion-test" class="cosmic-btn" data-text-en="Open Test Interface" data-text-ar="فتح واجهة الاختبار">Open Test Interface</a>
+                </div>
+                
+                <div class="feature-card">
+                    <h3 data-text-en="Cosmic Interface" data-text-ar="الواجهة الكونية">Cosmic Interface</h3>
+                    <p data-text-en="Experience our immersive cosmic interface with the emotional sphere." data-text-ar="جرب واجهتنا الكونية الغامرة مع كرة المشاعر.">
+                        Experience our immersive cosmic interface with the emotional sphere.
+                    </p>
+                    <a href="/emotion-core-test" class="cosmic-btn" data-text-en="Try Cosmic Interface" data-text-ar="جرب الواجهة الكونية">Try Cosmic Interface</a>
+                </div>
+            </div>
         </div>
         
-        <div class="test-section">
-            <button id="feedbackBtn">Test Feedback Verification</button>
-            <pre id="feedbackResult">Click the button to test...</pre>
+        <div class="cosmic-section">
+            <h2 data-text-en="API Testing" data-text-ar="اختبار واجهة برمجة التطبيقات">API Testing</h2>
+            
+            <div class="feature-cards">
+                <div class="feature-card">
+                    <h3 data-text-en="API Status" data-text-ar="حالة واجهة برمجة التطبيقات">API Status</h3>
+                    <p data-text-en="Check the current status of the Mashaaer API." data-text-ar="تحقق من الحالة الحالية لواجهة برمجة تطبيقات مشاعر.">
+                        Check the current status of the Mashaaer API.
+                    </p>
+                    <a href="/api-status" class="cosmic-btn" data-text-en="Check Status" data-text-ar="تحقق من الحالة">Check Status</a>
+                </div>
+                
+                <div class="feature-card">
+                    <h3 data-text-en="Emotion API" data-text-ar="واجهة برمجة المشاعر">Emotion API</h3>
+                    <p data-text-en="Test the emotion analysis API endpoints directly." data-text-ar="اختبر نقاط نهاية واجهة برمجة تحليل المشاعر مباشرة.">
+                        Test the emotion analysis API endpoints directly.
+                    </p>
+                    <a href="/api/test/emotion/analyze" class="cosmic-btn" data-text-en="Test API" data-text-ar="اختبار واجهة البرمجة">Test API</a>
+                </div>
+                
+                <div class="feature-card">
+                    <h3 data-text-en="Feedback System" data-text-ar="نظام الملاحظات">Feedback System</h3>
+                    <p data-text-en="Test our enhanced feedback system with emotional responses." data-text-ar="اختبر نظام الملاحظات المحسن مع الاستجابات العاطفية.">
+                        Test our enhanced feedback system with emotional responses.
+                    </p>
+                    <a href="/test-feedback-system" class="cosmic-btn" data-text-en="Test Feedback" data-text-ar="اختبار نظام الملاحظات">Test Feedback</a>
+                </div>
+            </div>
         </div>
         
-        <h2>Telegram Notification Tests</h2>
-        
-        <div class="test-section">
-            <button id="telegramStatusBtn">Check Telegram Status</button>
-            <pre id="telegramStatusResult">Click the button to check Telegram connectivity...</pre>
+        <div class="cosmic-nav">
+            <a href="/" class="cosmic-nav-item" data-text-en="Home" data-text-ar="الرئيسية">Home</a>
+            <a href="/direct-feedback" class="cosmic-nav-item" data-text-en="Feedback" data-text-ar="ملاحظات">Feedback</a>
+            <a href="/cosmic-onboarding" class="cosmic-nav-item" data-text-en="Start Journey" data-text-ar="ابدأ الرحلة">Start Journey</a>
         </div>
         
-        <div class="test-section">
-            <h3>Send Telegram Notification</h3>
-            <textarea id="messageText" placeholder="Enter notification message...">Mashaaer API test notification! 🪐</textarea>
-            <button id="sendMessageBtn">Send Message</button>
-            <pre id="messageResult">Results will appear here...</pre>
-        </div>
-
-        <div class="test-section">
-            <h3>Send System Startup Notification</h3>
-            <button id="sendStartupBtn">Send Startup Notification</button>
-            <pre id="startupResult">Results will appear here...</pre>
+        <div class="cosmic-footer">
+            <p class="version" data-text-en="Mashaaer v1.5 - Cosmic Emotion Companion" data-text-ar="مشاعر الإصدار 1.5 - رفيق المشاعر الكوني">
+                Mashaaer v1.5 - Cosmic Emotion Companion
+            </p>
         </div>
     </div>
 
-    <script>
-        // API Connection Tests
-        document.getElementById('healthBtn').addEventListener('click', async () => {
-            const resultElem = document.getElementById('healthResult');
-            resultElem.textContent = 'Testing API health...';
-            
-            try {
-                const response = await fetch('/api-health');
-                const data = await response.json();
-                resultElem.textContent = JSON.stringify(data, null, 2);
-            } catch (error) {
-                resultElem.textContent = 'Error: ' + error.message;
-            }
-        });
-        
-        document.getElementById('statusBtn').addEventListener('click', async () => {
-            const resultElem = document.getElementById('statusResult');
-            resultElem.textContent = 'Testing API status...';
-            
-            try {
-                const response = await fetch('/api-status');
-                const data = await response.json();
-                resultElem.textContent = JSON.stringify(data, null, 2);
-            } catch (error) {
-                resultElem.textContent = 'Error: ' + error.message;
-            }
-        });
-        
-        document.getElementById('feedbackBtn').addEventListener('click', async () => {
-            const resultElem = document.getElementById('feedbackResult');
-            resultElem.textContent = 'Testing feedback verification...';
-            
-            try {
-                const response = await fetch('/api/verify-feedback');
-                const data = await response.json();
-                resultElem.textContent = JSON.stringify(data, null, 2);
-            } catch (error) {
-                resultElem.textContent = 'Error: ' + error.message;
-            }
-        });
-        
-        // Telegram Status Check
-        document.getElementById('telegramStatusBtn').addEventListener('click', async () => {
-            const resultElem = document.getElementById('telegramStatusResult');
-            resultElem.textContent = 'Checking Telegram status...';
-            
-            try {
-                const response = await fetch('/api/notifications/status');
-                const data = await response.json();
-                resultElem.textContent = JSON.stringify(data, null, 2);
-            } catch (error) {
-                resultElem.textContent = 'Error: ' + error.message;
-            }
-        });
-        
-        // Send Direct Message
-        document.getElementById('sendMessageBtn').addEventListener('click', async () => {
-            const resultElem = document.getElementById('messageResult');
-            const message = document.getElementById('messageText').value;
-            resultElem.textContent = 'Sending message...';
-            
-            try {
-                const response = await fetch('/api/notifications/telegram/notify', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: message,
-                        parse_mode: 'Markdown'
-                    })
-                });
-                const data = await response.json();
-                resultElem.textContent = JSON.stringify(data, null, 2);
-            } catch (error) {
-                resultElem.textContent = 'Error: ' + error.message;
-            }
-        });
-        
-        // Send Startup Notification
-        document.getElementById('sendStartupBtn').addEventListener('click', async () => {
-            const resultElem = document.getElementById('startupResult');
-            resultElem.textContent = 'Sending startup notification...';
-            
-            try {
-                const response = await fetch('/api/notifications/telegram/system', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        type: 'startup',
-                        data: {
-                            version: '1.0',
-                            env: 'testing'
-                        }
-                    })
-                });
-                const data = await response.json();
-                resultElem.textContent = JSON.stringify(data, null, 2);
-            } catch (error) {
-                resultElem.textContent = 'Error: ' + error.message;
-            }
-        });
-    </script>
+    <script src="/static/js/cosmic-sphere.js"></script>
+    <script src="/static/js/language-switcher.js"></script>
 </body>
 </html>

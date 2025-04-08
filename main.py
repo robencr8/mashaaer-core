@@ -251,16 +251,19 @@ except Exception as e:
 # Add root route for the homepage
 @app.route("/", methods=["GET"])
 def index():
-    """Serve the main homepage"""
-    logger.debug("Serving homepage")
+    """Serve the main homepage with cosmic UI"""
+    logger.debug("Serving cosmic homepage")
     try:
-        return render_template("index.html")
+        # Version tag for cache busting
+        version = int(time.time())
+        return render_template("index.html", version=version, app_version="1.5")
     except Exception as e:
+        logger.error(f"Error serving homepage: {str(e)}")
         # Return a basic health check response if the template is missing
         return jsonify({
             "success": True,
             "status": "API server is running",
-            "version": "1.0",
+            "version": "1.5",
             "timestamp": datetime.datetime.utcnow().isoformat(),
             "endpoints": [
                 "/api/verify-feedback",
@@ -1050,12 +1053,30 @@ legacy_html_content = """
 @app.route("/emotion-test", methods=["GET"])
 def emotion_test_page():
     """Serve the emotion test page"""
-    return render_template("emotion_test.html")
+    try:
+        version = int(time.time())
+        return render_template("emotion_test.html", version=version)
+    except Exception as e:
+        logger.error(f"Error serving emotion test page: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": "Error serving emotion test page",
+            "error": str(e)
+        }), 500
 
 @app.route("/emotion-core-test", methods=["GET"])
 def emotion_core_test_page():
     """Serve the emotion core test page with cosmic sphere interface"""
-    return render_template("emotion_core_test.html")
+    try:
+        version = int(time.time())
+        return render_template("emotion_core_test.html", version=version)
+    except Exception as e:
+        logger.error(f"Error serving emotion core test page: {str(e)}")
+        return jsonify({
+            "success": False,
+            "message": "Error serving emotion core test page",
+            "error": str(e)
+        }), 500
 
 @app.route("/api-status", methods=["GET", "OPTIONS"])
 def api_status():

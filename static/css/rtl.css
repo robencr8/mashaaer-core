@@ -1,0 +1,191 @@
+/* 
+ * RTL Specific Styles for Mashaaer
+ * Used for Arabic language support and right-to-left text direction
+ */
+
+/* Basic RTL Document */
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+  font-family: 'Tajawal', 'Arial', sans-serif;
+}
+
+/* Cosmic Section and Card Adjustments */
+[dir="rtl"] .cosmic-section,
+[dir="rtl"] .cosmic-card {
+  border-left: none;
+  border-right: 4px solid #6060ff;
+  text-align: right;
+}
+
+/* Navigation Adjustments */
+[dir="rtl"] .language-switcher {
+  right: auto;
+  left: 1.5rem;
+}
+
+[dir="rtl"] .cosmic-nav-item {
+  margin-right: 0;
+  margin-left: var(--space-sm);
+}
+
+/* UI Elements Adjustments */
+[dir="rtl"] .cosmic-btn {
+  margin-right: 0;
+  margin-left: var(--space-sm);
+}
+
+[dir="rtl"] .tab-button {
+  margin-right: 0;
+  margin-left: 5px;
+}
+
+/* Form Elements */
+[dir="rtl"] label {
+  text-align: right;
+}
+
+[dir="rtl"] .cosmic-input {
+  text-align: right;
+}
+
+/* Emotion Tags */
+[dir="rtl"] .emotion-tag {
+  margin-right: 0;
+  margin-left: 10px;
+}
+
+/* Voice Interface Adjustments */
+[dir="rtl"] .recording-indicator {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+/* Feature Cards */
+[dir="rtl"] .feature-card {
+  text-align: right;
+  border-left: none;
+  border-right: 4px solid #6f00ff;
+}
+
+[dir="rtl"] .feature-icon {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+/* Timeline Adjustments */
+[dir="rtl"] .timeline-item {
+  padding-left: 0;
+  padding-right: 2rem;
+}
+
+[dir="rtl"] .timeline-item:before {
+  left: auto;
+  right: 0;
+}
+
+[dir="rtl"] .timeline-emotion-icon {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+/* Result Panels */
+[dir="rtl"] .result pre,
+[dir="rtl"] .response {
+  text-align: right;
+}
+
+/* Tooltip Adjustments */
+[dir="rtl"] .tooltip {
+  right: auto;
+  left: 0;
+}
+
+/* Settings Panel */
+[dir="rtl"] .settings-panel {
+  right: auto;
+  left: 1rem;
+}
+
+/* Button Icons */
+[dir="rtl"] .btn-icon {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Audio Player Controls */
+[dir="rtl"] .audio-controls button {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Animations Direction */
+@keyframes rtl-slide-in {
+  from { transform: translateX(100px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+[dir="rtl"] .animated-entry {
+  animation-name: rtl-slide-in;
+}
+
+/* Font Sizing Adjustments for Arabic */
+[dir="rtl"] {
+  /* Arabic typically needs slightly larger font sizes for readability */
+  --ar-font-scale: 1.05;
+}
+
+[dir="rtl"] body {
+  font-size: calc(1rem * var(--ar-font-scale));
+}
+
+[dir="rtl"] h1 {
+  font-size: calc(2.5rem * var(--ar-font-scale));
+}
+
+[dir="rtl"] h2 {
+  font-size: calc(2rem * var(--ar-font-scale));
+}
+
+[dir="rtl"] h3 {
+  font-size: calc(1.75rem * var(--ar-font-scale));
+}
+
+[dir="rtl"] .cosmic-btn {
+  font-size: calc(1rem * var(--ar-font-scale));
+}
+
+/* Table Adjustments */
+[dir="rtl"] th,
+[dir="rtl"] td {
+  text-align: right;
+}
+
+[dir="rtl"] th:first-child,
+[dir="rtl"] td:first-child {
+  padding-right: var(--space-md);
+  padding-left: var(--space-sm);
+}
+
+[dir="rtl"] th:last-child,
+[dir="rtl"] td:last-child {
+  padding-left: var(--space-md);
+  padding-right: var(--space-sm);
+}
+
+/* Inline Labels */
+[dir="rtl"] .inline-label {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  [dir="rtl"] .feature-card {
+    padding-right: var(--space-sm);
+  }
+  
+  [dir="rtl"] .cosmic-section {
+    padding-right: var(--space-sm);
+  }
+}
