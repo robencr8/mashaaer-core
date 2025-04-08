@@ -1,8 +1,6 @@
-<workflow>
 <name>
-All Servers
+Start Mashaaer App
 </name>
 <command>
-python simple_server.py & python micro_http_server.py & cd . && echo "All servers started successfully!"
+cd "$(dirname "$0")" && gunicorn --bind 0.0.0.0:5000 --reuse-port --timeout 120 --reload main:app
 </command>
-</workflow>
