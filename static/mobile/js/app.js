@@ -295,6 +295,10 @@ async function processUserInput(text, emotion = null) {
  * Update the emotion display and theme
  */
 function updateEmotionDisplay(emotion) {
+  // Store previous emotion for transition effect
+  const previousEmotion = appState.currentEmotion;
+  
+  // Update state
   appState.currentEmotion = emotion;
   elements.personalityType.textContent = emotion.charAt(0).toUpperCase() + emotion.slice(1);
   
@@ -303,6 +307,25 @@ function updateEmotionDisplay(emotion) {
   
   elements.personalityType.classList.remove(...emotionClasses);
   elements.personalityType.classList.add(emotion);
+  
+  // Play transition sound
+  try {
+    const transitionSound = new Audio('/static/sounds/transition.mp3');
+    transitionSound.volume = 0.4;
+    transitionSound.play().catch(err => console.log('Transition sound error:', err));
+  } catch (e) {
+    console.log('Transition sound playback failed:', e);
+  }
+  
+  // Create emotion transition effect if the micro_interactions.js module is available
+  try {
+    if (typeof createEmotionTransitionEffect === 'function') {
+      createEmotionTransitionEffect(previousEmotion, emotion, elements.personalityType);
+      console.log(`Created transition effect from ${previousEmotion} to ${emotion}`);
+    }
+  } catch (e) {
+    console.log('Emotion transition effect not available:', e);
+  }
   
   // Apply mood theme if available
   try {

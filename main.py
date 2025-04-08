@@ -135,6 +135,7 @@ try:
     from voice_logic import init_voice_logic  # Import voice logic routes
     from emotion_api import init_emotion_api  # Import emotion API routes
     from feedback_api import init_feedback_api  # Import feedback API routes
+    from mobile_routes import register_mobile_routes  # Import mobile routes
     
     # Initialize API routes
     api_blueprint = init_api(app, db_manager, emotion_tracker, face_detector, 
@@ -150,6 +151,9 @@ try:
     
     # Register additional routes from app_routes.py
     register_routes(app)
+    
+    # Register mobile routes
+    register_mobile_routes(app)
     
     logger.info(f"API routes registered successfully")
 except ImportError as e:

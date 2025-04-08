@@ -24,6 +24,27 @@
   opacity: 0;
   box-shadow: 0 0 8px var(--emotion-primary, #9370DB);
   pointer-events: none;
+  animation: emotion-sparkle 1.5s ease-out forwards;
+  transform-origin: center center;
+}
+
+/* Sparkle animation for emotion transitions */
+@keyframes emotion-sparkle {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(var(--sparkle-x, 30px), var(--sparkle-y, -20px)) scale(1.2);
+  }
+  70% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--sparkle-x, 40px), var(--sparkle-y, -40px)) scale(0.2);
+  }
 }
 
 /* Pulse animation for notifications and highlights */

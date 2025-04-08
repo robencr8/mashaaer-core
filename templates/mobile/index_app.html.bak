@@ -15,8 +15,6 @@
   <link rel="stylesheet" href="{{ versioned_url('mobile/css/mobile_style.css') }}" />
   <link rel="stylesheet" href="{{ versioned_url('mobile/css/app.css') }}" />
   <link rel="stylesheet" href="/static/css/mood-themes.css" />
-  <link rel="stylesheet" href="/static/css/emotion_micro_interactions.css" />
-  <link rel="stylesheet" href="/static/css/micro_interactions.css" />
 
   <!-- Icons + PWA Manifest -->
   <link rel="apple-touch-icon" href="{{ versioned_url('mobile/images/robin-icon-192.png') }}" />
