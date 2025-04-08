@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إعدادات التسهيلات - مشاعر</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cosmic-theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/rtl.css') }}">
+    <style>
+        :root {
+            --primary-bg: #0c0e14;
+            --secondary-bg: #1a1a35;
+            --text-color: #f0f0ff;
+            --accent-color: #9370DB;
+            --accent-hover: #7B68EE;
+            --border-color: rgba(147, 112, 219, 0.3);
+            --button-bg: rgba(147, 112, 219, 0.2);
+            --button-hover: rgba(147, 112, 219, 0.4);
+            --panel-bg: rgba(10, 12, 25, 0.8);
+            --success-color: #4CAF50;
+            --warning-color: #FFC107;
+            --error-color: #F44336;
+            --info-color: #2196F3;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-bg), var(--secondary-bg));
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 0;
+            flex: 1;
+        }
+        
+        .accessibility-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .accessibility-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-color);
+            text-shadow: 0 0 10px rgba(147, 112, 219, 0.5);
+        }
+        
+        .accessibility-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .settings-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        @media (min-width: 768px) {
+            .settings-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .settings-panel {
+            background: var(--panel-bg);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+        
+        .settings-panel h2 {
+            color: var(--accent-color);
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .settings-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .settings-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .settings-group h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .setting-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .setting-label {
+            flex: 1;
+        }
+        
+        .setting-label h4 {
+            margin: 0 0 0.25rem;
+            font-size: 1rem;
+        }
+        
+        .setting-label p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        .setting-control {
+            margin-right: 1rem;
+        }
+        
+        /* Switch toggle */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--accent-color);
+        }
+        
+        input:focus + .slider {
+            box-shadow: 0 0 1px var(--accent-color);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Select styles */
+        select, input[type="range"] {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            border-radius: 5px;
+            width: 140px;
+            outline: none;
+        }
+        
+        select:focus, input[type="range"]:focus {
+            border-color: var(--accent-color);
+        }
+        
+        /* Range slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            padding: 0;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-color);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--accent-color);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        
+        .button-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        
+        .cosmic-button {
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1.5rem;
+            margin-right: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        
+        .cosmic-button:last-child {
+            margin-right: 0;
+        }
+        
+        .cosmic-button:hover {
+            background-color: var(--button-hover);
+            box-shadow: 0 0 10px rgba(147, 112, 219, 0.5);
+        }
+        
+        .cosmic-button.primary {
+            background-color: var(--accent-color);
+        }
+        
+        .cosmic-button.primary:hover {
+            background-color: var(--accent-hover);
+        }
+        
+        /* Test area */
+        .test-area {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--panel-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+        }
+        
+        .test-area h2 {
+            color: var(--accent-color);
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .test-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .test-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .test-input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .test-input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .test-input-group input,
+        .test-input-group select,
+        .test-input-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            outline: none;
+        }
+        
+        .test-input-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .test-input-group input:focus,
+        .test-input-group select:focus,
+        .test-input-group textarea:focus {
+            border-color: var(--accent-color);
+        }
+        
+        .elements-to-announce {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .element-button {
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .element-button:hover {
+            background-color: var(--button-hover);
+        }
+        
+        /* Keyboard shortcuts */
+        .shortcuts-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .shortcuts-list {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+        }
+        
+        .shortcut-key {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            font-family: monospace;
+            margin-left: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Status message */
+        .status-message {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 5px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .status-message.success {
+            background-color: rgba(76, 175, 80, 0.2);
+            border: 1px solid var(--success-color);
+        }
+        
+        .status-message.error {
+            background-color: rgba(244, 67, 54, 0.2);
+            border: 1px solid var(--error-color);
+        }
+        
+        .show {
+            opacity: 1;
+        }
+        
+        /* Header navigation */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        
+        .nav-button {
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .nav-button:hover {
+            background-color: var(--button-hover);
+            box-shadow: 0 0 10px rgba(147, 112, 219, 0.3);
+        }
+        
+        .nav-button i {
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-buttons">
+            <a href="{{ url_for('index') }}" class="nav-button">
+                <i class="fas fa-arrow-right"></i> العودة للرئيسية
+            </a>
+            <a href="{{ url_for('help') }}" class="nav-button">
+                المساعدة <i class="fas fa-question-circle"></i>
+            </a>
+        </div>
+        
+        <div class="accessibility-header">
+            <h1>إعدادات التسهيلات</h1>
+            <p>قم بتخصيص كيفية تفاعل مشاعر معك من خلال المرشد الصوتي وميزات إمكانية الوصول الأخرى</p>
+        </div>
+        
+        <div class="settings-container">
+            <div class="settings-panel">
+                <h2>إعدادات المرشد الصوتي</h2>
+                
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <h4>تمكين المرشد الصوتي</h4>
+                            <p>تشغيل أو إيقاف توجيه الصوت لمساعدتك في التنقل في التطبيق</p>
+                        </div>
+                        <div class="setting-control">
+                            <label class="switch">
+                                <input type="checkbox" id="toggle-narrator" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <h4>لغة المرشد الصوتي</h4>
+                            <p>اختر اللغة التي سيتحدث بها المرشد الصوتي</p>
+                        </div>
+                        <div class="setting-control">
+                            <select id="narrator-language">
+                                <option value="ar" selected>العربية</option>
+                                <option value="en">الإنجليزية</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <h4>مستوى الإطناب</h4>
+                            <p>مقدار التفاصيل التي سيقدمها المرشد الصوتي</p>
+                        </div>
+                        <div class="setting-control">
+                            <select id="verbosity-level">
+                                <option value="low">منخفض</option>
+                                <option value="medium" selected>متوسط</option>
+                                <option value="high">عالي</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <h4>سرعة التحدث</h4>
+                            <p>اضبط سرعة كلام المرشد الصوتي</p>
+                        </div>
+                        <div class="setting-control">
+                            <input type="range" id="speaking-rate" min="0.5" max="2" step="0.1" value="1">
+                            <span id="rate-value">1.0x</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="settings-group">
+                    <h3>خيارات إضافية</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <h4>إعلان التنقل</h4>
+                            <p>إعلام عند الانتقال بين الشاشات</p>
+                        </div>
+                        <div class="setting-control">
+                            <label class="switch">
+                                <input type="checkbox" id="announce-navigation" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <h4>إعلان العناصر</h4>
+                            <p>وصف العناصر عند التفاعل معها</p>
+                        </div>
+                        <div class="setting-control">
+                            <label class="switch">
+                                <input type="checkbox" id="announce-elements" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <h4>إعلان المشاعر</h4>
+                            <p>وصف المشاعر المكتشفة</p>
+                        </div>
+                        <div class="setting-control">
+                            <label class="switch">
+                                <input type="checkbox" id="announce-emotions" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <h4>استخدام الصوت العاطفي</h4>
+                            <p>تعديل نبرة الصوت لتناسب المشاعر المختلفة</p>
+                        </div>
+                        <div class="setting-control">
+                            <label class="switch">
+                                <input type="checkbox" id="use-emotional-voice" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="button-row">
+                    <button id="reset-settings" class="cosmic-button">استعادة الافتراضيات</button>
+                    <button id="save-settings" class="cosmic-button primary">حفظ الإعدادات</button>
+                </div>
+            </div>
+            
+            <div class="settings-panel">
+                <h2>اختصارات لوحة المفاتيح</h2>
+                
+                <div class="shortcuts-list">
+                    <div class="shortcut-item">
+                        <span class="shortcut-key">Alt+A</span>
+                        <span>تشغيل/إيقاف المرشد الصوتي</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="shortcut-key">Alt+H</span>
+                        <span>المساعدة</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="shortcut-key">Alt+R</span>
+                        <span>قراءة الصفحة</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="shortcut-key">Alt+Up</span>
+                        <span>زيادة مستوى الإطناب</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="shortcut-key">Alt+Down</span>
+                        <span>تقليل مستوى الإطناب</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="shortcut-key">Alt+Right</span>
+                        <span>زيادة سرعة التحدث</span>
+                    </div>
+                    <div class="shortcut-item">
+                        <span class="shortcut-key">Alt+Left</span>
+                        <span>تقليل سرعة التحدث</span>
+                    </div>
+                </div>
+                
+                <h2 class="mt-4">منطقة اختبار</h2>
+                
+                <div class="test-input-group">
+                    <label for="test-text">نص للقراءة:</label>
+                    <textarea id="test-text" placeholder="أدخل نصًا ليقرأه المرشد الصوتي...">مرحبًا بك في إعدادات التسهيلات لتطبيق مشاعر. يمكنك تجربة المرشد الصوتي هنا.</textarea>
+                </div>
+                
+                <div class="test-input-group">
+                    <label for="test-emotion">العاطفة (للصوت العاطفي):</label>
+                    <select id="test-emotion">
+                        <option value="">بدون عاطفة</option>
+                        <option value="happy">سعيد</option>
+                        <option value="sad">حزين</option>
+                        <option value="angry">غاضب</option>
+                        <option value="neutral">محايد</option>
+                        <option value="calm">هادئ</option>
+                    </select>
+                </div>
+                
+                <div class="button-row">
+                    <button id="test-speak" class="cosmic-button">قراءة النص</button>
+                </div>
+                
+                <h3 class="mt-3">اختبار إعلان العناصر</h3>
+                <p>انقر على العناصر أدناه لاختبار كيفية إعلان المرشد الصوتي لها:</p>
+                
+                <div class="elements-to-announce">
+                    <button class="element-button" data-type="button" data-content="زر إرسال" data-info="ينقلك إلى الشاشة التالية">زر إرسال</button>
+                    <button class="element-button" data-type="link" data-content="رابط المساعدة" data-info="يفتح صفحة المساعدة">رابط المساعدة</button>
+                    <button class="element-button" data-type="input" data-content="حقل الاسم" data-info="أدخل اسمك هنا">حقل الاسم</button>
+                    <button class="element-button" data-type="checkbox" data-content="موافق على الشروط" data-info="يجب الموافقة للمتابعة">موافق على الشروط</button>
+                    <button class="element-button" data-type="menu" data-content="قائمة الإعدادات" data-info="تحتوي على خيارات متعددة">قائمة الإعدادات</button>
+                </div>
+                
+                <div class="status-message" id="status-message"></div>
+            </div>
+        </div>
+        
+        <div class="test-area">
+            <h2>تجربة توجيه الشاشة</h2>
+            
+            <div class="test-content">
+                <div>
+                    <div class="test-input-group">
+                        <label for="screen-id">معرف الشاشة:</label>
+                        <select id="screen-id">
+                            <option value="welcome">الترحيب</option>
+                            <option value="main">الرئيسية</option>
+                            <option value="settings">الإعدادات</option>
+                            <option value="voice_tone_test">اختبار نبرة الصوت</option>
+                            <option value="cosmic_onboarding">التأهيل الكوني</option>
+                            <option value="emotion_analysis">تحليل المشاعر</option>
+                            <option value="accessibility_settings">إعدادات التسهيلات</option>
+                        </select>
+                    </div>
+                    
+                    <div class="test-input-group">
+                        <label for="context-id">السياق:</label>
+                        <select id="context-id">
+                            <option value="initial">أولي</option>
+                            <option value="help">مساعدة</option>
+                            <option value="tutorial">شرح</option>
+                            <option value="form">نموذج</option>
+                            <option value="cosmic_sphere">الكرة الكونية</option>
+                            <option value="emotions">المشاعر</option>
+                            <option value="animation">تحريك</option>
+                        </select>
+                    </div>
+                    
+                    <button id="test-guide" class="cosmic-button">اختبار التوجيه</button>
+                </div>
+                
+                <div>
+                    <div class="test-input-group">
+                        <label for="emotion-announce">إعلان عاطفة:</label>
+                        <select id="emotion-announce">
+                            <option value="happy">سعيد</option>
+                            <option value="sad">حزين</option>
+                            <option value="angry">غاضب</option>
+                            <option value="fearful">خائف</option>
+                            <option value="disgusted">مشمئز</option>
+                            <option value="surprised">متفاجئ</option>
+                            <option value="neutral">محايد</option>
+                        </select>
+                    </div>
+                    
+                    <div class="test-input-group">
+                        <label for="emotion-intensity">شدة العاطفة:</label>
+                        <select id="emotion-intensity">
+                            <option value="">بدون شدة</option>
+                            <option value="low">منخفضة</option>
+                            <option value="medium">متوسطة</option>
+                            <option value="high">عالية</option>
+                            <option value="very high">عالية جدًا</option>
+                        </select>
+                    </div>
+                    
+                    <button id="test-announce-emotion" class="cosmic-button">إعلان العاطفة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get elements
+        const toggleNarrator = document.getElementById('toggle-narrator');
+        const narratorLanguage = document.getElementById('narrator-language');
+        const verbosityLevel = document.getElementById('verbosity-level');
+        const speakingRate = document.getElementById('speaking-rate');
+        const rateValue = document.getElementById('rate-value');
+        const announceNavigation = document.getElementById('announce-navigation');
+        const announceElements = document.getElementById('announce-elements');
+        const announceEmotions = document.getElementById('announce-emotions');
+        const useEmotionalVoice = document.getElementById('use-emotional-voice');
+        const resetSettings = document.getElementById('reset-settings');
+        const saveSettings = document.getElementById('save-settings');
+        const testText = document.getElementById('test-text');
+        const testEmotion = document.getElementById('test-emotion');
+        const testSpeak = document.getElementById('test-speak');
+        const statusMessage = document.getElementById('status-message');
+        const testGuide = document.getElementById('test-guide');
+        const screenId = document.getElementById('screen-id');
+        const contextId = document.getElementById('context-id');
+        const testAnnounceEmotion = document.getElementById('test-announce-emotion');
+        const emotionAnnounce = document.getElementById('emotion-announce');
+        const emotionIntensity = document.getElementById('emotion-intensity');
+        const elementButtons = document.querySelectorAll('.element-button');
+        
+        // Update rate value display
+        speakingRate.addEventListener('input', function() {
+            rateValue.textContent = `${speakingRate.value}x`;
+        });
+        
+        // Load current settings
+        fetchSettings();
+        
+        // Save settings
+        saveSettings.addEventListener('click', function() {
+            const settings = {
+                "enabled": toggleNarrator.checked,
+                "default_language": narratorLanguage.value,
+                "speaking_rate": parseFloat(speakingRate.value),
+                "verbosity_level": verbosityLevel.value,
+                "announce_navigation": announceNavigation.checked,
+                "announce_elements": announceElements.checked,
+                "announce_emotions": announceEmotions.checked,
+                "use_emotional_voice": useEmotionalVoice.checked
+            };
+            
+            updateSettings(settings);
+        });
+        
+        // Reset settings
+        resetSettings.addEventListener('click', function() {
+            resetToDefaults();
+        });
+        
+        // Test speak
+        testSpeak.addEventListener('click', function() {
+            const text = testText.value;
+            const emotion = testEmotion.value || null;
+            
+            if (text) {
+                speakText(text, emotion);
+            }
+        });
+        
+        // Test guide
+        testGuide.addEventListener('click', function() {
+            const screen = screenId.value;
+            const context = contextId.value;
+            
+            guideUser(screen, context);
+        });
+        
+        // Test announce emotion
+        testAnnounceEmotion.addEventListener('click', function() {
+            const emotion = emotionAnnounce.value;
+            const intensity = emotionIntensity.value || null;
+            
+            announceEmotion(emotion, intensity);
+        });
+        
+        // Element announcement test
+        elementButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const type = this.dataset.type;
+                const content = this.dataset.content;
+                const info = this.dataset.info;
+                
+                announceElement(type, content, info);
+            });
+        });
+        
+        // Toggle narrator
+        toggleNarrator.addEventListener('change', function() {
+            toggleNarratorState(this.checked);
+        });
+        
+        // Change language
+        narratorLanguage.addEventListener('change', function() {
+            setLanguage(this.value);
+        });
+        
+        // Change verbosity
+        verbosityLevel.addEventListener('change', function() {
+            setVerbosity(this.value);
+        });
+        
+        // Change speaking rate
+        speakingRate.addEventListener('change', function() {
+            setSpeakingRate(parseFloat(this.value));
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Alt+A: Toggle narrator
+            if (e.altKey && e.key === 'a') {
+                toggleNarrator.checked = !toggleNarrator.checked;
+                toggleNarratorState(toggleNarrator.checked);
+                e.preventDefault();
+            }
+            
+            // Alt+H: Help
+            if (e.altKey && e.key === 'h') {
+                provideHelp();
+                e.preventDefault();
+            }
+            
+            // Alt+R: Read page
+            if (e.altKey && e.key === 'r') {
+                speakText(document.querySelector('.accessibility-header h1').textContent + '. ' + 
+                    document.querySelector('.accessibility-header p').textContent);
+                e.preventDefault();
+            }
+            
+            // Alt+Up: Increase verbosity
+            if (e.altKey && e.key === 'ArrowUp') {
+                const currentIndex = Array.from(verbosityLevel.options).findIndex(option => option.selected);
+                if (currentIndex < verbosityLevel.options.length - 1) {
+                    verbosityLevel.selectedIndex = currentIndex + 1;
+                    setVerbosity(verbosityLevel.value);
+                }
+                e.preventDefault();
+            }
+            
+            // Alt+Down: Decrease verbosity
+            if (e.altKey && e.key === 'ArrowDown') {
+                const currentIndex = Array.from(verbosityLevel.options).findIndex(option => option.selected);
+                if (currentIndex > 0) {
+                    verbosityLevel.selectedIndex = currentIndex - 1;
+                    setVerbosity(verbosityLevel.value);
+                }
+                e.preventDefault();
+            }
+            
+            // Alt+Right: Increase speaking rate
+            if (e.altKey && e.key === 'ArrowRight') {
+                const newRate = Math.min(2.0, parseFloat(speakingRate.value) + 0.1);
+                speakingRate.value = newRate.toFixed(1);
+                rateValue.textContent = `${speakingRate.value}x`;
+                setSpeakingRate(newRate);
+                e.preventDefault();
+            }
+            
+            // Alt+Left: Decrease speaking rate
+            if (e.altKey && e.key === 'ArrowLeft') {
+                const newRate = Math.max(0.5, parseFloat(speakingRate.value) - 0.1);
+                speakingRate.value = newRate.toFixed(1);
+                rateValue.textContent = `${speakingRate.value}x`;
+                setSpeakingRate(newRate);
+                e.preventDefault();
+            }
+        });
+        
+        // API functions
+        function fetchSettings() {
+            fetch('/api/accessibility/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const config = data.config;
+                        
+                        toggleNarrator.checked = config.enabled;
+                        narratorLanguage.value = config.default_language;
+                        verbosityLevel.value = config.verbosity_level;
+                        speakingRate.value = config.speaking_rate;
+                        rateValue.textContent = `${config.speaking_rate}x`;
+                        announceNavigation.checked = config.announce_navigation;
+                        announceElements.checked = config.announce_elements;
+                        announceEmotions.checked = config.announce_emotions;
+                        useEmotionalVoice.checked = config.use_emotional_voice;
+                    }
+                })
+                .catch(error => {
+                    showStatus('خطأ في تحميل الإعدادات: ' + error.message, false);
+                });
+        }
+        
+        function updateSettings(settings) {
+            fetch('/api/accessibility/settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ settings: settings }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showStatus('تم حفظ الإعدادات بنجاح', true);
+                    } else {
+                        showStatus('خطأ في حفظ الإعدادات: ' + data.error, false);
+                    }
+                })
+                .catch(error => {
+                    showStatus('خطأ في حفظ الإعدادات: ' + error.message, false);
+                });
+        }
+        
+        function resetToDefaults() {
+            fetch('/api/accessibility/settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    settings: {
+                        "enabled": true,
+                        "default_language": "ar",
+                        "speaking_rate": 1.0,
+                        "verbosity_level": "medium",
+                        "announce_navigation": true,
+                        "announce_elements": true,
+                        "announce_updates": true,
+                        "announce_emotions": true,
+                        "use_emotional_voice": true,
+                        "auto_read_headings": true,
+                        "auto_read_alerts": true,
+                        "voice": "default"
+                    }
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showStatus('تمت استعادة الإعدادات الافتراضية', true);
+                        fetchSettings();
+                    } else {
+                        showStatus('خطأ في استعادة الإعدادات: ' + data.error, false);
+                    }
+                })
+                .catch(error => {
+                    showStatus('خطأ في استعادة الإعدادات: ' + error.message, false);
+                });
+        }
+        
+        function toggleNarratorState(enabled) {
+            fetch('/api/accessibility/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ enabled: enabled }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const state = data.enabled ? 'تم تشغيل' : 'تم إيقاف';
+                        showStatus(`${state} المرشد الصوتي`, true);
+                    } else {
+                        showStatus('خطأ في تبديل حالة المرشد الصوتي: ' + data.error, false);
+                    }
+                })
+                .catch(error => {
+                    showStatus('خطأ في تبديل حالة المرشد الصوتي: ' + error.message, false);
+                });
+        }
+        
+        function setLanguage(language) {
+            fetch('/api/accessibility/language', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ language: language }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const langName = language === 'ar' ? 'العربية' : 'الإنجليزية';
+                        showStatus(`تم تغيير اللغة إلى ${langName}`, true);
+                    } else {
+                        showStatus('خطأ في تغيير اللغة: ' + data.error, false);
+                    }
+                })
+                .catch(error => {
+                    showStatus('خطأ في تغيير اللغة: ' + error.message, false);
+                });
+        }
+        
+        function setVerbosity(level) {
+            fetch('/api/accessibility/verbosity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ level: level }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const levelNames = {
+                            'low': 'منخفض',
+                            'medium': 'متوسط',
+                            'high': 'عالي'
+                        };
+                        showStatus(`تم تغيير مستوى الإطناب إلى ${levelNames[level]}`, true);
+                    } else {
+                        showStatus('خطأ في تغيير مستوى الإطناب: ' + data.error, false);
+                    }
+                })
+                .catch(error => {
+                    showStatus('خطأ في تغيير مستوى الإطناب: ' + error.message, false);
+                });
+        }
+        
+        function setSpeakingRate(rate) {
+            fetch('/api/accessibility/speaking-rate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ rate: rate }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showStatus(`تم تغيير سرعة التحدث إلى ${rate}x`, true);
+                    } else {
+                        showStatus('خطأ في تغيير سرعة التحدث: ' + data.error, false);
+                    }
+                })
+                .catch(error => {
+                    showStatus('خطأ في تغيير سرعة التحدث: ' + error.message, false);
+                });
+        }
+        
+        function speakText(text, emotion = null) {
+            const payload = {
+                text: text,
+                language: narratorLanguage.value
+            };
+            
+            if (emotion) {
+                payload.emotion = emotion;
+            }
+            
+            fetch('/api/accessibility/speak', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showStatus('تم تشغيل الصوت', true);
+                    } else {
+                        showStatus('خطأ في تشغيل الصوت: ' + data.error, false);
+                    }
+                })
+                .catch(error => {
+                    showStatus('خطأ في تشغيل الصوت: ' + error.message, false);
+                });
+        }
+        
+        function guideUser(screen, context) {
+            fetch('/api/accessibility/guide', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    screen: screen,
+                    context: context
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showStatus(`تم تقديم التوجيه للشاشة: ${screen}`, true);
+                    } else {
+                        showStatus('خطأ في تقديم التوجيه: ' + data.error, false);
+                    }
+                })
+                .catch(error => {
+                    showStatus('خطأ في تقديم التوجيه: ' + error.message, false);
+                });
+        }
+        
+        function announceEmotion(emotion, intensity = null) {
+            const payload = {
+                emotion: emotion
+            };
+            
+            if (intensity) {
+                payload.intensity = intensity;
+            }
+            
+            fetch('/api/accessibility/announce-emotion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showStatus(`تم إعلان العاطفة: ${emotion}`, true);
+                    } else {
+                        showStatus('خطأ في إعلان العاطفة: ' + data.error, false);
+                    }
+                })
+                .catch(error => {
+                    showStatus('خطأ في إعلان العاطفة: ' + error.message, false);
+                });
+        }
+        
+        function announceElement(elementType, content, additionalInfo) {
+            fetch('/api/accessibility/announce-element', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    element_type: elementType,
+                    content: content,
+                    additional_info: additionalInfo
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showStatus(`تم إعلان العنصر: ${elementType}`, true);
+                    } else {
+                        showStatus('خطأ في إعلان العنصر: ' + data.error, false);
+                    }
+                })
+                .catch(error => {
+                    showStatus('خطأ في إعلان العنصر: ' + error.message, false);
+                });
+        }
+        
+        function provideHelp() {
+            fetch('/api/accessibility/help', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({}),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showStatus('تم تقديم المساعدة', true);
+                    } else {
+                        showStatus('خطأ في تقديم المساعدة: ' + data.error, false);
+                    }
+                })
+                .catch(error => {
+                    showStatus('خطأ في تقديم المساعدة: ' + error.message, false);
+                });
+        }
+        
+        function showStatus(message, isSuccess) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message ' + (isSuccess ? 'success' : 'error') + ' show';
+            
+            setTimeout(() => {
+                statusMessage.className = 'status-message';
+            }, 3000);
+        }
+    });
+    </script>
+</body>
+</html>

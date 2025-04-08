@@ -1,280 +1,272 @@
 """
-Voice Tone Modulation API for Mashaaer Feelings
-Provides endpoints for voice tone modulation based on detected emotions
+Voice Tone API for Mashaaer Feelings
+
+Provides REST API endpoints for generating speech with emotional tone modulation.
 """
 
 import os
 import json
 import logging
-from flask import Blueprint, request, jsonify, current_app
-from voice_tone_modulator import VoiceToneModulator
+from typing import Dict, Any, Optional
+from flask import Blueprint, request, jsonify, Response, send_file
+import time
 
-# Configure logger
 logger = logging.getLogger(__name__)
 
-# Create blueprint
-voice_tone_bp = Blueprint('voice_tone', __name__, url_prefix='/api')
+# Create Blueprint
+voice_tone_bp = Blueprint('voice_tone', __name__)
 
-# Global voice tone modulator instance
+# Global reference to VoiceToneModulator
 voice_tone_modulator = None
 
-def init_voice_tone_api(app, emotion_modulator=None, tts_manager=None):
+@voice_tone_bp.route('/api/voice-tone/generate', methods=['POST'])
+def generate_emotional_speech():
     """
-    Initialize the voice tone modulation API
+    Generate speech with emotional tone modulation
     
-    Args:
-        app: Flask application instance
-        emotion_modulator: EmotionModulator instance
-        tts_manager: TTS manager instance
-    """
-    global voice_tone_modulator
-    
-    logger.info("Initializing voice tone modulation API")
-    
-    # Register blueprint
-    app.register_blueprint(voice_tone_bp)
-    
-    # Initialize the voice tone modulator
-    voice_tone_modulator = VoiceToneModulator(
-        emotion_modulator=emotion_modulator,
-        tts_manager=tts_manager
-    )
-    
-    logger.info("Voice tone modulation API initialized")
-    return voice_tone_bp
-
-@voice_tone_bp.route('/voice_tone', methods=['POST'])
-def voice_tone():
-    """
-    Modulate voice tone based on detected emotion
-    
-    Request body:
+    Expected JSON request body:
     {
-        "text": "The text to speak",
-        "detected_emotion": "happy/sad/angry/etc.",
-        "target_emotion": "happy/neutral/etc." (optional, will determine appropriate response emotion if not provided),
-        "language": "en/ar" (optional, defaults to "en"),
-        "voice": "default/specific-voice-id" (optional, defaults to language-appropriate voice)
+        "text": "Text to convert to speech",
+        "emotion": "happy",  # Optional, defaults to "neutral"
+        "voice_id": "cosmic_voice_1",  # Optional, uses default if not provided
+        "output_format": "mp3",  # Optional, defaults to "mp3"
+        "language": "en"  # Optional, defaults to "en"
     }
     
-    Returns:
+    Returns JSON response:
     {
         "success": true,
-        "audio_url": "/tts_cache/modulated_audio123.mp3",
-        "modulated_text": "The modulated text...",
+        "audio_url": "/api/voice-tone/audio/filename.mp3",
         "emotion": "happy",
-        "original_text": "The original text...",
-        "voice_params": {
-            "pitch": 1.2,
-            "speed": 1.15,
-            ...
-        }
+        "text": "Original text",
+        "duration": 3.5
     }
+    
+    Or audio file directly if download=true parameter is added to request
     """
-    global voice_tone_modulator
+    if not voice_tone_modulator:
+        logger.error("Voice Tone Modulator not initialized")
+        return jsonify({
+            "success": False,
+            "error": "Voice Tone Modulator not available",
+            "message": "Service is temporarily unavailable"
+        }), 503
     
     try:
-        # Parse request data
+        # Get request data
         data = request.get_json()
         
-        if not data or 'text' not in data:
+        if not data or not isinstance(data, dict):
             return jsonify({
                 "success": False,
-                "error": "Missing required parameter: text"
+                "error": "Invalid request",
+                "message": "Request body must be valid JSON"
+            }), 400
+            
+        # Get parameters from request
+        text = data.get("text")
+        emotion = data.get("emotion", "neutral")
+        voice_id = data.get("voice_id")
+        output_format = data.get("output_format", "mp3")
+        language = data.get("language", "en")
+        
+        # Validate required parameters
+        if not text:
+            return jsonify({
+                "success": False,
+                "error": "Missing parameter",
+                "message": "Text is required"
             }), 400
         
-        text = data.get('text')
-        detected_emotion = data.get('detected_emotion', 'neutral')
-        target_emotion = data.get('target_emotion')  # Optional
-        language = data.get('language', 'en')
-        voice = data.get('voice', 'default')
-        
-        # Check if voice tone modulator is initialized
-        if not voice_tone_modulator:
-            return jsonify({
-                "success": False,
-                "error": "Voice tone modulator not initialized"
-            }), 500
-        
-        # Apply voice modulation
-        result = voice_tone_modulator.apply_voice_modulation(
+        # Generate speech with emotional tone
+        audio_path, metadata = voice_tone_modulator.generate_modulated_speech(
             text=text,
-            detected_emotion=detected_emotion,
-            target_emotion=target_emotion,
-            language=language,
-            voice=voice
+            emotion=emotion,
+            voice_id=voice_id,
+            output_format=output_format,
+            language=language
         )
         
-        if not result.get('success', False):
-            return jsonify({
-                "success": False,
-                "error": result.get('error', 'Unknown error during voice modulation')
-            }), 500
+        # Create URL for accessing the audio
+        filename = os.path.basename(audio_path)
+        audio_url = f"/api/voice-tone/audio/{filename}"
         
-        # Create response with audio URL
-        audio_path = result.get('audio_path')
-        
-        # Convert file path to URL
-        base_url = current_app.config.get('APP_URL', '')
-        audio_url = f"{base_url}/{audio_path}" if audio_path else None
-        
+        # Return response
         return jsonify({
             "success": True,
             "audio_url": audio_url,
-            "modulated_text": result.get('modulated_text'),
-            "emotion": result.get('emotion'),
-            "original_text": text,
-            "voice_params": result.get('params_applied', {})
+            "emotion": emotion,
+            "text": text,
+            "duration": metadata.get("duration", 0),
+            "filename": filename
         })
-        
     except Exception as e:
-        logger.error(f"Voice tone modulation error: {str(e)}")
+        logger.error(f"Error generating emotional speech: {str(e)}")
         return jsonify({
             "success": False,
-            "error": f"Server error: {str(e)}"
+            "error": "Speech generation failed",
+            "message": str(e)
         }), 500
 
-@voice_tone_bp.route('/voice_tone/emotions', methods=['GET'])
-def get_emotions():
+@voice_tone_bp.route('/api/voice-tone/audio/<filename>', methods=['GET'])
+def get_audio_file(filename):
     """
-    Get available emotions for voice tone modulation
+    Serve generated audio file
     
+    Args:
+        filename: Name of the audio file to serve
+        
     Returns:
+        Audio file response
+    """
+    try:
+        # Security check - only allow alphanumeric, underscore, dash, and extension
+        import re
+        if not re.match(r'^[\w\-\.]+$', filename):
+            logger.warning(f"Suspicious filename requested: {filename}")
+            return jsonify({
+                "success": False,
+                "error": "Invalid filename",
+                "message": "Filename contains invalid characters"
+            }), 400
+        
+        # Determine the cache directory based on where TTS files are stored
+        base_cache_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tts_cache')
+        if not os.path.exists(base_cache_dir):
+            base_cache_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'temp_sounds')
+        
+        # Look for the file in potential cache directories
+        potential_paths = [
+            os.path.join(base_cache_dir, filename),
+            os.path.join('tts_cache', filename),
+            os.path.join('temp_sounds', filename)
+        ]
+        
+        file_path = None
+        for path in potential_paths:
+            if os.path.exists(path) and os.path.isfile(path):
+                file_path = path
+                break
+        
+        if not file_path:
+            logger.warning(f"Audio file not found: {filename}")
+            return jsonify({
+                "success": False,
+                "error": "File not found",
+                "message": "The requested audio file does not exist"
+            }), 404
+        
+        # Determine content type based on file extension
+        content_type = "audio/mpeg"  # Default to mp3
+        if filename.endswith('.wav'):
+            content_type = "audio/wav"
+        elif filename.endswith('.ogg'):
+            content_type = "audio/ogg"
+        
+        # Serve the file
+        return send_file(
+            file_path,
+            mimetype=content_type,
+            as_attachment=request.args.get('download', 'false').lower() == 'true',
+            download_name=filename if request.args.get('download', 'false').lower() == 'true' else None
+        )
+    except Exception as e:
+        logger.error(f"Error serving audio file: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": "File access error",
+            "message": str(e)
+        }), 500
+
+@voice_tone_bp.route('/api/voice-tone/emotions', methods=['GET'])
+def get_available_emotions():
+    """
+    Get list of available emotions for voice modulation
+    
+    Returns JSON response:
     {
         "success": true,
         "emotions": [
             {
                 "id": "happy",
                 "name": "Happy",
-                "description": "Cheerful, upbeat tone"
+                "description": "Speech with happy emotional tone"
             },
             ...
         ]
     }
     """
-    global voice_tone_modulator
+    if not voice_tone_modulator:
+        logger.error("Voice Tone Modulator not initialized")
+        return jsonify({
+            "success": False,
+            "error": "Voice Tone Modulator not available",
+            "message": "Service is temporarily unavailable"
+        }), 503
     
     try:
-        # Check if voice tone modulator is initialized
-        if not voice_tone_modulator:
-            return jsonify({
-                "success": False,
-                "error": "Voice tone modulator not initialized"
-            }), 500
-        
-        # Get emotions from voice_emotion_params
-        emotions = []
-        
-        emotion_descriptions = {
-            "happy": "Cheerful, upbeat tone with higher pitch and faster speech",
-            "sad": "Somber, empathetic tone with lower pitch and slower speech",
-            "angry": "Controlled, steady tone with measured pace and clarity",
-            "fearful": "Reassuring, supportive tone with balanced parameters",
-            "surprised": "Engaged, curious tone with slightly elevated pitch",
-            "neutral": "Balanced, natural tone with standard parameters"
-        }
-        
-        for emotion_id, params in voice_tone_modulator.voice_emotion_params.items():
-            emotions.append({
-                "id": emotion_id,
-                "name": emotion_id.capitalize(),
-                "description": emotion_descriptions.get(emotion_id, "Custom tone configuration"),
-                "voice_quality": params.get("voice_quality", "balanced")
-            })
-        
+        emotions = voice_tone_modulator.get_available_emotions()
         return jsonify({
             "success": True,
             "emotions": emotions
         })
-        
     except Exception as e:
-        logger.error(f"Error fetching emotions: {str(e)}")
+        logger.error(f"Error getting available emotions: {str(e)}")
         return jsonify({
             "success": False,
-            "error": f"Server error: {str(e)}"
+            "error": "Failed to get emotions",
+            "message": str(e)
         }), 500
 
-@voice_tone_bp.route('/voice_tone/test', methods=['GET'])
-def test_voice_tone():
+@voice_tone_bp.route('/api/voice-tone/status', methods=['GET'])
+def get_voice_tone_status():
     """
-    Test endpoint for voice tone modulation
+    Get status of Voice Tone Modulator
     
-    Query parameters:
-        emotion: Emotion to test (happy, sad, angry, etc.)
-        language: Language code (en, ar)
+    Returns JSON response:
+    {
+        "success": true,
+        "available": true,
+        "has_emotion_modulator": true,
+        "has_tts_manager": true
+    }
+    """
+    available = False
+    has_emotion_modulator = False
+    has_tts_manager = False
     
+    if voice_tone_modulator:
+        available = voice_tone_modulator.is_available()
+        has_tts_manager = voice_tone_modulator.tts_manager is not None
+        has_emotion_modulator = (
+            voice_tone_modulator.emotion_modulator is not None and
+            voice_tone_modulator.emotion_modulator.is_available()
+        )
+    
+    return jsonify({
+        "success": True,
+        "available": available,
+        "has_emotion_modulator": has_emotion_modulator,
+        "has_tts_manager": has_tts_manager,
+        "timestamp": time.time()
+    })
+
+def init_voice_tone_api(app, modulator):
+    """
+    Initialize Voice Tone API
+    
+    Args:
+        app: Flask application instance
+        modulator: Instance of VoiceToneModulator
+        
     Returns:
-        Audio file with test message in the requested emotional tone
+        Blueprint for Voice Tone API
     """
     global voice_tone_modulator
+    voice_tone_modulator = modulator
     
-    try:
-        # Get query parameters
-        emotion = request.args.get('emotion', 'neutral')
-        language = request.args.get('language', 'en')
-        
-        # Check if voice tone modulator is initialized
-        if not voice_tone_modulator:
-            return jsonify({
-                "success": False,
-                "error": "Voice tone modulator not initialized"
-            }), 500
-        
-        # Create test messages for each language
-        test_messages = {
-            "en": {
-                "happy": "I'm really excited to share this news with you! It's going to be amazing!",
-                "sad": "I understand this is a difficult time. I'm here to support you through it.",
-                "angry": "I appreciate your patience while we resolve this issue. Let's find a solution together.",
-                "fearful": "Don't worry, we'll get through this step by step. You're not alone.",
-                "surprised": "Oh, that's unexpected! Let's explore what this means together.",
-                "neutral": "Here is the information you requested. Let me know if you need anything else."
-            },
-            "ar": {
-                "happy": "أنا متحمس جدًا لمشاركة هذا الخبر معك! سيكون رائعًا!",
-                "sad": "أتفهم أن هذا وقت صعب. أنا هنا لدعمك خلاله.",
-                "angry": "أقدر صبرك بينما نحل هذه المشكلة. دعنا نجد حلاً معًا.",
-                "fearful": "لا تقلق، سنتجاوز هذا خطوة بخطوة. أنت لست وحدك.",
-                "surprised": "أوه، هذا غير متوقع! دعنا نستكشف ماذا يعني ذلك معًا.",
-                "neutral": "هنا المعلومات التي طلبتها. أخبرني إذا كنت بحاجة إلى أي شيء آخر."
-            }
-        }
-        
-        # Get the test message
-        test_message = test_messages.get(language, test_messages["en"]).get(emotion, test_messages[language]["neutral"])
-        
-        # Apply voice modulation
-        result = voice_tone_modulator.apply_voice_modulation(
-            text=test_message,
-            detected_emotion="neutral",  # We're testing a specific target emotion
-            target_emotion=emotion,
-            language=language
-        )
-        
-        if not result.get('success', False):
-            return jsonify({
-                "success": False,
-                "error": result.get('error', 'Unknown error during voice modulation')
-            }), 500
-        
-        # Create response with audio URL
-        audio_path = result.get('audio_path')
-        
-        # Convert file path to URL
-        base_url = current_app.config.get('APP_URL', '')
-        audio_url = f"{base_url}/{audio_path}" if audio_path else None
-        
-        return jsonify({
-            "success": True,
-            "audio_url": audio_url,
-            "modulated_text": result.get('modulated_text'),
-            "emotion": emotion,
-            "original_text": test_message
-        })
-        
-    except Exception as e:
-        logger.error(f"Voice tone test error: {str(e)}")
-        return jsonify({
-            "success": False,
-            "error": f"Server error: {str(e)}"
-        }), 500
+    # Register blueprint with the Flask app
+    app.register_blueprint(voice_tone_bp)
+    
+    logger.info("Voice Tone API initialized")
+    return voice_tone_bp

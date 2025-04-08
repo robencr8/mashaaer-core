@@ -17,6 +17,8 @@ from enhanced_cors import enhance_cors
 from routes_feedback_tool import register_feedback_routes
 from direct_test_route import init_direct_test
 from direct_report_route import init_direct_report
+from voice_tone_api import init_voice_tone_api
+from accessibility_api import register_accessibility_routes
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, 
@@ -68,6 +70,34 @@ except ImportError:
     logger.warning("TTS module could not be imported")
 except Exception as e:
     logger.warning(f"Error initializing TTS: {str(e)}")
+    
+# Initialize EmotionModulator
+emotion_modulator = None
+try:
+    from emotion_modulator import EmotionModulator
+    emotion_modulator = EmotionModulator()
+    if emotion_modulator.is_available():
+        logger.info("EmotionModulator initialized successfully")
+    else:
+        logger.warning("EmotionModulator is available but OpenAI API connection failed")
+except ImportError:
+    logger.warning("EmotionModulator module could not be imported")
+except Exception as e:
+    logger.warning(f"Error initializing EmotionModulator: {str(e)}")
+    
+# Initialize VoiceToneModulator
+voice_tone_modulator = None
+try:
+    from voice_tone_modulator import VoiceToneModulator
+    voice_tone_modulator = VoiceToneModulator(
+        emotion_modulator=emotion_modulator,
+        tts_manager=tts_manager
+    )
+    logger.info("VoiceToneModulator initialized successfully")
+except ImportError:
+    logger.warning("VoiceToneModulator module could not be imported")
+except Exception as e:
+    logger.warning(f"Error initializing VoiceToneModulator: {str(e)}")
 
 # Initialize voice recognition
 voice_recognition = None
@@ -127,6 +157,15 @@ except ImportError as e:
     logger.error(f"Could not import API feedback module: {str(e)}")
 except Exception as e:
     logger.error(f"Error initializing API feedback routes: {str(e)}")
+    
+# Initialize Voice Tone API routes
+try:
+    voice_tone_bp = init_voice_tone_api(app, voice_tone_modulator)
+    logger.info("Voice Tone API routes registered successfully")
+except ImportError as e:
+    logger.error(f"Could not import Voice Tone API module: {str(e)}")
+except Exception as e:
+    logger.error(f"Error initializing Voice Tone API routes: {str(e)}")
 
 # Import and register API routes
 try:
@@ -339,6 +378,18 @@ def notify_telegram_test_page():
     """Serve a test page for Telegram notifications"""
     logger.debug("Telegram notification test page accessed")
     return send_from_directory('static_test', 'notify_telegram.html')
+
+@app.route('/voice-tone-test', methods=['GET'])
+def voice_tone_test_page():
+    """Serve a test page for voice tone modulation"""
+    logger.debug("Voice tone test page accessed")
+    return send_from_directory('static_test', 'voice_tone_test.html')
+
+@app.route('/accessibility-test', methods=['GET'])
+def accessibility_test_page():
+    """Serve a test page for accessibility features"""
+    logger.debug("Accessibility test page accessed")
+    return render_template('accessibility_settings.html')
 
 # Add direct access to the feedback page
 @app.route("/direct-feedback", methods=["GET"])

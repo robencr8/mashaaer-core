@@ -1,0 +1,23 @@
+{
+  "enabled": true,
+  "default_language": "ar",
+  "speaking_rate": 1.0,
+  "verbosity_level": "medium",
+  "announce_navigation": true,
+  "announce_elements": true,
+  "announce_updates": true,
+  "announce_emotions": true,
+  "use_emotional_voice": true,
+  "auto_read_headings": true,
+  "auto_read_alerts": true,
+  "voice": "default",
+  "accessibility_shortcuts": {
+    "toggle_narrator": "Alt+A",
+    "increase_verbosity": "Alt+Up",
+    "decrease_verbosity": "Alt+Down",
+    "increase_speed": "Alt+Right",
+    "decrease_speed": "Alt+Left",
+    "read_page": "Alt+R",
+    "help": "Alt+H"
+  }
+}

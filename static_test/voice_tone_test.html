@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار نبرة الصوت العاطفية</title>
+    <style>
+        :root {
+            --primary-bg: #0c0e14;
+            --secondary-bg: #1a1a35;
+            --text-color: #f0f0ff;
+            --accent-color: #9370DB;
+            --accent-hover: #7B68EE;
+            --border-color: rgba(147, 112, 219, 0.3);
+            --button-bg: rgba(147, 112, 219, 0.2);
+            --button-hover: rgba(147, 112, 219, 0.4);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(26, 26, 53, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #c8c8f0;
+        }
+        
+        textarea, input, select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: var(--button-bg);
+            color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: var(--button-hover);
+            transform: translateY(-2px);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .emotion-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+        
+        .emotion-option {
+            padding: 8px 15px;
+            background: var(--button-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .emotion-option.active {
+            background: var(--accent-color);
+            transform: scale(1.05);
+        }
+        
+        .result-section {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .audio-player {
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .audio-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        
+        .loading {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--accent-color);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-available {
+            background-color: #4CAF50;
+        }
+        
+        .status-unavailable {
+            background-color: #F44336;
+        }
+        
+        .api-status {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .error-message {
+            color: #F44336;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        
+        /* RTL Support */
+        [dir="rtl"] .status-indicator {
+            margin-right: 0;
+            margin-left: 8px;
+        }
+        
+        /* LTR Support */
+        html[dir="ltr"] .container {
+            direction: ltr;
+            text-align: left;
+        }
+        
+        .language-toggle {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--button-bg);
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        [dir="ltr"] .language-toggle {
+            left: auto;
+            right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <button class="language-toggle" onclick="toggleLanguage()">English</button>
+    
+    <div class="container">
+        <h1 class="ar">اختبار نبرة الصوت العاطفية</h1>
+        <h1 class="en" style="display: none;">Voice Tone Test</h1>
+        
+        <div class="api-status">
+            <span class="status-indicator status-unavailable"></span>
+            <span class="ar">جاري التحقق من توفر واجهة برمجة التطبيقات...</span>
+            <span class="en" style="display: none;">Checking API availability...</span>
+        </div>
+        
+        <div class="form-group">
+            <label class="ar" for="text-input">النص</label>
+            <label class="en" style="display: none;" for="text-input">Text</label>
+            <textarea id="text-input" class="ar" placeholder="أدخل النص لتحويله إلى كلام عاطفي"></textarea>
+            <textarea id="text-input-en" class="en" style="display: none;" placeholder="Enter text to convert to emotional speech"></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label class="ar">العاطفة</label>
+            <label class="en" style="display: none;">Emotion</label>
+            <div class="emotion-selector" id="emotion-selector">
+                <!-- emotions will be dynamically added here -->
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="ar" for="language-select">اللغة</label>
+            <label class="en" style="display: none;" for="language-select">Language</label>
+            <select id="language-select">
+                <option value="ar">العربية</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+        
+        <div class="button-group">
+            <button id="generate-btn" class="ar">إنشاء الكلام</button>
+            <button id="generate-btn-en" class="en" style="display: none;">Generate Speech</button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <span class="ar">جاري إنشاء الكلام...</span>
+            <span class="en" style="display: none;">Generating speech...</span>
+        </div>
+        
+        <div class="error-message" id="error-message"></div>
+        
+        <div class="result-section" id="result-section">
+            <h2 class="ar">النتيجة</h2>
+            <h2 class="en" style="display: none;">Result</h2>
+            <audio id="audio-player" class="audio-player" controls></audio>
+            <div class="audio-info" id="audio-info"></div>
+            <div class="button-group">
+                <button id="download-btn" class="ar">تحميل الملف الصوتي</button>
+                <button id="download-btn-en" class="en" style="display: none;">Download Audio</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Current language state
+        let currentLanguage = 'ar';
+        
+        // Toggle language between Arabic and English
+        function toggleLanguage() {
+            if (currentLanguage === 'ar') {
+                document.documentElement.dir = 'ltr';
+                document.documentElement.lang = 'en';
+                document.querySelector('.language-toggle').innerText = 'العربية';
+                currentLanguage = 'en';
+            } else {
+                document.documentElement.dir = 'rtl';
+                document.documentElement.lang = 'ar';
+                document.querySelector('.language-toggle').innerText = 'English';
+                currentLanguage = 'ar';
+            }
+            
+            // Toggle display of language-specific elements
+            document.querySelectorAll('.ar, .en').forEach(el => {
+                el.style.display = el.classList.contains(currentLanguage) ? '' : 'none';
+            });
+        }
+        
+        // Elements
+        const apiStatus = document.querySelector('.api-status');
+        const statusIndicator = document.querySelector('.status-indicator');
+        const emotionSelector = document.getElementById('emotion-selector');
+        const textInput = document.getElementById('text-input');
+        const textInputEn = document.getElementById('text-input-en');
+        const languageSelect = document.getElementById('language-select');
+        const generateBtn = document.getElementById('generate-btn');
+        const generateBtnEn = document.getElementById('generate-btn-en');
+        const loading = document.getElementById('loading');
+        const resultSection = document.getElementById('result-section');
+        const audioPlayer = document.getElementById('audio-player');
+        const audioInfo = document.getElementById('audio-info');
+        const downloadBtn = document.getElementById('download-btn');
+        const downloadBtnEn = document.getElementById('download-btn-en');
+        const errorMessage = document.getElementById('error-message');
+        
+        // Sample texts for each language
+        const sampleTexts = {
+            'ar': 'مرحباً بك في اختبار نبرة الصوت العاطفية. يمكنك تحويل هذا النص إلى كلام مع نبرة عاطفية من اختيارك.',
+            'en': 'Welcome to the voice tone test. You can convert this text to speech with an emotional tone of your choice.'
+        };
+        
+        // Current state
+        let currentEmotion = 'neutral';
+        let availableEmotions = [];
+        let audioFileName = null;
+        
+        // Check API status on load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkApiStatus();
+            await loadEmotions();
+            
+            // Set sample text based on language
+            textInput.value = sampleTexts.ar;
+            textInputEn.value = sampleTexts.en;
+            
+            // Event handlers
+            generateBtn.addEventListener('click', generateSpeech);
+            generateBtnEn.addEventListener('click', generateSpeech);
+            downloadBtn.addEventListener('click', downloadAudio);
+            downloadBtnEn.addEventListener('click', downloadAudio);
+            languageSelect.addEventListener('change', (e) => {
+                if (e.target.value === 'ar') {
+                    textInput.style.display = '';
+                    textInputEn.style.display = 'none';
+                } else {
+                    textInput.style.display = 'none';
+                    textInputEn.style.display = '';
+                }
+            });
+        });
+        
+        // Check API status
+        async function checkApiStatus() {
+            try {
+                const response = await fetch('/api/voice-tone/status');
+                const data = await response.json();
+                
+                if (data.success && data.available) {
+                    statusIndicator.classList.remove('status-unavailable');
+                    statusIndicator.classList.add('status-available');
+                    
+                    const statusText = {
+                        'ar': `واجهة برمجة التطبيقات متاحة. مكتبة النصوص: ${data.has_tts_manager ? 'متاحة' : 'غير متاحة'}. معالج العواطف: ${data.has_emotion_modulator ? 'متاح' : 'غير متاح'}`,
+                        'en': `API is available. TTS: ${data.has_tts_manager ? 'available' : 'unavailable'}. Emotion modulator: ${data.has_emotion_modulator ? 'available' : 'unavailable'}`
+                    };
+                    
+                    apiStatus.innerHTML = `
+                        <span class="status-indicator status-available"></span>
+                        <span class="ar">${statusText.ar}</span>
+                        <span class="en" style="display: none;">${statusText.en}</span>
+                    `;
+                } else {
+                    const errorText = {
+                        'ar': 'واجهة برمجة التطبيقات غير متاحة',
+                        'en': 'API is unavailable'
+                    };
+                    
+                    apiStatus.innerHTML = `
+                        <span class="status-indicator status-unavailable"></span>
+                        <span class="ar">${errorText.ar}</span>
+                        <span class="en" style="display: none;">${errorText.en}</span>
+                    `;
+                }
+            } catch (error) {
+                const errorText = {
+                    'ar': 'خطأ في الاتصال بواجهة برمجة التطبيقات',
+                    'en': 'Error connecting to API'
+                };
+                
+                apiStatus.innerHTML = `
+                    <span class="status-indicator status-unavailable"></span>
+                    <span class="ar">${errorText.ar}</span>
+                    <span class="en" style="display: none;">${errorText.en}</span>
+                `;
+            }
+        }
+        
+        // Load available emotions
+        async function loadEmotions() {
+            try {
+                const response = await fetch('/api/voice-tone/emotions');
+                const data = await response.json();
+                
+                if (data.success && data.emotions) {
+                    availableEmotions = data.emotions;
+                    renderEmotions();
+                } else {
+                    // Fallback to default emotions
+                    availableEmotions = [
+                        { id: 'happy', name: 'سعيد', name_en: 'Happy' },
+                        { id: 'sad', name: 'حزين', name_en: 'Sad' },
+                        { id: 'angry', name: 'غاضب', name_en: 'Angry' },
+                        { id: 'calm', name: 'هادئ', name_en: 'Calm' },
+                        { id: 'excited', name: 'متحمس', name_en: 'Excited' },
+                        { id: 'neutral', name: 'محايد', name_en: 'Neutral' }
+                    ];
+                    renderEmotions();
+                }
+            } catch (error) {
+                // Fallback to default emotions
+                availableEmotions = [
+                    { id: 'happy', name: 'سعيد', name_en: 'Happy' },
+                    { id: 'sad', name: 'حزين', name_en: 'Sad' },
+                    { id: 'angry', name: 'غاضب', name_en: 'Angry' },
+                    { id: 'calm', name: 'هادئ', name_en: 'Calm' },
+                    { id: 'excited', name: 'متحمس', name_en: 'Excited' },
+                    { id: 'neutral', name: 'محايد', name_en: 'Neutral' }
+                ];
+                renderEmotions();
+            }
+        }
+        
+        // Render emotion options
+        function renderEmotions() {
+            emotionSelector.innerHTML = '';
+            
+            availableEmotions.forEach(emotion => {
+                const option = document.createElement('div');
+                option.className = `emotion-option ${emotion.id === currentEmotion ? 'active' : ''}`;
+                option.dataset.emotion = emotion.id;
+                
+                // Add Arabic and English names
+                const nameAr = emotion.name || getEmotionArabicName(emotion.id);
+                const nameEn = emotion.name_en || emotion.name || emotion.id;
+                
+                option.innerHTML = `
+                    <span class="ar">${nameAr}</span>
+                    <span class="en" style="display: none;">${nameEn}</span>
+                `;
+                
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.emotion-option').forEach(el => {
+                        el.classList.remove('active');
+                    });
+                    option.classList.add('active');
+                    currentEmotion = emotion.id;
+                });
+                
+                emotionSelector.appendChild(option);
+            });
+        }
+        
+        // Helper to get Arabic emotion names
+        function getEmotionArabicName(emotionId) {
+            const emotionMap = {
+                'happy': 'سعيد',
+                'sad': 'حزين',
+                'angry': 'غاضب',
+                'calm': 'هادئ',
+                'excited': 'متحمس',
+                'neutral': 'محايد'
+            };
+            return emotionMap[emotionId] || emotionId;
+        }
+        
+        // Generate speech with emotion
+        async function generateSpeech() {
+            const language = languageSelect.value;
+            const text = language === 'ar' ? textInput.value : textInputEn.value;
+            
+            if (!text.trim()) {
+                showError({
+                    'ar': 'الرجاء إدخال نص',
+                    'en': 'Please enter some text'
+                });
+                return;
+            }
+            
+            // Show loading
+            loading.style.display = 'block';
+            resultSection.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/voice-tone/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        emotion: currentEmotion,
+                        language: language
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.audio_url) {
+                    audioFileName = data.filename;
+                    audioPlayer.src = data.audio_url;
+                    
+                    // Create info text
+                    const infoText = {
+                        'ar': `العاطفة: ${getEmotionArabicName(data.emotion)}<br>
+                               المدة: ${data.duration.toFixed(2)} ثانية<br>
+                               اللغة: ${language === 'ar' ? 'العربية' : 'الإنجليزية'}<br>
+                               الملف: ${data.filename}`,
+                        'en': `Emotion: ${data.emotion}<br>
+                               Duration: ${data.duration.toFixed(2)} seconds<br>
+                               Language: ${language === 'ar' ? 'Arabic' : 'English'}<br>
+                               File: ${data.filename}`
+                    };
+                    
+                    audioInfo.innerHTML = `
+                        <div class="ar">${infoText.ar}</div>
+                        <div class="en" style="display: ${currentLanguage === 'en' ? 'block' : 'none'}">${infoText.en}</div>
+                    `;
+                    
+                    // Show result
+                    resultSection.style.display = 'block';
+                    
+                    // Auto play
+                    audioPlayer.play();
+                } else {
+                    showError({
+                        'ar': data.message || 'حدث خطأ أثناء إنشاء الكلام',
+                        'en': data.message || 'Error generating speech'
+                    });
+                }
+            } catch (error) {
+                showError({
+                    'ar': 'خطأ في الاتصال بواجهة برمجة التطبيقات',
+                    'en': 'Error connecting to API'
+                });
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Download the audio file
+        function downloadAudio() {
+            if (!audioFileName) return;
+            
+            const downloadUrl = `/api/voice-tone/audio/${audioFileName}?download=true`;
+            window.open(downloadUrl, '_blank');
+        }
+        
+        // Show error message
+        function showError(message) {
+            errorMessage.innerHTML = `
+                <div class="ar">${message.ar}</div>
+                <div class="en" style="display: ${currentLanguage === 'en' ? 'block' : 'none'}">${message.en}</div>
+            `;
+            errorMessage.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

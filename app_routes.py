@@ -18,6 +18,11 @@ def app_home():
     """Serve the app homepage"""
     return render_template('index.html')
 
+@app_routes_bp.route('/accessibility')
+def accessibility_settings():
+    """Serve the accessibility settings page"""
+    return render_template('accessibility_settings.html')
+
 @app_routes_bp.route('/replit-access-test')
 def replit_access_test():
     """Simple test page for Replit access testing"""

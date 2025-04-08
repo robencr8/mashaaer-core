@@ -1,0 +1,130 @@
+{
+  "welcome": {
+    "initial": {
+      "en": "Welcome to Mashaaer Feelings. Use voice commands or touch to navigate.",
+      "ar": "مرحبًا بك في مشاعر. استخدم الأوامر الصوتية أو اللمس للتنقل."
+    },
+    "help": {
+      "en": "Say 'help' for assistance, 'menu' to hear options, or 'settings' to customize accessibility.",
+      "ar": "قل 'مساعدة' للحصول على المساعدة، 'القائمة' لسماع الخيارات، أو 'الإعدادات' لتخصيص إمكانية الوصول."
+    },
+    "tutorial": {
+      "en": "Mashaaer is an AI emotional companion that responds to your feelings. It uses a cosmic sphere that changes color based on your emotions.",
+      "ar": "مشاعر هو رفيق عاطفي ذكاء اصطناعي يستجيب لمشاعرك. يستخدم كرة كونية تتغير ألوانها بناءً على عواطفك."
+    }
+  },
+  "main": {
+    "initial": {
+      "en": "Main screen. Here you can interact with Mashaaer, express your feelings, or access settings.",
+      "ar": "الشاشة الرئيسية. هنا يمكنك التفاعل مع مشاعر، والتعبير عن مشاعرك، أو الوصول إلى الإعدادات."
+    },
+    "help": {
+      "en": "You can say 'talk to me', 'how are you feeling', or tap the cosmic sphere to begin interaction.",
+      "ar": "يمكنك أن تقول 'تحدث معي'، 'كيف تشعر'، أو انقر على الكرة الكونية لبدء التفاعل."
+    },
+    "cosmic_sphere": {
+      "en": "The cosmic sphere is the central element of Mashaaer. It changes color based on emotions detected in your interactions.",
+      "ar": "الكرة الكونية هي العنصر المركزي في مشاعر. تتغير ألوانها بناءً على المشاعر المكتشفة في تفاعلاتك."
+    },
+    "emotions": {
+      "en": "Mashaaer can detect and respond to various emotions including happiness, sadness, anger, and more.",
+      "ar": "يمكن لمشاعر اكتشاف والاستجابة لمختلف العواطف بما في ذلك السعادة والحزن والغضب والمزيد."
+    }
+  },
+  "settings": {
+    "initial": {
+      "en": "Settings screen. Here you can customize your experience and accessibility options.",
+      "ar": "شاشة الإعدادات. هنا يمكنك تخصيص تجربتك وخيارات إمكانية الوصول."
+    },
+    "help": {
+      "en": "Use the switches to toggle features on or off. Voice guidance can be adjusted here.",
+      "ar": "استخدم المفاتيح لتبديل الميزات. يمكن ضبط التوجيه الصوتي هنا."
+    },
+    "accessibility": {
+      "en": "In the accessibility section, you can adjust voice guidance, speaking rate, and verbosity level.",
+      "ar": "في قسم إمكانية الوصول، يمكنك ضبط التوجيه الصوتي ومعدل التحدث ومستوى الإطناب."
+    },
+    "language": {
+      "en": "Language settings allow you to switch between English and Arabic for both the interface and voice guidance.",
+      "ar": "تتيح لك إعدادات اللغة التبديل بين الإنجليزية والعربية لكل من الواجهة والتوجيه الصوتي."
+    },
+    "theme": {
+      "en": "Theme settings let you customize the visual appearance of Mashaaer.",
+      "ar": "تتيح لك إعدادات السمة تخصيص المظهر المرئي لمشاعر."
+    }
+  },
+  "voice_tone_test": {
+    "initial": {
+      "en": "Voice tone test screen. Here you can test how Mashaaer speaks with different emotional tones.",
+      "ar": "شاشة اختبار نبرة الصوت. هنا يمكنك اختبار كيف يتحدث مشاعر بنبرات عاطفية مختلفة."
+    },
+    "help": {
+      "en": "Enter text, select an emotion, and click the Generate button to hear how Mashaaer speaks with that emotion.",
+      "ar": "أدخل النصّ، واختر العاطفة، وانقر على زر التوليد لتسمع كيف يتحدث مشاعر بتلك العاطفة."
+    },
+    "form": {
+      "en": "This form has text input for your message, a dropdown for selecting emotion, and language options.",
+      "ar": "يحتوي هذا النموذج على إدخال نصي لرسالتك، وقائمة منسدلة لاختيار العاطفة، وخيارات اللغة."
+    }
+  },
+  "cosmic_onboarding": {
+    "initial": {
+      "en": "Welcome to the cosmic onboarding experience. This is where you'll begin your journey with Mashaaer.",
+      "ar": "مرحبًا بك في تجربة التأهيل الكونية. هنا ستبدأ رحلتك مع مشاعر."
+    },
+    "help": {
+      "en": "Follow the guided experience to learn about Mashaaer's capabilities and how to interact with it.",
+      "ar": "اتبع التجربة الموجهة للتعرف على قدرات مشاعر وكيفية التفاعل معها."
+    },
+    "animation": {
+      "en": "The cosmic sphere is animating. It represents Mashaaer's emotional awareness.",
+      "ar": "الكرة الكونية تتحرك. وهي تمثل الوعي العاطفي لمشاعر."
+    }
+  },
+  "error": {
+    "initial": {
+      "en": "An error has occurred. We apologize for the inconvenience.",
+      "ar": "حدث خطأ. نعتذر عن الإزعاج."
+    },
+    "help": {
+      "en": "Try refreshing the page or contact support if the problem persists.",
+      "ar": "حاول تحديث الصفحة أو اتصل بالدعم إذا استمرت المشكلة."
+    },
+    "connection": {
+      "en": "There may be a connection issue. Please check your internet connection and try again.",
+      "ar": "قد تكون هناك مشكلة في الاتصال. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى."
+    }
+  },
+  "accessibility_settings": {
+    "initial": {
+      "en": "Accessibility settings screen. Here you can customize how Mashaaer provides voice guidance.",
+      "ar": "شاشة إعدادات إمكانية الوصول. هنا يمكنك تخصيص كيفية تقديم مشاعر للتوجيه الصوتي."
+    },
+    "help": {
+      "en": "Adjust settings for voice guidance, speaking rate, verbosity, and keyboard shortcuts.",
+      "ar": "ضبط إعدادات التوجيه الصوتي، ومعدل التحدث، والإطناب، واختصارات لوحة المفاتيح."
+    },
+    "verbosity": {
+      "en": "Verbosity controls how much detail is provided in voice guidance. Low provides minimal information, high provides comprehensive details.",
+      "ar": "يتحكم الإطناب في مقدار التفاصيل المقدمة في التوجيه الصوتي. المنخفض يوفر الحد الأدنى من المعلومات، والعالي يوفر تفاصيل شاملة."
+    },
+    "shortcuts": {
+      "en": "Keyboard shortcuts allow quick access to accessibility features. Use Alt+A to toggle the narrator on or off.",
+      "ar": "تتيح اختصارات لوحة المفاتيح الوصول السريع إلى ميزات إمكانية الوصول. استخدم Alt+A لتبديل المرشد الصوتي."
+    }
+  },
+  "emotion_analysis": {
+    "initial": {
+      "en": "Emotion analysis screen. Here you can see how Mashaaer detects emotions in text.",
+      "ar": "شاشة تحليل المشاعر. هنا يمكنك رؤية كيف يكتشف مشاعر العواطف في النص."
+    },
+    "help": {
+      "en": "Enter text to analyze, and Mashaaer will identify the emotions present in the text.",
+      "ar": "أدخل النص للتحليل، وسيحدد مشاعر العواطف الموجودة في النص."
+    },
+    "results": {
+      "en": "Analysis results show the primary emotion detected and any secondary emotions present.",
+      "ar": "تظهر نتائج التحليل العاطفة الأساسية المكتشفة وأي عواطف ثانوية موجودة."
+    }
+  }
+}
