@@ -625,17 +625,10 @@
     notification.style.alignItems = 'center';
     notification.style.padding = '12px 15px';
     notification.style.marginBottom = '10px';
+    notification.style.background = `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`;
     notification.style.borderRadius = '8px';
-    notification.style.backgroundColor = colors.primary;
-    notification.style.boxShadow = `0 4px 12px rgba(0, 0, 0, 0.2), 0 0 0 3px ${colors.secondary}22`;
+    notification.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
     notification.style.color = 'white';
-    notification.style.minWidth = '250px';
-    notification.style.maxWidth = '350px';
-    
-    // Add close button event
-    closeBtn.addEventListener('click', () => {
-      closeNotification(notification);
-    });
     
     notification.appendChild(closeBtn);
     
@@ -653,55 +646,131 @@
       notification.style.transform = 'translateY(0)';
     }, 10);
     
-    // Auto close after duration
-    if (settings.duration > 0) {
-      setTimeout(() => {
-        closeNotification(notification);
-      }, settings.duration);
-    }
-    
-    // Function to close notification
-    function closeNotification(notif) {
-      notif.style.opacity = '0';
-      notif.style.transform = 'translateY(-20px)';
+    // Set up close handler
+    const closeNotification = () => {
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateY(-20px)';
       
-      // Remove after animation
       setTimeout(() => {
-        if (notif.parentNode) {
-          notif.parentNode.removeChild(notif);
+        if (container.contains(notification)) {
+          container.removeChild(notification);
         }
         
         // Remove container if empty
-        if (container.childNodes.length === 0) {
+        if (container.children.length === 0) {
           document.body.removeChild(container);
         }
       }, 300);
+    };
+    
+    // Close on button click
+    closeBtn.addEventListener('click', closeNotification);
+    
+    // Auto close after duration
+    if (settings.duration > 0) {
+      setTimeout(closeNotification, settings.duration);
     }
     
     return notification;
   }
   
-  // Initialize on DOM content loaded
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
+  /**
+   * Show success notification
+   * 
+   * @param {string} message - Success message
+   * @param {Object} options - Notification options
+   * @returns {Element} - The notification element
+   */
+  function showSuccess(message, options = {}) {
+    return createNotification(message, 'success', options);
   }
   
-  // Export public API
-  window.MashaaerInteractions = {
+  /**
+   * Show error notification
+   * 
+   * @param {string} message - Error message
+   * @param {Object} options - Notification options
+   * @returns {Element} - The notification element
+   */
+  function showError(message, options = {}) {
+    return createNotification(message, 'error', options);
+  }
+  
+  /**
+   * Initialize floating particles in the background for cosmic effect
+   * 
+   * @param {number} count - Number of particles to create
+   */
+  function initCosmicParticles(count = 30) {
+    if (!config.particlesEnabled) return;
+    
+    // Create container for particles
+    const container = document.createElement('div');
+    container.className = 'cosmic-particles-container';
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.pointerEvents = 'none';
+    container.style.zIndex = '0';
+    document.body.appendChild(container);
+    
+    // Get colors for current emotion
+    const colors = config.emotionColors[currentEmotion];
+    
+    // Create particles
+    for (let i = 0; i < count; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'cosmic-floating';
+      
+      // Random size (2-5px)
+      const size = 2 + Math.random() * 3;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      
+      // Random position
+      particle.style.left = `${Math.random() * 100}%`;
+      particle.style.top = `${Math.random() * 100}%`;
+      
+      // Random color (primary or secondary)
+      const color = Math.random() > 0.5 ? colors.primary : colors.secondary;
+      particle.style.backgroundColor = color;
+      particle.style.boxShadow = `0 0 ${size * 2}px ${color}`;
+      
+      // Random float direction
+      particle.style.setProperty('--float-x', `${(Math.random() * 60) - 30}px`);
+      
+      // Random animation duration (8-15s)
+      const duration = 8 + Math.random() * 7;
+      particle.style.animationDuration = `${duration}s`;
+      
+      // Random delay
+      const delay = Math.random() * 5;
+      particle.style.animationDelay = `${delay}s`;
+      
+      // Add to container
+      container.appendChild(particle);
+    }
+  }
+  
+  // Expose public API
+  window.MashaaerEffects = {
+    init,
     setEmotion,
     playSound,
-    createNotification,
     applyTo,
     createParticleBurst,
-    createEmotionTransitionEffect
+    showSuccess,
+    showError,
+    createNotification,
+    initCosmicParticles,
+    getSoundEnabled: () => config.soundEnabled,
+    setSoundEnabled: (enabled) => { config.soundEnabled = !!enabled; },
+    getParticlesEnabled: () => config.particlesEnabled,
+    setParticlesEnabled: (enabled) => { config.particlesEnabled = !!enabled; }
   };
+  
+  // Auto-initialize on DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', init);
 })();
-
-// Add global shortcut function
-window.createEmotionTransitionEffect = function(fromEmotion, toEmotion, sourceElement) {
-  if (window.MashaaerInteractions) {
-    window.MashaaerInteractions.createEmotionTransitionEffect(fromEmotion, toEmotion, sourceElement);
-  }
-};

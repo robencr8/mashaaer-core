@@ -6,7 +6,7 @@
 // Constants for volume and track settings
 const DEFAULT_VOLUME = 0.5;
 const FADE_DURATION = 1000;
-const BASE_AUDIO_PATH = '/static/sounds/';
+const BASE_AUDIO_PATH = '/static/mobile/audio/';
 
 // Track references
 let currentTrack = null;
@@ -21,7 +21,7 @@ const EMOTION_TRACKS = {
     'sad': 'sad_cosmic.mp3',
     'angry': 'angry_cosmic.mp3',
     'calm': 'calm_cosmic.mp3',
-    'neutral': 'cosmic.mp3', // Use default cosmic for neutral
+    'neutral': 'calm_cosmic.mp3', // Use calm for neutral
     'anxious': 'sad_cosmic.mp3',  // Use sad for anxious
     'tired': 'sad_cosmic.mp3',    // Use sad for tired
     'excited': 'happy_cosmic.mp3' // Use happy for excited
@@ -266,6 +266,48 @@ function handleEmotionResponse(response) {
         playEmotionTrack(response.primary_emotion);
     }
 }
+
+/**
+ * Handle emotion transition
+ * @param {string} fromEmotion - Previous emotion
+ * @param {string} toEmotion - New emotion
+ * @param {Object} options - Additional options
+ */
+function handleEmotionTransition(fromEmotion, toEmotion, options = {}) {
+    // Normalize emotion values
+    fromEmotion = fromEmotion?.toLowerCase() || 'neutral';
+    toEmotion = toEmotion?.toLowerCase() || 'neutral';
+    
+    console.log(`Handling emotion transition: ${fromEmotion} → ${toEmotion}`);
+    
+    // Play transition sound (if enhanced transition sound manager is available)
+    if (window.transitionSoundManager && 
+        typeof window.transitionSoundManager.playTransitionSound === 'function') {
+        window.transitionSoundManager.playTransitionSound(fromEmotion, toEmotion);
+    }
+    
+    // Change background ambient track after a short delay
+    setTimeout(() => {
+        playEmotionTrack(toEmotion);
+    }, 300);
+    
+    // Fire an event for other components to react to the transition
+    const event = new CustomEvent('emotionTransition', {
+        detail: {
+            from: fromEmotion,
+            to: toEmotion,
+            options: options
+        }
+    });
+    document.dispatchEvent(event);
+}
+
+// Listen for emotion change events from micro_interactions.js
+document.addEventListener('emotionChanged', (event) => {
+    if (event.detail && event.detail.from !== event.detail.to) {
+        handleEmotionTransition(event.detail.from, event.detail.to);
+    }
+});
 
 /**
  * Handle emotion transition

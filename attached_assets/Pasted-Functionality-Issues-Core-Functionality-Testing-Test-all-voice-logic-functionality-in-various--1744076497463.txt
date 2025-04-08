@@ -1,0 +1,153 @@
+Functionality Issues
+	•	Core Functionality Testing
+	•	Test all voice logic functionality in various environments
+	•	Verify API endpoints are properly responding (especially `/api/voice_logic`)
+	•	Ensure offline capabilities work as expected
+	•	Test session/context memory matching functionality
+	•	Verify emotion detection system accuracy
+	•	Test rule-based response system before AI fallbacks
+	•	User Authentication & Security
+	•	Test login/logout functionality
+	•	Verify password reset process
+	•	Check account creation workflow
+	•	Test session timeout handling
+	•	Verify data encryption for sensitive information
+	•	Check for proper API authentication
+	•	Test against common security vulnerabilities (SQL injection, XSS)
+	•	Data Management
+	•	Verify data is saved correctly
+	•	Test data synchronization between devices
+	•	Check offline data storage and syncing when connection is restored
+	•	Verify data backup and recovery processes
+	•	Test data migration for app updates
+	•	Network Handling
+	•	Test app behavior with slow network connections
+	•	Verify graceful handling of network interruptions
+	•	Test behavior when switching between WiFi and cellular data
+	•	Check timeout handling for API calls
+	•	Verify proper error messages for network failures
+
+Performance Issues
+	•	Speed & Responsiveness
+	•	Check app startup time
+	•	Verify smooth scrolling and navigation
+	•	Test response time for user interactions
+	•	Check animation smoothness
+	•	Verify background processing doesn’t affect UI responsiveness
+	•	Resource Usage
+	•	Monitor CPU usage during normal operation
+	•	Check memory usage and test for memory leaks
+	•	Verify battery consumption is reasonable
+	•	Test storage usage and cleanup processes
+	•	Monitor network data usage
+	•	Stability
+	•	Test app for crashes under various conditions
+	•	Verify error handling for edge cases
+	•	Check app behavior after extended use
+	•	Test recovery after forced closure
+	•	Verify background/foreground transition handling
+
+User Interface Issues
+	•	Visual Consistency
+	•	Check for consistent styling across all screens
+	•	Verify proper alignment of UI elements
+	•	Test for visual glitches during transitions
+	•	Check color consistency with brand guidelines
+	•	Verify text formatting consistency
+	•	Responsiveness
+	•	Test on different screen sizes
+	•	Verify proper display in both portrait and landscape modes
+	•	Check UI adaptation for different device densities
+	•	Test with different font sizes (accessibility settings)
+	•	Verify proper keyboard handling and input field visibility
+	•	Accessibility
+	•	Test with screen readers
+	•	Verify proper content descriptions for images
+	•	Check color contrast for readability
+	•	Test navigation without relying on color cues
+	•	Verify support for system accessibility settings
+
+Integration Issues
+	•	Third-Party Services
+	•	Verify all API integrations are functioning
+	•	Test social media sharing functionality
+	•	Check payment processing if applicable
+	•	Verify analytics tracking is working correctly
+	•	Test push notification delivery
+	•	Device Features
+	•	Test camera integration
+	•	Verify microphone access and recording
+	•	Check location services integration
+	•	Test biometric authentication if used
+	•	Verify proper permissions handling
+
+Platform-Specific Issues
+	•	iOS Specific
+	•	Test on different iOS versions (minimum to latest)
+	•	Verify proper handling of notches and dynamic islands
+	•	Check app behavior during calls or other interruptions
+	•	Test with various iPad models if supporting iPad
+	•	Verify proper use of iOS-specific UI patterns
+	•	Android Specific
+	•	Test on different Android versions (minimum to latest)
+	•	Verify behavior with different Android skins (Samsung, Xiaomi, etc.)
+	•	Check handling of back button and system navigation
+	•	Test with various screen ratios and cutouts
+	•	Verify proper handling of Android permissions model
+
+Content & Legal Issues
+	•	Content Compliance
+	•	Verify all text is free of spelling and grammatical errors
+	•	Check that all required legal notices are present
+	•	Verify privacy policy is up-to-date and accessible
+	•	Check terms of service for completeness
+	•	Verify app rating and content warnings are appropriate
+	•	Localization
+	•	Test all supported languages
+	•	Verify proper text display for RTL languages if supported
+	•	Check date, time, and number formatting for different locales
+	•	Verify cultural appropriateness of content
+	•	Test language switching functionality
+
+Store Submission Readiness
+	•	App Store (iOS)
+	•	Verify app meets Apple Human Interface Guidelines
+	•	Check compliance with App Store Review Guidelines
+	•	Verify app privacy declarations are accurate
+	•	Test in-app purchases if applicable
+	•	Ensure app works in App Store sandbox environment
+	•	Google Play (Android)
+	•	Verify compliance with Google Play policies
+	•	Check target API level meets requirements
+	•	Verify proper handling of Android app bundles
+	•	Test Google Play in-app billing if applicable
+	•	Ensure Data Safety section information is accurate
+
+Mashaaer-Specific Issues
+	•	Domain Mapping
+	•	Verify DNS records for decentravault.online
+	•	Check CNAME record for api.decentravault.online
+	•	Test SSL certificate validity
+	•	Verify GitHub Pages configuration for frontend
+	•	Check Replit configuration for backend
+	•	API Sync
+	•	Test all API endpoints for proper responses
+	•	Verify backend is running and accessible
+	•	Check authentication for API calls
+	•	Test rate limiting and error handling
+	•	Verify data format consistency
+	•	Feedback System
+	•	Test feedback form submission
+	•	Verify feedback data storage
+	•	Check notification system for new feedback
+	•	Test feedback response workflow
+	•	Verify feedback analytics
+	•	AI Response Pipeline
+	•	Test rule-based response system
+	•	Verify AI fallback mechanisms (GPT/Claude/HuggingFace)
+	•	Check emotion detection accuracy
+	•	Test session/context memory matching
+	•	Verify response variation to avoid repetition
+	•	Test offline-capable logic
+	•	Check for emotionally aligned replies
+	•	Verify user language and tone respect

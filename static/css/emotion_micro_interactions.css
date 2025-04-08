@@ -1,203 +1,274 @@
 /**
  * Emotion Micro-Interactions CSS
- * Provides styling for emotion-based visual effects and transitions
+ * Provides emotion-specific styling and animations for the Mashaaer interface
  */
 
-/* Emotion transition container */
-.emotion-transition {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 9000;
-}
-
-/* Individual sparkle particles */
-.emotion-sparkle {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--emotion-primary, #9370DB);
-  opacity: 0;
-  box-shadow: 0 0 8px var(--emotion-primary, #9370DB);
-  pointer-events: none;
-  animation: emotion-sparkle 1.5s ease-out forwards;
-  transform-origin: center center;
-}
-
-/* Sparkle animation for emotion transitions */
-@keyframes emotion-sparkle {
-  0% {
-    opacity: 0;
-    transform: translate(0, 0) scale(0);
-  }
-  20% {
-    opacity: 1;
-    transform: translate(var(--sparkle-x, 30px), var(--sparkle-y, -20px)) scale(1.2);
-  }
-  70% {
-    opacity: 0.8;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(var(--sparkle-x, 40px), var(--sparkle-y, -40px)) scale(0.2);
-  }
-}
-
-/* Pulse animation for notifications and highlights */
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.pulse-animation {
-  animation: pulse 2s infinite ease-in-out;
-}
-
-/* Ripple effect for buttons and interactive elements */
-@keyframes ripple-effect {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-
-.ripple {
-  position: absolute;
-  border-radius: 50%;
-  transform: scale(0);
-  background-color: rgba(255, 255, 255, 0.3);
-  animation: ripple-effect 0.6s linear;
-  pointer-events: none;
-}
-
-/* Emotion-specific colors */
-.emotion-happy {
-  --emotion-primary: #FFD700;
-  --emotion-secondary: #FFA500;
-}
-
-.emotion-sad {
-  --emotion-primary: #4169E1;
-  --emotion-secondary: #1E90FF;
-}
-
-.emotion-angry {
-  --emotion-primary: #FF4500;
-  --emotion-secondary: #FF6347;
-}
-
-.emotion-calm {
-  --emotion-primary: #48D1CC;
-  --emotion-secondary: #20B2AA;
-}
-
-.emotion-excited {
-  --emotion-primary: #FF1493;
-  --emotion-secondary: #FF69B4;
-}
-
-.emotion-confused {
-  --emotion-primary: #9932CC;
-  --emotion-secondary: #8B008B;
-}
-
-.emotion-neutral {
+/* Emotion-themed color variables */
+:root {
+  /* Default emotion is neutral cosmic purple */
   --emotion-primary: #9370DB;
   --emotion-secondary: #7B68EE;
+  
+  /* Animation durations */
+  --transition-duration: 0.5s;
+  --sparkle-duration: 1.5s;
+  --burst-duration: 2s;
+  
+  /* Sparkle sizing */
+  --sparkle-size: 7px;
+  --sparkle-small: 3px;
+  --sparkle-large: 12px;
 }
 
-/* Rating stars animation */
+/* Base sparkle styling */
+.emotion-sparkle {
+  position: absolute;
+  width: var(--sparkle-size);
+  height: var(--sparkle-size);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 9000;
+  will-change: transform, opacity;
+}
+
+/* Sparkle movement animation - traveling from origin point */
+.sparkle-particle {
+  animation: sparkle-fly var(--sparkle-duration) cubic-bezier(0.05, 0.7, 0.25, 1) forwards;
+}
+
+/* Star shape animation - larger and more pronounced */
+.star-shape {
+  width: var(--sparkle-large);
+  height: var(--sparkle-large);
+  background-color: white;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  animation: star-pulse var(--burst-duration) cubic-bezier(0.05, 0.7, 0.25, 1) forwards;
+}
+
+/* Trail effect for some sparkles */
+.with-trail::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  border-radius: inherit;
+  transform: translate(-50%, -50%) scale(0.6);
+  opacity: 0.7;
+  z-index: -1;
+  filter: blur(2px);
+}
+
+/* Sparkle Animations */
+@keyframes sparkle-fly {
+  0% {
+    transform: translate(0, 0) scale(0);
+    opacity: 0;
+  }
+  10% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--sparkle-x, 50px), var(--sparkle-y, -50px)) scale(0.2);
+    opacity: 0;
+  }
+}
+
 @keyframes star-pulse {
   0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.star.active {
-  animation: star-pulse 0.3s ease-in-out;
-}
-
-/* Emotion option selection animation */
-@keyframes emotion-select {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
-.emotion-option.active {
-  animation: emotion-select 0.3s ease-in-out;
-}
-
-/* Success sparkle effect */
-@keyframes success-sparkle {
-  0% {
+    transform: translate(0, 0) scale(0) rotate(0deg);
     opacity: 0;
-    transform: scale(0) rotate(0deg);
   }
-  20% {
+  10% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
     opacity: 1;
-    transform: scale(1.2) rotate(180deg);
   }
-  70% {
-    opacity: 0.9;
+  60% {
+    transform: translate(var(--sparkle-x, 70px), var(--sparkle-y, -70px)) scale(0.8) rotate(180deg);
+    opacity: 0.8;
   }
   100% {
+    transform: translate(var(--sparkle-x, 100px), var(--sparkle-y, -100px)) scale(0) rotate(360deg);
     opacity: 0;
-    transform: scale(0.3) translateY(-25px) rotate(360deg);
   }
 }
 
-/* Error shake animation */
-@keyframes error-shake {
-  0% { transform: translateX(0); }
-  10% { transform: translateX(-5px); }
-  20% { transform: translateX(5px); }
-  30% { transform: translateX(-5px); }
-  40% { transform: translateX(5px); }
-  50% { transform: translateX(-5px); }
-  60% { transform: translateX(5px); }
-  70% { transform: translateX(-5px); }
-  80% { transform: translateX(5px); }
-  90% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
+/* Emotion-specific sparkle styling */
+
+/* Happy - Golden sparkles */
+.emotion-happy {
+  background-color: #FFD700; /* Gold */
+  box-shadow: 0 0 15px 2px rgba(255, 215, 0, 0.8), 0 0 5px 1px rgba(255, 255, 255, 0.9);
 }
 
-.error-shake {
-  animation: error-shake 0.6s ease-in-out;
+.emotion-happy.with-trail::before {
+  background-color: #FFA500; /* Orange */
+  box-shadow: 0 0 12px 1px rgba(255, 165, 0, 0.7);
 }
 
-/* Focus glow effect */
-.focus-glow {
-  transition: box-shadow 0.3s ease;
+/* Sad - Blue sparkles */
+.emotion-sad {
+  background-color: #4169E1; /* Royal Blue */
+  box-shadow: 0 0 15px 2px rgba(65, 105, 225, 0.8), 0 0 5px 1px rgba(255, 255, 255, 0.7);
 }
 
-.focus-glow:focus {
-  box-shadow: 0 0 15px var(--emotion-primary, #9370DB);
-  outline: none;
+.emotion-sad.with-trail::before {
+  background-color: #1E90FF; /* Dodger Blue */
+  box-shadow: 0 0 12px 1px rgba(30, 144, 255, 0.7);
+}
+
+/* Angry - Red sparkles */
+.emotion-angry {
+  background-color: #FF4500; /* Orange Red */
+  box-shadow: 0 0 15px 2px rgba(255, 69, 0, 0.8), 0 0 5px 1px rgba(255, 255, 255, 0.7);
+}
+
+.emotion-angry.with-trail::before {
+  background-color: #FF6347; /* Tomato */
+  box-shadow: 0 0 12px 1px rgba(255, 99, 71, 0.7);
+}
+
+/* Calm - Teal sparkles */
+.emotion-calm {
+  background-color: #48D1CC; /* Medium Turquoise */
+  box-shadow: 0 0 15px 2px rgba(72, 209, 204, 0.8), 0 0 5px 1px rgba(255, 255, 255, 0.7);
+}
+
+.emotion-calm.with-trail::before {
+  background-color: #5F9EA0; /* Cadet Blue */
+  box-shadow: 0 0 12px 1px rgba(95, 158, 160, 0.7);
+}
+
+/* Surprised - Purple sparkles */
+.emotion-surprised {
+  background-color: #8A2BE2; /* Blue Violet */
+  box-shadow: 0 0 15px 2px rgba(138, 43, 226, 0.8), 0 0 5px 1px rgba(255, 255, 255, 0.7);
+}
+
+.emotion-surprised.with-trail::before {
+  background-color: #9370DB; /* Medium Purple */
+  box-shadow: 0 0 12px 1px rgba(147, 112, 219, 0.7);
+}
+
+/* Fearful - Dark purple sparkles */
+.emotion-fearful {
+  background-color: #800080; /* Purple */
+  box-shadow: 0 0 15px 2px rgba(128, 0, 128, 0.8), 0 0 5px 1px rgba(255, 255, 255, 0.7);
+}
+
+.emotion-fearful.with-trail::before {
+  background-color: #483D8B; /* Dark Slate Blue */
+  box-shadow: 0 0 12px 1px rgba(72, 61, 139, 0.7);
+}
+
+/* Disgusted - Green sparkles */
+.emotion-disgusted {
+  background-color: #006400; /* Dark Green */
+  box-shadow: 0 0 15px 2px rgba(0, 100, 0, 0.8), 0 0 5px 1px rgba(255, 255, 255, 0.7);
+}
+
+.emotion-disgusted.with-trail::before {
+  background-color: #228B22; /* Forest Green */
+  box-shadow: 0 0 12px 1px rgba(34, 139, 34, 0.7);
+}
+
+/* Neutral - Purple sparkles (default cosmic) */
+.emotion-neutral {
+  background-color: #9370DB; /* Medium Purple */
+  box-shadow: 0 0 15px 2px rgba(147, 112, 219, 0.8), 0 0 5px 1px rgba(255, 255, 255, 0.7);
+}
+
+.emotion-neutral.with-trail::before {
+  background-color: #7B68EE; /* Medium Slate Blue */
+  box-shadow: 0 0 12px 1px rgba(123, 104, 238, 0.7);
+}
+
+/* Mixed emotions - Pink/purple sparkles */
+.emotion-mixed {
+  background-color: #DA70D6; /* Orchid */
+  box-shadow: 0 0 15px 2px rgba(218, 112, 214, 0.8), 0 0 5px 1px rgba(255, 255, 255, 0.7);
+}
+
+.emotion-mixed.with-trail::before {
+  background-color: #BA55D3; /* Medium Orchid */
+  box-shadow: 0 0 12px 1px rgba(186, 85, 211, 0.7);
+}
+
+/* Excited - Pink sparkles */
+.emotion-excited {
+  background-color: #FF1493; /* Deep Pink */
+  box-shadow: 0 0 15px 2px rgba(255, 20, 147, 0.8), 0 0 5px 1px rgba(255, 255, 255, 0.7);
+}
+
+.emotion-excited.with-trail::before {
+  background-color: #FF69B4; /* Hot Pink */
+  box-shadow: 0 0 12px 1px rgba(255, 105, 180, 0.7);
+}
+
+/* Confused - Lavender sparkles */
+.emotion-confused {
+  background-color: #9932CC; /* Dark Orchid */
+  box-shadow: 0 0 15px 2px rgba(153, 50, 204, 0.8), 0 0 5px 1px rgba(255, 255, 255, 0.7);
+}
+
+.emotion-confused.with-trail::before {
+  background-color: #DDA0DD; /* Plum */
+  box-shadow: 0 0 12px 1px rgba(221, 160, 221, 0.7);
+}
+
+/* Transition container - ensures sparkles display correctly */
+.emotion-transition-container {
+  pointer-events: none;
+  z-index: 10000;
+  overflow: visible;
+}
+
+/* Body themes for each emotion */
+body.emotion-happy {
+  background-color: rgba(255, 215, 0, 0.05);
+}
+
+body.emotion-sad {
+  background-color: rgba(65, 105, 225, 0.05);
+}
+
+body.emotion-angry {
+  background-color: rgba(255, 69, 0, 0.05);
+}
+
+body.emotion-calm {
+  background-color: rgba(72, 209, 204, 0.05);
+}
+
+body.emotion-surprised {
+  background-color: rgba(138, 43, 226, 0.05);
+}
+
+body.emotion-fearful {
+  background-color: rgba(128, 0, 128, 0.05);
+}
+
+body.emotion-disgusted {
+  background-color: rgba(0, 100, 0, 0.05);
+}
+
+body.emotion-neutral {
+  background-color: rgba(147, 112, 219, 0.05);
+}
+
+body.emotion-mixed {
+  background-color: rgba(218, 112, 214, 0.05);
+}
+
+body.emotion-excited {
+  background-color: rgba(255, 20, 147, 0.05);
+}
+
+body.emotion-confused {
+  background-color: rgba(153, 50, 204, 0.05);
 }

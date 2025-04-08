@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Transition Test</title>
+    <link rel="stylesheet" href="/static/css/emotion_micro_interactions.css">
+    <link rel="stylesheet" href="/static/css/micro_interactions.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #121212;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            transition: all 0.5s ease;
+        }
+        
+        h1 {
+            margin-bottom: 40px;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+        
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #333;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .current-emotion {
+            font-size: 24px;
+            margin: 20px 0;
+            padding: 15px 30px;
+            border-radius: 12px;
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .output {
+            width: 100%;
+            max-width: 600px;
+            height: 200px;
+            background-color: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        
+        /* Emotion-specific button styling */
+        button.happy { background-color: #FFD700; color: black; }
+        button.sad { background-color: #4169E1; }
+        button.angry { background-color: #FF4500; }
+        button.calm { background-color: #48D1CC; color: black; }
+        button.excited { background-color: #FF1493; }
+        button.confused { background-color: #9932CC; }
+        button.neutral { background-color: #9370DB; }
+    </style>
+</head>
+<body class="emotion-neutral">
+    <h1>Emotion Transition Effects Test</h1>
+    
+    <div class="current-emotion" id="currentEmotion">
+        Current: <span id="emotionValue">neutral</span>
+    </div>
+    
+    <div class="controls">
+        <button class="happy" onclick="setEmotion('happy', this)">Happy</button>
+        <button class="sad" onclick="setEmotion('sad', this)">Sad</button>
+        <button class="angry" onclick="setEmotion('angry', this)">Angry</button>
+        <button class="calm" onclick="setEmotion('calm', this)">Calm</button>
+        <button class="excited" onclick="setEmotion('excited', this)">Excited</button>
+        <button class="confused" onclick="setEmotion('confused', this)">Confused</button>
+        <button class="neutral" onclick="setEmotion('neutral', this)">Neutral</button>
+    </div>
+    
+    <div class="controls">
+        <button onclick="toggleSounds()">Toggle Sounds</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+    
+    <div class="output" id="output"></div>
+    
+    <!-- Include the scripts -->
+    <script src="/static/mobile/js/enhanced_transition_audio.js"></script>
+    <script src="/static/js/micro_interactions.js"></script>
+    
+    <script>
+        // Current emotion state
+        let currentEmotion = 'neutral';
+        let soundsEnabled = true;
+        
+        // Reference elements
+        const outputEl = document.getElementById('output');
+        const emotionValueEl = document.getElementById('emotionValue');
+        
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Test initialized');
+            log('Available emotions: happy, sad, angry, calm, excited, confused, neutral');
+            
+            // Listen for emotion change events
+            document.addEventListener('emotionChanged', (e) => {
+                log(`Event received: Emotion changed from ${e.detail.from} to ${e.detail.to}`);
+            });
+        });
+        
+        // Set emotion with transition effects
+        function setEmotion(emotion, buttonEl) {
+            if (emotion === currentEmotion) {
+                log(`Already at emotion: ${emotion}`);
+                return;
+            }
+            
+            const previousEmotion = currentEmotion;
+            currentEmotion = emotion;
+            
+            // Update UI
+            emotionValueEl.textContent = emotion;
+            
+            // Apply to document body for theme change
+            document.body.classList.remove(`emotion-${previousEmotion}`);
+            document.body.classList.add(`emotion-${emotion}`);
+            
+            // Create transition effect
+            createEmotionTransitionEffect(previousEmotion, emotion, buttonEl);
+            
+            // Play transition sound
+            if (window.transitionSoundManager && soundsEnabled) {
+                window.transitionSoundManager.playTransitionSound(previousEmotion, emotion);
+                log(`Playing transition sound: ${previousEmotion} → ${emotion}`);
+            }
+            
+            log(`Changed emotion: ${previousEmotion} → ${emotion}`);
+        }
+        
+        // Helper for logging to output
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            outputEl.innerHTML += `[${timestamp}] ${message}\n`;
+            outputEl.scrollTop = outputEl.scrollHeight;
+        }
+        
+        // Toggle sounds on/off
+        function toggleSounds() {
+            soundsEnabled = !soundsEnabled;
+            if (window.transitionSoundManager) {
+                window.transitionSoundManager.setEnabled(soundsEnabled);
+            }
+            log(`Sounds ${soundsEnabled ? 'enabled' : 'disabled'}`);
+        }
+        
+        // Clear logs
+        function clearLogs() {
+            outputEl.innerHTML = '';
+            log('Logs cleared');
+        }
+    </script>
+</body>
+</html>
