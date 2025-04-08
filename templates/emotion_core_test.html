@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mashaaer Core - Emotion Test</title>
+  <link rel="manifest" href="/manifest.json" />
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at center, #0d0d2b 0%, #000 100%);
+      color: white;
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    #cosmic-sphere {
+      width: 200px;
+      height: 200px;
+      margin: 30px auto;
+      border-radius: 50%;
+      background: radial-gradient(circle, #6f00ff, #1f0036);
+      box-shadow: 0 0 30px 10px #6f00ff;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    #cosmic-sphere.listening {
+      box-shadow: 0 0 60px 20px #ff00cc;
+      transform: scale(1.05);
+    }
+    
+    #cosmic-sphere.happy {
+      background: radial-gradient(circle, #ffcc00, #ff9900);
+      box-shadow: 0 0 30px 10px #ffcc00;
+    }
+    
+    #cosmic-sphere.sad {
+      background: radial-gradient(circle, #1e90ff, #0000cd);
+      box-shadow: 0 0 30px 10px #1e90ff;
+    }
+    
+    #cosmic-sphere.angry {
+      background: radial-gradient(circle, #ff4500, #8b0000);
+      box-shadow: 0 0 30px 10px #ff4500;
+    }
+    
+    #cosmic-sphere.fearful {
+      background: radial-gradient(circle, #9932cc, #4b0082);
+      box-shadow: 0 0 30px 10px #9932cc;
+    }
+    
+    #cosmic-sphere.surprised {
+      background: radial-gradient(circle, #32cd32, #006400);
+      box-shadow: 0 0 30px 10px #32cd32;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: rgba(20, 25, 45, 0.5);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 5px 25px rgba(0, 0, 100, 0.2);
+    }
+    
+    h1 {
+      text-align: center;
+      color: #9090ff;
+      margin-bottom: 30px;
+      text-shadow: 0 0 10px rgba(100, 100, 255, 0.5);
+    }
+    
+    .test-section {
+      margin-bottom: 40px;
+      padding: 20px;
+      background-color: rgba(30, 35, 60, 0.6);
+      border-radius: 10px;
+      border-left: 4px solid #6060ff;
+      text-align: left;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #b0b0ff;
+    }
+    
+    textarea, select, input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      background-color: rgba(15, 20, 40, 0.7);
+      border: 1px solid #4040aa;
+      border-radius: 5px;
+      color: #e0e0ff;
+      font-size: 16px;
+    }
+    
+    button {
+      background: linear-gradient(135deg, #4040aa 0%, #6060ff 100%);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 10px;
+      transition: all 0.3s ease;
+    }
+    
+    button:hover {
+      background: linear-gradient(135deg, #5050cc 0%, #7070ff 100%);
+      box-shadow: 0 0 15px rgba(80, 80, 255, 0.5);
+      transform: translateY(-2px);
+    }
+    
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: rgba(40, 45, 80, 0.6);
+      border-radius: 10px;
+      border-left: 4px solid #8080ff;
+      min-height: 30px;
+    }
+    
+    .result pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    .emotion-tag {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      margin-right: 10px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    
+    .happy { background-color: #FFD700; color: #333; }
+    .sad { background-color: #4169E1; color: white; }
+    .angry { background-color: #FF4500; color: white; }
+    .fearful { background-color: #9932CC; color: white; }
+    .surprised { background-color: #32CD32; color: white; }
+    .neutral { background-color: #708090; color: white; }
+    
+    .loading {
+      text-align: center;
+      margin: 20px 0;
+      display: none;
+    }
+    
+    .loading::after {
+      content: "";
+      display: inline-block;
+      width: 1.5em;
+      height: 1.5em;
+      border: 3px solid #6060ff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .cosmic-glow {
+      text-shadow: 0 0 10px rgba(100, 100, 255, 0.8);
+      animation: glow 2s infinite alternate;
+    }
+    
+    @keyframes glow {
+      from { text-shadow: 0 0 5px rgba(100, 100, 255, 0.5); }
+      to { text-shadow: 0 0 20px rgba(100, 100, 255, 0.9); }
+    }
+    
+    #recording-indicator {
+      display: none;
+      margin: 20px auto;
+      width: 15px;
+      height: 15px;
+      background-color: #ff0000;
+      border-radius: 50%;
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    
+    #response {
+      margin: 30px auto;
+      font-size: 1.2rem;
+      max-width: 80%;
+      background-color: rgba(30, 35, 60, 0.6);
+      padding: 15px;
+      border-radius: 10px;
+      min-height: 60px;
+    }
+    
+    .settings {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 15px;
+    }
+    
+    .settings div {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .tab-buttons {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    
+    .tab-button {
+      background: rgba(30, 35, 60, 0.6);
+      border: none;
+      padding: 10px 20px;
+      margin: 0 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .tab-button.active {
+      background: linear-gradient(135deg, #4040aa 0%, #6060ff 100%);
+      box-shadow: 0 0 15px rgba(80, 80, 255, 0.5);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    @media (max-width: 600px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .test-section {
+        padding: 15px;
+      }
+      
+      #cosmic-sphere {
+        width: 150px;
+        height: 150px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><span class="cosmic-glow">Mashaaer</span> Emotion Test</h1>
+    
+    <div id="cosmic-sphere" onclick="toggleVoiceInput()">
+      <span>✨</span>
+    </div>
+    
+    <div id="recording-indicator"></div>
+    <div id="response">تحدث بالعربية أو الإنجليزية / Speak in Arabic or English</div>
+    
+    <div class="tab-buttons">
+      <button class="tab-button active" onclick="showTab('voice-tab')">Voice Test</button>
+      <button class="tab-button" onclick="showTab('analyze-tab')">Analyze Emotion</button>
+      <button class="tab-button" onclick="showTab('modulate-tab')">Modulate Text</button>
+    </div>
+    
+    <div id="voice-tab" class="tab-content active">
+      <div class="test-section">
+        <h2>Voice Emotion Test</h2>
+        <p>Click on the cosmic sphere above to start voice recording, or type your message below:</p>
+        
+        <textarea id="voice-text" rows="3" placeholder="Type your message here..."></textarea>
+        <button onclick="sendTextMessage()">Send Message</button>
+        
+        <div class="settings">
+          <div>
+            <label for="voice-language">Language:</label>
+            <select id="voice-language">
+              <option value="en">English</option>
+              <option value="ar">العربية</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="analyze-tab" class="tab-content">
+      <div class="test-section">
+        <h2>Emotion Analysis</h2>
+        <p>Test the ability to detect emotions in text</p>
+        
+        <label for="analyze-text">Enter text to analyze:</label>
+        <textarea id="analyze-text" rows="4" placeholder="Enter some text with emotional content..."></textarea>
+        
+        <button id="analyze-btn">Analyze Emotion</button>
+        
+        <div class="loading" id="analyze-loading"></div>
+        <div class="result" id="analyze-result"></div>
+      </div>
+    </div>
+    
+    <div id="modulate-tab" class="tab-content">
+      <div class="test-section">
+        <h2>Emotion Modulation</h2>
+        <p>Test the ability to modulate text based on target emotions</p>
+        
+        <label for="modulate-text">Enter text to modulate:</label>
+        <textarea id="modulate-text" rows="4" placeholder="Enter some text to be emotionally modulated..."></textarea>
+        
+        <div class="settings">
+          <div>
+            <label for="target-emotion">Target Emotion:</label>
+            <select id="target-emotion">
+              <option value="happy">Happy</option>
+              <option value="sad">Sad</option>
+              <option value="angry">Angry</option>
+              <option value="fearful">Fearful</option>
+              <option value="surprised">Surprised</option>
+              <option value="neutral">Neutral</option>
+            </select>
+          </div>
+          
+          <div>
+            <label for="user-emotion">User Emotion (optional):</label>
+            <select id="user-emotion">
+              <option value="">Not specified</option>
+              <option value="happy">Happy</option>
+              <option value="sad">Sad</option>
+              <option value="angry">Angry</option>
+              <option value="fearful">Fearful</option>
+              <option value="surprised">Surprised</option>
+              <option value="neutral">Neutral</option>
+            </select>
+          </div>
+          
+          <div>
+            <label for="language">Language:</label>
+            <select id="language">
+              <option value="en">English</option>
+              <option value="ar">Arabic</option>
+            </select>
+          </div>
+        </div>
+        
+        <button id="modulate-btn">Modulate Text</button>
+        
+        <div class="loading" id="modulate-loading"></div>
+        <div class="result" id="modulate-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global variables
+    let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
+    let lastDetectedEmotion = 'neutral';
+    const sphere = document.getElementById('cosmic-sphere');
+    const responseDiv = document.getElementById('response');
+    const recordingIndicator = document.getElementById('recording-indicator');
+    
+    // Tab navigation
+    function showTab(tabId) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Deactivate all buttons
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+      });
+      
+      // Activate selected tab
+      document.getElementById(tabId).classList.add('active');
+      
+      // Activate selected button
+      event.target.classList.add('active');
+    }
+    
+    // Voice Input Toggle
+    function toggleVoiceInput() {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+    
+    // Start Voice Recording
+    async function startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        
+        mediaRecorder.ondataavailable = e => {
+          audioChunks.push(e.data);
+        };
+        
+        mediaRecorder.onstop = async () => {
+          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          await processAudio(audioBlob);
+        };
+        
+        // Start recording
+        mediaRecorder.start();
+        isRecording = true;
+        
+        // Update UI
+        sphere.classList.add('listening');
+        recordingIndicator.style.display = 'block';
+        responseDiv.textContent = 'Listening...';
+        
+        // Auto-stop after 5 seconds
+        setTimeout(() => {
+          if (isRecording) {
+            stopRecording();
+          }
+        }, 5000);
+        
+      } catch (err) {
+        console.error('Error accessing microphone:', err);
+        responseDiv.textContent = 'Error accessing microphone. Please check permissions.';
+      }
+    }
+    
+    // Stop Voice Recording
+    function stopRecording() {
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        
+        // Update UI
+        sphere.classList.remove('listening');
+        recordingIndicator.style.display = 'none';
+        responseDiv.textContent = 'Processing...';
+      }
+    }
+    
+    // Process Audio Recording
+    async function processAudio(audioBlob) {
+      try {
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
+        formData.append('language', document.getElementById('voice-language').value);
+        
+        const response = await fetch('/api/voice_logic', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Display response
+          responseDiv.textContent = data.reply || 'No response';
+          
+          // Process detected emotion if available
+          if (data.emotion) {
+            lastDetectedEmotion = data.emotion;
+            updateSphereEmotion(data.emotion);
+          }
+          
+          // Speak response if available (using browser TTS)
+          if (data.reply && window.speechSynthesis) {
+            speakText(data.reply);
+          }
+        } else {
+          responseDiv.textContent = data.error || 'Error processing audio';
+        }
+      } catch (err) {
+        console.error('Error processing audio:', err);
+        responseDiv.textContent = `Error: ${err.message}`;
+      }
+    }
+    
+    // Send Text Message
+    async function sendTextMessage() {
+      const textInput = document.getElementById('voice-text');
+      const text = textInput.value.trim();
+      
+      if (!text) {
+        alert('Please enter a message');
+        return;
+      }
+      
+      responseDiv.textContent = 'Processing...';
+      
+      try {
+        const language = document.getElementById('voice-language').value;
+        
+        const response = await fetch('/api/text_input', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: text,
+            language: language
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Display response
+          responseDiv.textContent = data.reply || 'No response';
+          
+          // Clear input
+          textInput.value = '';
+          
+          // Process detected emotion if available
+          if (data.emotion) {
+            lastDetectedEmotion = data.emotion;
+            updateSphereEmotion(data.emotion);
+          }
+          
+          // Speak response if available (using browser TTS)
+          if (data.reply && window.speechSynthesis) {
+            speakText(data.reply, language);
+          }
+        } else {
+          responseDiv.textContent = data.error || 'Error processing text';
+        }
+      } catch (err) {
+        console.error('Error sending text:', err);
+        responseDiv.textContent = `Error: ${err.message}`;
+      }
+    }
+    
+    // Update Sphere Color/Glow based on Emotion
+    function updateSphereEmotion(emotion) {
+      // Remove all emotion classes
+      sphere.classList.remove('happy', 'sad', 'angry', 'fearful', 'surprised', 'neutral');
+      
+      // Add the detected emotion class
+      if (emotion && emotion !== 'neutral') {
+        sphere.classList.add(emotion);
+      }
+    }
+    
+    // Text-to-Speech
+    function speakText(text, language = 'en') {
+      if (!window.speechSynthesis) return;
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = language === 'ar' ? 'ar-SA' : 'en-US';
+      
+      window.speechSynthesis.speak(utterance);
+    }
+    
+    // Emotion Analysis
+    document.getElementById('analyze-btn').addEventListener('click', async () => {
+      const text = document.getElementById('analyze-text').value;
+      if (!text) {
+        alert('Please enter some text to analyze');
+        return;
+      }
+      
+      const loadingEl = document.getElementById('analyze-loading');
+      const resultEl = document.getElementById('analyze-result');
+      
+      loadingEl.style.display = 'block';
+      resultEl.innerHTML = '';
+      
+      try {
+        const response = await fetch('/api/test/emotion/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ text }),
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          const result = data.result;
+          let html = `<p>Detected Emotion: <span class="emotion-tag ${result.emotion}">${result.emotion}</span>`;
+          html += `<br>Confidence: ${(result.confidence * 100).toFixed(1)}%</p>`;
+          
+          if (result.explanation) {
+            html += `<p><strong>Explanation:</strong> ${result.explanation}</p>`;
+          }
+          
+          resultEl.innerHTML = html;
+          
+          // Update the sphere to show the detected emotion
+          updateSphereEmotion(result.emotion);
+        } else {
+          resultEl.innerHTML = `<p>Error: ${data.error || 'Unknown error'}</p>`;
+        }
+      } catch (error) {
+        resultEl.innerHTML = `<p>Error: ${error.message || 'Failed to connect to server'}</p>`;
+      } finally {
+        loadingEl.style.display = 'none';
+      }
+    });
+    
+    // Emotion Modulation
+    document.getElementById('modulate-btn').addEventListener('click', async () => {
+      const text = document.getElementById('modulate-text').value;
+      if (!text) {
+        alert('Please enter some text to modulate');
+        return;
+      }
+      
+      const targetEmotion = document.getElementById('target-emotion').value;
+      const userEmotion = document.getElementById('user-emotion').value;
+      const language = document.getElementById('language').value;
+      
+      const loadingEl = document.getElementById('modulate-loading');
+      const resultEl = document.getElementById('modulate-result');
+      
+      loadingEl.style.display = 'block';
+      resultEl.innerHTML = '';
+      
+      try {
+        const response = await fetch('/api/test/emotion/modulate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            text,
+            target_emotion: targetEmotion,
+            user_emotion: userEmotion || null,
+            language
+          }),
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          let html = `<p><strong>Original Text:</strong></p>`;
+          html += `<pre>${data.original_text}</pre>`;
+          html += `<p><strong>Modulated Text (${data.target_emotion}):</strong></p>`;
+          html += `<pre>${data.modulated_text}</pre>`;
+          
+          resultEl.innerHTML = html;
+          
+          // Update the sphere to show the target emotion
+          updateSphereEmotion(targetEmotion);
+        } else {
+          resultEl.innerHTML = `<p>Error: ${data.error || 'Unknown error'}</p>`;
+        }
+      } catch (error) {
+        resultEl.innerHTML = `<p>Error: ${error.message || 'Failed to connect to server'}</p>`;
+      } finally {
+        loadingEl.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

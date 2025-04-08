@@ -155,12 +155,43 @@ class TTSManager:
             
         # If using profile_manager, adapt response style and get voice preference
         if profile_manager:
-            # Adapt text based on preferred tone
-            text = profile_manager.adapt_response(text, language)
+            # Try to detect user emotion from input context (if available)
+            user_emotion = None
+            
+            # The context object might be attached to the profile manager in conversation flow
+            if hasattr(profile_manager, 'conversation_context'):
+                user_emotion = profile_manager.conversation_context.get('detected_emotion')
+                
+            # Adapt text based on preferred tone with enhanced emotional intelligence
+            self.logger.debug(f"Adapting response with profile manager (user_emotion: {user_emotion})")
+            text = profile_manager.adapt_response(text, language, user_emotion)
             
             # Get preferred voice for language if not explicitly specified
             if voice == "default":
                 voice = profile_manager.get_tts_voice_for_language(language)
+                
+            # If emotion modulator is available, adjust voice settings based on emotional context
+            if hasattr(profile_manager, 'emotion_modulator') and profile_manager.emotion_modulator:
+                try:
+                    # Get target emotion from profile manager or default to "neutral"
+                    target_emotion = profile_manager.get_current_profile().get('preferred_tone', 'neutral')
+                    
+                    # Map tone to emotion
+                    tone_to_emotion = {
+                        'playful': 'happy',
+                        'formal': 'neutral',
+                        'calm': 'neutral',
+                        'assertive': 'neutral',
+                        'neutral': 'neutral'
+                    }
+                    emotion = tone_to_emotion.get(target_emotion, 'neutral')
+                    
+                    # Get voice settings optimized for the emotion
+                    if hasattr(profile_manager.emotion_modulator, 'get_voice_settings'):
+                        voice_settings = profile_manager.emotion_modulator.get_voice_settings(emotion)
+                        self.logger.debug(f"Applied emotion-optimized voice settings for {emotion}")
+                except Exception as e:
+                    self.logger.warning(f"Error applying emotional voice settings: {str(e)}")
         
         with self.tts_lock:
             try:

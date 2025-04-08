@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer Emotion Test</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0c0e14 0%, #1a1a35 100%);
+            color: #e0e0ff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: rgba(20, 25, 45, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 25px rgba(0, 0, 100, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #9090ff;
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(100, 100, 255, 0.5);
+        }
+
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: rgba(30, 35, 60, 0.6);
+            border-radius: 10px;
+            border-left: 4px solid #6060ff;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #b0b0ff;
+        }
+
+        textarea, select, input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background-color: rgba(15, 20, 40, 0.7);
+            border: 1px solid #4040aa;
+            border-radius: 5px;
+            color: #e0e0ff;
+            font-size: 16px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #4040aa 0%, #6060ff 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #5050cc 0%, #7070ff 100%);
+            box-shadow: 0 0 15px rgba(80, 80, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(40, 45, 80, 0.6);
+            border-radius: 10px;
+            border-left: 4px solid #8080ff;
+            min-height: 30px;
+        }
+
+        .result pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .emotion-tag {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin-right: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .happy { background-color: #FFD700; color: #333; }
+        .sad { background-color: #4169E1; color: white; }
+        .angry { background-color: #FF4500; color: white; }
+        .fearful { background-color: #9932CC; color: white; }
+        .surprised { background-color: #32CD32; color: white; }
+        .neutral { background-color: #708090; color: white; }
+
+        .settings {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .settings div {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .test-section {
+                padding: 15px;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .loading::after {
+            content: "";
+            display: inline-block;
+            width: 1.5em;
+            height: 1.5em;
+            border: 3px solid #6060ff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .cosmic-glow {
+            text-shadow: 0 0 10px rgba(100, 100, 255, 0.8);
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(100, 100, 255, 0.5); }
+            to { text-shadow: 0 0 20px rgba(100, 100, 255, 0.9); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="cosmic-glow">Mashaaer</span> Emotion Test</h1>
+        
+        <div class="test-section">
+            <h2>Emotion Analysis</h2>
+            <p>Test the ability to detect emotions in text</p>
+            
+            <label for="analyze-text">Enter text to analyze:</label>
+            <textarea id="analyze-text" rows="4" placeholder="Enter some text with emotional content..."></textarea>
+            
+            <button id="analyze-btn">Analyze Emotion</button>
+            
+            <div class="loading" id="analyze-loading"></div>
+            <div class="result" id="analyze-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Emotion Modulation</h2>
+            <p>Test the ability to modulate text based on target emotions</p>
+            
+            <label for="modulate-text">Enter text to modulate:</label>
+            <textarea id="modulate-text" rows="4" placeholder="Enter some text to be emotionally modulated..."></textarea>
+            
+            <div class="settings">
+                <div>
+                    <label for="target-emotion">Target Emotion:</label>
+                    <select id="target-emotion">
+                        <option value="happy">Happy</option>
+                        <option value="sad">Sad</option>
+                        <option value="angry">Angry</option>
+                        <option value="fearful">Fearful</option>
+                        <option value="surprised">Surprised</option>
+                        <option value="neutral">Neutral</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="user-emotion">User Emotion (optional):</label>
+                    <select id="user-emotion">
+                        <option value="">Not specified</option>
+                        <option value="happy">Happy</option>
+                        <option value="sad">Sad</option>
+                        <option value="angry">Angry</option>
+                        <option value="fearful">Fearful</option>
+                        <option value="surprised">Surprised</option>
+                        <option value="neutral">Neutral</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="language">Language:</label>
+                    <select id="language">
+                        <option value="en">English</option>
+                        <option value="ar">Arabic</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button id="modulate-btn">Modulate Text</button>
+            
+            <div class="loading" id="modulate-loading"></div>
+            <div class="result" id="modulate-result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Emotion Analysis
+        document.getElementById('analyze-btn').addEventListener('click', async () => {
+            const text = document.getElementById('analyze-text').value;
+            if (!text) {
+                alert('Please enter some text to analyze');
+                return;
+            }
+            
+            const loadingEl = document.getElementById('analyze-loading');
+            const resultEl = document.getElementById('analyze-result');
+            
+            loadingEl.style.display = 'block';
+            resultEl.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/test/emotion/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const result = data.result;
+                    let html = `<p>Detected Emotion: <span class="emotion-tag ${result.emotion}">${result.emotion}</span>`;
+                    html += `<br>Confidence: ${(result.confidence * 100).toFixed(1)}%</p>`;
+                    
+                    if (result.explanation) {
+                        html += `<p><strong>Explanation:</strong> ${result.explanation}</p>`;
+                    }
+                    
+                    resultEl.innerHTML = html;
+                } else {
+                    resultEl.innerHTML = `<p>Error: ${data.error || 'Unknown error'}</p>`;
+                }
+            } catch (error) {
+                resultEl.innerHTML = `<p>Error: ${error.message || 'Failed to connect to server'}</p>`;
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        });
+        
+        // Emotion Modulation
+        document.getElementById('modulate-btn').addEventListener('click', async () => {
+            const text = document.getElementById('modulate-text').value;
+            if (!text) {
+                alert('Please enter some text to modulate');
+                return;
+            }
+            
+            const targetEmotion = document.getElementById('target-emotion').value;
+            const userEmotion = document.getElementById('user-emotion').value;
+            const language = document.getElementById('language').value;
+            
+            const loadingEl = document.getElementById('modulate-loading');
+            const resultEl = document.getElementById('modulate-result');
+            
+            loadingEl.style.display = 'block';
+            resultEl.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/test/emotion/modulate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        text,
+                        target_emotion: targetEmotion,
+                        user_emotion: userEmotion || null,
+                        language
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    let html = `<p><strong>Original Text:</strong></p>`;
+                    html += `<pre>${data.original_text}</pre>`;
+                    html += `<p><strong>Modulated Text (${data.target_emotion}):</strong></p>`;
+                    html += `<pre>${data.modulated_text}</pre>`;
+                    
+                    resultEl.innerHTML = html;
+                } else {
+                    resultEl.innerHTML = `<p>Error: ${data.error || 'Unknown error'}</p>`;
+                }
+            } catch (error) {
+                resultEl.innerHTML = `<p>Error: ${error.message || 'Failed to connect to server'}</p>`;
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

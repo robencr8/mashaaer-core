@@ -1047,6 +1047,16 @@ legacy_html_content = """
 # This is now handled by recommendation_routes.py
 
 # Add emotion analysis API endpoint
+@app.route("/emotion-test", methods=["GET"])
+def emotion_test_page():
+    """Serve the emotion test page"""
+    return render_template("emotion_test.html")
+
+@app.route("/emotion-core-test", methods=["GET"])
+def emotion_core_test_page():
+    """Serve the emotion core test page with cosmic sphere interface"""
+    return render_template("emotion_core_test.html")
+
 @app.route("/api-status", methods=["GET", "OPTIONS"])
 def api_status():
     """API status check endpoint"""
@@ -1119,6 +1129,16 @@ try:
     init_direct_test(app)
     init_direct_report(app)
     logger.info("Diagnostic routes registered successfully")
+    
+    # Register emotion test routes
+    try:
+        from api_emotion_test import register_emotion_test_routes
+        register_emotion_test_routes(app)
+        logger.info("Emotion test routes registered successfully")
+    except ImportError as e:
+        logger.error(f"Could not import emotion test module: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error registering emotion test routes: {str(e)}")
 except Exception as e:
     logger.error(f"Error registering diagnostic routes: {str(e)}")
 
