@@ -33,3 +33,4 @@ gtts
 textblob
 openai
 openai
+flask

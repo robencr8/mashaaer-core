@@ -12,7 +12,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-  origin: ['https://decentravault.online', 'http://localhost:3000', 'https://mashaaer.replit.app'],
+  origin: ['https://decentravault.online', 'http://localhost:3000', 'http://localhost:5000', 'http://localhost:8000', 'https://mashaaer.replit.app', '*'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
@@ -598,8 +598,8 @@ app.get('/settings/voice', (req, res) => {
 });
 
 // Start the server
-const server_port = process.env.PORT || 5000;
-app.listen(server_port, '0.0.0.0', () => {
-  console.log(`Mashaaer Voice Agent backend running on port ${server_port}`);
+// Make the app available on all interfaces
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Mashaaer Voice Agent backend running on port ${port}`);
   console.log(`API endpoint: ${config.apiEndpoint}`);
 });
