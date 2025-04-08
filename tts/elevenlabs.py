@@ -108,8 +108,16 @@ class ElevenLabsTTS:
             self.logger.error(f"Traceback: {traceback.format_exc()}")
             return False
     
-    def speak(self, text, voice="default"):
-        """Generate speech from text and return path to audio file"""
+    def speak(self, text, voice="default", voice_params=None):
+        """
+        Generate speech from text and return path to audio file
+        
+        Args:
+            text (str): The text to convert to speech
+            voice (str): Voice ID or name
+            voice_params (dict): Optional voice parameters for emotional tone modulation
+                (stability, similarity_boost, style, use_speaker_boost)
+        """
         self.logger.info(f"ElevenLabs TTS generating speech for: '{text[:30]}...' with voice: {voice}")
         
         if not self.api_key:
@@ -193,13 +201,25 @@ class ElevenLabsTTS:
                 "Accept": "audio/mpeg"
             }
             
+            # Prepare voice settings
+            voice_settings = {
+                "stability": 0.5,
+                "similarity_boost": 0.5,
+                "style": 0.0,
+                "use_speaker_boost": True
+            }
+            
+            # Apply voice parameters if provided
+            if voice_params:
+                self.logger.debug(f"Applying custom voice parameters for emotional tone: {voice_params}")
+                for param, value in voice_params.items():
+                    if param in voice_settings:
+                        voice_settings[param] = value
+            
             data = {
                 "text": text,
                 "model_id": "eleven_multilingual_v2",
-                "voice_settings": {
-                    "stability": 0.5,
-                    "similarity_boost": 0.5
-                }
+                "voice_settings": voice_settings
             }
             
             self.logger.debug(f"Making ElevenLabs API request to: {self.base_url}/text-to-speech/{voice_id}")

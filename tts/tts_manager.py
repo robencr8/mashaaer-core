@@ -127,7 +127,7 @@ class TTSManager:
             self.use_gtts = True
             return True
     
-    def speak(self, text, voice="default", language=None, profile_manager=None):
+    def speak(self, text, voice="default", language=None, profile_manager=None, voice_params=None):
         """
         Synthesize speech from text with the best available provider
         
@@ -136,6 +136,8 @@ class TTSManager:
             voice (str): Voice ID or category (default uses profile preferences)
             language (str): Language code (en, ar) - determines voice selection
             profile_manager: Optional profile manager to get voice preferences
+            voice_params (dict): Optional voice parameters for emotional tone modulation
+                                 (stability, similarity_boost, style, etc.)
         """
         # Create a guaranteed fallback file early
         fallback_path = os.path.join("tts_cache", "error.mp3")
