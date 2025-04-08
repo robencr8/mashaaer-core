@@ -1,0 +1,26 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "**Mashaaer | مشاعر** is an emotionally intelligent, voice-first AI assistant designed to understand and adapt to each user's unique characteristics. It analyzes tone, word choice, emotional state, and preferred language to create a truly personalized experience. Over time, Mashaaer evolves into a trusted companion, remembering past interactions, learning individual preferences, and responding with appropriate warmth, professionalism, or humor depending on the context.",
+  "main": "fix_script.js",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "nodemon": "^3.1.9",
+    "sqlite3": "^5.1.7"
+  }
+}

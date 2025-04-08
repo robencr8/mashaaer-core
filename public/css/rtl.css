@@ -1,0 +1,61 @@
+/* RTL Specific Styles for Mashaaer Voice Agent */
+
+body.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Header RTL Adjustments */
+body.rtl .logo {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+body.rtl nav ul li {
+  margin: 0 0 0 1rem;
+}
+
+/* Voice Interface RTL Adjustments */
+body.rtl .status-dot {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+body.rtl .voice-transcript {
+  text-align: right;
+}
+
+/* Plan Features RTL Adjustments */
+body.rtl .plan-features li::before {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Table RTL Adjustments */
+body.rtl .billing-table th,
+body.rtl .billing-table td,
+body.rtl .comparison-table th:first-child,
+body.rtl .comparison-table td:first-child {
+  text-align: right;
+}
+
+/* Timeline RTL Adjustments */
+body.rtl .timeline-emotion-icon {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+/* Form RTL Adjustments */
+body.rtl .form-group label {
+  text-align: right;
+}
+
+body.rtl .form-group input[type="range"] {
+  margin: 0 0 0 1rem;
+}
+
+@media (max-width: 480px) {
+  body.rtl .form-group input[type="range"] {
+    margin: 0.5rem 0;
+  }
+}

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشاعر | Mashaaer Voice Agent</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/rtl.css" id="direction-stylesheet">
+    <meta name="description" content="مشاعر - مساعد صوتي ذكي يفهم مشاعرك ويتفاعل معها">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a1a35">
+    <link rel="icon" href="/assets/images/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/images/icon-192x192.png">
+</head>
+<body class="rtl">
+    <header>
+        <div class="logo-container">
+            <img src="/assets/images/logo.svg" alt="مشاعر" class="logo">
+            <h1>مشاعر</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="/" class="active">الرئيسية</a></li>
+                <li><a href="/emotions">سجل المشاعر</a></li>
+                <li><a href="/settings/subscription">الاشتراك</a></li>
+                <li><a href="/settings/voice">الصوت</a></li>
+            </ul>
+        </nav>
+        <div class="user-controls">
+            <button id="language-toggle" aria-label="تبديل اللغة">
+                <span class="lang-icon">🌐</span>
+                <span class="lang-text">EN</span>
+            </button>
+            <button id="user-menu" aria-label="قائمة المستخدم">
+                <span class="user-icon">👤</span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section id="voice-interface" class="voice-container">
+            <div class="voice-status">
+                <div class="status-indicator active">
+                    <span class="status-dot"></span>
+                    <span class="status-text">جاهز للاستماع</span>
+                </div>
+            </div>
+            
+            <div class="voice-visualization">
+                <canvas id="voice-waves"></canvas>
+            </div>
+            
+            <div class="emotion-display">
+                <div class="current-emotion">
+                    <span class="emotion-icon">😊</span>
+                    <span class="emotion-text">سعيد</span>
+                </div>
+            </div>
+            
+            <div class="voice-controls">
+                <button id="start-voice" class="primary-button">
+                    <span class="mic-icon">🎤</span>
+                    <span class="button-text">ابدأ المحادثة</span>
+                </button>
+                <button id="stop-voice" class="secondary-button" disabled>
+                    <span class="stop-icon">⏹️</span>
+                    <span class="button-text">إيقاف</span>
+                </button>
+            </div>
+            
+            <div class="voice-transcript">
+                <p id="user-speech" class="user-text"></p>
+                <p id="assistant-response" class="assistant-text"></p>
+            </div>
+        </section>
+        
+        <div id="app-container">
+            <!-- المحتوى الديناميكي سيتم تحميله هنا -->
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>مشاعر &copy; 2025 - مساعد صوتي ذكي</p>
+            <div class="footer-links">
+                <a href="/privacy">سياسة الخصوصية</a>
+                <a href="/terms">شروط الاستخدام</a>
+                <a href="/contact">اتصل بنا</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- القوالب -->
+    <template id="subscription-template">
+        <section class="subscription-container">
+            <h2>إعدادات الاشتراك</h2>
+            <div class="current-plan">
+                <h3>خطتك الحالية</h3>
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <h4 id="current-plan-name">الأساسية</h4>
+                        <span class="plan-price" id="current-plan-price">$0 / شهرياً</span>
+                    </div>
+                    <div class="plan-features">
+                        <ul id="current-plan-features">
+                            <!-- سيتم ملؤها ديناميكياً -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="upgrade-options">
+                <h3>خيارات الترقية</h3>
+                <div class="plans-grid">
+                    <!-- سيتم ملؤها ديناميكياً -->
+                </div>
+            </div>
+            
+            <div class="billing-history">
+                <h3>سجل الفواتير</h3>
+                <table class="billing-table">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>الوصف</th>
+                            <th>المبلغ</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="billing-history-body">
+                        <!-- سيتم ملؤها ديناميكياً -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </template>
+
+    <template id="plan-comparison-template">
+        <section class="plan-comparison">
+            <h2>مقارنة خطط الاشتراك</h2>
+            <div class="comparison-table-container">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>الميزة</th>
+                            <th>الأساسية</th>
+                            <th>الاحترافية</th>
+                            <th>المتميزة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- سيتم ملؤها ديناميكياً -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </template>
+
+    <template id="emotions-template">
+        <section class="emotions-container">
+            <h2>سجل المشاعر</h2>
+            <div class="emotions-controls">
+                <div class="time-range">
+                    <label for="time-range-select">الفترة الزمنية:</label>
+                    <select id="time-range-select">
+                        <option value="day">اليوم</option>
+                        <option value="week" selected>الأسبوع</option>
+                        <option value="month">الشهر</option>
+                        <option value="year">السنة</option>
+                    </select>
+                </div>
+                <div class="view-type">
+                    <button id="graph-view" class="view-button active">رسم بياني</button>
+                    <button id="timeline-view" class="view-button">جدول زمني</button>
+                </div>
+            </div>
+            
+            <div class="emotions-visualization">
+                <canvas id="emotions-chart"></canvas>
+            </div>
+            
+            <div class="emotions-timeline" style="display: none;">
+                <ul id="emotions-timeline-list">
+                    <!-- سيتم ملؤها ديناميكياً -->
+                </ul>
+            </div>
+        </section>
+    </template>
+
+    <template id="voice-settings-template">
+        <section class="voice-settings-container">
+            <h2>إعدادات الصوت</h2>
+            <div class="voice-personalities">
+                <h3>شخصية المساعد الصوتي</h3>
+                <div class="personalities-grid">
+                    <div class="personality-card" data-personality="classic-arabic">
+                        <div class="personality-icon">🧕</div>
+                        <h4>العربية الكلاسيكية</h4>
+                        <p>أسلوب مهذب وشعري</p>
+                        <button class="select-button">اختيار</button>
+                    </div>
+                    <div class="personality-card locked" data-personality="snoop-style">
+                        <div class="personality-icon">🎤</div>
+                        <h4>نمط Snoop</h4>
+                        <p>أسلوب حضري وسلس</p>
+                        <div class="lock-indicator">
+                            <span class="lock-icon">🔒</span>
+                            <span>متاح فقط للخطة المتميزة</span>
+                        </div>
+                    </div>
+                    <div class="personality-card locked" data-personality="youth-pop">
+                        <div class="personality-icon">👧</div>
+                        <h4>شباب البوب</h4>
+                        <p>نبرة صديقة من الجيل Z</p>
+                        <div class="lock-indicator">
+                            <span class="lock-icon">🔒</span>
+                            <span>متاح فقط للخطة المتميزة</span>
+                        </div>
+                    </div>
+                    <div class="personality-card locked" data-personality="formal-british">
+                        <div class="personality-icon">👑</div>
+                        <h4>البريطانية الرسمية</h4>
+                        <p>أسلوب مثل الخادم</p>
+                        <div class="lock-indicator">
+                            <span class="lock-icon">🔒</span>
+                            <span>متاح فقط للخطة المتميزة</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="voice-settings">
+                <h3>إعدادات الصوت</h3>
+                <div class="settings-form">
+                    <div class="form-group">
+                        <label for="voice-speed">سرعة الصوت:</label>
+                        <input type="range" id="voice-speed" min="0.5" max="2" step="0.1" value="1">
+                        <span class="range-value">1.0</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="voice-pitch">طبقة الصوت:</label>
+                        <input type="range" id="voice-pitch" min="0.5" max="2" step="0.1" value="1">
+                        <span class="range-value">1.0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <!-- النصوص البرمجية -->
+    <script src="/js/app.js"></script>
+    <script src="/js/voice-agent.js"></script>
+    <script src="/js/subscription.js"></script>
+    <script src="/js/emotions.js"></script>
+    <script src="/js/voice-settings.js"></script>
+    <script src="/js/language-switcher.js"></script>
+</body>
+</html>

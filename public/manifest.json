@@ -1,0 +1,26 @@
+{
+  "name": "مشاعر | Mashaaer Voice Agent",
+  "short_name": "مشاعر",
+  "description": "مساعد صوتي ذكي يفهم مشاعرك ويتفاعل معها",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a35",
+  "theme_color": "#1a1a35",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/images/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/images/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "lang": "ar",
+  "dir": "rtl"
+}

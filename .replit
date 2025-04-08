@@ -1,6 +1,7 @@
-modules = ["python-3.11"]
+modules = ["python-3.11", "nodejs-20"]
 
 [workflows]
+runButton = "Run"
 
 [[workflows.workflow]]
 name = "Run"
