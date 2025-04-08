@@ -9,52 +9,52 @@ document.addEventListener('DOMContentLoaded', () => {
   const responseElement = document.getElementById('response');
   const recordingIndicator = document.getElementById('recording-indicator');
   const voiceTextInput = document.getElementById('voice-text');
-  
+
   // Speech recognition
   let recognition;
   let isRecording = false;
   let currentLanguage = localStorage.getItem('mashaaer-language') || 'en';
-  
+
   // Initialize speech recognition if supported
   if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechRecognition();
-    
+
     // Configure recognition
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.lang = currentLanguage === 'ar' ? 'ar-SA' : 'en-US';
-    
+
     // Setup recognition events
     setupRecognitionEvents();
   } else {
     console.log('Speech recognition not supported in this browser');
   }
-  
+
   // Setup text-to-speech if supported
   if ('speechSynthesis' in window) {
     setupTextToSpeech();
   } else {
     console.log('Text-to-speech not supported in this browser');
   }
-  
+
   // Setup sphere interaction for voice recording
   if (sphereElement) {
     setupSphereInteraction();
   }
-  
+
   // Setup text input for keyboard interaction
   if (voiceTextInput) {
     setupTextInput();
   }
-  
+
   // Listen for language changes
   document.addEventListener('languageChanged', function(e) {
     currentLanguage = e.detail.language;
     if (recognition) {
       recognition.lang = currentLanguage === 'ar' ? 'ar-SA' : 'en-US';
     }
-    
+
     // Update placeholder text
     if (voiceTextInput) {
       voiceTextInput.placeholder = currentLanguage === 'ar' 
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         : 'Type your message here...';
     }
   });
-  
+
   // Functions
   function setupRecognitionEvents() {
     recognition.onstart = function() {
@@ -74,24 +74,24 @@ document.addEventListener('DOMContentLoaded', () => {
         sphereElement.classList.add('recording');
       }
     };
-    
+
     recognition.onresult = function(event) {
       const transcript = Array.from(event.results)
         .map(result => result[0])
         .map(result => result.transcript)
         .join('');
-      
+
       // Show transcript while speaking
       if (responseElement) {
         responseElement.textContent = transcript;
       }
-      
+
       // Process final result
       if (event.results[0].isFinal) {
         processUserSpeech(transcript);
       }
     };
-    
+
     recognition.onerror = function(event) {
       console.error('Speech recognition error', event.error);
       isRecording = false;
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sphereElement.classList.remove('recording');
       }
     };
-    
+
     recognition.onend = function() {
       isRecording = false;
       if (recordingIndicator) {
@@ -113,18 +113,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
   }
-  
+
   function setupSphereInteraction() {
     sphereElement.addEventListener('click', function() {
       if (!recognition) return;
-      
+
       if (!isRecording) {
         startRecording();
       } else {
         stopRecording();
       }
     });
-    
+
     // Listen for cosmicSphereClick events from cosmic-sphere.js
     document.addEventListener('cosmicSphereClick', function(e) {
       if (!isRecording) {
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
+
   function setupTextInput() {
     // Handle enter key press
     voiceTextInput.addEventListener('keydown', function(e) {
@@ -142,10 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
+
   function startRecording() {
     if (!recognition) return;
-    
+
     try {
       // Update language in case it changed
       recognition.lang = currentLanguage === 'ar' ? 'ar-SA' : 'en-US';
@@ -154,25 +154,25 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Error starting recognition:', error);
     }
   }
-  
+
   function stopRecording() {
     if (!recognition) return;
-    
+
     try {
       recognition.stop();
     } catch (error) {
       console.error('Error stopping recognition:', error);
     }
   }
-  
+
   function processUserSpeech(speech) {
     if (!speech) return;
-    
+
     // Process dialect variations
     const processedSpeech = window.languageSwitcher && window.languageSwitcher.processDialect 
       ? window.languageSwitcher.processDialect(speech, currentLanguage)
       : { original: speech, standardized: speech };
-    
+
     // Check for language switch commands
 
 function sendTextMessage() {
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       return;
     }
-    
+
     if (currentLanguage === 'ar' && 
         (speech.toLowerCase().includes('english') || 
          speech.toLowerCase().includes('switch to english'))) {
@@ -220,54 +220,54 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       return;
     }
-    
+
     // Detect emotion
     const emotion = detectEmotion(speech);
-    
+
     // Update cosmic sphere color based on detected emotion
     if (window.cosmicSphere && window.cosmicSphere.setEmotion) {
       window.cosmicSphere.setEmotion(emotion);
     }
-    
+
     // Send to server and get response
     fetchResponse(processedSpeech.standardized, emotion);
   }
-  
+
   function setupTextToSpeech() {
     window.textToSpeech = {
       speak: function(text) {
         if (!('speechSynthesis' in window)) return;
-        
+
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = currentLanguage === 'ar' ? 'ar-SA' : 'en-US';
-        
+
         // Get voices
         const voices = window.speechSynthesis.getVoices();
-        
+
         // Try to find appropriate voice
         if (voices.length > 0) {
           // Find voice for current language
           const langVoices = voices.filter(voice => 
             voice.lang.startsWith(currentLanguage === 'ar' ? 'ar' : 'en')
           );
-          
+
           if (langVoices.length > 0) {
             utterance.voice = langVoices[0];
           }
         }
-        
+
         window.speechSynthesis.speak(utterance);
       }
     };
   }
-  
+
   // Detect emotion from text
   function detectEmotion(text) {
     if (!text) return 'neutral';
-    
+
     const lang = currentLanguage;
     const lowerText = text.toLowerCase();
-    
+
     // Simple keyword-based emotion detection
     const emotionKeywords = {
       happy: {
@@ -299,33 +299,33 @@ document.addEventListener('DOMContentLoaded', function() {
         en: ['calm', 'peaceful', 'relaxed', 'tranquil', 'serene']
       }
     };
-    
+
     // Count matches for each emotion
     let maxMatches = 0;
     let detectedEmotion = 'neutral';
-    
+
     for (const emotion in emotionKeywords) {
       let matches = 0;
-      
+
       for (const keyword of emotionKeywords[emotion][lang]) {
         if (lowerText.includes(keyword.toLowerCase())) {
           matches++;
         }
       }
-      
+
       if (matches > maxMatches) {
         maxMatches = matches;
         detectedEmotion = emotion;
       }
     }
-    
+
     return detectedEmotion;
   }
-  
+
   function fetchResponse(text, emotion) {
     // In a production environment, this would send the text to a backend API
     // and receive an appropriate response. For now, we'll generate a simple response.
-    
+
     const genericResponses = {
       ar: {
         happy: ['أنا سعيد لسماع ذلك!', 'رائع جداً!', 'هذا خبر مفرح!'],
@@ -348,23 +348,23 @@ document.addEventListener('DOMContentLoaded', function() {
         calm: ['I feel calm as well', 'This is a nice moment', 'Enjoy this feeling']
       }
     };
-    
+
     // Get responses for the detected emotion
     const responses = genericResponses[currentLanguage][emotion] || genericResponses[currentLanguage].neutral;
-    
+
     // Pick a random response
     const response = responses[Math.floor(Math.random() * responses.length)];
-    
+
     // Display the response
     if (responseElement) {
       responseElement.textContent = response;
     }
-    
+
     // Speak the response if text-to-speech is available
     if (window.textToSpeech) {
       window.textToSpeech.speak(response);
     }
-    
+
     return response;
   }
 });
@@ -373,20 +373,20 @@ document.addEventListener('DOMContentLoaded', function() {
 function sendTextMessage() {
   const textInput = document.getElementById('voice-text');
   if (!textInput || !textInput.value) return;
-  
+
   const text = textInput.value;
-  
+
   // Detect emotion
   const emotion = window.detectEmotion ? window.detectEmotion(text) : 'neutral';
-  
+
   // Update cosmic sphere
   if (window.cosmicSphere && window.cosmicSphere.setEmotion) {
     window.cosmicSphere.setEmotion(emotion);
   }
-  
+
   // Process the text
   processText(text);
-  
+
   // Clear the input
   textInput.value = '';
 }
@@ -394,7 +394,7 @@ function sendTextMessage() {
 // Process text input (can be called from other scripts)
 function processText(text) {
   const currentLanguage = localStorage.getItem('mashaaer-language') || 'en';
-  
+
   // Simple responses
   const responses = {
     ar: {
@@ -410,10 +410,10 @@ function processText(text) {
       default: ['I understand', 'How can I help you?', 'Tell me more']
     }
   };
-  
+
   // Determine response type
   let responseType = 'default';
-  
+
   if (currentLanguage === 'ar') {
     if (text.includes('مرحبا') || text.includes('أهلا') || text.includes('السلام عليكم')) {
       responseType = 'greeting';
@@ -431,22 +431,22 @@ function processText(text) {
       responseType = 'thanks';
     }
   }
-  
+
   // Get random response of the determined type
   const responseList = responses[currentLanguage][responseType];
   const response = responseList[Math.floor(Math.random() * responseList.length)];
-  
+
   // Display the response
   const responseElement = document.getElementById('response');
   if (responseElement) {
     responseElement.textContent = response;
   }
-  
+
   // Speak the response if text-to-speech is available
   if (window.textToSpeech) {
     window.textToSpeech.speak(response);
   }
-  
+
   return response;
 }
 
@@ -454,7 +454,7 @@ function processText(text) {
 window.detectEmotion = function(text) {
   const currentLanguage = localStorage.getItem('mashaaer-language') || 'en';
   const lowerText = text.toLowerCase();
-  
+
   // Simple keyword-based emotion detection
   const emotionKeywords = {
     happy: {
@@ -486,25 +486,25 @@ window.detectEmotion = function(text) {
       en: ['calm', 'peaceful', 'relaxed', 'tranquil', 'serene']
     }
   };
-  
+
   // Count matches for each emotion
   let maxMatches = 0;
   let detectedEmotion = 'neutral';
-  
+
   for (const emotion in emotionKeywords) {
     let matches = 0;
-    
+
     for (const keyword of emotionKeywords[emotion][currentLanguage]) {
       if (lowerText.includes(keyword.toLowerCase())) {
         matches++;
       }
     }
-    
+
     if (matches > maxMatches) {
       maxMatches = matches;
       detectedEmotion = emotion;
     }
   }
-  
+
   return detectedEmotion;
 };
