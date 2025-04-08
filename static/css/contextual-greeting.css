@@ -4,14 +4,17 @@
   transform: translateY(10px);
   transition: opacity 0.5s ease, transform 0.5s ease;
   margin: 1rem 0;
-  padding: 0.5rem 1rem;
+  padding: 0.8rem 1.2rem;
   border-radius: 1.5rem;
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(138, 43, 226, 0.3);
   backdrop-filter: blur(10px);
-  font-size: 1.1rem;
-  max-width: 80%;
+  font-size: 1.6rem;
+  font-weight: 600;
+  max-width: 85%;
   text-align: center;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .contextual-greeting-container.visible {
@@ -43,30 +46,30 @@
 
 /* Data mood specific colors */
 [data-mood="happy"] .contextual-greeting-container {
-  background: rgba(255, 215, 0, 0.25);
-  border: 1px solid rgba(255, 215, 0, 0.4);
+  background: rgba(255, 215, 0, 0.35);
+  border: 1px solid rgba(255, 215, 0, 0.5);
 }
 
 [data-mood="sad"] .contextual-greeting-container {
-  background: rgba(100, 149, 237, 0.25);
-  border: 1px solid rgba(100, 149, 237, 0.4);  
+  background: rgba(100, 149, 237, 0.35);
+  border: 1px solid rgba(100, 149, 237, 0.5);  
 }
 
 [data-mood="angry"] .contextual-greeting-container {
-  background: rgba(255, 60, 0, 0.25);
-  border: 1px solid rgba(255, 60, 0, 0.4);
+  background: rgba(255, 60, 0, 0.35);
+  border: 1px solid rgba(255, 60, 0, 0.5);
 }
 
 [data-mood="neutral"] .contextual-greeting-container {
-  background: rgba(138, 43, 226, 0.25);
-  border: 1px solid rgba(138, 43, 226, 0.4);
+  background: rgba(138, 43, 226, 0.35);
+  border: 1px solid rgba(138, 43, 226, 0.5);
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .contextual-greeting-container {
-    font-size: 1rem;
-    padding: 0.5rem 0.8rem;
-    margin: 0.8rem 0;
+    font-size: 1.4rem;
+    padding: 0.6rem 1rem;
+    margin: 1rem 0;
   }
 }
