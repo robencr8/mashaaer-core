@@ -174,6 +174,35 @@ document.addEventListener('DOMContentLoaded', () => {
       : { original: speech, standardized: speech };
     
     // Check for language switch commands
+
+function sendTextMessage() {
+  const textInput = document.getElementById('voice-text');
+  if (!textInput || !textInput.value) return;
+
+  const text = textInput.value;
+
+  // Detect emotion
+  const emotion = window.detectEmotion ? window.detectEmotion(text) : 'neutral';
+
+  // Update cosmic sphere
+  if (window.cosmicSphere && window.cosmicSphere.setEmotion) {
+    window.cosmicSphere.setEmotion(emotion);
+  }
+
+  // Process the text
+  processText(text);
+
+  // Clear the input
+  textInput.value = '';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const sendButton = document.querySelector('.cosmic-btn');
+  if (sendButton) {
+    sendButton.addEventListener('click', sendTextMessage);
+  }
+});
+
     if (currentLanguage === 'en' && 
         (speech.includes('تحدث بالعربية') || 
          speech.includes('العربية'))) {
