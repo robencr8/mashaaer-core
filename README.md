@@ -1,5 +1,3 @@
-# Mashaaer Core | مشروع مشاعر 🤖🗣️🧠
-
 **Mashaaer | مشاعر** is an emotionally intelligent, voice-first AI assistant designed to understand and adapt to each user's unique characteristics. It analyzes tone, word choice, emotional state, and preferred language to create a truly personalized experience. Over time, Mashaaer evolves into a trusted companion, remembering past interactions, learning individual preferences, and responding with appropriate warmth, professionalism, or humor depending on the context.
 
 ---
@@ -78,4 +76,4 @@ Explore the project's resources:
 - **Main GitHub Repository:** https://github.com/robencr8/mashaaer-core
 - **Live Domain:** [decentravault.online](https://decentravault.online)
 - **Replit Workspace:** https://replit.com/@robenedwan/mshrwaa-mshaar-or-Mashaaer
-- **Notion Dashboard:** https://www.notion.so/Mashaaer-Core-1cdd9ee336d48008b4add3b5fd91649c?pvs=4
+- **Notion Dashboard:** https://www.notion.so/Mashaaer-Core-1cdd9ee336d48008b4add3b5fd91649c?pvs=
