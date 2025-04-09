@@ -4,124 +4,196 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mashaaer Feelings</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/rtl.css">
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #0a1128;
-            color: #fff;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 30px;
         }
         
-        .cosmic-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 30px;
-            background-color: rgba(24, 40, 73, 0.7);
+        .menu-item {
+            background-color: rgba(94, 114, 228, 0.1);
             border-radius: 15px;
-            box-shadow: 0 0 20px rgba(94, 114, 228, 0.5);
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            color: #5e72e4;
-            text-shadow: 0 0 10px rgba(94, 114, 228, 0.5);
-        }
-        
-        p {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-        
-        .cosmic-button {
-            background: linear-gradient(45deg, #5e72e4, #825ee4);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            font-size: 1.1rem;
-            border-radius: 30px;
+            padding: 20px;
+            text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin: 10px;
             text-decoration: none;
-            display: inline-block;
+            color: white;
         }
         
-        .cosmic-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 14px rgba(94, 114, 228, 0.4);
+        .menu-item:hover {
+            transform: translateY(-5px);
+            background-color: rgba(94, 114, 228, 0.2);
+            box-shadow: 0 7px 14px rgba(94, 114, 228, 0.2);
         }
         
-        .stars {
+        .menu-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #5e72e4;
+        }
+        
+        .menu-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .menu-description {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .language-toggle {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
         }
         
-        .star {
-            position: absolute;
-            background-color: #fff;
-            border-radius: 50%;
-            animation: twinkle 5s infinite;
-        }
-        
-        @keyframes twinkle {
-            0% { opacity: 0.3; }
-            50% { opacity: 1; }
-            100% { opacity: 0.3; }
+        @media (max-width: 768px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="stars" id="stars"></div>
     
+    <button class="language-toggle" id="languageToggle">العربية</button>
+    
     <div class="cosmic-container">
         <h1>Mashaaer Feelings</h1>
-        <p>Welcome to Mashaaer Feelings, an advanced AI emotional companion that analyzes and responds to your emotions. Experience the future of human-AI interaction with our bilingual support and cosmic design.</p>
+        <p id="welcomeText">Welcome to Mashaaer Feelings, an advanced AI emotional companion that analyzes and responds to your emotions. Experience the future of human-AI interaction with our bilingual support and cosmic design.</p>
         
-        <a href="/emotion-analysis" class="cosmic-button">Start Analysis</a>
-        <a href="/settings" class="cosmic-button">Settings</a>
+        <div class="menu-grid">
+            <a href="/emotion-analysis.html" class="menu-item">
+                <div class="menu-icon">🔍</div>
+                <div class="menu-title" id="analysisTitle">Emotion Analysis</div>
+                <div class="menu-description" id="analysisDesc">Analyze your emotions through text or voice input</div>
+            </a>
+            
+            <a href="/emotions-visualization.html" class="menu-item">
+                <div class="menu-icon">✨</div>
+                <div class="menu-title" id="visualizationTitle">Emotions Visualization</div>
+                <div class="menu-description" id="visualizationDesc">View your emotional patterns in an interactive display</div>
+            </a>
+            
+            <a href="/accessibility.html" class="menu-item">
+                <div class="menu-icon">🔊</div>
+                <div class="menu-title" id="accessibilityTitle">Accessibility Features</div>
+                <div class="menu-description" id="accessibilityDesc">Voice guidance and other accessibility options</div>
+            </a>
+            
+            <a href="/settings.html" class="menu-item">
+                <div class="menu-icon">⚙️</div>
+                <div class="menu-title" id="settingsTitle">Settings</div>
+                <div class="menu-description" id="settingsDesc">Configure your preferences and personalization</div>
+            </a>
+        </div>
+        
+        <div style="margin-top: 40px;">
+            <a href="/cosmic-loader-demo.html" class="cosmic-button" id="demoButton">Cosmic UI Demo</a>
+        </div>
     </div>
     
     <script>
-        // Create stars background
-        const starsContainer = document.getElementById('stars');
-        const numberOfStars = 100;
-        
-        for (let i = 0; i < numberOfStars; i++) {
-            const star = document.createElement('div');
-            star.classList.add('star');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create stars background
+            const starsContainer = document.getElementById('stars');
+            const numberOfStars = 100;
             
-            // Random position
-            const posX = Math.random() * 100;
-            const posY = Math.random() * 100;
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // Random position
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                
+                // Random size
+                const size = Math.random() * 3;
+                
+                // Random animation delay
+                const delay = Math.random() * 5;
+                
+                star.style.left = `${posX}%`;
+                star.style.top = `${posY}%`;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.animationDelay = `${delay}s`;
+                
+                starsContainer.appendChild(star);
+            }
             
-            // Random size
-            const size = Math.random() * 3;
+            // Language toggle
+            const languageToggle = document.getElementById('languageToggle');
+            let currentLanguage = 'en';
             
-            // Random animation delay
-            const delay = Math.random() * 5;
+            languageToggle.addEventListener('click', function() {
+                if (currentLanguage === 'en') {
+                    currentLanguage = 'ar';
+                    document.body.classList.add('rtl');
+                    this.textContent = 'English';
+                    updateUILanguage('ar');
+                } else {
+                    currentLanguage = 'en';
+                    document.body.classList.remove('rtl');
+                    this.textContent = 'العربية';
+                    updateUILanguage('en');
+                }
+            });
             
-            star.style.left = `${posX}%`;
-            star.style.top = `${posY}%`;
-            star.style.width = `${size}px`;
-            star.style.height = `${size}px`;
-            star.style.animationDelay = `${delay}s`;
-            
-            starsContainer.appendChild(star);
-        }
+            function updateUILanguage(lang) {
+                if (lang === 'ar') {
+                    // Update all text elements to Arabic
+                    document.querySelector('h1').textContent = 'مشاعر';
+                    document.getElementById('welcomeText').textContent = 'مرحبًا بك في مشاعر، رفيق الذكاء الاصطناعي العاطفي المتقدم الذي يحلل ويستجيب لمشاعرك. استمتع بمستقبل التفاعل بين الإنسان والذكاء الاصطناعي مع دعمنا ثنائي اللغة وتصميمنا الكوني.';
+                    
+                    document.getElementById('analysisTitle').textContent = 'تحليل المشاعر';
+                    document.getElementById('analysisDesc').textContent = 'تحليل مشاعرك من خلال النص أو الإدخال الصوتي';
+                    
+                    document.getElementById('visualizationTitle').textContent = 'تصور المشاعر';
+                    document.getElementById('visualizationDesc').textContent = 'عرض أنماط مشاعرك في عرض تفاعلي';
+                    
+                    document.getElementById('accessibilityTitle').textContent = 'ميزات إمكانية الوصول';
+                    document.getElementById('accessibilityDesc').textContent = 'التوجيه الصوتي وخيارات إمكانية الوصول الأخرى';
+                    
+                    document.getElementById('settingsTitle').textContent = 'الإعدادات';
+                    document.getElementById('settingsDesc').textContent = 'تكوين تفضيلاتك والتخصيص';
+                    
+                    document.getElementById('demoButton').textContent = 'عرض واجهة المستخدم الكونية';
+                } else {
+                    // Update all text elements to English
+                    document.querySelector('h1').textContent = 'Mashaaer Feelings';
+                    document.getElementById('welcomeText').textContent = 'Welcome to Mashaaer Feelings, an advanced AI emotional companion that analyzes and responds to your emotions. Experience the future of human-AI interaction with our bilingual support and cosmic design.';
+                    
+                    document.getElementById('analysisTitle').textContent = 'Emotion Analysis';
+                    document.getElementById('analysisDesc').textContent = 'Analyze your emotions through text or voice input';
+                    
+                    document.getElementById('visualizationTitle').textContent = 'Emotions Visualization';
+                    document.getElementById('visualizationDesc').textContent = 'View your emotional patterns in an interactive display';
+                    
+                    document.getElementById('accessibilityTitle').textContent = 'Accessibility Features';
+                    document.getElementById('accessibilityDesc').textContent = 'Voice guidance and other accessibility options';
+                    
+                    document.getElementById('settingsTitle').textContent = 'Settings';
+                    document.getElementById('settingsDesc').textContent = 'Configure your preferences and personalization';
+                    
+                    document.getElementById('demoButton').textContent = 'Cosmic UI Demo';
+                }
+            }
+        });
     </script>
 </body>
 </html>

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | Mashaaer Feelings</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .settings-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: rgba(24, 40, 73, 0.5);
+        }
+        
+        .settings-section h2 {
+            color: #5e72e4;
+            margin-top: 0;
+        }
+        
+        .setting-item {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .setting-label {
+            flex: 1;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #5e72e4;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        .select-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        
+        select {
+            appearance: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: none;
+            padding: 10px 35px 10px 15px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .select-wrapper:after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid white;
+            pointer-events: none;
+        }
+        
+        .range-slider {
+            width: 200px;
+        }
+        
+        .range-slider input {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+        
+        .range-slider input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #5e72e4;
+            cursor: pointer;
+        }
+        
+        .language-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .setting-value {
+            color: #5e72e4;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .profile-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #5e72e4;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <button class="language-toggle" id="languageToggle">العربية</button>
+    
+    <div class="cosmic-container">
+        <h1>Settings</h1>
+        
+        <div class="profile-section">
+            <div class="profile-avatar">
+                <span>👤</span>
+            </div>
+            <h2 id="userName">User Profile</h2>
+        </div>
+        
+        <div class="settings-section">
+            <h2>Accessibility</h2>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <h3>Voice Guidance</h3>
+                    <p>Enable voice narration for better accessibility</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="voiceGuidanceToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <h3>Text Size</h3>
+                    <p>Adjust the size of text across the application</p>
+                </div>
+                <div class="range-slider">
+                    <input type="range" min="1" max="3" step="0.5" value="1" id="textSizeSlider">
+                    <span class="setting-value" id="textSizeValue">Default</span>
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <h3>High Contrast Mode</h3>
+                    <p>Increase contrast for better visibility</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="contrastModeToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="settings-section">
+            <h2>Voice & Language</h2>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <h3>Default Language</h3>
+                    <p>Select your preferred language</p>
+                </div>
+                <div class="select-wrapper">
+                    <select id="languageSelect">
+                        <option value="en">English</option>
+                        <option value="ar">العربية</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <h3>Voice Style</h3>
+                    <p>Choose the voice style for the narrator</p>
+                </div>
+                <div class="select-wrapper">
+                    <select id="voiceStyleSelect">
+                        <option value="default">Default</option>
+                        <option value="calm">Calm & Soothing</option>
+                        <option value="professional">Professional</option>
+                        <option value="friendly">Friendly & Warm</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <h3>Speaking Rate</h3>
+                    <p>Adjust how fast the voice speaks</p>
+                </div>
+                <div class="range-slider">
+                    <input type="range" min="0.5" max="2" step="0.1" value="1" id="speakingRateSlider">
+                    <span class="setting-value" id="speakingRateValue">1.0x</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="settings-section">
+            <h2>Privacy & Data</h2>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <h3>Save Conversation History</h3>
+                    <p>Store your conversations for future reference</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="saveHistoryToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <h3>Anonymous Usage Data</h3>
+                    <p>Help improve Mashaaer by sharing anonymous usage data</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="anonymousDataToggle" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <h3>Data Retention Period</h3>
+                    <p>How long to keep your data</p>
+                </div>
+                <div class="select-wrapper">
+                    <select id="dataRetentionSelect">
+                        <option value="30">30 days</option>
+                        <option value="90">90 days</option>
+                        <option value="180">180 days</option>
+                        <option value="365">1 year</option>
+                        <option value="forever">Forever</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="settings-section">
+            <h2>Advanced Settings</h2>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <h3>API Connection</h3>
+                    <p>Status of the emotional analysis API</p>
+                </div>
+                <span id="apiStatus" class="setting-value">Connected</span>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <h3>Cache Clear</h3>
+                    <p>Clear cached data to free up space</p>
+                </div>
+                <button class="cosmic-button" id="clearCacheButton">Clear Cache</button>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-label">
+                    <h3>Export Data</h3>
+                    <p>Download all your data</p>
+                </div>
+                <button class="cosmic-button" id="exportDataButton">Export</button>
+            </div>
+        </div>
+        
+        <a href="/" class="cosmic-button">Back to Home</a>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create stars background
+            const starsContainer = document.getElementById('stars');
+            const numberOfStars = 100;
+            
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // Random position
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                
+                // Random size
+                const size = Math.random() * 3;
+                
+                // Random animation delay
+                const delay = Math.random() * 5;
+                
+                star.style.left = `${posX}%`;
+                star.style.top = `${posY}%`;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.animationDelay = `${delay}s`;
+                
+                starsContainer.appendChild(star);
+            }
+            
+            // Language toggle
+            const languageToggle = document.getElementById('languageToggle');
+            const languageSelect = document.getElementById('languageSelect');
+            let currentLanguage = 'en';
+            
+            languageToggle.addEventListener('click', function() {
+                if (currentLanguage === 'en') {
+                    currentLanguage = 'ar';
+                    document.body.classList.add('rtl');
+                    this.textContent = 'English';
+                    languageSelect.value = 'ar';
+                    updateUILanguage('ar');
+                } else {
+                    currentLanguage = 'en';
+                    document.body.classList.remove('rtl');
+                    this.textContent = 'العربية';
+                    languageSelect.value = 'en';
+                    updateUILanguage('en');
+                }
+            });
+            
+            languageSelect.addEventListener('change', function() {
+                const lang = this.value;
+                if (lang === 'ar') {
+                    currentLanguage = 'ar';
+                    document.body.classList.add('rtl');
+                    languageToggle.textContent = 'English';
+                    updateUILanguage('ar');
+                } else {
+                    currentLanguage = 'en';
+                    document.body.classList.remove('rtl');
+                    languageToggle.textContent = 'العربية';
+                    updateUILanguage('en');
+                }
+            });
+            
+            function updateUILanguage(lang) {
+                if (lang === 'ar') {
+                    // Update all text elements to Arabic
+                    document.querySelector('h1').textContent = 'الإعدادات';
+                    document.getElementById('userName').textContent = 'ملف المستخدم';
+                    // Update section headers
+                    document.querySelectorAll('.settings-section h2')[0].textContent = 'إمكانية الوصول';
+                    document.querySelectorAll('.settings-section h2')[1].textContent = 'الصوت واللغة';
+                    document.querySelectorAll('.settings-section h2')[2].textContent = 'الخصوصية والبيانات';
+                    document.querySelectorAll('.settings-section h2')[3].textContent = 'إعدادات متقدمة';
+                    // Update button text
+                    document.querySelector('.cosmic-button').textContent = 'العودة إلى الصفحة الرئيسية';
+                    document.getElementById('clearCacheButton').textContent = 'مسح ذاكرة التخزين المؤقت';
+                    document.getElementById('exportDataButton').textContent = 'تصدير';
+                    // And so on for all text elements...
+                } else {
+                    // Update all text elements to English
+                    document.querySelector('h1').textContent = 'Settings';
+                    document.getElementById('userName').textContent = 'User Profile';
+                    // Update section headers
+                    document.querySelectorAll('.settings-section h2')[0].textContent = 'Accessibility';
+                    document.querySelectorAll('.settings-section h2')[1].textContent = 'Voice & Language';
+                    document.querySelectorAll('.settings-section h2')[2].textContent = 'Privacy & Data';
+                    document.querySelectorAll('.settings-section h2')[3].textContent = 'Advanced Settings';
+                    // Update button text
+                    document.querySelector('.cosmic-button').textContent = 'Back to Home';
+                    document.getElementById('clearCacheButton').textContent = 'Clear Cache';
+                    document.getElementById('exportDataButton').textContent = 'Export';
+                    // And so on for all text elements...
+                }
+            }
+            
+            // Text size slider
+            const textSizeSlider = document.getElementById('textSizeSlider');
+            const textSizeValue = document.getElementById('textSizeValue');
+            
+            textSizeSlider.addEventListener('input', function() {
+                const size = this.value;
+                let sizeText;
+                
+                switch(parseFloat(size)) {
+                    case 1:
+                        sizeText = currentLanguage === 'en' ? 'Default' : 'افتراضي';
+                        document.documentElement.style.fontSize = '16px';
+                        break;
+                    case 1.5:
+                        sizeText = currentLanguage === 'en' ? 'Medium' : 'متوسط';
+                        document.documentElement.style.fontSize = '18px';
+                        break;
+                    case 2:
+                        sizeText = currentLanguage === 'en' ? 'Large' : 'كبير';
+                        document.documentElement.style.fontSize = '20px';
+                        break;
+                    case 2.5:
+                        sizeText = currentLanguage === 'en' ? 'Extra Large' : 'كبير جدًا';
+                        document.documentElement.style.fontSize = '22px';
+                        break;
+                    case 3:
+                        sizeText = currentLanguage === 'en' ? 'Maximum' : 'الحد الأقصى';
+                        document.documentElement.style.fontSize = '24px';
+                        break;
+                }
+                
+                textSizeValue.textContent = sizeText;
+            });
+            
+            // Speaking rate slider
+            const speakingRateSlider = document.getElementById('speakingRateSlider');
+            const speakingRateValue = document.getElementById('speakingRateValue');
+            
+            speakingRateSlider.addEventListener('input', function() {
+                const rate = this.value;
+                speakingRateValue.textContent = `${rate}x`;
+            });
+            
+            // High contrast mode toggle
+            const contrastModeToggle = document.getElementById('contrastModeToggle');
+            
+            contrastModeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.body.classList.add('high-contrast');
+                } else {
+                    document.body.classList.remove('high-contrast');
+                }
+            });
+            
+            // Cache clear button
+            const clearCacheButton = document.getElementById('clearCacheButton');
+            
+            clearCacheButton.addEventListener('click', function() {
+                // In a real app, this would clear the cache
+                alert(currentLanguage === 'en' ? 'Cache cleared successfully!' : 'تم مسح ذاكرة التخزين المؤقت بنجاح!');
+            });
+            
+            // Export data button
+            const exportDataButton = document.getElementById('exportDataButton');
+            
+            exportDataButton.addEventListener('click', function() {
+                // In a real app, this would export the user's data
+                alert(currentLanguage === 'en' ? 'Your data export is being prepared. You will receive a download link shortly.' : 'جاري إعداد تصدير بياناتك. ستتلقى رابط التنزيل قريبًا.');
+            });
+            
+            // API status check (simulated)
+            const apiStatus = document.getElementById('apiStatus');
+            
+            // Simulate API status check
+            setTimeout(() => {
+                apiStatus.textContent = currentLanguage === 'en' ? 'Connected' : 'متصل';
+                apiStatus.style.color = '#4cd964'; // Green color for connected status
+            }, 2000);
+            
+            // Voice guidance toggle (simulated)
+            const voiceGuidanceToggle = document.getElementById('voiceGuidanceToggle');
+            
+            voiceGuidanceToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    // In a real app, this would enable voice guidance
+                    // For now, just show a message
+                    setTimeout(() => {
+                        const message = currentLanguage === 'en' ? 
+                            'Voice guidance is now enabled. The system will narrate important elements as you interact with them.' : 
+                            'تم تمكين التوجيه الصوتي. سيقوم النظام بسرد العناصر المهمة أثناء تفاعلك معها.';
+                        alert(message);
+                    }, 500);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

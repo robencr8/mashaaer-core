@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Analysis | Mashaaer Feelings</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .emotion-input {
+            width: 100%;
+            padding: 15px;
+            margin: 20px 0;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 10px;
+        }
+        
+        .emotion-result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 15px;
+            background-color: rgba(24, 40, 73, 0.5);
+            display: none;
+        }
+        
+        .emotion-icons {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+        }
+        
+        .emotion-icon {
+            text-align: center;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .emotion-icon.active {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+        
+        .emotion-icon img {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 10px;
+        }
+        
+        .mic-button {
+            background: linear-gradient(45deg, #5e72e4, #825ee4);
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mic-button:hover {
+            transform: scale(1.1);
+        }
+        
+        .recording .mic-button {
+            background: linear-gradient(45deg, #f5365c, #f56036);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .mic-icon {
+            width: 30px;
+            height: 30px;
+            color: white;
+        }
+        
+        .language-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <button class="language-toggle" id="languageToggle">العربية</button>
+    
+    <div class="cosmic-container">
+        <h1>Emotion Analysis</h1>
+        <p>Speak or type your thoughts below, and I'll analyze your emotions.</p>
+        
+        <div id="recordingContainer">
+            <button class="mic-button" id="micButton">
+                <svg class="mic-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+            </button>
+            <p id="recordingStatus">Click the microphone to start recording</p>
+        </div>
+        
+        <textarea class="emotion-input" id="textInput" placeholder="Or type your thoughts here..."></textarea>
+        <button class="cosmic-button" id="analyzeButton">Analyze Emotions</button>
+        
+        <div class="emotion-result" id="emotionResult">
+            <h2>Your Emotional Analysis</h2>
+            <div class="emotion-icons">
+                <div class="emotion-icon" data-emotion="happy">
+                    <img src="/assets/images/happy.svg" alt="Happy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"%235e72e4\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path fill=\"white\" d=\"M8 13a4 4 0 0 0 8 0H8z\"/><circle cx=\"9\" cy=\"9\" r=\"1.5\" fill=\"white\"/><circle cx=\"15\" cy=\"9\" r=\"1.5\" fill=\"white\"/></svg>'">
+                    <p>Happy</p>
+                    <div class="percentage">0%</div>
+                </div>
+                <div class="emotion-icon" data-emotion="sad">
+                    <img src="/assets/images/sad.svg" alt="Sad" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"%235e72e4\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path fill=\"white\" d=\"M16 16a4 4 0 0 0-8 0\"/><circle cx=\"9\" cy=\"9\" r=\"1.5\" fill=\"white\"/><circle cx=\"15\" cy=\"9\" r=\"1.5\" fill=\"white\"/></svg>'">
+                    <p>Sad</p>
+                    <div class="percentage">0%</div>
+                </div>
+                <div class="emotion-icon" data-emotion="angry">
+                    <img src="/assets/images/angry.svg" alt="Angry" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"%235e72e4\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path fill=\"white\" d=\"M16 16a4 4 0 0 0-8 0\"/><path fill=\"white\" d=\"M7 9a2 2 0 0 1 4 0\"/><path fill=\"white\" d=\"M13 9a2 2 0 0 1 4 0\"/></svg>'">
+                    <p>Angry</p>
+                    <div class="percentage">0%</div>
+                </div>
+                <div class="emotion-icon" data-emotion="scared">
+                    <img src="/assets/images/scared.svg" alt="Scared" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"%235e72e4\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"9\" cy=\"9\" r=\"1.5\" fill=\"white\"/><circle cx=\"15\" cy=\"9\" r=\"1.5\" fill=\"white\"/><path fill=\"white\" d=\"M8 15h8a4 4 0 0 1-8 0z\"/></svg>'">
+                    <p>Scared</p>
+                    <div class="percentage">0%</div>
+                </div>
+                <div class="emotion-icon" data-emotion="surprised">
+                    <img src="/assets/images/surprised.svg" alt="Surprised" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"%235e72e4\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><circle cx=\"12\" cy=\"15\" r=\"2\" fill=\"white\"/><circle cx=\"9\" cy=\"9\" r=\"1.5\" fill=\"white\"/><circle cx=\"15\" cy=\"9\" r=\"1.5\" fill=\"white\"/></svg>'">
+                    <p>Surprised</p>
+                    <div class="percentage">0%</div>
+                </div>
+            </div>
+            
+            <div id="analysis">
+                <p id="primaryEmotion">Primary emotion: <strong>Neutral</strong></p>
+                <p id="emotionDescription">Your emotional state appears balanced and steady.</p>
+            </div>
+            
+            <button class="cosmic-button" id="newAnalysisButton">New Analysis</button>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create stars background
+            const starsContainer = document.getElementById('stars');
+            const numberOfStars = 100;
+            
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // Random position
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                
+                // Random size
+                const size = Math.random() * 3;
+                
+                // Random animation delay
+                const delay = Math.random() * 5;
+                
+                star.style.left = `${posX}%`;
+                star.style.top = `${posY}%`;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.animationDelay = `${delay}s`;
+                
+                starsContainer.appendChild(star);
+            }
+            
+            // Language toggle
+            const languageToggle = document.getElementById('languageToggle');
+            let currentLanguage = 'en';
+            
+            languageToggle.addEventListener('click', function() {
+                if (currentLanguage === 'en') {
+                    currentLanguage = 'ar';
+                    document.body.classList.add('rtl');
+                    this.textContent = 'English';
+                    // Update all text elements to Arabic
+                    updateUILanguage('ar');
+                } else {
+                    currentLanguage = 'en';
+                    document.body.classList.remove('rtl');
+                    this.textContent = 'العربية';
+                    // Update all text elements to English
+                    updateUILanguage('en');
+                }
+            });
+            
+            function updateUILanguage(lang) {
+                // In a real app, this would update all text on the page
+                // For now we'll just show a placeholder message
+                if (lang === 'ar') {
+                    document.querySelector('h1').textContent = 'تحليل المشاعر';
+                    document.querySelector('p').textContent = 'تحدث أو اكتب أفكارك أدناه، وسأقوم بتحليل مشاعرك.';
+                    document.getElementById('analyzeButton').textContent = 'تحليل المشاعر';
+                    document.getElementById('newAnalysisButton').textContent = 'تحليل جديد';
+                    document.getElementById('recordingStatus').textContent = 'انقر على الميكروفون لبدء التسجيل';
+                    document.getElementById('textInput').placeholder = 'أو اكتب أفكارك هنا...';
+                } else {
+                    document.querySelector('h1').textContent = 'Emotion Analysis';
+                    document.querySelector('p').textContent = 'Speak or type your thoughts below, and I\'ll analyze your emotions.';
+                    document.getElementById('analyzeButton').textContent = 'Analyze Emotions';
+                    document.getElementById('newAnalysisButton').textContent = 'New Analysis';
+                    document.getElementById('recordingStatus').textContent = 'Click the microphone to start recording';
+                    document.getElementById('textInput').placeholder = 'Or type your thoughts here...';
+                }
+            }
+            
+            // Recording functionality
+            const micButton = document.getElementById('micButton');
+            const recordingStatus = document.getElementById('recordingStatus');
+            let isRecording = false;
+            
+            micButton.addEventListener('click', function() {
+                if (!isRecording) {
+                    startRecording();
+                } else {
+                    stopRecording();
+                }
+            });
+            
+            function startRecording() {
+                isRecording = true;
+                document.getElementById('recordingContainer').classList.add('recording');
+                recordingStatus.textContent = currentLanguage === 'en' ? 'Recording... Click to stop' : 'جاري التسجيل... انقر للإيقاف';
+                
+                // In a real app, this would use the Web Speech API
+                // For now, we'll just simulate it
+                setTimeout(() => {
+                    stopRecording();
+                }, 5000);
+            }
+            
+            function stopRecording() {
+                isRecording = false;
+                document.getElementById('recordingContainer').classList.remove('recording');
+                recordingStatus.textContent = currentLanguage === 'en' ? 'Recording finished' : 'انتهى التسجيل';
+                
+                // In a real app, this would process the recording
+                // For now, we'll just simulate it
+                document.getElementById('textInput').value = currentLanguage === 'en' ? 
+                    "I'm feeling really happy today because the sun is shining!" : 
+                    "أشعر بسعادة كبيرة اليوم لأن الشمس مشرقة!";
+                
+                // Auto-analyze after recording
+                analyzeEmotions();
+            }
+            
+            // Analysis functionality
+            const analyzeButton = document.getElementById('analyzeButton');
+            const newAnalysisButton = document.getElementById('newAnalysisButton');
+            const emotionResult = document.getElementById('emotionResult');
+            const textInput = document.getElementById('textInput');
+            
+            analyzeButton.addEventListener('click', analyzeEmotions);
+            
+            newAnalysisButton.addEventListener('click', function() {
+                emotionResult.style.display = 'none';
+                textInput.value = '';
+                resetEmotionIcons();
+            });
+            
+            function analyzeEmotions() {
+                const text = textInput.value.trim();
+                
+                if (text.length === 0) {
+                    alert(currentLanguage === 'en' ? 'Please enter some text or record your voice first.' : 'الرجاء إدخال بعض النص أو تسجيل صوتك أولاً.');
+                    return;
+                }
+                
+                // In a real app, this would call the backend API
+                // For now, we'll just simulate it
+                
+                // Simple emotion detection based on keywords
+                const emotions = {
+                    happy: 0,
+                    sad: 0,
+                    angry: 0,
+                    scared: 0,
+                    surprised: 0
+                };
+                
+                const lowerText = text.toLowerCase();
+                
+                // English keywords
+                if (lowerText.includes('happy') || lowerText.includes('joy') || lowerText.includes('wonderful') || lowerText.includes('great')) {
+                    emotions.happy += 0.7;
+                }
+                if (lowerText.includes('sad') || lowerText.includes('depressed') || lowerText.includes('unhappy') || lowerText.includes('miserable')) {
+                    emotions.sad += 0.7;
+                }
+                if (lowerText.includes('angry') || lowerText.includes('mad') || lowerText.includes('furious') || lowerText.includes('annoyed')) {
+                    emotions.angry += 0.7;
+                }
+                if (lowerText.includes('scared') || lowerText.includes('afraid') || lowerText.includes('fearful') || lowerText.includes('terrified')) {
+                    emotions.scared += 0.7;
+                }
+                if (lowerText.includes('surprised') || lowerText.includes('shocked') || lowerText.includes('astonished') || lowerText.includes('amazed')) {
+                    emotions.surprised += 0.7;
+                }
+                
+                // Arabic keywords
+                if (lowerText.includes('سعيد') || lowerText.includes('فرح') || lowerText.includes('مبتهج') || lowerText.includes('مسرور')) {
+                    emotions.happy += 0.7;
+                }
+                if (lowerText.includes('حزين') || lowerText.includes('مكتئب') || lowerText.includes('تعيس') || lowerText.includes('بائس')) {
+                    emotions.sad += 0.7;
+                }
+                if (lowerText.includes('غاضب') || lowerText.includes('عصبي') || lowerText.includes('منفعل') || lowerText.includes('ثائر')) {
+                    emotions.angry += 0.7;
+                }
+                if (lowerText.includes('خائف') || lowerText.includes('مرعوب') || lowerText.includes('فزع') || lowerText.includes('خوف')) {
+                    emotions.scared += 0.7;
+                }
+                if (lowerText.includes('متفاجئ') || lowerText.includes('مندهش') || lowerText.includes('مصدوم') || lowerText.includes('مذهول')) {
+                    emotions.surprised += 0.7;
+                }
+                
+                // Add some randomness
+                emotions.happy += Math.random() * 0.3;
+                emotions.sad += Math.random() * 0.3;
+                emotions.angry += Math.random() * 0.3;
+                emotions.scared += Math.random() * 0.3;
+                emotions.surprised += Math.random() * 0.3;
+                
+                // Normalize to percentages
+                const total = Object.values(emotions).reduce((sum, value) => sum + value, 0);
+                if (total > 0) {
+                    Object.keys(emotions).forEach(emotion => {
+                        emotions[emotion] = Math.round((emotions[emotion] / total) * 100);
+                    });
+                }
+                
+                // Find primary emotion
+                let primaryEmotion = 'neutral';
+                let maxValue = 0;
+                Object.entries(emotions).forEach(([emotion, value]) => {
+                    if (value > maxValue) {
+                        maxValue = value;
+                        primaryEmotion = emotion;
+                    }
+                });
+                
+                // Update UI
+                updateEmotionUI(emotions, primaryEmotion);
+                
+                // Show result
+                emotionResult.style.display = 'block';
+            }
+            
+            function updateEmotionUI(emotions, primaryEmotion) {
+                // Update percentages
+                Object.entries(emotions).forEach(([emotion, percentage]) => {
+                    const emotionIcon = document.querySelector(`.emotion-icon[data-emotion="${emotion}"]`);
+                    emotionIcon.querySelector('.percentage').textContent = `${percentage}%`;
+                    emotionIcon.style.opacity = percentage / 100;
+                    
+                    if (emotion === primaryEmotion) {
+                        emotionIcon.classList.add('active');
+                    } else {
+                        emotionIcon.classList.remove('active');
+                    }
+                });
+                
+                // Update primary emotion text
+                const primaryEmotionText = document.getElementById('primaryEmotion');
+                const emotionDescription = document.getElementById('emotionDescription');
+                
+                if (currentLanguage === 'en') {
+                    primaryEmotionText.innerHTML = `Primary emotion: <strong>${capitalizeFirstLetter(primaryEmotion)}</strong>`;
+                    
+                    // Set description based on primary emotion
+                    switch(primaryEmotion) {
+                        case 'happy':
+                            emotionDescription.textContent = 'You seem to be in a positive mood. Your words reflect joy and contentment.';
+                            break;
+                        case 'sad':
+                            emotionDescription.textContent = 'Your words suggest you might be feeling down. Remember that it\'s okay to feel this way sometimes.';
+                            break;
+                        case 'angry':
+                            emotionDescription.textContent = 'Your words indicate frustration or anger. Taking deep breaths might help calm these feelings.';
+                            break;
+                        case 'scared':
+                            emotionDescription.textContent = 'Your words suggest you might be feeling anxious or fearful about something.';
+                            break;
+                        case 'surprised':
+                            emotionDescription.textContent = 'You seem surprised or astonished by something unexpected.';
+                            break;
+                        default:
+                            emotionDescription.textContent = 'Your emotional state appears balanced and steady.';
+                    }
+                } else {
+                    // Arabic versions
+                    const arabicEmotionNames = {
+                        'happy': 'سعيد',
+                        'sad': 'حزين',
+                        'angry': 'غاضب',
+                        'scared': 'خائف',
+                        'surprised': 'متفاجئ',
+                        'neutral': 'محايد'
+                    };
+                    
+                    primaryEmotionText.innerHTML = `المشاعر الرئيسية: <strong>${arabicEmotionNames[primaryEmotion]}</strong>`;
+                    
+                    switch(primaryEmotion) {
+                        case 'happy':
+                            emotionDescription.textContent = 'يبدو أنك في مزاج إيجابي. كلماتك تعكس الفرح والرضا.';
+                            break;
+                        case 'sad':
+                            emotionDescription.textContent = 'تشير كلماتك إلى أنك قد تشعر بالإحباط. تذكر أنه من الطبيعي أن تشعر بهذه الطريقة أحيانًا.';
+                            break;
+                        case 'angry':
+                            emotionDescription.textContent = 'تشير كلماتك إلى الإحباط أو الغضب. قد يساعد أخذ أنفاس عميقة في تهدئة هذه المشاعر.';
+                            break;
+                        case 'scared':
+                            emotionDescription.textContent = 'تشير كلماتك إلى أنك قد تشعر بالقلق أو الخوف من شيء ما.';
+                            break;
+                        case 'surprised':
+                            emotionDescription.textContent = 'يبدو أنك متفاجئ أو مندهش من شيء غير متوقع.';
+                            break;
+                        default:
+                            emotionDescription.textContent = 'تبدو حالتك العاطفية متوازنة ومستقرة.';
+                    }
+                }
+            }
+            
+            function resetEmotionIcons() {
+                const emotionIcons = document.querySelectorAll('.emotion-icon');
+                emotionIcons.forEach(icon => {
+                    icon.style.opacity = 0.5;
+                    icon.classList.remove('active');
+                    icon.querySelector('.percentage').textContent = '0%';
+                });
+            }
+            
+            function capitalizeFirstLetter(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+        });
+    </script>
+</body>
+</html>

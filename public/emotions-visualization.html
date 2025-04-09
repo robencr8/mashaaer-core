@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotions Visualization | Mashaaer Feelings</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/rtl.css">
+    <style>
+        .visualization-container {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: rgba(24, 40, 73, 0.5);
+            border-radius: 15px;
+        }
+        
+        .emotion-chart {
+            width: 100%;
+            height: 300px;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .emotion-orbit {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: rotate 60s linear infinite;
+        }
+        
+        .emotion-planet {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .emotion-planet:hover {
+            transform: scale(1.2);
+        }
+        
+        .emotion-planet.happy {
+            background: linear-gradient(45deg, #4cd964, #5af57a);
+        }
+        
+        .emotion-planet.sad {
+            background: linear-gradient(45deg, #007aff, #5ac8fa);
+        }
+        
+        .emotion-planet.angry {
+            background: linear-gradient(45deg, #ff3b30, #ff9500);
+        }
+        
+        .emotion-planet.surprised {
+            background: linear-gradient(45deg, #5856d6, #af52de);
+        }
+        
+        .emotion-planet.scared {
+            background: linear-gradient(45deg, #ff2d55, #ff3b30);
+        }
+        
+        .emotion-planet.disgusted {
+            background: linear-gradient(45deg, #8e8e93, #5ac8fa);
+        }
+        
+        .emotion-planet.neutral {
+            background: linear-gradient(45deg, #8e8e93, #c7c7cc);
+        }
+        
+        .center-sun {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #5e72e4, #825ee4);
+            box-shadow: 0 0 30px rgba(94, 114, 228, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            z-index: 10;
+        }
+        
+        .emotion-details {
+            padding: 20px;
+            background-color: rgba(94, 114, 228, 0.1);
+            border-radius: 10px;
+            text-align: left;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .emotion-percentage {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+        
+        .percentage-bar {
+            background-color: rgba(255, 255, 255, 0.1);
+            height: 8px;
+            border-radius: 4px;
+            width: 70%;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        
+        .percentage-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .happy-fill {
+            background-color: #4cd964;
+        }
+        
+        .sad-fill {
+            background-color: #007aff;
+        }
+        
+        .angry-fill {
+            background-color: #ff3b30;
+        }
+        
+        .surprised-fill {
+            background-color: #5856d6;
+        }
+        
+        .scared-fill {
+            background-color: #ff2d55;
+        }
+        
+        .neutral-fill {
+            background-color: #8e8e93;
+        }
+        
+        .time-span-selector {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .time-span-option {
+            padding: 8px 15px;
+            margin: 0 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .time-span-option.active {
+            background-color: #5e72e4;
+        }
+        
+        .historic-data-container {
+            margin-top: 40px;
+        }
+        
+        .emotion-timeline {
+            height: 200px;
+            width: 100%;
+            position: relative;
+            margin: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .timeline-day {
+            position: absolute;
+            bottom: 0;
+            width: 12%;
+            text-align: center;
+            padding-bottom: 20px;
+            font-size: 0.8rem;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: #5e72e4;
+            transform: translate(-50%, 50%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .timeline-marker:hover {
+            transform: translate(-50%, 50%) scale(1.3);
+        }
+        
+        .language-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+        }
+        
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <button class="language-toggle" id="languageToggle">العربية</button>
+    
+    <div class="cosmic-container">
+        <h1>Emotions Visualization</h1>
+        <p>Explore your emotional universe with our interactive cosmic visualization.</p>
+        
+        <div class="visualization-container">
+            <h2>Current Emotional State</h2>
+            
+            <div class="emotion-chart" id="emotionOrbitChart">
+                <div class="center-sun">You</div>
+                
+                <!-- Orbits will be generated by JavaScript -->
+                
+                <!-- Emotion planets will be positioned by JavaScript -->
+            </div>
+            
+            <div class="emotion-details" id="emotionDetails">
+                <h3>Your Emotional Breakdown</h3>
+                <p>Analysis based on your recent interactions:</p>
+                
+                <div class="emotion-percentage">
+                    <span>Happy</span>
+                    <div class="percentage-bar">
+                        <div class="percentage-fill happy-fill" style="width: 65%;"></div>
+                    </div>
+                    <span>65%</span>
+                </div>
+                
+                <div class="emotion-percentage">
+                    <span>Sad</span>
+                    <div class="percentage-bar">
+                        <div class="percentage-fill sad-fill" style="width: 10%;"></div>
+                    </div>
+                    <span>10%</span>
+                </div>
+                
+                <div class="emotion-percentage">
+                    <span>Angry</span>
+                    <div class="percentage-bar">
+                        <div class="percentage-fill angry-fill" style="width: 5%;"></div>
+                    </div>
+                    <span>5%</span>
+                </div>
+                
+                <div class="emotion-percentage">
+                    <span>Surprised</span>
+                    <div class="percentage-bar">
+                        <div class="percentage-fill surprised-fill" style="width: 12%;"></div>
+                    </div>
+                    <span>12%</span>
+                </div>
+                
+                <div class="emotion-percentage">
+                    <span>Scared</span>
+                    <div class="percentage-bar">
+                        <div class="percentage-fill scared-fill" style="width: 8%;"></div>
+                    </div>
+                    <span>8%</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="historic-data-container">
+            <h2>Emotional History</h2>
+            <p>See how your emotions have changed over time.</p>
+            
+            <div class="time-span-selector">
+                <div class="time-span-option active" data-span="7">7 Days</div>
+                <div class="time-span-option" data-span="30">30 Days</div>
+                <div class="time-span-option" data-span="90">90 Days</div>
+            </div>
+            
+            <div class="emotion-timeline" id="emotionTimeline">
+                <!-- Timeline will be generated by JavaScript -->
+            </div>
+            
+            <p id="timelineDescription">Click on a point to view details about your emotional state on that day.</p>
+        </div>
+        
+        <div class="visualization-container">
+            <h2>Emotional Insights</h2>
+            
+            <div id="insightsContainer">
+                <p>Based on your emotional patterns over the past week:</p>
+                
+                <ul style="text-align: left;">
+                    <li>Your overall emotional wellbeing score is <strong>82/100</strong>, which is excellent!</li>
+                    <li>You tend to feel most positive in the <strong>mornings</strong>.</li>
+                    <li>Conversations about <strong>family</strong> and <strong>achievements</strong> typically boost your mood.</li>
+                    <li>You've had <strong>fewer</strong> negative emotional spikes compared to the previous week.</li>
+                </ul>
+                
+                <p>These insights help you understand your emotional patterns and identify factors that influence your mood.</p>
+            </div>
+        </div>
+        
+        <a href="/" class="cosmic-button">Back to Home</a>
+        <a href="/emotion-analysis" class="cosmic-button">New Analysis</a>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create stars background
+            const starsContainer = document.getElementById('stars');
+            const numberOfStars = 100;
+            
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // Random position
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                
+                // Random size
+                const size = Math.random() * 3;
+                
+                // Random animation delay
+                const delay = Math.random() * 5;
+                
+                star.style.left = `${posX}%`;
+                star.style.top = `${posY}%`;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.animationDelay = `${delay}s`;
+                
+                starsContainer.appendChild(star);
+            }
+            
+            // Language toggle
+            const languageToggle = document.getElementById('languageToggle');
+            let currentLanguage = 'en';
+            
+            languageToggle.addEventListener('click', function() {
+                if (currentLanguage === 'en') {
+                    currentLanguage = 'ar';
+                    document.body.classList.add('rtl');
+                    this.textContent = 'English';
+                    updateUILanguage('ar');
+                } else {
+                    currentLanguage = 'en';
+                    document.body.classList.remove('rtl');
+                    this.textContent = 'العربية';
+                    updateUILanguage('en');
+                }
+            });
+            
+            function updateUILanguage(lang) {
+                if (lang === 'ar') {
+                    // Update all text elements to Arabic
+                    document.querySelector('h1').textContent = 'تصور المشاعر';
+                    document.querySelector('p').textContent = 'استكشف عالم مشاعرك مع تصورنا الكوني التفاعلي.';
+                    document.querySelectorAll('h2')[0].textContent = 'الحالة العاطفية الحالية';
+                    document.querySelectorAll('h2')[1].textContent = 'تاريخ المشاعر';
+                    document.querySelectorAll('h2')[2].textContent = 'رؤى عاطفية';
+                    document.querySelector('.center-sun').textContent = 'أنت';
+                    document.getElementById('timelineDescription').textContent = 'انقر على نقطة لعرض تفاصيل حول حالتك العاطفية في ذلك اليوم.';
+                    document.querySelector('#insightsContainer > p').textContent = 'بناءً على أنماط مشاعرك خلال الأسبوع الماضي:';
+                    document.querySelectorAll('.cosmic-button')[0].textContent = 'العودة إلى الصفحة الرئيسية';
+                    document.querySelectorAll('.cosmic-button')[1].textContent = 'تحليل جديد';
+                    document.querySelectorAll('.time-span-option')[0].textContent = '7 أيام';
+                    document.querySelectorAll('.time-span-option')[1].textContent = '30 يوم';
+                    document.querySelectorAll('.time-span-option')[2].textContent = '90 يوم';
+                } else {
+                    // Update all text elements to English
+                    document.querySelector('h1').textContent = 'Emotions Visualization';
+                    document.querySelector('p').textContent = 'Explore your emotional universe with our interactive cosmic visualization.';
+                    document.querySelectorAll('h2')[0].textContent = 'Current Emotional State';
+                    document.querySelectorAll('h2')[1].textContent = 'Emotional History';
+                    document.querySelectorAll('h2')[2].textContent = 'Emotional Insights';
+                    document.querySelector('.center-sun').textContent = 'You';
+                    document.getElementById('timelineDescription').textContent = 'Click on a point to view details about your emotional state on that day.';
+                    document.querySelector('#insightsContainer > p').textContent = 'Based on your emotional patterns over the past week:';
+                    document.querySelectorAll('.cosmic-button')[0].textContent = 'Back to Home';
+                    document.querySelectorAll('.cosmic-button')[1].textContent = 'New Analysis';
+                    document.querySelectorAll('.time-span-option')[0].textContent = '7 Days';
+                    document.querySelectorAll('.time-span-option')[1].textContent = '30 Days';
+                    document.querySelectorAll('.time-span-option')[2].textContent = '90 Days';
+                }
+            }
+            
+            // Create emotion orbit visualization
+            const emotionOrbitChart = document.getElementById('emotionOrbitChart');
+            const emotions = [
+                { name: 'happy', label: 'Happy', percentage: 65, orbit: 0.8 },
+                { name: 'sad', label: 'Sad', percentage: 10, orbit: 0.65 },
+                { name: 'angry', label: 'Angry', percentage: 5, orbit: 0.9 },
+                { name: 'surprised', label: 'Surprised', percentage: 12, orbit: 0.5 },
+                { name: 'scared', label: 'Scared', percentage: 8, orbit: 0.7 }
+            ];
+            
+            // Create orbits
+            for (let i = 1; i <= 3; i++) {
+                const orbit = document.createElement('div');
+                orbit.classList.add('emotion-orbit');
+                orbit.style.width = `${i * 25}%`;
+                orbit.style.height = `${i * 25}%`;
+                orbit.style.left = `${50 - (i * 25) / 2}%`;
+                orbit.style.top = `${50 - (i * 25) / 2}%`;
+                emotionOrbitChart.appendChild(orbit);
+            }
+            
+            // Position emotion planets
+            emotions.forEach((emotion, index) => {
+                const planet = document.createElement('div');
+                planet.classList.add('emotion-planet', emotion.name);
+                
+                // Calculate position on orbit
+                const angle = (index / emotions.length) * 2 * Math.PI;
+                const orbitRadius = emotionOrbitChart.clientWidth * emotion.orbit / 2;
+                const x = Math.cos(angle) * orbitRadius + emotionOrbitChart.clientWidth / 2 - 20;
+                const y = Math.sin(angle) * orbitRadius + emotionOrbitChart.clientHeight / 2 - 20;
+                
+                planet.style.left = `${x}px`;
+                planet.style.top = `${y}px`;
+                planet.textContent = emotion.percentage + '%';
+                planet.setAttribute('data-emotion', emotion.name);
+                planet.setAttribute('data-percentage', emotion.percentage);
+                
+                planet.addEventListener('click', () => {
+                    showEmotionDetails();
+                });
+                
+                emotionOrbitChart.appendChild(planet);
+            });
+            
+            // Show emotion details
+            function showEmotionDetails() {
+                const emotionDetails = document.getElementById('emotionDetails');
+                emotionDetails.style.display = 'block';
+            }
+            
+            // Create historical timeline
+            const emotionTimeline = document.getElementById('emotionTimeline');
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const dayWidth = 100 / days.length;
+            
+            // Generate the last 7 days for the timeline
+            const today = new Date();
+            
+            days.forEach((day, index) => {
+                // Calculate the date for this position (going back from today)
+                const date = new Date(today);
+                date.setDate(today.getDate() - (6 - index));
+                
+                // Create day label
+                const dayLabel = document.createElement('div');
+                dayLabel.classList.add('timeline-day');
+                dayLabel.style.left = `${index * dayWidth}%`;
+                dayLabel.innerHTML = `${day}<br>${date.getDate()}/${date.getMonth() + 1}`;
+                emotionTimeline.appendChild(dayLabel);
+                
+                // Create data point
+                const dataPoint = document.createElement('div');
+                dataPoint.classList.add('timeline-marker');
+                dataPoint.style.left = `${index * dayWidth + dayWidth / 2}%`;
+                
+                // Randomize the height (representing emotional wellbeing)
+                const happiness = Math.random() * 80 + 20; // Between 20% and 100%
+                dataPoint.style.bottom = `${happiness}%`;
+                
+                // Color based on happiness level
+                if (happiness > 70) {
+                    dataPoint.style.backgroundColor = '#4cd964'; // Happy
+                } else if (happiness > 40) {
+                    dataPoint.style.backgroundColor = '#ffcc00'; // Neutral
+                } else {
+                    dataPoint.style.backgroundColor = '#ff3b30'; // Sad
+                }
+                
+                dataPoint.setAttribute('data-date', `${date.getDate()}/${date.getMonth() + 1}`);
+                dataPoint.setAttribute('data-emotion', happiness > 70 ? 'happy' : (happiness > 40 ? 'neutral' : 'sad'));
+                
+                dataPoint.addEventListener('click', function() {
+                    const date = this.getAttribute('data-date');
+                    const emotion = this.getAttribute('data-emotion');
+                    
+                    alert(`On ${date}, your primary emotion was ${emotion.toUpperCase()}`);
+                });
+                
+                emotionTimeline.appendChild(dataPoint);
+            });
+            
+            // Time span selector
+            const timeSpanOptions = document.querySelectorAll('.time-span-option');
+            
+            timeSpanOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Remove active class from all options
+                    timeSpanOptions.forEach(opt => opt.classList.remove('active'));
+                    
+                    // Add active class to clicked option
+                    this.classList.add('active');
+                    
+                    // In a real app, this would update the timeline data
+                    // For now, just show a message
+                    const span = this.getAttribute('data-span');
+                    alert(`Timeline updated to show the last ${span} days`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

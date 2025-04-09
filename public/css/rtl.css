@@ -1,61 +1,132 @@
-/* RTL Specific Styles for Mashaaer Voice Agent */
+/* RTL (Right-to-Left) Support for Arabic */
 
-body.rtl {
-  direction: rtl;
-  text-align: right;
+/* Base RTL Direction */
+.rtl {
+    direction: rtl;
+    text-align: right;
 }
 
-/* Header RTL Adjustments */
-body.rtl .logo {
-  margin-right: 0;
-  margin-left: 1rem;
+/* Container Alignments */
+.rtl .cosmic-container {
+    text-align: right;
 }
 
-body.rtl nav ul li {
-  margin: 0 0 0 1rem;
+/* Button and Element Margins */
+.rtl .cosmic-button {
+    margin: 10px 0 10px 10px;
 }
 
-/* Voice Interface RTL Adjustments */
-body.rtl .status-dot {
-  margin-right: 0;
-  margin-left: 0.5rem;
+/* Text Alignment for Headers and Paragraphs */
+.rtl h1, 
+.rtl h2, 
+.rtl h3, 
+.rtl p {
+    text-align: right;
 }
 
-body.rtl .voice-transcript {
-  text-align: right;
+/* Form Elements */
+.rtl input[type="text"],
+.rtl input[type="email"],
+.rtl input[type="password"],
+.rtl textarea {
+    text-align: right;
 }
 
-/* Plan Features RTL Adjustments */
-body.rtl .plan-features li::before {
-  margin-right: 0;
-  margin-left: 0.5rem;
+/* Lists */
+.rtl ul, 
+.rtl ol {
+    padding-right: 20px;
+    padding-left: 0;
 }
 
-/* Table RTL Adjustments */
-body.rtl .billing-table th,
-body.rtl .billing-table td,
-body.rtl .comparison-table th:first-child,
-body.rtl .comparison-table td:first-child {
-  text-align: right;
+/* Flexbox Containers */
+.rtl .setting-item {
+    flex-direction: row-reverse;
 }
 
-/* Timeline RTL Adjustments */
-body.rtl .timeline-emotion-icon {
-  margin-right: 0;
-  margin-left: 1rem;
+/* UI Components */
+.rtl .language-toggle {
+    left: 20px;
+    right: auto;
 }
 
-/* Form RTL Adjustments */
-body.rtl .form-group label {
-  text-align: right;
+.rtl .setting-value {
+    margin-right: 10px;
+    margin-left: 0;
 }
 
-body.rtl .form-group input[type="range"] {
-  margin: 0 0 0 1rem;
+/* Icons and Button Groups */
+.rtl .emotion-icon {
+    margin-left: 10px;
+    margin-right: 0;
+}
+
+/* Avatar */
+.rtl .profile-avatar {
+    margin: 0 0 20px auto;
+}
+
+/* Navigation */
+.rtl .nav-menu {
+    padding-right: 0;
+}
+
+.rtl .nav-item {
+    margin-left: 0;
+    margin-right: 20px;
+}
+
+/* Font adjustments for Arabic */
+.rtl {
+    font-family: 'Segoe UI', 'Tahoma', sans-serif;
+}
+
+/* Arabic Font Size Adjustments */
+.rtl h1 {
+    font-size: 2.3rem;
+}
+
+.rtl h2 {
+    font-size: 1.7rem;
+}
+
+.rtl p {
+    font-size: 1.1rem;
+}
+
+/* Border Directions */
+.rtl .border-left {
+    border-left: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Scroll Bars */
+.rtl ::-webkit-scrollbar {
+    left: 0;
+    right: auto;
+}
+
+/* Media Queries for Responsive RTL */
+@media (max-width: 768px) {
+    .rtl h1 {
+        font-size: 1.8rem;
+    }
+    
+    .rtl h2 {
+        font-size: 1.4rem;
+    }
+    
+    .rtl p {
+        font-size: 0.95rem;
+    }
 }
 
 @media (max-width: 480px) {
-  body.rtl .form-group input[type="range"] {
-    margin: 0.5rem 0;
-  }
+    .rtl .cosmic-container {
+        padding: 15px;
+    }
+    
+    .rtl h1 {
+        font-size: 1.6rem;
+    }
 }
