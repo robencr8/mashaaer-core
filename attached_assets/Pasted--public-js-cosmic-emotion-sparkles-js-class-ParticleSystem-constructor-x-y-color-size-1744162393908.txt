@@ -1,0 +1,141 @@
+// public/js/cosmic/emotion-sparkles.js
+
+class ParticleSystem {
+    constructor(x, y, color, size, vx, vy, opacity, fadeRate) {
+        this.x = x;
+        this.y = y;
+        this.color = Array.isArray(color) ? color[Math.floor(Math.random() * color.length)] : color;
+        this.size = size;
+        this.vx = vx;
+        this.vy = vy;
+        this.opacity = opacity;
+        this.fadeRate = fadeRate;
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.opacity -= this.fadeRate;
+    }
+
+    draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${this.hexToRgb(this.color)}, ${this.opacity})`;
+        ctx.fill();
+    }
+
+    isAlive() {
+        return this.opacity > 0 && this.x >= -50 && this.x <= window.innerWidth + 50 && this.y >= -50 && this.y <= window.innerHeight + 50;
+    }
+
+    hexToRgb(hex) {
+        if (hex.startsWith('#')) hex = hex.slice(1);
+        const bigint = parseInt(hex, 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+        return `${r}, ${g}, ${b}`;
+    }
+}
+
+class EmotionSparkleEffect {
+    constructor(targetElementId) {
+        this.targetElement = document.getElementById(targetElementId);
+        this.particles = [];
+        this.emotionMap = {
+            happiness: { color: 'gold', intensity: 10, speed: { min: 0.5, max: 1 }, fadeRate: 0.02, size: { min: 2, max: 4 } },
+            sadness: { color: 'lightblue', intensity: 5, speed: { min: 0.2, max: 0.5, vy: 0.3 }, fadeRate: 0.01, size: { min: 1, max: 3 } },
+            excitement: { color: ['orange', 'pink', 'yellow'], intensity: 15, speed: { min: 1, max: 2 }, fadeRate: 0.03, size: { min: 2, max: 5 } },
+            calmness: { color: 'white', intensity: 8, speed: { min: 0.1, max: 0.3 }, fadeRate: 0.005, size: { min: 1.5, max: 3.5 } },
+            anger: { color: 'red', intensity: 12, speed: { min: 1.5, max: 2.5 }, fadeRate: 0.04, size: { min: 2, max: 4 } },
+            // Add more emotions here
+        };
+    }
+
+    trigger(emotion) {
+        if (!this.targetElement || !this.emotionMap[emotion]) return;
+
+        const rect = this.targetElement.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const settings = this.emotionMap[emotion];
+
+        for (let i = 0; i < settings.intensity; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speedMagnitude = Math.random() * (settings.speed.max - (settings.speed.min || 0)) + (settings.speed.min || 0);
+            const vx = Math.cos(angle) * speedMagnitude;
+            const vy = Math.sin(angle) * speedMagnitude + (settings.speed.vy || 0);
+            const size = Math.random() * (settings.size.max - settings.size.min) + settings.size.min;
+            const initialOpacity = Math.random() * 0.5 + 0.5; // Initial opacity between 0.5 and 1
+
+            this.particles.push(new ParticleSystem(
+                centerX + Math.random() * 10 - 5, // Slight random initial position
+                centerY + Math.random() * 10 - 5,
+                settings.color,
+                size,
+                vx,
+                vy,
+                initialOpacity,
+                settings.fadeRate
+            ));
+        }
+    }
+
+    update() {
+        this.particles.forEach(particle => particle.update());
+        this.particles = this.particles.filter(particle => particle.isAlive());
+    }
+
+    draw(ctx) {
+        this.particles.forEach(particle => particle.draw(ctx));
+    }
+}
+
+// --- Integration Instructions for app.js or cosmic-background.js ---
+
+// 1. Identify Emotion Display Elements:
+//    Determine the IDs of the HTML elements that display user emotions.
+//    For example: '<div id="emotion-display">😊</div>' -> elementId would be 'emotion-display'
+
+// 2. Instantiate EmotionSparkleEffect:
+//    In your app.js or cosmic-background.js, create instances of EmotionSparkleEffect
+//    for each relevant emotion display element:
+//    const emotionSparkle1 = new EmotionSparkleEffect('emotion-display-1');
+//    const emotionSparkle2 = new EmotionSparkleEffect('emotion-display-2');
+//    // ... and so on for all emotion display elements
+
+// 3. Trigger Effects on Emotion Change:
+//    Wherever your application logic updates the displayed emotion of an element,
+//    call the `trigger()` method of the corresponding EmotionSparkleEffect instance:
+//    function updateEmotionDisplay(elementId, newEmotion) {
+//        const element = document.getElementById(elementId);
+//        element.textContent = getEmotionIcon(newEmotion); // Example: update the text
+//        if (elementId === 'emotion-display-1') {
+//            emotionSparkle1.trigger(newEmotion);
+//        } else if (elementId === 'emotion-display-2') {
+//            emotionSparkle2.trigger(newEmotion);
+//        }
+//        // ... handle other emotion displays
+//    }
+
+// 4. Integrate into Animation Loop:
+//    Find your main animation loop (likely in `cosmic-background.js` if you want the sparkles to render on the same canvas).
+//    Inside the loop's `animate()` function (after getting the canvas context `ctx`),
+//    call the `update()` and `draw(ctx)` methods of each EmotionSparkleEffect instance:
+
+//    function animate() {
+//        ctx.clearRect(0, 0, canvas.width, canvas.height);
+//        // ... drawing logic for stars, nebulae, etc. ...
+
+//        emotionSparkle1.update();
+//        emotionSparkle1.draw(ctx);
+//        emotionSparkle2.update();
+//        emotionSparkle2.draw(ctx);
+//        // ... draw calls for other sparkle effects
+
+//        requestAnimationFrame(animate);
+//    }
+
+// Ensure the `emotion-sparkles.js` file is included in your `index.html`:
+// <script src="js/cosmic/emotion-sparkles.js"></script>
