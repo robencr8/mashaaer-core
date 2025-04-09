@@ -21,20 +21,72 @@ function initializeEmotionsView() {
   updateEmotionsDisplay();
 }
 
-// Load emotion data from storage
+// Load emotion data from server
 function loadEmotionData() {
-  // In a real implementation, this would load data from memory.db or indexedDB
-  // For demo purposes, we'll generate some sample data
+  // Get user ID
+  const userId = localStorage.getItem('mashaaer_user_id');
   
-  // Check if we already have sample data in localStorage
-  const savedEmotionData = localStorage.getItem('mashaaer_emotion_data');
-  
-  if (savedEmotionData) {
-    window.emotionData = JSON.parse(savedEmotionData);
-  } else {
-    // Generate sample emotion data for the past month
-    generateSampleEmotionData();
+  if (!userId) {
+    // If no user ID, use sample data for demo purposes
+    const savedEmotionData = localStorage.getItem('mashaaer_emotion_data');
+    
+    if (savedEmotionData) {
+      window.emotionData = JSON.parse(savedEmotionData);
+    } else {
+      // Generate sample emotion data for the past month
+      generateSampleEmotionData();
+    }
+    
+    return;
   }
+  
+  // Fetch emotion data from server
+  fetch(`/api/user/${userId}/emotions`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch emotion data');
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Transform the data format if needed
+      const transformedData = data.map(entry => {
+        return {
+          timestamp: entry.timestamp,
+          emotion: entry.emotion,
+          emoji: getEmotionEmoji(entry.emotion),
+          context: entry.context || ''
+        };
+      });
+      
+      // Sort by timestamp
+      transformedData.sort((a, b) => a.timestamp - b.timestamp);
+      
+      // Update window object
+      window.emotionData = transformedData;
+      
+      // Cache in localStorage as well
+      localStorage.setItem('mashaaer_emotion_data', JSON.stringify(transformedData));
+      
+      // Update display
+      updateEmotionsDisplay();
+    })
+    .catch(error => {
+      console.error('Error fetching emotion data:', error);
+      
+      // Fallback to local storage if available
+      const savedEmotionData = localStorage.getItem('mashaaer_emotion_data');
+      
+      if (savedEmotionData) {
+        window.emotionData = JSON.parse(savedEmotionData);
+      } else {
+        // Generate sample data as last resort
+        generateSampleEmotionData();
+      }
+      
+      // Update display
+      updateEmotionsDisplay();
+    });
 }
 
 // Generate sample emotion data

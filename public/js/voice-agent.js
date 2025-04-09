@@ -156,6 +156,8 @@ function processUserSpeech(speech) {
   // Process dialect variations
   const processedSpeech = window.languageSwitcher.processDialect(speech);
   
+  // Client-side handling for specific commands
+  
   // Check for language switch commands
   if (speech.includes('تحدث بالعربية')) {
     window.languageSwitcher.switchToArabic();
@@ -180,14 +182,56 @@ function processUserSpeech(speech) {
     return;
   }
   
-  // In a real implementation, we would send the processed speech
-  // to the voice agent via the /api/voice_logic endpoint
+  // Check for voice settings command
+  if (speech.includes('إعدادات الصوت') || speech.toLowerCase().includes('voice settings')) {
+    window.app.appState.lastUserIntent = 'voice_settings_view';
+    window.app.saveUserData();
+    
+    // Navigate to voice settings page
+    window.app.navigateTo('/settings/voice');
+    
+    // Generate response
+    const response = window.app.appState.currentLanguage === 'ar' 
+      ? 'حسناً، هذه هي إعدادات الصوت.'
+      : 'Here are the voice settings.';
+    document.getElementById('assistant-response').textContent = response;
+    
+    if (window.textToSpeech) {
+      window.textToSpeech.speak(
+        response, 
+        window.app.appState.currentLanguage,
+        window.app.appState.voicePersonality
+      );
+    }
+    return;
+  }
   
-  // For demo purposes, generate a generic response
-  generateResponse('generic', processedSpeech.standardized);
+  // Check for emotions command
+  if (speech.includes('عرض المشاعر') || speech.toLowerCase().includes('show emotions')) {
+    window.app.appState.lastUserIntent = 'emotions_view';
+    window.app.saveUserData();
+    
+    // Navigate to emotions page
+    window.app.navigateTo('/emotions');
+    
+    // Generate response
+    const response = window.app.appState.currentLanguage === 'ar' 
+      ? 'حسناً، هذا هو سجل المشاعر الخاص بك.'
+      : 'Here is your emotion history.';
+    document.getElementById('assistant-response').textContent = response;
+    
+    if (window.textToSpeech) {
+      window.textToSpeech.speak(
+        response, 
+        window.app.appState.currentLanguage,
+        window.app.appState.voicePersonality
+      );
+    }
+    return;
+  }
   
-  // Detect emotion from speech
-  detectEmotion(speech);
+  // For all other speech, send to the server via API
+  sendToVoiceLogicAPI(speech);
 }
 
 // Set up text-to-speech
@@ -508,6 +552,100 @@ function saveEmotionToHistory(emotion, context) {
   }
 }
 
+// Send speech to voice logic API
+function sendToVoiceLogicAPI(speech) {
+  // Create a user ID (in a real app, this would be a proper user authentication)
+  const userId = localStorage.getItem('mashaaer_user_id') || generateUserId();
+  
+  // Save detected emotion locally for immediate feedback
+  const emotion = detectEmotion(speech);
+  
+  // Prepare request data
+  const requestData = {
+    user_id: userId,
+    speech: speech,
+    language: window.app.appState.currentLanguage
+  };
+  
+  // Show loading state
+  document.getElementById('assistant-response').textContent = 
+    window.app.appState.currentLanguage === 'ar' ? 'جاري التفكير...' : 'Thinking...';
+  
+  // Make API call
+  fetch('/api/voice_logic', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(requestData)
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    // Handle response
+    console.log('API response:', data);
+    
+    // Check for specific actions
+    if (data.action === 'switch_language') {
+      if (data.language === 'ar') {
+        window.languageSwitcher.switchToArabic();
+      } else if (data.language === 'en') {
+        window.languageSwitcher.switchToEnglish();
+      }
+    } else if (data.action === 'show_subscription') {
+      window.app.navigateTo('/settings/subscription');
+    } else if (data.emotion) {
+      // Update emotion display with server-detected emotion
+      updateEmotionDisplay(data.emotion);
+    }
+    
+    // Display and speak response
+    if (data.response) {
+      document.getElementById('assistant-response').textContent = data.response;
+      
+      if (window.textToSpeech) {
+        window.textToSpeech.speak(
+          data.response,
+          window.app.appState.currentLanguage,
+          window.app.appState.voicePersonality
+        );
+      }
+    }
+  })
+  .catch(error => {
+    console.error('Error calling voice logic API:', error);
+    
+    // Fallback to client-side response on error
+    const fallbackResponse = window.app.appState.currentLanguage === 'ar'
+      ? 'عذراً، حدث خطأ في الاتصال. سأحاول مساعدتك بشكل محدود.'
+      : 'Sorry, there was a connection error. I\'ll try to help you in a limited way.';
+    
+    document.getElementById('assistant-response').textContent = fallbackResponse;
+    
+    if (window.textToSpeech) {
+      window.textToSpeech.speak(
+        fallbackResponse,
+        window.app.appState.currentLanguage,
+        window.app.appState.voicePersonality
+      );
+    }
+    
+    // Still update emotion display with client-side detection
+    updateEmotionDisplay(emotion);
+  });
+}
+
+// Generate a unique user ID
+function generateUserId() {
+  const userId = 'user_' + Math.random().toString(36).substring(2, 15);
+  localStorage.setItem('mashaaer_user_id', userId);
+  return userId;
+}
+
 // Simulate voice recognition for demo purposes
 function simulateVoiceRecognition() {
   // Update UI
@@ -528,14 +666,18 @@ function simulateVoiceRecognition() {
         'كيف حالك؟',
         'ورجيني اشتراكي',
         'تحدث بالعربية',
-        'شلونك؟'
+        'شلونك؟',
+        'عرض المشاعر',
+        'إعدادات الصوت'
       ],
       en: [
         'Hello',
         'How are you?',
         'Show my subscription',
         'Switch to English',
-        'What\'s up?'
+        'What\'s up?',
+        'Show emotions',
+        'Voice settings'
       ]
     };
     
