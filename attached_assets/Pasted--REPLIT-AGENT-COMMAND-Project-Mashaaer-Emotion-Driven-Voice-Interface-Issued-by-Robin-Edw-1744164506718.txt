@@ -1,0 +1,74 @@
+[REPLIT_AGENT_COMMAND]
+
+Project: Mashaaer — Emotion-Driven Voice Interface  
+Issued by: Robin Edwan (General Manager, Eco Technology – Ajman)  
+Target: Replit Assistant / DevOps Automation
+
+—
+
+🎯 OBJECTIVE:
+Finalize production deployment of the Mashaaer application.  
+Assume development is complete and the system is ready for launch.
+
+—
+
+🔧 CONFIGURATION PHASE:
+
+1. ✅ **Activate Full Node Environment**
+- Ensure `server.js` is the main entry point
+- All dependencies must be resolved from `package.json`
+- Environment variables loaded from `.env`
+
+2. ✅ **Frontend Setup**
+- Serve `/index.html` or equivalent from `public/` or `src/frontend/`
+- Connect all JS modules:
+  - `app.js`, `voice-agent.js`, `emotions.js`, `subscription.js`
+- Bind canvas rendering (cosmic UI) as the root experience
+
+3. ✅ **Routing & API Binding**
+- `/api/voice_logic` must be active and responsive
+- User data, preferences, and emotion endpoints verified
+- CORS headers enabled for `https://decentravault.online`
+
+—
+
+🚀 LAUNCH PHASE:
+
+1. 🛰️ **Bind Custom Domain**
+- Domain: `https://decentravault.online`
+- Verify SSL, CNAME setup, and HTTPS readiness
+- Replit must respond properly on custom domain
+
+2. 📈 **Health Check**
+- API returns success for basic test
+- Frontend renders and accepts voice input
+- Emotion detection + response + visual feedback confirmed
+
+3. 📦 **Post-Launch State**
+- Ensure memory persistence via `memory.db`
+- UI/UX responsive on desktop and mobile
+- Log system status on first run
+
+—
+
+🧪 FINAL QA:
+
+✅ Verify:
+- Real-time voice interaction
+- Emotion-triggered UI adaptation
+- No visible errors in console or server logs
+- Deployment is stable under multiple client sessions
+
+—
+
+📛 FAILURE HANDLING:
+If any part fails, rollback to last verified build.
+Notify Robin before attempting any fix.
+
+—
+
+💡 FINAL NOTE:
+This is not a test. This is the **production launch** of a public-facing intelligent voice assistant.  
+Deploy with confidence and precision.
+
+[END_COMMAND]

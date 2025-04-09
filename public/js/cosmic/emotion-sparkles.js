@@ -3,7 +3,22 @@
  * Add particle effects to emotion displays that reflect the current emotional state
  */
 
+/**
+ * ParticleSystem class represents a single particle in the emotion sparkle effect.
+ * Each particle has its own position, velocity, color, size, and opacity properties.
+ */
 class ParticleSystem {
+    /**
+     * Create a new particle
+     * @param {number} x - Initial x position
+     * @param {number} y - Initial y position
+     * @param {string|Array<string>} color - Hex color or array of hex colors
+     * @param {number} size - Particle size in pixels
+     * @param {number} vx - X velocity
+     * @param {number} vy - Y velocity
+     * @param {number} opacity - Initial opacity (0-1)
+     * @param {number} fadeRate - How quickly the particle fades each frame
+     */
     constructor(x, y, color, size, vx, vy, opacity, fadeRate) {
         this.x = x;
         this.y = y;
@@ -15,12 +30,19 @@ class ParticleSystem {
         this.fadeRate = fadeRate;
     }
 
+    /**
+     * Update particle position and opacity
+     */
     update() {
         this.x += this.vx;
         this.y += this.vy;
         this.opacity -= this.fadeRate;
     }
 
+    /**
+     * Draw the particle to the canvas context
+     * @param {CanvasRenderingContext2D} ctx - Canvas rendering context
+     */
     draw(ctx) {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -28,21 +50,46 @@ class ParticleSystem {
         ctx.fill();
     }
 
+    /**
+     * Check if the particle is still visible and within bounds
+     * @returns {boolean} True if particle is still alive
+     */
     isAlive() {
         return this.opacity > 0 && this.x >= -50 && this.x <= window.innerWidth + 50 && this.y >= -50 && this.y <= window.innerHeight + 50;
     }
 
+    /**
+     * Convert hex color to RGB format
+     * @param {string} hex - Hex color code
+     * @returns {string} RGB color values as "r, g, b"
+     */
     hexToRgb(hex) {
+        if (!hex) return "255, 255, 255"; // Default to white if hex is undefined
+        if (typeof hex !== 'string') return "255, 255, 255"; // Default to white if hex is not a string
         if (hex.startsWith('#')) hex = hex.slice(1);
-        const bigint = parseInt(hex, 16);
-        const r = (bigint >> 16) & 255;
-        const g = (bigint >> 8) & 255;
-        const b = bigint & 255;
-        return `${r}, ${g}, ${b}`;
+        try {
+            const bigint = parseInt(hex, 16);
+            const r = (bigint >> 16) & 255;
+            const g = (bigint >> 8) & 255;
+            const b = bigint & 255;
+            return `${r}, ${g}, ${b}`;
+        } catch (e) {
+            console.error("Error parsing hex color:", hex, e);
+            return "255, 255, 255"; // Default to white on error
+        }
     }
 }
 
+/**
+ * EmotionSparkleEffect class creates and manages particle effects based on emotional states.
+ * It creates a canvas overlay for the target element and renders particle animations
+ * with colors and behaviors appropriate for different emotions.
+ */
 class EmotionSparkleEffect {
+    /**
+     * Create a new emotion sparkle effect
+     * @param {string|HTMLElement} targetElementId - Either element ID string or DOM element
+     */
     constructor(targetElementId) {
         if (typeof targetElementId === 'string') {
             this.targetElement = document.getElementById(targetElementId);
@@ -146,6 +193,9 @@ class EmotionSparkleEffect {
         };
     }
 
+    /**
+     * Resize the canvas to match the target element's dimensions
+     */
     resizeCanvas() {
         if (!this.canvas || !this.targetElement) return;
         
@@ -154,6 +204,10 @@ class EmotionSparkleEffect {
         this.canvas.height = rect.height;
     }
 
+    /**
+     * Trigger particle effect for a specific emotion
+     * @param {string} emotion - Emotion name (e.g., 'happy', 'sad', 'angry')
+     */
     trigger(emotion) {
         if (!this.targetElement || !this.ctx) return;
         
@@ -200,15 +254,27 @@ class EmotionSparkleEffect {
         }
     }
 
+    /**
+     * Update all particles (position and opacity)
+     * and remove dead particles from the collection
+     */
     update() {
         this.particles.forEach(particle => particle.update());
         this.particles = this.particles.filter(particle => particle.isAlive());
     }
 
+    /**
+     * Draw all particles to the canvas
+     * @param {CanvasRenderingContext2D} ctx - Canvas context
+     */
     draw(ctx) {
         this.particles.forEach(particle => particle.draw(ctx));
     }
     
+    /**
+     * Animate the particle system using requestAnimationFrame
+     * This creates a continuous animation loop while particles exist
+     */
     animate() {
         if (!this.ctx) return;
         
@@ -227,13 +293,20 @@ class EmotionSparkleEffect {
         }
     }
     
-    // Create burst effect (when emotion changes or for emphasis)
+    /**
+     * Create a burst effect with a larger number of particles
+     * Used for emphasizing emotion changes or important events
+     * @param {number} count - Number of particles to create in the burst
+     */
     createBurst(count = 20) {
         if (!this.targetElement) return;
         
         // Get current emotion from the emotion text
-        const emotionText = document.querySelector('.emotion-text')?.textContent.trim().toLowerCase();
-        let emotion = mapArabicEmotionToEnglish(emotionText);
+        const emotionTextEl = document.querySelector('.emotion-text');
+        if (!emotionTextEl) return;
+        
+        const emotionText = emotionTextEl.textContent.trim().toLowerCase();
+        let emotion = mapArabicEmotionToEnglish(emotionText) || 'neutral';
         
         // Handle aliases
         if (this.emotionMap[emotion]?.alias) {
@@ -245,6 +318,7 @@ class EmotionSparkleEffect {
         
         // If this is an alias entry, get the actual settings
         if (settings.alias) {
+            emotion = settings.alias;
             return this.createBurst(count);
         }
         
@@ -279,13 +353,21 @@ class EmotionSparkleEffect {
         }
     }
     
-    // Method to allow direct access to the original EmotionSparkles interface
+    /**
+     * Method to allow direct access to the original EmotionSparkles interface
+     * This maintains backward compatibility with existing code
+     * @param {string} emotion - Emotion name to trigger 
+     */
     setEmotion(emotion) {
         this.trigger(emotion);
     }
 }
 
-// Helper function to map Arabic emotion names to English
+/**
+ * Helper function to map Arabic emotion names to English
+ * @param {string} arabicEmotion - Emotion name in Arabic
+ * @returns {string} - Corresponding English emotion name or 'neutral' if not found
+ */
 function mapArabicEmotionToEnglish(arabicEmotion) {
     const arabicToEnglish = {
         'سعيد': 'happy',

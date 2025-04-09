@@ -29,8 +29,10 @@ const voiceSettingsTemplate = document.getElementById('voice-settings-template')
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize cosmic background
-  const cosmicBackground = new CosmicBackground(cosmicCanvas); // Pass canvas element
+  // Use existing cosmicBackground instance if available, or create if not
+  if (!window.cosmicBackground && cosmicCanvas) {
+    window.cosmicBackground = new CosmicBackground();
+  }
 
   // Check online status
   updateOnlineStatus();
@@ -49,77 +51,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load initial route
   navigateTo(window.location.pathname);
 
-  // Initialize emotion sparkles effect (replace 'emotion-display' with the actual ID)
-  const emotionSparkleEffect = new EmotionSparkleEffect('emotion-display');
+  // Initialize emotion sparkles effect if not already initialized by emotion-sparkles.js
+  if (document.querySelector('.emotion-display') && !window.emotionSparkles) {
+    try {
+      window.emotionSparkles = new EmotionSparkleEffect(document.querySelector('.emotion-display'));
+    } catch (e) {
+      console.warn('Error initializing EmotionSparkleEffect:', e);
+    }
+  }
 });
 
 
-// Cosmic Background Class (moved here from separate file)
-class CosmicBackground {
-  constructor(canvas) {
-    this.canvas = canvas;
-    this.ctx = this.canvas.getContext('2d');
-    this.stars = [];
-    this.init();
-  }
-
-  init() {
-    this.setCanvasSize();
-    this.createStars();
-    this.animate();
-  }
-
-  setCanvasSize() {
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
-  }
-
-  createStars() {
-    this.stars = [];
-    for (let i = 0; i < 1000; i++) {
-      this.stars.push({
-        x: Math.random() * this.canvas.width,
-        y: Math.random() * this.canvas.height,
-        radius: Math.random() * 1.5
-      });
-    }
-  }
-
-  animate() {
-    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.fillStyle = 'white';
-
-    for (const star of this.stars) {
-      this.ctx.beginPath();
-      this.ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-      this.ctx.fill();
-    }
-
-    requestAnimationFrame(() => this.animate());
-  }
-}
+// Cosmic Background is now imported from cosmic-background.js
 
 
-// Emotion Sparkle Effect Class (moved here from separate file)
-class EmotionSparkleEffect {
-  constructor(emotionElementId) {
-    this.emotionElement = document.getElementById(emotionElementId);
-    this.sparkles = [];
-    this.init();
-  }
-
-  init() {
-    this.emotionElement.addEventListener('emotionChange', (e) => {
-      this.triggerSparkles(e.detail.emotion);
-    });
-  }
-
-  triggerSparkles(emotion) {
-    // Basic logic to trigger sparkles based on emotion (replace with actual effect)
-    console.log(`Triggering sparkles for: ${emotion}`);
-  }
-}
+// EmotionSparkleEffect is now imported from cosmic/emotion-sparkles.js
 
 
 // Initialize the cosmic background (simplified)
