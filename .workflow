@@ -1,1 +1,1 @@
-run = "python ultra_minimal.py"
+run = "python server.py"
