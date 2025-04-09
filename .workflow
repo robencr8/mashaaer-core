@@ -1,1 +1,1 @@
-run = "python server.py"
+run = "cd RobinAI_Enhanced && gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app"
