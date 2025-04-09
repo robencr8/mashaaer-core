@@ -1,0 +1,3 @@
+task = "shell.exec"
+args = "python3 startup.py"
+waitForPort = 5000

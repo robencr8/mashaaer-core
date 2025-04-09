@@ -7,8 +7,13 @@ from flask_cors import CORS
 import datetime
 import logging
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
+# Configure logging with file output to reduce console overhead
+logging.basicConfig(level=logging.INFO, 
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    filename='app.log')
+console = logging.StreamHandler()
+console.setLevel(logging.WARNING)
+logging.getLogger('').addHandler(console)
 logger = logging.getLogger(__name__)
 
 # Create Flask app
@@ -33,6 +38,9 @@ app_config = {
     'chatModel': os.environ.get('ROBIN_CHAT_MODEL', 'openchat'),
     'apiEndpoint': os.environ.get('API_ENDPOINT', 'https://mashaaer.replit.app')
 }
+
+# Add health check endpoint for workflow
+# (removed to avoid duplicate definition with the one at line 529)
 
 # Initialize database
 db_path = os.path.join(os.getcwd(), 'memory.db')
@@ -547,5 +555,5 @@ def serve_static(path):
         return send_from_directory('public', 'index.html')
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8080))
+    port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)

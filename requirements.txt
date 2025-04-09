@@ -34,3 +34,4 @@ textblob
 openai
 openai
 flask
+gunicorn
