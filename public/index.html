@@ -11,21 +11,19 @@
     <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/images/favicon.ico">
     <link rel="apple-touch-icon" href="/assets/images/icon-192x192.png">
+    <script src="/js/cosmic/cosmic-background.js"></script>
+    <script src="/js/cosmic/emotion-sparkles.js"></script>
 </head>
 <body class="rtl">
-    <!-- Cosmic Canvas Background -->
     <canvas id="cosmicCanvas"></canvas>
-    <div id="cosmic-overlay"></div>
-    
-    <!-- Audio Player -->
     <div id="audioPlayer">
         <audio id="deepVoidMusic" loop>
-            <source src="https://freesound.org/data/previews/448/448595_7724152-lq.mp3" type="audio/mpeg">
+            <source src="/assets/sounds/deep-void-ambience.mp3" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
-        <button id="playPauseButton">▶ Play Cosmic Ambience</button>
+        <button id="playPauseButton">Play Music</button>
     </div>
-    
+
     <header>
         <div class="logo-container">
             <img src="/assets/images/logo.svg" alt="مشاعر" class="logo">
@@ -58,18 +56,18 @@
                     <span class="status-text">جاهز للاستماع</span>
                 </div>
             </div>
-            
+
             <div class="voice-visualization">
                 <canvas id="voice-waves"></canvas>
             </div>
-            
+
             <div class="emotion-display">
                 <div class="current-emotion">
                     <span class="emotion-icon">😊</span>
                     <span class="emotion-text">سعيد</span>
                 </div>
             </div>
-            
+
             <div class="voice-controls">
                 <button id="start-voice" class="primary-button">
                     <span class="mic-icon">🎤</span>
@@ -80,13 +78,13 @@
                     <span class="button-text">إيقاف</span>
                 </button>
             </div>
-            
+
             <div class="voice-transcript">
                 <p id="user-speech" class="user-text"></p>
                 <p id="assistant-response" class="assistant-text"></p>
             </div>
         </section>
-        
+
         <div id="app-container">
             <!-- المحتوى الديناميكي سيتم تحميله هنا -->
         </div>
@@ -121,14 +119,14 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="upgrade-options">
                 <h3>خيارات الترقية</h3>
                 <div class="plans-grid">
                     <!-- سيتم ملؤها ديناميكياً -->
                 </div>
             </div>
-            
+
             <div class="billing-history">
                 <h3>سجل الفواتير</h3>
                 <table class="billing-table">
@@ -187,11 +185,11 @@
                     <button id="timeline-view" class="view-button">جدول زمني</button>
                 </div>
             </div>
-            
+
             <div class="emotions-visualization">
                 <canvas id="emotions-chart"></canvas>
             </div>
-            
+
             <div class="emotions-timeline" style="display: none;">
                 <ul id="emotions-timeline-list">
                     <!-- سيتم ملؤها ديناميكياً -->
@@ -241,7 +239,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="voice-settings">
                 <h3>إعدادات الصوت</h3>
                 <div class="settings-form">
@@ -267,7 +265,6 @@
     <script src="/js/emotions.js"></script>
     <script src="/js/voice-settings.js"></script>
     <script src="/js/language-switcher.js"></script>
-    <script src="/js/cosmic/cosmic-background.js"></script>
-    <script src="/js/cosmic/emotion-sparkles.js"></script>
+
 </body>
 </html>

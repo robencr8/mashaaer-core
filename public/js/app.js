@@ -19,6 +19,7 @@ const startVoiceBtn = document.getElementById('start-voice');
 const stopVoiceBtn = document.getElementById('stop-voice');
 const userSpeechElement = document.getElementById('user-speech');
 const assistantResponseElement = document.getElementById('assistant-response');
+const cosmicCanvas = document.getElementById('cosmicCanvas'); // Added for cosmic background
 
 // Templates
 const subscriptionTemplate = document.getElementById('subscription-template');
@@ -29,54 +30,122 @@ const voiceSettingsTemplate = document.getElementById('voice-settings-template')
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize cosmic background
-  initCosmicBackground();
-  
+  const cosmicBackground = new CosmicBackground(cosmicCanvas); // Pass canvas element
+
   // Check online status
   updateOnlineStatus();
   window.addEventListener('online', updateOnlineStatus);
   window.addEventListener('offline', updateOnlineStatus);
-  
+
   // Initialize memory from localStorage or IndexedDB
   initializeMemory();
-  
+
   // Set up routing
   setupRouting();
-  
+
   // Set up event listeners
   setupEventListeners();
-  
+
   // Load initial route
   navigateTo(window.location.pathname);
+
+  // Initialize emotion sparkles effect (replace 'emotion-display' with the actual ID)
+  const emotionSparkleEffect = new EmotionSparkleEffect('emotion-display');
 });
 
-// Initialize the cosmic background
-function initCosmicBackground() {
-  // Handle audio player if it exists
-  const playPauseButton = document.getElementById('playPauseButton');
-  if (playPauseButton) {
-    playPauseButton.addEventListener('click', toggleBackgroundAudio);
+
+// Cosmic Background Class (moved here from separate file)
+class CosmicBackground {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = this.canvas.getContext('2d');
+    this.stars = [];
+    this.init();
   }
+
+  init() {
+    this.setCanvasSize();
+    this.createStars();
+    this.animate();
+  }
+
+  setCanvasSize() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+  }
+
+  createStars() {
+    this.stars = [];
+    for (let i = 0; i < 1000; i++) {
+      this.stars.push({
+        x: Math.random() * this.canvas.width,
+        y: Math.random() * this.canvas.height,
+        radius: Math.random() * 1.5
+      });
+    }
+  }
+
+  animate() {
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillStyle = 'white';
+
+    for (const star of this.stars) {
+      this.ctx.beginPath();
+      this.ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+
+    requestAnimationFrame(() => this.animate());
+  }
+}
+
+
+// Emotion Sparkle Effect Class (moved here from separate file)
+class EmotionSparkleEffect {
+  constructor(emotionElementId) {
+    this.emotionElement = document.getElementById(emotionElementId);
+    this.sparkles = [];
+    this.init();
+  }
+
+  init() {
+    this.emotionElement.addEventListener('emotionChange', (e) => {
+      this.triggerSparkles(e.detail.emotion);
+    });
+  }
+
+  triggerSparkles(emotion) {
+    // Basic logic to trigger sparkles based on emotion (replace with actual effect)
+    console.log(`Triggering sparkles for: ${emotion}`);
+  }
+}
+
+
+// Initialize the cosmic background (simplified)
+function initCosmicBackground() {
+  //No changes needed here, CosmicBackground is handled in DOMContentLoaded
 }
 
 // Initialize memory from localStorage or IndexedDB
 function initializeMemory() {
   // Try to load user data from localStorage first (for demo purposes)
   const savedUserData = localStorage.getItem('mashaaer_user_data');
-  
+
   if (savedUserData) {
     const userData = JSON.parse(savedUserData);
     appState.currentLanguage = userData.language || 'ar';
     appState.userPlan = userData.plan || 'basic';
     appState.lastUserIntent = userData.lastIntent || '';
     appState.voicePersonality = userData.voicePersonality || 'classic-arabic';
-    
+
     // Update UI based on loaded data
     updateLanguageUI();
   } else {
     // If no data in localStorage, create default data
     saveUserData();
   }
-  
+
   // In a real implementation, we would also check IndexedDB for emotion history
   // and other persistent data that doesn't fit well in localStorage
 }
@@ -89,9 +158,9 @@ function saveUserData() {
     lastIntent: appState.lastUserIntent,
     voicePersonality: appState.voicePersonality
   };
-  
+
   localStorage.setItem('mashaaer_user_data', JSON.stringify(userData));
-  
+
   // In a real implementation, we would also sync with memory.db
   // via the /api/voice_logic endpoint
 }
@@ -99,11 +168,11 @@ function saveUserData() {
 // Update online status and UI
 function updateOnlineStatus() {
   appState.isOnline = navigator.onLine;
-  
+
   // Update UI to reflect online status
   const statusIndicator = document.querySelector('.status-indicator');
   const statusText = document.querySelector('.status-text');
-  
+
   if (appState.isOnline) {
     statusIndicator.classList.add('active');
     statusText.textContent = appState.currentLanguage === 'ar' ? 'جاهز للاستماع' : 'Ready to listen';
@@ -122,7 +191,7 @@ function setupRouting() {
       navigateTo(new URL(e.target.href).pathname);
     }
   });
-  
+
   // Handle browser back/forward navigation
   window.addEventListener('popstate', () => {
     navigateTo(window.location.pathname, false);
@@ -138,15 +207,15 @@ function navigateTo(path, addToHistory = true) {
       link.classList.add('active');
     }
   });
-  
+
   // Update current route
   appState.currentRoute = path;
-  
+
   // Add to browser history if needed
   if (addToHistory) {
     history.pushState(null, '', path);
   }
-  
+
   // Render the appropriate view
   renderView(path);
 }
@@ -155,7 +224,7 @@ function navigateTo(path, addToHistory = true) {
 function renderView(path) {
   // Clear the app container
   appContainer.innerHTML = '';
-  
+
   // Render the appropriate view
   switch (path) {
     case '/':
@@ -180,10 +249,10 @@ function renderView(path) {
 function renderSubscriptionView() {
   // Clone the subscription template
   const subscriptionView = document.importNode(subscriptionTemplate.content, true);
-  
+
   // Add the view to the app container
   appContainer.appendChild(subscriptionView);
-  
+
   // Initialize the subscription components
   initializeSubscriptionView();
 }
@@ -192,10 +261,10 @@ function renderSubscriptionView() {
 function renderEmotionsView() {
   // Clone the emotions template
   const emotionsView = document.importNode(emotionsTemplate.content, true);
-  
+
   // Add the view to the app container
   appContainer.appendChild(emotionsView);
-  
+
   // Initialize the emotions components
   initializeEmotionsView();
 }
@@ -204,10 +273,10 @@ function renderEmotionsView() {
 function renderVoiceSettingsView() {
   // Clone the voice settings template
   const voiceSettingsView = document.importNode(voiceSettingsTemplate.content, true);
-  
+
   // Add the view to the app container
   appContainer.appendChild(voiceSettingsView);
-  
+
   // Initialize the voice settings components
   initializeVoiceSettingsView();
 }
@@ -216,10 +285,28 @@ function renderVoiceSettingsView() {
 function setupEventListeners() {
   // Language toggle
   languageToggle.addEventListener('click', toggleLanguage);
-  
+
   // Voice controls
   startVoiceBtn.addEventListener('click', startVoiceRecognition);
   stopVoiceBtn.addEventListener('click', stopVoiceRecognition);
+
+  // Audio control (modified to use the audio element directly)
+  document.addEventListener('DOMContentLoaded', () => {
+    const music = document.getElementById('deepVoidMusic');
+    const playPauseButton = document.getElementById('playPauseButton');
+    let audioPlaying = false;
+
+    playPauseButton.addEventListener('click', () => {
+      if (audioPlaying) {
+        music.pause();
+        playPauseButton.textContent = 'Play Music';
+      } else {
+        music.play();
+        playPauseButton.textContent = 'Pause Music';
+      }
+      audioPlaying = !audioPlaying;
+    });
+  });
 }
 
 // Toggle between Arabic and English
@@ -234,7 +321,7 @@ function updateLanguageUI() {
   const body = document.body;
   const langText = document.querySelector('.lang-text');
   const directionStylesheet = document.getElementById('direction-stylesheet');
-  
+
   if (appState.currentLanguage === 'ar') {
     body.classList.add('rtl');
     body.setAttribute('dir', 'rtl');
@@ -248,7 +335,7 @@ function updateLanguageUI() {
     langText.textContent = 'AR';
     directionStylesheet.setAttribute('href', 'css/ltr.css');
   }
-  
+
   // Update all text elements based on language
   updateTextElements();
 }
@@ -257,22 +344,22 @@ function updateLanguageUI() {
 function updateTextElements() {
   // This would be implemented with a full translation system
   // For now, we'll just update a few key elements as an example
-  
+
   const statusText = document.querySelector('.status-text');
   if (statusText) {
     statusText.textContent = appState.currentLanguage === 'ar' ? 'جاهز للاستماع' : 'Ready to listen';
   }
-  
+
   const startButtonText = document.querySelector('#start-voice .button-text');
   if (startButtonText) {
     startButtonText.textContent = appState.currentLanguage === 'ar' ? 'ابدأ المحادثة' : 'Start Conversation';
   }
-  
+
   const stopButtonText = document.querySelector('#stop-voice .button-text');
   if (stopButtonText) {
     stopButtonText.textContent = appState.currentLanguage === 'ar' ? 'إيقاف' : 'Stop';
   }
-  
+
   // In a real implementation, we would use a full translation system
   // with language files for all UI text
 }
@@ -283,10 +370,10 @@ function startVoiceRecognition() {
     appState.voiceActive = true;
     startVoiceBtn.disabled = true;
     stopVoiceBtn.disabled = false;
-    
+
     // In a real implementation, we would start the voice recognition here
     // and connect to the voice agent
-    
+
     // For demo purposes, simulate voice recognition
     simulateVoiceRecognition();
   }
@@ -298,7 +385,7 @@ function stopVoiceRecognition() {
     appState.voiceActive = false;
     startVoiceBtn.disabled = false;
     stopVoiceBtn.disabled = true;
-    
+
     // In a real implementation, we would stop the voice recognition here
   }
 }
@@ -308,7 +395,7 @@ function simulateVoiceRecognition() {
   // This is just a simulation for demo purposes
   // In a real implementation, we would use the Web Speech API
   // or a custom voice recognition service
-  
+
   setTimeout(() => {
     // Simulate user speech
     const userPhrases = {
@@ -327,10 +414,10 @@ function simulateVoiceRecognition() {
         'What\'s up?'
       ]
     };
-    
+
     const randomPhrase = userPhrases[appState.currentLanguage][Math.floor(Math.random() * userPhrases[appState.currentLanguage].length)];
     userSpeechElement.textContent = randomPhrase;
-    
+
     // Process the user speech
     processUserSpeech(randomPhrase);
   }, 1000);
@@ -340,22 +427,22 @@ function simulateVoiceRecognition() {
 function processUserSpeech(speech) {
   // In a real implementation, we would send the speech to the voice agent
   // via the /api/voice_logic endpoint
-  
+
   // For demo purposes, we'll handle a few commands directly
-  
+
   // Check for subscription command
   if (speech.includes('اشتراكي') || speech.toLowerCase().includes('subscription')) {
     appState.lastUserIntent = 'subscription_view';
     saveUserData();
-    
+
     // Navigate to subscription page
     navigateTo('/settings/subscription');
-    
+
     // Simulate assistant response
     simulateAssistantResponse('subscription');
     return;
   }
-  
+
   // Check for language switch command
   if (speech.includes('تحدث بالعربية')) {
     if (appState.currentLanguage !== 'ar') {
@@ -363,24 +450,24 @@ function processUserSpeech(speech) {
       updateLanguageUI();
       saveUserData();
     }
-    
+
     // Simulate assistant response
     simulateAssistantResponse('switch_to_arabic');
     return;
   }
-  
+
   if (speech.toLowerCase().includes('switch to english')) {
     if (appState.currentLanguage !== 'en') {
       appState.currentLanguage = 'en';
       updateLanguageUI();
       saveUserData();
     }
-    
+
     // Simulate assistant response
     simulateAssistantResponse('switch_to_english');
     return;
   }
-  
+
   // For other phrases, just simulate a generic response
   simulateAssistantResponse('generic');
 }
@@ -389,13 +476,13 @@ function processUserSpeech(speech) {
 function simulateAssistantResponse(type) {
   // This is just a simulation for demo purposes
   // In a real implementation, we would get the response from the voice agent
-  
+
   let response = '';
-  
+
   switch (type) {
     case 'subscription':
-      response = appState.currentLanguage === 'ar' 
-        ? 'حسناً، هذه هي معلومات اشتراكك. أنت حالياً على الخطة الأساسية.' 
+      response = appState.currentLanguage === 'ar'
+        ? 'حسناً، هذه هي معلومات اشتراكك. أنت حالياً على الخطة الأساسية.'
         : 'Here is your subscription information. You are currently on the Basic plan.';
       break;
     case 'switch_to_arabic':
@@ -420,43 +507,30 @@ function simulateAssistantResponse(type) {
           'Is there anything else you need?'
         ]
       };
-      
+
       response = genericResponses[appState.currentLanguage][Math.floor(Math.random() * genericResponses[appState.currentLanguage].length)];
   }
-  
+
   // Display the assistant response
   assistantResponseElement.textContent = response;
-  
+
   // In a real implementation, we would also use text-to-speech
   // to speak the response
-  
+
   // Reset voice recognition for demo purposes
   setTimeout(() => {
     stopVoiceRecognition();
   }, 2000);
 }
 
-// Toggle background audio
+// Toggle background audio (simplified - directly uses audio element)
 function toggleBackgroundAudio() {
-  const music = document.getElementById('deepVoidMusic');
-  const playPauseButton = document.getElementById('playPauseButton');
-  
-  if (!music) return;
-  
-  if (music.paused) {
-    music.play()
-      .then(() => {
-        console.log('Cosmic audio playback started successfully');
-        playPauseButton.textContent = '⏸️ Pause Cosmic Ambience';
-      })
-      .catch(error => {
-        console.error('Cosmic audio playback failed:', error);
-        playPauseButton.textContent = '❌ Audio Failed';
-      });
-  } else {
-    music.pause();
-    playPauseButton.textContent = '▶ Play Cosmic Ambience';
-  }
+    const music = document.getElementById('deepVoidMusic');
+    if (music.paused) {
+      music.play();
+    } else {
+      music.pause();
+    }
 }
 
 // Export functions for use in other modules
