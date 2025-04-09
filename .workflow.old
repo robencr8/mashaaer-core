@@ -1,0 +1,3 @@
+task = "shell.exec"
+args = "python run.py"
+waitForPort = 8080

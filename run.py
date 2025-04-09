@@ -1,7 +1,7 @@
 """
 Fast and direct server for Mashaaer app with cosmic effects
 """
-from flask import Flask, send_from_directory, jsonify
+from flask import Flask, send_from_directory
 
 app = Flask(__name__, static_folder='public')
 
@@ -18,8 +18,8 @@ def serve_static(path):
 @app.route('/health')
 def health_check():
     """Health check endpoint for workflow"""
-    return jsonify({"status": "healthy"})
+    return {"status": "healthy"}
 
 if __name__ == "__main__":
-    print("Starting Mashaaer server on port 5000...")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    print("Starting Mashaaer server on port 8080...")
+    app.run(host='0.0.0.0', port=8080, debug=True)
