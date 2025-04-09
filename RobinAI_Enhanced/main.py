@@ -42,4 +42,4 @@ except ImportError as e:
 # This is just for local testing - when running through gunicorn, 
 # the app variable above will be used directly
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=8000, debug=False)
