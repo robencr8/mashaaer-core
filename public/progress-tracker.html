@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotional Learning Progress | مشاعر</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/rtl.css">
+    <link rel="stylesheet" href="/css/cosmic-theme.css">
+    <link rel="stylesheet" href="/css/cosmic-animations.css">
+    <link rel="stylesheet" href="/static/css/progress-tracker.css">
+    <style>
+        /* Additional styles for progress tracker */
+        .progress-container {
+            margin-top: 30px;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--cosmic-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            box-shadow: var(--cosmic-shadow);
+        }
+        
+        .user-level {
+            background-color: var(--cosmic-bg-element);
+            border-radius: 30px;
+            padding: 5px 15px;
+            font-weight: bold;
+            color: var(--cosmic-primary);
+            box-shadow: var(--cosmic-shadow);
+        }
+        
+        .user-xp {
+            font-size: 0.8rem;
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .dashboard-section {
+            background-color: var(--cosmic-bg-element);
+            border-radius: var(--cosmic-radius-lg);
+            padding: 20px;
+            box-shadow: var(--cosmic-shadow);
+            transition: var(--cosmic-transition);
+            min-height: 200px;
+        }
+        
+        .dashboard-section:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--cosmic-glow);
+        }
+        
+        .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: var(--cosmic-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-icon {
+            font-size: 1.6rem;
+        }
+        
+        .badge-grid, .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .badge-item, .achievement-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: var(--cosmic-radius-md);
+            transition: var(--cosmic-transition);
+        }
+        
+        .badge-item:hover, .achievement-item:hover {
+            background-color: rgba(94, 114, 228, 0.1);
+        }
+        
+        .badge-icon, .achievement-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--cosmic-bg-container);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .badge-locked .badge-icon, .achievement-locked .achievement-icon {
+            opacity: 0.5;
+        }
+        
+        .badge-locked::after, .achievement-locked::after {
+            content: '🔒';
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-size: 1rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .badge-name, .achievement-name {
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .xp-progress {
+            width: 100%;
+            height: 8px;
+            background-color: rgba(94, 114, 228, 0.1);
+            border-radius: 4px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .xp-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cosmic-primary), var(--cosmic-secondary));
+            transition: width 0.5s ease-out;
+        }
+        
+        .emotion-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .emotion-stat {
+            background-color: rgba(94, 114, 228, 0.1);
+            border-radius: var(--cosmic-radius-md);
+            padding: 15px;
+            text-align: center;
+            transition: var(--cosmic-transition);
+        }
+        
+        .emotion-stat:hover {
+            transform: translateY(-3px);
+        }
+        
+        .emotion-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .emotion-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .emotion-level {
+            font-size: 0.9rem;
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .streak-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .streak-count {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--cosmic-primary);
+            min-width: 70px;
+            text-align: center;
+        }
+        
+        .streak-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .streak-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .streak-message {
+            font-size: 0.9rem;
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .insights-list {
+            margin-top: 20px;
+        }
+        
+        .insight-item {
+            background-color: rgba(94, 114, 228, 0.05);
+            border-radius: var(--cosmic-radius-md);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 3px solid var(--cosmic-primary);
+            transition: var(--cosmic-transition);
+        }
+        
+        .insight-item:hover {
+            transform: translateX(5px);
+            background-color: rgba(94, 114, 228, 0.1);
+        }
+        
+        .insight-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.8rem;
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .insight-emotion {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .insight-content {
+            line-height: 1.6;
+        }
+        
+        .stats-chart {
+            height: 200px;
+            margin-top: 20px;
+            border-radius: var(--cosmic-radius-md);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .chart-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(94, 114, 228, 0.05);
+            color: var(--cosmic-text-secondary);
+        }
+        
+        /* RTL support */
+        .rtl .badge-locked::after, .rtl .achievement-locked::after {
+            left: 0;
+            right: auto;
+        }
+        
+        .rtl .insight-item {
+            border-left: none;
+            border-right: 3px solid var(--cosmic-primary);
+        }
+        
+        .rtl .insight-item:hover {
+            transform: translateX(-5px);
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .badge-grid, .achievement-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .emotion-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="cosmicBackground"></div>
+    
+    <button class="language-toggle" id="languageToggle">العربية</button>
+    
+    <div class="main-container">
+        <div class="cosmic-container">
+            <h1 class="welcome-title cosmic-title" id="pageTitle">Emotional Learning Progress</h1>
+            
+            <div class="progress-container">
+                <div class="progress-header">
+                    <div class="user-info">
+                        <div class="user-avatar cosmic-glow">
+                            <span id="userInitial">U</span>
+                        </div>
+                        <div class="user-details">
+                            <h2 id="userName">Username</h2>
+                            <div class="user-level cosmic-glow-animation">
+                                <span id="userLevelLabel">Level</span> <span id="userLevel">1</span>
+                            </div>
+                            <div class="user-xp">
+                                <span id="userXP">0</span> XP to next level: <span id="nextLevelXP">100</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="level-progress">
+                        <div class="xp-progress">
+                            <div class="xp-progress-bar" id="xpProgressBar" style="width: 25%;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <!-- Badges Section -->
+                    <div class="dashboard-section">
+                        <div class="section-title">
+                            <span class="section-icon">🏆</span>
+                            <span id="badgesTitle">Badges</span>
+                        </div>
+                        <div class="badge-grid" id="badgesGrid">
+                            <!-- Badges will be populated dynamically -->
+                            <div class="badge-item" data-badge-id="1">
+                                <div class="badge-icon cosmic-glow">🌱</div>
+                                <div class="badge-name">First Steps</div>
+                            </div>
+                            <div class="badge-item badge-locked" data-badge-id="2">
+                                <div class="badge-icon">🔥</div>
+                                <div class="badge-name">3-Day Streak</div>
+                            </div>
+                            <div class="badge-item badge-locked" data-badge-id="3">
+                                <div class="badge-icon">⚡</div>
+                                <div class="badge-name">7-Day Streak</div>
+                            </div>
+                            <div class="badge-item badge-locked" data-badge-id="4">
+                                <div class="badge-icon">🌟</div>
+                                <div class="badge-name">Emotion Explorer</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Achievements Section -->
+                    <div class="dashboard-section">
+                        <div class="section-title">
+                            <span class="section-icon">🎯</span>
+                            <span id="achievementsTitle">Achievements</span>
+                        </div>
+                        <div class="achievement-grid" id="achievementsGrid">
+                            <!-- Achievements will be populated dynamically -->
+                            <div class="achievement-item" data-achievement-id="1">
+                                <div class="achievement-icon cosmic-glow">🚀</div>
+                                <div class="achievement-name">Journey Begins</div>
+                            </div>
+                            <div class="achievement-item achievement-locked" data-achievement-id="2">
+                                <div class="achievement-icon">📊</div>
+                                <div class="achievement-name">Consistent Reflector</div>
+                            </div>
+                            <div class="achievement-item achievement-locked" data-achievement-id="3">
+                                <div class="achievement-icon">🧠</div>
+                                <div class="achievement-name">Emotion Diversity</div>
+                            </div>
+                            <div class="achievement-item achievement-locked" data-achievement-id="4">
+                                <div class="achievement-icon">🔮</div>
+                                <div class="achievement-name">Insight Master</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Emotion Stats Section -->
+                    <div class="dashboard-section">
+                        <div class="section-title">
+                            <span class="section-icon">📈</span>
+                            <span id="emotionStatsTitle">Emotion Stats</span>
+                        </div>
+                        <div class="emotion-stats" id="emotionStatsGrid">
+                            <!-- Emotion stats will be populated dynamically -->
+                            <div class="emotion-stat" data-emotion="happiness">
+                                <div class="emotion-icon cosmic-glow">😊</div>
+                                <div class="emotion-name">Happiness</div>
+                                <div class="emotion-level">Level 2</div>
+                                <div class="xp-progress">
+                                    <div class="xp-progress-bar" style="width: 60%;"></div>
+                                </div>
+                            </div>
+                            <div class="emotion-stat" data-emotion="sadness">
+                                <div class="emotion-icon cosmic-glow">😢</div>
+                                <div class="emotion-name">Sadness</div>
+                                <div class="emotion-level">Level 1</div>
+                                <div class="xp-progress">
+                                    <div class="xp-progress-bar" style="width: 30%;"></div>
+                                </div>
+                            </div>
+                            <div class="emotion-stat" data-emotion="anger">
+                                <div class="emotion-icon cosmic-glow">😠</div>
+                                <div class="emotion-name">Anger</div>
+                                <div class="emotion-level">Level 1</div>
+                                <div class="xp-progress">
+                                    <div class="xp-progress-bar" style="width: 15%;"></div>
+                                </div>
+                            </div>
+                            <!-- More emotions -->
+                        </div>
+                        <div class="stats-chart" id="emotionChart">
+                            <div class="chart-placeholder">Emotion trend chart</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Streaks and Insights Section -->
+                    <div class="dashboard-section">
+                        <div class="section-title">
+                            <span class="section-icon">💡</span>
+                            <span id="insightsTitle">Insights & Streaks</span>
+                        </div>
+                        <div class="streak-container cosmic-glow">
+                            <div class="streak-count cosmic-pulse" id="streakCount">3</div>
+                            <div class="streak-info">
+                                <div class="streak-label" id="streakLabel">Day Streak</div>
+                                <div class="streak-message" id="streakMessage">Keep going! You're building a habit.</div>
+                            </div>
+                        </div>
+                        <div class="insights-list" id="insightsList">
+                            <!-- Insights will be populated dynamically -->
+                            <div class="insight-item" data-insight-id="1">
+                                <div class="insight-meta">
+                                    <div class="insight-emotion">
+                                        <span>😊</span> Happiness
+                                    </div>
+                                    <div class="insight-date">Today</div>
+                                </div>
+                                <div class="insight-content">Great job expressing joy! Try to identify what exactly made you happy today, and consider how you can incorporate more of it into your routine.</div>
+                            </div>
+                            <div class="insight-item" data-insight-id="2">
+                                <div class="insight-meta">
+                                    <div class="insight-emotion">
+                                        <span>🔄</span> Pattern
+                                    </div>
+                                    <div class="insight-date">Yesterday</div>
+                                </div>
+                                <div class="insight-content">I've noticed you've been experiencing happiness frequently lately. This might be a good time to reflect on any recurring situations or thoughts that might be contributing to this pattern.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation -->
+                <div style="margin-top: 40px; text-align: center;">
+                    <a href="/" class="cosmic-button cosmic-button-outlined" id="homeButton">Back to Home</a>
+                    <a href="/emotion-analysis.html" class="cosmic-button" id="analysisButton">Record New Emotion</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for Badge/Achievement Details -->
+    <div class="cosmic-modal" id="detailsModal" style="display: none;">
+        <div class="cosmic-modal-overlay"></div>
+        <div class="cosmic-modal-container">
+            <div class="cosmic-modal-header">
+                <h3 id="modalTitle">Badge Details</h3>
+                <button class="cosmic-modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="cosmic-modal-body">
+                <div class="modal-content-center">
+                    <div class="badge-icon large cosmic-glow" id="modalIcon">🏆</div>
+                </div>
+                <h3 id="modalItemName" class="cosmic-text-gradient">First Steps</h3>
+                <p id="modalItemDescription">Record your first emotion</p>
+                <div class="modal-extra-info" id="modalExtraInfo">
+                    <p><strong>Earned:</strong> <span id="modalEarnedDate">April 5, 2025</span></p>
+                    <p><strong>Points:</strong> <span id="modalPoints">10 XP</span></p>
+                </div>
+            </div>
+            <div class="cosmic-modal-footer">
+                <button class="cosmic-button" id="modalCloseButton">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/cosmic-theme.js"></script>
+    <script src="/js/cosmic-emotion-sparkles.js"></script>
+    <script src="/static/js/progress-tracker.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the Cosmic Background
+            const cosmicBackground = new CosmicBackground({
+                container: document.getElementById('cosmicBackground'),
+                starsBrightness: 0.7,
+                nebulaIntensity: 0.8,
+                animationSpeed: 0.5,
+                reduceMotion: false,
+                showControls: false,
+                theme: 'blue-purple',
+                zIndex: -1
+            });
+            
+            // Initialize Emotion Sparkles
+            const emotionSparkles = new EmotionSparkles({
+                container: document.body,
+                enabled: true,
+                size: 6,
+                count: 25,
+                clickEnabled: true,
+                hoverEnabled: true,
+                emotionChangeEnabled: true
+            });
+            
+            // Language toggle
+            const languageToggle = document.getElementById('languageToggle');
+            let currentLanguage = 'en';
+            
+            languageToggle.addEventListener('click', function() {
+                if (currentLanguage === 'en') {
+                    currentLanguage = 'ar';
+                    document.body.classList.add('rtl');
+                    this.textContent = 'English';
+                    updateUILanguage('ar');
+                    // Changed emotion theme based on Arabic
+                    cosmicBackground.setEmotion('happy');
+                } else {
+                    currentLanguage = 'en';
+                    document.body.classList.remove('rtl');
+                    this.textContent = 'العربية';
+                    updateUILanguage('en');
+                    // Reset emotion theme
+                    cosmicBackground.setEmotion('neutral');
+                }
+            });
+            
+            function updateUILanguage(lang) {
+                if (lang === 'ar') {
+                    // Update all text elements to Arabic
+                    document.getElementById('pageTitle').textContent = 'تقدم التعلم العاطفي';
+                    document.getElementById('userLevelLabel').textContent = 'المستوى';
+                    document.getElementById('badgesTitle').textContent = 'الشارات';
+                    document.getElementById('achievementsTitle').textContent = 'الإنجازات';
+                    document.getElementById('emotionStatsTitle').textContent = 'إحصائيات المشاعر';
+                    document.getElementById('insightsTitle').textContent = 'الرؤى والتتابع';
+                    document.getElementById('streakLabel').textContent = 'أيام متتالية';
+                    document.getElementById('streakMessage').textContent = 'استمر! أنت تبني عادة جيدة.';
+                    document.getElementById('homeButton').textContent = 'العودة للرئيسية';
+                    document.getElementById('analysisButton').textContent = 'تسجيل شعور جديد';
+                    document.getElementById('modalTitle').textContent = 'تفاصيل الشارة';
+                    document.getElementById('modalCloseButton').textContent = 'إغلاق';
+                } else {
+                    // Update all text elements to English
+                    document.getElementById('pageTitle').textContent = 'Emotional Learning Progress';
+                    document.getElementById('userLevelLabel').textContent = 'Level';
+                    document.getElementById('badgesTitle').textContent = 'Badges';
+                    document.getElementById('achievementsTitle').textContent = 'Achievements';
+                    document.getElementById('emotionStatsTitle').textContent = 'Emotion Stats';
+                    document.getElementById('insightsTitle').textContent = 'Insights & Streaks';
+                    document.getElementById('streakLabel').textContent = 'Day Streak';
+                    document.getElementById('streakMessage').textContent = 'Keep going! You\'re building a habit.';
+                    document.getElementById('homeButton').textContent = 'Back to Home';
+                    document.getElementById('analysisButton').textContent = 'Record New Emotion';
+                    document.getElementById('modalTitle').textContent = 'Badge Details';
+                    document.getElementById('modalCloseButton').textContent = 'Close';
+                }
+            }
+            
+            // Event listeners for badge and achievement items
+            const badgeItems = document.querySelectorAll('.badge-item');
+            const achievementItems = document.querySelectorAll('.achievement-item');
+            
+            // Function to open modal with details
+            function openDetailsModal(type, id, name, description, icon) {
+                const modal = document.getElementById('detailsModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalItemName = document.getElementById('modalItemName');
+                const modalItemDescription = document.getElementById('modalItemDescription');
+                const modalIcon = document.getElementById('modalIcon');
+                const modalEarnedDate = document.getElementById('modalEarnedDate');
+                const modalPoints = document.getElementById('modalPoints');
+                const modalExtraInfo = document.getElementById('modalExtraInfo');
+                
+                modalTitle.textContent = type === 'badge' ? 'Badge Details' : 'Achievement Details';
+                modalItemName.textContent = name;
+                modalItemDescription.textContent = description;
+                modalIcon.textContent = icon;
+                
+                // For demo, we'll show extra info only for unlocked items
+                const isLocked = document.querySelector(`[data-${type}-id="${id}"]`).classList.contains(`${type}-locked`);
+                
+                modalExtraInfo.style.display = isLocked ? 'none' : 'block';
+                
+                if (!isLocked) {
+                    // Demo data
+                    modalEarnedDate.textContent = 'April 5, 2025';
+                    modalPoints.textContent = type === 'badge' ? '10 XP' : '50 XP';
+                }
+                
+                modal.style.display = 'block';
+            }
+            
+            // Close modal functions
+            document.getElementById('modalClose').addEventListener('click', function() {
+                document.getElementById('detailsModal').style.display = 'none';
+            });
+            
+            document.getElementById('modalCloseButton').addEventListener('click', function() {
+                document.getElementById('detailsModal').style.display = 'none';
+            });
+            
+            // Add event listeners to badge items
+            badgeItems.forEach(function(item) {
+                item.addEventListener('click', function() {
+                    const id = this.getAttribute('data-badge-id');
+                    const name = this.querySelector('.badge-name').textContent;
+                    const icon = this.querySelector('.badge-icon').textContent;
+                    
+                    // Demo descriptions
+                    const descriptions = {
+                        '1': 'Record your first emotion',
+                        '2': 'Record your emotions for 3 days in a row',
+                        '3': 'Record your emotions for 7 days in a row',
+                        '4': 'Experience and record 5 different emotions'
+                    };
+                    
+                    openDetailsModal('badge', id, name, descriptions[id], icon);
+                });
+            });
+            
+            // Add event listeners to achievement items
+            achievementItems.forEach(function(item) {
+                item.addEventListener('click', function() {
+                    const id = this.getAttribute('data-achievement-id');
+                    const name = this.querySelector('.achievement-name').textContent;
+                    const icon = this.querySelector('.achievement-icon').textContent;
+                    
+                    // Demo descriptions
+                    const descriptions = {
+                        '1': 'Start your journey of emotional awareness',
+                        '2': 'Make reflection a daily habit',
+                        '3': 'Experience the full spectrum of emotions',
+                        '4': 'Gain deep understanding from your emotions'
+                    };
+                    
+                    openDetailsModal('achievement', id, name, descriptions[id], icon);
+                });
+            });
+            
+            // Animation effects for stats
+            const emotionStats = document.querySelectorAll('.emotion-stat');
+            emotionStats.forEach(stat => {
+                stat.addEventListener('mouseover', function() {
+                    const emotionType = this.getAttribute('data-emotion');
+                    
+                    // Change background emotion
+                    if (emotionType === 'happiness') {
+                        cosmicBackground.setEmotion('happy');
+                        emotionSparkles.setEmotion('happy');
+                    } else if (emotionType === 'sadness') {
+                        cosmicBackground.setEmotion('sad');
+                        emotionSparkles.setEmotion('sad');
+                    } else if (emotionType === 'anger') {
+                        cosmicBackground.setEmotion('angry');
+                        emotionSparkles.setEmotion('angry');
+                    } else {
+                        cosmicBackground.setEmotion('neutral');
+                        emotionSparkles.setEmotion('neutral');
+                    }
+                    
+                    // Add glow effect
+                    this.classList.add('cosmic-glow');
+                    
+                    // Emit particles
+                    const rect = this.getBoundingClientRect();
+                    const x = rect.left + rect.width / 2;
+                    const y = rect.top + rect.height / 2;
+                    emotionSparkles.emit(x, y);
+                });
+                
+                stat.addEventListener('mouseout', function() {
+                    // Reset emotion
+                    cosmicBackground.setEmotion('neutral');
+                    emotionSparkles.setEmotion('neutral');
+                    
+                    // Remove glow
+                    this.classList.remove('cosmic-glow');
+                });
+            });
+            
+            // Make streak counter pulse
+            const streakCount = document.getElementById('streakCount');
+            streakCount.classList.add('cosmic-pulse');
+        });
+    </script>
+</body>
+</html>

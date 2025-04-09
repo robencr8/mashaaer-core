@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mashaaer Feelings</title>
+    <title>Mashaaer Feelings | مشاعر</title>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/rtl.css">
+    <link rel="stylesheet" href="/css/cosmic-theme.css">
+    <link rel="stylesheet" href="/css/cosmic-animations.css">
     <style>
         .menu-grid {
             display: grid;
@@ -15,49 +17,117 @@
         }
         
         .menu-item {
-            background-color: rgba(94, 114, 228, 0.1);
-            border-radius: 15px;
-            padding: 20px;
+            background-color: var(--cosmic-bg-element);
+            border-radius: var(--cosmic-radius-lg);
+            padding: 25px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: var(--cosmic-transition);
             text-decoration: none;
-            color: white;
+            color: var(--cosmic-text-primary);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, 
+                          rgba(94, 114, 228, 0.2) 0%, 
+                          rgba(94, 114, 228, 0) 70%);
+            transform: scale(0);
+            transform-origin: center;
+            transition: transform 0.6s ease-out;
+            z-index: -1;
+        }
+        
+        .menu-item:hover::before {
+            transform: scale(1.5);
         }
         
         .menu-item:hover {
-            transform: translateY(-5px);
-            background-color: rgba(94, 114, 228, 0.2);
-            box-shadow: 0 7px 14px rgba(94, 114, 228, 0.2);
+            transform: translateY(-8px);
+            box-shadow: var(--cosmic-shadow);
+        }
+        
+        .menu-item:hover .menu-icon {
+            transform: scale(1.1);
         }
         
         .menu-icon {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            color: #5e72e4;
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--cosmic-primary);
+            transition: var(--cosmic-transition);
+            display: inline-block;
         }
         
         .menu-title {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
+            font-size: 1.4rem;
+            margin-bottom: 12px;
             font-weight: bold;
+            background: linear-gradient(45deg, var(--cosmic-primary), var(--cosmic-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
         }
         
         .menu-description {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+            color: var(--cosmic-text-secondary);
+            line-height: 1.5;
         }
         
         .language-toggle {
             position: absolute;
             top: 20px;
             right: 20px;
-            background: none;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 5px 15px;
-            border-radius: 20px;
+            background: rgba(94, 114, 228, 0.1);
+            border: 1px solid rgba(94, 114, 228, 0.3);
+            padding: 8px 20px;
+            border-radius: 30px;
             color: white;
             cursor: pointer;
+            transition: var(--cosmic-transition);
+            z-index: 100;
+        }
+        
+        .language-toggle:hover {
+            background: rgba(94, 114, 228, 0.2);
+            box-shadow: 0 0 15px rgba(94, 114, 228, 0.4);
+        }
+        
+        .welcome-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+        
+        .welcome-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cosmic-primary), transparent);
+        }
+        
+        .rtl .welcome-title::after {
+            left: auto;
+            right: 0;
+            background: linear-gradient(90deg, transparent, var(--cosmic-primary));
+        }
+        
+        .main-container {
+            position: relative;
+            z-index: 2;
+            padding-top: 30px;
         }
         
         @media (max-width: 768px) {
@@ -68,73 +138,62 @@
     </style>
 </head>
 <body>
-    <div class="stars" id="stars"></div>
+    <div id="cosmicBackground"></div>
     
     <button class="language-toggle" id="languageToggle">العربية</button>
     
-    <div class="cosmic-container">
-        <h1>Mashaaer Feelings</h1>
-        <p id="welcomeText">Welcome to Mashaaer Feelings, an advanced AI emotional companion that analyzes and responds to your emotions. Experience the future of human-AI interaction with our bilingual support and cosmic design.</p>
-        
-        <div class="menu-grid">
-            <a href="/emotion-analysis.html" class="menu-item">
-                <div class="menu-icon">🔍</div>
-                <div class="menu-title" id="analysisTitle">Emotion Analysis</div>
-                <div class="menu-description" id="analysisDesc">Analyze your emotions through text or voice input</div>
-            </a>
+    <div class="main-container">
+        <div class="cosmic-container">
+            <h1 class="welcome-title cosmic-title" id="mainTitle">Mashaaer Feelings</h1>
+            <p id="welcomeText" class="cosmic-text">Welcome to Mashaaer Feelings, an advanced AI emotional companion that analyzes and responds to your emotions. Experience the future of human-AI interaction with our bilingual support and cosmic design.</p>
             
-            <a href="/emotions-visualization.html" class="menu-item">
-                <div class="menu-icon">✨</div>
-                <div class="menu-title" id="visualizationTitle">Emotions Visualization</div>
-                <div class="menu-description" id="visualizationDesc">View your emotional patterns in an interactive display</div>
-            </a>
+            <div class="menu-grid">
+                <a href="/emotion-analysis.html" class="menu-item cosmic-card">
+                    <div class="menu-icon">🔍</div>
+                    <div class="menu-title" id="analysisTitle">Emotion Analysis</div>
+                    <div class="menu-description" id="analysisDesc">Analyze your emotions through text or voice input</div>
+                </a>
+                
+                <a href="/emotions-visualization.html" class="menu-item cosmic-card">
+                    <div class="menu-icon">✨</div>
+                    <div class="menu-title" id="visualizationTitle">Emotions Visualization</div>
+                    <div class="menu-description" id="visualizationDesc">View your emotional patterns in an interactive display</div>
+                </a>
+                
+                <a href="/accessibility.html" class="menu-item cosmic-card">
+                    <div class="menu-icon">🔊</div>
+                    <div class="menu-title" id="accessibilityTitle">Accessibility Features</div>
+                    <div class="menu-description" id="accessibilityDesc">Voice guidance and other accessibility options</div>
+                </a>
+                
+                <a href="/settings.html" class="menu-item cosmic-card">
+                    <div class="menu-icon">⚙️</div>
+                    <div class="menu-title" id="settingsTitle">Settings</div>
+                    <div class="menu-description" id="settingsDesc">Configure your preferences and personalization</div>
+                </a>
+            </div>
             
-            <a href="/accessibility.html" class="menu-item">
-                <div class="menu-icon">🔊</div>
-                <div class="menu-title" id="accessibilityTitle">Accessibility Features</div>
-                <div class="menu-description" id="accessibilityDesc">Voice guidance and other accessibility options</div>
-            </a>
-            
-            <a href="/settings.html" class="menu-item">
-                <div class="menu-icon">⚙️</div>
-                <div class="menu-title" id="settingsTitle">Settings</div>
-                <div class="menu-description" id="settingsDesc">Configure your preferences and personalization</div>
-            </a>
-        </div>
-        
-        <div style="margin-top: 40px;">
-            <a href="/cosmic-loader-demo.html" class="cosmic-button" id="demoButton">Cosmic UI Demo</a>
+            <div style="margin-top: 40px; text-align: center;">
+                <a href="/cosmic-loader-demo.html" class="cosmic-button" id="demoButton">Cosmic UI Demo</a>
+            </div>
         </div>
     </div>
     
+    <script src="/js/cosmic-theme.js"></script>
+    <script src="/js/cosmic-emotion-sparkles.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Create stars background
-            const starsContainer = document.getElementById('stars');
-            const numberOfStars = 100;
-            
-            for (let i = 0; i < numberOfStars; i++) {
-                const star = document.createElement('div');
-                star.classList.add('star');
-                
-                // Random position
-                const posX = Math.random() * 100;
-                const posY = Math.random() * 100;
-                
-                // Random size
-                const size = Math.random() * 3;
-                
-                // Random animation delay
-                const delay = Math.random() * 5;
-                
-                star.style.left = `${posX}%`;
-                star.style.top = `${posY}%`;
-                star.style.width = `${size}px`;
-                star.style.height = `${size}px`;
-                star.style.animationDelay = `${delay}s`;
-                
-                starsContainer.appendChild(star);
-            }
+            // Initialize the Cosmic Background
+            const cosmicBackground = new CosmicBackground({
+                container: document.getElementById('cosmicBackground'),
+                starsBrightness: 0.7,
+                nebulaIntensity: 0.8,
+                animationSpeed: 0.5,
+                reduceMotion: false,
+                showControls: false,
+                theme: 'blue-purple',
+                zIndex: -1
+            });
             
             // Language toggle
             const languageToggle = document.getElementById('languageToggle');
@@ -146,18 +205,22 @@
                     document.body.classList.add('rtl');
                     this.textContent = 'English';
                     updateUILanguage('ar');
+                    // Changed emotion theme based on Arabic
+                    cosmicBackground.setEmotion('happy');
                 } else {
                     currentLanguage = 'en';
                     document.body.classList.remove('rtl');
                     this.textContent = 'العربية';
                     updateUILanguage('en');
+                    // Reset emotion theme
+                    cosmicBackground.setEmotion('neutral');
                 }
             });
             
             function updateUILanguage(lang) {
                 if (lang === 'ar') {
                     // Update all text elements to Arabic
-                    document.querySelector('h1').textContent = 'مشاعر';
+                    document.getElementById('mainTitle').textContent = 'مشاعر';
                     document.getElementById('welcomeText').textContent = 'مرحبًا بك في مشاعر، رفيق الذكاء الاصطناعي العاطفي المتقدم الذي يحلل ويستجيب لمشاعرك. استمتع بمستقبل التفاعل بين الإنسان والذكاء الاصطناعي مع دعمنا ثنائي اللغة وتصميمنا الكوني.';
                     
                     document.getElementById('analysisTitle').textContent = 'تحليل المشاعر';
@@ -175,7 +238,7 @@
                     document.getElementById('demoButton').textContent = 'عرض واجهة المستخدم الكونية';
                 } else {
                     // Update all text elements to English
-                    document.querySelector('h1').textContent = 'Mashaaer Feelings';
+                    document.getElementById('mainTitle').textContent = 'Mashaaer Feelings';
                     document.getElementById('welcomeText').textContent = 'Welcome to Mashaaer Feelings, an advanced AI emotional companion that analyzes and responds to your emotions. Experience the future of human-AI interaction with our bilingual support and cosmic design.';
                     
                     document.getElementById('analysisTitle').textContent = 'Emotion Analysis';
@@ -193,6 +256,114 @@
                     document.getElementById('demoButton').textContent = 'Cosmic UI Demo';
                 }
             }
+            
+            // Initialize Emotion Sparkles
+            const emotionSparkles = new EmotionSparkles({
+                container: document.body,
+                enabled: true,
+                size: 6,
+                count: 25,
+                clickEnabled: true,
+                hoverEnabled: true,
+                emotionChangeEnabled: true
+            });
+            
+            // Add interactive elements with cosmic theme
+            const menuItems = document.querySelectorAll('.menu-item');
+            
+            menuItems.forEach(item => {
+                // إضافة سمة data-emotion لكل عنصر من العناصر
+                const title = item.querySelector('.menu-title').textContent.toLowerCase();
+                let emotionType = 'neutral';
+                
+                if (title.includes('emotion') || title.includes('تحليل المشاعر')) {
+                    emotionType = 'happy';
+                } else if (title.includes('visualization') || title.includes('تصور')) {
+                    emotionType = 'neutral';
+                } else if (title.includes('accessibility') || title.includes('الوصول')) {
+                    emotionType = 'sad';
+                } else if (title.includes('settings') || title.includes('الإعدادات')) {
+                    emotionType = 'angry';
+                }
+                
+                item.setAttribute('data-emotion', emotionType);
+                
+                item.addEventListener('mouseover', function() {
+                    // Get menu title to determine emotion
+                    const title = this.querySelector('.menu-title').textContent.toLowerCase();
+                    
+                    // Set background emotion based on menu item
+                    if (title.includes('emotion') || title.includes('تحليل المشاعر')) {
+                        cosmicBackground.setEmotion('happy');
+                        emotionSparkles.setEmotion('happy');
+                    } else if (title.includes('visualization') || title.includes('تصور')) {
+                        cosmicBackground.setEmotion('neutral');
+                        emotionSparkles.setEmotion('neutral');
+                    } else if (title.includes('accessibility') || title.includes('الوصول')) {
+                        cosmicBackground.setEmotion('sad');
+                        emotionSparkles.setEmotion('sad');
+                    } else if (title.includes('settings') || title.includes('الإعدادات')) {
+                        cosmicBackground.setEmotion('angry');
+                        emotionSparkles.setEmotion('angry');
+                    }
+                    
+                    // Add glow effect
+                    this.classList.add('cosmic-glow');
+                    
+                    // إضافة تأثير مموج للعنصر
+                    this.classList.add('cosmic-wave');
+                    
+                    // إنشاء تأثير المشاعر فوق العنصر
+                    const rect = this.getBoundingClientRect();
+                    const x = rect.left + rect.width / 2;
+                    const y = rect.top + rect.height / 2;
+                    
+                    // إصدار تأثير الجسيمات
+                    emotionSparkles.emit(x, y);
+                });
+                
+                item.addEventListener('mouseout', function() {
+                    // Reset emotion
+                    cosmicBackground.setEmotion('neutral');
+                    emotionSparkles.setEmotion('neutral');
+                    
+                    // Remove glow and wave effects
+                    this.classList.remove('cosmic-glow');
+                    this.classList.remove('cosmic-wave');
+                });
+                
+                // Add click interaction effect
+                item.addEventListener('click', function(e) {
+                    // Create ripple effect
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    this.appendChild(ripple);
+                    
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    
+                    ripple.style.width = ripple.style.height = `${size}px`;
+                    ripple.style.left = `${e.clientX - rect.left - size/2}px`;
+                    ripple.style.top = `${e.clientY - rect.top - size/2}px`;
+                    
+                    ripple.classList.add('active');
+                    
+                    // إنشاء تأثير إضافي للنقر باستخدام جسيمات المشاعر
+                    emotionSparkles.emitFromEvent(e);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 500);
+                });
+            });
+            
+            // إضافة تأثير للعنوان الرئيسي
+            const mainTitle = document.getElementById('mainTitle');
+            mainTitle.classList.add('cosmic-sparkle-animation');
+            
+            // إضافة تأثير للزر الرئيسي
+            const demoButton = document.getElementById('demoButton');
+            demoButton.classList.add('cosmic-pulse');
         });
     </script>
 </body>

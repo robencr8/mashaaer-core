@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="50" r="45" fill="url(#consistent_gradient)" />
+  <circle cx="50" cy="50" r="40" stroke="white" stroke-width="2" stroke-opacity="0.6" fill="none" />
+  
+  <!-- Chart/Graph Icon -->
+  <g>
+    <!-- Chart Frame -->
+    <rect x="30" y="30" width="40" height="40" rx="2" stroke="white" stroke-width="2" fill="white" fill-opacity="0.1" />
+    
+    <!-- Chart Grid Lines -->
+    <line x1="30" y1="40" x2="70" y2="40" stroke="white" stroke-opacity="0.3" stroke-width="1" />
+    <line x1="30" y1="50" x2="70" y2="50" stroke="white" stroke-opacity="0.3" stroke-width="1" />
+    <line x1="30" y1="60" x2="70" y2="60" stroke="white" stroke-opacity="0.3" stroke-width="1" />
+    <line x1="40" y1="30" x2="40" y2="70" stroke="white" stroke-opacity="0.3" stroke-width="1" />
+    <line x1="50" y1="30" x2="50" y2="70" stroke="white" stroke-opacity="0.3" stroke-width="1" />
+    <line x1="60" y1="30" x2="60" y2="70" stroke="white" stroke-opacity="0.3" stroke-width="1" />
+    
+    <!-- Chart Data Points -->
+    <path d="M35 55 L45 50 L55 45 L65 40" stroke="#4DABF7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="35" cy="55" r="2.5" fill="#4DABF7" />
+    <circle cx="45" cy="50" r="2.5" fill="#4DABF7" />
+    <circle cx="55" cy="45" r="2.5" fill="#4DABF7" />
+    <circle cx="65" cy="40" r="2.5" fill="#4DABF7" />
+    
+    <!-- Calendar Indicators (7 days) -->
+    <rect x="30" y="72" width="4" height="4" rx="1" fill="white" />
+    <rect x="36" y="72" width="4" height="4" rx="1" fill="white" />
+    <rect x="42" y="72" width="4" height="4" rx="1" fill="white" />
+    <rect x="48" y="72" width="4" height="4" rx="1" fill="white" />
+    <rect x="54" y="72" width="4" height="4" rx="1" fill="white" />
+    <rect x="60" y="72" width="4" height="4" rx="1" fill="white" />
+    <rect x="66" y="72" width="4" height="4" rx="1" fill="white" />
+    
+    <!-- Checkmark -->
+    <g transform="translate(50, 45) scale(0.7)">
+      <circle cx="0" cy="0" r="15" fill="#A9E34B" fill-opacity="0.7" />
+      <path d="M-7 0 L-2 5 L7 -5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+  </g>
+  
+  <!-- Repeating pulse animation for consistency -->
+  <circle cx="50" cy="50" r="43" stroke="white" stroke-opacity="0.5" fill="none">
+    <animate attributeName="r" values="43;47;43" dur="3s" repeatCount="indefinite" />
+    <animate attributeName="stroke-opacity" values="0.5;0.2;0.5" dur="3s" repeatCount="indefinite" />
+  </circle>
+  
+  <!-- Glow effect -->
+  <circle cx="50" cy="50" r="48" stroke="url(#glow_gradient)" stroke-width="4" stroke-opacity="0.5" fill="none">
+    <animate attributeName="stroke-opacity" values="0.3;0.7;0.3" dur="3s" repeatCount="indefinite" />
+  </circle>
+  
+  <!-- Definitions for gradients -->
+  <defs>
+    <linearGradient id="consistent_gradient" x1="20" y1="20" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4DABF7"/>
+      <stop offset="1" stop-color="#1971C2"/>
+    </linearGradient>
+    <radialGradient id="glow_gradient" cx="50" cy="50" r="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#74C0FC"/>
+      <stop offset="1" stop-color="#74C0FC" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>

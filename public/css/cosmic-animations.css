@@ -1,0 +1,402 @@
+/**
+ * cosmic-animations.css - تأثيرات حركية للثيم الكوني
+ * تم تطويره بواسطة فريق مشاعر
+ * الإصدار 1.0.0
+ */
+
+/* تأثير الريبل (تموج النقر) */
+.ripple {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple-animation 0.6s ease-out;
+    pointer-events: none;
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* تأثير النبض */
+.cosmic-pulse {
+    animation: cosmic-pulse 2s infinite;
+}
+
+@keyframes cosmic-pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(94, 114, 228, 0.7);
+    }
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(94, 114, 228, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(94, 114, 228, 0);
+    }
+}
+
+/* تأثير الدورَان */
+.cosmic-rotate {
+    animation: cosmic-rotate 20s linear infinite;
+}
+
+@keyframes cosmic-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* تأثير التوهج */
+.cosmic-flicker {
+    animation: cosmic-flicker 3s infinite alternate;
+}
+
+@keyframes cosmic-flicker {
+    0%, 100% {
+        opacity: 1;
+    }
+    25% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 0.6;
+    }
+    75% {
+        opacity: 0.9;
+    }
+}
+
+/* تأثير الضوء الساطع */
+.cosmic-glow-animation {
+    animation: cosmic-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes cosmic-glow {
+    from {
+        box-shadow: 0 0 10px rgba(94, 114, 228, 0.7);
+    }
+    to {
+        box-shadow: 0 0 20px rgba(94, 114, 228, 0.9);
+    }
+}
+
+/* تأثير التلاشي عند الدخول */
+.cosmic-fade-in {
+    animation: cosmic-fade-in 0.8s ease-in-out;
+}
+
+@keyframes cosmic-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* تأثير الرفرفة */
+.cosmic-float {
+    animation: cosmic-float 3s ease-in-out infinite;
+}
+
+@keyframes cosmic-float {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+/* تأثير لمعان النجوم */
+.cosmic-sparkle-animation {
+    position: relative;
+}
+
+.cosmic-sparkle-animation::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-image: 
+        radial-gradient(circle, white 1px, transparent 1px),
+        radial-gradient(circle, white 1px, transparent 1px),
+        radial-gradient(circle, white 1px, transparent 1px),
+        radial-gradient(circle, white 1px, transparent 1px),
+        radial-gradient(circle, white 1px, transparent 1px),
+        radial-gradient(circle, white 1px, transparent 1px);
+    background-size: 
+        100px 100px, 130px 130px, 80px 80px, 
+        110px 110px, 90px 90px, 120px 120px;
+    background-position: 
+        0% 0%, 20% 20%, 40% 40%,
+        60% 60%, 80% 80%, 100% 100%;
+    animation: cosmic-sparkle-animation 8s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes cosmic-sparkle-animation {
+    0% {
+        opacity: 0;
+        background-position: 
+            0% 0%, 20% 20%, 40% 40%,
+            60% 60%, 80% 80%, 100% 100%;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        background-position: 
+            100% 100%, 0% 0%, 60% 60%,
+            40% 40%, 100% 0%, 0% 100%;
+    }
+}
+
+/* تأثير الروح/الشبح */
+.cosmic-ghost {
+    animation: cosmic-ghost 5s ease-in-out infinite;
+}
+
+@keyframes cosmic-ghost {
+    0%, 100% {
+        opacity: 0.3;
+        filter: blur(5px);
+    }
+    50% {
+        opacity: 0.7;
+        filter: blur(0);
+    }
+}
+
+/* تأثير التموج العائم */
+.cosmic-wave {
+    position: relative;
+    overflow: hidden;
+}
+
+.cosmic-wave::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 30%, transparent 70%);
+    transform-origin: center;
+    animation: cosmic-wave 10s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes cosmic-wave {
+    0% {
+        transform: scale(0.5) rotate(0deg);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1) rotate(180deg);
+        opacity: 0.1;
+    }
+    100% {
+        transform: scale(0.5) rotate(360deg);
+        opacity: 0.3;
+    }
+}
+
+/* أنيميشنز للتغييرات العاطفية */
+.emotion-happy {
+    animation: emotion-happy 0.5s ease-in-out forwards;
+}
+
+@keyframes emotion-happy {
+    0% {
+        background-color: var(--cosmic-bg-element);
+    }
+    100% {
+        background-color: rgba(45, 206, 137, 0.1);
+    }
+}
+
+.emotion-sad {
+    animation: emotion-sad 0.5s ease-in-out forwards;
+}
+
+@keyframes emotion-sad {
+    0% {
+        background-color: var(--cosmic-bg-element);
+    }
+    100% {
+        background-color: rgba(0, 122, 255, 0.1);
+    }
+}
+
+.emotion-angry {
+    animation: emotion-angry 0.5s ease-in-out forwards;
+}
+
+@keyframes emotion-angry {
+    0% {
+        background-color: var(--cosmic-bg-element);
+    }
+    100% {
+        background-color: rgba(245, 54, 92, 0.1);
+    }
+}
+
+.emotion-neutral {
+    animation: emotion-neutral 0.5s ease-in-out forwards;
+}
+
+@keyframes emotion-neutral {
+    0% {
+        background-color: rgba(45, 206, 137, 0.1);
+        background-color: rgba(0, 122, 255, 0.1);
+        background-color: rgba(245, 54, 92, 0.1);
+    }
+    100% {
+        background-color: var(--cosmic-bg-element);
+    }
+}
+
+/* تأثير الظهور المتدرج للعناصر */
+.cosmic-stagger-item {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.cosmic-stagger-container:hover .cosmic-stagger-item {
+    animation: cosmic-stagger 0.8s ease-in-out forwards;
+}
+
+.cosmic-stagger-container:hover .cosmic-stagger-item:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.cosmic-stagger-container:hover .cosmic-stagger-item:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.cosmic-stagger-container:hover .cosmic-stagger-item:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.cosmic-stagger-container:hover .cosmic-stagger-item:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+.cosmic-stagger-container:hover .cosmic-stagger-item:nth-child(5) {
+    animation-delay: 0.4s;
+}
+
+@keyframes cosmic-stagger {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* تأثير اضطراب النص */
+.cosmic-glitch {
+    position: relative;
+    animation: cosmic-glitch-skew 1s infinite alternate-reverse;
+}
+
+.cosmic-glitch::before,
+.cosmic-glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.cosmic-glitch::before {
+    left: 2px;
+    text-shadow: -2px 0 #ff00c1;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: cosmic-glitch-anim 5s infinite linear alternate-reverse;
+}
+
+.cosmic-glitch::after {
+    left: -2px;
+    text-shadow: -2px 0 #00fff9, 2px 2px #ff00c1;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: cosmic-glitch-anim2 5s infinite linear alternate-reverse;
+}
+
+@keyframes cosmic-glitch-anim {
+    0% {
+        clip: rect(19px, 9999px, 33px, 0);
+    }
+    5% {
+        clip: rect(79px, 9999px, 18px, 0);
+    }
+    10% {
+        clip: rect(24px, 9999px, 71px, 0);
+    }
+    /* ... continue pattern ... */
+    100% {
+        clip: rect(67px, 9999px, 61px, 0);
+    }
+}
+
+@keyframes cosmic-glitch-anim2 {
+    0% {
+        clip: rect(9px, 9999px, 56px, 0);
+    }
+    5% {
+        clip: rect(59px, 9999px, 98px, 0);
+    }
+    10% {
+        clip: rect(34px, 9999px, 11px, 0);
+    }
+    /* ... continue pattern ... */
+    100% {
+        clip: rect(47px, 9999px, 31px, 0);
+    }  
+}
+
+@keyframes cosmic-glitch-skew {
+    0% {
+        transform: skew(0deg);
+    }
+    20% {
+        transform: skew(0deg);
+    }
+    21% {
+        transform: skew(3deg);
+    }
+    23% {
+        transform: skew(0deg);
+    }
+    40% {
+        transform: skew(-2deg);
+    }
+    41% {
+        transform: skew(0deg);
+    }
+    100% {
+        transform: skew(0deg);
+    }
+}

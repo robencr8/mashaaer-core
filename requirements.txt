@@ -45,3 +45,7 @@ flask-cors
 python-dotenv
 flask
 gunicorn
+flask
+flask-sqlalchemy
+psycopg2-binary
+sqlalchemy

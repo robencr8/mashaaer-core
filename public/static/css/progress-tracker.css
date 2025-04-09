@@ -1,0 +1,344 @@
+/**
+ * progress-tracker.css - Styles for the emotional learning progress tracker
+ * تنسيقات متتبع تقدم التعلم العاطفي
+ */
+
+/* ===== Modal Styles ===== */
+.cosmic-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.cosmic-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+}
+
+.cosmic-modal-container {
+    background-color: var(--cosmic-bg-container);
+    border-radius: var(--cosmic-radius-lg);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    z-index: 1001;
+    box-shadow: var(--cosmic-shadow);
+    animation: modal-appear 0.3s ease-out;
+    overflow: hidden;
+}
+
+@keyframes modal-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.cosmic-modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cosmic-modal-header h3 {
+    margin: 0;
+    color: var(--cosmic-primary);
+}
+
+.cosmic-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--cosmic-text-secondary);
+    cursor: pointer;
+    transition: var(--cosmic-transition);
+}
+
+.cosmic-modal-close:hover {
+    color: var(--cosmic-text-primary);
+    transform: rotate(90deg);
+}
+
+.cosmic-modal-body {
+    padding: 20px;
+}
+
+.cosmic-modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.modal-content-center {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.badge-icon.large, .achievement-icon.large {
+    width: 100px;
+    height: 100px;
+    font-size: 3rem;
+}
+
+.cosmic-button-outlined {
+    background: transparent;
+    border: 2px solid var(--cosmic-primary);
+    color: var(--cosmic-primary);
+}
+
+.cosmic-button-outlined:hover {
+    background: rgba(94, 114, 228, 0.1);
+}
+
+/* ===== Progress Dashboard Elements ===== */
+.level-indicator {
+    position: relative;
+}
+
+.level-progress-circle {
+    width: 80px;
+    height: 80px;
+    position: relative;
+}
+
+.level-progress-circle canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.level-progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.level-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--cosmic-primary);
+}
+
+.level-label {
+    font-size: 0.8rem;
+    color: var(--cosmic-text-secondary);
+}
+
+/* ===== Emotion-Specific Styling ===== */
+.emotion-happiness {
+    background: linear-gradient(45deg, rgba(45, 206, 137, 0.1), rgba(45, 206, 137, 0.2));
+    border-left: 3px solid #2dce89;
+}
+
+.emotion-sadness {
+    background: linear-gradient(45deg, rgba(17, 205, 239, 0.1), rgba(17, 205, 239, 0.2));
+    border-left: 3px solid #11cdef;
+}
+
+.emotion-anger {
+    background: linear-gradient(45deg, rgba(245, 54, 92, 0.1), rgba(245, 54, 92, 0.2));
+    border-left: 3px solid #f5365c;
+}
+
+.emotion-fear {
+    background: linear-gradient(45deg, rgba(94, 114, 228, 0.1), rgba(94, 114, 228, 0.2));
+    border-left: 3px solid #5e72e4;
+}
+
+.emotion-surprise {
+    background: linear-gradient(45deg, rgba(251, 99, 64, 0.1), rgba(251, 99, 64, 0.2));
+    border-left: 3px solid #fb6340;
+}
+
+.emotion-disgust {
+    background: linear-gradient(45deg, rgba(130, 94, 228, 0.1), rgba(130, 94, 228, 0.2));
+    border-left: 3px solid #825ee4;
+}
+
+/* RTL support for emotion cards */
+.rtl .emotion-happiness,
+.rtl .emotion-sadness,
+.rtl .emotion-anger,
+.rtl .emotion-fear,
+.rtl .emotion-surprise,
+.rtl .emotion-disgust {
+    border-left: none;
+    border-right: 3px solid;
+}
+
+/* ===== Progress Tracker Page-Specific Animations ===== */
+@keyframes float-badge {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.badge-icon, .achievement-icon {
+    animation: float-badge 3s ease-in-out infinite;
+}
+
+@keyframes pulse-streak {
+    0% {
+        box-shadow: 0 0 0 0 rgba(94, 114, 228, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(94, 114, 228, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(94, 114, 228, 0);
+    }
+}
+
+.streak-count {
+    animation: pulse-streak 2s infinite;
+}
+
+/* ===== Animations for level up ===== */
+@keyframes level-up {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.5);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.level-up-animation {
+    animation: level-up 1s ease-out;
+}
+
+/* ===== Badge/Achievement collection animations ===== */
+.badge-grid, .achievement-grid {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fade-in-up 0.8s forwards;
+}
+
+@keyframes fade-in-up {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.badge-item, .achievement-item {
+    opacity: 0;
+    animation: item-appear 0.5s forwards;
+}
+
+@keyframes item-appear {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Staggered animation for grid items */
+.badge-item:nth-child(1), .achievement-item:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.badge-item:nth-child(2), .achievement-item:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.badge-item:nth-child(3), .achievement-item:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.badge-item:nth-child(4), .achievement-item:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.badge-item:nth-child(5), .achievement-item:nth-child(5) {
+    animation-delay: 0.5s;
+}
+
+.badge-item:nth-child(6), .achievement-item:nth-child(6) {
+    animation-delay: 0.6s;
+}
+
+.badge-item:nth-child(7), .achievement-item:nth-child(7) {
+    animation-delay: 0.7s;
+}
+
+.badge-item:nth-child(8), .achievement-item:nth-child(8) {
+    animation-delay: 0.8s;
+}
+
+/* ===== Tooltip Styles ===== */
+.cosmic-tooltip {
+    position: relative;
+}
+
+.cosmic-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--cosmic-bg-container);
+    color: var(--cosmic-text-primary);
+    padding: 5px 10px;
+    border-radius: var(--cosmic-radius-sm);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    visibility: hidden;
+    opacity: 0;
+    transition: var(--cosmic-transition);
+    z-index: 100;
+    box-shadow: var(--cosmic-shadow);
+}
+
+.cosmic-tooltip:hover::after {
+    visibility: visible;
+    opacity: 1;
+    bottom: calc(100% + 5px);
+}
+
+/* Mobile styles */
+@media (max-width: 576px) {
+    .cosmic-tooltip::after {
+        left: 0;
+        transform: none;
+    }
+    
+    .badge-icon.large, .achievement-icon.large {
+        width: 80px;
+        height: 80px;
+        font-size: 2.5rem;
+    }
+    
+    .cosmic-modal-container {
+        width: 95%;
+    }
+}
