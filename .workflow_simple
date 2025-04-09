@@ -1,6 +1,1 @@
-<name>
-Simple Feedback
-</name>
-<command>
-python simple_feedback.py
-</command>
+run = "python simple_app.py"

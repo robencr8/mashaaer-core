@@ -1,40 +1,18 @@
-"""
-Extremely simple Flask application for Replit detection testing
-"""
-from flask import Flask
+from flask import Flask, jsonify, send_from_directory
 
 app = Flask(__name__)
 
-@app.route('/')
-def index():
-    """Simplest possible home route"""
-    return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Simple Replit App</title>
-    </head>
-    <body>
-        <h1>Simple Replit Test App</h1>
-        <p>This is a minimal Flask application designed to be detected by Replit.</p>
-    </body>
-    </html>
-    """
-
 @app.route('/health')
 def health():
-    """Health check endpoint"""
-    return "OK", 200
+    return jsonify({"status": "healthy", "message": "Simple app is running"})
 
-@app.route('/_health')
-def _health():
-    """Alternative health endpoint"""
-    return "OK", 200
+@app.route('/')
+def index():
+    return send_from_directory('public', 'index.html')
 
-@app.route('/favicon.ico')
-def favicon():
-    """Favicon route to avoid 404 errors"""
-    return "", 204
+@app.route('/<path:path>')
+def static_files(path):
+    return send_from_directory('public', path)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)

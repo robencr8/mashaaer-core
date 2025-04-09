@@ -75,18 +75,12 @@ class SubscriptionHistory(Base):
     """History of subscription changes and billing"""
     __tablename__ = 'subscription_history'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(String, ForeignKey('user_profiles.user_id'))
+    user_id = Column(String)  # Remove ForeignKey temporarily to fix DB initialization
     date = Column(DateTime, server_default=func.now())
     description = Column(String)
     amount = Column(Numeric(10, 2))
     status = Column(String)  # 'paid', 'pending', 'refunded'
     transaction_id = Column(String, nullable=True)
-    
-    # Relationship
-    user = relationship("UserProfile", back_populates="billing_history")
-
-# Add relationship to UserProfile
-UserProfile.billing_history = relationship("SubscriptionHistory", back_populates="user", cascade="all, delete-orphan")
 
 class Cache(Base):
     """

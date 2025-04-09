@@ -1,44 +1,31 @@
-from flask import Flask, jsonify
-from flask_cors import CORS
+"""
+Basic Flask App with proper configuration for Mashaaer
+"""
 import os
+from flask import Flask, send_from_directory, jsonify
 
 app = Flask(__name__)
-CORS(app)
-
-@app.route('/')
-def index():
-    return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Flask App for Replit</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                max-width: 800px;
-                margin: 0 auto;
-                padding: 20px;
-                line-height: 1.6;
-            }
-            h1 {
-                color: #2c3e50;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>Flask Application for Replit</h1>
-        <p>This application follows Replit's recommended structure for Flask apps.</p>
-        <p>The server is running and should be accessible via webview.</p>
-        <p>Check the <a href="/health">/health</a> endpoint for status information.</p>
-    </body>
-    </html>
-    """
+app.secret_key = os.environ.get("SESSION_SECRET", "mashaaer-secret-key-2025")
 
 @app.route('/health')
 def health():
+    """Health check endpoint"""
     return jsonify({
-        "status": "ok",
-        "message": "Server is healthy"
+        "status": "healthy",
+        "message": "Mashaaer app is running",
+        "version": "1.0.0"
     })
+
+@app.route('/')
+def index():
+    """Main index route"""
+    return send_from_directory('public', 'index.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    """Serve all other static files"""
+    return send_from_directory('public', path)
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port, debug=True)

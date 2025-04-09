@@ -1,3 +1,1 @@
-task = "shell.exec"
-args = "node express-server.js"
-waitForPort = 5000
+run = "python ultra_minimal.py"
