@@ -28,6 +28,9 @@ const voiceSettingsTemplate = document.getElementById('voice-settings-template')
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
+  // Initialize cosmic background
+  initCosmicBackground();
+  
   // Check online status
   updateOnlineStatus();
   window.addEventListener('online', updateOnlineStatus);
@@ -45,6 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load initial route
   navigateTo(window.location.pathname);
 });
+
+// Initialize the cosmic background
+function initCosmicBackground() {
+  // Handle audio player if it exists
+  const playPauseButton = document.getElementById('playPauseButton');
+  if (playPauseButton) {
+    playPauseButton.addEventListener('click', toggleBackgroundAudio);
+  }
+}
 
 // Initialize memory from localStorage or IndexedDB
 function initializeMemory() {
@@ -424,10 +436,34 @@ function simulateAssistantResponse(type) {
   }, 2000);
 }
 
+// Toggle background audio
+function toggleBackgroundAudio() {
+  const music = document.getElementById('deepVoidMusic');
+  const playPauseButton = document.getElementById('playPauseButton');
+  
+  if (!music) return;
+  
+  if (music.paused) {
+    music.play()
+      .then(() => {
+        console.log('Cosmic audio playback started successfully');
+        playPauseButton.textContent = '⏸️ Pause Cosmic Ambience';
+      })
+      .catch(error => {
+        console.error('Cosmic audio playback failed:', error);
+        playPauseButton.textContent = '❌ Audio Failed';
+      });
+  } else {
+    music.pause();
+    playPauseButton.textContent = '▶ Play Cosmic Ambience';
+  }
+}
+
 // Export functions for use in other modules
 window.app = {
   appState,
   navigateTo,
   updateLanguageUI,
-  saveUserData
+  saveUserData,
+  toggleBackgroundAudio
 };

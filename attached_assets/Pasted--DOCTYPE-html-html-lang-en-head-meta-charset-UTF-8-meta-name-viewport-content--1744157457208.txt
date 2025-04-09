@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mashaaer | Cosmic Interface</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: radial-gradient(ellipse at center, #000000 0%, #0a0a0a 100%); /* Deeper space background */
+      height: 100%;
+    }
+    canvas {
+      display: block;
+    }
+    #audioPlayer {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10; /* Ensure it's above the canvas */
+      color: #eee;
+      font-family: sans-serif;
+      opacity: 0.7;
+    }
+    #audioPlayer button {
+      background: none;
+      border: none;
+      color: #eee;
+      cursor: pointer;
+      font-size: 1em;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    #audioPlayer button:hover {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="audioPlayer">
+    <audio id="deepVoidMusic" loop>
+      <source src="your-deep-void-music.mp3" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+    <button id="playPauseButton">Play Music</button>
+  </div>
+  <canvas id="cosmicCanvas"></canvas>
+  <script>
+    const canvas = document.getElementById('cosmicCanvas');
+    const ctx = canvas.getContext('2d');
+    const music = document.getElementById('deepVoidMusic');
+    const playPauseButton = document.getElementById('playPauseButton');
+    let audioPlaying = false;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const stars = [];
+    const dustParticles = [];
+    const nebulaColors = ['rgba(100, 50, 150, 0.1)', 'rgba(50, 100, 180, 0.1)', 'rgba(150, 80, 70, 0.15)']; // More varied nebula colors
+
+    // Create a wider range of stars with varying sizes and brightness
+    for (let i = 0; i < 600; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 1.8 + 0.3, // Slightly wider range of sizes
+        brightness: Math.random() * 0.7 + 0.3, // Varying brightness
+        twinkleSpeed: Math.random() * 0.01 + 0.005 // Subtle twinkling speed
+      });
+    }
+
+    // Create subtle dust particles
+    for (let i = 0; i < 150; i++) {
+      dustParticles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 1 + 0.5,
+        alpha: Math.random() * 0.05 + 0.02, // Very faint
+        vx: (Math.random() - 0.5) * 0.02, // Subtle horizontal drift
+        vy: (Math.random() - 0.5) * 0.02  // Subtle vertical drift
+      });
+    }
+
+    // Function to draw a faint, diffused nebula
+    function drawNebula() {
+      const gradient = ctx.createRadialGradient(
+        Math.random() * canvas.width, Math.random() * canvas.height, 50,
+        Math.random() * canvas.width, Math.random() * canvas.height, 200 + Math.random() * 150
+      );
+      const color = nebulaColors[Math.floor(Math.random() * nebulaColors.length)];
+      gradient.addColorStop(0, color);
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function drawStars() {
+      stars.forEach(star => {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, 2 * Math.PI);
+        const twinkle = 0.8 + 0.2 * Math.sin(Date.now() * star.twinkleSpeed); // Subtle twinkle
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness * twinkle})`;
+        ctx.fill();
+      });
+    }
+
+    function drawDust() {
+      dustParticles.forEach(particle => {
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, 2 * Math.PI);
+        ctx.fillStyle = `rgba(200, 200, 200, ${particle.alpha})`;
+        ctx.fill();
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        // Wrap around edges for continuous subtle movement
+        if (particle.x < 0) particle.x = canvas.width;
+        if (particle.x > canvas.width) particle.x = 0;
+        if (particle.y < 0) particle.y = canvas.height;
+        if (particle.y > canvas.height) particle.y = 0;
+      });
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.9)'; // Slightly less harsh black
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw faint nebulae for depth and color variation
+      for (let i = 0; i < 2; i++) { // Draw a couple of nebulae per frame
+        drawNebula();
+      }
+
+      drawDust();
+      drawStars();
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    // Audio control
+    playPauseButton.addEventListener('click', () => {
+      if (audioPlaying) {
+        music.pause();
+        playPauseButton.textContent = 'Play Music';
+      } else {
+        music.play();
+        playPauseButton.textContent = 'Pause Music';
+      }
+      audioPlaying = !audioPlaying;
+    });
+
+    // Example of a more visually impactful interaction
+    canvas.addEventListener('click', (event) => {
+      const centerX = event.clientX;
+      const centerY = event.clientY;
+      const explosionRadius = 50 + Math.random() * 30;
+      const numParticles = 30 + Math.floor(Math.random() * 20);
+      const explosionColor = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.8)`;
+
+      for (let i = 0; i < numParticles; i++) {
+        const angle = Math.random() * 2 * Math.PI;
+        const speed = Math.random() * 3 + 1;
+        const particleRadius = Math.random() * 2 + 1;
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+
+        dustParticles.push({
+          x: centerX,
+          y: centerY,
+          size: particleRadius,
+          alpha: 1,
+          vx: vx,
+          vy: vy,
+          color: explosionColor,
+          decay: 0.02 // Fade out speed
+        });
+      }
+
+      // Update the dust drawing function to handle the color and decay
+      const originalDrawDust = drawDust;
+      drawDust = () => {
+        originalDrawDust(); // Draw existing dust
+
+        for (let i = dustParticles.length - 1; i >= 0; i--) {
+          if (dustParticles[i].color) { // Check if it's an explosion particle
+            ctx.beginPath();
+            ctx.arc(dustParticles[i].x, dustParticles[i].y, dustParticles[i].size, 0, 2 * Math.PI);
+            ctx.fillStyle = dustParticles[i].color;
+            ctx.fill();
+            dustParticles[i].x += dustParticles[i].vx;
+            dustParticles[i].y += dustParticles[i].vy;
+            dustParticles[i].alpha -= dustParticles[i].decay;
+            if (dustParticles[i].alpha <= 0) {
+              dustParticles.splice(i, 1); // Remove faded particles
+            }
+          }
+        }
+      };
+    });
+  </script>
+</body>
+</html>

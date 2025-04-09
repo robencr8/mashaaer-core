@@ -3,16 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشاعر | Mashaaer Voice Agent</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title>مشاعر | Mashaaer Cosmic Interface</title>
+    <link rel="stylesheet" href="/css/cosmic/cosmic-theme.css">
     <link rel="stylesheet" href="/css/rtl.css" id="direction-stylesheet">
-    <meta name="description" content="مشاعر - مساعد صوتي ذكي يفهم مشاعرك ويتفاعل معها">
+    <meta name="description" content="مشاعر - مساعد صوتي ذكي من بعد كوني يفهم مشاعرك ويتفاعل معها">
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#1a1a35">
+    <meta name="theme-color" content="#000000">
     <link rel="icon" href="/assets/images/favicon.ico">
     <link rel="apple-touch-icon" href="/assets/images/icon-192x192.png">
 </head>
 <body class="rtl">
+    <!-- Cosmic Canvas Background -->
+    <canvas id="cosmicCanvas"></canvas>
+    <div id="cosmic-overlay"></div>
+    
+    <!-- Audio Player -->
+    <div id="audioPlayer">
+        <audio id="deepVoidMusic" loop>
+            <source src="https://freesound.org/data/previews/448/448595_7724152-lq.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <button id="playPauseButton">▶ Play Cosmic Ambience</button>
+    </div>
+    
     <header>
         <div class="logo-container">
             <img src="/assets/images/logo.svg" alt="مشاعر" class="logo">
@@ -81,7 +94,7 @@
 
     <footer>
         <div class="footer-content">
-            <p>مشاعر &copy; 2025 - مساعد صوتي ذكي</p>
+            <p>مشاعر &copy; 2025 - مساعد صوتي ذكي من بعد كوني</p>
             <div class="footer-links">
                 <a href="/privacy">سياسة الخصوصية</a>
                 <a href="/terms">شروط الاستخدام</a>
@@ -254,5 +267,7 @@
     <script src="/js/emotions.js"></script>
     <script src="/js/voice-settings.js"></script>
     <script src="/js/language-switcher.js"></script>
+    <script src="/js/cosmic/cosmic-background.js"></script>
+    <script src="/js/cosmic/emotion-sparkles.js"></script>
 </body>
 </html>

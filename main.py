@@ -15,8 +15,15 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__, static_folder='public', static_url_path='')
 app.config['START_TIME'] = time.time()
 
-# Configure CORS
-CORS(app, resources={r"/*": {"origins": "*"}})
+# Configure CORS with more specific settings
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+        "supports_credentials": False
+    }
+})
 
 # Load config from .env if available
 app_config = {

@@ -1,0 +1,4 @@
+This is a placeholder for the deep void ambient sound.
+In a production environment, this would be replaced with an actual .mp3 or .wav file.
+
+For testing purposes, we'll use a URL to a space ambient sound from an external source.

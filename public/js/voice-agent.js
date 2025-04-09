@@ -513,6 +513,29 @@ function updateEmotionDisplay(emotion) {
   };
   
   emotionText.textContent = emotionNames[window.app.appState.currentLanguage][emotion] || emotionNames[window.app.appState.currentLanguage].neutral;
+  
+  // Update global app state with current emotion
+  window.app.appState.currentEmotion = emotion;
+  
+  // Trigger cosmic sparkle effects if available
+  if (window.emotionSparkles) {
+    // Set the emotion for sparkle effects
+    window.emotionSparkles.setEmotion(emotion);
+    
+    // Create a burst effect for emphasis
+    window.emotionSparkles.createBurst();
+    
+    // Add active class for glow effect and remove it after animation
+    const currentEmotionEl = document.querySelector('.current-emotion');
+    if (currentEmotionEl) {
+      currentEmotionEl.classList.add('emotion-active');
+      
+      // Remove the active class after animation completes
+      setTimeout(() => {
+        currentEmotionEl.classList.remove('emotion-active');
+      }, 2000);
+    }
+  }
 }
 
 // Save emotion to history

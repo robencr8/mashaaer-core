@@ -1,0 +1,549 @@
+/* Cosmic Theme for Mashaaer AI - Main CSS */
+
+:root {
+  --cosmic-primary: #5c6bc0;      /* Deep purple-blue */
+  --cosmic-secondary: #7986cb;    /* Lighter purple-blue */
+  --cosmic-accent: #ff9800;       /* Warm orange for highlights */
+  --cosmic-alert: #ff4081;        /* Pink for alerts/emotions */
+  --cosmic-text: #eceff1;         /* Light blue-gray */
+  --cosmic-text-secondary: #b0bec5; /* Muted text */
+  --cosmic-background: #000000;   /* Deep space black */
+  --cosmic-background-alt: #0a0a0a; /* Slightly lighter black */
+  --cosmic-card: rgba(20, 20, 30, 0.7); /* Semi-transparent card background */
+  --cosmic-card-border: rgba(100, 100, 150, 0.2); /* Subtle border color */
+  --cosmic-shadow: 0 4px 20px rgba(0, 0, 0, 0.7); /* Deep shadow */
+  --cosmic-glow: 0 0 15px rgba(100, 150, 255, 0.4); /* Subtle blue glow */
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background: var(--cosmic-background);
+  color: var(--cosmic-text);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+/* Hide scrollbar but allow scrolling */
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+/* Canvas positioning */
+#cosmicCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1; /* Behind all content */
+}
+
+#cosmic-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+  pointer-events: none;
+}
+
+/* Header styles */
+header {
+  background: rgba(10, 10, 15, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--cosmic-shadow);
+  border-bottom: 1px solid var(--cosmic-card-border);
+  padding: 10px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  height: 40px;
+  width: 40px;
+  margin-right: 10px;
+  filter: drop-shadow(0 0 5px rgba(100, 150, 255, 0.7));
+}
+
+.logo-container h1 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--cosmic-text);
+  text-shadow: 0 0 10px rgba(100, 150, 255, 0.5);
+}
+
+/* Navigation styles */
+nav ul {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+nav li {
+  margin: 0 10px;
+}
+
+nav a {
+  color: var(--cosmic-text-secondary);
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+nav a:hover, nav a.active {
+  color: var(--cosmic-text);
+  background: rgba(92, 107, 192, 0.3);
+  box-shadow: var(--cosmic-glow);
+}
+
+/* User controls */
+.user-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.user-controls button {
+  background: rgba(92, 107, 192, 0.2);
+  border: 1px solid var(--cosmic-card-border);
+  color: var(--cosmic-text);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.user-controls button:hover {
+  background: rgba(92, 107, 192, 0.4);
+  box-shadow: var(--cosmic-glow);
+}
+
+/* Main content */
+main {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 130px);
+  position: relative;
+  z-index: 1;
+}
+
+/* Voice interface container */
+.voice-container {
+  background: var(--cosmic-card);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 15px;
+  border: 1px solid var(--cosmic-card-border);
+  box-shadow: var(--cosmic-shadow);
+  padding: 20px;
+  margin-bottom: 30px;
+  transition: all 0.3s ease;
+}
+
+.voice-container:hover {
+  box-shadow: var(--cosmic-glow), var(--cosmic-shadow);
+}
+
+/* Status indicators */
+.voice-status {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 20px;
+  background: rgba(30, 30, 50, 0.5);
+  border: 1px solid var(--cosmic-card-border);
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cosmic-text-secondary);
+  margin-right: 8px;
+}
+
+.status-indicator.active .status-dot {
+  background: var(--cosmic-primary);
+  box-shadow: 0 0 10px var(--cosmic-primary);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+}
+
+/* Voice visualization */
+.voice-visualization {
+  background: rgba(10, 10, 20, 0.5);
+  border: 1px solid var(--cosmic-card-border);
+  border-radius: 10px;
+  overflow: hidden;
+  height: 100px;
+  margin-bottom: 20px;
+}
+
+#voice-waves {
+  width: 100%;
+  height: 100%;
+}
+
+/* Emotion display */
+.emotion-display {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  position: relative; /* Important for sparkle positioning */
+  min-height: 100px;  /* Ensure enough space for sparkles */
+  width: 150px;      /* Fixed width for consistent sparkle area */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.current-emotion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(30, 30, 50, 0.5);
+  border: 1px solid var(--cosmic-card-border);
+  border-radius: 10px;
+  padding: 10px 20px;
+  position: relative; /* For proper z-indexing with sparkles */
+  z-index: 2; /* Place above the base sparkle layer */
+  width: 100%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Add subtle glow effect when emotions change */
+.current-emotion:hover, .current-emotion.emotion-active {
+  box-shadow: 0 0 15px var(--cosmic-accent);
+  transform: scale(1.03);
+}
+
+/* Sparkle canvas styling */
+.sparkle-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Allow clicks to pass through */
+}
+
+.emotion-icon {
+  font-size: 32px;
+  margin-bottom: 5px;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.emotion-text {
+  color: var(--cosmic-text);
+}
+
+/* Voice controls */
+.voice-controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.primary-button, .secondary-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.primary-button {
+  background: linear-gradient(45deg, var(--cosmic-primary), var(--cosmic-secondary));
+  color: white;
+  box-shadow: 0 4px 15px rgba(92, 107, 192, 0.4);
+}
+
+.primary-button:hover {
+  box-shadow: 0 4px 20px rgba(92, 107, 192, 0.7);
+  transform: translateY(-2px);
+}
+
+.secondary-button {
+  background: rgba(30, 30, 50, 0.7);
+  color: var(--cosmic-text);
+  border: 1px solid var(--cosmic-card-border);
+}
+
+.secondary-button:hover {
+  background: rgba(40, 40, 70, 0.8);
+  box-shadow: var(--cosmic-glow);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Voice transcript */
+.voice-transcript {
+  background: rgba(10, 10, 20, 0.6);
+  border: 1px solid var(--cosmic-card-border);
+  border-radius: 10px;
+  padding: 15px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.user-text, .assistant-text {
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  max-width: 80%;
+}
+
+.user-text {
+  background: rgba(92, 107, 192, 0.3);
+  color: var(--cosmic-text);
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+.assistant-text {
+  background: rgba(50, 50, 70, 0.5);
+  color: var(--cosmic-text);
+  align-self: flex-start;
+}
+
+/* App container for dynamic content */
+#app-container {
+  background: var(--cosmic-card);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 15px;
+  border: 1px solid var(--cosmic-card-border);
+  box-shadow: var(--cosmic-shadow);
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+#app-container:hover {
+  box-shadow: var(--cosmic-glow), var(--cosmic-shadow);
+}
+
+/* Section styles */
+section {
+  margin-bottom: 30px;
+}
+
+h2 {
+  color: var(--cosmic-text);
+  border-bottom: 1px solid var(--cosmic-card-border);
+  padding-bottom: 10px;
+  margin-top: 0;
+}
+
+h3 {
+  color: var(--cosmic-text);
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+
+/* Footer styles */
+footer {
+  background: rgba(10, 10, 15, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--cosmic-card-border);
+  padding: 15px 20px;
+  color: var(--cosmic-text-secondary);
+  text-align: center;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.footer-links a {
+  color: var(--cosmic-text-secondary);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: var(--cosmic-text);
+  text-shadow: var(--cosmic-glow);
+}
+
+/* Audio player */
+#audioPlayer {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  color: var(--cosmic-text);
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+#audioPlayer:hover {
+  opacity: 1;
+}
+
+#audioPlayer button {
+  background: rgba(92, 107, 192, 0.3);
+  border: 1px solid var(--cosmic-card-border);
+  color: var(--cosmic-text);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+#audioPlayer button:hover {
+  background: rgba(92, 107, 192, 0.5);
+  box-shadow: var(--cosmic-glow);
+}
+
+/* RTL Support */
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Media queries for responsiveness */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+  }
+  
+  nav {
+    width: 100%;
+    margin: 15px 0;
+  }
+  
+  nav ul {
+    justify-content: space-between;
+  }
+  
+  .user-controls {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .voice-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .primary-button, .secondary-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  nav ul {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  nav li {
+    margin: 5px 0;
+  }
+  
+  .logo-container h1 {
+    font-size: 20px;
+  }
+  
+  .voice-container, #app-container {
+    padding: 15px;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 5px rgba(92, 107, 192, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(92, 107, 192, 0.6); }
+  100% { box-shadow: 0 0 5px rgba(92, 107, 192, 0.3); }
+}
+
+/* Apply animations to elements */
+.voice-container, #app-container {
+  animation: fadeIn 0.5s ease, slideUp 0.5s ease;
+}
+
+.primary-button {
+  animation: glow 2s infinite;
+}

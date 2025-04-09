@@ -1,0 +1,66 @@
+{
+  "directive": "IMPLEMENT_COSMIC_THEME_AND_ENHANCE",
+  "agent_instruction_set": [
+    {
+      "step": 1,
+      "action": "ANALYZE_CURRENT_ENVIRONMENT",
+      "details": "Scan the entire project directory structure and identify all files and directories related to the existing user interface themes. This includes CSS files, JavaScript files, image assets, audio assets, and any configuration files or code sections responsible for theme selection or application.",
+      "output_expectation": "A comprehensive list of all theme-related files and directories, clearly demarcated."
+    },
+    {
+      "step": 2,
+      "action": "DELETE_LEGACY_THEME_DATA",
+      "details": "Based on the analysis in Step 1, permanently delete all identified files and directories associated with the old user interface themes. This action is irreversible and crucial to avoid any conflicts or confusion with the new Cosmic Theme. Exercise extreme caution to ensure only the intended files are deleted.",
+      "output_expectation": "Confirmation of successful deletion of all legacy theme-related data."
+    },
+    {
+      "step": 3,
+      "action": "CREATE_COSMIC_THEME_FILES",
+      "details": "Create the following directory structure and files within the `public` directory:",
+      "sub_steps": [
+        {
+          "sub_step": "3.1",
+          "directory": "public/css/cosmic/",
+          "files_to_create": ["cosmic-theme.css"],
+          "content_template": "/* Cosmic Theme Styles - See Step 4 */"
+        },
+        {
+          "sub_step": "3.2",
+          "directory": "public/js/cosmic/",
+          "files_to_create": ["cosmic-background.js"],
+          "content_template": "// Cosmic Background Logic - See Step 5"
+        },
+        {
+          "sub_step": "3.3",
+          "directory": "public/assets/sounds/",
+          "files_to_create": ["deep-void-ambience.mp3"],
+          "content_source": "Acquire a suitable 'deep void' ambient sound in MP3 format and place it here."
+        }
+      ],
+      "output_expectation": "Confirmation of the successful creation of the specified files and directories."
+    },
+    {
+      "step": 4,
+      "action": "POPULATE_COSMIC_THEME_CSS",
+      "details": "Populate the `public/css/cosmic/cosmic-theme.css` file with the following CSS code. This defines the visual styling for the Cosmic Theme:",
+      "code": "/* Cosmic Theme Styles */\nbody {\n    margin: 0;\n    padding: 0;\n    font-family: sans-serif;\n    background: radial-gradient(ellipse at center, #000000 0%, #0a0a0a 100%); /* Deep space background */\n    color: #eee;\n    direction: ltr;\n}\n\nbody.rtl {\n    direction: rtl;\n    font-family: 'Arial', sans-serif; /* Example RTL font */\n}\n\n/* General UI elements - Adapt to application structure */\n.container {\n    max-width: 960px;\n    margin: 20px auto;\n    padding: 20px;\n    background-color: rgba(0, 0, 0, 0.5);\n    border-radius: 8px;\n    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);\n}\n\nbutton {\n    background-color: #333;\n    color: #eee;\n    border: 1px solid #555;\n    padding: 10px 20px;\n    border-radius: 5px;\n    cursor: pointer;\n    transition: background-color 0.3s ease;\n}\n\nbutton:hover {\n    background-color: #555;\n}\n\ninput[type=\"text\"], input[type=\"password\"], textarea {\n    background-color: #222;\n    color: #eee;\n    border: 1px solid #444;\n    padding: 8px;\n    border-radius: 4px;\n    margin-bottom: 10px;\n    width: calc(100% - 18px);\n    box-sizing: border-box;\n}\n\n/* Glowing effect */\nbutton, input[type=\"text\"], input[type=\"password\"], textarea, .interactive {\n    box-shadow: 0 0 5px rgba(100, 100, 255, 0.3);\n}\n\nbutton:hover, input[type=\"text\"]:focus, input[type=\"password\"]:focus, textarea:focus, .interactive:hover {\n    box-shadow: 0 0 10px rgba(100, 100, 255, 0.7);\n}\n\n/* Pulsing animation example */\n.pulse {\n    animation: pulse-glow 2s infinite alternate;\n}\n\n@keyframes pulse-glow {\n    0% {\n        box-shadow: 0 0 5px rgba(100, 100, 255, 0.3);\n    }\n    100% {\n        box-shadow: 0 0 15px rgba(100, 100, 255, 0.7);\n    }\n}\n\n/* Audio player styling */\n#audioPlayer {\n    position: absolute;\n    top: 20px;\n    left: 20px;\n    z-index: 10;\n    color: #eee;\n    font-family: sans-serif;\n    opacity: 0.7;\n}\n\n#audioPlayer button {\n    background: none;\n    border: none;\n    color: #eee;\n    cursor: pointer;\n    font-size: 1em;\n    padding: 5px 10px;\n    border-radius: 5px;\n}\n\n#audioPlayer button:hover {\n    opacity: 1;\n}\n\n/* Canvas for background */\n#cosmicCanvas {\n    position: fixed;\n    top: 0;\n    left: 0;\n    z-index: -1;\n}\n\n/* RTL specific adjustments */\nbody.rtl .container {\n    margin-left: auto;\n    margin-right: 20px;\n}\n\n/* Add more specific styles for application components here */",
+      "output_expectation": "Confirmation that `cosmic-theme.css` has been populated with the provided CSS code."
+    },
+    {
+      "step": 5,
+      "action": "POPULATE_COSMIC_BACKGROUND_JS",
+      "details": "Populate the `public/js/cosmic/cosmic-background.js` file with the following JavaScript code. This script handles the animated cosmic background:",
+      "code": "class CosmicBackground {\n    constructor(canvasId) {\n        this.canvas = document.getElementById(canvasId);\n        this.ctx = this.canvas.getContext('2d');\n        this.stars = [];\n        this.dustParticles = [];\n        this.nebulaColors = ['rgba(100, 50, 150, 0.1)', 'rgba(50, 100, 180, 0.1)', 'rgba(150, 80, 70, 0.15)'];\n        this.resizeCanvas();\n        window.addEventListener('resize', this.resizeCanvas.bind(this));\n        this.initStars();\n        this.initDust();\n        this.animate();\n        this.canvas.addEventListener('click', this.handleCanvasClick.bind(this));\n    }\n\n    resizeCanvas() {\n        this.canvas.width = window.innerWidth;\n        this.canvas.height = window.innerHeight;\n    }\n\n    initStars() {\n        for (let i = 0; i < 600; i++) {\n            this.stars.push({\n                x: Math.random() * this.canvas.width,\n                y: Math.random() * this.canvas.height,\n                radius: Math.random() * 1.8 + 0.3,\n                brightness: Math.random() * 0.7 + 0.3,\n                twinkleSpeed: Math.random() * 0.01 + 0.005\n            });\n        }\n    }\n\n    initDust() {\n        for (let i = 0; i < 150; i++) {\n            this.dustParticles.push({\n                x: Math.random() * this.canvas.width,\n                y: Math.random() * this.canvas.height,\n                size: Math.random() * 1 + 0.5,\n                alpha: Math.random() * 0.05 + 0.02,\n                vx: (Math.random() - 0.5) * 0.02,\n                vy: (Math.random() - 0.5) * 0.02\n            });\n        }\n    }\n\n    drawNebula() {\n        const gradient = this.ctx.createRadialGradient(\n            Math.random() * this.canvas.width, Math.random() * this.canvas.height, 50,\n            Math.random() * this.canvas.width, Math.random() * this.canvas.height, 200 + Math.random() * 150\n        );\n        const color = this.nebulaColors[Math.floor(Math.random() * this.nebulaColors.length)];\n        gradient.addColorStop(0, color);\n        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');\n        this.ctx.fillStyle = gradient;\n        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);\n    }\n\n    drawStars() {\n        this.stars.forEach(star => {\n            this.ctx.beginPath();\n            this.ctx.arc(star.x, star.y, star.radius, 0, 2 * Math.PI);\n            const twinkle = 0.8 + 0.2 * Math.sin(Date.now() * star.twinkleSpeed);\n            this.ctx.fillStyle = `rgba(255, 255, 255, ${star.brightness * twinkle})`;\n            this.ctx.fill();\n        });\n    }\n\n    drawDust() {\n        this.dustParticles.forEach(particle => {\n            this.ctx.beginPath();\n            this.ctx.arc(particle.x, particle.y, particle.size, 0, 2 * Math.PI);\n            this.ctx.fillStyle = `rgba(200, 200, 200, ${particle.alpha})`;\n            this.ctx.fill();\n            particle.x += particle.vx;\n            particle.y += particle.vy;\n            if (particle.x < 0) particle.x = this.canvas.width;\n            if (particle.x > this.canvas.width) particle.x = 0;\n            if (particle.y < 0) particle.y = this.canvas.height;\n            if (particle.y > this.canvas.height) particle.y = 0;\n        });\n    }\n\n    animate() {\n        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);\n        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';\n        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);\n\n        for (let i = 0; i < 2; i++) {\n            this.drawNebula();\n        }\n\n        this.drawDust();\n        this.drawStars();\n\n        requestAnimationFrame(this.animate.bind(this));\n    }\n\n    handleCanvasClick(event) {\n        const centerX = event.clientX;\n        const centerY = event.clientY;\n        const explosionRadius = 50 + Math.random() * 30;\n        const numParticles = 30 + Math.floor(Math.random() * 20);\n        const explosionColor = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.8)`;\n\n        for (let i = 0; i < numParticles; i++) {\n            const angle = Math.random() * 2 * Math.PI;\n            const speed = Math.random() * 3 + 1;\n            const particleRadius = Math.random() * 2 + 1;\n            const vx = Math.cos(angle) * speed;\n            const vy = Math.sin(angle) * speed;\n\n            this.dustParticles.push({\n                x: centerX,\n                y: centerY,\n                size: particleRadius,\n                alpha: 1,\n                vx: vx,\n                vy: vy,\n                color: explosionColor,\n                decay: 0.02\n            });\n        }\n\n        const originalDrawDust = this.drawDust.bind(this);\n        this.drawDust = () => {\n            originalDrawDust();\n            for (let i = this.dustParticles.length - 1; i >= 0; i--) {\n                if (this.dustParticles[i].color) {\n                    this.ctx.beginPath();\n                    this.ctx.arc(this.dustParticles[i].x, this.dustParticles[i].y, this.dustParticles[i].size, 0, 2 * Math.PI);\n                    this.ctx.fillStyle = this.dustParticles[i].color;\n                    this.ctx.fill();\n                    this.dustParticles[i].x += this.dustParticles[i].vx;\n                    this.dustParticles[i].y += this.dustParticles[i].vy;\n                    this.dustParticles[i].alpha -= this.dustParticles[i].decay;\n                    if (this.dustParticles[i].alpha <= 0) {\n                        this.dustParticles.splice(i, 1);\n                    }\n                }\n            }\n        };\n    }\n}\n\n// Initialization will be handled in step 6\n",
+      "output_expectation": "Confirmation that `cosmic-background.js` has been populated with the provided JavaScript code."
+    },
+    {
+      "step": 6,
+      "action": "MODIFY_INDEX_HTML",
+      "details": "Modify the `public/index.html` file to integrate the Cosmic Theme. Ensure all links to old theme CSS or JavaScript are removed. The updated structure should be:",
+      "code": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Mashaaer | Cosmic Interface</title>\n    <link rel=\"stylesheet\" href=\"css/cosmic/cosmic-theme.css\" />\n    <style>\n        html, body {\n            margin: 0;\n            padding: 0;\n            overflow: hidden; /* Hide scrollbars for the canvas */\n            height: 100%;\n        }\n        canvas {\n            display: block; /* Prevent extra space below canvas */\n        }\n    </style>\n</head>\n<body class=\"\">\n    <div id=\"audioPlayer\">\n        <audio id=\"deepVoidMusic\" loop>\n            <source src=\"assets/sounds/deep-void-ambience.mp3\" type=\"audio/mpeg\">\n            Your browser does not support the audio element.\n        </audio>\n        <button id=\"playPauseButton\">Play Music</button>\n    </div>\n    <canvas id=\"cosmicCanvas\"></canvas>\n\n    <script src=\"js/cosmic/cosmic-background.js\"></script>\n    <script src=\"js/app.js\"></script>\n</body>\n</html>",
+      "output_expectation": "Confirmation that `index.html` has been updated with the provided HTML structure."
+    },
+    {
+      "step": 7,
+      "action": "MODIFY_APP_JS",
+      "details
