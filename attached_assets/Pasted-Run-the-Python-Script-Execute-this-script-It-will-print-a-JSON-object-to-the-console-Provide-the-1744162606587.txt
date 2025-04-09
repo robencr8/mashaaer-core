@@ -1,0 +1,38 @@
+Run the Python Script: Execute this script. It will print a JSON object to the console.
+
+Provide the JSON to manus ai: Copy the entire JSON output.
+
+Prompt manus ai:
+
+Code snippet
+
+**Subject: IMPLEMENT COSMIC THEME - PRECISE INSTRUCTIONS**
+
+**To: manus ai**
+
+**Objective:** Implement the Cosmic Theme based on the provided JSON instructions. Follow each step precisely and handle file modifications and code insertions as specified.
+
+**Input:** (Paste the JSON output from the Python script here)
+
+**Instructions:**
+
+1.  **Cleanup:** Execute the cleanup steps provided in the `cleanup_instructions` array.
+2.  **Create Files:** Create the files and directories as implied by the file paths in the JSON.
+3.  **Populate Files:** Populate the files with the `css_content`, `js_background_content`, and `js_effects_content` (where applicable).
+4.  **Place Audio:** If the `audio_file` path is provided, follow the instruction to place the audio file in the correct location.
+5.  **Modify index.html:** For each item in the `integration_steps_index_html` array:
+    * Use the `action` to determine how to modify the `public/index.html` file.
+    * `INSERT_INTO_HEAD`: Insert the `content` into the `<head>` section.
+    * `INSERT_INTO_BODY_BEGINNING`: Insert the `content` at the beginning of the `<body>` section.
+    * `INSERT_BEFORE_CLOSING_BODY`: Insert the `content` just before the closing `</body>` tag.
+6.  **Modify app.js:** For each item in the `integration_steps_app_js` array:
+    * Use the `action` to determine how to modify the `public/js/app.js` file.
+    * `ENSURE_PRESENT`: Check if the `content` already exists in the file. If it does not, append the `content` to the end of the file.
+    * `INSERT_AFTER_COMMENT`: Find the line in the file that contains the `comment_target` and insert the `content` on the line *after* it.
+7.  **Output:** Provide a confirmation message indicating that all steps have been completed.
+
+**Important Notes:**
+
+* Preserve the original formatting and indentation of the existing code in `index.html` and `app.js` as much as possible.
+* If an action cannot be performed (e.g., the `comment_target` is not found), report an error and proceed with the remaining instructions.
+* Do not make any assumptions about the structure or content of the files other 

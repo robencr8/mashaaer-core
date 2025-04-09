@@ -1,151 +1,197 @@
 /* 
  * Cosmic Emotion Sparkle Effects
- * Add subtle particle effects to emotion displays that reflect the current emotional state
+ * Add particle effects to emotion displays that reflect the current emotional state
  */
 
-class EmotionSparkles {
-    constructor(container) {
-        // The container element where sparkles will appear (typically the emotion display element)
-        this.container = container;
+class ParticleSystem {
+    constructor(x, y, color, size, vx, vy, opacity, fadeRate) {
+        this.x = x;
+        this.y = y;
+        this.color = Array.isArray(color) ? color[Math.floor(Math.random() * color.length)] : color;
+        this.size = size;
+        this.vx = vx;
+        this.vy = vy;
+        this.opacity = opacity;
+        this.fadeRate = fadeRate;
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.opacity -= this.fadeRate;
+    }
+
+    draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${this.hexToRgb(this.color)}, ${this.opacity})`;
+        ctx.fill();
+    }
+
+    isAlive() {
+        return this.opacity > 0 && this.x >= -50 && this.x <= window.innerWidth + 50 && this.y >= -50 && this.y <= window.innerHeight + 50;
+    }
+
+    hexToRgb(hex) {
+        if (hex.startsWith('#')) hex = hex.slice(1);
+        const bigint = parseInt(hex, 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+        return `${r}, ${g}, ${b}`;
+    }
+}
+
+class EmotionSparkleEffect {
+    constructor(targetElementId) {
+        if (typeof targetElementId === 'string') {
+            this.targetElement = document.getElementById(targetElementId);
+        } else {
+            // Assume targetElementId is actually the DOM element itself
+            this.targetElement = targetElementId;
+        }
         
-        // Create canvas for sparkle effects
-        this.canvas = document.createElement('canvas');
-        this.canvas.className = 'sparkle-canvas';
-        this.canvas.style.position = 'absolute';
-        this.canvas.style.top = '0';
-        this.canvas.style.left = '0';
-        this.canvas.style.width = '100%';
-        this.canvas.style.height = '100%';
-        this.canvas.style.pointerEvents = 'none'; // Allow clicks to pass through
-        this.canvas.style.zIndex = '1';
+        if (this.targetElement) {
+            // Create canvas for sparkle effects
+            this.canvas = document.createElement('canvas');
+            this.canvas.className = 'sparkle-canvas';
+            this.canvas.style.position = 'absolute';
+            this.canvas.style.top = '0';
+            this.canvas.style.left = '0';
+            this.canvas.style.width = '100%';
+            this.canvas.style.height = '100%';
+            this.canvas.style.pointerEvents = 'none'; // Allow clicks to pass through
+            this.canvas.style.zIndex = '1';
+            
+            // Add canvas to container
+            this.targetElement.style.position = 'relative'; // Ensure container can position the canvas
+            this.targetElement.appendChild(this.canvas);
+            
+            // Initialize canvas context
+            this.ctx = this.canvas.getContext('2d');
+            
+            // Resize canvas to match container size
+            this.resizeCanvas();
+            
+            // Add resize listener
+            window.addEventListener('resize', () => this.resizeCanvas());
+        }
         
-        // Add canvas to container
-        this.container.style.position = 'relative'; // Ensure container can position the canvas
-        this.container.appendChild(this.canvas);
-        
-        // Initialize canvas context
-        this.ctx = this.canvas.getContext('2d');
-        
-        // Set canvas dimensions
-        this.resizeCanvas();
-        
-        // Add resize listener
-        window.addEventListener('resize', this.resizeCanvas.bind(this));
-        
-        // Particles array
         this.particles = [];
-        
-        // Animation frame ID
         this.animationId = null;
         
-        // Current emotion
-        this.currentEmotion = 'neutral';
-        
-        // Emotion to color and behavior mapping
         this.emotionMap = {
-            'happy': {
-                colors: ['#FFD700', '#FFC107', '#FFEB3B'], // Golden yellows
-                movementSpeed: 1.2,
-                particleSize: [2, 3.5],
-                particleCount: 30,
-                gravity: -0.02, // Slight upward drift
-                fadeSpeed: 0.02,
-                spread: 0.8
+            happiness: { 
+                color: ['#FFD700', '#FFC107', '#FFEB3B'], // Gold and yellow shades
+                intensity: 10, 
+                speed: { min: 0.5, max: 1 }, 
+                fadeRate: 0.02,
+                size: { min: 2, max: 4 }
             },
-            'sad': {
-                colors: ['#90CAF9', '#2196F3', '#BBDEFB'], // Blues
-                movementSpeed: 0.6,
-                particleSize: [1.5, 3],
-                particleCount: 20,
-                gravity: 0.05, // Downward drift
-                fadeSpeed: 0.01,
-                spread: 0.5
+            sadness: { 
+                color: ['#90CAF9', '#2196F3', '#BBDEFB'], // Blues
+                intensity: 5, 
+                speed: { min: 0.2, max: 0.5, vy: 0.3 }, 
+                fadeRate: 0.01,
+                size: { min: 1, max: 3 }
             },
-            'angry': {
-                colors: ['#FF5722', '#F44336', '#FFAB91'], // Reds and oranges
-                movementSpeed: 2,
-                particleSize: [1.5, 3],
-                particleCount: 40,
-                gravity: 0,
-                fadeSpeed: 0.04, // Fast fade
-                spread: 1.5
+            excitement: { 
+                color: ['#FF9800', '#FF5722', '#FFEB3B'], // Orange, pink, and yellow
+                intensity: 15, 
+                speed: { min: 1, max: 2 }, 
+                fadeRate: 0.03,
+                size: { min: 2, max: 5 }
             },
-            'surprised': {
-                colors: ['#E040FB', '#7E57C2', '#B388FF'], // Purples
-                movementSpeed: 1.8,
-                particleSize: [2, 4],
-                particleCount: 35,
-                gravity: -0.03, // Upward drift
-                fadeSpeed: 0.025,
-                spread: 1.2
+            calmness: { 
+                color: ['#FFFFFF', '#E3F2FD', '#B3E5FC'], // White and light blues
+                intensity: 8, 
+                speed: { min: 0.1, max: 0.3 }, 
+                fadeRate: 0.005,
+                size: { min: 1.5, max: 3.5 }
             },
-            'fearful': {
-                colors: ['#78909C', '#607D8B', '#B0BEC5'], // Gray-blues
-                movementSpeed: 1.5,
-                particleSize: [1, 2.5],
-                particleCount: 25,
-                gravity: 0.01,
-                fadeSpeed: 0.03,
-                spread: 0.7
+            anger: { 
+                color: ['#F44336', '#FF5722', '#D50000'], // Red shades
+                intensity: 12, 
+                speed: { min: 1.5, max: 2.5 }, 
+                fadeRate: 0.04,
+                size: { min: 2, max: 4 }
             },
-            'neutral': {
-                colors: ['#BBDEFB', '#E3F2FD', '#FFFFFF'], // Light blues and white
-                movementSpeed: 0.7,
-                particleSize: [1.5, 2.5],
-                particleCount: 15,
-                gravity: 0,
-                fadeSpeed: 0.015,
-                spread: 0.4
-            }
+            surprised: { 
+                color: ['#E040FB', '#7E57C2', '#B388FF'], // Purples
+                intensity: 12, 
+                speed: { min: 1.2, max: 2.2 }, 
+                fadeRate: 0.03,
+                size: { min: 2, max: 4.5 }
+            },
+            fearful: { 
+                color: ['#78909C', '#607D8B', '#B0BEC5'], // Gray-blues
+                intensity: 7, 
+                speed: { min: 0.8, max: 1.5 }, 
+                fadeRate: 0.025,
+                size: { min: 1.5, max: 3 }
+            },
+            neutral: { 
+                color: ['#BBDEFB', '#E3F2FD', '#FFFFFF'], // Light blues and white
+                intensity: 5, 
+                speed: { min: 0.3, max: 0.6 }, 
+                fadeRate: 0.015,
+                size: { min: 1, max: 2.5 }
+            },
+            // Map original emotion names to our standard ones
+            happy: { alias: 'happiness' },
+            sad: { alias: 'sadness' },
+            angry: { alias: 'anger' },
+            excited: { alias: 'excitement' },
+            calm: { alias: 'calmness' },
         };
     }
-    
-    // Resize canvas to match container
+
     resizeCanvas() {
-        const rect = this.container.getBoundingClientRect();
+        if (!this.canvas || !this.targetElement) return;
+        
+        const rect = this.targetElement.getBoundingClientRect();
         this.canvas.width = rect.width;
         this.canvas.height = rect.height;
     }
-    
-    // Set current emotion and trigger sparkle effect
-    setEmotion(emotion) {
-        // If the emotion is not in our map, default to neutral
-        if (!this.emotionMap[emotion]) {
-            emotion = 'neutral';
+
+    trigger(emotion) {
+        if (!this.targetElement || !this.ctx) return;
+        
+        // Handle aliases
+        if (this.emotionMap[emotion]?.alias) {
+            emotion = this.emotionMap[emotion].alias;
         }
         
-        this.currentEmotion = emotion;
-        this.createParticles();
-    }
-    
-    // Create new particles based on current emotion
-    createParticles() {
-        const settings = this.emotionMap[this.currentEmotion];
-        const centerX = this.canvas.width / 2;
-        const centerY = this.canvas.height / 2;
+        // Default to neutral if emotion not found
+        const settings = this.emotionMap[emotion] || this.emotionMap.neutral;
         
-        // Clear existing particles
-        this.particles = [];
+        // If this is an alias entry, get the actual settings
+        if (settings.alias) {
+            return this.trigger(settings.alias);
+        }
         
-        // Create new particles
-        for (let i = 0; i < settings.particleCount; i++) {
+        const rect = this.targetElement.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        for (let i = 0; i < settings.intensity; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * settings.movementSpeed;
-            const size = settings.particleSize[0] + Math.random() * (settings.particleSize[1] - settings.particleSize[0]);
-            const color = settings.colors[Math.floor(Math.random() * settings.colors.length)];
-            const spread = settings.spread;
-            
-            this.particles.push({
-                x: centerX + (Math.random() - 0.5) * 20, // Small initial spread
-                y: centerY + (Math.random() - 0.5) * 20,
-                vx: Math.cos(angle) * speed * spread,
-                vy: Math.sin(angle) * speed * spread,
-                size: size,
-                color: color,
-                alpha: 1,
-                fadeSpeed: settings.fadeSpeed * (0.7 + Math.random() * 0.6), // Slightly randomize fade speed
-                gravity: settings.gravity
-            });
+            const speedMagnitude = Math.random() * (settings.speed.max - (settings.speed.min || 0)) + (settings.speed.min || 0);
+            const vx = Math.cos(angle) * speedMagnitude;
+            const vy = Math.sin(angle) * speedMagnitude + (settings.speed.vy || 0);
+            const size = Math.random() * (settings.size.max - settings.size.min) + settings.size.min;
+            const initialOpacity = Math.random() * 0.5 + 0.5; // Initial opacity between 0.5 and 1
+
+            this.particles.push(new ParticleSystem(
+                centerX + Math.random() * 10 - 5, // Slight random initial position
+                centerY + Math.random() * 10 - 5,
+                settings.color,
+                size,
+                vx,
+                vy,
+                initialOpacity,
+                settings.fadeRate
+            ));
         }
         
         // Start animation if not already running
@@ -153,95 +199,89 @@ class EmotionSparkles {
             this.animate();
         }
     }
+
+    update() {
+        this.particles.forEach(particle => particle.update());
+        this.particles = this.particles.filter(particle => particle.isAlive());
+    }
+
+    draw(ctx) {
+        this.particles.forEach(particle => particle.draw(ctx));
+    }
     
-    // Animation loop
     animate() {
+        if (!this.ctx) return;
+        
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
         // Update and draw particles
-        for (let i = this.particles.length - 1; i >= 0; i--) {
-            const p = this.particles[i];
-            
-            // Update position
-            p.x += p.vx;
-            p.y += p.vy + p.gravity;
-            
-            // Update alpha
-            p.alpha -= p.fadeSpeed;
-            
-            // Remove faded particles
-            if (p.alpha <= 0) {
-                this.particles.splice(i, 1);
-                continue;
-            }
-            
-            // Draw particle
-            this.ctx.beginPath();
-            this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            this.ctx.fillStyle = this.hexToRgba(p.color, p.alpha);
-            this.ctx.fill();
-            
-            // Add glow effect
-            this.ctx.shadowBlur = p.size * 2;
-            this.ctx.shadowColor = p.color;
-        }
+        this.update();
+        this.draw(this.ctx);
         
         // Continue animation if particles exist
         if (this.particles.length > 0) {
-            this.animationId = requestAnimationFrame(this.animate.bind(this));
+            this.animationId = requestAnimationFrame(() => this.animate());
         } else {
             this.animationId = null;
         }
     }
     
-    // Helper to convert hex color to rgba with alpha
-    hexToRgba(hex, alpha) {
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    }
-    
-    // Stop animation and clear particles
-    stop() {
-        if (this.animationId) {
-            cancelAnimationFrame(this.animationId);
-            this.animationId = null;
-        }
-        this.particles = [];
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-    
     // Create burst effect (when emotion changes or for emphasis)
     createBurst(count = 20) {
-        const settings = this.emotionMap[this.currentEmotion];
-        const centerX = this.canvas.width / 2;
-        const centerY = this.canvas.height / 2;
+        if (!this.targetElement) return;
         
+        // Get current emotion from the emotion text
+        const emotionText = document.querySelector('.emotion-text')?.textContent.trim().toLowerCase();
+        let emotion = mapArabicEmotionToEnglish(emotionText);
+        
+        // Handle aliases
+        if (this.emotionMap[emotion]?.alias) {
+            emotion = this.emotionMap[emotion].alias;
+        }
+        
+        // Default to neutral if emotion not found
+        const settings = this.emotionMap[emotion] || this.emotionMap.neutral;
+        
+        // If this is an alias entry, get the actual settings
+        if (settings.alias) {
+            return this.createBurst(count);
+        }
+        
+        const rect = this.targetElement.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        // Create a more intense burst
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * settings.movementSpeed * 2; // Faster for burst
-            const size = settings.particleSize[0] + Math.random() * (settings.particleSize[1] - settings.particleSize[0]);
-            const color = settings.colors[Math.floor(Math.random() * settings.colors.length)];
+            const speedMagnitude = Math.random() * (settings.speed.max * 2 - settings.speed.min) + settings.speed.min;
+            const vx = Math.cos(angle) * speedMagnitude * 1.5; // More spread
+            const vy = Math.sin(angle) * speedMagnitude * 1.5;
+            const size = Math.random() * (settings.size.max - settings.size.min) + settings.size.min;
+            const initialOpacity = Math.random() * 0.3 + 0.7; // Higher initial opacity
             
-            this.particles.push({
-                x: centerX,
-                y: centerY,
-                vx: Math.cos(angle) * speed * 2, // More spread for burst
-                vy: Math.sin(angle) * speed * 2,
-                size: size,
-                color: color,
-                alpha: 1,
-                fadeSpeed: settings.fadeSpeed * 1.5, // Faster fade for burst
-                gravity: settings.gravity / 2 // Reduced gravity for burst
-            });
+            this.particles.push(new ParticleSystem(
+                centerX,
+                centerY,
+                settings.color,
+                size * 1.2, // Slightly larger particles
+                vx,
+                vy,
+                initialOpacity,
+                settings.fadeRate * 0.8 // Slower fade for burst
+            ));
         }
         
         // Start animation if not already running
         if (!this.animationId) {
             this.animate();
         }
+    }
+    
+    // Method to allow direct access to the original EmotionSparkles interface
+    setEmotion(emotion) {
+        this.trigger(emotion);
     }
 }
 
@@ -266,15 +306,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const emotionDisplay = document.querySelector('.emotion-display');
     if (emotionDisplay) {
         // Create the sparkles instance
-        window.emotionSparkles = new EmotionSparkles(emotionDisplay);
+        window.emotionSparkles = new EmotionSparkleEffect(emotionDisplay);
         
         // Initialize with current emotion
         const emotionText = document.querySelector('.emotion-text')?.textContent.trim().toLowerCase();
         if (emotionText) {
             const emotion = mapArabicEmotionToEnglish(emotionText);
-            window.emotionSparkles.setEmotion(emotion);
+            window.emotionSparkles.trigger(emotion);
         } else {
-            window.emotionSparkles.setEmotion('neutral');
+            window.emotionSparkles.trigger('neutral');
         }
         
         // Create a MutationObserver to detect when the emotion text changes
@@ -285,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (mutation.type === 'characterData' || mutation.type === 'childList') {
                         const newEmotionText = emotionTextElement.textContent.trim().toLowerCase();
                         const emotion = mapArabicEmotionToEnglish(newEmotionText);
-                        window.emotionSparkles.setEmotion(emotion);
+                        window.emotionSparkles.trigger(emotion);
                         window.emotionSparkles.createBurst();
                     }
                 });

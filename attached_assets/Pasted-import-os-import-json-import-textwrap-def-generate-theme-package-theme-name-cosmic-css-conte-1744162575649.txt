@@ -1,0 +1,193 @@
+import os
+import json
+import textwrap
+
+def generate_theme_package(theme_name="cosmic", css_content="", js_background_content="", js_effects_content="", audio_file_name="deep-void-ambience.mp3", audio_file_path=""):
+    """
+    Generates a structured package for a web application theme, including detailed integration instructions.
+
+    Args:
+        theme_name (str): The name of the theme.
+        css_content (str): The CSS code for the theme.
+        js_background_content (str): The JavaScript code for the background animation.
+        js_effects_content (str): The JavaScript code for the emotion sparkle effects.
+        audio_file_name (str): The filename for the ambient audio file.
+        audio_file_path (str): The path to the ambient audio file (for instruction purposes).
+    """
+
+    theme_dir = os.path.join("public", "css", theme_name)
+    os.makedirs(theme_dir, exist_ok=True)
+    with open(os.path.join(theme_dir, f"{theme_name}-theme.css"), "w") as f:
+        f.write(css_content)
+
+    background_dir = os.path.join("public", "js", theme_name)
+    os.makedirs(background_dir, exist_ok=True)
+    with open(os.path.join(background_dir, f"{theme_name}-background.js"), "w") as f:
+        f.write(js_background_content)
+
+    effects_dir = os.path.join("public", "js", theme_name)
+    os.makedirs(effects_dir, exist_ok=True)
+    with open(os.path.join(effects_dir, "emotion-sparkles.js"), "w") as f:
+        f.write(js_effects_content)
+
+    assets_dir = os.path.join("public", "assets", "sounds")
+    os.makedirs(assets_dir, exist_ok=True)
+
+    if audio_file_path:
+        print(f"Instruction: Place the audio file '{audio_file_name}' in '{assets_dir}'.")
+        print(f"  (Source path: '{audio_file_path}')")  # Provide the original path for context
+
+    instructions = {
+        "theme_name": theme_name,
+        "css_file": os.path.join("css", theme_name, f"{theme_name}-theme.css"),
+        "background_js_file": os.path.join("js", theme_name, f"{theme_name}-background.js"),
+        "effects_js_file": os.path.join("js", theme_name, "emotion-sparkles.js"),
+        "audio_file": os.path.join("assets", "sounds", audio_file_name),
+        "integration_steps_index_html": [
+            {
+                "action": "INSERT_INTO_HEAD",
+                "content": f'<link rel="stylesheet" href="{os.path.join("css", theme_name, f"{theme_name}-theme.css")}" />',
+                "comment": "Cosmic Theme CSS"
+            },
+            {
+                "action": "INSERT_INTO_BODY_BEGINNING",
+                "content": '<canvas id="cosmicCanvas"></canvas>',
+                "comment": "Cosmic Background Canvas"
+            },
+            {
+                "action": "INSERT_INTO_BODY_BEGINNING",
+                "content": textwrap.dedent(f"""\
+                    <div id="audioPlayer">
+                        <audio id="deepVoidMusic" loop>
+                            <source src="{os.path.join("assets", "sounds", audio_file_name)}" type="audio/mpeg">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <button id="playPauseButton">Play Music</button>
+                    </div>
+                """).strip(),
+                "comment": "Audio Player"
+            },
+            {
+                "action": "INSERT_BEFORE_CLOSING_BODY",
+                "content": f'<script src="{os.path.join("js", theme_name, f"{theme_name}-background.js")}"></script>',
+                "comment": "Cosmic Background JS"
+            },
+            {
+                "action": "INSERT_BEFORE_CLOSING_BODY",
+                "content": '<script src="js/app.js"></script>',
+                "comment": "Main Application JS (Ensure this is correctly placed)"
+            },
+            {
+                "action": "INSERT_BEFORE_CLOSING_BODY",
+                "content": f'<script src="{os.path.join("js", theme_name, "emotion-sparkles.js")}"></script>',
+                "comment": "Emotion Sparkle Effects JS"
+            }
+        ],
+        "integration_steps_app_js": [
+            {
+                "action": "ENSURE_PRESENT",
+                "content": "const cosmicBackground = new CosmicBackground('cosmicCanvas');",
+                "comment": "Cosmic Background Initialization (Place in app.js or appropriate startup)"
+            },
+            {
+                "action": "ENSURE_PRESENT",
+                "content": textwrap.dedent("""\
+                    const music = document.getElementById('deepVoidMusic');
+                    const playPauseButton = document.getElementById('playPauseButton');
+                    let audioPlaying = false;
+                    playPauseButton.addEventListener('click', () => {
+                        if (audioPlaying) {
+                            music.pause();
+                            playPauseButton.textContent = 'Play Music';
+                        } else {
+                            music.play();
+                            playPauseButton.textContent = 'Pause Music';
+                        }
+                        audioPlaying = !audioPlaying;
+                    });
+                """).strip(),
+                "comment": "Audio Control Logic (Place in app.js if not already present)"
+            },
+            {
+                "action": "INSERT_AFTER_COMMENT",
+                "comment_target": "// Initialize EmotionSparkleEffect for relevant elements:",
+                "content": textwrap.dedent("""\
+                    const emotionDisplayElement = document.getElementById('your-emotion-element-id'); // Replace with actual ID
+                    let emotionSparkleEffect = null; // Declare outside the conditional
+                    if (emotionDisplayElement) {
+                        emotionSparkleEffect = new EmotionSparkleEffect('your-emotion-element-id');
+                    }
+                """).strip(),
+                "comment": "Emotion Sparkle Effect Initialization"
+            },
+            {
+                "action": "INSERT_AFTER_COMMENT",
+                "comment_target": "// Trigger the effect when the emotion changes:",
+                "content": textwrap.dedent("""\
+                    function updateEmotion(newEmotion) {
+                        // ... your logic to update the displayed emotion ...
+                        if (emotionSparkleEffect) {
+                            emotionSparkleEffect.trigger(newEmotion);
+                        }
+                    }
+                """).strip(),
+                "comment": "Function to Trigger Sparkles on Emotion Change"
+            },
+            {
+                "action": "INSERT_AFTER_COMMENT",
+                "comment_target": "// Integrate update and draw into your animation loop (e.g., in cosmic-background.js or app.js):",
+                "content": textwrap.dedent("""\
+                    function animate() {
+                        // ... your existing animation code ...
+                        if (emotionSparkleEffect) {
+                            emotionSparkleEffect.update();
+                            emotionSparkleEffect.draw(ctx); // Ensure 'ctx' is accessible
+                        }
+                        requestAnimationFrame(animate);
+                    }
+                """).strip(),
+                "comment": "Animation Loop Integration"
+            }
+        ],
+        "cleanup_instructions": [
+            "Delete any CSS files, JavaScript files, or assets related to the old theme(s) from the `public/css`, `public/js`, and `public/assets` directories.",
+            "Remove any theme-switching logic or UI elements from your application (e.g., dropdowns, buttons)."
+        ]
+    }
+
+    print(json.dumps(instructions, indent=4))
+
+
+# Example usage:
+cosmic_css = """
+/* Your complete cosmic-theme.css content here */
+body { ... }
+#audioPlayer { ... }
+#cosmicCanvas { ... }
+/* ... more styles ... */
+"""
+
+cosmic_bg_js = """
+class CosmicBackground {
+    constructor(canvasId) { ... }
+    resizeCanvas() { ... }
+    initStars() { ... }
+    initDust() { ... }
+    drawNebula() { ... }
+    drawStars() { ... }
+    drawDust() { ... }
+    animate() { ... }
+    handleCanvasClick(event) { ... }
+}
+"""
+
+emotion_effects_js = """
+class ParticleSystem { ... }
+class EmotionSparkleEffect { ... }
+// ... emotion mapping ...
+"""
+
+audio_path = "path/to/your/deep-void-ambience.mp3"  # Replace with the actual path
+audio_filename = os.path.basename(audio_path) if audio_path else "deep-void-ambience.mp3"
+
+generate_theme_package("cosmic", cosmic_css, cosmic_bg_js, emotion_effects_js, audio_filename, audio_path)
