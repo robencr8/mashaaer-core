@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+  <metadata>
+    <!-- This is an SVG representation of a sound wave pattern for "loader-complete.mp3" -->
+    <!-- The actual audio file needs to be created separately, this SVG just provides visual representation -->
+    <!-- Sound description: A triumphant rising tone that indicates the completion of a loading process -->
+  </metadata>
+  <rect width="100%" height="100%" fill="#0a1128"/>
+  <g fill="#5e72e4">
+    <!-- Sound wave visualization -->
+    <rect x="10" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;20;30;20;10" dur="0.5s" repeatCount="1"/>
+      <animate attributeName="y" values="50;45;40;45;50" dur="0.5s" repeatCount="1"/>
+    </rect>
+    <rect x="20" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;30;50;30;10" dur="0.6s" repeatCount="1"/>
+      <animate attributeName="y" values="50;40;30;40;50" dur="0.6s" repeatCount="1"/>
+    </rect>
+    <rect x="30" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;40;70;40;10" dur="0.7s" repeatCount="1"/>
+      <animate attributeName="y" values="50;35;20;35;50" dur="0.7s" repeatCount="1"/>
+    </rect>
+    <rect x="40" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;50;80;50;10" dur="0.8s" repeatCount="1"/>
+      <animate attributeName="y" values="50;30;15;30;50" dur="0.8s" repeatCount="1"/>
+    </rect>
+    <rect x="50" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;60;80;60;10" dur="0.8s" repeatCount="1"/>
+      <animate attributeName="y" values="50;25;15;25;50" dur="0.8s" repeatCount="1"/>
+    </rect>
+    <rect x="60" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;50;70;50;10" dur="0.7s" repeatCount="1"/>
+      <animate attributeName="y" values="50;30;20;30;50" dur="0.7s" repeatCount="1"/>
+    </rect>
+    <rect x="70" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;30;50;30;10" dur="0.6s" repeatCount="1"/>
+      <animate attributeName="y" values="50;40;30;40;50" dur="0.6s" repeatCount="1"/>
+    </rect>
+    <rect x="80" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;20;30;20;10" dur="0.5s" repeatCount="1"/>
+      <animate attributeName="y" values="50;45;40;45;50" dur="0.5s" repeatCount="1"/>
+    </rect>
+  </g>
+  
+  <!-- Success indicator -->
+  <circle cx="50" cy="50" r="25" fill="none" stroke="#5e72e4" stroke-width="2">
+    <animate attributeName="r" values="0;25" dur="0.5s" repeatCount="1"/>
+    <animate attributeName="opacity" values="1;0" dur="1s" begin="0.5s" repeatCount="1"/>
+  </circle>
+  <path d="M40,50 L45,55 L60,40" fill="none" stroke="#5e72e4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <animate attributeName="stroke-dasharray" from="0,100" to="100,0" dur="0.5s" begin="0.3s" fill="freeze" />
+  </path>
+  
+  <text x="50" y="95" font-family="Arial" font-size="8" text-anchor="middle" fill="#ffffff">loader-complete.mp3</text>
+</svg>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
+  <metadata>
+    <!-- This is an SVG representation of a sound wave pattern for "loader-start.mp3" -->
+    <!-- The actual audio file needs to be created separately, this SVG just provides visual representation -->
+    <!-- Sound description: A soft, gentle rising tone that signifies the start of a loading process -->
+  </metadata>
+  <rect width="100%" height="100%" fill="#0a1128"/>
+  <g fill="#5e72e4">
+    <!-- Sound wave visualization -->
+    <rect x="10" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;40;10" dur="0.5s" repeatCount="1"/>
+      <animate attributeName="y" values="50;35;50" dur="0.5s" repeatCount="1"/>
+    </rect>
+    <rect x="20" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;30;60;30;10" dur="0.6s" repeatCount="1"/>
+      <animate attributeName="y" values="50;40;25;40;50" dur="0.6s" repeatCount="1"/>
+    </rect>
+    <rect x="30" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;20;50;70;50;20;10" dur="0.7s" repeatCount="1"/>
+      <animate attributeName="y" values="50;45;30;20;30;45;50" dur="0.7s" repeatCount="1"/>
+    </rect>
+    <rect x="40" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;20;40;60;70;60;40;20;10" dur="0.8s" repeatCount="1"/>
+      <animate attributeName="y" values="50;45;35;25;20;25;35;45;50" dur="0.8s" repeatCount="1"/>
+    </rect>
+    <rect x="50" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;30;50;70;80;70;50;30;10" dur="0.9s" repeatCount="1"/>
+      <animate attributeName="y" values="50;40;30;20;15;20;30;40;50" dur="0.9s" repeatCount="1"/>
+    </rect>
+    <rect x="60" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;40;60;70;60;40;10" dur="0.8s" repeatCount="1"/>
+      <animate attributeName="y" values="50;35;25;20;25;35;50" dur="0.8s" repeatCount="1"/>
+    </rect>
+    <rect x="70" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;30;50;30;10" dur="0.7s" repeatCount="1"/>
+      <animate attributeName="y" values="50;40;30;40;50" dur="0.7s" repeatCount="1"/>
+    </rect>
+    <rect x="80" y="50" width="5" height="10" transform="translate(0 -5)">
+      <animate attributeName="height" values="10;20;10" dur="0.6s" repeatCount="1"/>
+      <animate attributeName="y" values="50;45;50" dur="0.6s" repeatCount="1"/>
+    </rect>
+  </g>
+  <text x="50" y="95" font-family="Arial" font-size="8" text-anchor="middle" fill="#ffffff">loader-start.mp3</text>
+</svg>

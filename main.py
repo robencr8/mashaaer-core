@@ -20,6 +20,11 @@ def index():
     """Main index route"""
     return send_from_directory('public', 'index.html')
 
+@app.route('/cosmic-loader-demo')
+def cosmic_loader_demo():
+    """Demo page for cosmic loader animations"""
+    return send_from_directory('public', 'cosmic-loader-demo.html')
+
 @app.route('/<path:path>')
 def serve_static(path):
     """Serve all other static files"""
