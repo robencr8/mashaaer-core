@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood Music - Mashaaer Feelings</title>
+    <link rel="stylesheet" href="css/cosmic-theme.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at center, #1a1a2e 0%, #16213e 50%, #0f0f1a 100%);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        nav a {
+            margin: 0 1rem;
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        nav a:hover {
+            color: #00d4ff;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(110, 0, 255, 0.7);
+        }
+        
+        .music-recommendation-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .emotion-selector {
+            background: rgba(20, 30, 60, 0.7);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(110, 0, 255, 0.2);
+            margin-bottom: 2rem;
+        }
+        
+        .emotion-selector h2 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: #fff;
+            text-align: center;
+        }
+        
+        .emotion-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+        
+        .emotion-card {
+            background: rgba(30, 40, 70, 0.6);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            text-align: center;
+        }
+        
+        .emotion-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(110, 0, 255, 0.3);
+            background: rgba(50, 60, 90, 0.6);
+        }
+        
+        .emotion-card.active {
+            background: rgba(110, 0, 255, 0.2);
+            border: 2px solid var(--cosmic-primary);
+            box-shadow: 0 0 15px rgba(110, 0, 255, 0.5);
+        }
+        
+        .emotion-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .emotion-name {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .intensity-slider-container {
+            margin-top: 2rem;
+            text-align: center;
+        }
+        
+        .intensity-slider-container label {
+            display: block;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+        
+        .intensity-slider {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 5px;
+            background: linear-gradient(90deg, #3498db, #f1c40f, #e74c3c);
+            outline: none;
+        }
+        
+        .intensity-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: var(--cosmic-primary);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(110, 0, 255, 0.7);
+        }
+        
+        .intensity-slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: var(--cosmic-primary);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(110, 0, 255, 0.7);
+        }
+        
+        .intensity-value {
+            margin-top: 0.5rem;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--cosmic-secondary);
+        }
+        
+        .advanced-options {
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+        }
+        
+        .advanced-options-toggle {
+            display: block;
+            margin: 0 auto;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 20px;
+            color: var(--cosmic-text-light);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .advanced-options-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .options-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        
+        .options-content.open {
+            max-height: 400px;
+        }
+        
+        .genre-preferences {
+            margin-top: 1.5rem;
+        }
+        
+        .genre-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .genre-chip {
+            background: rgba(50, 60, 90, 0.4);
+            border-radius: 20px;
+            padding: 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .genre-chip:hover {
+            background: rgba(50, 60, 90, 0.7);
+        }
+        
+        .genre-chip.selected {
+            background: rgba(110, 0, 255, 0.4);
+            box-shadow: 0 0 8px rgba(110, 0, 255, 0.5);
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+        
+        .action-buttons button {
+            margin: 0 0.5rem;
+        }
+        
+        .results-container {
+            display: none;
+            background: rgba(20, 30, 60, 0.7);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(110, 0, 255, 0.2);
+        }
+        
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        
+        .results-header h2 {
+            margin: 0;
+        }
+        
+        .results-emotion {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: rgba(30, 40, 70, 0.6);
+            border-radius: 20px;
+        }
+        
+        .results-emotion-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+        
+        .explanation-box {
+            background: rgba(110, 0, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--cosmic-primary);
+        }
+        
+        .playlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .playlist-card {
+            background: rgba(30, 40, 70, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .playlist-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(110, 0, 255, 0.3);
+        }
+        
+        .playlist-header {
+            padding: 1.5rem;
+            background: rgba(110, 0, 255, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .playlist-title {
+            margin: 0;
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+        
+        .playlist-description {
+            margin: 0;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        .playlist-tracks {
+            padding: 1.5rem;
+            flex: 1;
+        }
+        
+        .track-item {
+            padding: 0.7rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: background 0.3s ease;
+        }
+        
+        .track-item:hover {
+            background: rgba(110, 0, 255, 0.1);
+        }
+        
+        .track-title {
+            font-weight: bold;
+            margin-bottom: 0.2rem;
+        }
+        
+        .track-artist {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .music-controls {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .loading-content {
+            text-align: center;
+        }
+        
+        .cosmic-loader {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(45deg, var(--cosmic-primary), var(--cosmic-secondary));
+            animation: pulse 1.5s infinite alternate;
+            position: relative;
+        }
+        
+        .cosmic-loader::before,
+        .cosmic-loader::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 50%;
+            border: 2px solid var(--cosmic-primary);
+            animation: cosmic-loader-rings 2s linear infinite;
+            opacity: 0;
+        }
+        
+        .cosmic-loader::after {
+            animation-delay: 1s;
+        }
+        
+        @keyframes cosmic-loader-rings {
+            0% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .emotion-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .playlist-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .genre-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="/">Home</a>
+            <a href="/progress-tracker">Progress Tracker</a>
+            <a href="/emotional-learning-game">Learning Game</a>
+            <a href="/music-recommendations" class="active">Mood Music</a>
+        </nav>
+        
+        <div class="header">
+            <h1>Cosmic Mood Music</h1>
+            <p>Discover music that resonates with your emotional state</p>
+        </div>
+        
+        <div class="music-recommendation-container">
+            <div class="emotion-selector">
+                <h2>How are you feeling right now?</h2>
+                
+                <div class="emotion-grid" id="emotionGrid">
+                    <div class="emotion-card" data-emotion="happiness">
+                        <div class="emotion-icon">😊</div>
+                        <div class="emotion-name">Happiness</div>
+                    </div>
+                    
+                    <div class="emotion-card" data-emotion="sadness">
+                        <div class="emotion-icon">😢</div>
+                        <div class="emotion-name">Sadness</div>
+                    </div>
+                    
+                    <div class="emotion-card" data-emotion="anger">
+                        <div class="emotion-icon">😠</div>
+                        <div class="emotion-name">Anger</div>
+                    </div>
+                    
+                    <div class="emotion-card" data-emotion="fear">
+                        <div class="emotion-icon">😨</div>
+                        <div class="emotion-name">Fear</div>
+                    </div>
+                    
+                    <div class="emotion-card" data-emotion="surprise">
+                        <div class="emotion-icon">😲</div>
+                        <div class="emotion-name">Surprise</div>
+                    </div>
+                    
+                    <div class="emotion-card" data-emotion="disgust">
+                        <div class="emotion-icon">🤢</div>
+                        <div class="emotion-name">Disgust</div>
+                    </div>
+                    
+                    <div class="emotion-card" data-emotion="mixed">
+                        <div class="emotion-icon">🤔</div>
+                        <div class="emotion-name">Mixed</div>
+                    </div>
+                </div>
+                
+                <div class="intensity-slider-container">
+                    <label for="intensitySlider">How intense is this feeling?</label>
+                    <input type="range" min="0" max="100" value="50" class="intensity-slider" id="intensitySlider">
+                    <div class="intensity-value" id="intensityValue">Medium Intensity (50%)</div>
+                </div>
+                
+                <div class="advanced-options">
+                    <button class="advanced-options-toggle" id="advancedOptionsToggle">Show Advanced Options</button>
+                    <div class="options-content" id="advancedOptionsContent">
+                        <div class="genre-preferences">
+                            <h3>Genre Preferences</h3>
+                            <div class="genre-grid" id="genreGrid">
+                                <div class="genre-chip" data-genre="pop">Pop</div>
+                                <div class="genre-chip" data-genre="rock">Rock</div>
+                                <div class="genre-chip" data-genre="electronic">Electronic</div>
+                                <div class="genre-chip" data-genre="classical">Classical</div>
+                                <div class="genre-chip" data-genre="jazz">Jazz</div>
+                                <div class="genre-chip" data-genre="hip-hop">Hip-Hop</div>
+                                <div class="genre-chip" data-genre="ambient">Ambient</div>
+                                <div class="genre-chip" data-genre="indie">Indie</div>
+                                <div class="genre-chip" data-genre="metal">Metal</div>
+                                <div class="genre-chip" data-genre="folk">Folk</div>
+                                <div class="genre-chip" data-genre="blues">Blues</div>
+                                <div class="genre-chip" data-genre="world">World</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="cosmic-btn" id="recommendButton">Get Recommendations</button>
+                    <button class="cosmic-btn cosmic-btn-secondary" id="resetButton">Reset</button>
+                </div>
+            </div>
+            
+            <div class="results-container" id="resultsContainer">
+                <div class="results-header">
+                    <h2>Your Music Recommendations</h2>
+                    <div class="results-emotion">
+                        <span class="results-emotion-icon" id="resultsEmotionIcon">😊</span>
+                        <span id="resultsEmotionText">Happiness</span>
+                    </div>
+                </div>
+                
+                <div class="explanation-box" id="explanationBox">
+                    When feeling happy, upbeat music with positive vibes can enhance your mood and maintain positive energy.
+                </div>
+                
+                <div class="playlist-grid" id="playlistGrid">
+                    <!-- Playlist cards will be added here via JavaScript -->
+                </div>
+                
+                <div class="music-controls">
+                    <button class="cosmic-btn cosmic-btn-secondary" id="newRecommendationsButton">Get New Recommendations</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="cosmic-loader"></div>
+            <h3>Crafting your cosmic playlist...</h3>
+            <p>Finding music that resonates with your emotional state</p>
+        </div>
+    </div>
+    
+    <script src="js/cosmic-emotion-sparkles.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const emotionGrid = document.getElementById('emotionGrid');
+            const emotionCards = document.querySelectorAll('.emotion-card');
+            const intensitySlider = document.getElementById('intensitySlider');
+            const intensityValue = document.getElementById('intensityValue');
+            const advancedOptionsToggle = document.getElementById('advancedOptionsToggle');
+            const advancedOptionsContent = document.getElementById('advancedOptionsContent');
+            const genreGrid = document.getElementById('genreGrid');
+            const genreChips = document.querySelectorAll('.genre-chip');
+            const recommendButton = document.getElementById('recommendButton');
+            const resetButton = document.getElementById('resetButton');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsEmotionIcon = document.getElementById('resultsEmotionIcon');
+            const resultsEmotionText = document.getElementById('resultsEmotionText');
+            const explanationBox = document.getElementById('explanationBox');
+            const playlistGrid = document.getElementById('playlistGrid');
+            const newRecommendationsButton = document.getElementById('newRecommendationsButton');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            // State
+            let selectedEmotion = null;
+            let intensity = 0.5;
+            let selectedGenres = [];
+            
+            // Emotion mapping for icons
+            const emotionIcons = {
+                'happiness': '😊',
+                'sadness': '😢',
+                'anger': '😠',
+                'fear': '😨',
+                'surprise': '😲',
+                'disgust': '🤢',
+                'mixed': '🤔'
+            };
+            
+            // Initialize UI
+            function init() {
+                // Set up emotion selection
+                emotionCards.forEach(card => {
+                    card.addEventListener('click', () => {
+                        const emotion = card.dataset.emotion;
+                        selectEmotion(emotion, card);
+                    });
+                });
+                
+                // Set up intensity slider
+                intensitySlider.addEventListener('input', () => {
+                    intensity = intensitySlider.value / 100;
+                    updateIntensityLabel();
+                    
+                    // Update theme based on emotion and intensity if an emotion is selected
+                    if (selectedEmotion) {
+                        triggerEmotionEffect(selectedEmotion, window.innerWidth / 2, intensitySlider.getBoundingClientRect().top);
+                    }
+                });
+                
+                // Set up advanced options toggle
+                advancedOptionsToggle.addEventListener('click', () => {
+                    advancedOptionsContent.classList.toggle('open');
+                    advancedOptionsToggle.textContent = advancedOptionsContent.classList.contains('open') ? 
+                        'Hide Advanced Options' : 'Show Advanced Options';
+                });
+                
+                // Set up genre selection
+                genreChips.forEach(chip => {
+                    chip.addEventListener('click', () => {
+                        chip.classList.toggle('selected');
+                        const genre = chip.dataset.genre;
+                        
+                        if (chip.classList.contains('selected')) {
+                            if (!selectedGenres.includes(genre)) {
+                                selectedGenres.push(genre);
+                            }
+                        } else {
+                            selectedGenres = selectedGenres.filter(g => g !== genre);
+                        }
+                    });
+                });
+                
+                // Set up action buttons
+                recommendButton.addEventListener('click', getRecommendations);
+                resetButton.addEventListener('click', resetForm);
+                newRecommendationsButton.addEventListener('click', () => {
+                    resultsContainer.style.display = 'none';
+                    getRecommendations();
+                });
+            }
+            
+            // Select an emotion
+            function selectEmotion(emotion, card) {
+                // Remove active class from all cards
+                emotionCards.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to selected card
+                card.classList.add('active');
+                
+                // Update selected emotion
+                selectedEmotion = emotion;
+                
+                // Apply theme based on emotion
+                applyTheme(emotion);
+                
+                // Create emotion sparkling effect
+                const rect = card.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                triggerEmotionEffect(emotion, x, y);
+            }
+            
+            // Update intensity label
+            function updateIntensityLabel() {
+                let intensityText = 'Medium';
+                if (intensity < 0.25) {
+                    intensityText = 'Very Low';
+                } else if (intensity < 0.4) {
+                    intensityText = 'Low';
+                } else if (intensity < 0.6) {
+                    intensityText = 'Medium';
+                } else if (intensity < 0.8) {
+                    intensityText = 'High';
+                } else {
+                    intensityText = 'Very High';
+                }
+                
+                intensityValue.textContent = `${intensityText} Intensity (${Math.round(intensity * 100)}%)`;
+            }
+            
+            // Reset the form
+            function resetForm() {
+                // Reset emotion selection
+                emotionCards.forEach(card => card.classList.remove('active'));
+                selectedEmotion = null;
+                
+                // Reset intensity
+                intensitySlider.value = 50;
+                intensity = 0.5;
+                updateIntensityLabel();
+                
+                // Reset genre selection
+                genreChips.forEach(chip => chip.classList.remove('selected'));
+                selectedGenres = [];
+                
+                // Reset theme
+                applyTheme('default');
+                
+                // Hide results
+                resultsContainer.style.display = 'none';
+            }
+            
+            // Get music recommendations
+            function getRecommendations() {
+                // Validate that an emotion is selected
+                if (!selectedEmotion) {
+                    alert('Please select an emotion first.');
+                    return;
+                }
+                
+                // Show loading overlay
+                loadingOverlay.style.display = 'flex';
+                
+                // Prepare request data
+                const requestData = {
+                    emotion: selectedEmotion,
+                    intensity: intensity
+                };
+                
+                // Add genre preferences if any are selected
+                if (selectedGenres.length > 0) {
+                    requestData.user_preferences = {
+                        preferred_genres: selectedGenres
+                    };
+                }
+                
+                // Make API request
+                setTimeout(() => {
+                    fetchRecommendations(requestData);
+                }, 1000); // Adding a small delay to show the loading spinner
+            }
+            
+            // Fetch recommendations from API
+            async function fetchRecommendations(requestData) {
+                try {
+                    const response = await fetch('/api/music/recommendations', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        displayResults(result.data);
+                    } else {
+                        // If API fails, use demo data
+                        console.error('API Error:', result.error);
+                        displayDemoResults();
+                    }
+                } catch (error) {
+                    console.error('Fetch Error:', error);
+                    displayDemoResults();
+                } finally {
+                    // Hide loading overlay
+                    loadingOverlay.style.display = 'none';
+                }
+            }
+            
+            // Display recommendation results
+            function displayResults(data) {
+                // Update emotion display
+                resultsEmotionIcon.textContent = emotionIcons[data.emotion] || '🎵';
+                resultsEmotionText.textContent = data.emotion.charAt(0).toUpperCase() + data.emotion.slice(1);
+                
+                // Update explanation
+                explanationBox.textContent = data.explanation || '';
+                
+                // Clear existing playlists
+                playlistGrid.innerHTML = '';
+                
+                // Add playlists
+                if (data.playlists && data.playlists.length > 0) {
+                    data.playlists.forEach(playlist => {
+                        const playlistCard = createPlaylistCard(playlist);
+                        playlistGrid.appendChild(playlistCard);
+                    });
+                } else {
+                    playlistGrid.innerHTML = '<p class="no-results">No playlists found. Try a different emotion.</p>';
+                }
+                
+                // Show results container
+                resultsContainer.style.display = 'block';
+                
+                // Scroll to results
+                resultsContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Create a playlist card element
+            function createPlaylistCard(playlist) {
+                const card = document.createElement('div');
+                card.className = 'playlist-card';
+                
+                const header = document.createElement('div');
+                header.className = 'playlist-header';
+                
+                const title = document.createElement('h3');
+                title.className = 'playlist-title';
+                title.textContent = playlist.name;
+                
+                const description = document.createElement('p');
+                description.className = 'playlist-description';
+                description.textContent = playlist.description;
+                
+                header.appendChild(title);
+                header.appendChild(description);
+                
+                const tracksContainer = document.createElement('div');
+                tracksContainer.className = 'playlist-tracks';
+                
+                // Add tracks
+                if (playlist.tracks && playlist.tracks.length > 0) {
+                    playlist.tracks.forEach(track => {
+                        const trackItem = document.createElement('div');
+                        trackItem.className = 'track-item';
+                        
+                        const trackTitle = document.createElement('div');
+                        trackTitle.className = 'track-title';
+                        trackTitle.textContent = track.title;
+                        
+                        const trackArtist = document.createElement('div');
+                        trackArtist.className = 'track-artist';
+                        trackArtist.textContent = track.artist;
+                        
+                        trackItem.appendChild(trackTitle);
+                        trackItem.appendChild(trackArtist);
+                        tracksContainer.appendChild(trackItem);
+                    });
+                }
+                
+                card.appendChild(header);
+                card.appendChild(tracksContainer);
+                
+                return card;
+            }
+            
+            // Display demo results (fallback if API fails)
+            function displayDemoResults() {
+                const demoData = {
+                    emotion: selectedEmotion,
+                    explanation: `Music can be a powerful way to process and enhance ${selectedEmotion}. These playlists are curated to resonate with your current emotional state.`,
+                    playlists: [
+                        {
+                            name: `${selectedEmotion.charAt(0).toUpperCase() + selectedEmotion.slice(1)} Vibes`,
+                            description: "A curated playlist to match your mood",
+                            tracks: [
+                                { title: "Track One", artist: "Artist A" },
+                                { title: "Second Song", artist: "Artist B" },
+                                { title: "Third Melody", artist: "Artist C" },
+                                { title: "Fourth Tune", artist: "Artist D" },
+                                { title: "Final Track", artist: "Artist E" }
+                            ]
+                        },
+                        {
+                            name: "Cosmic Emotions",
+                            description: "Journey through musical emotions",
+                            tracks: [
+                                { title: "Interstellar Feelings", artist: "Cosmic Artist" },
+                                { title: "Nebula Dreams", artist: "Star Collective" },
+                                { title: "Emotional Galaxies", artist: "Cosmic Vibes" },
+                                { title: "Stellar Moods", artist: "Space Harmony" },
+                                { title: "Universe Within", artist: "Inner Cosmos" }
+                            ]
+                        }
+                    ]
+                };
+                
+                displayResults(demoData);
+            }
+            
+            // Initialize the page
+            init();
+        });
+    </script>
+</body>
+</html>

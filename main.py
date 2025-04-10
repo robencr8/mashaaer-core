@@ -5,7 +5,12 @@ Mashaaer - Advanced emotional learning platform with gamification
 import os
 import logging
 from flask import Flask, send_from_directory, jsonify, g
-from models.emotion_progress import db, User, EmotionEntry
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+import requests
+
+# Initialize database
+db = SQLAlchemy()
 
 # Set up logging
 logging.basicConfig(
@@ -31,9 +36,17 @@ def create_app():
     # Initialize database
     db.init_app(app)
     
+    # Import models (do this after db is initialized but before routes)
+    from models.user import User
+    from models.emotion_progress import UserEmotionProgress, Achievement, UserAchievement, UserLearningPathProgress
+
     # Register API routes
     from routes.emotion_progress_routes import register_routes as register_progress_routes
     register_progress_routes(app)
+    
+    # Register music recommendation routes
+    from routes.music_recommendation_routes import register_routes as register_music_routes
+    register_music_routes(app)
     
     # Health check endpoint
     @app.route('/health')
@@ -42,7 +55,7 @@ def create_app():
         return jsonify({
             "status": "healthy",
             "message": "Mashaaer server is running",
-            "features": ["emotion_analysis", "progress_tracking", "gamification"]
+            "features": ["emotion_analysis", "progress_tracking", "gamification", "music_recommendations"]
         })
     
     # Static file routes
@@ -60,6 +73,16 @@ def create_app():
     def progress_tracker():
         """Emotional progress tracker page"""
         return send_from_directory('public', 'progress-tracker.html')
+        
+    @app.route('/emotional-learning-game')
+    def emotional_learning_game():
+        """Gamified emotional learning experience"""
+        return send_from_directory('public', 'emotional-learning-game.html')
+    
+    @app.route('/music-recommendations')
+    def music_recommendations():
+        """Mood-based music recommendations page"""
+        return send_from_directory('public', 'music-recommendations.html')
     
     @app.route('/<path:path>')
     def serve_static(path):

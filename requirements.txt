@@ -49,3 +49,6 @@ flask
 flask-sqlalchemy
 psycopg2-binary
 sqlalchemy
+flask-login
+flask-sqlalchemy
+flask-login

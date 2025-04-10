@@ -3,368 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mashaaer Feelings | مشاعر</title>
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="/css/rtl.css">
-    <link rel="stylesheet" href="/css/cosmic-theme.css">
-    <link rel="stylesheet" href="/css/cosmic-animations.css">
+    <title>Mashaaer - Emotional Learning Platform</title>
+    <link rel="stylesheet" href="css/cosmic-theme.css">
     <style>
-        .menu-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-top: 30px;
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at center, #1a1a2e 0%, #16213e 50%, #0f0f1a 100%);
         }
         
-        .menu-item {
-            background-color: var(--cosmic-bg-element);
-            border-radius: var(--cosmic-radius-lg);
-            padding: 25px;
+        .cosmic-container {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
             text-align: center;
-            cursor: pointer;
-            transition: var(--cosmic-transition);
-            text-decoration: none;
-            color: var(--cosmic-text-primary);
+        }
+        
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
             position: relative;
             overflow: hidden;
-            z-index: 1;
         }
         
-        .menu-item::before {
-            content: '';
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(100, 149, 237, 0.7);
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            color: #b3e0ff;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .feature-card {
+            background: rgba(20, 30, 60, 0.7);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 149, 237, 0.2);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(100, 149, 237, 0.3);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #6e00ff, #3498db);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            margin-top: 1rem;
+            box-shadow: 0 4px 15px rgba(110, 0, 255, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(110, 0, 255, 0.6);
+        }
+        
+        .cosmic-stars {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, 
-                          rgba(94, 114, 228, 0.2) 0%, 
-                          rgba(94, 114, 228, 0) 70%);
-            transform: scale(0);
-            transform-origin: center;
-            transition: transform 0.6s ease-out;
+            pointer-events: none;
             z-index: -1;
         }
         
-        .menu-item:hover::before {
-            transform: scale(1.5);
-        }
-        
-        .menu-item:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--cosmic-shadow);
-        }
-        
-        .menu-item:hover .menu-icon {
-            transform: scale(1.1);
-        }
-        
-        .menu-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            color: var(--cosmic-primary);
-            transition: var(--cosmic-transition);
-            display: inline-block;
-        }
-        
-        .menu-title {
-            font-size: 1.4rem;
-            margin-bottom: 12px;
-            font-weight: bold;
-            background: linear-gradient(45deg, var(--cosmic-primary), var(--cosmic-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: inline-block;
-        }
-        
-        .menu-description {
-            font-size: 1rem;
-            color: var(--cosmic-text-secondary);
-            line-height: 1.5;
-        }
-        
-        .language-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(94, 114, 228, 0.1);
-            border: 1px solid rgba(94, 114, 228, 0.3);
-            padding: 8px 20px;
-            border-radius: 30px;
-            color: white;
-            cursor: pointer;
-            transition: var(--cosmic-transition);
-            z-index: 100;
-        }
-        
-        .language-toggle:hover {
-            background: rgba(94, 114, 228, 0.2);
-            box-shadow: 0 0 15px rgba(94, 114, 228, 0.4);
-        }
-        
-        .welcome-title {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 30px;
-        }
-        
-        .welcome-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 0;
-            width: 60px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--cosmic-primary), transparent);
-        }
-        
-        .rtl .welcome-title::after {
-            left: auto;
-            right: 0;
-            background: linear-gradient(90deg, transparent, var(--cosmic-primary));
-        }
-        
-        .main-container {
-            position: relative;
-            z-index: 2;
-            padding-top: 30px;
-        }
-        
         @media (max-width: 768px) {
-            .menu-grid {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            h2 {
+                font-size: 1.3rem;
+            }
+            
+            .feature-grid {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div id="cosmicBackground"></div>
-    
-    <button class="language-toggle" id="languageToggle">العربية</button>
-    
-    <div class="main-container">
-        <div class="cosmic-container">
-            <h1 class="welcome-title cosmic-title" id="mainTitle">Mashaaer Feelings</h1>
-            <p id="welcomeText" class="cosmic-text">Welcome to Mashaaer Feelings, an advanced AI emotional companion that analyzes and responds to your emotions. Experience the future of human-AI interaction with our bilingual support and cosmic design.</p>
-            
-            <div class="menu-grid">
-                <a href="/emotion-analysis.html" class="menu-item cosmic-card">
-                    <div class="menu-icon">🔍</div>
-                    <div class="menu-title" id="analysisTitle">Emotion Analysis</div>
-                    <div class="menu-description" id="analysisDesc">Analyze your emotions through text or voice input</div>
-                </a>
-                
-                <a href="/emotions-visualization.html" class="menu-item cosmic-card">
-                    <div class="menu-icon">✨</div>
-                    <div class="menu-title" id="visualizationTitle">Emotions Visualization</div>
-                    <div class="menu-description" id="visualizationDesc">View your emotional patterns in an interactive display</div>
-                </a>
-                
-                <a href="/accessibility.html" class="menu-item cosmic-card">
-                    <div class="menu-icon">🔊</div>
-                    <div class="menu-title" id="accessibilityTitle">Accessibility Features</div>
-                    <div class="menu-description" id="accessibilityDesc">Voice guidance and other accessibility options</div>
-                </a>
-                
-                <a href="/settings.html" class="menu-item cosmic-card">
-                    <div class="menu-icon">⚙️</div>
-                    <div class="menu-title" id="settingsTitle">Settings</div>
-                    <div class="menu-description" id="settingsDesc">Configure your preferences and personalization</div>
-                </a>
-            </div>
-            
-            <div style="margin-top: 40px; text-align: center;">
-                <a href="/cosmic-loader-demo.html" class="cosmic-button" id="demoButton">Cosmic UI Demo</a>
+    <div class="cosmic-container">
+        <div class="hero">
+            <div class="cosmic-stars" id="stars"></div>
+            <h1>Mashaaer Feelings</h1>
+            <h2>Advanced Emotional Learning & Tracking Platform</h2>
+            <p>Explore, understand, and master your emotions through an engaging cosmic journey</p>
+            <div>
+                <a href="/progress-tracker" class="cta-button">View Your Progress</a>
+                <a href="/emotional-learning-game" class="cta-button">Start Learning</a>
             </div>
         </div>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🌟</div>
+                <h3>Emotional Recognition</h3>
+                <p>Advanced technology to identify and analyze emotions in voice, text, and facial expressions</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🏆</div>
+                <h3>Achievement System</h3>
+                <p>Track your emotional intelligence journey with badges, levels, and personalized insights</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <h3>Learning Paths</h3>
+                <p>Customized emotional intelligence curriculum tailored to your progress and needs</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔊</div>
+                <h3>Voice Interaction</h3>
+                <p>Natural voice-based interaction for a more intuitive and accessible experience</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🌍</div>
+                <h3>Bilingual Support</h3>
+                <p>Full support for both English and Arabic languages</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">✨</div>
+                <h3>Cosmic Theme</h3>
+                <p>Immersive cosmic design that responds to your emotional state</p>
+            </div>
+        </div>
+        
+        <div>
+            <h2>Begin Your Emotional Journey Today</h2>
+            <a href="/cosmic-loader-demo" class="cta-button">Explore Cosmic Animations</a>
+        </div>
     </div>
-    
-    <script src="/js/cosmic-theme.js"></script>
-    <script src="/js/cosmic-emotion-sparkles.js"></script>
+
+    <script src="js/cosmic-theme.js"></script>
     <script>
+        // Simple star animation for the cosmic background
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize the Cosmic Background
-            const cosmicBackground = new CosmicBackground({
-                container: document.getElementById('cosmicBackground'),
-                starsBrightness: 0.7,
-                nebulaIntensity: 0.8,
-                animationSpeed: 0.5,
-                reduceMotion: false,
-                showControls: false,
-                theme: 'blue-purple',
-                zIndex: -1
-            });
+            const starsContainer = document.getElementById('stars');
             
-            // Language toggle
-            const languageToggle = document.getElementById('languageToggle');
-            let currentLanguage = 'en';
-            
-            languageToggle.addEventListener('click', function() {
-                if (currentLanguage === 'en') {
-                    currentLanguage = 'ar';
-                    document.body.classList.add('rtl');
-                    this.textContent = 'English';
-                    updateUILanguage('ar');
-                    // Changed emotion theme based on Arabic
-                    cosmicBackground.setEmotion('happy');
-                } else {
-                    currentLanguage = 'en';
-                    document.body.classList.remove('rtl');
-                    this.textContent = 'العربية';
-                    updateUILanguage('en');
-                    // Reset emotion theme
-                    cosmicBackground.setEmotion('neutral');
-                }
-            });
-            
-            function updateUILanguage(lang) {
-                if (lang === 'ar') {
-                    // Update all text elements to Arabic
-                    document.getElementById('mainTitle').textContent = 'مشاعر';
-                    document.getElementById('welcomeText').textContent = 'مرحبًا بك في مشاعر، رفيق الذكاء الاصطناعي العاطفي المتقدم الذي يحلل ويستجيب لمشاعرك. استمتع بمستقبل التفاعل بين الإنسان والذكاء الاصطناعي مع دعمنا ثنائي اللغة وتصميمنا الكوني.';
-                    
-                    document.getElementById('analysisTitle').textContent = 'تحليل المشاعر';
-                    document.getElementById('analysisDesc').textContent = 'تحليل مشاعرك من خلال النص أو الإدخال الصوتي';
-                    
-                    document.getElementById('visualizationTitle').textContent = 'تصور المشاعر';
-                    document.getElementById('visualizationDesc').textContent = 'عرض أنماط مشاعرك في عرض تفاعلي';
-                    
-                    document.getElementById('accessibilityTitle').textContent = 'ميزات إمكانية الوصول';
-                    document.getElementById('accessibilityDesc').textContent = 'التوجيه الصوتي وخيارات إمكانية الوصول الأخرى';
-                    
-                    document.getElementById('settingsTitle').textContent = 'الإعدادات';
-                    document.getElementById('settingsDesc').textContent = 'تكوين تفضيلاتك والتخصيص';
-                    
-                    document.getElementById('demoButton').textContent = 'عرض واجهة المستخدم الكونية';
-                } else {
-                    // Update all text elements to English
-                    document.getElementById('mainTitle').textContent = 'Mashaaer Feelings';
-                    document.getElementById('welcomeText').textContent = 'Welcome to Mashaaer Feelings, an advanced AI emotional companion that analyzes and responds to your emotions. Experience the future of human-AI interaction with our bilingual support and cosmic design.';
-                    
-                    document.getElementById('analysisTitle').textContent = 'Emotion Analysis';
-                    document.getElementById('analysisDesc').textContent = 'Analyze your emotions through text or voice input';
-                    
-                    document.getElementById('visualizationTitle').textContent = 'Emotions Visualization';
-                    document.getElementById('visualizationDesc').textContent = 'View your emotional patterns in an interactive display';
-                    
-                    document.getElementById('accessibilityTitle').textContent = 'Accessibility Features';
-                    document.getElementById('accessibilityDesc').textContent = 'Voice guidance and other accessibility options';
-                    
-                    document.getElementById('settingsTitle').textContent = 'Settings';
-                    document.getElementById('settingsDesc').textContent = 'Configure your preferences and personalization';
-                    
-                    document.getElementById('demoButton').textContent = 'Cosmic UI Demo';
-                }
+            // Create stars
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                star.style.animationDelay = `${Math.random() * 2}s`;
+                starsContainer.appendChild(star);
             }
-            
-            // Initialize Emotion Sparkles
-            const emotionSparkles = new EmotionSparkles({
-                container: document.body,
-                enabled: true,
-                size: 6,
-                count: 25,
-                clickEnabled: true,
-                hoverEnabled: true,
-                emotionChangeEnabled: true
-            });
-            
-            // Add interactive elements with cosmic theme
-            const menuItems = document.querySelectorAll('.menu-item');
-            
-            menuItems.forEach(item => {
-                // إضافة سمة data-emotion لكل عنصر من العناصر
-                const title = item.querySelector('.menu-title').textContent.toLowerCase();
-                let emotionType = 'neutral';
-                
-                if (title.includes('emotion') || title.includes('تحليل المشاعر')) {
-                    emotionType = 'happy';
-                } else if (title.includes('visualization') || title.includes('تصور')) {
-                    emotionType = 'neutral';
-                } else if (title.includes('accessibility') || title.includes('الوصول')) {
-                    emotionType = 'sad';
-                } else if (title.includes('settings') || title.includes('الإعدادات')) {
-                    emotionType = 'angry';
-                }
-                
-                item.setAttribute('data-emotion', emotionType);
-                
-                item.addEventListener('mouseover', function() {
-                    // Get menu title to determine emotion
-                    const title = this.querySelector('.menu-title').textContent.toLowerCase();
-                    
-                    // Set background emotion based on menu item
-                    if (title.includes('emotion') || title.includes('تحليل المشاعر')) {
-                        cosmicBackground.setEmotion('happy');
-                        emotionSparkles.setEmotion('happy');
-                    } else if (title.includes('visualization') || title.includes('تصور')) {
-                        cosmicBackground.setEmotion('neutral');
-                        emotionSparkles.setEmotion('neutral');
-                    } else if (title.includes('accessibility') || title.includes('الوصول')) {
-                        cosmicBackground.setEmotion('sad');
-                        emotionSparkles.setEmotion('sad');
-                    } else if (title.includes('settings') || title.includes('الإعدادات')) {
-                        cosmicBackground.setEmotion('angry');
-                        emotionSparkles.setEmotion('angry');
-                    }
-                    
-                    // Add glow effect
-                    this.classList.add('cosmic-glow');
-                    
-                    // إضافة تأثير مموج للعنصر
-                    this.classList.add('cosmic-wave');
-                    
-                    // إنشاء تأثير المشاعر فوق العنصر
-                    const rect = this.getBoundingClientRect();
-                    const x = rect.left + rect.width / 2;
-                    const y = rect.top + rect.height / 2;
-                    
-                    // إصدار تأثير الجسيمات
-                    emotionSparkles.emit(x, y);
-                });
-                
-                item.addEventListener('mouseout', function() {
-                    // Reset emotion
-                    cosmicBackground.setEmotion('neutral');
-                    emotionSparkles.setEmotion('neutral');
-                    
-                    // Remove glow and wave effects
-                    this.classList.remove('cosmic-glow');
-                    this.classList.remove('cosmic-wave');
-                });
-                
-                // Add click interaction effect
-                item.addEventListener('click', function(e) {
-                    // Create ripple effect
-                    const ripple = document.createElement('span');
-                    ripple.classList.add('ripple');
-                    this.appendChild(ripple);
-                    
-                    const rect = this.getBoundingClientRect();
-                    const size = Math.max(rect.width, rect.height);
-                    
-                    ripple.style.width = ripple.style.height = `${size}px`;
-                    ripple.style.left = `${e.clientX - rect.left - size/2}px`;
-                    ripple.style.top = `${e.clientY - rect.top - size/2}px`;
-                    
-                    ripple.classList.add('active');
-                    
-                    // إنشاء تأثير إضافي للنقر باستخدام جسيمات المشاعر
-                    emotionSparkles.emitFromEvent(e);
-                    
-                    setTimeout(() => {
-                        ripple.remove();
-                    }, 500);
-                });
-            });
-            
-            // إضافة تأثير للعنوان الرئيسي
-            const mainTitle = document.getElementById('mainTitle');
-            mainTitle.classList.add('cosmic-sparkle-animation');
-            
-            // إضافة تأثير للزر الرئيسي
-            const demoButton = document.getElementById('demoButton');
-            demoButton.classList.add('cosmic-pulse');
         });
     </script>
+    <style>
+        .star {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.7); }
+        }
+    </style>
 </body>
 </html>

@@ -1,1 +1,1 @@
-run = "cd RobinAI_Enhanced && gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app"
+run = "gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app"

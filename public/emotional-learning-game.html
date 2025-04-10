@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotional Learning Game - Mashaaer Feelings</title>
+    <link rel="stylesheet" href="css/cosmic-theme.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at center, #1a1a2e 0%, #16213e 50%, #0f0f1a 100%);
+        }
+        
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 4rem);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        nav a {
+            margin: 0 1rem;
+            color: #fff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        nav a:hover {
+            color: #00d4ff;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(110, 0, 255, 0.7);
+        }
+        
+        .game-board {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        .game-area {
+            display: flex;
+            flex: 1;
+            gap: 2rem;
+        }
+        
+        .emotion-panel {
+            flex: 1;
+            background: rgba(20, 30, 60, 0.7);
+            border-radius: 10px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(110, 0, 255, 0.2);
+        }
+        
+        .emotion-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .emotion-icon {
+            font-size: 6rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite alternate;
+        }
+        
+        .emotion-hint {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .hint-wrapper {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .hint-text {
+            font-style: italic;
+            margin-bottom: 0.5rem;
+        }
+        
+        .hint-quote {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .choice-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .emotion-choice {
+            background: rgba(30, 40, 70, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        }
+        
+        .emotion-choice:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(110, 0, 255, 0.3);
+            background: rgba(50, 60, 90, 0.6);
+        }
+        
+        .choice-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .choice-label {
+            font-weight: bold;
+        }
+        
+        .score-panel {
+            background: rgba(20, 30, 60, 0.7);
+            border-radius: 10px;
+            padding: 1.5rem;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(110, 0, 255, 0.2);
+        }
+        
+        .score-header {
+            text-align: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #6e00ff, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .streak-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            justify-content: center;
+        }
+        
+        .streak-value {
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+        
+        .streak-flame {
+            color: #f39c12;
+            font-size: 1.5rem;
+        }
+        
+        .mini-achievement {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .mini-achievement-icon {
+            font-size: 1.8rem;
+            margin-right: 1rem;
+        }
+        
+        .mini-achievement-text {
+            font-size: 0.9rem;
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .stats-label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .stats-value {
+            font-weight: bold;
+        }
+        
+        .emotion-feedback {
+            visibility: hidden;
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .emotion-feedback.correct {
+            color: #2ecc71;
+        }
+        
+        .emotion-feedback.incorrect {
+            color: #e74c3c;
+        }
+        
+        .show-feedback {
+            visibility: visible;
+            opacity: 1;
+            animation: feedback-animation 1.5s ease-out;
+        }
+        
+        @keyframes feedback-animation {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+            }
+            40% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0;
+            }
+        }
+        
+        .game-controls {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .cosmic-btn {
+            margin: 0 0.5rem;
+        }
+        
+        .results-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .results-card {
+            background: rgba(30, 40, 70, 0.9);
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 4px 30px rgba(110, 0, 255, 0.5);
+            border: 1px solid rgba(110, 0, 255, 0.3);
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        .results-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #6e00ff, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .results-badge {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            position: relative;
+            border: 3px solid #6e00ff;
+            box-shadow: 0 0 20px rgba(110, 0, 255, 0.7);
+        }
+        
+        .results-badge::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            bottom: -3px;
+            left: -3px;
+            background: linear-gradient(45deg, #6e00ff, #00d4ff);
+            border-radius: 50%;
+            z-index: -1;
+            animation: rotate 10s linear infinite;
+        }
+        
+        .results-stats {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+        
+        .results-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .results-label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .results-value {
+            font-weight: bold;
+        }
+        
+        .level-up-indicator {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border: 1px solid #f7c52e;
+            box-shadow: 0 0 15px rgba(247, 197, 46, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .level-up-text {
+            font-weight: bold;
+            color: #f7c52e;
+            margin-left: 0.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+            }
+            
+            .score-panel {
+                width: 100%;
+                margin-top: 1.5rem;
+            }
+            
+            .choice-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <nav>
+            <a href="/">Home</a>
+            <a href="/progress-tracker">Progress Tracker</a>
+            <a href="/emotional-learning-game" class="active">Learning Game</a>
+        </nav>
+        
+        <div class="header">
+            <h1>Emotional Intelligence Game</h1>
+            <p>Test and improve your emotional recognition skills through this immersive game</p>
+        </div>
+        
+        <div class="game-board">
+            <div class="emotion-feedback" id="feedback">Correct!</div>
+            
+            <div class="game-area">
+                <div class="emotion-panel">
+                    <div class="emotion-view">
+                        <div class="emotion-icon" id="currentEmotionIcon">😶</div>
+                        <h2 id="currentEmotionLabel">Identify this emotion</h2>
+                    </div>
+                    
+                    <div class="emotion-hint">
+                        <div class="hint-wrapper">
+                            <div class="hint-text" id="emotionHint">This feeling often arises when something unexpected occurs, bringing a surge of energy and alertness.</div>
+                            <div class="hint-quote" id="emotionQuote">"The body's way of increasing alertness in response to something novel or unexpected."</div>
+                        </div>
+                        
+                        <div class="choice-container">
+                            <div class="emotion-choice" data-emotion="happiness">
+                                <div class="choice-icon">😊</div>
+                                <div class="choice-label">Happiness</div>
+                            </div>
+                            
+                            <div class="emotion-choice" data-emotion="sadness">
+                                <div class="choice-icon">😢</div>
+                                <div class="choice-label">Sadness</div>
+                            </div>
+                            
+                            <div class="emotion-choice" data-emotion="anger">
+                                <div class="choice-icon">😠</div>
+                                <div class="choice-label">Anger</div>
+                            </div>
+                            
+                            <div class="emotion-choice" data-emotion="fear">
+                                <div class="choice-icon">😨</div>
+                                <div class="choice-label">Fear</div>
+                            </div>
+                            
+                            <div class="emotion-choice" data-emotion="surprise">
+                                <div class="choice-icon">😲</div>
+                                <div class="choice-label">Surprise</div>
+                            </div>
+                            
+                            <div class="emotion-choice" data-emotion="disgust">
+                                <div class="choice-icon">🤢</div>
+                                <div class="choice-label">Disgust</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-panel">
+                    <div class="score-header">
+                        <h3>Game Progress</h3>
+                    </div>
+                    
+                    <div class="score-value" id="scoreValue">0</div>
+                    
+                    <div class="streak-indicator">
+                        <span class="streak-flame">🔥</span>
+                        <span class="streak-value" id="streakValue">0</span> streak
+                    </div>
+                    
+                    <div class="mini-achievement">
+                        <div class="mini-achievement-icon">🎯</div>
+                        <div class="mini-achievement-text">Identify 5 emotions correctly in a row</div>
+                    </div>
+                    
+                    <div class="mini-achievement">
+                        <div class="mini-achievement-icon">🚀</div>
+                        <div class="mini-achievement-text">Reach a score of 50 points</div>
+                    </div>
+                    
+                    <h4>Session Stats</h4>
+                    
+                    <div class="stats-row">
+                        <div class="stats-label">Correct:</div>
+                        <div class="stats-value" id="correctAnswers">0</div>
+                    </div>
+                    
+                    <div class="stats-row">
+                        <div class="stats-label">Incorrect:</div>
+                        <div class="stats-value" id="incorrectAnswers">0</div>
+                    </div>
+                    
+                    <div class="stats-row">
+                        <div class="stats-label">Accuracy:</div>
+                        <div class="stats-value" id="accuracyRate">0%</div>
+                    </div>
+                    
+                    <div class="stats-row">
+                        <div class="stats-label">Questions:</div>
+                        <div class="stats-value" id="questionCount">0/20</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="game-controls">
+                <button class="cosmic-btn cosmic-btn-secondary" id="skipButton">Skip</button>
+                <button class="cosmic-btn" id="hintButton">Get Hint</button>
+                <button class="cosmic-btn cosmic-btn-danger" id="endGameButton">End Game</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="results-overlay" id="resultsOverlay">
+        <div class="results-card">
+            <h2 class="results-title">Game Results</h2>
+            
+            <div class="results-badge">🏆</div>
+            
+            <div class="level-up-indicator">
+                <span>🌟</span>
+                <span class="level-up-text">Level Up! You've advanced to Level 3 in Surprise recognition</span>
+            </div>
+            
+            <div class="results-stats">
+                <div class="results-row">
+                    <div class="results-label">Final Score:</div>
+                    <div class="results-value" id="finalScore">75</div>
+                </div>
+                
+                <div class="results-row">
+                    <div class="results-label">Correct Answers:</div>
+                    <div class="results-value" id="finalCorrect">15</div>
+                </div>
+                
+                <div class="results-row">
+                    <div class="results-label">Accuracy Rate:</div>
+                    <div class="results-value" id="finalAccuracy">75%</div>
+                </div>
+                
+                <div class="results-row">
+                    <div class="results-label">Best Streak:</div>
+                    <div class="results-value" id="finalStreak">6</div>
+                </div>
+                
+                <div class="results-row">
+                    <div class="results-label">XP Earned:</div>
+                    <div class="results-value" id="xpEarned">120</div>
+                </div>
+            </div>
+            
+            <div class="game-controls">
+                <button class="cosmic-btn" id="playAgainButton">Play Again</button>
+                <a href="/progress-tracker" class="cosmic-btn cosmic-btn-secondary">View Progress</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/cosmic-emotion-sparkles.js"></script>
+    <script src="js/cosmic-theme.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game data
+            const emotions = [
+                {
+                    name: 'happiness',
+                    icon: '😊',
+                    hints: [
+                        'This emotion is associated with feelings of joy, satisfaction, and contentment.',
+                        'Often experienced when goals are achieved or during positive social interactions.',
+                        'This pleasant state is characterized by a sense of well-being and enjoyment.'
+                    ],
+                    quotes: [
+                        '"The secret of happiness is not in doing what one likes, but in liking what one does."',
+                        '"Happiness is not something ready-made. It comes from your own actions."',
+                        '"The purpose of our lives is to be happy."'
+                    ]
+                },
+                {
+                    name: 'sadness',
+                    icon: '😢',
+                    hints: [
+                        'This emotion typically occurs in response to loss, disappointment, or difficult situations.',
+                        'It\'s characterized by feelings of sorrow, emptiness, and lack of energy.',
+                        'While often viewed negatively, it helps us process difficult experiences and can deepen empathy.'
+                    ],
+                    quotes: [
+                        '"Tears are words the heart can\'t express."',
+                        '"The good life is not one immune to sadness but one in which suffering contributes to our development."',
+                        '"Sadness is but a wall between two gardens."'
+                    ]
+                },
+                {
+                    name: 'anger',
+                    icon: '😠',
+                    hints: [
+                        'This emotion arises when we feel that our goals are being blocked or that we\'re being treated unfairly.',
+                        'It ranges from mild frustration to intense rage, and often motivates defensive behavior.',
+                        'While often viewed negatively, it can signal our boundaries and motivate change.'
+                    ],
+                    quotes: [
+                        '"Anger is an acid that can do more harm to the vessel in which it is stored than to anything on which it is poured."',
+                        '"Speak when you are angry and you will make the best speech you will ever regret."',
+                        '"For every minute you remain angry, you give up sixty seconds of peace of mind."'
+                    ]
+                },
+                {
+                    name: 'fear',
+                    icon: '😨',
+                    hints: [
+                        'This emotion alerts us to potential danger or threats to our well-being.',
+                        'It prepares the body for fight-or-flight responses through physiological changes.',
+                        'It ranges from mild worry to intense terror depending on the perceived threat.'
+                    ],
+                    quotes: [
+                        '"Fear is the path to the dark side."',
+                        '"The key to change is to let go of fear."',
+                        '"Everything you want is on the other side of fear."'
+                    ]
+                },
+                {
+                    name: 'surprise',
+                    icon: '😲',
+                    hints: [
+                        'This feeling often arises when something unexpected occurs, bringing a surge of energy and alertness.',
+                        'It\'s a brief emotion that quickly transitions to other feelings based on whether the surprise is positive or negative.',
+                        'It\'s characterized by widened eyes, raised eyebrows, and a momentary pause in activity.'
+                    ],
+                    quotes: [
+                        '"The moments of surprise are what I live for."',
+                        '"The secret to humor is surprise."',
+                        '"Life is full of surprises and serendipity."'
+                    ]
+                },
+                {
+                    name: 'disgust',
+                    icon: '🤢',
+                    hints: [
+                        'This emotion evolved to help us avoid harmful substances or situations.',
+                        'It\'s characterized by feelings of aversion and a desire to distance oneself from the trigger.',
+                        'Beyond physical reactions, it can also extend to moral violations or social behaviors.'
+                    ],
+                    quotes: [
+                        '"What we feel and think and are is to a great extent determined by the state of our digestive organs."',
+                        '"Disgust is often more deeply felt than admiration."',
+                        '"The emotion has evolved to motivate avoidance behavior."'
+                    ]
+                }
+            ];
+            
+            // Game state
+            let gameState = {
+                score: 0,
+                streak: 0,
+                bestStreak: 0,
+                correct: 0,
+                incorrect: 0,
+                questionCount: 0,
+                maxQuestions: 20,
+                currentEmotion: null,
+                hintsUsed: 0,
+                hintsAvailable: true,
+                isGameOver: false
+            };
+            
+            // UI elements
+            const scoreElement = document.getElementById('scoreValue');
+            const streakElement = document.getElementById('streakValue');
+            const correctElement = document.getElementById('correctAnswers');
+            const incorrectElement = document.getElementById('incorrectAnswers');
+            const accuracyElement = document.getElementById('accuracyRate');
+            const questionCountElement = document.getElementById('questionCount');
+            const feedbackElement = document.getElementById('feedback');
+            const emotionIcon = document.getElementById('currentEmotionIcon');
+            const emotionLabel = document.getElementById('currentEmotionLabel');
+            const emotionHint = document.getElementById('emotionHint');
+            const emotionQuote = document.getElementById('emotionQuote');
+            const choiceButtons = document.querySelectorAll('.emotion-choice');
+            const skipButton = document.getElementById('skipButton');
+            const hintButton = document.getElementById('hintButton');
+            const endGameButton = document.getElementById('endGameButton');
+            const resultsOverlay = document.getElementById('resultsOverlay');
+            const finalScoreElement = document.getElementById('finalScore');
+            const finalCorrectElement = document.getElementById('finalCorrect');
+            const finalAccuracyElement = document.getElementById('finalAccuracy');
+            const finalStreakElement = document.getElementById('finalStreak');
+            const xpEarnedElement = document.getElementById('xpEarned');
+            const playAgainButton = document.getElementById('playAgainButton');
+            
+            // Initialize game
+            initGame();
+            
+            function initGame() {
+                // Reset game state
+                gameState = {
+                    score: 0,
+                    streak: 0,
+                    bestStreak: 0,
+                    correct: 0,
+                    incorrect: 0,
+                    questionCount: 0,
+                    maxQuestions: 20,
+                    currentEmotion: null,
+                    hintsUsed: 0,
+                    hintsAvailable: true,
+                    isGameOver: false
+                };
+                
+                // Update UI
+                updateUI();
+                
+                // Set first question
+                nextQuestion();
+                
+                // Add event listeners
+                choiceButtons.forEach(button => {
+                    button.addEventListener('click', handleEmotionChoice);
+                });
+                
+                skipButton.addEventListener('click', handleSkip);
+                hintButton.addEventListener('click', handleHint);
+                endGameButton.addEventListener('click', endGame);
+                playAgainButton.addEventListener('click', () => {
+                    resultsOverlay.style.display = 'none';
+                    initGame();
+                });
+            }
+            
+            function nextQuestion() {
+                if (gameState.questionCount >= gameState.maxQuestions) {
+                    endGame();
+                    return;
+                }
+                
+                // Reset hint state
+                emotionHint.textContent = 'Select an emotion or use a hint if you need help.';
+                emotionQuote.textContent = '';
+                gameState.hintsAvailable = true;
+                
+                // Select a random emotion that's different from the current one
+                let newEmotion;
+                do {
+                    newEmotion = emotions[Math.floor(Math.random() * emotions.length)];
+                } while (newEmotion.name === gameState.currentEmotion?.name && emotions.length > 1);
+                
+                gameState.currentEmotion = newEmotion;
+                gameState.questionCount++;
+                
+                // Hide the emotion name and show the question
+                emotionIcon.textContent = newEmotion.icon;
+                emotionLabel.textContent = 'Identify this emotion';
+                
+                // Update UI
+                updateUI();
+            }
+            
+            function handleEmotionChoice(event) {
+                if (gameState.isGameOver) return;
+                
+                const selectedEmotion = event.currentTarget.dataset.emotion;
+                const isCorrect = selectedEmotion === gameState.currentEmotion.name;
+                const choiceButton = event.currentTarget;
+                
+                // Update game state
+                if (isCorrect) {
+                    gameState.score += 10 + (gameState.streak * 2);
+                    gameState.streak++;
+                    gameState.bestStreak = Math.max(gameState.bestStreak, gameState.streak);
+                    gameState.correct++;
+                    
+                    // Show feedback
+                    showFeedback('Correct!', 'correct');
+                    
+                    // Trigger sparkle effect at the button location
+                    const rect = choiceButton.getBoundingClientRect();
+                    const x = rect.left + rect.width / 2;
+                    const y = rect.top + rect.height / 2;
+                    triggerEmotionEffect(selectedEmotion, x, y);
+                } else {
+                    gameState.streak = 0;
+                    gameState.incorrect++;
+                    
+                    // Show feedback
+                    showFeedback('Incorrect!', 'incorrect');
+                }
+                
+                // Show the actual emotion briefly
+                emotionLabel.textContent = `That was ${gameState.currentEmotion.name}`;
+                
+                // Update UI
+                updateUI();
+                
+                // Move to next question after a short delay
+                setTimeout(nextQuestion, 1500);
+            }
+            
+            function handleSkip() {
+                if (gameState.isGameOver) return;
+                
+                gameState.streak = 0;  // Reset streak when skipping
+                
+                // Show the actual emotion briefly
+                emotionLabel.textContent = `That was ${gameState.currentEmotion.name}`;
+                
+                // Move to next question after a short delay
+                setTimeout(nextQuestion, 1000);
+            }
+            
+            function handleHint() {
+                if (gameState.isGameOver || !gameState.hintsAvailable) return;
+                
+                const currentEmotion = gameState.currentEmotion;
+                
+                // Show a random hint and quote
+                const hintIndex = Math.floor(Math.random() * currentEmotion.hints.length);
+                const quoteIndex = Math.floor(Math.random() * currentEmotion.quotes.length);
+                
+                emotionHint.textContent = currentEmotion.hints[hintIndex];
+                emotionQuote.textContent = currentEmotion.quotes[quoteIndex];
+                
+                // Increment hints used (could be used for scoring)
+                gameState.hintsUsed++;
+                
+                // Disable hint button for this question
+                gameState.hintsAvailable = false;
+                hintButton.disabled = true;
+                
+                // Re-enable the hint button for the next question
+                setTimeout(() => {
+                    hintButton.disabled = false;
+                }, 1500);
+            }
+            
+            function showFeedback(message, type) {
+                feedbackElement.textContent = message;
+                feedbackElement.className = `emotion-feedback ${type}`;
+                feedbackElement.classList.add('show-feedback');
+                
+                setTimeout(() => {
+                    feedbackElement.classList.remove('show-feedback');
+                }, 1500);
+            }
+            
+            function updateUI() {
+                // Update score and stats
+                scoreElement.textContent = gameState.score;
+                streakElement.textContent = gameState.streak;
+                correctElement.textContent = gameState.correct;
+                incorrectElement.textContent = gameState.incorrect;
+                
+                // Calculate and update accuracy
+                const totalAnswered = gameState.correct + gameState.incorrect;
+                const accuracy = totalAnswered > 0 ? Math.round((gameState.correct / totalAnswered) * 100) : 0;
+                accuracyElement.textContent = `${accuracy}%`;
+                
+                // Update question count
+                questionCountElement.textContent = `${gameState.questionCount}/${gameState.maxQuestions}`;
+            }
+            
+            function endGame() {
+                gameState.isGameOver = true;
+                
+                // Prepare results
+                finalScoreElement.textContent = gameState.score;
+                finalCorrectElement.textContent = gameState.correct;
+                finalAccuracyElement.textContent = accuracyElement.textContent;
+                finalStreakElement.textContent = gameState.bestStreak;
+                
+                // Calculate XP (just as an example - you'd connect this to your backend)
+                const xpEarned = gameState.score + (gameState.bestStreak * 5) + (gameState.correct * 10);
+                xpEarnedElement.textContent = xpEarned;
+                
+                // Show results overlay
+                resultsOverlay.style.display = 'flex';
+                
+                // Trigger celebration effects
+                setTimeout(() => {
+                    // Create a series of emotion sparkles for celebration
+                    const emotions = ['happiness', 'surprise', 'mixed'];
+                    let delay = 0;
+                    
+                    for (let i = 0; i < 5; i++) {
+                        setTimeout(() => {
+                            const emotion = emotions[Math.floor(Math.random() * emotions.length)];
+                            const x = Math.random() * window.innerWidth;
+                            const y = Math.random() * (window.innerHeight / 2);
+                            triggerEmotionEffect(emotion, x, y);
+                        }, delay);
+                        delay += 300;
+                    }
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,358 +1,224 @@
 """
 Emotion Progress Models for Mashaaer Feelings Application
 
-These models store user progress data for the gamified emotional learning system.
+These models track a user's emotional learning progress, achievements, and streaks.
+They form the foundation of the gamified emotional learning experience.
 """
 
-import enum
 import datetime
-from typing import Dict, Any
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, Enum, JSON, Text
-from sqlalchemy.orm import relationship, declarative_base
+import enum
+from typing import List, Optional
 
-# Create database instance
-db = SQLAlchemy()
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Float, Enum, Text
+from sqlalchemy.orm import relationship
 
-# Define emotion types as enum for consistency
+from main import db
+
+
+# Enums for emotion types and progress levels
 class EmotionType(enum.Enum):
+    """Types of emotions that can be tracked"""
     HAPPINESS = "happiness"
     SADNESS = "sadness"
     ANGER = "anger"
     FEAR = "fear"
     SURPRISE = "surprise"
     DISGUST = "disgust"
-    NEUTRAL = "neutral"
+    MIXED = "mixed"  # For complex emotions
+    
+    
+class ProgressLevel(enum.Enum):
+    """Progress levels for emotional intelligence development"""
+    NOVICE = 1
+    BEGINNER = 2
+    INTERMEDIATE = 3
+    ADVANCED = 4
+    MASTER = 5
 
 
-class User(db.Model):
-    """User model for storing basic user information"""
-    __tablename__ = 'users'
-    
-    id = Column(Integer, primary_key=True)
-    username = Column(String(64), unique=True, nullable=False)
-    email = Column(String(120), unique=True, nullable=True)
-    password_hash = Column(String(256), nullable=True)
-    language_preference = Column(String(5), default='en')
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    last_active_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
-    is_active = Column(Boolean, default=True)
-    level = Column(Integer, default=1)
-    experience = Column(Integer, default=0)
-
-    # Relationships
-    emotion_entries = relationship("EmotionEntry", back_populates="user", lazy='dynamic')
-    badges = relationship("UserBadge", back_populates="user", lazy='dynamic')
-    achievements = relationship("UserAchievement", back_populates="user", lazy='dynamic')
-    insights = relationship("EmotionInsight", back_populates="user", lazy='dynamic')
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert user object to dictionary for API responses"""
-        next_level_xp = self.calculate_next_level_xp()
-        progress_percentage = self.calculate_level_progress()
-        
-        return {
-            'id': self.id,
-            'username': self.username,
-            'email': self.email,
-            'language_preference': self.language_preference,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'last_active_at': self.last_active_at.isoformat() if self.last_active_at else None,
-            'is_active': self.is_active,
-            'level': self.level,
-            'experience': self.experience,
-            'next_level_xp': next_level_xp,
-            'progress_percentage': progress_percentage
-        }
-    
-    def calculate_next_level_xp(self) -> Dict[str, Any]:
-        """Calculate experience needed for next level"""
-        # Simple formula: level * 100 XP needed for each level
-        current_level_xp = (self.level - 1) * 100
-        required_xp = self.level * 100
-        remaining_xp = required_xp - self.experience
-        
-        # Check if user has reached max level (hypothetical level 20)
-        is_max_level = self.level >= 20
-        
-        return {
-            'current': self.experience - current_level_xp,
-            'required': 100,  # Each level requires 100 XP points above previous level
-            'remaining': remaining_xp if remaining_xp > 0 else 0,
-            'is_max_level': is_max_level
-        }
-    
-    def calculate_level_progress(self) -> float:
-        """Calculate percentage progress to next level"""
-        next_level_xp = self.calculate_next_level_xp()
-        
-        if next_level_xp['is_max_level']:
-            return 100.0
-        
-        return (next_level_xp['current'] / next_level_xp['required']) * 100
-
-
-class EmotionEntry(db.Model):
-    """Model for storing emotion entries by users"""
-    __tablename__ = 'emotion_entries'
-    
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    dominant_emotion = Column(Enum(EmotionType), nullable=False)
-    
-    # Emotion confidence scores (0-1)
-    happiness = Column(Float, default=0.0)
-    sadness = Column(Float, default=0.0)
-    anger = Column(Float, default=0.0)
-    fear = Column(Float, default=0.0)
-    surprise = Column(Float, default=0.0)
-    disgust = Column(Float, default=0.0)
-    neutral = Column(Float, default=0.0)
-    
-    # Optional note or description
-    notes = Column(Text, nullable=True)
-    
-    # Additional data can store extra information like triggers, context, etc.
-    additional_data = Column(JSON, nullable=True)
-    
-    # Relationships
-    user = relationship("User", back_populates="emotion_entries")
-    insight = relationship("EmotionInsight", back_populates="emotion_entry", uselist=False)
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert emotion entry to dictionary for API responses"""
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'dominant_emotion': self.dominant_emotion.value if self.dominant_emotion else None,
-            'happiness': self.happiness,
-            'sadness': self.sadness,
-            'anger': self.anger,
-            'fear': self.fear,
-            'surprise': self.surprise,
-            'disgust': self.disgust,
-            'neutral': self.neutral,
-            'notes': self.notes,
-            'metadata': self.additional_data
-        }
-
-
-class Badge(db.Model):
-    """Model for system badges that users can earn"""
-    __tablename__ = 'badges'
-    
-    id = Column(Integer, primary_key=True)
-    name = Column(String(64), nullable=False, unique=True)
-    description = Column(Text, nullable=True)
-    icon_path = Column(String(255), nullable=True)
-    category = Column(String(64), nullable=True)
-    difficulty = Column(String(64), default='beginner')
-    points = Column(Integer, default=10)
-    
-    # Relationships
-    user_badges = relationship("UserBadge", back_populates="badge", lazy='dynamic')
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert badge to dictionary for API responses"""
-        return {
-            'id': self.id,
-            'name': self.name,
-            'description': self.description,
-            'icon_path': self.icon_path,
-            'category': self.category,
-            'difficulty': self.difficulty,
-            'points': self.points
-        }
-
-
-class UserBadge(db.Model):
-    """Model for badges earned by users"""
-    __tablename__ = 'user_badges'
-    
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    badge_id = Column(Integer, ForeignKey('badges.id'), nullable=False)
-    earned_date = Column(DateTime, default=datetime.datetime.utcnow)
-    times_earned = Column(Integer, default=1)  # Some badges can be earned multiple times
-    
-    # Relationships
-    user = relationship("User", back_populates="badges")
-    badge = relationship("Badge", back_populates="user_badges")
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert user badge to dictionary for API responses"""
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'badge_id': self.badge_id,
-            'badge_name': self.badge.name if self.badge else None,
-            'badge_description': self.badge.description if self.badge else None,
-            'badge_icon': self.badge.icon_path if self.badge else None,
-            'earned_date': self.earned_date.isoformat() if self.earned_date else None,
-            'times_earned': self.times_earned
-        }
-
-
+# Achievement and progress tracking models
 class Achievement(db.Model):
-    """Model for system achievements that users can earn"""
-    __tablename__ = 'achievements'
+    """Achievement model for tracking user accomplishments"""
+    __tablename__ = "achievement"
     
-    id = Column(Integer, primary_key=True)
-    name = Column(String(64), nullable=False, unique=True)
-    description = Column(Text, nullable=True)
-    icon_path = Column(String(255), nullable=True)
-    requirement = Column(Text, nullable=True)
-    experience_points = Column(Integer, default=50)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(255), nullable=False)
+    icon = db.Column(db.String(50))  # Emoji or icon reference
+    emotion_type = db.Column(db.String(50), nullable=True)  # Optional emotion association
+    points = db.Column(db.Integer, default=10)
+    criteria = db.Column(db.Text)  # JSON string with criteria details
+    
+    # For achievement prerequisites (e.g., "Complete 3 beginner achievements")
+    prerequisite_ids = db.Column(db.String(100))  # Comma-separated IDs
     
     # Relationships
-    user_achievements = relationship("UserAchievement", back_populates="achievement", lazy='dynamic')
+    users = relationship("UserAchievement", back_populates="achievement")
     
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert achievement to dictionary for API responses"""
-        return {
-            'id': self.id,
-            'name': self.name,
-            'description': self.description,
-            'icon_path': self.icon_path,
-            'requirement': self.requirement,
-            'experience_points': self.experience_points
-        }
+    def __repr__(self):
+        return f"<Achievement {self.name}>"
 
 
 class UserAchievement(db.Model):
-    """Model for achievements earned by users"""
-    __tablename__ = 'user_achievements'
+    """Join table for users and their achievements"""
+    __tablename__ = "user_achievement"
     
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    achievement_id = Column(Integer, ForeignKey('achievements.id'), nullable=False)
-    earned_date = Column(DateTime, default=datetime.datetime.utcnow)
-    progress = Column(Float, default=0.0)  # For tracking partial progress (0-1)
-    completed = Column(Boolean, default=False)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    achievement_id = db.Column(db.Integer, db.ForeignKey("achievement.id"), nullable=False)
+    earned_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     
     # Relationships
     user = relationship("User", back_populates="achievements")
-    achievement = relationship("Achievement", back_populates="user_achievements")
+    achievement = relationship("Achievement", back_populates="users")
     
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert user achievement to dictionary for API responses"""
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'achievement_id': self.achievement_id,
-            'achievement_name': self.achievement.name if self.achievement else None,
-            'achievement_description': self.achievement.description if self.achievement else None,
-            'icon_path': self.achievement.icon_path if self.achievement else None,
-            'earned_date': self.earned_date.isoformat() if self.earned_date else None,
-            'progress': self.progress,
-            'completed': self.completed
-        }
+    def __repr__(self):
+        return f"<UserAchievement user_id={self.user_id} achievement_id={self.achievement_id}>"
 
 
-class EmotionLevel(db.Model):
-    """Model for tracking user's level for each emotion type"""
-    __tablename__ = 'emotion_levels'
+class UserEmotionProgress(db.Model):
+    """User progress in recognizing and managing specific emotions"""
+    __tablename__ = "user_emotion_progress"
     
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    emotion_type = Column(Enum(EmotionType), nullable=False)
-    level = Column(Integer, default=1)
-    experience = Column(Integer, default=0)
-    entries_count = Column(Integer, default=0)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    emotion_type = db.Column(db.String(50), nullable=False)  # Using EmotionType enum values
+    
+    # Progress metrics
+    level = db.Column(db.Integer, default=1)  # 1-5 corresponding to ProgressLevel
+    experience_points = db.Column(db.Integer, default=0)
+    interactions_count = db.Column(db.Integer, default=0)
+    accuracy_rate = db.Column(db.Float, default=0.0)  # 0.0 to 1.0
+    
+    # Additional data
+    most_common_trigger = db.Column(db.String(255))
+    last_interaction = db.Column(db.DateTime)
     
     # Relationships
-    user = relationship("User")
+    user = relationship("User", back_populates="emotion_progress")
+    insights = relationship("EmotionInsight", back_populates="progress", cascade="all, delete-orphan")
     
     __table_args__ = (
-        db.UniqueConstraint('user_id', 'emotion_type', name='unique_user_emotion'),
+        db.UniqueConstraint('user_id', 'emotion_type', name='_user_emotion_uc'),
     )
     
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert emotion level to dictionary for API responses"""
-        next_level_xp = self.calculate_next_level_xp()
-        
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'emotion_type': self.emotion_type.value if self.emotion_type else None,
-            'level': self.level,
-            'experience': self.experience,
-            'entries_count': self.entries_count,
-            'next_level_xp': next_level_xp
-        }
+    def __repr__(self):
+        return f"<UserEmotionProgress user_id={self.user_id} emotion={self.emotion_type} level={self.level}>"
     
-    def calculate_next_level_xp(self) -> Dict[str, Any]:
-        """Calculate experience needed for next level"""
-        # Formula: level * 50 XP needed for each emotion level
-        current_level_xp = (self.level - 1) * 50
-        required_xp = self.level * 50
-        remaining_xp = required_xp - self.experience
-        
-        # Check if user has reached max level (hypothetical level 10 for emotions)
-        is_max_level = self.level >= 10
-        
-        return {
-            'current': self.experience - current_level_xp,
-            'required': 50,  # Each level requires 50 XP points above previous level
-            'remaining': remaining_xp if remaining_xp > 0 else 0,
-            'is_max_level': is_max_level
+    def get_level_name(self) -> str:
+        """Get the name of the current progress level"""
+        level_map = {
+            1: "Novice",
+            2: "Beginner", 
+            3: "Intermediate",
+            4: "Advanced",
+            5: "Master"
         }
+        return level_map.get(self.level, "Unknown")
+    
+    def get_next_level_xp(self) -> int:
+        """Calculate XP needed for next level"""
+        base_xp = 100
+        level_multiplier = 1.5
+        return int(base_xp * (level_multiplier ** self.level))
+    
+    def get_progress_percentage(self) -> float:
+        """Calculate percentage progress to next level"""
+        if self.level >= 5:  # Max level
+            return 100.0
+        
+        next_level_xp = self.get_next_level_xp()
+        prev_level_xp = int(next_level_xp / 1.5)
+        current_xp = self.experience_points - prev_level_xp
+        required_xp = next_level_xp - prev_level_xp
+        
+        return min(100.0, max(0.0, (current_xp / required_xp) * 100.0))
 
 
 class EmotionInsight(db.Model):
-    """Model for storing AI-generated insights based on emotion patterns"""
-    __tablename__ = 'emotion_insights'
+    """Insights and patterns identified in user's emotional responses"""
+    __tablename__ = "emotion_insight"
     
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    emotion_entry_id = Column(Integer, ForeignKey('emotion_entries.id'), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    insight_text = Column(Text, nullable=False)
-    emotion_type = Column(Enum(EmotionType), nullable=True)
-    is_read = Column(Boolean, default=False)
-    importance_level = Column(Integer, default=1)  # 1-5 scale
-    category = Column(String(64), nullable=True)  # pattern, recommendation, observation, etc.
+    id = db.Column(db.Integer, primary_key=True)
+    progress_id = db.Column(db.Integer, db.ForeignKey("user_emotion_progress.id"), nullable=False)
+    insight_text = db.Column(db.Text, nullable=False)
+    source_data = db.Column(db.Text)  # JSON string with source data
+    discovered_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    is_viewed = db.Column(db.Boolean, default=False)
     
     # Relationships
-    user = relationship("User", back_populates="insights")
-    emotion_entry = relationship("EmotionEntry", back_populates="insight")
+    progress = relationship("UserEmotionProgress", back_populates="insights")
     
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert insight to dictionary for API responses"""
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'emotion_entry_id': self.emotion_entry_id,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'insight_text': self.insight_text,
-            'emotion_type': self.emotion_type.value if self.emotion_type else None,
-            'is_read': self.is_read,
-            'importance_level': self.importance_level,
-            'category': self.category
-        }
+    def __repr__(self):
+        return f"<EmotionInsight progress_id={self.progress_id} discovered_at={self.discovered_at}>"
 
 
 class EmotionStreak(db.Model):
-    """Model for tracking user's consecutive emotion entry streaks"""
-    __tablename__ = 'emotion_streaks'
+    """Tracks consecutive days of emotional tracking"""
+    __tablename__ = "emotion_streak"
     
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    current_streak = Column(Integer, default=0)
-    longest_streak = Column(Integer, default=0)
-    last_entry_date = Column(DateTime, nullable=True)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    current_streak = db.Column(db.Integer, default=0)
+    longest_streak = db.Column(db.Integer, default=0)
+    last_updated = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    
+    # Relationship to User model
+    user = relationship("User", back_populates="streaks")
+    
+    def __repr__(self):
+        return f"<EmotionStreak user_id={self.user_id} current={self.current_streak} longest={self.longest_streak}>"
+
+
+class UserLearningPathProgress(db.Model):
+    """Tracks user progress through the emotional learning path"""
+    __tablename__ = "user_learning_path_progress"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    path_id = db.Column(db.Integer, nullable=False)  # Reference to learning path
+    step_id = db.Column(db.Integer, nullable=False)  # Reference to step within path
+    is_completed = db.Column(db.Boolean, default=False)
+    progress_percentage = db.Column(db.Float, default=0.0)  # 0.0 to 100.0
+    completed_at = db.Column(db.DateTime)
     
     # Relationships
-    user = relationship("User")
+    user = relationship("User", back_populates="learning_path_progress")
     
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert streak to dictionary for API responses"""
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'current_streak': self.current_streak,
-            'longest_streak': self.longest_streak,
-            'last_entry_date': self.last_entry_date.isoformat() if self.last_entry_date else None
-        }
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'path_id', 'step_id', name='_user_path_step_uc'),
+    )
+    
+    def __repr__(self):
+        return f"<UserLearningPathProgress user_id={self.user_id} path={self.path_id} step={self.step_id}>"
+
+
+class EmotionEntry(db.Model):
+    """Record of a user's emotion tracking entry"""
+    __tablename__ = "emotion_entry"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    emotion_type = db.Column(db.String(50), nullable=False)
+    intensity = db.Column(db.Float)  # 0.0 to 1.0
+    context = db.Column(db.Text)
+    trigger = db.Column(db.String(255))
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    
+    # Relationships
+    user = relationship("User", back_populates="emotion_entries")
+    
+    def __repr__(self):
+        return f"<EmotionEntry user_id={self.user_id} emotion={self.emotion_type} created_at={self.created_at}>"
+
+
+# Update User model to include relationships with the above models
+def update_user_model():
+    from models.user import User
+    
+    User.emotion_progress = relationship("UserEmotionProgress", back_populates="user", cascade="all, delete-orphan")
+    User.achievements = relationship("UserAchievement", back_populates="user", cascade="all, delete-orphan")
+    User.streaks = relationship("EmotionStreak", back_populates="user", cascade="all, delete-orphan")
+    User.learning_path_progress = relationship("UserLearningPathProgress", back_populates="user", cascade="all, delete-orphan")
+    User.emotion_entries = relationship("EmotionEntry", back_populates="user", cascade="all, delete-orphan")

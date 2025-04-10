@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mashaaer AI Companion Onboarding | مشاعر</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/rtl.css">
+    <link rel="stylesheet" href="/css/cosmic-theme.css">
+    <link rel="stylesheet" href="/css/cosmic-animations.css">
+    <style>
+        /* Onboarding specific styles */
+        body {
+            margin: 0;
+            overflow-x: hidden;
+            font-family: 'Arial', sans-serif;
+            background-color: var(--cosmic-bg-body);
+            color: var(--cosmic-text-primary);
+        }
+        
+        .onboarding-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .step-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+        
+        .step {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            width: 100%;
+        }
+        
+        .step.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .step-title {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--cosmic-primary);
+            text-shadow: 0 0 10px rgba(94, 114, 228, 0.5);
+        }
+        
+        .step-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: var(--cosmic-text-secondary);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .onboarding-logo {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 30px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--cosmic-primary), var(--cosmic-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            color: white;
+            box-shadow: 0 0 30px rgba(94, 114, 228, 0.7);
+            animation: cosmic-pulse 3s infinite ease-in-out;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .rtl .form-group {
+            text-align: right;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--cosmic-bg-element);
+            border-radius: var(--cosmic-radius-md);
+            background-color: var(--cosmic-bg-container);
+            color: var(--cosmic-text-primary);
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            border-color: var(--cosmic-primary);
+            box-shadow: 0 0 10px rgba(94, 114, 228, 0.3);
+            outline: none;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--cosmic-bg-element);
+            border-radius: var(--cosmic-radius-md);
+            background-color: var(--cosmic-bg-container);
+            color: var(--cosmic-text-primary);
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235e72e4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+        }
+        
+        .rtl .form-select {
+            background-position: left 15px center;
+        }
+        
+        .form-select:focus {
+            border-color: var(--cosmic-primary);
+            box-shadow: 0 0 10px rgba(94, 114, 228, 0.3);
+            outline: none;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 30px;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: var(--cosmic-radius-md);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, var(--cosmic-primary), var(--cosmic-primary-light));
+            color: white;
+            box-shadow: 0 4px 15px rgba(94, 114, 228, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(94, 114, 228, 0.5);
+        }
+        
+        .btn-secondary {
+            background: var(--cosmic-bg-element);
+            color: var(--cosmic-text-primary);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--cosmic-bg-container);
+            transform: translateY(-3px);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            max-width: 500px;
+            height: 8px;
+            background-color: var(--cosmic-bg-element);
+            border-radius: 4px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cosmic-primary), var(--cosmic-secondary));
+            width: 0;
+            transition: width 0.5s ease;
+        }
+        
+        .avatar-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .avatar-option {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--cosmic-bg-element);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .avatar-option:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(94, 114, 228, 0.5);
+        }
+        
+        .avatar-option.selected {
+            border: 3px solid var(--cosmic-primary);
+            box-shadow: 0 0 20px rgba(94, 114, 228, 0.7);
+        }
+        
+        .avatar-option.selected::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: var(--cosmic-primary);
+            border-radius: 50%;
+            bottom: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .language-options {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .language-option {
+            padding: 10px 20px;
+            border-radius: var(--cosmic-radius-md);
+            background: var(--cosmic-bg-element);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .language-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .language-option.selected {
+            background: linear-gradient(45deg, var(--cosmic-primary), var(--cosmic-primary-light));
+            color: white;
+            box-shadow: 0 5px 15px rgba(94, 114, 228, 0.3);
+        }
+        
+        .preference-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .preference-option {
+            padding: 15px;
+            border-radius: var(--cosmic-radius-md);
+            background: var(--cosmic-bg-element);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: calc(50% - 15px);
+            max-width: 200px;
+            text-align: center;
+        }
+        
+        .preference-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .preference-option.selected {
+            background: linear-gradient(45deg, var(--cosmic-primary), var(--cosmic-primary-light));
+            color: white;
+            box-shadow: 0 5px 15px rgba(94, 114, 228, 0.3);
+        }
+        
+        .preference-option-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+        
+        .preference-option-label {
+            font-weight: bold;
+        }
+        
+        /* Welcome animation */
+        @keyframes welcome-float {
+            0% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+        
+        .welcome-animation {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 40px;
+        }
+        
+        .welcome-orb {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--cosmic-primary) 0%, transparent 70%);
+            animation: welcome-float 6s infinite ease-in-out, cosmic-pulse 3s infinite alternate;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 60px;
+            opacity: 0.9;
+            box-shadow: 0 0 40px var(--cosmic-primary);
+        }
+        
+        .welcome-sparkles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .welcome-sparkle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: white;
+            opacity: 0.7;
+        }
+        
+        /* Emotion selection */
+        .emotion-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .emotion-option {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--cosmic-bg-element);
+            padding: 10px;
+        }
+        
+        .emotion-option:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .emotion-option.selected {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px var(--cosmic-primary);
+        }
+        
+        .emotion-emoji {
+            font-size: 36px;
+            margin-bottom: 5px;
+        }
+        
+        .emotion-label {
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        /* Completion animation */
+        .completion-animation {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 40px;
+        }
+        
+        .completion-circle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(var(--cosmic-primary) 0%, transparent 0%);
+            animation: fill-animation 2s forwards;
+        }
+        
+        @keyframes fill-animation {
+            to { background: conic-gradient(var(--cosmic-primary) 360deg, transparent 0%); }
+        }
+        
+        .completion-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            color: white;
+            opacity: 0;
+            animation: appear-animation 0.5s 2s forwards;
+        }
+        
+        @keyframes appear-animation {
+            to { opacity: 1; }
+        }
+        
+        .voice-setup {
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: var(--cosmic-radius-md);
+            background-color: var(--cosmic-bg-element);
+            text-align: center;
+        }
+        
+        .voice-status {
+            margin: 15px 0;
+            font-size: 1.1rem;
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .voice-waves {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 3px;
+            height: 50px;
+            margin: 20px 0;
+        }
+        
+        .voice-wave {
+            width: 5px;
+            height: 5px;
+            background-color: var(--cosmic-primary);
+            border-radius: 3px;
+        }
+        
+        .is-listening .voice-wave {
+            animation: voice-wave 0.5s ease-in-out infinite;
+        }
+        
+        .is-listening .voice-wave:nth-child(2) { animation-delay: 0.1s; }
+        .is-listening .voice-wave:nth-child(3) { animation-delay: 0.2s; }
+        .is-listening .voice-wave:nth-child(4) { animation-delay: 0.3s; }
+        .is-listening .voice-wave:nth-child(5) { animation-delay: 0.4s; }
+        
+        @keyframes voice-wave {
+            0%, 100% { height: 5px; }
+            50% { height: 30px; }
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .step-title {
+                font-size: 1.8rem;
+            }
+            
+            .step-subtitle {
+                font-size: 1rem;
+            }
+            
+            .onboarding-logo {
+                width: 120px;
+                height: 120px;
+                font-size: 60px;
+            }
+            
+            .welcome-animation {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .welcome-orb {
+                font-size: 40px;
+            }
+            
+            .preference-options {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .preference-option {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="cosmicBackground"></div>
+    
+    <div class="onboarding-container">
+        <!-- Step 1: Welcome -->
+        <div class="step-container">
+            <div class="step active" id="step-welcome">
+                <div class="welcome-animation">
+                    <div class="welcome-orb">
+                        <span>💫</span>
+                    </div>
+                    <div class="welcome-sparkles" id="welcomeSparkles"></div>
+                </div>
+                <h1 class="step-title" id="welcomeTitle">Welcome to Mashaaer</h1>
+                <p class="step-subtitle" id="welcomeSubtitle">Your personal AI companion from a parallel cosmic realm. Let's set up your experience together.</p>
+                <div class="language-options">
+                    <div class="language-option selected" data-lang="en">
+                        <span>🇺🇸</span> English
+                    </div>
+                    <div class="language-option" data-lang="ar">
+                        <span>🇸🇦</span> العربية
+                    </div>
+                </div>
+                <div class="btn-container">
+                    <button class="btn btn-primary" id="btnWelcomeNext">
+                        <span id="welcomeNextLabel">Let's Begin</span> →
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 2: Profile Setup -->
+            <div class="step" id="step-profile">
+                <div class="onboarding-logo cosmic-glow">👤</div>
+                <h1 class="step-title" id="profileTitle">Create Your Profile</h1>
+                <p class="step-subtitle" id="profileSubtitle">Let us know a bit about you so we can personalize your experience.</p>
+                
+                <div class="form-group">
+                    <label class="form-label" id="nameLabel">Your Name</label>
+                    <input type="text" class="form-input" id="userName" placeholder="Enter your name">
+                </div>
+                
+                <div class="avatar-options">
+                    <div class="avatar-option selected" data-avatar="👤">👤</div>
+                    <div class="avatar-option" data-avatar="👩">👩</div>
+                    <div class="avatar-option" data-avatar="👨">👨</div>
+                    <div class="avatar-option" data-avatar="👩‍🦰">👩‍🦰</div>
+                    <div class="avatar-option" data-avatar="👨‍🦰">👨‍🦰</div>
+                    <div class="avatar-option" data-avatar="👩‍🦱">👩‍🦱</div>
+                    <div class="avatar-option" data-avatar="👨‍🦱">👨‍🦱</div>
+                    <div class="avatar-option" data-avatar="🧕">🧕</div>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 25%;"></div>
+                </div>
+                
+                <div class="btn-container">
+                    <button class="btn btn-secondary" id="btnProfilePrev">
+                        ← <span id="profilePrevLabel">Back</span>
+                    </button>
+                    <button class="btn btn-primary" id="btnProfileNext">
+                        <span id="profileNextLabel">Continue</span> →
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 3: Preferences -->
+            <div class="step" id="step-preferences">
+                <div class="onboarding-logo cosmic-glow">⚙️</div>
+                <h1 class="step-title" id="preferencesTitle">Your Preferences</h1>
+                <p class="step-subtitle" id="preferencesSubtitle">Help us tailor the Mashaaer experience to your liking.</p>
+                
+                <div class="form-group">
+                    <label class="form-label" id="themeLabel">Cosmic Theme Intensity</label>
+                    <select class="form-select" id="themeIntensity">
+                        <option value="low" id="themeOptionLow">Low - Subtle cosmic effects</option>
+                        <option value="medium" selected id="themeOptionMedium">Medium - Balanced cosmic experience</option>
+                        <option value="high" id="themeOptionHigh">High - Immersive cosmic journey</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" id="interactionLabel">Preferred Interaction Mode</label>
+                </div>
+                
+                <div class="preference-options">
+                    <div class="preference-option selected" data-preference="voice">
+                        <div class="preference-option-icon">🎤</div>
+                        <div class="preference-option-label" id="voiceOptionLabel">Voice</div>
+                    </div>
+                    <div class="preference-option" data-preference="text">
+                        <div class="preference-option-icon">⌨️</div>
+                        <div class="preference-option-label" id="textOptionLabel">Text</div>
+                    </div>
+                    <div class="preference-option" data-preference="mixed">
+                        <div class="preference-option-icon">🔄</div>
+                        <div class="preference-option-label" id="mixedOptionLabel">Mixed</div>
+                    </div>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 50%;"></div>
+                </div>
+                
+                <div class="btn-container">
+                    <button class="btn btn-secondary" id="btnPreferencesPrev">
+                        ← <span id="preferencesPrevLabel">Back</span>
+                    </button>
+                    <button class="btn btn-primary" id="btnPreferencesNext">
+                        <span id="preferencesNextLabel">Continue</span> →
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 4: Voice Setup -->
+            <div class="step" id="step-voice">
+                <div class="onboarding-logo cosmic-glow">🎤</div>
+                <h1 class="step-title" id="voiceTitle">Voice Interaction</h1>
+                <p class="step-subtitle" id="voiceSubtitle">Let's set up voice interaction for a more natural experience with Mashaaer.</p>
+                
+                <div class="voice-setup">
+                    <button class="btn btn-primary" id="btnStartVoiceTest">
+                        <span id="startVoiceLabel">Start Voice Test</span>
+                    </button>
+                    
+                    <div class="voice-status" id="voiceStatus">Click the button to test your microphone</div>
+                    
+                    <div class="voice-waves" id="voiceWaves">
+                        <div class="voice-wave"></div>
+                        <div class="voice-wave"></div>
+                        <div class="voice-wave"></div>
+                        <div class="voice-wave"></div>
+                        <div class="voice-wave"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" id="voiceSettingsLabel">Voice Assistant Settings</label>
+                    <select class="form-select" id="voiceAssistantType">
+                        <option value="supportive" selected id="voiceOptionSupportive">Supportive - Gentle and encouraging</option>
+                        <option value="analytical" id="voiceOptionAnalytical">Analytical - Detailed and informative</option>
+                        <option value="playful" id="voiceOptionPlayful">Playful - Fun and lighthearted</option>
+                    </select>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 75%;"></div>
+                </div>
+                
+                <div class="btn-container">
+                    <button class="btn btn-secondary" id="btnVoicePrev">
+                        ← <span id="voicePrevLabel">Back</span>
+                    </button>
+                    <button class="btn btn-primary" id="btnVoiceNext">
+                        <span id="voiceNextLabel">Continue</span> →
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 5: Emotion Baseline -->
+            <div class="step" id="step-emotion">
+                <div class="onboarding-logo cosmic-glow">😊</div>
+                <h1 class="step-title" id="emotionTitle">Your Emotional Baseline</h1>
+                <p class="step-subtitle" id="emotionSubtitle">How are you feeling today? This helps us calibrate your emotional journey.</p>
+                
+                <div class="emotion-options">
+                    <div class="emotion-option" data-emotion="happiness">
+                        <div class="emotion-emoji">😊</div>
+                        <div class="emotion-label" id="emotionHappiness">Happy</div>
+                    </div>
+                    <div class="emotion-option" data-emotion="sadness">
+                        <div class="emotion-emoji">😢</div>
+                        <div class="emotion-label" id="emotionSadness">Sad</div>
+                    </div>
+                    <div class="emotion-option" data-emotion="anger">
+                        <div class="emotion-emoji">😠</div>
+                        <div class="emotion-label" id="emotionAnger">Angry</div>
+                    </div>
+                    <div class="emotion-option" data-emotion="fear">
+                        <div class="emotion-emoji">😨</div>
+                        <div class="emotion-label" id="emotionFear">Afraid</div>
+                    </div>
+                    <div class="emotion-option" data-emotion="surprise">
+                        <div class="emotion-emoji">😲</div>
+                        <div class="emotion-label" id="emotionSurprise">Surprised</div>
+                    </div>
+                    <div class="emotion-option" data-emotion="disgust">
+                        <div class="emotion-emoji">🤢</div>
+                        <div class="emotion-label" id="emotionDisgust">Disgusted</div>
+                    </div>
+                    <div class="emotion-option selected" data-emotion="neutral">
+                        <div class="emotion-emoji">😐</div>
+                        <div class="emotion-label" id="emotionNeutral">Neutral</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" id="emotionNoteLabel">Add a note about how you're feeling (optional)</label>
+                    <textarea class="form-input" id="emotionNote" rows="3" placeholder="Describe your emotions..."></textarea>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 90%;"></div>
+                </div>
+                
+                <div class="btn-container">
+                    <button class="btn btn-secondary" id="btnEmotionPrev">
+                        ← <span id="emotionPrevLabel">Back</span>
+                    </button>
+                    <button class="btn btn-primary" id="btnEmotionNext">
+                        <span id="emotionNextLabel">Complete Setup</span> →
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 6: Completion -->
+            <div class="step" id="step-complete">
+                <div class="completion-animation">
+                    <div class="completion-circle"></div>
+                    <div class="completion-icon">✓</div>
+                </div>
+                <h1 class="step-title" id="completeTitle">All Set!</h1>
+                <p class="step-subtitle" id="completeSubtitle">Your cosmic AI companion is ready. Your emotional journey awaits!</p>
+                
+                <div class="btn-container">
+                    <button class="btn btn-primary" id="btnStartJourney">
+                        <span id="startJourneyLabel">Begin Your Journey</span> →
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Import cosmic scripts -->
+    <script src="/js/cosmic-theme.js"></script>
+    <script src="/js/cosmic-animations.js"></script>
+    <script src="/js/cosmic-emotion-sparkles.js"></script>
+    <script src="/js/voice-interaction.js"></script>
+    
+    <script>
+        // Onboarding Flow Controller
+        class OnboardingController {
+            constructor() {
+                this.currentStep = 1;
+                this.totalSteps = 6;
+                this.userPreferences = {
+                    language: 'en',
+                    name: '',
+                    avatar: '👤',
+                    themeIntensity: 'medium',
+                    interactionMode: 'voice',
+                    voiceAssistantType: 'supportive',
+                    currentEmotion: 'neutral',
+                    emotionNote: ''
+                };
+                
+                this.isRTL = false;
+                
+                this.initEventListeners();
+                this.initWelcomeAnimation();
+                this.loadSavedPreferences();
+            }
+            
+            initEventListeners() {
+                // Welcome step
+                document.getElementById('btnWelcomeNext').addEventListener('click', () => this.goToStep(2));
+                document.querySelectorAll('.language-option').forEach(option => {
+                    option.addEventListener('click', (e) => this.selectLanguage(e.currentTarget));
+                });
+                
+                // Profile step
+                document.getElementById('btnProfilePrev').addEventListener('click', () => this.goToStep(1));
+                document.getElementById('btnProfileNext').addEventListener('click', () => this.goToStep(3));
+                document.querySelectorAll('.avatar-option').forEach(option => {
+                    option.addEventListener('click', (e) => this.selectAvatar(e.currentTarget));
+                });
+                
+                // Preferences step
+                document.getElementById('btnPreferencesPrev').addEventListener('click', () => this.goToStep(2));
+                document.getElementById('btnPreferencesNext').addEventListener('click', () => this.goToStep(4));
+                document.querySelectorAll('.preference-option').forEach(option => {
+                    option.addEventListener('click', (e) => this.selectPreference(e.currentTarget));
+                });
+                
+                // Voice step
+                document.getElementById('btnVoicePrev').addEventListener('click', () => this.goToStep(3));
+                document.getElementById('btnVoiceNext').addEventListener('click', () => this.goToStep(5));
+                document.getElementById('btnStartVoiceTest').addEventListener('click', () => this.startVoiceTest());
+                
+                // Emotion step
+                document.getElementById('btnEmotionPrev').addEventListener('click', () => this.goToStep(4));
+                document.getElementById('btnEmotionNext').addEventListener('click', () => this.goToStep(6));
+                document.querySelectorAll('.emotion-option').forEach(option => {
+                    option.addEventListener('click', (e) => this.selectEmotion(e.currentTarget));
+                });
+                
+                // Complete step
+                document.getElementById('btnStartJourney').addEventListener('click', () => this.completeOnboarding());
+                
+                // Form inputs
+                document.getElementById('userName').addEventListener('change', (e) => this.userPreferences.name = e.target.value);
+                document.getElementById('themeIntensity').addEventListener('change', (e) => this.userPreferences.themeIntensity = e.target.value);
+                document.getElementById('voiceAssistantType').addEventListener('change', (e) => this.userPreferences.voiceAssistantType = e.target.value);
+                document.getElementById('emotionNote').addEventListener('change', (e) => this.userPreferences.emotionNote = e.target.value);
+            }
+            
+            goToStep(step) {
+                // Save current step data
+                this.saveCurrentStepData();
+                
+                // Hide current step
+                document.querySelector('.step.active').classList.remove('active');
+                
+                // Show new step
+                const newStep = document.getElementById(`step-${this.getStepName(step)}`);
+                newStep.classList.add('active');
+                
+                // Update current step
+                this.currentStep = step;
+                
+                // Animation for the new step
+                if (step === 1) {
+                    this.initWelcomeAnimation();
+                } else if (step === 6) {
+                    this.triggerCompletionAnimation();
+                }
+                
+                // Trigger emotion sparkles on emotion selection step
+                if (step === 5) {
+                    setTimeout(() => {
+                        window.triggerEmotionSparkles(this.userPreferences.currentEmotion);
+                    }, 500);
+                }
+            }
+            
+            getStepName(stepNumber) {
+                const stepNames = ['welcome', 'profile', 'preferences', 'voice', 'emotion', 'complete'];
+                return stepNames[stepNumber - 1];
+            }
+            
+            saveCurrentStepData() {
+                // Save specific data based on current step
+                switch(this.currentStep) {
+                    case 1: // Welcome
+                        // Language is saved when selected
+                        break;
+                    case 2: // Profile
+                        this.userPreferences.name = document.getElementById('userName').value;
+                        break;
+                    case 3: // Preferences
+                        this.userPreferences.themeIntensity = document.getElementById('themeIntensity').value;
+                        break;
+                    case 4: // Voice
+                        this.userPreferences.voiceAssistantType = document.getElementById('voiceAssistantType').value;
+                        break;
+                    case 5: // Emotion
+                        this.userPreferences.emotionNote = document.getElementById('emotionNote').value;
+                        break;
+                }
+                
+                // Save preferences to local storage
+                localStorage.setItem('userPreferences', JSON.stringify(this.userPreferences));
+            }
+            
+            loadSavedPreferences() {
+                const savedPreferences = localStorage.getItem('userPreferences');
+                if (savedPreferences) {
+                    const preferences = JSON.parse(savedPreferences);
+                    this.userPreferences = { ...this.userPreferences, ...preferences };
+                    
+                    // Apply saved language
+                    if (preferences.language) {
+                        this.selectLanguage(document.querySelector(`.language-option[data-lang="${preferences.language}"]`), false);
+                    }
+                    
+                    // Fill in form fields
+                    document.getElementById('userName').value = preferences.name || '';
+                    
+                    // Select avatar
+                    if (preferences.avatar) {
+                        this.selectAvatar(document.querySelector(`.avatar-option[data-avatar="${preferences.avatar}"]`), false);
+                    }
+                    
+                    // Select theme intensity
+                    if (preferences.themeIntensity) {
+                        document.getElementById('themeIntensity').value = preferences.themeIntensity;
+                    }
+                    
+                    // Select interaction mode
+                    if (preferences.interactionMode) {
+                        this.selectPreference(document.querySelector(`.preference-option[data-preference="${preferences.interactionMode}"]`), false);
+                    }
+                    
+                    // Select voice assistant type
+                    if (preferences.voiceAssistantType) {
+                        document.getElementById('voiceAssistantType').value = preferences.voiceAssistantType;
+                    }
+                    
+                    // Select emotion
+                    if (preferences.currentEmotion) {
+                        this.selectEmotion(document.querySelector(`.emotion-option[data-emotion="${preferences.currentEmotion}"]`), false);
+                    }
+                    
+                    // Set emotion note
+                    if (preferences.emotionNote) {
+                        document.getElementById('emotionNote').value = preferences.emotionNote;
+                    }
+                }
+            }
+            
+            selectLanguage(languageOption, savePreference = true) {
+                // Remove selected class from all options
+                document.querySelectorAll('.language-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked option
+                languageOption.classList.add('selected');
+                
+                // Get selected language
+                const language = languageOption.getAttribute('data-lang');
+                
+                // Save preference
+                if (savePreference) {
+                    this.userPreferences.language = language;
+                    localStorage.setItem('userPreferences', JSON.stringify(this.userPreferences));
+                }
+                
+                // Apply language
+                this.applyLanguage(language);
+            }
+            
+            selectAvatar(avatarOption, savePreference = true) {
+                // Remove selected class from all options
+                document.querySelectorAll('.avatar-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked option
+                avatarOption.classList.add('selected');
+                
+                // Get selected avatar
+                const avatar = avatarOption.getAttribute('data-avatar');
+                
+                // Save preference
+                if (savePreference) {
+                    this.userPreferences.avatar = avatar;
+                    localStorage.setItem('userPreferences', JSON.stringify(this.userPreferences));
+                }
+            }
+            
+            selectPreference(preferenceOption, savePreference = true) {
+                // Remove selected class from all options
+                document.querySelectorAll('.preference-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked option
+                preferenceOption.classList.add('selected');
+                
+                // Get selected preference
+                const preference = preferenceOption.getAttribute('data-preference');
+                
+                // Save preference
+                if (savePreference) {
+                    this.userPreferences.interactionMode = preference;
+                    localStorage.setItem('userPreferences', JSON.stringify(this.userPreferences));
+                }
+            }
+            
+            selectEmotion(emotionOption, savePreference = true) {
+                // Remove selected class from all options
+                document.querySelectorAll('.emotion-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // Add selected class to clicked option
+                emotionOption.classList.add('selected');
+                
+                // Get selected emotion
+                const emotion = emotionOption.getAttribute('data-emotion');
+                
+                // Save preference
+                if (savePreference) {
+                    this.userPreferences.currentEmotion = emotion;
+                    localStorage.setItem('userPreferences', JSON.stringify(this.userPreferences));
+                    
+                    // Trigger emotion sparkles
+                    window.triggerEmotionSparkles(emotion);
+                }
+            }
+            
+            startVoiceTest() {
+                const voiceWaves = document.getElementById('voiceWaves');
+                const voiceStatus = document.getElementById('voiceStatus');
+                const startButton = document.getElementById('btnStartVoiceTest');
+                
+                // Check if browser supports speech recognition
+                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                    voiceStatus.textContent = this.isRTL ? 
+                        'متصفحك لا يدعم التعرف على الصوت' :
+                        'Your browser does not support voice recognition';
+                    return;
+                }
+                
+                // If already listening, stop test
+                if (voiceWaves.classList.contains('is-listening')) {
+                    this.stopVoiceTest();
+                    return;
+                }
+                
+                // Create speech recognition object
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                this.recognition = new SpeechRecognition();
+                this.recognition.continuous = false;
+                this.recognition.interimResults = true;
+                this.recognition.lang = this.userPreferences.language === 'ar' ? 'ar-SA' : 'en-US';
+                
+                // Start listening
+                voiceWaves.classList.add('is-listening');
+                startButton.textContent = this.isRTL ? 'إيقاف الاختبار' : 'Stop Test';
+                
+                voiceStatus.textContent = this.isRTL ? 
+                    'قل شيئًا...' :
+                    'Say something...';
+                
+                this.recognition.start();
+                
+                // Handle results
+                this.recognition.onresult = (event) => {
+                    const transcript = Array.from(event.results)
+                        .map(result => result[0])
+                        .map(result => result.transcript)
+                        .join('');
+                    
+                    voiceStatus.textContent = transcript || (this.isRTL ? 'جاري الاستماع...' : 'Listening...');
+                };
+                
+                // Handle end of speech
+                this.recognition.onend = () => {
+                    if (voiceWaves.classList.contains('is-listening')) {
+                        voiceStatus.textContent = this.isRTL ? 
+                            'تم التعرف على صوتك بنجاح!' :
+                            'Voice recognized successfully!';
+                        this.stopVoiceTest();
+                    }
+                };
+                
+                // Handle errors
+                this.recognition.onerror = (event) => {
+                    if (event.error === 'no-speech') {
+                        voiceStatus.textContent = this.isRTL ? 
+                            'لم نسمع أي شيء. حاول مرة أخرى.' :
+                            'We didn\'t hear anything. Try again.';
+                    } else {
+                        voiceStatus.textContent = this.isRTL ? 
+                            `خطأ: ${event.error}` :
+                            `Error: ${event.error}`;
+                    }
+                    this.stopVoiceTest();
+                };
+            }
+            
+            stopVoiceTest() {
+                const voiceWaves = document.getElementById('voiceWaves');
+                const startButton = document.getElementById('btnStartVoiceTest');
+                
+                voiceWaves.classList.remove('is-listening');
+                startButton.textContent = this.isRTL ? 'ابدأ اختبار الصوت' : 'Start Voice Test';
+                
+                if (this.recognition) {
+                    this.recognition.stop();
+                }
+            }
+            
+            initWelcomeAnimation() {
+                const welcomeSparkles = document.getElementById('welcomeSparkles');
+                
+                // Clear existing sparkles
+                welcomeSparkles.innerHTML = '';
+                
+                // Create new sparkles
+                for (let i = 0; i < 50; i++) {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'welcome-sparkle';
+                    
+                    // Random position
+                    const left = Math.random() * 200;
+                    const top = Math.random() * 200;
+                    
+                    // Random size
+                    const size = Math.random() * 3 + 1;
+                    
+                    // Random animation delay
+                    const delay = Math.random() * 5;
+                    
+                    // Set styles
+                    sparkle.style.left = `${left}px`;
+                    sparkle.style.top = `${top}px`;
+                    sparkle.style.width = `${size}px`;
+                    sparkle.style.height = `${size}px`;
+                    sparkle.style.animationDelay = `${delay}s`;
+                    
+                    // Add to container
+                    welcomeSparkles.appendChild(sparkle);
+                }
+            }
+            
+            triggerCompletionAnimation() {
+                // Trigger completion circle animation
+                const completionCircle = document.querySelector('.completion-circle');
+                completionCircle.style.animation = 'fill-animation 2s forwards';
+                
+                // Trigger sparkles for completion
+                setTimeout(() => {
+                    window.triggerEmotionSparkles('happiness');
+                }, 1000);
+            }
+            
+            applyLanguage(language) {
+                this.isRTL = language === 'ar';
+                
+                // Set RTL or LTR
+                document.body.classList.toggle('rtl', this.isRTL);
+                document.documentElement.dir = this.isRTL ? 'rtl' : 'ltr';
+                document.documentElement.lang = language;
+                
+                // Update text content based on language
+                if (language === 'ar') {
+                    // Arabic text
+                    document.getElementById('welcomeTitle').textContent = 'مرحبًا بك في مشاعر';
+                    document.getElementById('welcomeSubtitle').textContent = 'مساعدك الشخصي بالذكاء الاصطناعي من عالم كوني موازٍ. دعنا نعد تجربتك معًا.';
+                    document.getElementById('welcomeNextLabel').textContent = 'لنبدأ';
+                    
+                    document.getElementById('profileTitle').textContent = 'إنشاء ملفك الشخصي';
+                    document.getElementById('profileSubtitle').textContent = 'دعنا نتعرف عليك قليلاً لتخصيص تجربتك.';
+                    document.getElementById('nameLabel').textContent = 'اسمك';
+                    document.getElementById('userName').placeholder = 'أدخل اسمك';
+                    document.getElementById('profilePrevLabel').textContent = 'رجوع';
+                    document.getElementById('profileNextLabel').textContent = 'متابعة';
+                    
+                    document.getElementById('preferencesTitle').textContent = 'تفضيلاتك';
+                    document.getElementById('preferencesSubtitle').textContent = 'ساعدنا في تخصيص تجربة مشاعر وفقًا لذوقك.';
+                    document.getElementById('themeLabel').textContent = 'كثافة الموضوع الكوني';
+                    document.getElementById('themeOptionLow').textContent = 'منخفض - تأثيرات كونية خفيفة';
+                    document.getElementById('themeOptionMedium').textContent = 'متوسط - تجربة كونية متوازنة';
+                    document.getElementById('themeOptionHigh').textContent = 'مرتفع - رحلة كونية غامرة';
+                    document.getElementById('interactionLabel').textContent = 'وضع التفاعل المفضل';
+                    document.getElementById('voiceOptionLabel').textContent = 'صوت';
+                    document.getElementById('textOptionLabel').textContent = 'نص';
+                    document.getElementById('mixedOptionLabel').textContent = 'مختلط';
+                    document.getElementById('preferencesPrevLabel').textContent = 'رجوع';
+                    document.getElementById('preferencesNextLabel').textContent = 'متابعة';
+                    
+                    document.getElementById('voiceTitle').textContent = 'التفاعل الصوتي';
+                    document.getElementById('voiceSubtitle').textContent = 'دعنا نعد التفاعل الصوتي لتجربة أكثر طبيعية مع مشاعر.';
+                    document.getElementById('startVoiceLabel').textContent = 'بدء اختبار الصوت';
+                    document.getElementById('voiceStatus').textContent = 'انقر على الزر لاختبار الميكروفون';
+                    document.getElementById('voiceSettingsLabel').textContent = 'إعدادات المساعد الصوتي';
+                    document.getElementById('voiceOptionSupportive').textContent = 'داعم - لطيف ومشجع';
+                    document.getElementById('voiceOptionAnalytical').textContent = 'تحليلي - مفصل ومعلوماتي';
+                    document.getElementById('voiceOptionPlayful').textContent = 'مرح - ممتع وخفيف';
+                    document.getElementById('voicePrevLabel').textContent = 'رجوع';
+                    document.getElementById('voiceNextLabel').textContent = 'متابعة';
+                    
+                    document.getElementById('emotionTitle').textContent = 'أساس حالتك العاطفية';
+                    document.getElementById('emotionSubtitle').textContent = 'كيف تشعر اليوم؟ هذا يساعدنا على معايرة رحلتك العاطفية.';
+                    document.getElementById('emotionHappiness').textContent = 'سعيد';
+                    document.getElementById('emotionSadness').textContent = 'حزين';
+                    document.getElementById('emotionAnger').textContent = 'غاضب';
+                    document.getElementById('emotionFear').textContent = 'خائف';
+                    document.getElementById('emotionSurprise').textContent = 'متفاجئ';
+                    document.getElementById('emotionDisgust').textContent = 'مشمئز';
+                    document.getElementById('emotionNeutral').textContent = 'محايد';
+                    document.getElementById('emotionNoteLabel').textContent = 'أضف ملاحظة حول شعورك (اختياري)';
+                    document.getElementById('emotionNote').placeholder = 'صف مشاعرك...';
+                    document.getElementById('emotionPrevLabel').textContent = 'رجوع';
+                    document.getElementById('emotionNextLabel').textContent = 'إكمال الإعداد';
+                    
+                    document.getElementById('completeTitle').textContent = 'كل شيء جاهز!';
+                    document.getElementById('completeSubtitle').textContent = 'رفيقك بالذكاء الاصطناعي الكوني جاهز. رحلتك العاطفية في انتظارك!';
+                    document.getElementById('startJourneyLabel').textContent = 'ابدأ رحلتك';
+                } else {
+                    // English text
+                    document.getElementById('welcomeTitle').textContent = 'Welcome to Mashaaer';
+                    document.getElementById('welcomeSubtitle').textContent = 'Your personal AI companion from a parallel cosmic realm. Let\'s set up your experience together.';
+                    document.getElementById('welcomeNextLabel').textContent = 'Let\'s Begin';
+                    
+                    document.getElementById('profileTitle').textContent = 'Create Your Profile';
+                    document.getElementById('profileSubtitle').textContent = 'Let us know a bit about you so we can personalize your experience.';
+                    document.getElementById('nameLabel').textContent = 'Your Name';
+                    document.getElementById('userName').placeholder = 'Enter your name';
+                    document.getElementById('profilePrevLabel').textContent = 'Back';
+                    document.getElementById('profileNextLabel').textContent = 'Continue';
+                    
+                    document.getElementById('preferencesTitle').textContent = 'Your Preferences';
+                    document.getElementById('preferencesSubtitle').textContent = 'Help us tailor the Mashaaer experience to your liking.';
+                    document.getElementById('themeLabel').textContent = 'Cosmic Theme Intensity';
+                    document.getElementById('themeOptionLow').textContent = 'Low - Subtle cosmic effects';
+                    document.getElementById('themeOptionMedium').textContent = 'Medium - Balanced cosmic experience';
+                    document.getElementById('themeOptionHigh').textContent = 'High - Immersive cosmic journey';
+                    document.getElementById('interactionLabel').textContent = 'Preferred Interaction Mode';
+                    document.getElementById('voiceOptionLabel').textContent = 'Voice';
+                    document.getElementById('textOptionLabel').textContent = 'Text';
+                    document.getElementById('mixedOptionLabel').textContent = 'Mixed';
+                    document.getElementById('preferencesPrevLabel').textContent = 'Back';
+                    document.getElementById('preferencesNextLabel').textContent = 'Continue';
+                    
+                    document.getElementById('voiceTitle').textContent = 'Voice Interaction';
+                    document.getElementById('voiceSubtitle').textContent = 'Let\'s set up voice interaction for a more natural experience with Mashaaer.';
+                    document.getElementById('startVoiceLabel').textContent = 'Start Voice Test';
+                    document.getElementById('voiceStatus').textContent = 'Click the button to test your microphone';
+                    document.getElementById('voiceSettingsLabel').textContent = 'Voice Assistant Settings';
+                    document.getElementById('voiceOptionSupportive').textContent = 'Supportive - Gentle and encouraging';
+                    document.getElementById('voiceOptionAnalytical').textContent = 'Analytical - Detailed and informative';
+                    document.getElementById('voiceOptionPlayful').textContent = 'Playful - Fun and lighthearted';
+                    document.getElementById('voicePrevLabel').textContent = 'Back';
+                    document.getElementById('voiceNextLabel').textContent = 'Continue';
+                    
+                    document.getElementById('emotionTitle').textContent = 'Your Emotional Baseline';
+                    document.getElementById('emotionSubtitle').textContent = 'How are you feeling today? This helps us calibrate your emotional journey.';
+                    document.getElementById('emotionHappiness').textContent = 'Happy';
+                    document.getElementById('emotionSadness').textContent = 'Sad';
+                    document.getElementById('emotionAnger').textContent = 'Angry';
+                    document.getElementById('emotionFear').textContent = 'Afraid';
+                    document.getElementById('emotionSurprise').textContent = 'Surprised';
+                    document.getElementById('emotionDisgust').textContent = 'Disgusted';
+                    document.getElementById('emotionNeutral').textContent = 'Neutral';
+                    document.getElementById('emotionNoteLabel').textContent = 'Add a note about how you\'re feeling (optional)';
+                    document.getElementById('emotionNote').placeholder = 'Describe your emotions...';
+                    document.getElementById('emotionPrevLabel').textContent = 'Back';
+                    document.getElementById('emotionNextLabel').textContent = 'Complete Setup';
+                    
+                    document.getElementById('completeTitle').textContent = 'All Set!';
+                    document.getElementById('completeSubtitle').textContent = 'Your cosmic AI companion is ready. Your emotional journey awaits!';
+                    document.getElementById('startJourneyLabel').textContent = 'Begin Your Journey';
+                }
+            }
+            
+            completeOnboarding() {
+                // Save final preferences
+                this.saveCurrentStepData();
+                
+                // Redirect to main application
+                window.location.href = '/';
+            }
+        }
+        
+        // Initialize onboarding when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const onboarding = new OnboardingController();
+            
+            // Add cosmic background animation
+            if (window.initCosmicBackground) {
+                window.initCosmicBackground();
+            }
+        });
+    </script>
+</body>
+</html>

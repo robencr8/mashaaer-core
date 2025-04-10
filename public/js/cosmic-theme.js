@@ -1,1061 +1,417 @@
 /**
- * cosmic-theme.js - خلفية كونية تفاعلية لتطبيق مشاعر
- * تم تطويره بواسطة فريق مشاعر
- * الإصدار 1.0.1 (مُحدَّث للتفاعلية والدمج)
+ * Cosmic Theme JavaScript - Core functionality
+ * For Mashaaer Feelings Application
  */
 
-class CosmicBackground {
-    /**
-     * إنشاء خلفية كونية تفاعلية
-     * @param {Object} options - خيارات تكوين الخلفية الكونية
-     */
-    constructor(options = {}) {
-        // الإعدادات الافتراضية
-        this.settings = {
-            container: options.container || document.body,
-            starsBrightness: options.starsBrightness || 0.7,
-            nebulaIntensity: options.nebulaIntensity || 0.8,
-            animationSpeed: options.animationSpeed || 0.5,
-            reduceMotion: options.reduceMotion !== undefined ? options.reduceMotion : true,
-            showControls: options.showControls !== undefined ? options.showControls : false,
-            autoResize: options.autoResize !== undefined ? options.autoResize : true,
-            onReady: options.onReady || null,
-            theme: options.theme || 'blue-purple', // blue-purple, green-blue, orange-red
-            zIndex: options.zIndex || -1,
-            enableAudio: options.enableAudio !== undefined ? options.enableAudio : true, // تمكين الصوت
-            welcomeSound: options.welcomeSound || 'welcome.mp3', // مسار صوت الترحيب
-            clickSound: options.clickSound || 'click.mp3', // مسار صوت النقر
-            emotionChangeSpeed: options.emotionChangeSpeed || 2000 // سرعة تغيير المشاعر (مللي ثانية)
-        };
-
-        // حالة الخلفية
-        this.state = {
-            isPaused: false,
-            mouseX: 0,
-            mouseY: 0,
-            touchActive: false,
-            showNebula: true,
-            showStars: true,
-            showDust: true,
-            isInitialized: false,
-            currentEmotion: 'neutral', // المشاعر الحالية
-            emotionTransitioning: false // هل يتم الانتقال بين المشاعر؟
-        };
-
-        // عناصر DOM
-        this.container = null;
-        this.canvasContainer = null;
-        this.starsCanvas = null;
-        this.nebulaCanvas = null;
-        this.dustCanvas = null;
-        this.meteorsCanvas = null;
-        this.interactionCanvas = null;
-        this.controlsContainer = null;
-        this.audioPlayer = null; // مشغل الصوت
-
-        // سياقات الرسم
-        this.starsCtx = null;
-        this.nebulaCtx = null;
-        this.dustCtx = null;
-        this.meteorsCtx = null;
-        this.interactionCtx = null;
-
-        // المصفوفات الكونية
-        this.stars = [];
-        this.nebulaPoints = [];
-        this.dustParticles = [];
-        this.meteors = [];
-        this.nebulaTime = 0;
-
-        // تهيئة الخلفية
-        this._initialize();
+// Initialize when the document is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Create starfield background if the element exists
+    const starfieldContainer = document.getElementById('cosmic-starfield');
+    if (starfieldContainer) {
+        createStarfield(starfieldContainer);
     }
+    
+    // Setup theme toggles
+    setupThemeToggles();
+    
+    // Initialize any cosmic elements
+    initializeCosmicElements();
+    
+    // Add click effects to buttons
+    addButtonEffects();
+});
 
-    /**
-     * تهيئة الخلفية الكونية
-     * @private
-     */
-    _initialize() {
-        // تحديد الحاوية
-        if (typeof this.settings.container === 'string') {
-            this.container = document.querySelector(this.settings.container);
-        } else {
-            this.container = this.settings.container;
-        }
-
-        // التحقق من وجود الحاوية
-        if (!this.container) {
-            console.error('لم يتم العثور على حاوية الخلفية الكونية');
-            return;
-        }
-
-        // إنشاء حاوية الـ canvas
-        this.canvasContainer = document.createElement('div');
-        this.canvasContainer.className = 'cosmic-background';
-        this.canvasContainer.style.position = 'absolute';
-        this.canvasContainer.style.top = '0';
-        this.canvasContainer.style.left = '0';
-        this.canvasContainer.style.width = '100%';
-        this.canvasContainer.style.height = '100%';
-        this.canvasContainer.style.overflow = 'hidden';
-        this.canvasContainer.style.zIndex = this.settings.zIndex.toString();
-
-        // إضافة حاوية الـ canvas إلى الحاوية الرئيسية
-        if (this.container === document.body) {
-            this.canvasContainer.style.position = 'fixed';
-        }
+/**
+ * Create a cosmic starfield background
+ * @param {HTMLElement} container - The container element for the starfield
+ * @param {number} starCount - Number of stars to create (default: 100)
+ */
+function createStarfield(container, starCount = 100) {
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.pointerEvents = 'none';
+    container.style.zIndex = '-1';
+    
+    // Create stars with different sizes and opacities
+    for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        const size = Math.random() * 3 + 1;
         
-        // التأكد من أن الحاوية الرئيسية لديها position: relative إذا لم تكن بالفعل
-        const containerPosition = window.getComputedStyle(this.container).position;
-        if (containerPosition === 'static') {
-            this.container.style.position = 'relative';
-        }
+        // Apply star styles
+        star.style.position = 'absolute';
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.backgroundColor = 'white';
+        star.style.borderRadius = '50%';
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.opacity = Math.random() * 0.8 + 0.2;
+        star.style.boxShadow = `0 0 ${size * 2}px rgba(255, 255, 255, 0.8)`;
+        star.style.animation = `twinkle ${Math.random() * 4 + 3}s infinite ease-in-out ${Math.random() * 5}s`;
         
-        this.container.appendChild(this.canvasContainer);
-
-        // إنشاء عناصر canvas
-        this.starsCanvas = this._createCanvas('cosmic-stars-canvas');
-        this.nebulaCanvas = this._createCanvas('cosmic-nebula-canvas');
-        this.dustCanvas = this._createCanvas('cosmic-dust-canvas');
-        this.meteorsCanvas = this._createCanvas('cosmic-meteors-canvas');
-        this.interactionCanvas = this._createCanvas('cosmic-interaction-canvas');
-
-        // الحصول على سياقات الرسم
-        this.starsCtx = this.starsCanvas.getContext('2d');
-        this.nebulaCtx = this.nebulaCanvas.getContext('2d');
-        this.dustCtx = this.dustCanvas.getContext('2d');
-        this.meteorsCtx = this.meteorsCanvas.getContext('2d');
-        this.interactionCtx = this.interactionCanvas.getContext('2d');
-
-        // إضافة عناصر التحكم إذا كان مطلوباً
-        if (this.settings.showControls) {
-            this._createControls();
-        }
-
-        // إعداد الصوت
-        if (this.settings.enableAudio) {
-            this._setupAudio();
-        }
-
-        // إضافة مستمعي الأحداث
-        this._setupEventListeners();
-
-        // ضبط أحجام canvas
-        this._resizeCanvases();
-
-        // تهيئة العناصر الكونية
-        this._initializeCosmicElements();
-
-        // تعيين حالة التهيئة
-        this.state.isInitialized = true;
-
-        // استدعاء دالة الاستعداد إذا كانت موجودة
-        if (typeof this.settings.onReady === 'function') {
-            this.settings.onReady(this);
-        }
+        container.appendChild(star);
     }
-
-    /**
-     * إنشاء عنصر canvas
-     * @param {string} className - اسم الفئة للـ canvas
-     * @returns {HTMLCanvasElement} - عنصر canvas جديد
-     * @private
-     */
-    _createCanvas(className) {
-        const canvas = document.createElement('canvas');
-        canvas.className = className;
-        canvas.style.position = 'absolute';
-        canvas.style.top = '0';
-        canvas.style.left = '0';
-        canvas.style.width = '100%';
-        canvas.style.height = '100%';
-        this.canvasContainer.appendChild(canvas);
-        return canvas;
-    }
-
-    /**
-     * إنشاء عناصر التحكم
-     * @private
-     */
-    _createControls() {
-        this.controlsContainer = document.createElement('div');
-        this.controlsContainer.className = 'cosmic-controls';
-        this.controlsContainer.style.position = 'absolute';
-        this.controlsContainer.style.top = '10px';
-        this.controlsContainer.style.right = '10px';
-        this.controlsContainer.style.zIndex = (parseInt(this.settings.zIndex) + 1).toString();
-        this.controlsContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-        this.controlsContainer.style.padding = '10px';
-        this.controlsContainer.style.borderRadius = '5px';
-        this.controlsContainer.style.color = 'white';
-        this.controlsContainer.style.fontSize = '12px';
-        this.controlsContainer.style.display = 'flex';
-        this.controlsContainer.style.flexDirection = 'column';
-        this.controlsContainer.style.gap = '5px';
-        this.controlsContainer.style.direction = 'rtl';
-        this.controlsContainer.style.textAlign = 'right';
-
-        // إنشاء عناصر التحكم
-        const controls = [
-            {
-                type: 'range',
-                label: 'سطوع النجوم',
-                id: 'cosmic-stars-brightness',
-                min: 0,
-                max: 100,
-                value: this.settings.starsBrightness * 100,
-                onChange: (value) => {
-                    this.settings.starsBrightness = value / 100;
-                    this._drawStars();
-                }
-            },
-            {
-                type: 'range',
-                label: 'كثافة السديم',
-                id: 'cosmic-nebula-intensity',
-                min: 0,
-                max: 100,
-                value: this.settings.nebulaIntensity * 100,
-                onChange: (value) => {
-                    this.settings.nebulaIntensity = value / 100;
-                }
-            },
-            {
-                type: 'range',
-                label: 'سرعة الحركة',
-                id: 'cosmic-animation-speed',
-                min: 0,
-                max: 100,
-                value: this.settings.animationSpeed * 100,
-                onChange: (value) => {
-                    this.settings.animationSpeed = value / 100;
-                }
-            },
-            {
-                type: 'checkbox',
-                label: 'تقليل الحركة',
-                id: 'cosmic-reduce-motion',
-                checked: this.settings.reduceMotion,
-                onChange: (checked) => {
-                    this.settings.reduceMotion = checked;
-                }
-            }
-        ];
-
-        // إضافة عناصر التحكم إلى الحاوية
-        controls.forEach(control => {
-            const controlContainer = document.createElement('div');
-            controlContainer.style.display = 'flex';
-            controlContainer.style.alignItems = 'center';
-            controlContainer.style.gap = '5px';
-
-            const label = document.createElement('label');
-            label.textContent = control.label;
-            label.style.flexGrow = '1';
-            label.htmlFor = control.id;
-
-            const input = document.createElement('input');
-            input.type = control.type;
-            input.id = control.id;
-
-            if (control.type === 'range') {
-                input.min = control.min;
-                input.max = control.max;
-                input.value = control.value;
-                input.style.width = '80px';
-                input.addEventListener('input', () => {
-                    control.onChange(parseFloat(input.value));
-                });
-            } else if (control.type === 'checkbox') {
-                input.checked = control.checked;
-                input.addEventListener('change', () => {
-                    control.onChange(input.checked);
-                });
-            }
-
-            controlContainer.appendChild(label);
-            controlContainer.appendChild(input);
-            this.controlsContainer.appendChild(controlContainer);
-        });
-
-        this.canvasContainer.appendChild(this.controlsContainer);
-    }
-
-    /**
-     * إعداد الصوت
-     * @private
-     */
-    _setupAudio() {
-        this.audioPlayer = document.createElement('audio');
-        this.audioPlayer.id = 'cosmic-audio-player';
-        // تعطيل الصوت مؤقتًا حتى نتأكد من وجود الملفات الصوتية
-        // this.audioPlayer.src = this.settings.welcomeSound;
-        this.audioPlayer.volume = 0.5;
-        this.audioPlayer.loop = true;
-        this.audioPlayer.style.display = 'none'; // إخفاء المشغل
-        this.canvasContainer.appendChild(this.audioPlayer);
-
-        // تشغيل صوت الترحيب عند التهيئة - معطل مؤقتًا
-        /*
-        this.audioPlayer.play().catch(error => {
-            console.warn('لم يتم تشغيل صوت الترحيب تلقائياً:', error);
-        });
-        */
-    }
-
-    /**
-     * إعداد مستمعي الأحداث
-     * @private
-     */
-    _setupEventListeners() {
-        // مستمع تغيير حجم النافذة
-        if (this.settings.autoResize) {
-            window.addEventListener('resize', this._resizeCanvases.bind(this));
-        }
-
-        // مستمعي حركة الماوس واللمس
-        this.interactionCanvas.addEventListener('mousemove', (e) => {
-            const rect = this.interactionCanvas.getBoundingClientRect();
-            this.state.mouseX = e.clientX - rect.left;
-            this.state.mouseY = e.clientY - rect.top;
-        });
-
-        this.interactionCanvas.addEventListener('touchstart', (e) => {
-            this.state.touchActive = true;
-            if (e.touches.length > 0) {
-                const rect = this.interactionCanvas.getBoundingClientRect();
-                this.state.mouseX = e.touches[0].clientX - rect.left;
-                this.state.mouseY = e.touches[0].clientY - rect.top;
-            }
-        });
-
-        this.interactionCanvas.addEventListener('touchmove', (e) => {
-            if (e.touches.length > 0) {
-                const rect = this.interactionCanvas.getBoundingClientRect();
-                this.state.mouseX = e.touches[0].clientX - rect.left;
-                this.state.mouseY = e.touches[0].clientY - rect.top;
-            }
-        });
-
-        this.interactionCanvas.addEventListener('touchend', () => {
-            this.state.touchActive = false;
-        });
-
-        // مستمع مفتاح ESC لإيقاف الحركة
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                this.togglePause();
-            }
-        });
-    }
-
-    /**
-     * ضبط أحجام canvas
-     * @private
-     */
-    _resizeCanvases() {
-        const width = this.canvasContainer.clientWidth;
-        const height = this.canvasContainer.clientHeight;
-        
-        const canvases = [
-            this.starsCanvas,
-            this.nebulaCanvas,
-            this.dustCanvas,
-            this.meteorsCanvas,
-            this.interactionCanvas
-        ];
-        
-        canvases.forEach(canvas => {
-            if (canvas) {
-                canvas.width = width;
-                canvas.height = height;
-            }
-        });
-        
-        // إعادة توليد نقاط السديم
-        if (this.state.isInitialized) {
-            this._generateNebulaPoints();
-            this._drawStars();
-        }
-    }
-
-    /**
-     * تهيئة العناصر الكونية
-     * @private
-     */
-    _initializeCosmicElements() {
-        // إنشاء النجوم
-        for (let i = 0; i < 1500; i++) {
-            this.stars.push(new this.Star(this));
-        }
-        
-        // إنشاء جزيئات الغبار الكوني
-        for (let i = 0; i < 300; i++) {
-            this.dustParticles.push(new this.DustParticle(this));
-        }
-        
-        // إنشاء الشهب
-        for (let i = 0; i < 5; i++) {
-            this.meteors.push(new this.Meteor(this));
-        }
-        
-        // إنشاء نقاط السديم
-        this._generateNebulaPoints();
-        
-        // بدء حلقة الرسم
-        this._startAnimationLoop();
-    }
-
-    /**
-     * توليد نقاط السديم
-     * @private
-     */
-    _generateNebulaPoints() {
-        this.nebulaPoints = [];
-        const centerX = this.nebulaCanvas.width / 2;
-        const centerY = this.nebulaCanvas.height / 2;
-        const radius = Math.min(this.nebulaCanvas.width, this.nebulaCanvas.height) * 0.3;
-        
-        // إنشاء نقاط عشوائية حول المركز
-        for (let i = 0; i < 8; i++) {
-            const angle = (i / 8) * Math.PI * 2;
-            const distance = radius * (0.8 + Math.random() * 0.4);
-            const x = centerX + Math.cos(angle) * distance;
-            const y = centerY + Math.sin(angle) * distance;
-            
-            this.nebulaPoints.push({
-                x, y,
-                originalX: x,
-                originalY: y,
-                angle,
-                distance
-            });
-        }
-    }
-
-    /**
-     * بدء حلقة الرسم
-     * @private
-     */
-    _startAnimationLoop() {
-        let lastDrawTime = 0;
-        const drawInterval = 1000 / 60; // 60 إطار في الثانية
-        
-        const animate = (timestamp) => {
-            // حساب الوقت المنقضي منذ آخر رسم
-            const elapsed = timestamp - lastDrawTime;
-            
-            // تحديث العناصر في كل إطار
-            if (!this.state.isPaused) {
-                this.stars.forEach(star => star.update(timestamp));
-                this.dustParticles.forEach(particle => particle.update());
-                this.meteors.forEach(meteor => meteor.update());
+    
+    // Add CSS animation if not already defined
+    if (!document.getElementById('cosmic-animations')) {
+        const style = document.createElement('style');
+        style.id = 'cosmic-animations';
+        style.textContent = `
+            @keyframes twinkle {
+                0%, 100% { opacity: 0.8; transform: scale(1); }
+                50% { opacity: 0.2; transform: scale(0.7); }
             }
             
-            // رسم العناصر فقط إذا مر وقت كافٍ
-            if (elapsed >= drawInterval) {
-                this._drawStars();
-                this._drawNebula(timestamp);
-                this._drawDust();
-                this._drawMeteors();
-                this._drawInteraction(timestamp);
-                
-                lastDrawTime = timestamp;
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.05); }
             }
             
-            // استمرار الحلقة
-            requestAnimationFrame(animate);
-        };
-        
-        requestAnimationFrame(animate);
-    }
-
-    /**
-     * رسم النجوم
-     * @private
-     */
-    _drawStars() {
-        if (!this.starsCtx) return;
-        
-        this.starsCtx.clearRect(0, 0, this.starsCanvas.width, this.starsCanvas.height);
-        
-        if (this.state.showStars) {
-            this.stars.forEach(star => {
-                star.draw(this.starsCtx);
-            });
-        }
-    }
-
-    /**
-     * رسم السديم
-     * @param {number} time - الوقت الحالي
-     * @private
-     */
-    _drawNebula(time) {
-        if (!this.nebulaCtx || !this.state.showNebula) {
-            if (this.nebulaCtx) {
-                this.nebulaCtx.clearRect(0, 0, this.nebulaCanvas.width, this.nebulaCanvas.height);
+            @keyframes float {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-10px); }
             }
-            return;
-        }
-        
-        this.nebulaCtx.clearRect(0, 0, this.nebulaCanvas.width, this.nebulaCanvas.height);
-        
-        // تحديث نقاط السديم
-        if (!this.state.isPaused) {
-            this.nebulaTime += 0.001 * this.settings.animationSpeed * (this.settings.reduceMotion ? 0.3 : 1);
-            
-            this.nebulaPoints.forEach((point, index) => {
-                const wobble = Math.sin(this.nebulaTime + index) * 20;
-                point.x = point.originalX + Math.cos(point.angle + this.nebulaTime) * wobble;
-                point.y = point.originalY + Math.sin(point.angle + this.nebulaTime) * wobble;
-            });
-        }
-        
-        const centerX = this.nebulaCanvas.width / 2;
-        const centerY = this.nebulaCanvas.height / 2;
-        
-        // تحديد ألوان السديم بناءً على السمة
-        let colors;
-        switch (this.settings.theme) {
-            case 'green-blue':
-                colors = {
-                    center: `rgba(255, 255, 255, ${0.8 * this.settings.nebulaIntensity})`,
-                    inner: `rgba(0, 200, 100, ${0.6 * this.settings.nebulaIntensity})`,
-                    middle: `rgba(0, 100, 150, ${0.5 * this.settings.nebulaIntensity})`,
-                    outer1: `rgba(0, 150, 200, ${0.4 * this.settings.nebulaIntensity})`,
-                    outer2: `rgba(0, 50, 100, ${0.3 * this.settings.nebulaIntensity})`
-                };
-                break;
-            case 'orange-red':
-                colors = {
-                    center: `rgba(255, 255, 255, ${0.8 * this.settings.nebulaIntensity})`,
-                    inner: `rgba(255, 200, 0, ${0.6 * this.settings.nebulaIntensity})`,
-                    middle: `rgba(255, 100, 0, ${0.5 * this.settings.nebulaIntensity})`,
-                    outer1: `rgba(200, 50, 0, ${0.4 * this.settings.nebulaIntensity})`,
-                    outer2: `rgba(100, 0, 0, ${0.3 * this.settings.nebulaIntensity})`
-                };
-                break;
-            default: // blue-purple
-                colors = {
-                    center: `rgba(255, 255, 255, ${0.8 * this.settings.nebulaIntensity})`,
-                    inner: `rgba(74, 137, 220, ${0.6 * this.settings.nebulaIntensity})`,
-                    middle: `rgba(28, 60, 120, ${0.5 * this.settings.nebulaIntensity})`,
-                    outer1: `rgba(255, 105, 180, ${0.4 * this.settings.nebulaIntensity})`,
-                    outer2: `rgba(128, 0, 128, ${0.3 * this.settings.nebulaIntensity})`
-                };
-        }
-        
-        // طبقة 1: الهالة الخارجية
-        const outerGradient = this.nebulaCtx.createRadialGradient(
-            centerX, centerY, 0,
-            centerX, centerY, Math.min(this.nebulaCanvas.width, this.nebulaCanvas.height) * 0.5
-        );
-        
-        outerGradient.addColorStop(0, `rgba(28, 60, 120, 0)`);
-        outerGradient.addColorStop(0.5, `rgba(28, 60, 120, ${0.1 * this.settings.nebulaIntensity})`);
-        outerGradient.addColorStop(0.8, `rgba(28, 60, 120, ${0.05 * this.settings.nebulaIntensity})`);
-        outerGradient.addColorStop(1, `rgba(0, 0, 0, 0)`);
-        
-        this.nebulaCtx.beginPath();
-        this.nebulaCtx.arc(centerX, centerY, Math.min(this.nebulaCanvas.width, this.nebulaCanvas.height) * 0.5, 0, Math.PI * 2);
-        this.nebulaCtx.fillStyle = outerGradient;
-        this.nebulaCtx.fill();
-        
-        // طبقة 2: السديم الرئيسي
-        const mainGradient = this.nebulaCtx.createRadialGradient(
-            centerX, centerY, 0,
-            centerX, centerY, Math.min(this.nebulaCanvas.width, this.nebulaCanvas.height) * 0.4
-        );
-        
-        mainGradient.addColorStop(0, `rgba(255, 255, 255, ${0.8 * this.settings.nebulaIntensity})`);
-        mainGradient.addColorStop(0.2, `rgba(74, 137, 220, ${0.6 * this.settings.nebulaIntensity})`);
-        mainGradient.addColorStop(0.4, `rgba(28, 60, 120, ${0.5 * this.settings.nebulaIntensity})`);
-        mainGradient.addColorStop(0.6, `rgba(255, 105, 180, ${0.4 * this.settings.nebulaIntensity})`);
-        mainGradient.addColorStop(0.8, `rgba(128, 0, 128, ${0.3 * this.settings.nebulaIntensity})`);
-        mainGradient.addColorStop(1, `rgba(0, 0, 0, 0)`);
-        
-        // رسم السديم باستخدام منحنى بيزيه
-        this.nebulaCtx.globalCompositeOperation = 'source-over';
-        this.nebulaCtx.beginPath();
-        this.nebulaCtx.moveTo(this.nebulaPoints[0].x, this.nebulaPoints[0].y);
-        
-        for (let i = 0; i < this.nebulaPoints.length; i++) {
-            const currentPoint = this.nebulaPoints[i];
-            const nextPoint = this.nebulaPoints[(i + 1) % this.nebulaPoints.length];
-            
-            const controlX = (currentPoint.x + nextPoint.x) / 2;
-            const controlY = (currentPoint.y + nextPoint.y) / 2;
-            
-            this.nebulaCtx.quadraticCurveTo(
-                currentPoint.x, currentPoint.y,
-                controlX, controlY
-            );
-        }
-        
-        this.nebulaCtx.closePath();
-        this.nebulaCtx.fillStyle = mainGradient;
-        this.nebulaCtx.fill();
-        
-        // طبقة 3: إضافة تفاصيل داخلية للسديم
-        this.nebulaCtx.globalCompositeOperation = 'screen';
-        
-        // إضافة خطوط مضيئة داخل السديم
-        for (let i = 0; i < 5; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const length = Math.random() * 100 + 50;
-            const startX = centerX + Math.cos(angle) * 20;
-            const startY = centerY + Math.sin(angle) * 20;
-            const endX = startX + Math.cos(angle) * length;
-            const endY = startY + Math.sin(angle) * length;
-            
-            const glowGradient = this.nebulaCtx.createLinearGradient(startX, startY, endX, endY);
-            glowGradient.addColorStop(0, `rgba(255, 255, 255, ${0.7 * this.settings.nebulaIntensity})`);
-            glowGradient.addColorStop(0.5, `rgba(74, 137, 220, ${0.5 * this.settings.nebulaIntensity})`);
-            glowGradient.addColorStop(1, `rgba(0, 0, 0, 0)`);
-            
-            this.nebulaCtx.beginPath();
-            this.nebulaCtx.strokeStyle = glowGradient;
-            this.nebulaCtx.lineWidth = Math.random() * 5 + 2;
-            this.nebulaCtx.moveTo(startX, startY);
-            this.nebulaCtx.lineTo(endX, endY);
-            this.nebulaCtx.stroke();
-        }
-        
-        // طبقة 4: إضافة توهج للسديم
-        this.nebulaCtx.filter = 'blur(30px)';
-        this.nebulaCtx.beginPath();
-        this.nebulaCtx.arc(centerX, centerY, Math.min(this.nebulaCanvas.width, this.nebulaCanvas.height) * 0.2, 0, Math.PI * 2);
-        this.nebulaCtx.fillStyle = mainGradient;
-        this.nebulaCtx.fill();
-        
-        // طبقة 5: إضافة نجوم ساطعة داخل السديم
-        this.nebulaCtx.filter = 'none';
-        for (let i = 0; i < 8; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = Math.random() * 150;
-            const x = centerX + Math.cos(angle) * distance;
-            const y = centerY + Math.sin(angle) * distance;
-            const size = Math.random() * 3 + 1;
-            
-            // رسم النجمة
-            this.nebulaCtx.beginPath();
-            this.nebulaCtx.arc(x, y, size, 0, Math.PI * 2);
-            this.nebulaCtx.fillStyle = `rgba(255, 255, 255, ${0.8 * this.settings.nebulaIntensity})`;
-            this.nebulaCtx.fill();
-            
-            // إضافة توهج حول النجمة
-            this.nebulaCtx.beginPath();
-            this.nebulaCtx.arc(x, y, size * 3, 0, Math.PI * 2);
-            const starGlow = this.nebulaCtx.createRadialGradient(x, y, 0, x, y, size * 3);
-            starGlow.addColorStop(0, `rgba(255, 255, 255, ${0.5 * this.settings.nebulaIntensity})`);
-            starGlow.addColorStop(1, `rgba(255, 255, 255, 0)`);
-            this.nebulaCtx.fillStyle = starGlow;
-            this.nebulaCtx.fill();
-        }
-        
-        // إعادة تعيين globalCompositeOperation
-        this.nebulaCtx.globalCompositeOperation = 'source-over';
-    }
-
-    /**
-     * رسم جزيئات الغبار الكوني
-     * @private
-     */
-    _drawDust() {
-        if (!this.dustCtx || !this.state.showDust) {
-            if (this.dustCtx) {
-                this.dustCtx.clearRect(0, 0, this.dustCanvas.width, this.dustCanvas.height);
-            }
-            return;
-        }
-        
-        this.dustCtx.clearRect(0, 0, this.dustCanvas.width, this.dustCanvas.height);
-        
-        this.dustParticles.forEach(particle => {
-            particle.draw(this.dustCtx);
-        });
-    }
-
-    /**
-     * رسم الشهب
-     * @private
-     */
-    _drawMeteors() {
-        if (!this.meteorsCtx) return;
-        
-        this.meteorsCtx.clearRect(0, 0, this.meteorsCanvas.width, this.meteorsCanvas.height);
-        
-        this.meteors.forEach(meteor => {
-            meteor.draw(this.meteorsCtx);
-        });
-    }
-
-    /**
-     * رسم تأثيرات التفاعل
-     * @param {number} time - الوقت الحالي
-     * @private
-     */
-    _drawInteraction(time) {
-        if (!this.interactionCtx) return;
-        
-        this.interactionCtx.clearRect(0, 0, this.interactionCanvas.width, this.interactionCanvas.height);
-        
-        // رسم تأثير التفاعل فقط إذا كان المؤشر أو اللمس نشطاً
-        if (this.state.touchActive || (this.state.mouseX !== 0 && this.state.mouseY !== 0)) {
-            this._drawMouseInteraction(time);
-        }
-    }
-
-    /**
-     * رسم تأثير تفاعل الماوس
-     * @param {number} time - الوقت الحالي
-     * @private
-     */
-    _drawMouseInteraction(time) {
-        const ctx = this.interactionCtx;
-        const pulseSpeed = 0.0005;
-        const pulseSize = 20 + Math.sin(time * pulseSpeed) * 10;
-        const pulseOpacity = 0.3 + Math.cos(time * pulseSpeed) * 0.2;
-        
-        ctx.beginPath();
-        const gradient = ctx.createRadialGradient(
-            this.state.mouseX, this.state.mouseY, 0,
-            this.state.mouseX, this.state.mouseY, pulseSize
-        );
-        
-        gradient.addColorStop(0, `rgba(255, 255, 255, ${pulseOpacity})`);
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        
-        ctx.fillStyle = gradient;
-        ctx.arc(this.state.mouseX, this.state.mouseY, pulseSize, 0, Math.PI * 2);
-        ctx.fill();
-    }
-
-    /**
-     * فئة النجوم
-     */
-    Star = class {
-        constructor(cosmic) {
-            this.cosmic = cosmic;
-            this.reset();
-        }
-        
-        reset() {
-            this.x = Math.random() * this.cosmic.starsCanvas.width;
-            this.y = Math.random() * this.cosmic.starsCanvas.height;
-            this.size = Math.random() * 2 + 0.5;
-            this.brightness = Math.random() * 0.5 + 0.5;
-            this.twinkleSpeed = Math.random() * 0.01 + 0.005;
-            this.twinklePhase = Math.random() * Math.PI * 2;
-            this.color = '#ffffff';
-        }
-        
-        update(timestamp) {
-            if (this.cosmic.state.isPaused) return;
-            
-            // تومض النجوم
-            this.twinklePhase += this.twinkleSpeed * this.cosmic.settings.animationSpeed;
-            this.brightness = 0.5 + Math.sin(this.twinklePhase) * 0.5;
-            
-            // تتحرك النجوم قليلاً
-            if (!this.cosmic.settings.reduceMotion) {
-                this.y += 0.05 * this.cosmic.settings.animationSpeed;
-                
-                // إعادة ضبط النجمة عندما تخرج عن الشاشة
-                if (this.y > this.cosmic.starsCanvas.height) {
-                    this.y = 0;
-                    this.x = Math.random() * this.cosmic.starsCanvas.width;
-                }
-            }
-        }
-        
-        draw(ctx) {
-            const opacity = this.brightness * this.cosmic.settings.starsBrightness;
-            const size = this.size * (0.8 + this.brightness * 0.4);
-            
-            // رسم النجمة
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
-            ctx.fill();
-            
-            // رسم التوهج حول النجمة الأكبر
-            if (this.size > 1.5) {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, size * 3, 0, Math.PI * 2);
-                const glow = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, size * 3);
-                glow.addColorStop(0, `rgba(255, 255, 255, ${opacity * 0.5})`);
-                glow.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                ctx.fillStyle = glow;
-                ctx.fill();
-            }
-        }
-    };
-
-    /**
-     * فئة جزيئات الغبار الكوني
-     */
-    DustParticle = class {
-        constructor(cosmic) {
-            this.cosmic = cosmic;
-            this.reset();
-        }
-        
-        reset() {
-            this.x = Math.random() * this.cosmic.dustCanvas.width;
-            this.y = Math.random() * this.cosmic.dustCanvas.height;
-            this.size = Math.random() * 0.6 + 0.2;
-            this.speedX = (Math.random() - 0.5) * 0.1;
-            this.speedY = (Math.random() - 0.5) * 0.1;
-            this.opacity = Math.random() * 0.3 + 0.2;
-        }
-        
-        update() {
-            if (this.cosmic.state.isPaused) return;
-            
-            // تحريك جزيئات الغبار
-            this.x += this.speedX * this.cosmic.settings.animationSpeed * (this.cosmic.settings.reduceMotion ? 0.3 : 1);
-            this.y += this.speedY * this.cosmic.settings.animationSpeed * (this.cosmic.settings.reduceMotion ? 0.3 : 1);
-            
-            // إعادة ضبط الجزيء عندما يخرج عن الشاشة
-            if (this.x < 0 || this.x > this.cosmic.dustCanvas.width || this.y < 0 || this.y > this.cosmic.dustCanvas.height) {
-                this.reset();
-            }
-        }
-        
-        draw(ctx) {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity * this.cosmic.settings.nebulaIntensity})`;
-            ctx.fill();
-        }
-    };
-
-    /**
-     * فئة الشهب
-     */
-    Meteor = class {
-        constructor(cosmic) {
-            this.cosmic = cosmic;
-            this.reset();
-            this.visible = false; // يبدأ غير مرئي
-            this.cooldown = Math.floor(Math.random() * 500) + 100; // تأخير عشوائي
-        }
-        
-        reset() {
-            this.startX = Math.random() * this.cosmic.meteorsCanvas.width;
-            this.startY = 0;
-            this.endX = this.startX + (Math.random() - 0.5) * 300;
-            this.endY = this.cosmic.meteorsCanvas.height;
-            this.progress = 0;
-            this.speed = Math.random() * 0.01 + 0.005;
-            this.width = Math.random() * 2 + 1;
-            this.length = Math.random() * 80 + 50;
-        }
-        
-        update() {
-            if (this.cosmic.state.isPaused) return;
-            
-            if (!this.visible) {
-                this.cooldown--;
-                if (this.cooldown <= 0) {
-                    this.visible = true;
-                }
-                return;
-            }
-            
-            this.progress += this.speed * this.cosmic.settings.animationSpeed * (this.cosmic.settings.reduceMotion ? 0.3 : 1);
-            
-            if (this.progress >= 1) {
-                this.reset();
-                this.visible = false;
-                this.cooldown = Math.floor(Math.random() * 500) + 1000;
-            }
-        }
-        
-        draw(ctx) {
-            if (!this.visible) return;
-            
-            const x = this.startX + (this.endX - this.startX) * this.progress;
-            const y = this.startY + (this.endY - this.startY) * this.progress;
-            
-            // حساب زاوية الشهاب
-            const angle = Math.atan2(this.endY - this.startY, this.endX - this.startX);
-            
-            // رسم ذيل الشهاب
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(angle);
-            
-            const gradient = ctx.createLinearGradient(0, 0, -this.length, 0);
-            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-            gradient.addColorStop(0.2, 'rgba(255, 255, 255, 0.3)');
-            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(-this.length, this.width);
-            ctx.lineTo(-this.length, -this.width);
-            ctx.closePath();
-            ctx.fillStyle = gradient;
-            ctx.fill();
-            
-            // رسم رأس الشهاب
-            ctx.beginPath();
-            ctx.arc(0, 0, this.width * 2, 0, Math.PI * 2);
-            ctx.fillStyle = 'white';
-            ctx.fill();
-            
-            ctx.restore();
-        }
-    };
-
-    /**
-     * تغيير السمة الكونية
-     * @param {string} theme - السمة المطلوبة ('blue-purple', 'green-blue', 'orange-red')
-     */
-    setTheme(theme) {
-        if (['blue-purple', 'green-blue', 'orange-red'].includes(theme)) {
-            this.settings.theme = theme;
-        } else {
-            console.warn(`السمة غير صالحة: ${theme}. استخدام 'blue-purple' كسمة افتراضية.`);
-            this.settings.theme = 'blue-purple';
-        }
-    }
-
-    /**
-     * تغيير مشاعر الخلفية الكونية
-     * @param {string} emotion - المشاعر المطلوبة ('happy', 'sad', 'angry', 'neutral', etc.)
-     */
-    setEmotion(emotion) {
-        if (this.state.emotionTransitioning) return;
-        
-        this.state.emotionTransitioning = true;
-        this.state.currentEmotion = emotion;
-        
-        // تعيين السمة المناسبة للمشاعر
-        switch (emotion) {
-            case 'happy':
-                this.settings.theme = 'green-blue'; // سعيد - ألوان زرقاء وخضراء
-                this.settings.starsBrightness = 0.8;
-                this.settings.nebulaIntensity = 0.9;
-                this.settings.animationSpeed = 0.8;
-                break;
-            case 'sad':
-                this.settings.theme = 'blue-purple'; // حزين - ألوان زرقاء وأرجوانية
-                this.settings.starsBrightness = 0.5;
-                this.settings.nebulaIntensity = 0.5;
-                this.settings.animationSpeed = 0.3;
-                break;
-            case 'angry':
-                this.settings.theme = 'orange-red'; // غاضب - ألوان برتقالية وحمراء
-                this.settings.starsBrightness = 0.9;
-                this.settings.nebulaIntensity = 1.0;
-                this.settings.animationSpeed = 1.0;
-                break;
-            default: // neutral or any other emotion
-                this.settings.theme = 'blue-purple'; // محايد - ألوان زرقاء وأرجوانية
-                this.settings.starsBrightness = 0.7;
-                this.settings.nebulaIntensity = 0.8;
-                this.settings.animationSpeed = 0.5;
-        }
-        
-        // السماح بإعادة تغيير المشاعر بعد فترة
-        setTimeout(() => {
-            this.state.emotionTransitioning = false;
-        }, this.settings.emotionChangeSpeed);
-    }
-
-    /**
-     * إيقاف/تشغيل الخلفية الكونية
-     */
-    togglePause() {
-        this.state.isPaused = !this.state.isPaused;
-        return this.state.isPaused;
-    }
-
-    /**
-     * تغيير عرض/إخفاء السديم
-     * @param {boolean} show - عرض السديم
-     */
-    toggleNebula(show) {
-        if (show !== undefined) {
-            this.state.showNebula = show;
-        } else {
-            this.state.showNebula = !this.state.showNebula;
-        }
-        return this.state.showNebula;
-    }
-
-    /**
-     * تغيير عرض/إخفاء النجوم
-     * @param {boolean} show - عرض النجوم
-     */
-    toggleStars(show) {
-        if (show !== undefined) {
-            this.state.showStars = show;
-        } else {
-            this.state.showStars = !this.state.showStars;
-        }
-        
-        if (!this.state.showStars && this.starsCtx) {
-            this.starsCtx.clearRect(0, 0, this.starsCanvas.width, this.starsCanvas.height);
-        }
-        
-        return this.state.showStars;
-    }
-
-    /**
-     * تغيير عرض/إخفاء الغبار الكوني
-     * @param {boolean} show - عرض الغبار الكوني
-     */
-    toggleDust(show) {
-        if (show !== undefined) {
-            this.state.showDust = show;
-        } else {
-            this.state.showDust = !this.state.showDust;
-        }
-        
-        if (!this.state.showDust && this.dustCtx) {
-            this.dustCtx.clearRect(0, 0, this.dustCanvas.width, this.dustCanvas.height);
-        }
-        
-        return this.state.showDust;
-    }
-
-    /**
-     * تشغيل صوت
-     * @param {string} sound - مسار الصوت
-     * @param {boolean} loop - تكرار الصوت
-     * @param {number} volume - مستوى الصوت (0.0 - 1.0)
-     */
-    playSound(sound, loop = false, volume = 0.5) {
-        if (!this.settings.enableAudio || !this.audioPlayer) return;
-        
-        this.audioPlayer.src = sound;
-        this.audioPlayer.loop = loop;
-        this.audioPlayer.volume = volume;
-        
-        this.audioPlayer.play().catch(error => {
-            console.warn('لم يتم تشغيل الصوت:', error);
-        });
-    }
-
-    /**
-     * إيقاف الصوت الحالي
-     */
-    stopSound() {
-        if (!this.settings.enableAudio || !this.audioPlayer) return;
-        
-        this.audioPlayer.pause();
-        this.audioPlayer.currentTime = 0;
+        `;
+        document.head.appendChild(style);
     }
 }
 
-// تصدير الكلاس للاستخدام في وحدات أخرى
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { CosmicBackground };
-} else if (typeof define === 'function' && define.amd) {
-    define([], function() { return { CosmicBackground }; });
+/**
+ * Setup theme toggle functionality
+ */
+function setupThemeToggles() {
+    const themeToggles = document.querySelectorAll('.theme-toggle');
+    
+    themeToggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const theme = this.dataset.theme || 'default';
+            applyTheme(theme);
+            
+            // Update toggle active state
+            themeToggles.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Save theme preference
+            localStorage.setItem('cosmic-theme', theme);
+        });
+    });
+    
+    // Apply saved theme or default
+    const savedTheme = localStorage.getItem('cosmic-theme') || 'default';
+    applyTheme(savedTheme);
+    
+    // Update active toggle
+    const activeToggle = document.querySelector(`.theme-toggle[data-theme="${savedTheme}"]`);
+    if (activeToggle) {
+        activeToggle.classList.add('active');
+    }
 }
+
+/**
+ * Apply a specific cosmic theme
+ * @param {string} theme - Theme name to apply
+ */
+function applyTheme(theme) {
+    // Remove any existing theme classes
+    document.body.classList.remove(
+        'theme-default', 
+        'theme-happiness', 
+        'theme-sadness', 
+        'theme-anger', 
+        'theme-fear', 
+        'theme-surprise',
+        'theme-disgust',
+        'theme-neutral'
+    );
+    
+    // Add the selected theme class
+    document.body.classList.add(`theme-${theme}`);
+    
+    // Update root CSS variables for the theme
+    const root = document.documentElement;
+    
+    switch (theme) {
+        case 'happiness':
+            root.style.setProperty('--cosmic-primary', '#f7c52e');
+            root.style.setProperty('--cosmic-secondary', '#f4d03f');
+            root.style.setProperty('--cosmic-highlight', '#f39c12');
+            root.style.setProperty('--cosmic-bg-dark', '#141E24');
+            root.style.setProperty('--cosmic-bg-medium', '#1D2730');
+            root.style.setProperty('--cosmic-bg-light', '#263238');
+            break;
+            
+        case 'sadness':
+            root.style.setProperty('--cosmic-primary', '#3498db');
+            root.style.setProperty('--cosmic-secondary', '#2980b9');
+            root.style.setProperty('--cosmic-highlight', '#1abc9c');
+            root.style.setProperty('--cosmic-bg-dark', '#0A1A2A');
+            root.style.setProperty('--cosmic-bg-medium', '#102436');
+            root.style.setProperty('--cosmic-bg-light', '#1a3a5f');
+            break;
+            
+        case 'anger':
+            root.style.setProperty('--cosmic-primary', '#e74c3c');
+            root.style.setProperty('--cosmic-secondary', '#c0392b');
+            root.style.setProperty('--cosmic-highlight', '#f39c12');
+            root.style.setProperty('--cosmic-bg-dark', '#1A0A0A');
+            root.style.setProperty('--cosmic-bg-medium', '#2A1010');
+            root.style.setProperty('--cosmic-bg-light', '#3D1A1A');
+            break;
+            
+        case 'fear':
+            root.style.setProperty('--cosmic-primary', '#9b59b6');
+            root.style.setProperty('--cosmic-secondary', '#8e44ad');
+            root.style.setProperty('--cosmic-highlight', '#2980b9');
+            root.style.setProperty('--cosmic-bg-dark', '#14091A');
+            root.style.setProperty('--cosmic-bg-medium', '#240D34');
+            root.style.setProperty('--cosmic-bg-light', '#36184D');
+            break;
+            
+        case 'surprise':
+            root.style.setProperty('--cosmic-primary', '#1abc9c');
+            root.style.setProperty('--cosmic-secondary', '#16a085');
+            root.style.setProperty('--cosmic-highlight', '#f1c40f');
+            root.style.setProperty('--cosmic-bg-dark', '#0A1A14');
+            root.style.setProperty('--cosmic-bg-medium', '#132921');
+            root.style.setProperty('--cosmic-bg-light', '#1D3D30');
+            break;
+            
+        case 'disgust':
+            root.style.setProperty('--cosmic-primary', '#27ae60');
+            root.style.setProperty('--cosmic-secondary', '#2ecc71');
+            root.style.setProperty('--cosmic-highlight', '#f39c12');
+            root.style.setProperty('--cosmic-bg-dark', '#0A160A');
+            root.style.setProperty('--cosmic-bg-medium', '#101D10');
+            root.style.setProperty('--cosmic-bg-light', '#162916');
+            break;
+            
+        case 'neutral':
+            root.style.setProperty('--cosmic-primary', '#95a5a6');
+            root.style.setProperty('--cosmic-secondary', '#7f8c8d');
+            root.style.setProperty('--cosmic-highlight', '#bdc3c7');
+            root.style.setProperty('--cosmic-bg-dark', '#1A1A1A');
+            root.style.setProperty('--cosmic-bg-medium', '#2A2A2A');
+            root.style.setProperty('--cosmic-bg-light', '#3A3A3A');
+            break;
+            
+        default: // Default cosmic theme
+            root.style.setProperty('--cosmic-primary', '#6e00ff');
+            root.style.setProperty('--cosmic-secondary', '#00d4ff');
+            root.style.setProperty('--cosmic-highlight', '#ff6b6b');
+            root.style.setProperty('--cosmic-bg-dark', '#0a0a1a');
+            root.style.setProperty('--cosmic-bg-medium', '#16213e');
+            root.style.setProperty('--cosmic-bg-light', '#1a1a2e');
+            break;
+    }
+}
+
+/**
+ * Initialize cosmic UI elements with animations and effects
+ */
+function initializeCosmicElements() {
+    // Animate elements with cosmic-animate class
+    const animatedElements = document.querySelectorAll('.cosmic-animate');
+    
+    animatedElements.forEach(el => {
+        const animation = el.dataset.animation || 'pulse';
+        const duration = el.dataset.duration || '3s';
+        
+        el.style.animation = `${animation} ${duration} infinite alternate`;
+    });
+    
+    // Add parallax effect to cosmic-parallax elements
+    const parallaxElements = document.querySelectorAll('.cosmic-parallax');
+    
+    parallaxElements.forEach(el => {
+        const speed = el.dataset.speed || 0.1;
+        
+        window.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth / 2 - e.clientX) * speed;
+            const y = (window.innerHeight / 2 - e.clientY) * speed;
+            
+            el.style.transform = `translate(${x}px, ${y}px)`;
+        });
+    });
+    
+    // Add hover effects to cosmic-hover elements
+    const hoverElements = document.querySelectorAll('.cosmic-hover');
+    
+    hoverElements.forEach(el => {
+        el.addEventListener('mouseenter', () => {
+            const effect = el.dataset.effect || 'glow';
+            
+            if (effect === 'glow') {
+                el.style.boxShadow = 'var(--cosmic-glow-md)';
+            } else if (effect === 'scale') {
+                el.style.transform = 'scale(1.05)';
+            } else if (effect === 'rotate') {
+                el.style.transform = 'rotate(5deg)';
+            }
+        });
+        
+        el.addEventListener('mouseleave', () => {
+            el.style.boxShadow = '';
+            el.style.transform = '';
+        });
+    });
+}
+
+/**
+ * Add click effects to buttons
+ */
+function addButtonEffects() {
+    const buttons = document.querySelectorAll('.cosmic-btn, button');
+    
+    buttons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Create ripple effect
+            const ripple = document.createElement('span');
+            ripple.classList.add('cosmic-ripple');
+            
+            // Position the ripple
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                top: ${y}px;
+                left: ${x}px;
+                transform: translate(-50%, -50%);
+                width: 0;
+                height: 0;
+                background-color: rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                z-index: 0;
+                pointer-events: none;
+                animation: ripple 0.6s ease-out;
+            `;
+            
+            btn.style.position = btn.style.position || 'relative';
+            btn.style.overflow = 'hidden';
+            
+            btn.appendChild(ripple);
+            
+            // Remove ripple after animation completes
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+    
+    // Add ripple animation if not already defined
+    if (!document.getElementById('ripple-animation')) {
+        const style = document.createElement('style');
+        style.id = 'ripple-animation';
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    width: 300px;
+                    height: 300px;
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+/**
+ * Trigger a cosmic effect at a specific position
+ * @param {string} type - Effect type (sparkle, pulse, etc.)
+ * @param {number} x - X position
+ * @param {number} y - Y position
+ * @param {object} options - Additional options for the effect
+ */
+function triggerCosmicEffect(type, x, y, options = {}) {
+    const defaults = {
+        color: 'white',
+        size: 5,
+        duration: 1000
+    };
+    
+    const settings = { ...defaults, ...options };
+    
+    if (type === 'sparkle') {
+        // Create sparkle container if it doesn't exist
+        let container = document.getElementById('cosmic-effects-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'cosmic-effects-container';
+            container.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                z-index: 9999;
+            `;
+            document.body.appendChild(container);
+        }
+        
+        // Create sparkles
+        for (let i = 0; i < 12; i++) {
+            const sparkle = document.createElement('div');
+            const angle = Math.random() * Math.PI * 2;
+            const distance = Math.random() * settings.size * 4;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+            
+            sparkle.style.cssText = `
+                position: absolute;
+                top: ${y}px;
+                left: ${x}px;
+                width: ${settings.size}px;
+                height: ${settings.size}px;
+                background-color: ${settings.color};
+                border-radius: 50%;
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+                animation: cosmic-sparkle-out ${settings.duration}ms ease-out forwards;
+                box-shadow: 0 0 ${settings.size * 2}px ${settings.color};
+            `;
+            
+            // Set custom properties for the animation
+            sparkle.style.setProperty('--tx', `${tx}px`);
+            sparkle.style.setProperty('--ty', `${ty}px`);
+            
+            container.appendChild(sparkle);
+            
+            // Remove sparkle after animation
+            setTimeout(() => {
+                sparkle.remove();
+            }, settings.duration);
+        }
+        
+        // Add sparkle animation if not already defined
+        if (!document.getElementById('cosmic-sparkle-animation')) {
+            const style = document.createElement('style');
+            style.id = 'cosmic-sparkle-animation';
+            style.textContent = `
+                @keyframes cosmic-sparkle-out {
+                    0% {
+                        transform: translate(-50%, -50%) scale(0);
+                        opacity: 1;
+                    }
+                    70% {
+                        opacity: 0.8;
+                    }
+                    100% {
+                        transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+}
+
+// Export functions to global scope
+window.createStarfield = createStarfield;
+window.applyTheme = applyTheme;
+window.triggerCosmicEffect = triggerCosmicEffect;

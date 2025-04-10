@@ -1,402 +1,526 @@
 /**
- * cosmic-animations.css - تأثيرات حركية للثيم الكوني
- * تم تطويره بواسطة فريق مشاعر
- * الإصدار 1.0.0
+ * Cosmic Animations CSS
+ * أنماط الرسوم المتحركة الكونية
+ * 
+ * Animations and effects for the cosmic theme
  */
 
-/* تأثير الريبل (تموج النقر) */
-.ripple {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    transform: scale(0);
-    animation: ripple-animation 0.6s ease-out;
-    pointer-events: none;
-}
-
-@keyframes ripple-animation {
-    to {
-        transform: scale(2);
-        opacity: 0;
-    }
-}
-
-/* تأثير النبض */
-.cosmic-pulse {
-    animation: cosmic-pulse 2s infinite;
+/* Base Animations */
+@keyframes cosmic-float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
 }
 
 @keyframes cosmic-pulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(94, 114, 228, 0.7);
-    }
-    70% {
-        transform: scale(1.05);
-        box-shadow: 0 0 0 10px rgba(94, 114, 228, 0);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(94, 114, 228, 0);
-    }
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
-/* تأثير الدورَان */
-.cosmic-rotate {
-    animation: cosmic-rotate 20s linear infinite;
-}
-
-@keyframes cosmic-rotate {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-/* تأثير التوهج */
-.cosmic-flicker {
-    animation: cosmic-flicker 3s infinite alternate;
-}
-
-@keyframes cosmic-flicker {
-    0%, 100% {
-        opacity: 1;
-    }
-    25% {
-        opacity: 0.8;
-    }
-    50% {
-        opacity: 0.6;
-    }
-    75% {
-        opacity: 0.9;
-    }
-}
-
-/* تأثير الضوء الساطع */
-.cosmic-glow-animation {
-    animation: cosmic-glow 2s ease-in-out infinite alternate;
+@keyframes cosmic-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 @keyframes cosmic-glow {
-    from {
-        box-shadow: 0 0 10px rgba(94, 114, 228, 0.7);
-    }
-    to {
-        box-shadow: 0 0 20px rgba(94, 114, 228, 0.9);
-    }
+    0% { box-shadow: 0 0 5px var(--cosmic-primary); }
+    50% { box-shadow: 0 0 20px var(--cosmic-primary); }
+    100% { box-shadow: 0 0 5px var(--cosmic-primary); }
 }
 
-/* تأثير التلاشي عند الدخول */
-.cosmic-fade-in {
-    animation: cosmic-fade-in 0.8s ease-in-out;
+@keyframes cosmic-shimmer {
+    0% { background-position: -100% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes cosmic-ripple {
+    0% { width: 0; height: 0; opacity: 1; }
+    100% { width: 300px; height: 300px; opacity: 0; }
+}
+
+@keyframes cosmic-appear {
+    0% { transform: scale(0); opacity: 0; }
+    80% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes cosmic-disappear {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0); opacity: 0; }
+}
+
+@keyframes cosmic-bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-20px); }
+    60% { transform: translateY(-10px); }
+}
+
+@keyframes cosmic-shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes cosmic-rotate {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(10deg); }
+    50% { transform: rotate(0deg); }
+    75% { transform: rotate(-10deg); }
+    100% { transform: rotate(0deg); }
 }
 
 @keyframes cosmic-fade-in {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-/* تأثير الرفرفة */
+@keyframes cosmic-fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes cosmic-slide-in {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes cosmic-slide-out {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(20px); opacity: 0; }
+}
+
+@keyframes cosmic-scale-in {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes cosmic-scale-out {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0.8); opacity: 0; }
+}
+
+/* Animation Classes */
 .cosmic-float {
     animation: cosmic-float 3s ease-in-out infinite;
 }
 
-@keyframes cosmic-float {
-    0% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-10px);
-    }
-    100% {
-        transform: translateY(0);
-    }
+.cosmic-pulse {
+    animation: cosmic-pulse 2s ease-in-out infinite;
 }
 
-/* تأثير لمعان النجوم */
-.cosmic-sparkle-animation {
-    position: relative;
+.cosmic-spin {
+    animation: cosmic-spin 6s linear infinite;
 }
 
-.cosmic-sparkle-animation::after {
-    content: '';
+.cosmic-slow-spin {
+    animation: cosmic-spin 20s linear infinite;
+}
+
+.cosmic-fast-spin {
+    animation: cosmic-spin 3s linear infinite;
+}
+
+.cosmic-glow {
+    animation: cosmic-glow 2s ease-in-out infinite;
+}
+
+.cosmic-shimmer {
+    background: linear-gradient(90deg, 
+        rgba(255,255,255,0) 0%, 
+        rgba(255,255,255,0.2) 50%, 
+        rgba(255,255,255,0) 100%);
+    background-size: 200% 100%;
+    animation: cosmic-shimmer 2s infinite;
+}
+
+.cosmic-bounce {
+    animation: cosmic-bounce 2s infinite;
+}
+
+.cosmic-shake {
+    animation: cosmic-shake 0.5s ease-in-out;
+}
+
+.cosmic-rotate {
+    animation: cosmic-rotate 2s ease-in-out infinite;
+}
+
+.cosmic-appear {
+    animation: cosmic-appear 0.5s forwards;
+}
+
+.cosmic-disappear {
+    animation: cosmic-disappear 0.5s forwards;
+}
+
+.cosmic-fade-in {
+    animation: cosmic-fade-in 0.5s forwards;
+}
+
+.cosmic-fade-out {
+    animation: cosmic-fade-out 0.5s forwards;
+}
+
+.cosmic-slide-in {
+    animation: cosmic-slide-in 0.5s forwards;
+}
+
+.cosmic-slide-out {
+    animation: cosmic-slide-out 0.5s forwards;
+}
+
+.cosmic-scale-in {
+    animation: cosmic-scale-in 0.5s forwards;
+}
+
+.cosmic-scale-out {
+    animation: cosmic-scale-out 0.5s forwards;
+}
+
+/* Animation Delays */
+.cosmic-delay-100 { animation-delay: 0.1s; }
+.cosmic-delay-200 { animation-delay: 0.2s; }
+.cosmic-delay-300 { animation-delay: 0.3s; }
+.cosmic-delay-400 { animation-delay: 0.4s; }
+.cosmic-delay-500 { animation-delay: 0.5s; }
+.cosmic-delay-700 { animation-delay: 0.7s; }
+.cosmic-delay-1000 { animation-delay: 1s; }
+.cosmic-delay-1500 { animation-delay: 1.5s; }
+.cosmic-delay-2000 { animation-delay: 2s; }
+
+/* Animation Durations */
+.cosmic-duration-500 { animation-duration: 0.5s; }
+.cosmic-duration-700 { animation-duration: 0.7s; }
+.cosmic-duration-1000 { animation-duration: 1s; }
+.cosmic-duration-1500 { animation-duration: 1.5s; }
+.cosmic-duration-2000 { animation-duration: 2s; }
+.cosmic-duration-3000 { animation-duration: 3s; }
+.cosmic-duration-5000 { animation-duration: 5s; }
+
+/* Emotion-Specific Animations */
+/* Happiness */
+@keyframes cosmic-happiness {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.1) rotate(5deg); }
+    50% { transform: scale(1.1) rotate(-5deg); }
+    75% { transform: scale(1.1) rotate(5deg); }
+    100% { transform: scale(1); }
+}
+
+.cosmic-happiness {
+    animation: cosmic-happiness 2s ease-in-out;
+}
+
+/* Sadness */
+@keyframes cosmic-sadness {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(10px); }
+    100% { transform: translateY(0); }
+}
+
+.cosmic-sadness {
+    animation: cosmic-sadness 3s ease-in-out;
+}
+
+/* Anger */
+@keyframes cosmic-anger {
+    0% { transform: scale(1); }
+    10% { transform: scale(1.05) rotate(-2deg); }
+    20% { transform: scale(1.05) rotate(2deg); }
+    30% { transform: scale(1.05) rotate(-2deg); }
+    40% { transform: scale(1.05) rotate(2deg); }
+    50% { transform: scale(1.05) rotate(-2deg); }
+    60% { transform: scale(1.05) rotate(2deg); }
+    70% { transform: scale(1.05) rotate(-2deg); }
+    80% { transform: scale(1.05) rotate(2deg); }
+    90% { transform: scale(1.05) rotate(-2deg); }
+    100% { transform: scale(1); }
+}
+
+.cosmic-anger {
+    animation: cosmic-anger 0.5s ease-in-out;
+}
+
+/* Fear */
+@keyframes cosmic-fear {
+    0% { transform: scale(1); }
+    10% { transform: scale(0.95); }
+    20% { transform: scale(1); }
+    30% { transform: scale(0.95); }
+    40% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    60% { transform: scale(1); }
+    70% { transform: scale(0.95); }
+    80% { transform: scale(1); }
+    90% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+.cosmic-fear {
+    animation: cosmic-fear 1s ease-in-out;
+}
+
+/* Surprise */
+@keyframes cosmic-surprise {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    85% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+.cosmic-surprise {
+    animation: cosmic-surprise 0.6s ease-in-out;
+}
+
+/* Disgust */
+@keyframes cosmic-disgust {
+    0% { transform: translateX(0) rotate(0); }
+    25% { transform: translateX(-5px) rotate(-5deg); }
+    50% { transform: translateX(0) rotate(0); }
+    75% { transform: translateX(5px) rotate(5deg); }
+    100% { transform: translateX(0) rotate(0); }
+}
+
+.cosmic-disgust {
+    animation: cosmic-disgust 0.8s ease-in-out;
+}
+
+/* Badge Unlock Animation */
+@keyframes cosmic-badge-unlock {
+    0% { transform: scale(0) rotate(0); opacity: 0; }
+    20% { transform: scale(1.2) rotate(10deg); opacity: 1; }
+    40% { transform: scale(0.9) rotate(-10deg); }
+    60% { transform: scale(1.1) rotate(5deg); }
+    80% { transform: scale(0.95) rotate(-5deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+
+.cosmic-badge-unlock {
+    animation: cosmic-badge-unlock 1s forwards;
+}
+
+/* Star Effect Animation */
+@keyframes cosmic-star-effect {
+    0% { transform: scale(0) rotate(0); opacity: 1; }
+    100% { transform: scale(1.5) rotate(90deg); opacity: 0; }
+}
+
+.cosmic-star-effect {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    background-image: 
-        radial-gradient(circle, white 1px, transparent 1px),
-        radial-gradient(circle, white 1px, transparent 1px),
-        radial-gradient(circle, white 1px, transparent 1px),
-        radial-gradient(circle, white 1px, transparent 1px),
-        radial-gradient(circle, white 1px, transparent 1px),
-        radial-gradient(circle, white 1px, transparent 1px);
-    background-size: 
-        100px 100px, 130px 130px, 80px 80px, 
-        110px 110px, 90px 90px, 120px 120px;
-    background-position: 
-        0% 0%, 20% 20%, 40% 40%,
-        60% 60%, 80% 80%, 100% 100%;
-    animation: cosmic-sparkle-animation 8s linear infinite;
+    width: 20px;
+    height: 20px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FFD700'%3E%3Cpath d='M12 0l2.62 8.26L22 9.27l-6 5.01 1.78 8.31L12 19.13l-5.78 3.46L8 14.28l-6-5.01 7.38-1.01L12 0z'/%3E%3C/svg%3E");
+    background-size: contain;
+    animation: cosmic-star-effect 0.7s ease-out forwards;
     pointer-events: none;
 }
 
-@keyframes cosmic-sparkle-animation {
-    0% {
-        opacity: 0;
-        background-position: 
-            0% 0%, 20% 20%, 40% 40%,
-            60% 60%, 80% 80%, 100% 100%;
-    }
-    50% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-        background-position: 
-            100% 100%, 0% 0%, 60% 60%,
-            40% 40%, 100% 0%, 0% 100%;
-    }
+/* Level Up Animation */
+@keyframes cosmic-level-up {
+    0% { transform: scale(1); }
+    10% { transform: scale(1.1); }
+    20% { transform: scale(0.9); }
+    30% { transform: scale(1.05); }
+    40% { transform: scale(0.95); }
+    50% { transform: scale(1.02); }
+    60% { transform: scale(0.98); }
+    70% { transform: scale(1.01); }
+    80% { transform: scale(0.99); }
+    90% { transform: scale(1.005); }
+    100% { transform: scale(1); }
 }
 
-/* تأثير الروح/الشبح */
-.cosmic-ghost {
-    animation: cosmic-ghost 5s ease-in-out infinite;
+.cosmic-level-up {
+    animation: cosmic-level-up 0.7s ease-in-out;
 }
 
-@keyframes cosmic-ghost {
-    0%, 100% {
-        opacity: 0.3;
-        filter: blur(5px);
-    }
-    50% {
-        opacity: 0.7;
-        filter: blur(0);
-    }
+/* XP Gain Animation */
+@keyframes cosmic-xp-gain {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-20px) scale(1.2); opacity: 0; }
 }
 
-/* تأثير التموج العائم */
-.cosmic-wave {
-    position: relative;
-    overflow: hidden;
-}
-
-.cosmic-wave::before {
-    content: '';
+.cosmic-xp-gain {
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 30%, transparent 70%);
-    transform-origin: center;
-    animation: cosmic-wave 10s linear infinite;
+    color: var(--cosmic-primary);
+    font-weight: bold;
     pointer-events: none;
+    animation: cosmic-xp-gain 1s forwards;
 }
 
-@keyframes cosmic-wave {
-    0% {
-        transform: scale(0.5) rotate(0deg);
-        opacity: 0.3;
-    }
-    50% {
-        transform: scale(1) rotate(180deg);
-        opacity: 0.1;
-    }
-    100% {
-        transform: scale(0.5) rotate(360deg);
-        opacity: 0.3;
-    }
+/* Challenge Complete Animation */
+@keyframes cosmic-challenge-complete {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.05) rotateY(0deg); }
+    50% { transform: scale(1.1) rotateY(180deg); }
+    75% { transform: scale(1.05) rotateY(360deg); }
+    100% { transform: scale(1) rotateY(360deg); }
 }
 
-/* أنيميشنز للتغييرات العاطفية */
-.emotion-happy {
-    animation: emotion-happy 0.5s ease-in-out forwards;
+.cosmic-challenge-complete {
+    animation: cosmic-challenge-complete 1s ease-in-out;
 }
 
-@keyframes emotion-happy {
-    0% {
-        background-color: var(--cosmic-bg-element);
-    }
-    100% {
-        background-color: rgba(45, 206, 137, 0.1);
-    }
+/* Path Progress Animation */
+@keyframes cosmic-path-progress {
+    0% { transform: scaleX(0); transform-origin: left; }
+    100% { transform: scaleX(1); transform-origin: left; }
 }
 
-.emotion-sad {
-    animation: emotion-sad 0.5s ease-in-out forwards;
+.rtl .cosmic-path-progress {
+    animation: cosmic-path-progress 1s ease-out forwards;
+    transform-origin: right !important;
 }
 
-@keyframes emotion-sad {
-    0% {
-        background-color: var(--cosmic-bg-element);
-    }
-    100% {
-        background-color: rgba(0, 122, 255, 0.1);
-    }
+.cosmic-path-progress {
+    animation: cosmic-path-progress 1s ease-out forwards;
 }
 
-.emotion-angry {
-    animation: emotion-angry 0.5s ease-in-out forwards;
+/* Page Transitions */
+@keyframes cosmic-page-in {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes emotion-angry {
-    0% {
-        background-color: var(--cosmic-bg-element);
-    }
-    100% {
-        background-color: rgba(245, 54, 92, 0.1);
-    }
+@keyframes cosmic-page-out {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-20px); }
 }
 
-.emotion-neutral {
-    animation: emotion-neutral 0.5s ease-in-out forwards;
+.cosmic-page-in {
+    animation: cosmic-page-in 0.5s ease-out forwards;
 }
 
-@keyframes emotion-neutral {
-    0% {
-        background-color: rgba(45, 206, 137, 0.1);
-        background-color: rgba(0, 122, 255, 0.1);
-        background-color: rgba(245, 54, 92, 0.1);
-    }
-    100% {
-        background-color: var(--cosmic-bg-element);
-    }
+.cosmic-page-out {
+    animation: cosmic-page-out 0.5s ease-in forwards;
 }
 
-/* تأثير الظهور المتدرج للعناصر */
-.cosmic-stagger-item {
+/* Staggered List Animations */
+.cosmic-list-stagger > * {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
 }
 
-.cosmic-stagger-container:hover .cosmic-stagger-item {
-    animation: cosmic-stagger 0.8s ease-in-out forwards;
+.cosmic-list-stagger.animate > *:nth-child(1) {
+    animation: cosmic-slide-in 0.5s 0.1s forwards;
 }
 
-.cosmic-stagger-container:hover .cosmic-stagger-item:nth-child(1) {
-    animation-delay: 0s;
+.cosmic-list-stagger.animate > *:nth-child(2) {
+    animation: cosmic-slide-in 0.5s 0.2s forwards;
 }
 
-.cosmic-stagger-container:hover .cosmic-stagger-item:nth-child(2) {
-    animation-delay: 0.1s;
+.cosmic-list-stagger.animate > *:nth-child(3) {
+    animation: cosmic-slide-in 0.5s 0.3s forwards;
 }
 
-.cosmic-stagger-container:hover .cosmic-stagger-item:nth-child(3) {
+.cosmic-list-stagger.animate > *:nth-child(4) {
+    animation: cosmic-slide-in 0.5s 0.4s forwards;
+}
+
+.cosmic-list-stagger.animate > *:nth-child(5) {
+    animation: cosmic-slide-in 0.5s 0.5s forwards;
+}
+
+.cosmic-list-stagger.animate > *:nth-child(6) {
+    animation: cosmic-slide-in 0.5s 0.6s forwards;
+}
+
+.cosmic-list-stagger.animate > *:nth-child(7) {
+    animation: cosmic-slide-in 0.5s 0.7s forwards;
+}
+
+.cosmic-list-stagger.animate > *:nth-child(8) {
+    animation: cosmic-slide-in 0.5s 0.8s forwards;
+}
+
+.cosmic-list-stagger.animate > *:nth-child(9) {
+    animation: cosmic-slide-in 0.5s 0.9s forwards;
+}
+
+.cosmic-list-stagger.animate > *:nth-child(10) {
+    animation: cosmic-slide-in 0.5s 1s forwards;
+}
+
+/* Loading Animations */
+@keyframes cosmic-loading-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes cosmic-loading-pulse {
+    0%, 100% { transform: scale(0.5); opacity: 0.5; }
+    50% { transform: scale(1); opacity: 1; }
+}
+
+.cosmic-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(94, 114, 228, 0.1);
+    border-left-color: var(--cosmic-primary);
+    border-radius: 50%;
+    animation: cosmic-loading-spin 1s linear infinite;
+}
+
+.cosmic-loading-dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.cosmic-loading-dots .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--cosmic-primary);
+    animation: cosmic-loading-pulse 1.2s infinite ease-in-out;
+}
+
+.cosmic-loading-dots .dot:nth-child(2) {
     animation-delay: 0.2s;
 }
 
-.cosmic-stagger-container:hover .cosmic-stagger-item:nth-child(4) {
-    animation-delay: 0.3s;
-}
-
-.cosmic-stagger-container:hover .cosmic-stagger-item:nth-child(5) {
+.cosmic-loading-dots .dot:nth-child(3) {
     animation-delay: 0.4s;
 }
 
-@keyframes cosmic-stagger {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
+/* Responsive Animation Adjustments */
+@media (prefers-reduced-motion) {
+    .cosmic-float,
+    .cosmic-pulse,
+    .cosmic-spin,
+    .cosmic-slow-spin,
+    .cosmic-fast-spin,
+    .cosmic-glow,
+    .cosmic-shimmer,
+    .cosmic-bounce,
+    .cosmic-rotate,
+    .cosmic-happiness,
+    .cosmic-sadness,
+    .cosmic-anger,
+    .cosmic-fear,
+    .cosmic-surprise,
+    .cosmic-disgust {
+        animation: none !important;
     }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* تأثير اضطراب النص */
-.cosmic-glitch {
-    position: relative;
-    animation: cosmic-glitch-skew 1s infinite alternate-reverse;
-}
-
-.cosmic-glitch::before,
-.cosmic-glitch::after {
-    content: attr(data-text);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-.cosmic-glitch::before {
-    left: 2px;
-    text-shadow: -2px 0 #ff00c1;
-    clip: rect(44px, 450px, 56px, 0);
-    animation: cosmic-glitch-anim 5s infinite linear alternate-reverse;
-}
-
-.cosmic-glitch::after {
-    left: -2px;
-    text-shadow: -2px 0 #00fff9, 2px 2px #ff00c1;
-    clip: rect(44px, 450px, 56px, 0);
-    animation: cosmic-glitch-anim2 5s infinite linear alternate-reverse;
-}
-
-@keyframes cosmic-glitch-anim {
-    0% {
-        clip: rect(19px, 9999px, 33px, 0);
-    }
-    5% {
-        clip: rect(79px, 9999px, 18px, 0);
-    }
-    10% {
-        clip: rect(24px, 9999px, 71px, 0);
-    }
-    /* ... continue pattern ... */
-    100% {
-        clip: rect(67px, 9999px, 61px, 0);
-    }
-}
-
-@keyframes cosmic-glitch-anim2 {
-    0% {
-        clip: rect(9px, 9999px, 56px, 0);
-    }
-    5% {
-        clip: rect(59px, 9999px, 98px, 0);
-    }
-    10% {
-        clip: rect(34px, 9999px, 11px, 0);
-    }
-    /* ... continue pattern ... */
-    100% {
-        clip: rect(47px, 9999px, 31px, 0);
-    }  
-}
-
-@keyframes cosmic-glitch-skew {
-    0% {
-        transform: skew(0deg);
-    }
-    20% {
-        transform: skew(0deg);
-    }
-    21% {
-        transform: skew(3deg);
-    }
-    23% {
-        transform: skew(0deg);
-    }
-    40% {
-        transform: skew(-2deg);
-    }
-    41% {
-        transform: skew(0deg);
-    }
-    100% {
-        transform: skew(0deg);
+    
+    .cosmic-appear,
+    .cosmic-disappear,
+    .cosmic-fade-in,
+    .cosmic-fade-out,
+    .cosmic-slide-in,
+    .cosmic-slide-out,
+    .cosmic-scale-in,
+    .cosmic-scale-out,
+    .cosmic-badge-unlock,
+    .cosmic-level-up,
+    .cosmic-challenge-complete,
+    .cosmic-path-progress,
+    .cosmic-page-in,
+    .cosmic-page-out,
+    .cosmic-list-stagger.animate > * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
     }
 }

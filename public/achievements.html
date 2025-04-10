@@ -1,0 +1,2146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotional Learning Achievements | مشاعر</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/rtl.css">
+    <link rel="stylesheet" href="/css/cosmic-theme.css">
+    <link rel="stylesheet" href="/css/cosmic-animations.css">
+    <style>
+        /* Achievement System Specific Styles */
+        .achievement-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .achievement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .user-level-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background-color: var(--cosmic-bg-element);
+            padding: 15px 25px;
+            border-radius: var(--cosmic-radius-lg);
+            box-shadow: var(--cosmic-shadow);
+            transition: var(--cosmic-transition);
+        }
+        
+        .user-level-display:hover {
+            box-shadow: var(--cosmic-glow);
+        }
+        
+        .avatar-container {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--cosmic-primary), var(--cosmic-primary-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            border: 3px solid var(--cosmic-bg-container);
+            box-shadow: 0 0 15px rgba(94, 114, 228, 0.5);
+        }
+        
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .username {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--cosmic-text-primary);
+            margin-bottom: 5px;
+        }
+        
+        .level-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            background-color: var(--cosmic-primary);
+            color: white;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-flex;
+        }
+        
+        .points-display {
+            background-color: var(--cosmic-bg-element);
+            padding: 15px 25px;
+            border-radius: var(--cosmic-radius-lg);
+            box-shadow: var(--cosmic-shadow);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: var(--cosmic-transition);
+        }
+        
+        .points-display:hover {
+            box-shadow: var(--cosmic-glow);
+        }
+        
+        .points-icon {
+            font-size: 1.8rem;
+            color: var(--cosmic-primary);
+        }
+        
+        .points-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .points-label {
+            font-size: 0.9rem;
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .points-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--cosmic-text-primary);
+        }
+        
+        .achievement-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background-color: var(--cosmic-bg-element);
+            border-radius: var(--cosmic-radius-lg);
+            padding: 5px;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+        }
+        
+        .achievement-tabs::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Edge */
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: var(--cosmic-transition);
+            border-radius: var(--cosmic-radius-md);
+            white-space: nowrap;
+            font-weight: 500;
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .tab.active {
+            background-color: var(--cosmic-primary);
+            color: white;
+            box-shadow: var(--cosmic-shadow);
+        }
+        
+        .tab:hover:not(.active) {
+            background-color: rgba(94, 114, 228, 0.1);
+            color: var(--cosmic-text-primary);
+        }
+        
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+        }
+        
+        .achievement-card {
+            background-color: var(--cosmic-bg-element);
+            border-radius: var(--cosmic-radius-lg);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: var(--cosmic-transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: var(--cosmic-shadow);
+        }
+        
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--cosmic-glow);
+        }
+        
+        .achievement-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, var(--cosmic-primary), var(--cosmic-primary-light));
+            color: white;
+            font-size: 2.5rem;
+            position: relative;
+        }
+        
+        .achievement-card.locked .achievement-icon {
+            background: linear-gradient(45deg, #4b5a80, #5d6d94);
+            opacity: 0.7;
+        }
+        
+        .achievement-card.locked .achievement-icon::after {
+            content: '🔒';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--cosmic-bg-container);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .achievement-name {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--cosmic-text-primary);
+        }
+        
+        .achievement-card.locked .achievement-name {
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .achievement-description {
+            font-size: 0.9rem;
+            color: var(--cosmic-text-secondary);
+            margin-bottom: 15px;
+            line-height: 1.4;
+            flex-grow: 1;
+        }
+        
+        .achievement-progress {
+            width: 100%;
+            height: 6px;
+            background-color: var(--cosmic-bg-container);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .achievement-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cosmic-primary), var(--cosmic-primary-light));
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        .achievement-progress-text {
+            font-size: 0.8rem;
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .achievement-card.completed .achievement-icon {
+            box-shadow: 0 0 15px var(--cosmic-primary);
+        }
+        
+        .achievement-card.completed::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(94, 114, 228, 0.2) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .achievement-card.completed .achievement-progress-bar {
+            width: 100% !important;
+        }
+        
+        .achievement-points {
+            background-color: var(--cosmic-bg-container);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--cosmic-primary);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .achievement-card.locked .achievement-points {
+            opacity: 0.5;
+        }
+        
+        .achievement-date {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .emotion-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.2rem;
+            filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.3));
+        }
+        
+        .rtl .emotion-badge {
+            right: auto;
+            left: 15px;
+        }
+        
+        .achievement-card.locked .emotion-badge {
+            opacity: 0.5;
+        }
+        
+        /* Category Styles */
+        .category-beginner .achievement-icon {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+        }
+        
+        .category-intermediate .achievement-icon {
+            background: linear-gradient(45deg, #2196F3, #03A9F4);
+        }
+        
+        .category-advanced .achievement-icon {
+            background: linear-gradient(45deg, #9C27B0, #673AB7);
+        }
+        
+        .category-expert .achievement-icon {
+            background: linear-gradient(45deg, #FF9800, #FF5722);
+        }
+        
+        .category-master .achievement-icon {
+            background: linear-gradient(45deg, #F44336, #E91E63);
+        }
+        
+        /* Achievement Modal */
+        .achievement-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            background-color: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .achievement-modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .achievement-modal-content {
+            background-color: var(--cosmic-bg-container);
+            border-radius: var(--cosmic-radius-lg);
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: var(--cosmic-glow);
+        }
+        
+        .achievement-modal.show .achievement-modal-content {
+            transform: translateY(0);
+        }
+        
+        .achievement-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--cosmic-text-secondary);
+            cursor: pointer;
+            transition: var(--cosmic-transition);
+        }
+        
+        .rtl .achievement-modal-close {
+            right: auto;
+            left: 15px;
+        }
+        
+        .achievement-modal-close:hover {
+            color: var(--cosmic-text-primary);
+            transform: rotate(90deg);
+        }
+        
+        .achievement-modal-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, var(--cosmic-primary), var(--cosmic-primary-light));
+            color: white;
+            font-size: 3.5rem;
+            box-shadow: 0 0 30px var(--cosmic-primary);
+            position: relative;
+            animation: achievement-unlock 1s ease-out;
+        }
+        
+        .achievement-modal-icon::before,
+        .achievement-modal-icon::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            animation: achievement-glow 2s infinite;
+        }
+        
+        .achievement-modal-icon::before {
+            width: 130%;
+            height: 130%;
+            border: 2px solid var(--cosmic-primary);
+            animation-delay: 0.2s;
+        }
+        
+        .achievement-modal-icon::after {
+            width: 160%;
+            height: 160%;
+            border: 2px solid var(--cosmic-primary);
+            opacity: 0.3;
+            animation-delay: 0.4s;
+        }
+        
+        .achievement-modal-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--cosmic-primary);
+            margin-bottom: 10px;
+        }
+        
+        .achievement-modal-description {
+            color: var(--cosmic-text-secondary);
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .achievement-modal-points {
+            background-color: var(--cosmic-bg-element);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--cosmic-primary);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .achievement-modal-footer {
+            margin-top: 30px;
+        }
+        
+        .achievement-modal-button {
+            background: linear-gradient(45deg, var(--cosmic-primary), var(--cosmic-primary-light));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: var(--cosmic-radius-md);
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--cosmic-transition);
+        }
+        
+        .achievement-modal-button:hover {
+            box-shadow: var(--cosmic-glow);
+            transform: translateY(-3px);
+        }
+        
+        @keyframes achievement-unlock {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes achievement-glow {
+            0% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.8); }
+            50% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+        }
+        
+        /* Learning Path Section */
+        .learning-path-container {
+            margin-top: 40px;
+            background-color: var(--cosmic-bg-element);
+            border-radius: var(--cosmic-radius-lg);
+            padding: 30px;
+            box-shadow: var(--cosmic-shadow);
+            transition: var(--cosmic-transition);
+        }
+        
+        .learning-path-container:hover {
+            box-shadow: var(--cosmic-glow);
+        }
+        
+        .learning-path-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .learning-path-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--cosmic-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .learning-path-progress {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .learning-path-bar {
+            width: 100px;
+            height: 6px;
+            background-color: var(--cosmic-bg-container);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .learning-path-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cosmic-primary), var(--cosmic-primary-light));
+        }
+        
+        .learning-path-text {
+            font-size: 0.8rem;
+            color: var(--cosmic-text-secondary);
+            text-align: end;
+        }
+        
+        .path-steps {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .rtl .path-steps {
+            padding-left: 0;
+            padding-right: 30px;
+        }
+        
+        .path-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--cosmic-primary), var(--cosmic-primary-light));
+            border-radius: 2px;
+            z-index: 1;
+        }
+        
+        .rtl .path-line {
+            left: auto;
+            right: 0;
+        }
+        
+        .path-step {
+            position: relative;
+            padding: 0 0 40px 30px;
+            z-index: 2;
+        }
+        
+        .rtl .path-step {
+            padding: 0 30px 40px 0;
+        }
+        
+        .path-step:last-child {
+            padding-bottom: 0;
+        }
+        
+        .path-step-marker {
+            position: absolute;
+            left: -18px;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            background-color: var(--cosmic-bg-container);
+            border: 4px solid var(--cosmic-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--cosmic-primary);
+            box-shadow: 0 0 10px rgba(94, 114, 228, 0.3);
+        }
+        
+        .rtl .path-step-marker {
+            left: auto;
+            right: -18px;
+        }
+        
+        .path-step.completed .path-step-marker {
+            background-color: var(--cosmic-primary);
+            color: white;
+        }
+        
+        .path-step.current .path-step-marker {
+            animation: path-step-pulse 2s infinite;
+        }
+        
+        .path-step-content {
+            background-color: var(--cosmic-bg-container);
+            border-radius: var(--cosmic-radius-md);
+            padding: 20px;
+            box-shadow: var(--cosmic-shadow);
+            transition: var(--cosmic-transition);
+        }
+        
+        .path-step-content:hover {
+            box-shadow: var(--cosmic-glow);
+            transform: translateY(-3px);
+        }
+        
+        .path-step.completed .path-step-content {
+            border-left: 4px solid var(--cosmic-primary);
+        }
+        
+        .rtl .path-step.completed .path-step-content {
+            border-left: none;
+            border-right: 4px solid var(--cosmic-primary);
+        }
+        
+        .path-step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .path-step-title {
+            font-weight: bold;
+            color: var(--cosmic-text-primary);
+            font-size: 1.1rem;
+        }
+        
+        .path-step-status {
+            font-size: 0.8rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background-color: var(--cosmic-bg-element);
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .path-step.completed .path-step-status {
+            background-color: var(--cosmic-success);
+            color: white;
+        }
+        
+        .path-step.current .path-step-status {
+            background-color: var(--cosmic-primary);
+            color: white;
+        }
+        
+        .path-step-description {
+            font-size: 0.9rem;
+            color: var(--cosmic-text-secondary);
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        .path-step-achievements {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .path-mini-achievement {
+            background-color: var(--cosmic-bg-element);
+            border-radius: var(--cosmic-radius-sm);
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            color: var(--cosmic-text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .path-mini-achievement.completed {
+            background-color: rgba(45, 206, 137, 0.2);
+            color: var(--cosmic-success);
+        }
+        
+        @keyframes path-step-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(94, 114, 228, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(94, 114, 228, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(94, 114, 228, 0); }
+        }
+        
+        /* Leaderboard Section */
+        .leaderboard-container {
+            margin-top: 40px;
+            background-color: var(--cosmic-bg-element);
+            border-radius: var(--cosmic-radius-lg);
+            padding: 30px;
+            box-shadow: var(--cosmic-shadow);
+            transition: var(--cosmic-transition);
+        }
+        
+        .leaderboard-container:hover {
+            box-shadow: var(--cosmic-glow);
+        }
+        
+        .leaderboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .leaderboard-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--cosmic-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .leaderboard-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .leaderboard-control {
+            background-color: var(--cosmic-bg-container);
+            border: none;
+            border-radius: var(--cosmic-radius-md);
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: var(--cosmic-transition);
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .leaderboard-control.active {
+            background-color: var(--cosmic-primary);
+            color: white;
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+        
+        .leaderboard-table th {
+            text-align: left;
+            padding: 10px 15px;
+            color: var(--cosmic-text-secondary);
+            font-weight: 500;
+            border-bottom: 1px solid var(--cosmic-bg-container);
+        }
+        
+        .rtl .leaderboard-table th {
+            text-align: right;
+        }
+        
+        .leaderboard-table td {
+            padding: 15px;
+            background-color: var(--cosmic-bg-container);
+        }
+        
+        .leaderboard-table tr td:first-child {
+            border-top-left-radius: var(--cosmic-radius-md);
+            border-bottom-left-radius: var(--cosmic-radius-md);
+        }
+        
+        .leaderboard-table tr td:last-child {
+            border-top-right-radius: var(--cosmic-radius-md);
+            border-bottom-right-radius: var(--cosmic-radius-md);
+        }
+        
+        .rtl .leaderboard-table tr td:first-child {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border-top-right-radius: var(--cosmic-radius-md);
+            border-bottom-right-radius: var(--cosmic-radius-md);
+        }
+        
+        .rtl .leaderboard-table tr td:last-child {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-top-left-radius: var(--cosmic-radius-md);
+            border-bottom-left-radius: var(--cosmic-radius-md);
+        }
+        
+        .leaderboard-table tr {
+            transition: var(--cosmic-transition);
+        }
+        
+        .leaderboard-table tr:hover td {
+            background-color: rgba(94, 114, 228, 0.1);
+        }
+        
+        .user-rank {
+            font-weight: bold;
+            color: var(--cosmic-text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+        }
+        
+        .user-rank.top-1 {
+            background-color: #FFD700;
+            border-radius: 50%;
+            color: #000;
+        }
+        
+        .user-rank.top-2 {
+            background-color: #C0C0C0;
+            border-radius: 50%;
+            color: #000;
+        }
+        
+        .user-rank.top-3 {
+            background-color: #CD7F32;
+            border-radius: 50%;
+            color: #000;
+        }
+        
+        .user-info-cell {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--cosmic-primary), var(--cosmic-primary-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+        
+        .user-name-cell {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-name {
+            font-weight: bold;
+            color: var(--cosmic-text-primary);
+        }
+        
+        .user-level-small {
+            font-size: 0.8rem;
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .user-achievements-cell {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .mini-achievement-icon {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background-color: var(--cosmic-bg-element);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+        
+        .user-points-cell {
+            font-weight: bold;
+            color: var(--cosmic-primary);
+        }
+        
+        .user-current-row td {
+            background-color: rgba(94, 114, 228, 0.15);
+            border-left: 3px solid var(--cosmic-primary);
+        }
+        
+        .rtl .user-current-row td {
+            border-left: none;
+            border-right: 3px solid var(--cosmic-primary);
+        }
+        
+        /* Latest Achievements Section */
+        .latest-achievements {
+            margin-top: 40px;
+        }
+        
+        .latest-achievements-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .latest-achievements-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--cosmic-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .latest-achievements-time {
+            font-size: 0.9rem;
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .latest-achievements-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .latest-achievement-item {
+            background-color: var(--cosmic-bg-element);
+            border-radius: var(--cosmic-radius-md);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: var(--cosmic-transition);
+        }
+        
+        .latest-achievement-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--cosmic-glow);
+        }
+        
+        .latest-achievement-icon {
+            width: 50px;
+            height: 50px;
+            min-width: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--cosmic-primary), var(--cosmic-primary-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .latest-achievement-content {
+            flex-grow: 1;
+        }
+        
+        .latest-achievement-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .latest-achievement-name {
+            font-weight: bold;
+            color: var(--cosmic-text-primary);
+        }
+        
+        .latest-achievement-time {
+            font-size: 0.8rem;
+            color: var(--cosmic-text-secondary);
+        }
+        
+        .latest-achievement-description {
+            font-size: 0.9rem;
+            color: var(--cosmic-text-secondary);
+            margin-bottom: 5px;
+        }
+        
+        .latest-achievement-user {
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .latest-achievement-user-avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--cosmic-primary), var(--cosmic-primary-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: white;
+        }
+        
+        .latest-achievement-username {
+            color: var(--cosmic-text-secondary);
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .achievement-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .user-level-display, .points-display {
+                width: 100%;
+            }
+            
+            .achievement-tabs {
+                overflow-x: auto;
+            }
+            
+            .tab {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .achievement-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+            
+            .learning-path-container, 
+            .leaderboard-container {
+                padding: 20px;
+            }
+            
+            .path-steps {
+                padding-left: 20px;
+            }
+            
+            .rtl .path-steps {
+                padding-left: 0;
+                padding-right: 20px;
+            }
+            
+            .path-step {
+                padding-left: 20px;
+            }
+            
+            .rtl .path-step {
+                padding-left: 0;
+                padding-right: 20px;
+            }
+            
+            .leaderboard-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="cosmicBackground"></div>
+    
+    <button class="language-toggle" id="languageToggle">العربية</button>
+    
+    <div class="main-container">
+        <div class="achievement-container">
+            <!-- Header with User Level and Points -->
+            <div class="achievement-header">
+                <div class="user-level-display">
+                    <div class="avatar-container cosmic-glow" id="userAvatar">
+                        👤
+                    </div>
+                    <div class="user-info">
+                        <div class="username" id="displayUsername">Username</div>
+                        <div class="level-badge">
+                            <span id="levelLabel">Level</span> <span id="userLevel">5</span>
+                        </div>
+                        <div class="xp-progress">
+                            <div class="xp-progress-bar" id="xpProgressBar" style="width: 65%;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="points-display">
+                    <div class="points-icon">✨</div>
+                    <div class="points-info">
+                        <div class="points-label" id="pointsLabel">Achievement Points</div>
+                        <div class="points-value" id="userPoints">750</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabs for Different Achievement Categories -->
+            <div class="achievement-tabs" id="achievementTabs">
+                <div class="tab active" data-tab="all" id="tabAll">All Achievements</div>
+                <div class="tab" data-tab="completed" id="tabCompleted">Completed</div>
+                <div class="tab" data-tab="locked" id="tabLocked">Locked</div>
+                <div class="tab" data-tab="emotion" id="tabEmotions">Emotion-Based</div>
+                <div class="tab" data-tab="streaks" id="tabStreaks">Streaks</div>
+                <div class="tab" data-tab="exploration" id="tabExploration">Exploration</div>
+                <div class="tab" data-tab="mastery" id="tabMastery">Mastery</div>
+            </div>
+            
+            <!-- Achievement Grid -->
+            <div class="achievement-grid" id="achievementGrid">
+                <!-- Achievement cards will be dynamically generated here -->
+                <!-- Example of a completed achievement -->
+                <div class="achievement-card completed category-beginner" data-id="1" data-category="emotion">
+                    <div class="emotion-badge">😊</div>
+                    <div class="achievement-icon">🚀</div>
+                    <div class="achievement-name">First Steps</div>
+                    <div class="achievement-description">Record your first emotion in the journal</div>
+                    <div class="achievement-progress">
+                        <div class="achievement-progress-bar" style="width: 100%;"></div>
+                    </div>
+                    <div class="achievement-progress-text">Completed</div>
+                    <div class="achievement-points">✨ 50 points</div>
+                    <div class="achievement-date">Earned: April 5, 2025</div>
+                </div>
+                
+                <!-- Example of an in-progress achievement -->
+                <div class="achievement-card category-intermediate" data-id="2" data-category="streaks">
+                    <div class="emotion-badge">📅</div>
+                    <div class="achievement-icon">🔥</div>
+                    <div class="achievement-name">Weekly Streak</div>
+                    <div class="achievement-description">Record your emotions for 7 consecutive days</div>
+                    <div class="achievement-progress">
+                        <div class="achievement-progress-bar" style="width: 70%;"></div>
+                    </div>
+                    <div class="achievement-progress-text">5/7 days</div>
+                    <div class="achievement-points">✨ 100 points</div>
+                </div>
+                
+                <!-- Example of a locked achievement -->
+                <div class="achievement-card locked category-advanced" data-id="3" data-category="mastery">
+                    <div class="emotion-badge">🧠</div>
+                    <div class="achievement-icon">🎓</div>
+                    <div class="achievement-name">Emotion Master</div>
+                    <div class="achievement-description">Reach level 5 in understanding three different emotions</div>
+                    <div class="achievement-progress">
+                        <div class="achievement-progress-bar" style="width: 30%;"></div>
+                    </div>
+                    <div class="achievement-progress-text">1/3 emotions</div>
+                    <div class="achievement-points">✨ 250 points</div>
+                </div>
+                
+                <!-- More example achievements -->
+                <div class="achievement-card completed category-beginner" data-id="4" data-category="emotion">
+                    <div class="emotion-badge">😢</div>
+                    <div class="achievement-icon">💧</div>
+                    <div class="achievement-name">Embracing Sadness</div>
+                    <div class="achievement-description">Record and reflect on sadness for the first time</div>
+                    <div class="achievement-progress">
+                        <div class="achievement-progress-bar" style="width: 100%;"></div>
+                    </div>
+                    <div class="achievement-progress-text">Completed</div>
+                    <div class="achievement-points">✨ 50 points</div>
+                    <div class="achievement-date">Earned: April 6, 2025</div>
+                </div>
+                
+                <div class="achievement-card category-intermediate" data-id="5" data-category="exploration">
+                    <div class="emotion-badge">🔍</div>
+                    <div class="achievement-icon">🌍</div>
+                    <div class="achievement-name">Emotion Explorer</div>
+                    <div class="achievement-description">Record at least 5 different emotions</div>
+                    <div class="achievement-progress">
+                        <div class="achievement-progress-bar" style="width: 60%;"></div>
+                    </div>
+                    <div class="achievement-progress-text">3/5 emotions</div>
+                    <div class="achievement-points">✨ 100 points</div>
+                </div>
+                
+                <div class="achievement-card locked category-expert" data-id="6" data-category="mastery">
+                    <div class="emotion-badge">📊</div>
+                    <div class="achievement-icon">📈</div>
+                    <div class="achievement-name">Emotional Growth</div>
+                    <div class="achievement-description">Show improvement in emotional regulation over 30 days</div>
+                    <div class="achievement-progress">
+                        <div class="achievement-progress-bar" style="width: 10%;"></div>
+                    </div>
+                    <div class="achievement-progress-text">3/30 days</div>
+                    <div class="achievement-points">✨ 300 points</div>
+                </div>
+                
+                <div class="achievement-card locked category-advanced" data-id="7" data-category="streaks">
+                    <div class="emotion-badge">🗓️</div>
+                    <div class="achievement-icon">⚡</div>
+                    <div class="achievement-name">Monthly Dedication</div>
+                    <div class="achievement-description">Record your emotions for 30 consecutive days</div>
+                    <div class="achievement-progress">
+                        <div class="achievement-progress-bar" style="width: 20%;"></div>
+                    </div>
+                    <div class="achievement-progress-text">6/30 days</div>
+                    <div class="achievement-points">✨ 250 points</div>
+                </div>
+                
+                <div class="achievement-card locked category-master" data-id="8" data-category="mastery">
+                    <div class="emotion-badge">🌟</div>
+                    <div class="achievement-icon">👑</div>
+                    <div class="achievement-name">Emotion Guru</div>
+                    <div class="achievement-description">Reach the highest level in all emotion categories</div>
+                    <div class="achievement-progress">
+                        <div class="achievement-progress-bar" style="width: 15%;"></div>
+                    </div>
+                    <div class="achievement-progress-text">1/7 emotions mastered</div>
+                    <div class="achievement-points">✨ 500 points</div>
+                </div>
+            </div>
+            
+            <!-- Learning Path Section -->
+            <div class="learning-path-container">
+                <div class="learning-path-header">
+                    <div class="learning-path-title">
+                        <span class="path-icon">🛤️</span>
+                        <span id="pathTitle">Emotional Learning Path</span>
+                    </div>
+                    <div class="learning-path-progress">
+                        <div class="learning-path-bar">
+                            <div class="learning-path-fill" style="width: 40%;"></div>
+                        </div>
+                        <div class="learning-path-text">40% Complete</div>
+                    </div>
+                </div>
+                
+                <div class="path-steps">
+                    <div class="path-line"></div>
+                    
+                    <!-- Step 1: Introduction -->
+                    <div class="path-step completed" data-step="1">
+                        <div class="path-step-marker">1</div>
+                        <div class="path-step-content">
+                            <div class="path-step-header">
+                                <div class="path-step-title" id="pathStep1Title">Introduction to Emotions</div>
+                                <div class="path-step-status" id="completedStatus">Completed</div>
+                            </div>
+                            <div class="path-step-description" id="pathStep1Desc">
+                                Learn the basics of emotional awareness and begin your journey of self-discovery.
+                            </div>
+                            <div class="path-step-achievements">
+                                <div class="path-mini-achievement completed">
+                                    <span>🚀</span> First Steps
+                                </div>
+                                <div class="path-mini-achievement completed">
+                                    <span>📝</span> First Journal Entry
+                                </div>
+                                <div class="path-mini-achievement completed">
+                                    <span>💧</span> Embracing Sadness
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Consistent Practice -->
+                    <div class="path-step current" data-step="2">
+                        <div class="path-step-marker">2</div>
+                        <div class="path-step-content">
+                            <div class="path-step-header">
+                                <div class="path-step-title" id="pathStep2Title">Consistent Practice</div>
+                                <div class="path-step-status" id="inProgressStatus">In Progress</div>
+                            </div>
+                            <div class="path-step-description" id="pathStep2Desc">
+                                Develop the habit of regular emotional check-ins and build your first streaks.
+                            </div>
+                            <div class="path-step-achievements">
+                                <div class="path-mini-achievement">
+                                    <span>🔥</span> Weekly Streak
+                                </div>
+                                <div class="path-mini-achievement">
+                                    <span>🌍</span> Emotion Explorer
+                                </div>
+                                <div class="path-mini-achievement">
+                                    <span>🔄</span> Daily Reflector
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Emotional Diversity -->
+                    <div class="path-step" data-step="3">
+                        <div class="path-step-marker">3</div>
+                        <div class="path-step-content">
+                            <div class="path-step-header">
+                                <div class="path-step-title" id="pathStep3Title">Emotional Diversity</div>
+                                <div class="path-step-status" id="lockedStatus">Locked</div>
+                            </div>
+                            <div class="path-step-description" id="pathStep3Desc">
+                                Expand your emotional vocabulary and explore the full spectrum of human emotions.
+                            </div>
+                            <div class="path-step-achievements">
+                                <div class="path-mini-achievement">
+                                    <span>📚</span> Emotion Vocabulary
+                                </div>
+                                <div class="path-mini-achievement">
+                                    <span>🎭</span> Emotion Spectrum
+                                </div>
+                                <div class="path-mini-achievement">
+                                    <span>🔍</span> Deep Reflection
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4: Emotional Intelligence -->
+                    <div class="path-step" data-step="4">
+                        <div class="path-step-marker">4</div>
+                        <div class="path-step-content">
+                            <div class="path-step-header">
+                                <div class="path-step-title" id="pathStep4Title">Emotional Intelligence</div>
+                                <div class="path-step-status" id="lockedStatus2">Locked</div>
+                            </div>
+                            <div class="path-step-description" id="pathStep4Desc">
+                                Learn to recognize patterns in your emotions and develop strategies for emotional regulation.
+                            </div>
+                            <div class="path-step-achievements">
+                                <div class="path-mini-achievement">
+                                    <span>📊</span> Emotional Growth
+                                </div>
+                                <div class="path-mini-achievement">
+                                    <span>⚡</span> Monthly Dedication
+                                </div>
+                                <div class="path-mini-achievement">
+                                    <span>🧠</span> Emotion Master
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 5: Emotional Mastery -->
+                    <div class="path-step" data-step="5">
+                        <div class="path-step-marker">5</div>
+                        <div class="path-step-content">
+                            <div class="path-step-header">
+                                <div class="path-step-title" id="pathStep5Title">Emotional Mastery</div>
+                                <div class="path-step-status" id="lockedStatus3">Locked</div>
+                            </div>
+                            <div class="path-step-description" id="pathStep5Desc">
+                                Achieve mastery of emotional intelligence and help others on their emotional journey.
+                            </div>
+                            <div class="path-step-achievements">
+                                <div class="path-mini-achievement">
+                                    <span>👑</span> Emotion Guru
+                                </div>
+                                <div class="path-mini-achievement">
+                                    <span>🌟</span> Emotional Wisdom
+                                </div>
+                                <div class="path-mini-achievement">
+                                    <span>🤝</span> Emotional Mentor
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Leaderboard Section -->
+            <div class="leaderboard-container">
+                <div class="leaderboard-header">
+                    <div class="leaderboard-title">
+                        <span class="leaderboard-icon">🏆</span>
+                        <span id="leaderboardTitle">Leaderboard</span>
+                    </div>
+                    <div class="leaderboard-controls">
+                        <button class="leaderboard-control active" data-period="weekly" id="weeklyBtn">Weekly</button>
+                        <button class="leaderboard-control" data-period="monthly" id="monthlyBtn">Monthly</button>
+                        <button class="leaderboard-control" data-period="alltime" id="alltimeBtn">All Time</button>
+                    </div>
+                </div>
+                
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th id="rankCol">Rank</th>
+                            <th id="userCol">User</th>
+                            <th id="achievementsCol">Recent Achievements</th>
+                            <th id="pointsCol">Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="user-rank top-1">1</div>
+                            </td>
+                            <td>
+                                <div class="user-info-cell">
+                                    <div class="user-avatar-small">👨</div>
+                                    <div class="user-name-cell">
+                                        <div class="user-name">Ahmed77</div>
+                                        <div class="user-level-small">Level 8</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="user-achievements-cell">
+                                    <div class="mini-achievement-icon">🔥</div>
+                                    <div class="mini-achievement-icon">📊</div>
+                                    <div class="mini-achievement-icon">🌍</div>
+                                </div>
+                            </td>
+                            <td class="user-points-cell">1250</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="user-rank top-2">2</div>
+                            </td>
+                            <td>
+                                <div class="user-info-cell">
+                                    <div class="user-avatar-small">👩</div>
+                                    <div class="user-name-cell">
+                                        <div class="user-name">Sara_K</div>
+                                        <div class="user-level-small">Level 7</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="user-achievements-cell">
+                                    <div class="mini-achievement-icon">⚡</div>
+                                    <div class="mini-achievement-icon">🧠</div>
+                                </div>
+                            </td>
+                            <td class="user-points-cell">1120</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="user-rank top-3">3</div>
+                            </td>
+                            <td>
+                                <div class="user-info-cell">
+                                    <div class="user-avatar-small">🧕</div>
+                                    <div class="user-name-cell">
+                                        <div class="user-name">Noura123</div>
+                                        <div class="user-level-small">Level 7</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="user-achievements-cell">
+                                    <div class="mini-achievement-icon">📈</div>
+                                    <div class="mini-achievement-icon">🌍</div>
+                                </div>
+                            </td>
+                            <td class="user-points-cell">980</td>
+                        </tr>
+                        <tr class="user-current-row">
+                            <td>
+                                <div class="user-rank">5</div>
+                            </td>
+                            <td>
+                                <div class="user-info-cell">
+                                    <div class="user-avatar-small">👤</div>
+                                    <div class="user-name-cell">
+                                        <div class="user-name" id="currentUsername">Username</div>
+                                        <div class="user-level-small">Level 5</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="user-achievements-cell">
+                                    <div class="mini-achievement-icon">🚀</div>
+                                    <div class="mini-achievement-icon">💧</div>
+                                </div>
+                            </td>
+                            <td class="user-points-cell">750</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="user-rank">6</div>
+                            </td>
+                            <td>
+                                <div class="user-info-cell">
+                                    <div class="user-avatar-small">👨‍🦰</div>
+                                    <div class="user-name-cell">
+                                        <div class="user-name">Omar_2022</div>
+                                        <div class="user-level-small">Level 4</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="user-achievements-cell">
+                                    <div class="mini-achievement-icon">🔥</div>
+                                </div>
+                            </td>
+                            <td class="user-points-cell">620</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Latest Achievements Section -->
+            <div class="latest-achievements">
+                <div class="latest-achievements-header">
+                    <div class="latest-achievements-title">
+                        <span class="latest-icon">🏅</span>
+                        <span id="latestTitle">Latest Community Achievements</span>
+                    </div>
+                    <div class="latest-achievements-time" id="latestTimeframe">This Week</div>
+                </div>
+                
+                <div class="latest-achievements-list">
+                    <div class="latest-achievement-item">
+                        <div class="latest-achievement-icon">🔥</div>
+                        <div class="latest-achievement-content">
+                            <div class="latest-achievement-header">
+                                <div class="latest-achievement-name">Weekly Streak</div>
+                                <div class="latest-achievement-time">2 hours ago</div>
+                            </div>
+                            <div class="latest-achievement-description">Recorded emotions for 7 consecutive days</div>
+                            <div class="latest-achievement-user">
+                                <div class="latest-achievement-user-avatar">👨</div>
+                                <div class="latest-achievement-username">Ahmed77</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="latest-achievement-item">
+                        <div class="latest-achievement-icon">🧠</div>
+                        <div class="latest-achievement-content">
+                            <div class="latest-achievement-header">
+                                <div class="latest-achievement-name">Emotion Master</div>
+                                <div class="latest-achievement-time">Yesterday</div>
+                            </div>
+                            <div class="latest-achievement-description">Reached level 5 in understanding three different emotions</div>
+                            <div class="latest-achievement-user">
+                                <div class="latest-achievement-user-avatar">👩</div>
+                                <div class="latest-achievement-username">Sara_K</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="latest-achievement-item">
+                        <div class="latest-achievement-icon">📈</div>
+                        <div class="latest-achievement-content">
+                            <div class="latest-achievement-header">
+                                <div class="latest-achievement-name">Emotional Growth</div>
+                                <div class="latest-achievement-time">3 days ago</div>
+                            </div>
+                            <div class="latest-achievement-description">Showed improvement in emotional regulation over 30 days</div>
+                            <div class="latest-achievement-user">
+                                <div class="latest-achievement-user-avatar">🧕</div>
+                                <div class="latest-achievement-username">Noura123</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Achievement Unlock Modal -->
+            <div class="achievement-modal" id="achievementModal">
+                <div class="achievement-modal-content">
+                    <button class="achievement-modal-close" id="modalClose">×</button>
+                    <div class="achievement-modal-icon" id="modalIcon">🎯</div>
+                    <h2 class="achievement-modal-title" id="modalTitle">Achievement Unlocked!</h2>
+                    <p class="achievement-modal-description" id="modalDescription">
+                        You've successfully completed a challenge and earned a new achievement.
+                    </p>
+                    <div class="achievement-modal-points" id="modalPoints">✨ 100 points</div>
+                    <div class="achievement-modal-footer">
+                        <button class="achievement-modal-button" id="modalButton">Continue</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Import cosmic scripts -->
+    <script src="/js/cosmic-theme.js"></script>
+    <script src="/js/cosmic-animations.js"></script>
+    <script src="/js/cosmic-emotion-sparkles.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Achievement System
+            const achievementSystem = new AchievementSystem();
+            achievementSystem.init();
+            
+            // For demo purposes, trigger an achievement unlock after 3 seconds
+            setTimeout(() => {
+                achievementSystem.unlockAchievement({
+                    id: 2,
+                    name: 'Weekly Streak',
+                    description: 'Record your emotions for 7 consecutive days',
+                    icon: '🔥',
+                    points: 100,
+                    category: 'streaks'
+                });
+            }, 3000);
+        });
+        
+        /**
+         * Achievement System Class
+         * نظام الإنجازات التفاعلي
+         */
+        class AchievementSystem {
+            constructor() {
+                this.achievements = [];
+                this.completedAchievements = [];
+                this.currentTab = 'all';
+                this.isRTL = false;
+                this.username = 'Username'; // Will be replaced with actual username from API
+                this.userAvatar = '👤';     // Will be replaced with actual avatar from API
+                this.userLevel = 5;         // Will be replaced with actual level from API
+                this.userPoints = 750;      // Will be replaced with actual points from API
+                this.userXP = 65;           // Will be replaced with actual XP percentage from API
+            }
+            
+            /**
+             * Initialize the Achievement System
+             * تهيئة نظام الإنجازات
+             */
+            init() {
+                // Set up language toggle
+                this.setupLanguageToggle();
+                
+                // Set up tab switching
+                this.setupTabSwitching();
+                
+                // Set up achievement card clicking
+                this.setupAchievementCardClicks();
+                
+                // Set up achievement unlock modal
+                this.setupAchievementModal();
+                
+                // Set up leaderboard controls
+                this.setupLeaderboardControls();
+                
+                // Load user data (in a real app, this would come from an API)
+                this.loadUserData();
+                
+                // Load achievements (in a real app, this would come from an API)
+                this.loadAchievements();
+                
+                // Update UI with user data
+                this.updateUserUI();
+            }
+            
+            /**
+             * Set up language toggle button
+             * إعداد زر تبديل اللغة
+             */
+            setupLanguageToggle() {
+                const toggleBtn = document.getElementById('languageToggle');
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', () => {
+                        this.toggleLanguage();
+                    });
+                }
+            }
+            
+            /**
+             * Toggle between English and Arabic
+             * التبديل بين اللغة الإنجليزية والعربية
+             */
+            toggleLanguage() {
+                this.isRTL = !this.isRTL;
+                document.body.classList.toggle('rtl', this.isRTL);
+                document.documentElement.dir = this.isRTL ? 'rtl' : 'ltr';
+                document.documentElement.lang = this.isRTL ? 'ar' : 'en';
+                
+                const toggleBtn = document.getElementById('languageToggle');
+                if (toggleBtn) {
+                    toggleBtn.textContent = this.isRTL ? 'English' : 'العربية';
+                }
+                
+                // Update UI text based on language
+                this.updateLanguageText();
+            }
+            
+            /**
+             * Update UI text based on current language
+             * تحديث نص واجهة المستخدم بناءً على اللغة الحالية
+             */
+            updateLanguageText() {
+                const textElements = {
+                    'levelLabel': this.isRTL ? 'المستوى' : 'Level',
+                    'pointsLabel': this.isRTL ? 'نقاط الإنجاز' : 'Achievement Points',
+                    'tabAll': this.isRTL ? 'جميع الإنجازات' : 'All Achievements',
+                    'tabCompleted': this.isRTL ? 'المكتملة' : 'Completed',
+                    'tabLocked': this.isRTL ? 'المقفلة' : 'Locked',
+                    'tabEmotions': this.isRTL ? 'العواطف' : 'Emotion-Based',
+                    'tabStreaks': this.isRTL ? 'التتابعات' : 'Streaks',
+                    'tabExploration': this.isRTL ? 'استكشاف' : 'Exploration',
+                    'tabMastery': this.isRTL ? 'إتقان' : 'Mastery',
+                    'pathTitle': this.isRTL ? 'مسار التعلم العاطفي' : 'Emotional Learning Path',
+                    'pathStep1Title': this.isRTL ? 'مقدمة في العواطف' : 'Introduction to Emotions',
+                    'pathStep2Title': this.isRTL ? 'الممارسة المستمرة' : 'Consistent Practice',
+                    'pathStep3Title': this.isRTL ? 'تنوع العواطف' : 'Emotional Diversity',
+                    'pathStep4Title': this.isRTL ? 'الذكاء العاطفي' : 'Emotional Intelligence',
+                    'pathStep5Title': this.isRTL ? 'إتقان العواطف' : 'Emotional Mastery',
+                    'pathStep1Desc': this.isRTL ? 'تعلم أساسيات الوعي العاطفي وابدأ رحلة اكتشاف الذات.' : 'Learn the basics of emotional awareness and begin your journey of self-discovery.',
+                    'pathStep2Desc': this.isRTL ? 'تطوير عادة الفحص العاطفي المنتظم وبناء سلاسلك الأولى من التتابعات.' : 'Develop the habit of regular emotional check-ins and build your first streaks.',
+                    'pathStep3Desc': this.isRTL ? 'توسيع المفردات العاطفية واستكشاف الطيف الكامل للعواطف البشرية.' : 'Expand your emotional vocabulary and explore the full spectrum of human emotions.',
+                    'pathStep4Desc': this.isRTL ? 'تعلم التعرف على أنماط عواطفك وتطوير استراتيجيات للتنظيم العاطفي.' : 'Learn to recognize patterns in your emotions and develop strategies for emotional regulation.',
+                    'pathStep5Desc': this.isRTL ? 'تحقيق إتقان الذكاء العاطفي ومساعدة الآخرين في رحلتهم العاطفية.' : 'Achieve mastery of emotional intelligence and help others on their emotional journey.',
+                    'completedStatus': this.isRTL ? 'مكتمل' : 'Completed',
+                    'inProgressStatus': this.isRTL ? 'قيد التقدم' : 'In Progress',
+                    'lockedStatus': this.isRTL ? 'مقفل' : 'Locked',
+                    'lockedStatus2': this.isRTL ? 'مقفل' : 'Locked',
+                    'lockedStatus3': this.isRTL ? 'مقفل' : 'Locked',
+                    'leaderboardTitle': this.isRTL ? 'لوحة المتصدرين' : 'Leaderboard',
+                    'weeklyBtn': this.isRTL ? 'أسبوعي' : 'Weekly',
+                    'monthlyBtn': this.isRTL ? 'شهري' : 'Monthly',
+                    'alltimeBtn': this.isRTL ? 'كل الأوقات' : 'All Time',
+                    'rankCol': this.isRTL ? 'الترتيب' : 'Rank',
+                    'userCol': this.isRTL ? 'المستخدم' : 'User',
+                    'achievementsCol': this.isRTL ? 'الإنجازات الأخيرة' : 'Recent Achievements',
+                    'pointsCol': this.isRTL ? 'النقاط' : 'Points',
+                    'latestTitle': this.isRTL ? 'أحدث إنجازات المجتمع' : 'Latest Community Achievements',
+                    'latestTimeframe': this.isRTL ? 'هذا الأسبوع' : 'This Week',
+                    'modalTitle': this.isRTL ? 'تم فتح الإنجاز!' : 'Achievement Unlocked!',
+                    'modalDescription': this.isRTL ? 'لقد أكملت التحدي بنجاح وحصلت على إنجاز جديد.' : 'You\'ve successfully completed a challenge and earned a new achievement.',
+                    'modalButton': this.isRTL ? 'متابعة' : 'Continue'
+                };
+                
+                // Update each text element
+                for (const [id, text] of Object.entries(textElements)) {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = text;
+                    }
+                }
+            }
+            
+            /**
+             * Set up tab switching functionality
+             * إعداد وظيفة تبديل علامات التبويب
+             */
+            setupTabSwitching() {
+                const tabs = document.querySelectorAll('.tab');
+                if (tabs) {
+                    tabs.forEach(tab => {
+                        tab.addEventListener('click', () => {
+                            // Remove active class from all tabs
+                            tabs.forEach(t => t.classList.remove('active'));
+                            
+                            // Add active class to clicked tab
+                            tab.classList.add('active');
+                            
+                            // Update current tab
+                            this.currentTab = tab.getAttribute('data-tab');
+                            
+                            // Filter achievements
+                            this.filterAchievements();
+                        });
+                    });
+                }
+            }
+            
+            /**
+             * Set up achievement card clicks
+             * إعداد نقرات بطاقة الإنجاز
+             */
+            setupAchievementCardClicks() {
+                const cards = document.querySelectorAll('.achievement-card');
+                if (cards) {
+                    cards.forEach(card => {
+                        card.addEventListener('click', () => {
+                            // Don't show details for locked achievements
+                            if (card.classList.contains('locked')) return;
+                            
+                            const id = card.getAttribute('data-id');
+                            const name = card.querySelector('.achievement-name').textContent;
+                            const description = card.querySelector('.achievement-description').textContent;
+                            const icon = card.querySelector('.achievement-icon').textContent;
+                            const pointsText = card.querySelector('.achievement-points').textContent;
+                            const points = parseInt(pointsText.match(/\d+/)[0]);
+                            
+                            // Show achievement details in modal
+                            this.showAchievementDetails({
+                                id,
+                                name,
+                                description,
+                                icon,
+                                points
+                            });
+                        });
+                    });
+                }
+            }
+            
+            /**
+             * Set up achievement unlock modal
+             * إعداد نافذة فتح الإنجاز
+             */
+            setupAchievementModal() {
+                const modal = document.getElementById('achievementModal');
+                const closeBtn = document.getElementById('modalClose');
+                const continueBtn = document.getElementById('modalButton');
+                
+                if (modal && closeBtn && continueBtn) {
+                    // Close modal when close button is clicked
+                    closeBtn.addEventListener('click', () => {
+                        modal.classList.remove('show');
+                    });
+                    
+                    // Close modal when continue button is clicked
+                    continueBtn.addEventListener('click', () => {
+                        modal.classList.remove('show');
+                    });
+                    
+                    // Close modal when clicking outside the modal content
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            modal.classList.remove('show');
+                        }
+                    });
+                }
+            }
+            
+            /**
+             * Set up leaderboard controls
+             * إعداد عناصر التحكم في لوحة المتصدرين
+             */
+            setupLeaderboardControls() {
+                const controls = document.querySelectorAll('.leaderboard-control');
+                if (controls) {
+                    controls.forEach(control => {
+                        control.addEventListener('click', () => {
+                            // Remove active class from all controls
+                            controls.forEach(c => c.classList.remove('active'));
+                            
+                            // Add active class to clicked control
+                            control.classList.add('active');
+                            
+                            // In a real app, this would load different leaderboard data
+                            const period = control.getAttribute('data-period');
+                            this.loadLeaderboardData(period);
+                        });
+                    });
+                }
+            }
+            
+            /**
+             * Load user data (in a real app, this would come from an API)
+             * تحميل بيانات المستخدم (في تطبيق حقيقي، ستأتي من واجهة برمجة التطبيقات)
+             */
+            loadUserData() {
+                // In a real application, this would be an API call
+                // For demo, we'll use hardcoded data
+                
+                // Check if there's a stored username in localStorage
+                const storedUsername = localStorage.getItem('username');
+                if (storedUsername) {
+                    this.username = storedUsername;
+                }
+                
+                // Check if there's a stored avatar in localStorage
+                const storedAvatar = localStorage.getItem('userAvatar');
+                if (storedAvatar) {
+                    this.userAvatar = storedAvatar;
+                }
+            }
+            
+            /**
+             * Update UI with user data
+             * تحديث واجهة المستخدم ببيانات المستخدم
+             */
+            updateUserUI() {
+                // Update username display
+                const usernameElements = document.querySelectorAll('#displayUsername, #currentUsername');
+                usernameElements.forEach(el => {
+                    if (el) el.textContent = this.username;
+                });
+                
+                // Update avatar display
+                const avatarElement = document.getElementById('userAvatar');
+                if (avatarElement) {
+                    avatarElement.textContent = this.userAvatar;
+                }
+                
+                // Update level display
+                const levelElement = document.getElementById('userLevel');
+                if (levelElement) {
+                    levelElement.textContent = this.userLevel;
+                }
+                
+                // Update points display
+                const pointsElement = document.getElementById('userPoints');
+                if (pointsElement) {
+                    pointsElement.textContent = this.userPoints;
+                }
+                
+                // Update XP progress bar
+                const xpProgressBar = document.getElementById('xpProgressBar');
+                if (xpProgressBar) {
+                    xpProgressBar.style.width = `${this.userXP}%`;
+                }
+            }
+            
+            /**
+             * Load achievements (in a real app, this would come from an API)
+             * تحميل الإنجازات (في تطبيق حقيقي، ستأتي من واجهة برمجة التطبيقات)
+             */
+            loadAchievements() {
+                // In a real application, this would be an API call
+                // For demo, we'll use the achievements already in the HTML
+                
+                const achievementCards = document.querySelectorAll('.achievement-card');
+                this.achievements = Array.from(achievementCards).map(card => {
+                    const id = card.getAttribute('data-id');
+                    const category = card.getAttribute('data-category');
+                    const name = card.querySelector('.achievement-name').textContent;
+                    const description = card.querySelector('.achievement-description').textContent;
+                    const icon = card.querySelector('.achievement-icon').textContent;
+                    const pointsText = card.querySelector('.achievement-points').textContent;
+                    const points = parseInt(pointsText.match(/\d+/)[0]);
+                    const isCompleted = card.classList.contains('completed');
+                    const progress = card.querySelector('.achievement-progress-bar').style.width;
+                    
+                    return {
+                        id,
+                        name,
+                        description,
+                        icon,
+                        points,
+                        category,
+                        isCompleted,
+                        progress
+                    };
+                });
+                
+                // Store completed achievements
+                this.completedAchievements = this.achievements.filter(a => a.isCompleted);
+            }
+            
+            /**
+             * Filter achievements based on current tab
+             * تصفية الإنجازات بناءً على علامة التبويب الحالية
+             */
+            filterAchievements() {
+                const grid = document.getElementById('achievementGrid');
+                if (!grid) return;
+                
+                const cards = grid.querySelectorAll('.achievement-card');
+                cards.forEach(card => {
+                    const category = card.getAttribute('data-category');
+                    const isCompleted = card.classList.contains('completed');
+                    const isLocked = card.classList.contains('locked');
+                    
+                    // Determine if the card should be visible based on current tab
+                    let isVisible = false;
+                    
+                    switch (this.currentTab) {
+                        case 'all':
+                            isVisible = true;
+                            break;
+                        case 'completed':
+                            isVisible = isCompleted;
+                            break;
+                        case 'locked':
+                            isVisible = isLocked;
+                            break;
+                        case 'emotion':
+                        case 'streaks':
+                        case 'exploration':
+                        case 'mastery':
+                            isVisible = category === this.currentTab;
+                            break;
+                    }
+                    
+                    // Show or hide the card
+                    card.style.display = isVisible ? 'flex' : 'none';
+                });
+                
+                // Add a nice animation when filtering
+                this.animateFilteredCards();
+            }
+            
+            /**
+             * Animate cards when filtering
+             * تحريك البطاقات عند التصفية
+             */
+            animateFilteredCards() {
+                const grid = document.getElementById('achievementGrid');
+                if (!grid) return;
+                
+                const visibleCards = grid.querySelectorAll('.achievement-card[style*="flex"]');
+                visibleCards.forEach((card, index) => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    
+                    setTimeout(() => {
+                        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, index * 50);
+                });
+            }
+            
+            /**
+             * Show achievement details in modal
+             * عرض تفاصيل الإنجاز في النافذة المنبثقة
+             */
+            showAchievementDetails(achievement) {
+                const modal = document.getElementById('achievementModal');
+                const modalIcon = document.getElementById('modalIcon');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalDescription = document.getElementById('modalDescription');
+                const modalPoints = document.getElementById('modalPoints');
+                
+                if (modal && modalIcon && modalTitle && modalDescription && modalPoints) {
+                    // Update modal content
+                    modalIcon.textContent = achievement.icon;
+                    modalTitle.textContent = achievement.name;
+                    modalDescription.textContent = achievement.description;
+                    modalPoints.textContent = `✨ ${achievement.points} points`;
+                    
+                    // Show modal
+                    modal.classList.add('show');
+                    
+                    // Trigger appropriate emotion sparkles
+                    if (window.triggerEmotionSparkles) {
+                        let emotion = 'happiness';
+                        
+                        // Determine the most appropriate emotion based on achievement category
+                        if (achievement.category === 'emotion') {
+                            if (achievement.name.includes('Sadness')) {
+                                emotion = 'sadness';
+                            } else if (achievement.name.includes('Anger')) {
+                                emotion = 'anger';
+                            } else if (achievement.name.includes('Fear')) {
+                                emotion = 'fear';
+                            } else if (achievement.name.includes('Surprise')) {
+                                emotion = 'surprise';
+                            } else if (achievement.name.includes('Disgust')) {
+                                emotion = 'disgust';
+                            }
+                        }
+                        
+                        window.triggerEmotionSparkles(emotion);
+                    }
+                }
+            }
+            
+            /**
+             * Unlock a new achievement
+             * فتح إنجاز جديد
+             */
+            unlockAchievement(achievement) {
+                // Find the achievement card in the DOM
+                const cards = document.querySelectorAll('.achievement-card');
+                let achievementCard = null;
+                
+                for (const card of cards) {
+                    if (card.getAttribute('data-id') === achievement.id.toString()) {
+                        achievementCard = card;
+                        break;
+                    }
+                }
+                
+                if (!achievementCard) return;
+                
+                // If the achievement is already completed, don't show the unlock animation
+                if (achievementCard.classList.contains('completed')) return;
+                
+                // Update the card to show it's completed
+                achievementCard.classList.remove('locked');
+                achievementCard.classList.add('completed');
+                
+                const progressBar = achievementCard.querySelector('.achievement-progress-bar');
+                if (progressBar) {
+                    progressBar.style.width = '100%';
+                }
+                
+                const progressText = achievementCard.querySelector('.achievement-progress-text');
+                if (progressText) {
+                    progressText.textContent = 'Completed';
+                }
+                
+                // Add date
+                const dateElement = document.createElement('div');
+                dateElement.className = 'achievement-date';
+                dateElement.textContent = 'Earned: ' + new Date().toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                achievementCard.appendChild(dateElement);
+                
+                // Update completed achievements list
+                this.completedAchievements.push(achievement);
+                
+                // Update user points
+                this.userPoints += achievement.points;
+                this.updateUserUI();
+                
+                // Show unlock notification
+                this.showAchievementDetails(achievement);
+                
+                // Update learning path if applicable
+                this.updateLearningPath();
+            }
+            
+            /**
+             * Update learning path progress
+             * تحديث تقدم مسار التعلم
+             */
+            updateLearningPath() {
+                // In a real application, this would be more sophisticated
+                // For demo, we'll just update the overall progress
+                
+                const completedCount = this.completedAchievements.length;
+                const totalCount = this.achievements.length;
+                const progressPercentage = Math.floor((completedCount / totalCount) * 100);
+                
+                const pathFill = document.querySelector('.learning-path-fill');
+                const pathText = document.querySelector('.learning-path-text');
+                
+                if (pathFill && pathText) {
+                    pathFill.style.width = `${progressPercentage}%`;
+                    pathText.textContent = `${progressPercentage}% Complete`;
+                }
+            }
+            
+            /**
+             * Load leaderboard data based on time period
+             * تحميل بيانات لوحة المتصدرين بناءً على الفترة الزمنية
+             */
+            loadLeaderboardData(period) {
+                // In a real application, this would be an API call
+                // For demo, we'll just update the timeframe text
+                
+                const timeframeElement = document.getElementById('latestTimeframe');
+                if (timeframeElement) {
+                    switch(period) {
+                        case 'weekly':
+                            timeframeElement.textContent = this.isRTL ? 'هذا الأسبوع' : 'This Week';
+                            break;
+                        case 'monthly':
+                            timeframeElement.textContent = this.isRTL ? 'هذا الشهر' : 'This Month';
+                            break;
+                        case 'alltime':
+                            timeframeElement.textContent = this.isRTL ? 'كل الأوقات' : 'All Time';
+                            break;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

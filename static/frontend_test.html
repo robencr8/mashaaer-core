@@ -1,202 +1,254 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mashaaer Frontend Test</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #4e2a8e;
-            margin-top: 0;
-        }
-        .test-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        button {
-            background-color: #4e2a8e;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        .result {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border-radius: 5px;
-        }
-        .success {
-            color: green;
-            font-weight: bold;
-        }
-        .error {
-            color: red;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Mashaaer Frontend Test</h1>
-        
-        <div class="test-section">
-            <h2>Server Connectivity</h2>
-            <button onclick="testServerConnectivity()">Test Server Connection</button>
-            <div id="server-result" class="result"></div>
-        </div>
-        
-        <div class="test-section">
-            <h2>API Health Check</h2>
-            <button onclick="testApiHealth()">Check API Endpoints</button>
-            <div id="api-result" class="result"></div>
-        </div>
-        
-        <div class="test-section">
-            <h2>Emotion Analysis</h2>
-            <input type="text" id="emotion-text" placeholder="Enter text to analyze" value="I feel happy today!">
-            <button onclick="testEmotionAnalysis()">Analyze</button>
-            <div id="emotion-result" class="result"></div>
-        </div>
-    </div>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Mashaaer Frontend Test</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 20px;
+                background-color: #f5f5f5;
+            }
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background-color: white;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            h1 {
+                color: #4e2a8e;
+                margin-top: 0;
+            }
+            .test-section {
+                margin-bottom: 20px;
+                padding: 15px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+            }
+            button {
+                background-color: #4e2a8e;
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 5px;
+                cursor: pointer;
+                margin-right: 10px;
+            }
+            .result {
+                margin-top: 15px;
+                padding: 10px;
+                background-color: #f9f9f9;
+                border-radius: 5px;
+            }
+            .success {
+                color: green;
+                font-weight: bold;
+            }
+            .error {
+                color: red;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Mashaaer Frontend Test</h1>
 
-    <script>
-        const BASE_URL = window.location.protocol + '//' + window.location.host;
-        
-        async function testServerConnectivity() {
-            const resultElement = document.getElementById('server-result');
-            resultElement.innerHTML = 'Testing server connection...';
-            
-            try {
-                const startTime = performance.now();
-                const response = await fetch(BASE_URL);
-                const endTime = performance.now();
-                const responseTime = Math.round(endTime - startTime);
-                
-                if (response.ok) {
-                    resultElement.innerHTML = `
+            <div class="test-section">
+                <h2>Server Connectivity</h2>
+                <button onclick="testServerConnectivity()">
+                    Test Server Connection
+                </button>
+                <div id="server-result" class="result"></div>
+            </div>
+
+            <div class="test-section">
+                <h2>API Health Check</h2>
+                <button onclick="testApiHealth()">Check API Endpoints</button>
+                <div id="api-result" class="result"></div>
+            </div>
+
+            <div class="test-section">
+                <h2>Emotion Analysis</h2>
+                <input
+                    type="text"
+                    id="emotion-text"
+                    placeholder="Enter text to analyze"
+                    value="I feel happy today!"
+                />
+                <button onclick="testEmotionAnalysis()">Analyze</button>
+                <div id="emotion-result" class="result"></div>
+            </div>
+
+            <div class="test-section">
+                <h2>AI Voice (TTS)</h2>
+                <input
+                    type="text"
+                    id="voice-text"
+                    placeholder="Enter text to speak"
+                    value="أهلا بك في مشاعر"
+                />
+                <button onclick="generateVoice()">Speak</button>
+                <audio
+                    id="voice-player"
+                    controls
+                    style="display: none; margin-top: 10px"
+                ></audio>
+                <div id="voice-result" class="result"></div>
+            </div>
+        </div>
+
+        <script>
+            const BASE_URL =
+                window.location.protocol + "//" + window.location.host;
+
+            async function testServerConnectivity() {
+                const resultElement = document.getElementById("server-result");
+                resultElement.innerHTML = "Testing server connection...";
+
+                try {
+                    const startTime = performance.now();
+                    const response = await fetch(BASE_URL);
+                    const endTime = performance.now();
+                    const responseTime = Math.round(endTime - startTime);
+
+                    if (response.ok) {
+                        resultElement.innerHTML = `
                         <p class="success">Server is online!</p>
                         <p>Response time: ${responseTime}ms</p>
                         <p>Status: ${response.status}</p>
                     `;
-                } else {
-                    resultElement.innerHTML = `
+                    } else {
+                        resultElement.innerHTML = `
                         <p class="error">Server returned an error!</p>
                         <p>Status: ${response.status}</p>
                     `;
-                }
-            } catch (error) {
-                resultElement.innerHTML = `
-                    <p class="error">Connection failed!</p>
-                    <p>Error: ${error.message}</p>
-                `;
-            }
-        }
-        
-        async function testApiHealth() {
-            const resultElement = document.getElementById('api-result');
-            resultElement.innerHTML = 'Checking API endpoints...';
-            
-            const endpoints = [
-                '/api/analyze-emotion',
-                '/api/chat',
-                '/api/cosmic-sound',
-                '/api/recommendations/contextual'
-            ];
-            
-            let results = '';
-            let passCount = 0;
-            
-            for (const endpoint of endpoints) {
-                try {
-                    const response = await fetch(`${BASE_URL}${endpoint}`, {
-                        method: 'OPTIONS'
-                    });
-                    
-                    if (response.ok) {
-                        results += `<p>${endpoint}: <span class="success">Available</span></p>`;
-                        passCount++;
-                    } else {
-                        results += `<p>${endpoint}: <span class="error">Error ${response.status}</span></p>`;
                     }
                 } catch (error) {
-                    results += `<p>${endpoint}: <span class="error">Failed - ${error.message}</span></p>`;
+                    resultElement.innerHTML = `
+                    <p class="error">Connection failed!</p>
+                    <p>Error: ${error.message}</p>`;
                 }
             }
-            
-            resultElement.innerHTML = `
+
+            async function testApiHealth() {
+                const resultElement = document.getElementById("api-result");
+                resultElement.innerHTML = "Checking API endpoints...";
+
+                const endpoints = [
+                    "/api/analyze-emotion",
+                    "/api/chat",
+                    "/api/cosmic-sound",
+                    "/api/recommendations/contextual",
+                ];
+
+                let results = "";
+                let passCount = 0;
+
+                for (const endpoint of endpoints) {
+                    try {
+                        const response = await fetch(`${BASE_URL}${endpoint}`, {
+                            method: "OPTIONS",
+                        });
+
+                        if (response.ok) {
+                            results += `<p>${endpoint}: <span class="success">Available</span></p>`;
+                            passCount++;
+                        } else {
+                            results += `<p>${endpoint}: <span class="error">Error ${response.status}</span></p>`;
+                        }
+                    } catch (error) {
+                        results += `<p>${endpoint}: <span class="error">Failed - ${error.message}</span></p>`;
+                    }
+                }
+
+                resultElement.innerHTML = `
                 <p>${passCount} of ${endpoints.length} endpoints are available.</p>
                 ${results}
             `;
-        }
-        
-        async function testEmotionAnalysis() {
-            const text = document.getElementById('emotion-text').value;
-            const resultElement = document.getElementById('emotion-result');
-            
-            if (!text) {
-                resultElement.innerHTML = '<p class="error">Please enter text to analyze</p>';
-                return;
             }
-            
-            resultElement.innerHTML = 'Analyzing emotion...';
-            
-            try {
-                const response = await fetch(`${BASE_URL}/api/analyze-emotion`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        text: text
-                    })
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success) {
-                        resultElement.innerHTML = `
+
+            async function testEmotionAnalysis() {
+                const text = document.getElementById("emotion-text").value;
+                const resultElement = document.getElementById("emotion-result");
+
+                if (!text) {
+                    resultElement.innerHTML =
+                        '<p class="error">Please enter text to analyze</p>';
+                    return;
+                }
+
+                resultElement.innerHTML = "Analyzing emotion...";
+
+                try {
+                    const response = await fetch(
+                        `${BASE_URL}/api/analyze-emotion`,
+                        {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ text }),
+                        },
+                    );
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success) {
+                            resultElement.innerHTML = `
                             <p class="success">Emotion analyzed successfully!</p>
                             <p>Primary emotion: <strong>${data.primary_emotion}</strong></p>
                             <pre>${JSON.stringify(data.emotion_data, null, 2)}</pre>
                         `;
+                        } else {
+                            resultElement.innerHTML = `<p class="error">Emotion analysis failed: ${data.error || "Unknown error"}</p>`;
+                        }
                     } else {
-                        resultElement.innerHTML = `
-                            <p class="error">Emotion analysis failed!</p>
-                            <p>Error: ${data.error || 'Unknown error'}</p>
-                        `;
+                        resultElement.innerHTML = `<p class="error">API request failed: ${response.status}</p>`;
                     }
-                } else {
-                    resultElement.innerHTML = `
-                        <p class="error">API request failed!</p>
-                        <p>Status: ${response.status}</p>
-                    `;
+                } catch (error) {
+                    resultElement.innerHTML = `<p class="error">Request failed: ${error.message}</p>`;
                 }
-            } catch (error) {
-                resultElement.innerHTML = `
-                    <p class="error">Request failed!</p>
-                    <p>Error: ${error.message}</p>
-                `;
             }
-        }
-    </script>
-</body>
+
+            async function generateVoice() {
+                const text = document.getElementById("voice-text").value;
+                const resultElement = document.getElementById("voice-result");
+                const player = document.getElementById("voice-player");
+
+                if (!text) {
+                    resultElement.innerHTML =
+                        '<p class="error">Please enter text to speak</p>';
+                    return;
+                }
+
+                resultElement.innerHTML = "Sending to voice API...";
+
+                try {
+                    const response = await fetch(
+                        `${BASE_URL}/api/voice_logic`,
+                        {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ text, language: "auto" }),
+                        },
+                    );
+
+                    const data = await response.json();
+                    if (data.success) {
+                        resultElement.innerHTML = `<p class="success">Voice generated successfully.</p>`;
+                        player.src = data.audio_url;
+                        player.style.display = "block";
+                        player.play();
+                    } else {
+                        resultElement.innerHTML = `<p class="error">Voice generation failed: ${data.error}</p>`;
+                    }
+                } catch (error) {
+                    resultElement.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+                }
+            }
+        </script>
+    </body>
 </html>
