@@ -1,11 +1,112 @@
-/* Cosmic Background Animation for Mashaaer AI */
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار الخلفية الكونية - مشاعر</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at center, #1a1a2e 0%, #16213e 50%, #0f0f1a 100%);
+        }
+        
+        #cosmicCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1; /* يظهر خلف كل المحتوى */
+        }
+        
+        .content {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+            z-index: 1;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(100, 149, 237, 0.7);
+        }
+        
+        p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .control-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6e00ff, #3498db);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(110, 0, 255, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .control-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(110, 0, 255, 0.6);
+        }
+        
+        .info-panel {
+            background: rgba(20, 30, 60, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 149, 237, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="cosmicCanvas"></canvas>
+    <audio id="deepVoidMusic" src="/static/cosmic_sounds/cosmicmusic.mp3" loop></audio>
+    
+    <div class="content">
+        <h1>اختبار الخلفية الكونية - مشاعر</h1>
+        <p>هذه صفحة اختبار بسيطة للخلفية الكونية التفاعلية. انقر في أي مكان على الشاشة لإنشاء تأثيرات مختلفة.</p>
+        
+        <button id="playPauseButton" class="control-button">تشغيل الموسيقى</button>
+        <button id="resetButton" class="control-button">إعادة تعيين الخلفية</button>
+        
+        <div class="info-panel">
+            <h2>تعليمات</h2>
+            <p>• انقر في أي مكان على الشاشة لإنشاء انفجارات نجمية</p>
+            <p>• استخدم زر "تشغيل الموسيقى" للتحكم في الصوت الخلفي</p>
+            <p>• اضغط على "إعادة تعيين الخلفية" لإعادة تعيين التأثيرات المرئية</p>
+        </div>
+    </div>
+    
+    <!-- تضمين كود الخلفية الكونية -->
+    <script>
+    /* Cosmic Background Animation for Mashaaer AI */
 
 class CosmicBackground {
   constructor() {
     this.canvas = document.getElementById('cosmicCanvas');
     this.ctx = this.canvas.getContext('2d');
     this.music = document.getElementById('deepVoidMusic');
-    this.playPauseButton = document.getElementById('toggleCosmicAudio');
+    this.playPauseButton = document.getElementById('playPauseButton');
     this.audioPlaying = false;
     
     this.stars = [];
@@ -20,6 +121,7 @@ class CosmicBackground {
     
     this.explosionParticles = [];
     this.animationId = null;
+    
     this.resizeTimer = null;
     
     this.init();
@@ -100,94 +202,15 @@ class CosmicBackground {
       }
     });
     
-    // Add meteor animation on random intervals
-    this.startMeteorAnimation();
-  }
-  
-  startMeteorAnimation() {
-    // Create random meteors every 5-15 seconds
-    setInterval(() => {
-      this.createMeteor();
-    }, 5000 + Math.random() * 10000);
-  }
-  
-  createMeteor() {
-    const startX = Math.random() * this.canvas.width;
-    const startY = -50; // Start above the canvas
-    const angle = Math.PI / 4 + (Math.random() * Math.PI / 2); // Angle between π/4 and 3π/4
-    const length = 150 + Math.random() * 100;
-    const speed = 5 + Math.random() * 10;
-    
-    const meteor = {
-      x: startX,
-      y: startY,
-      vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed,
-      length: length,
-      width: 2 + Math.random() * 3,
-      alpha: 0.8,
-      color: `hsl(${30 + Math.random() * 30}, 100%, 70%)`, // Orange-yellow colors
-      particles: []
-    };
-    
-    // Create trailing particles
-    for (let i = 0; i < 20; i++) {
-      meteor.particles.push({
-        offset: i * (length / 20),
-        size: 2 * (1 - i / 20),
-        alpha: 0.3 * (1 - i / 20)
+    // Reset button functionality
+    const resetButton = document.getElementById('resetButton');
+    if (resetButton) {
+      resetButton.addEventListener('click', () => {
+        this.explosionParticles = [];
+        this.createStars();
+        this.createDustParticles();
       });
     }
-    
-    // Play meteor sound if audio is enabled
-    const meteorAudio = new Audio('/static/cosmic_sounds/cosmic_touch.mp3');
-    if (this.audioPlaying) {
-      meteorAudio.volume = 0.3;
-      meteorAudio.play().catch(e => console.log('Meteor sound error:', e));
-    }
-    
-    // Animate the meteor
-    const animateMeteor = () => {
-      // Update position
-      meteor.x += meteor.vx;
-      meteor.y += meteor.vy;
-      
-      // Draw meteor
-      this.ctx.save();
-      
-      // Draw main meteor line
-      this.ctx.beginPath();
-      this.ctx.moveTo(meteor.x, meteor.y);
-      const tailX = meteor.x - meteor.vx * (meteor.length / speed);
-      const tailY = meteor.y - meteor.vy * (meteor.length / speed);
-      this.ctx.lineTo(tailX, tailY);
-      this.ctx.strokeStyle = meteor.color;
-      this.ctx.lineWidth = meteor.width;
-      this.ctx.globalAlpha = meteor.alpha;
-      this.ctx.stroke();
-      
-      // Draw particles
-      meteor.particles.forEach(particle => {
-        const particleX = meteor.x - meteor.vx * (particle.offset / speed);
-        const particleY = meteor.y - meteor.vy * (particle.offset / speed);
-        
-        this.ctx.beginPath();
-        this.ctx.arc(particleX, particleY, particle.size, 0, Math.PI * 2);
-        this.ctx.fillStyle = meteor.color;
-        this.ctx.globalAlpha = particle.alpha;
-        this.ctx.fill();
-      });
-      
-      this.ctx.restore();
-      
-      // Continue animation if meteor is still on screen
-      if (meteor.y < this.canvas.height + 100 && meteor.x > -100 && meteor.x < this.canvas.width + 100) {
-        requestAnimationFrame(animateMeteor);
-      }
-    };
-    
-    // Start meteor animation
-    animateMeteor();
   }
   
   toggleAudio() {
@@ -195,10 +218,7 @@ class CosmicBackground {
     
     if (this.audioPlaying) {
       this.music.pause();
-      if (this.playPauseButton) {
-        this.playPauseButton.classList.remove('playing');
-        this.playPauseButton.setAttribute('aria-label', 'تشغيل الموسيقى الكونية');
-      }
+      this.playPauseButton.textContent = 'تشغيل الموسيقى';
     } else {
       this.music.play()
         .then(() => {
@@ -207,10 +227,7 @@ class CosmicBackground {
         .catch(error => {
           console.error('Audio playback failed:', error);
         });
-      if (this.playPauseButton) {
-        this.playPauseButton.classList.add('playing');
-        this.playPauseButton.setAttribute('aria-label', 'إيقاف الموسيقى الكونية');
-      }
+      this.playPauseButton.textContent = 'إيقاف الموسيقى';
     }
     this.audioPlaying = !this.audioPlaying;
   }
@@ -242,13 +259,6 @@ class CosmicBackground {
         color: explosionColor,
         decay: 0.02
       });
-    }
-    
-    // Play star click sound if audio is enabled
-    if (this.audioPlaying) {
-      const clickAudio = new Audio('/static/cosmic_sounds/cosmic_touch.mp3');
-      clickAudio.volume = 0.2;
-      clickAudio.play().catch(e => console.log('Click sound error:', e));
     }
   }
   
@@ -325,8 +335,8 @@ class CosmicBackground {
     this.ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     
-    // Draw faint nebulae occasionally (less frequently for performance)
-    if (Math.random() < 0.05) {
+    // Draw faint nebulae
+    for (let i = 0; i < 2; i++) {
       this.drawNebula();
     }
     
@@ -358,3 +368,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.cosmicBackground = new CosmicBackground();
   }
 });
+    </script>
+</body>
+</html>
